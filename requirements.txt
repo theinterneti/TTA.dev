@@ -1,0 +1,19 @@
+## requirements for production
+dotenv
+langchain
+langchain-community
+langchain-openai
+langchain-spacy
+langchain-neo4j
+langchain-langgraph
+
+langgraph
+neo4j
+pydantic
+spacy
+python-dotenv
+# Add other dependencies here, e.g., for LM Studio:
+openai  # If you're using OpenAI's API (even locally, it's often used)
+
+## development requirements
+pytest
