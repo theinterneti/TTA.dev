@@ -1,47 +1,82 @@
-# Use a specific Python version (adjust as needed)
-FROM python:3.11
+# --- Base Image ---
+# Use a specific Python version. 'slim' variant is smaller, good for production.
+FROM python:3.11-slim as base
 
-# Set environment variables to enable LangSmith (optional, but good for debugging)
-ENV LANGCHAIN_TRACING_V2=true
-ENV LANGCHAIN_ENDPOINT="https://api.smith.langchain.com"
-ENV LANGCHAIN_API_KEY=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
-ENV LANGCHAIN_PROJECT=react-agent 
-ENV LANGSMITH_API_KEY=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
-
-ENV openai_api_base=http://172.31.16.1:1234/v1,
-ENV model="qwen2.5-7b-instruct"
-
-ENV NEO4J_PASSWORD=11111111  
-
-ENV TAVILY_API_KEY=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
-
-ENV PYTHONUNBUFFERED=1
-ENV POETRY_VERSION=1.7.1
-
-# Install Poetry
-RUN pip install --no-cache-dir poetry
-
-# Copy project files (make sure .dockerignore excludes unnecessary files)
+# Set working directory inside the container.  All subsequent commands are relative to this.
 WORKDIR /app
-COPY pyproject.toml poetry.lock /app/
 
-# Install dependencies using Poetry
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+# --- Install System Dependencies (if needed) ---
+# If your Python libraries or application requires system-level dependencies
+# (like specific libraries, tools, etc.), install them here using 'apt-get'.
+# For example, if you needed 'libpq-dev' for psycopg2 (PostgreSQL):
+# RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev
+#
+# For this AI project, we might not need any system dependencies initially.
+# If you find errors later related to missing system libraries, you can add them here.
+# For now, we'll skip this section.
+#
+# Example of installing system packages (uncomment if needed):
+# RUN apt-get update && apt-get install -y --no-install-recommends some-system-package another-package
 
-# Copy the application code
+
+# --- Copy Requirements File and Install Python Dependencies ---
+# Copy only the requirements.txt file first to leverage Docker's caching.
+# This means if only application code changes, Docker can reuse the cached dependency installation layer,
+# making builds much faster.
+COPY requirements.txt /app/
+
+# Install Python dependencies from requirements.txt.
+# --no-cache-dir: Prevents pip from caching downloaded packages, reduces image size.
+# -r requirements.txt: Tells pip to install packages listed in requirements.txt.
+RUN pip install --no-cache-dir -r requirements.txt
+
+
+# --- Copy Application Code ---
+# Copy the rest of your application code into the container.
+# IMPORTANT: Make sure you have a '.dockerignore' file to exclude unnecessary files
+# (like .git folders, __pycache__, etc.) to keep the image size small and build fast.
 COPY . /app/
 
-# Expose any necessary ports (e.g., for a Streamlit app)
-#8501 for Streamlit, 1234 for LM Studio, 7687 for LM Studio
-EXPOSE 8501
-EXPOSE 1234
-EXPOSE 7687
-# You can add other setup steps here (e.g., installing system packages)
 
-# Set a non-root user (good practice)
-RUN useradd -m vscode
-USER vscode
+# --- Expose Ports ---
+# Expose the ports that your application and services will use.
+# 8501:  Likely for Streamlit (if you are using it)
+# 1234:  Default port for LM Studio
+# 7687:  Default Bolt port for Neo4j (though Neo4j should ideally be in a separate container)
+EXPOSE 8501 1234 7687
 
-# No CMD or ENTRYPOINT here - VS Code handles the command to run
-CMD ["poetry", "run", "python", "app/tta/main.py"]
+
+# --- Create a Non-Root User for Security ---
+# Create a new user named 'appuser' with a home directory.
+RUN useradd -m appuser
+
+# Switch to the 'appuser' user for running the application.
+# Running as a non-root user is a security best practice.
+USER appuser
+
+
+# --- Command to Run the Application ---
+# Define the command to execute when the container starts.
+# Assumes your main Python script is in 'src/main.py'.
+# Adjust the path if your main script is located elsewhere.
+CMD ["python", "src/main.py"]
+
+# --- IMPORTANT REMINDERS ---
+# 1. ENVIRONMENT VARIABLES:
+#    - DO NOT hardcode API keys, passwords, or sensitive configuration directly in this Dockerfile.
+#    - Pass environment variables at runtime using Docker Compose, 'docker run -e', or your container orchestration system.
+#    - Use a '.env' file (and load it in your Python code with 'python-dotenv' as you are already doing) for local development.
+#
+# 2. .dockerignore FILE:
+#    - Create a '.dockerignore' file in the same directory as your Dockerfile.
+#    - Add patterns for files and directories you don't want to include in the Docker image
+#      (e.g., .git/, __pycache__/, *.pyc, .env, node_modules/, etc.).
+#    - This significantly reduces image size and build time.
+#
+# 3. PRODUCTION vs. DEVELOPMENT:
+#    - This Dockerfile is suitable for both development and production.
+#    - For development, you'll typically use it with VS Code Dev Containers, which mounts your source code.
+#    - For production, you'll build the image and deploy it.
+#
+# 4. ADJUST CMD:
+#    - Ensure the 'CMD' instruction correctly points to your main Python application file.
