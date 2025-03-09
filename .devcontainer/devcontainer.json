@@ -3,8 +3,6 @@
     "build": {
       "dockerfile": "docker-compose.yml"
     },
-    "devContainerPath": "/app",
-    "service": "app",
     "workspaceFolder": "/app",
     "forwardPorts": [8501, 1234, 7687],
     "postCreateCommand": "pip install -r requirements.txt && git submodule update --init --recursive",
