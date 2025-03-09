@@ -1,0 +1,26 @@
+## requirements for production environment
+
+python-dotenv
+
+langchain
+langchain-community
+langchain-openai
+langchain-neo4j
+
+langgraph
+
+neo4j
+
+pydantic
+fastapi
+uvicorn
+guidance
+
+spacy
+transformers
+
+openai
+
+
+## development requirements
+pytest
