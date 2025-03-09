@@ -13,4 +13,6 @@ services:
       - .env  # Replace with your actual environment variables
     volumes:
       - .:/app  # Mount the current directory to /app in the container
+      - com.docker.devenvironments.code:/app/tta.prod  
+    working_dir: /app
     command: /bin/sh -c "./setup.sh"
