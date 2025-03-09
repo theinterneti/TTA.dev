@@ -13,3 +13,4 @@ services:
       - .env  # Replace with your actual environment variables
     volumes:
       - .:/app  # Mount the current directory to /app in the container
+    command: /bin/sh -c "./setup.sh"
