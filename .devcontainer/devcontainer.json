@@ -1,8 +1,11 @@
 {
-    "name": "Python 3 AI Chat App",
+    "name": "TTA-Dev",
     "build": {
-      "dockerfile": "Dockerfile"
+      "dockerfile": "docker-compose.yml"
     },
+    "devContainerPath": "/app",
+    "service": "app",
+    "workspaceFolder": "/app",
     "forwardPorts": [8501, 1234, 7687],
     "postCreateCommand": "pip install -r requirements.txt && git submodule update --init --recursive",
     "customizations": {
@@ -14,12 +17,21 @@
         "extensions": [
           "ms-python.python",
           "ms-python.vscode-pylance",
+          "ms-python.debugpy",
+          "mgesbert.python-path"
           "ms-azuretools.vscode-docker",
           "ms-vscode-remote.remote-containers",
-          "ms-vscode.neo4j"
+          "ms-vscode.neo4j",
+          "ms-toolsai.jupyter",
+          "ms-toolsai.vscode-jupyter-cell-tags",
+          "ms-toolsai.vscode-ai",
+          "ionutvmi.path-autocomplete",
+          "GitHub.copilot",
+          "GitHub.copilot-chat",
+          "eriklynd.json-tools"
         ]
       }
     },
-    "workspaceFolder": "/app",
+
     "remoteUser": "appuser"
 }
