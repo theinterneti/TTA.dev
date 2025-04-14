@@ -7,7 +7,7 @@ echo "Setting up TTA.dev environment..."
 pip install -r requirements.txt
 
 # Create necessary directories if they don't exist
-mkdir -p data logs 2>/dev/null || true
+mkdir -p data logs model_test_results 2>/dev/null || true
 
 # Set up environment variables
 if [ -f .env ]; then
@@ -15,6 +15,9 @@ if [ -f .env ]; then
 else
     echo "Warning: .env file not found. Using default environment variables."
 fi
+
+# Make model analysis scripts executable
+chmod +x scripts/model_analysis/*.py scripts/model_analysis/*.sh 2>/dev/null || true
 
 echo "Setup complete. Starting application..."
 
