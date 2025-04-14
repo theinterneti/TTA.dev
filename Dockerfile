@@ -19,10 +19,14 @@ COPY requirements.txt ./
 
 # Install Python dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir streamlit>=1.30.0
 
 # Copy application source code
 COPY . .
+
+# Make setup.sh executable
+RUN chmod +x setup.sh
 
 # --- Final Stage ---
 FROM base as final
@@ -34,12 +38,19 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy application source code
 COPY . .
 
+# Make setup.sh executable
+RUN chmod +x setup.sh
+
 # Expose application ports
 EXPOSE 8501 1234 7687
 
+# Create necessary directories
+RUN mkdir -p /app/data /app/logs
+
 # Set non-root user for security
 RUN useradd -ms /bin/bash appuser
+RUN chown -R appuser:appuser /app
 USER appuser
 
 # Command to run the application
-CMD ["python", "src/main.py"]
+CMD ["./setup.sh"]
