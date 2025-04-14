@@ -11,7 +11,7 @@ services:
     env_file:
       - .env  # Replace with your actual environment variables
     volumes:
-      - .:/app/tta.prod    # Mount the current directory to /app in the container
+      - .:/app/TTA.dev    # Mount the current directory to /app in the container
     working_dir: /app
     command: /bin/sh -c "./setup.sh"
     stdin_open: true
