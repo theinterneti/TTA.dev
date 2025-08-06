@@ -20,28 +20,28 @@ from src.knowledge import Neo4jManager
 class TestDynamicTool(unittest.TestCase):
     """Test the DynamicTool class."""
     
-    def setUp(self):
-        """Set up the test."""
-# Create a simple function code for testing
-self.function_code = (
-    "def test_tool_action(param1):\n"
-    "    return f\"Executed with {param1}\"\n"
-)
-        
-        # Create a dynamic tool
-        self.tool = DynamicTool(
-            name="test_tool",
-            description="A test tool",
-            function_code=self.function_code,
-            parameters=[
-                ToolParameter(
-                    name="param1",
-                    description="A test parameter",
-                    type="string",
-                    required=True
-                )
-            ]
-        )
+def setUp(self):
+    """Set up the test."""
+    # Create a simple function code for testing
+    self.function_code = (
+        "def test_tool_action(param1):\n"
+        "    return f\"Executed with {param1}\"\n"
+    )
+    
+    # Create a dynamic tool
+    self.tool = DynamicTool(
+        name="test_tool",
+        description="A test tool",
+        function_code=self.function_code,
+        parameters=[
+            ToolParameter(
+                name="param1",
+                description="A test parameter",
+                type="string",
+                required=True
+            )
+        ]
+    )
     
     def test_compile_function(self):
         """Test that the function is compiled correctly."""

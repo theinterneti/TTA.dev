@@ -23,7 +23,7 @@ plt.style.use('ggplot')
 sns.set_theme(style="whitegrid")
 
 # Results directory
-RESULTS_DIR = os.getenv("RESULTS_DIR", "/app/model_test_results")
+RESULTS_DIR = os.getenv("RESULTS_DIR", "./model_test_results")
 CHARTS_DIR = os.path.join(RESULTS_DIR, "charts")
 
 # Ensure directories exist

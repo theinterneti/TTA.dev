@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable, Tuple
 
 # Add the project root to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root))
 
 from src.mcp import MCPServerManager, MCPServerType
 
