@@ -33,7 +33,7 @@ class AIAssistantSimulator:
     reading resources, and calling tools.
     """
 
-    def __init__(self, knowledge_server_url: str, agent_tool_server_url: str):
+    def __init__(self, knowledge_server_url: Optional[str] = None, agent_tool_server_url: Optional[str] = None):
         """
         Initialize the AI assistant simulator.
 
@@ -41,6 +41,18 @@ class AIAssistantSimulator:
             knowledge_server_url: URL of the Knowledge Resource MCP server
             agent_tool_server_url: URL of the Agent Tool MCP server
         """
+        # Provide default URLs if not supplied
+        if not knowledge_server_url:
+            knowledge_server_url = f"http://localhost:{KNOWLEDGE_SERVER_PORT}"
+        if not agent_tool_server_url:
+            agent_tool_server_url = f"http://localhost:{AGENT_TOOL_SERVER_PORT}"
+
+        # Basic validation for URLs
+        if not knowledge_server_url.startswith("http://") and not knowledge_server_url.startswith("https://"):
+            raise ValueError("Invalid knowledge_server_url: must start with http:// or https://")
+        if not agent_tool_server_url.startswith("http://") and not agent_tool_server_url.startswith("https://"):
+            raise ValueError("Invalid agent_tool_server_url: must start with http:// or https://")
+
         self.knowledge_server_url = knowledge_server_url
         self.agent_tool_server_url = agent_tool_server_url
         self.knowledge_session_id = None

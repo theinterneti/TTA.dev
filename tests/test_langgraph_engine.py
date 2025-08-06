@@ -8,7 +8,7 @@ import unittest
 import os
 import sys
 
-# The sys.path modification is now handled in conftest.py via a pytest fixture.
+# Note: There is no conftest.py handling sys.path modification in this directory.
 
 from src.core.langgraph_engine import (
     CharacterState,

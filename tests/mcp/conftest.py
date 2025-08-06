@@ -13,8 +13,19 @@ import time
 from typing import Dict, Any, List, Optional, Callable, Tuple
 import pytest_asyncio
 
-# Add the project root to the Python path dynamically
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+# Add the project root to the Python path dynamically by searching for a marker file
+def find_project_root(marker_files=('pyproject.toml', '.git')):
+    current = os.path.abspath(os.path.dirname(__file__))
+    while True:
+        if any(os.path.exists(os.path.join(current, marker)) for marker in marker_files):
+            return current
+        parent = os.path.dirname(current)
+        if parent == current:
+            break
+        current = parent
+    raise RuntimeError("Project root not found. Please ensure a marker file exists.")
+
+project_root = find_project_root()
 if project_root not in sys.path:
     sys.path.append(project_root)
 

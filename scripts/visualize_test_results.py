@@ -18,7 +18,13 @@ from pathlib import Path
 from typing import Dict, Any, List
 
 # Normalization constants
+
 MAX_TOKENS_PER_SECOND = 30  # Used for speed normalization in radar chart
+"""
+MAX_TOKENS_PER_SECOND is an estimated upper bound for model generation speed (tokens per second).
+This value was determined based on observed maximum speeds from recent benchmark runs.
+Update this constant if new models or hardware achieve higher speeds, or if the benchmarking methodology changes.
+"""
 
 # Set up matplotlib
 plt.style.use('ggplot')
