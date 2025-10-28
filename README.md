@@ -30,7 +30,6 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 Production-ready composable workflow primitives for building reliable, observable agent workflows.
 
 **Features:**
-
 - 🔀 Router, Cache, Timeout, Retry primitives
 - 🔗 Composition operators (`>>`, `|`)
 - ⚡ Parallel and conditional execution
@@ -39,7 +38,6 @@ Production-ready composable workflow primitives for building reliable, observabl
 - 📉 30-40% cost reduction via intelligent caching
 
 **Installation:**
-
 ```bash
 pip install tta-workflow-primitives
 ```
