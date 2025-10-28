@@ -4,9 +4,9 @@ import asyncio
 
 import pytest
 
-from tta_workflow_primitives.core.base import LambdaPrimitive, WorkflowContext
-from tta_workflow_primitives.recovery.timeout import TimeoutError, TimeoutPrimitive
-from tta_workflow_primitives.testing.mocks import MockPrimitive
+from tta_dev_primitives.core.base import LambdaPrimitive, WorkflowContext
+from tta_dev_primitives.recovery.timeout import TimeoutError, TimeoutPrimitive
+from tta_dev_primitives.testing.mocks import MockPrimitive
 
 
 @pytest.mark.asyncio

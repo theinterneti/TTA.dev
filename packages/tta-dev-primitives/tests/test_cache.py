@@ -4,9 +4,9 @@ import time
 
 import pytest
 
-from tta_workflow_primitives.core.base import WorkflowContext
-from tta_workflow_primitives.performance.cache import CachePrimitive
-from tta_workflow_primitives.testing.mocks import MockPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.performance.cache import CachePrimitive
+from tta_dev_primitives.testing.mocks import MockPrimitive
 
 
 @pytest.mark.asyncio
@@ -170,7 +170,7 @@ async def test_cache_realistic_llm_scenario() -> None:
             call_count += 1
             return {"response": response, "call": call_count}
 
-        from tta_workflow_primitives.core.base import LambdaPrimitive
+        from tta_dev_primitives.core.base import LambdaPrimitive
 
         return LambdaPrimitive(llm_call)
 

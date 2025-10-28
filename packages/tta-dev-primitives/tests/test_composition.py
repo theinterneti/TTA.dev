@@ -4,12 +4,12 @@ from typing import Any
 
 import pytest
 
-from tta_workflow_primitives import (
+from tta_dev_primitives import (
     ConditionalPrimitive,
     WorkflowContext,
 )
-from tta_workflow_primitives.core.base import LambdaPrimitive
-from tta_workflow_primitives.testing import MockPrimitive
+from tta_dev_primitives.core.base import LambdaPrimitive
+from tta_dev_primitives.testing import MockPrimitive
 
 
 @pytest.mark.asyncio

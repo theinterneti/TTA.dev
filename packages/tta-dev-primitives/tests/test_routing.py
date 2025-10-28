@@ -2,9 +2,9 @@
 
 import pytest
 
-from tta_workflow_primitives.core.base import WorkflowContext
-from tta_workflow_primitives.core.routing import RouterPrimitive
-from tta_workflow_primitives.testing.mocks import MockPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.core.routing import RouterPrimitive
+from tta_dev_primitives.testing.mocks import MockPrimitive
 
 
 @pytest.mark.asyncio
