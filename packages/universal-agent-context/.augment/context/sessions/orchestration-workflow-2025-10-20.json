@@ -1,0 +1,42 @@
+{
+  "session_id": "orchestration-workflow-2025-10-20",
+  "messages": [
+    {
+      "role": "system",
+      "content": "\nTTA (Therapeutic Text Adventure) Architecture Context:\n\n**Core Components:**\n- Multi-agent system: IPA (Input Processor), WBA (World Builder), NGA (Narrative Generator)\n- State Management: Redis (session state), Neo4j (knowledge graphs)\n- Workflow Orchestration: LangGraph integration for complex workflows\n- Component System: Base Component class with lifecycle management\n\n**Key Directories:**\n- src/agent_orchestration/ - Multi-agent coordination and workflows\n- src/player_experience/ - User-facing APIs and session management\n- src/components/ - Reusable components (Neo4j, Redis, LLM, etc.)\n- src/ai_components/ - AI-specific components (prompts, RAG, etc.)\n\n**Development Principles:**\n- Therapeutic Safety: All content validated for therapeutic appropriateness\n- Appropriate Complexity: YAGNI/KISS, avoid gold-plating\n- Component Maturity: Development \u2192 Staging \u2192 Production workflow\n- Solo Developer Focus: Optimized for WSL2, single-GPU constraints\n\n**Testing Strategy:**\n- Unit tests: Development stage validation\n- Integration tests: Staging stage validation\n- E2E tests: Production readiness validation\n- Component-specific test organization\n\n**Current Focus:**\n- Implementing agentic primitives (context management, error recovery, observability)\n- Phase 1: Meta-level (development process)\n- Phase 2: Product-level (TTA application)\n",
+      "timestamp": "2025-10-20T20:52:46.824822",
+      "metadata": {
+        "type": "architecture_context"
+      },
+      "tokens": 337,
+      "importance": 1.0
+    },
+    {
+      "role": "user",
+      "content": "Starting workflow for component 'orchestration' targeting 'staging' stage",
+      "timestamp": "2025-10-20T20:52:46.824848",
+      "metadata": {},
+      "tokens": 18,
+      "importance": 1.0
+    },
+    {
+      "role": "user",
+      "content": "Specification parsed successfully: specs/orchestration.md",
+      "timestamp": "2025-10-20T20:52:46.826780",
+      "metadata": {},
+      "tokens": 14,
+      "importance": 0.9
+    },
+    {
+      "role": "user",
+      "content": "Testing stage failed: Coverage 49.4% < threshold 70.0%",
+      "timestamp": "2025-10-20T20:52:54.766363",
+      "metadata": {},
+      "tokens": 13,
+      "importance": 0.9
+    }
+  ],
+  "max_tokens": 8000,
+  "current_tokens": 382,
+  "metadata": {}
+}
