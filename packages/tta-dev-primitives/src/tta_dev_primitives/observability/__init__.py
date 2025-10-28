@@ -7,11 +7,14 @@ from .context_propagation import (
     inject_trace_context,
     propagate_baggage,
 )
+from .instrumented_primitive import InstrumentedPrimitive
 from .logging import setup_logging
 from .metrics import PrimitiveMetrics, get_metrics_collector
 from .tracing import ObservablePrimitive, setup_tracing
 
 __all__ = [
+    # Instrumented primitives
+    "InstrumentedPrimitive",
     # Tracing
     "ObservablePrimitive",
     "setup_tracing",

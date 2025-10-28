@@ -5,10 +5,11 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from ..observability.instrumented_primitive import InstrumentedPrimitive
 from .base import WorkflowContext, WorkflowPrimitive
 
 
-class ParallelPrimitive(WorkflowPrimitive[Any, list[Any]]):
+class ParallelPrimitive(InstrumentedPrimitive[Any, list[Any]]):
     """
     Execute primitives in parallel.
 
@@ -37,10 +38,15 @@ class ParallelPrimitive(WorkflowPrimitive[Any, list[Any]]):
         if not primitives:
             raise ValueError("ParallelPrimitive requires at least one primitive")
         self.primitives = primitives
+        # Initialize InstrumentedPrimitive with name
+        super().__init__(name="ParallelPrimitive")
 
-    async def execute(self, input_data: Any, context: WorkflowContext) -> list[Any]:
+    async def _execute_impl(self, input_data: Any, context: WorkflowContext) -> list[Any]:
         """
         Execute primitives in parallel.
+
+        Each primitive receives the same input and executes concurrently.
+        Child contexts are created for each branch to maintain trace hierarchy.
 
         Args:
             input_data: Input data sent to all primitives
@@ -52,7 +58,15 @@ class ParallelPrimitive(WorkflowPrimitive[Any, list[Any]]):
         Raises:
             Exception: If any primitive fails
         """
-        tasks = [primitive.execute(input_data, context) for primitive in self.primitives]
+        # Create child contexts for each parallel branch
+        # This ensures proper trace context inheritance
+        child_contexts = [context.create_child_context() for _ in self.primitives]
+
+        # Execute all primitives in parallel with their own contexts
+        tasks = [
+            primitive.execute(input_data, child_ctx)
+            for primitive, child_ctx in zip(self.primitives, child_contexts, strict=True)
+        ]
         return await asyncio.gather(*tasks)
 
     def __or__(self, other: WorkflowPrimitive) -> ParallelPrimitive:
