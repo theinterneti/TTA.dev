@@ -3,8 +3,22 @@ name: Quality Checks
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'packages/**'
+      - 'core/**'
+      - 'tests/**'
+      - '*.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
   push:
     branches: [main]
+    paths:
+      - 'packages/**'
+      - 'core/**'
+      - 'tests/**'
+      - '*.py'
+      - 'pyproject.toml'
+      - 'uv.lock'
 
 jobs:
   quality:
