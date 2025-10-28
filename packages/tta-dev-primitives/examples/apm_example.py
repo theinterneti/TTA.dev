@@ -13,10 +13,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Import workflow primitives
-from tta_workflow_primitives.apm import setup_apm
-from tta_workflow_primitives.apm.decorators import trace_workflow, track_metric
-from tta_workflow_primitives.apm.instrumented import APMWorkflowPrimitive
-from tta_workflow_primitives.core.base import WorkflowContext
+from tta_dev_primitives.apm import setup_apm
+from tta_dev_primitives.apm.decorators import trace_workflow, track_metric
+from tta_dev_primitives.apm.instrumented import APMWorkflowPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
 
 
 # Example 1: Using APMWorkflowPrimitive base class

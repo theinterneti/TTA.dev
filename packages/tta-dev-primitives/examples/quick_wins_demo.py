@@ -2,7 +2,7 @@
 
 import asyncio
 
-from tta_workflow_primitives import (
+from tta_dev_primitives import (
     CachePrimitive,
     LambdaPrimitive,
     RouterPrimitive,

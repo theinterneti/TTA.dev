@@ -812,7 +812,7 @@ wheels = [
 ]
 
 [[package]]
-name = "tta-workflow-primitives"
+name = "tta-dev-primitives"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

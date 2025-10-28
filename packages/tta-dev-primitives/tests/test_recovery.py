@@ -2,14 +2,14 @@
 
 import pytest
 
-from tta_workflow_primitives import WorkflowContext
-from tta_workflow_primitives.recovery import (
+from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives.recovery import (
     FallbackPrimitive,
     RetryPrimitive,
     RetryStrategy,
     SagaPrimitive,
 )
-from tta_workflow_primitives.testing import MockPrimitive
+from tta_dev_primitives.testing import MockPrimitive
 
 
 @pytest.mark.asyncio
@@ -24,7 +24,7 @@ async def test_retry_success_on_second_attempt() -> None:
             raise ValueError("First attempt fails")
         return "success"
 
-    from tta_workflow_primitives.core.base import LambdaPrimitive
+    from tta_dev_primitives.core.base import LambdaPrimitive
 
     flaky = LambdaPrimitive(flaky_operation)
     workflow = RetryPrimitive(flaky, strategy=RetryStrategy(max_retries=3, backoff_base=0.01))
