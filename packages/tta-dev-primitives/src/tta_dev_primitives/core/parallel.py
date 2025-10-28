@@ -65,7 +65,7 @@ class ParallelPrimitive(InstrumentedPrimitive[Any, list[Any]]):
         # Execute all primitives in parallel with their own contexts
         tasks = [
             primitive.execute(input_data, child_ctx)
-            for primitive, child_ctx in zip(self.primitives, child_contexts, strict=False)
+            for primitive, child_ctx in zip(self.primitives, child_contexts, strict=True)
         ]
         return await asyncio.gather(*tasks)
 
