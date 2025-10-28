@@ -30,6 +30,7 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 Production-ready composable workflow primitives for building reliable, observable agent workflows.
 
 **Features:**
+
 - 🔀 Router, Cache, Timeout, Retry primitives
 - 🔗 Composition operators (`>>`, `|`)
 - ⚡ Parallel and conditional execution
@@ -38,11 +39,13 @@ Production-ready composable workflow primitives for building reliable, observabl
 - 📉 30-40% cost reduction via intelligent caching
 
 **Installation:**
+
 ```bash
 pip install tta-workflow-primitives
 ```
 
 **Quick Start:**
+
 ```python
 from tta_workflow_primitives import RouterPrimitive, CachePrimitive
 
@@ -67,12 +70,14 @@ result = await workflow.execute(data, context)
 Development utilities and meta-level primitives for building robust development processes.
 
 **Features:**
+
 - 🛠️ Development and debugging tools
 - 📝 Structured logging utilities
 - ♻️ Retry mechanisms
 - 🧪 Testing helpers
 
 **Installation:**
+
 ```bash
 pip install dev-primitives
 ```
@@ -148,10 +153,17 @@ TTA.dev follows a **composable, modular architecture**:
 
 ## 📚 Documentation
 
-- [Getting Started](docs/getting-started.md) (Coming soon)
-- [Architecture Overview](docs/architecture.md) (Coming soon)
-- [API Reference](docs/api/) (Coming soon)
-- [Migration Guide](docs/migration.md) (Coming soon)
+- **[Getting Started Guide](GETTING_STARTED.md)** - 5-minute quickstart
+- **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
+- **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
+- **[MCP Integration](docs/mcp/README.md)** - Model Context Protocol guides
+- **[Package Documentation](packages/tta-dev-primitives/README.md)** - Detailed API reference
+
+### Additional Resources
+
+- [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
+- [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
+- [Examples](packages/tta-dev-primitives/examples/)
 
 ---
 
@@ -234,21 +246,25 @@ Before submitting a PR, ensure:
 ### Contribution Workflow
 
 1. **Create feature branch**
+
    ```bash
    git checkout -b feature/add-awesome-feature
    ```
 
 2. **Make changes and validate**
+
    ```bash
    ./scripts/validate-package.sh <package-name>
    ```
 
 3. **Commit with semantic message**
+
    ```bash
    git commit -m "feat(package): Add awesome feature"
    ```
 
 4. **Create PR**
+
    ```bash
    gh pr create --title "feat: Add awesome feature"
    ```
@@ -262,23 +278,28 @@ Before submitting a PR, ensure:
 ## 📋 Code Quality Standards
 
 ### Formatting
+
 - **Ruff** with 88 character line length
 - Auto-format on save in VS Code
 
 ### Linting
+
 - **Ruff** with strict rules
 - No unused imports or variables
 
 ### Type Checking
+
 - **Pyright** in basic mode
 - Type hints required for all functions
 
 ### Testing
+
 - **pytest** with AAA pattern
 - >80% coverage required
 - All tests must pass
 
 ### Documentation
+
 - Google-style docstrings
 - README for each package
 - Examples for all features
@@ -335,6 +356,7 @@ MIT License - see [LICENSE](LICENSE) for details
 ## 🙏 Acknowledgments
 
 Built with:
+
 - [Python](https://www.python.org/)
 - [uv](https://github.com/astral-sh/uv) - Fast Python package installer
 - [Ruff](https://github.com/astral-sh/ruff) - Fast Python linter

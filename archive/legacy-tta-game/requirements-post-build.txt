@@ -1,0 +1,26 @@
+# Packages that must be installed after container build
+
+# Packages with complex build dependencies or requiring GPU during installation
+kenlm @ git+https://github.com/ydshieh/kenlm@78f664fb3dafe1468d868d71faf19534530698d5
+detectron2 @ git+https://github.com/facebookresearch/detectron2.git@9604f5995cc628619f0e4fd913453b4d7d61db3f
+pycocotools>=2.0.8
+
+# Audio processing libraries that might need system dependencies
+librosa>=0.11.0
+audioread>=3.0.0
+soundfile>=0.13.0
+soxr>=0.5.0
+av>=14.0.0
+
+# NLP packages with complex dependencies
+SudachiPy>=0.6.10
+SudachiDict-core>=20250129
+pyctcdecode>=0.5.0
+fugashi>=1.4.0
+ipadic>=1.0.0
+unidic>=1.1.0
+unidic-lite>=1.0.8
+rjieba>=0.1.13
+
+# Packages that might need GPU access
+ray>=2.44.0
