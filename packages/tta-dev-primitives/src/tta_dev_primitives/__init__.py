@@ -1,43 +1,45 @@
-"""TTA Workflow Primitives - Composable workflow building blocks."""
+"""TTA Dev Primitives - Production-quality workflow primitives for AI applications."""
 
-from .core.base import LambdaPrimitive, WorkflowContext, WorkflowPrimitive
+# Core primitives
+from .core.base import WorkflowContext, WorkflowPrimitive
 from .core.conditional import ConditionalPrimitive
 from .core.parallel import ParallelPrimitive
-from .core.routing import RouterPrimitive
 from .core.sequential import SequentialPrimitive
-from .performance.cache import CachePrimitive
-from .recovery.timeout import TimeoutError, TimeoutPrimitive
 
-# APM support (optional)
-try:
-    from .apm import get_meter, get_tracer, is_apm_enabled, setup_apm
-    from .apm.decorators import trace_workflow, track_metric
-    from .apm.instrumented import APMWorkflowPrimitive
-
-    _apm_exports = [
-        "setup_apm",
-        "get_tracer",
-        "get_meter",
-        "is_apm_enabled",
-        "APMWorkflowPrimitive",
-        "trace_workflow",
-        "track_metric",
-    ]
-except ImportError:
-    # APM dependencies not installed
-    _apm_exports = []
+# Memory & workflow primitives
+from .memory_workflow import MemoryWorkflowPrimitive
+from .paf_memory import PAF, PAFMemoryPrimitive, PAFStatus, PAFValidationResult
+from .session_group import GroupStatus, SessionGroup, SessionGroupPrimitive
+from .workflow_hub import (
+    GenerateWorkflowHubPrimitive,
+    WorkflowMode,
+    WorkflowProfile,
+    WorkflowStage,
+)
 
 __all__ = [
-    "WorkflowContext",
+    # Core primitives
     "WorkflowPrimitive",
-    "LambdaPrimitive",
-    "ConditionalPrimitive",
-    "ParallelPrimitive",
+    "WorkflowContext",
     "SequentialPrimitive",
-    "RouterPrimitive",
-    "CachePrimitive",
-    "TimeoutPrimitive",
-    "TimeoutError",
-] + _apm_exports
+    "ParallelPrimitive",
+    "ConditionalPrimitive",
+    # Memory & workflow
+    "MemoryWorkflowPrimitive",
+    # PAF system
+    "PAF",
+    "PAFMemoryPrimitive",
+    "PAFStatus",
+    "PAFValidationResult",
+    # Session grouping
+    "SessionGroup",
+    "SessionGroupPrimitive",
+    "GroupStatus",
+    # Workflow profiles
+    "GenerateWorkflowHubPrimitive",
+    "WorkflowMode",
+    "WorkflowProfile",
+    "WorkflowStage",
+]
 
-__version__ = "0.2.0"
+__version__ = "0.1.0"
