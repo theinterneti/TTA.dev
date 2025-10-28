@@ -1,8 +1,12 @@
-# AI Libraries Comparison for TTA Project
+# AI Libraries Comparison for AI Applications
+
+> **Note**: This document was originally created for the Therapeutic Text Adventure (TTA) game project.
+> The library comparisons and integration strategies remain highly relevant for general AI application development.
+> For the historical TTA game context, see [archive/legacy-tta-game](../../archive/legacy-tta-game).
 
 ## Overview
 
-This document provides a comprehensive comparison of the AI libraries used in the Therapeutic Text Adventure (TTA) project: Transformers, Guidance, Pydantic-AI, LangGraph, and spaCy. It analyzes their strengths, weaknesses, overlaps, and optimal use cases to guide implementation decisions.
+This document provides a comprehensive comparison of AI libraries commonly used in AI applications: Transformers, Guidance, Pydantic-AI, LangGraph, and spaCy. It analyzes their strengths, weaknesses, overlaps, and optimal use cases to guide implementation decisions.
 
 ## Library Summaries
 
