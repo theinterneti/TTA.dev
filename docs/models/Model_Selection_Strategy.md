@@ -1,8 +1,12 @@
-# Model Selection Strategy for TTA Project
+# Model Selection Strategy for AI Applications
+
+> **Note**: This document was originally created for the Therapeutic Text Adventure (TTA) game project.
+> The model evaluation methodology and selection criteria remain valuable for general AI application development.
+> For the historical TTA game context, see [archive/legacy-tta-game](../../archive/legacy-tta-game).
 
 ## Overview
 
-This document outlines the comprehensive model selection strategy for the Therapeutic Text Adventure (TTA) project. It details how models will be dynamically selected based on task requirements, performance metrics, and resource constraints to optimize both quality and efficiency.
+This document outlines a comprehensive model selection strategy for AI applications. It details how models can be dynamically selected based on task requirements, performance metrics, and resource constraints to optimize both quality and efficiency.
 
 ## Model Evaluation Results
 
@@ -76,24 +80,24 @@ def select_model_for_task(
 ) -> str:
     """
     Select the most appropriate model for a given task.
-    
+
     Args:
         task_type: Type of task (narrative_generation, tool_selection, etc.)
         structured_output: Whether structured output (like JSON) is required
         streaming: Whether streaming is required
         response_time_priority: Whether response time is a priority
-        
+
     Returns:
         Name of the selected model
     """
     # Fast response is highest priority
     if response_time_priority:
         return "qwen2.5-0.5b"
-    
+
     # Structured output (JSON) is required
     if structured_output:
         return "gemma-3-1b-it"
-    
+
     # Task-specific selection
     if task_type == "tool_selection":
         return "phi-4-mini-instruct"
@@ -103,7 +107,7 @@ def select_model_for_task(
         return "gemma-3-1b-it"  # Supports streaming
     elif task_type == "simple_question":
         return "qwen2.5-0.5b"  # Fastest for simple tasks
-    
+
     # Default to phi-4-mini-instruct for best quality
     return "phi-4-mini-instruct"
 ```
@@ -119,11 +123,11 @@ We'll track performance metrics for each model:
 ```python
 class ModelPerformanceTracker:
     """Track performance metrics for models."""
-    
+
     def __init__(self):
         """Initialize the tracker."""
         self.metrics = {}
-    
+
     def record_generation(
         self,
         model_name: str,
@@ -134,15 +138,15 @@ class ModelPerformanceTracker:
     ):
         """Record a generation event."""
         # Implementation details...
-    
+
     def get_average_speed(self, model_name: str, task_type: str) -> float:
         """Get the average generation speed for a model and task."""
         # Implementation details...
-    
+
     def get_success_rate(self, model_name: str, task_type: str) -> float:
         """Get the success rate for a model and task."""
         # Implementation details...
-    
+
     def get_recommended_model(self, task_type: str, **kwargs) -> str:
         """Get the recommended model for a task based on metrics."""
         # Implementation details...
@@ -161,13 +165,13 @@ def select_model_based_on_resources(
 ) -> str:
     """
     Select a model based on available resources.
-    
+
     Args:
         available_memory: Available memory in MB
         available_compute: Available compute (relative units)
         task_type: Type of task
         **kwargs: Additional parameters
-        
+
     Returns:
         Name of the selected model
     """
@@ -181,12 +185,12 @@ We'll adapt model selection based on user feedback and system performance:
 ```python
 class AdaptiveModelSelector:
     """Adaptively select models based on feedback and performance."""
-    
+
     def __init__(self, performance_tracker: ModelPerformanceTracker):
         """Initialize the selector."""
         self.performance_tracker = performance_tracker
         self.user_feedback = {}
-    
+
     def record_user_feedback(
         self,
         model_name: str,
@@ -195,7 +199,7 @@ class AdaptiveModelSelector:
     ):
         """Record user feedback for a generation."""
         # Implementation details...
-    
+
     def select_model(
         self,
         task_type: str,
@@ -317,7 +321,7 @@ We'll implement fallback mechanisms for when the preferred model is unavailable 
 ```python
 class ModelSelectionWithFallback:
     """Select models with fallback mechanisms."""
-    
+
     def __init__(self, model_configs: Dict[str, Any]):
         """Initialize the selector."""
         self.model_configs = model_configs
@@ -326,7 +330,7 @@ class ModelSelectionWithFallback:
             "gemma-3-1b-it": ["phi-4-mini-instruct", "qwen2.5-0.5b"],
             "qwen2.5-0.5b": ["gemma-3-1b-it", "phi-4-mini-instruct"]
         }
-    
+
     def select_with_fallback(
         self,
         task_type: str,
@@ -335,27 +339,27 @@ class ModelSelectionWithFallback:
     ) -> str:
         """
         Select a model with fallback options.
-        
+
         Args:
             task_type: Type of task
             preferred_model: Preferred model name
             **kwargs: Additional parameters
-            
+
         Returns:
             Name of the selected model
         """
         # Check if preferred model is suitable
         if self._is_model_suitable(preferred_model, task_type, **kwargs):
             return preferred_model
-        
+
         # Try fallbacks
         for fallback in self.fallback_chains.get(preferred_model, []):
             if self._is_model_suitable(fallback, task_type, **kwargs):
                 return fallback
-        
+
         # Return the most general model as last resort
         return "qwen2.5-0.5b"  # Fastest and most reliable
-    
+
     def _is_model_suitable(
         self,
         model_name: str,
@@ -376,10 +380,10 @@ We'll implement task-specific optimizations for each model:
 def optimize_for_narrative_generation(model_name: str) -> Dict[str, Any]:
     """
     Get optimized parameters for narrative generation.
-    
+
     Args:
         model_name: Name of the model
-        
+
     Returns:
         Dictionary of optimized parameters
     """
@@ -411,10 +415,10 @@ def optimize_for_narrative_generation(model_name: str) -> Dict[str, Any]:
 def optimize_for_structured_output(model_name: str) -> Dict[str, Any]:
     """
     Get optimized parameters for structured output.
-    
+
     Args:
         model_name: Name of the model
-        
+
     Returns:
         Dictionary of optimized parameters
     """
