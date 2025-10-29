@@ -1,0 +1,129 @@
+{
+  "dashboard": {
+    "title": "Workflow Overview",
+    "tags": ["tta-dev", "workflows", "overview"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate (RPS)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(primitive_requests_total[5m])",
+            "legendFormat": "{{primitive_name}} - {{status}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Active Requests",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "primitive_active_requests",
+            "legendFormat": "{{primitive_name}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Active"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Latency Percentiles",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 24, "h": 10},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(primitive_duration_seconds_bucket[5m])) by (le, primitive_name))",
+            "legendFormat": "{{primitive_name}} p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.90, sum(rate(primitive_duration_seconds_bucket[5m])) by (le, primitive_name))",
+            "legendFormat": "{{primitive_name}} p90",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(primitive_duration_seconds_bucket[5m])) by (le, primitive_name))",
+            "legendFormat": "{{primitive_name}} p95",
+            "refId": "C"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(primitive_duration_seconds_bucket[5m])) by (le, primitive_name))",
+            "legendFormat": "{{primitive_name}} p99",
+            "refId": "D"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Success Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 18, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(primitive_requests_total{status=\"success\"}[5m])) by (primitive_name) / sum(rate(primitive_requests_total[5m])) by (primitive_name)",
+            "legendFormat": "{{primitive_name}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit", "label": "Success Rate", "min": 0, "max": 1},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 18, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(primitive_requests_total{status=\"error\"}[5m])) by (primitive_name)",
+            "legendFormat": "{{primitive_name}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Errors/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Throughput by Primitive",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 26, "w": 24, "h": 8},
+        "targets": [
+          {
+            "expr": "primitive_requests_per_second",
+            "legendFormat": "{{primitive_name}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ]
+      }
+    ]
+  }
+}
