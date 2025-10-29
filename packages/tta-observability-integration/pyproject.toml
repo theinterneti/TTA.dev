@@ -11,9 +11,7 @@ version = "0.1.0"
 description = "Comprehensive observability and monitoring integration for TTA platform"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [
-    {name = "TTA Team"}
-]
+authors = [{ name = "TTA Team" }]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -53,4 +51,4 @@ pythonVersion = "3.11"
 typeCheckingMode = "basic"
 
 [tool.uv.sources]
-tta-dev-primitives = { path = "../tta-dev-primitives", editable = true }
+tta-dev-primitives = { workspace = true }
