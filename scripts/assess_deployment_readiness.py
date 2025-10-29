@@ -94,15 +94,9 @@ class DeploymentReadinessChecker:
         await self._check_git_status()
 
         # Categorize results
-        blockers = [
-            r for r in self.results if not r.passed and r.severity == Severity.BLOCKER
-        ]
-        critical = [
-            r for r in self.results if not r.passed and r.severity == Severity.CRITICAL
-        ]
-        warnings = [
-            r for r in self.results if not r.passed and r.severity == Severity.WARNING
-        ]
+        blockers = [r for r in self.results if not r.passed and r.severity == Severity.BLOCKER]
+        critical = [r for r in self.results if not r.passed and r.severity == Severity.CRITICAL]
+        warnings = [r for r in self.results if not r.passed and r.severity == Severity.WARNING]
         info_items = [r for r in self.results if r.severity == Severity.INFO]
 
         # Determine readiness
@@ -201,9 +195,7 @@ class DeploymentReadinessChecker:
                 passed=has_tta_primitives,
                 severity=Severity.BLOCKER,
                 message=f"{'✓' if has_tta_primitives else '✗'} tta-dev-primitives dependency declared",
-                fix_command="uv add tta-dev-primitives"
-                if not has_tta_primitives
-                else None,
+                fix_command="uv add tta-dev-primitives" if not has_tta_primitives else None,
             )
         )
 
@@ -329,18 +321,14 @@ class DeploymentReadinessChecker:
                     passed=has_section,
                     severity=severity,
                     message=f"{'✓' if has_section else '✗'} {section} section in README",
-                    fix_command=f"Add {section} section to README.md"
-                    if not has_section
-                    else None,
+                    fix_command=f"Add {section} section to README.md" if not has_section else None,
                 )
             )
 
     async def _check_examples(self) -> None:
         """Check if examples exist."""
         examples_dir = self.package_path / "examples"
-        has_examples = (
-            examples_dir.exists() and len(list(examples_dir.glob("*.py"))) > 0
-        )
+        has_examples = examples_dir.exists() and len(list(examples_dir.glob("*.py"))) > 0
 
         self.results.append(
             ValidationResult(
@@ -387,9 +375,7 @@ class DeploymentReadinessChecker:
                         passed=has_field,
                         severity=Severity.CRITICAL,
                         message=f"{'✓' if has_field else '✗'} {field} field in manifest",
-                        fix_command=f"Add {field} to mcp-manifest.json"
-                        if not has_field
-                        else None,
+                        fix_command=f"Add {field} to mcp-manifest.json" if not has_field else None,
                     )
                 )
         except json.JSONDecodeError:
@@ -508,9 +494,7 @@ class DeploymentReadinessChecker:
 
 async def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Assess deployment readiness for TTA.dev packages"
-    )
+    parser = argparse.ArgumentParser(description="Assess deployment readiness for TTA.dev packages")
     parser.add_argument(
         "--target",
         default="mcp-servers",

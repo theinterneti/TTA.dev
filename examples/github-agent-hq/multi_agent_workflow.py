@@ -319,12 +319,8 @@ class AggregatorPrimitive(WorkflowPrimitive[list[AgentResponse], dict[str, Any]]
         return {
             "agents_consulted": [r.agent_name for r in input_data],
             "avg_confidence": sum(r.confidence for r in input_data) / len(input_data),
-            "total_issues": sum(
-                len(r.result.get("issues_found", [])) for r in input_data
-            ),
-            "recommendations": [
-                rec for r in input_data for rec in r.result.get("suggestions", [])
-            ],
+            "total_issues": sum(len(r.result.get("issues_found", [])) for r in input_data),
+            "recommendations": [rec for r in input_data for rec in r.result.get("suggestions", [])],
         }
 
 
@@ -338,9 +334,7 @@ async def pattern5_production_pipeline():
     claude = RetryPrimitive(
         ClaudeAgent(name="claude"), max_retries=3, backoff_strategy="exponential"
     )
-    codex = RetryPrimitive(
-        CodexAgent(name="codex"), max_retries=3, backoff_strategy="exponential"
-    )
+    codex = RetryPrimitive(CodexAgent(name="codex"), max_retries=3, backoff_strategy="exponential")
     copilot = RetryPrimitive(
         CopilotAgent(name="copilot"), max_retries=3, backoff_strategy="exponential"
     )

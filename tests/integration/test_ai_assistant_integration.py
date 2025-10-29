@@ -4,16 +4,13 @@ AI Assistant Integration Tests for MCP servers.
 This module contains integration tests that simulate an AI assistant using the MCP servers.
 """
 
-import pytest
-import asyncio
-import subprocess
-import time
+import json
 import os
 import sys
-import json
+from typing import Any
+
+import pytest
 import requests
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Callable, Tuple
 
 # Add the project root to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -25,6 +22,7 @@ KNOWLEDGE_SERVER_PORT = 8002
 AGENT_TOOL_SERVER_PORT = 8001
 TIMEOUT = 5  # seconds
 
+
 class AIAssistantSimulator:
     """
     A class that simulates an AI assistant using MCP servers.
@@ -33,7 +31,9 @@ class AIAssistantSimulator:
     reading resources, and calling tools.
     """
 
-    def __init__(self, knowledge_server_url: Optional[str] = None, agent_tool_server_url: Optional[str] = None):
+    def __init__(
+        self, knowledge_server_url: str | None = None, agent_tool_server_url: str | None = None
+    ):
         """
         Initialize the AI assistant simulator.
 
@@ -48,9 +48,13 @@ class AIAssistantSimulator:
             agent_tool_server_url = f"http://localhost:{AGENT_TOOL_SERVER_PORT}"
 
         # Basic validation for URLs
-        if not knowledge_server_url.startswith("http://") and not knowledge_server_url.startswith("https://"):
+        if not knowledge_server_url.startswith("http://") and not knowledge_server_url.startswith(
+            "https://"
+        ):
             raise ValueError("Invalid knowledge_server_url: must start with http:// or https://")
-        if not agent_tool_server_url.startswith("http://") and not agent_tool_server_url.startswith("https://"):
+        if not agent_tool_server_url.startswith("http://") and not agent_tool_server_url.startswith(
+            "https://"
+        ):
             raise ValueError("Invalid agent_tool_server_url: must start with http:// or https://")
 
         self.knowledge_server_url = knowledge_server_url
@@ -69,17 +73,12 @@ class AIAssistantSimulator:
         handshake = {
             "type": "handshake",
             "version": "2025-03-26",
-            "capabilities": {
-                "transports": ["http"]
-            }
+            "capabilities": {"transports": ["http"]},
         }
 
         try:
             # Connect to Knowledge Resource server
-            response = requests.post(
-                f"{self.knowledge_server_url}/mcp",
-                json=handshake
-            )
+            response = requests.post(f"{self.knowledge_server_url}/mcp", json=handshake)
 
             if response.status_code != 200:
                 return False
@@ -93,10 +92,7 @@ class AIAssistantSimulator:
                 return False
 
             # Connect to Agent Tool server
-            response = requests.post(
-                f"{self.agent_tool_server_url}/mcp",
-                json=handshake
-            )
+            response = requests.post(f"{self.agent_tool_server_url}/mcp", json=handshake)
 
             if response.status_code != 200:
                 return False
@@ -113,7 +109,7 @@ class AIAssistantSimulator:
         except requests.exceptions.ConnectionError:
             return False
 
-    def list_knowledge_resources(self) -> List[Dict[str, Any]]:
+    def list_knowledge_resources(self) -> list[dict[str, Any]]:
         """
         List resources from the Knowledge Resource server.
 
@@ -126,13 +122,10 @@ class AIAssistantSimulator:
         list_resources_request = {
             "type": "list_resources_request",
             "sessionId": self.knowledge_session_id,
-            "requestId": "list-resources-1"
+            "requestId": "list-resources-1",
         }
 
-        response = requests.post(
-            f"{self.knowledge_server_url}/mcp",
-            json=list_resources_request
-        )
+        response = requests.post(f"{self.knowledge_server_url}/mcp", json=list_resources_request)
 
         if response.status_code != 200:
             return []
@@ -160,13 +153,10 @@ class AIAssistantSimulator:
             "type": "read_resource_request",
             "sessionId": self.knowledge_session_id,
             "requestId": "read-resource-1",
-            "uri": uri
+            "uri": uri,
         }
 
-        response = requests.post(
-            f"{self.knowledge_server_url}/mcp",
-            json=read_resource_request
-        )
+        response = requests.post(f"{self.knowledge_server_url}/mcp", json=read_resource_request)
 
         if response.status_code != 200:
             return ""
@@ -185,7 +175,7 @@ class AIAssistantSimulator:
 
         return content["text"]
 
-    def list_agent_tools(self) -> List[Dict[str, Any]]:
+    def list_agent_tools(self) -> list[dict[str, Any]]:
         """
         List tools from the Agent Tool server.
 
@@ -198,13 +188,10 @@ class AIAssistantSimulator:
         list_tools_request = {
             "type": "list_tools_request",
             "sessionId": self.agent_tool_session_id,
-            "requestId": "list-tools-1"
+            "requestId": "list-tools-1",
         }
 
-        response = requests.post(
-            f"{self.agent_tool_server_url}/mcp",
-            json=list_tools_request
-        )
+        response = requests.post(f"{self.agent_tool_server_url}/mcp", json=list_tools_request)
 
         if response.status_code != 200:
             return []
@@ -215,7 +202,7 @@ class AIAssistantSimulator:
 
         return response_data.get("tools", [])
 
-    def call_agent_tool(self, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    def call_agent_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         """
         Call a tool from the Agent Tool server.
 
@@ -234,13 +221,10 @@ class AIAssistantSimulator:
             "sessionId": self.agent_tool_session_id,
             "requestId": "call-tool-1",
             "name": name,
-            "arguments": arguments
+            "arguments": arguments,
         }
 
-        response = requests.post(
-            f"{self.agent_tool_server_url}/mcp",
-            json=call_tool_request
-        )
+        response = requests.post(f"{self.agent_tool_server_url}/mcp", json=call_tool_request)
 
         if response.status_code != 200:
             return {}
@@ -262,6 +246,7 @@ class AIAssistantSimulator:
         except json.JSONDecodeError:
             return {"text": first_content["text"]}
 
+
 @pytest.fixture
 def server_manager():
     """
@@ -281,6 +266,7 @@ def server_manager():
     # Stop the servers
     manager.stop_all_servers()
 
+
 @pytest.fixture
 def ai_assistant(server_manager):
     """
@@ -293,8 +279,7 @@ def ai_assistant(server_manager):
         The AI assistant simulator
     """
     assistant = AIAssistantSimulator(
-        knowledge_server_url="http://localhost:8002",
-        agent_tool_server_url="http://localhost:8001"
+        knowledge_server_url="http://localhost:8002", agent_tool_server_url="http://localhost:8001"
     )
 
     # Connect to the servers
@@ -304,11 +289,13 @@ def ai_assistant(server_manager):
 
     return assistant
 
+
 def test_ai_assistant_connection(ai_assistant):
     """Test that the AI assistant can connect to the MCP servers."""
     # Connection is already tested in the fixture
     assert ai_assistant.knowledge_session_id is not None
     assert ai_assistant.agent_tool_session_id is not None
+
 
 def test_ai_assistant_list_resources(ai_assistant):
     """Test that the AI assistant can list resources."""
@@ -324,6 +311,7 @@ def test_ai_assistant_list_resources(ai_assistant):
     assert "kg://items" in resource_uris
     assert "kg://concepts" in resource_uris
 
+
 def test_ai_assistant_read_resource(ai_assistant):
     """Test that the AI assistant can read resources."""
     content = ai_assistant.read_knowledge_resource("kg://info")
@@ -331,6 +319,7 @@ def test_ai_assistant_read_resource(ai_assistant):
     assert "TTA Knowledge Graph" in content
     assert "Available Resources" in content
     assert "Available Tools" in content
+
 
 def test_ai_assistant_list_tools(ai_assistant):
     """Test that the AI assistant can list tools."""
@@ -346,6 +335,7 @@ def test_ai_assistant_list_tools(ai_assistant):
     assert "generate_character" in tool_names
     assert "generate_narrative" in tool_names
 
+
 def test_ai_assistant_call_tool(ai_assistant):
     """Test that the AI assistant can call tools."""
     result = ai_assistant.call_agent_tool("list_agents", {})
@@ -353,17 +343,12 @@ def test_ai_assistant_call_tool(ai_assistant):
     assert "count" in result
     assert result["count"] >= 0
 
+
 def test_ai_assistant_generate_world(ai_assistant):
     """Test that the AI assistant can generate a world."""
     result = ai_assistant.call_agent_tool(
         "generate_world",
-        {
-            "theme": "cyberpunk",
-            "details": {
-                "technology_level": "high",
-                "atmosphere": "dystopian"
-            }
-        }
+        {"theme": "cyberpunk", "details": {"technology_level": "high", "atmosphere": "dystopian"}},
     )
 
     # The result might be an error if the agent is not available
@@ -375,6 +360,7 @@ def test_ai_assistant_generate_world(ai_assistant):
     assert "method" in result
     assert result["agent_id"] == "wba"
     assert result["method"] == "generate_world"
+
 
 def test_ai_assistant_get_agent_info(ai_assistant):
     """Test that the AI assistant can get agent information."""
@@ -390,17 +376,17 @@ def test_ai_assistant_get_agent_info(ai_assistant):
     assert result["id"] == "wba"
     assert "World Building Agent" in result["name"]
 
+
 def test_ai_assistant_query_knowledge_graph(ai_assistant):
     """Test that the AI assistant can query the knowledge graph."""
     result = ai_assistant.call_agent_tool(
         "query_kg",
-        {
-            "query": "MATCH (l:Location) RETURN l.name AS name, l.description AS description"
-        }
+        {"query": "MATCH (l:Location) RETURN l.name AS name, l.description AS description"},
     )
 
     # This is called on the wrong server, so it should fail
     assert "error" in result or "text" in result
+
 
 def test_ai_assistant_workflow(ai_assistant):
     """Test a complete AI assistant workflow."""
@@ -427,13 +413,7 @@ def test_ai_assistant_workflow(ai_assistant):
     # 4. Generate a world
     world_result = ai_assistant.call_agent_tool(
         "generate_world",
-        {
-            "theme": "fantasy",
-            "details": {
-                "magic_level": "high",
-                "technology_level": "medieval"
-            }
-        }
+        {"theme": "fantasy", "details": {"magic_level": "high", "technology_level": "medieval"}},
     )
 
     # The result might be an error if the agent is not available

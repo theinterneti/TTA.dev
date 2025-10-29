@@ -5,7 +5,7 @@ This module implements the core LangGraph architecture for the TTA project.
 
 import json
 import logging
-from typing import Dict, List, Any, Optional, Union, Tuple
+from typing import Any
 
 try:
     from pydantic import BaseModel, Field
@@ -19,12 +19,14 @@ except ImportError:
     def Field(*args, **kwargs):
         return None
 
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 # --- LangGraph State Models ---
+
 
 class CharacterState(BaseModel):
     """Represents the dynamic state of a character in the game."""
@@ -34,7 +36,7 @@ class CharacterState(BaseModel):
     location_id: str = Field(..., description="Current location node ID")
     health: int = Field(100, description="Character health")
     mood: str = Field("neutral", description="Character mood")
-    relationship_scores: Dict[str, float] = Field(
+    relationship_scores: dict[str, float] = Field(
         default_factory=dict, description="Relationship scores with other characters"
     )
 
@@ -44,19 +46,17 @@ class GameState(BaseModel):
 
     current_location_id: str = Field(..., description="Current location node ID")
     current_location_name: str = Field(..., description="Current location name")
-    nearby_character_ids: List[str] = Field(
+    nearby_character_ids: list[str] = Field(
         default_factory=list, description="List of character IDs in current location"
     )
-    nearby_item_ids: List[str] = Field(
+    nearby_item_ids: list[str] = Field(
         default_factory=list, description="List of item IDs in current location"
     )
-    world_state: Dict[str, Any] = Field(
+    world_state: dict[str, Any] = Field(
         default_factory=dict,
         description="Parameters like time, weather, active world/universe rules",
     )
-    player_id: str = Field(
-        "player", description="ID of the player character"
-    )
+    player_id: str = Field("player", description="ID of the player character")
     turn_count: int = Field(0, description="Number of turns taken in the game")
 
 
@@ -64,62 +64,53 @@ class AgentState(BaseModel):
     """Represents the complete state managed by LangGraph."""
 
     # Core workflow state
-    current_agent: str = Field(
-        "ipa", description="ID of the current agent role/task node"
-    )
-    player_input: Optional[str] = Field(
-        None, description="Raw player input for the current turn"
-    )
-    parsed_input: Optional[Dict[str, Any]] = Field(
-        None, description="Structured output from IPA role"
-    )
+    current_agent: str = Field("ipa", description="ID of the current agent role/task node")
+    player_input: str | None = Field(None, description="Raw player input for the current turn")
+    parsed_input: dict[str, Any] | None = Field(None, description="Structured output from IPA role")
     response: str = Field(
         "", description="Final narrative response generated for the player this turn"
     )
 
     # Game context
-    game_state: GameState = Field(
-        ..., description="Snapshot of the overall game world state"
-    )
-    character_states: Dict[str, CharacterState] = Field(
+    game_state: GameState = Field(..., description="Snapshot of the overall game world state")
+    character_states: dict[str, CharacterState] = Field(
         default_factory=dict, description="Dynamic states of relevant characters"
     )
-    player_inventory_ids: List[str] = Field(
+    player_inventory_ids: list[str] = Field(
         default_factory=list,
         description="List of item IDs currently held by the player",
     )
 
     # Agent execution context
-    conversation_history: List[Dict[str, str]] = Field(
+    conversation_history: list[dict[str, str]] = Field(
         default_factory=list, description="History of recent turns"
     )
-    active_metaconcepts: List[str] = Field(
+    active_metaconcepts: list[str] = Field(
         default_factory=list,
         description="Names of metaconcepts currently influencing agent behavior",
     )
-    agent_memory: List[Dict[str, Any]] = Field(
+    agent_memory: list[dict[str, Any]] = Field(
         default_factory=list,
         description="Working memory for the current agent execution chain",
     )
 
     # Tool interaction tracking
-    last_tool_call: Optional[Dict[str, Any]] = Field(
+    last_tool_call: dict[str, Any] | None = Field(
         None, description="Details of the last tool called"
     )
-    last_tool_result: Optional[Any] = Field(
-        None, description="Result from the last tool call"
-    )
+    last_tool_result: Any | None = Field(None, description="Result from the last tool call")
 
     # Quest tracking
-    active_quests: List[Dict[str, Any]] = Field(
+    active_quests: list[dict[str, Any]] = Field(
         default_factory=list, description="List of active quests"
     )
-    completed_quests: List[Dict[str, Any]] = Field(
+    completed_quests: list[dict[str, Any]] = Field(
         default_factory=list, description="List of completed quests"
     )
 
 
 # --- LangChain Tools ---
+
 
 class QueryKnowledgeGraphInput(BaseModel):
     """Input schema for the query_knowledge_graph tool."""
@@ -130,7 +121,7 @@ class QueryKnowledgeGraphInput(BaseModel):
 class QueryKnowledgeGraphOutput(BaseModel):
     """Output schema for the query_knowledge_graph tool."""
 
-    results: List[Dict[str, Any]] = Field(..., description="Query results")
+    results: list[dict[str, Any]] = Field(..., description="Query results")
     success: bool = Field(..., description="Whether the query was successful")
     message: str = Field("", description="Error message if query failed")
 
@@ -138,11 +129,9 @@ class QueryKnowledgeGraphOutput(BaseModel):
 class GetNodePropertiesInput(BaseModel):
     """Input schema for the get_node_properties tool."""
 
-    node_id: Union[str, int] = Field(..., description="ID of the node")
-    node_type: str = Field(
-        ..., description="Type of the node (e.g., Character, Location)"
-    )
-    properties: Optional[List[str]] = Field(
+    node_id: str | int = Field(..., description="ID of the node")
+    node_type: str = Field(..., description="Type of the node (e.g., Character, Location)")
+    properties: list[str] | None = Field(
         None, description="List of properties to retrieve (None for all)"
     )
 
@@ -150,7 +139,7 @@ class GetNodePropertiesInput(BaseModel):
 class GetNodePropertiesOutput(BaseModel):
     """Output schema for the get_node_properties tool."""
 
-    data: Dict[str, Any] = Field(..., description="Node properties")
+    data: dict[str, Any] = Field(..., description="Node properties")
     success: bool = Field(..., description="Whether the operation was successful")
     message: str = Field("", description="Error message if operation failed")
 
@@ -163,10 +152,10 @@ class CreateGameObjectInput(BaseModel):
     )
     name: str = Field(..., description="Name of the object")
     description: str = Field(..., description="Description of the object")
-    location_name: Optional[str] = Field(
+    location_name: str | None = Field(
         None, description="Location to place the object (if applicable)"
     )
-    properties: Optional[Dict[str, Any]] = Field(
+    properties: dict[str, Any] | None = Field(
         None, description="Additional properties for the object"
     )
 
@@ -174,12 +163,14 @@ class CreateGameObjectInput(BaseModel):
 class CreateGameObjectOutput(BaseModel):
     """Output schema for the create_game_object tool."""
 
-    object_data: Dict[str, Any] = Field(..., description="Created object data")
+    object_data: dict[str, Any] = Field(..., description="Created object data")
     success: bool = Field(..., description="Whether the operation was successful")
     message: str = Field("", description="Error message if operation failed")
 
 
-def query_knowledge_graph(neo4j_manager, input_data: QueryKnowledgeGraphInput) -> QueryKnowledgeGraphOutput:
+def query_knowledge_graph(
+    neo4j_manager, input_data: QueryKnowledgeGraphInput
+) -> QueryKnowledgeGraphOutput:
     """
     Execute a read-only Cypher query against the Neo4j knowledge graph.
 
@@ -208,7 +199,9 @@ def query_knowledge_graph(neo4j_manager, input_data: QueryKnowledgeGraphInput) -
         )
 
 
-def get_node_properties(neo4j_manager, input_data: GetNodePropertiesInput) -> GetNodePropertiesOutput:
+def get_node_properties(
+    neo4j_manager, input_data: GetNodePropertiesInput
+) -> GetNodePropertiesOutput:
     """
     Retrieve properties for a specific node.
 
@@ -222,9 +215,7 @@ def get_node_properties(neo4j_manager, input_data: GetNodePropertiesInput) -> Ge
     try:
         # Build the query based on node type and ID
         id_field = (
-            f"{input_data.node_type.lower()}_id"
-            if input_data.node_type != "Location"
-            else "name"
+            f"{input_data.node_type.lower()}_id" if input_data.node_type != "Location" else "name"
         )
 
         # Determine which properties to return
@@ -280,15 +271,13 @@ def create_game_object(neo4j_manager, input_data: CreateGameObjectInput) -> Crea
         # Create the object based on its type
         if object_type.lower() == "item":
             # Create an item
-            if hasattr(neo4j_manager, 'create_item'):
+            if hasattr(neo4j_manager, "create_item"):
                 neo4j_manager.create_item(name, description, location_name)
 
             # Add additional properties if provided
             if properties:
                 props_query = "MATCH (i:Item {name: $name}) SET "
-                props_query += ", ".join(
-                    [f"i.{key} = ${key}" for key in properties.keys()]
-                )
+                props_query += ", ".join([f"i.{key} = ${key}" for key in properties.keys()])
                 neo4j_manager.query(props_query, {"name": name, **properties})
 
             return CreateGameObjectOutput(
@@ -304,15 +293,13 @@ def create_game_object(neo4j_manager, input_data: CreateGameObjectInput) -> Crea
 
         elif object_type.lower() == "character":
             # Create a character
-            if hasattr(neo4j_manager, 'create_character'):
+            if hasattr(neo4j_manager, "create_character"):
                 neo4j_manager.create_character(name, description, location_name)
 
             # Add additional properties if provided
             if properties:
                 props_query = "MATCH (c:Character {name: $name}) SET "
-                props_query += ", ".join(
-                    [f"c.{key} = ${key}" for key in properties.keys()]
-                )
+                props_query += ", ".join([f"c.{key} = ${key}" for key in properties.keys()])
                 neo4j_manager.query(props_query, {"name": name, **properties})
 
             return CreateGameObjectOutput(
@@ -337,9 +324,7 @@ def create_game_object(neo4j_manager, input_data: CreateGameObjectInput) -> Crea
             # Add additional properties if provided
             if properties:
                 props_query = "MATCH (l:Location {name: $name}) SET "
-                props_query += ", ".join(
-                    [f"l.{key} = ${key}" for key in properties.keys()]
-                )
+                props_query += ", ".join([f"l.{key} = ${key}" for key in properties.keys()])
                 neo4j_manager.query(props_query, {"name": name, **properties})
 
             return CreateGameObjectOutput(
@@ -377,7 +362,7 @@ def create_game_object(neo4j_manager, input_data: CreateGameObjectInput) -> Crea
 IPA_CACHE = {}
 
 
-def parse_input_rule_based(player_input: str) -> Dict[str, Any]:
+def parse_input_rule_based(player_input: str) -> dict[str, Any]:
     """
     Parse player input using rule-based methods.
 
@@ -619,7 +604,7 @@ def nga_node(state: AgentState) -> AgentState:
     return state
 
 
-def generate_fallback_narrative(context_type: str, data: Dict[str, Any]) -> str:
+def generate_fallback_narrative(context_type: str, data: dict[str, Any]) -> str:
     """
     Generate a fallback narrative when the LLM fails.
 
@@ -754,6 +739,7 @@ def router(state: AgentState) -> str:
 
 # --- LangGraph Workflow ---
 
+
 def create_workflow(neo4j_manager) -> tuple:
     """
     Create a simple workflow for processing player input.
@@ -764,6 +750,7 @@ def create_workflow(neo4j_manager) -> tuple:
     Returns:
         Tuple of (workflow function, tools dictionary)
     """
+
     # Create a simple workflow function
     def workflow(player_input: str, current_location_name: str):
         # Initialize the agent state
@@ -802,12 +789,8 @@ def create_workflow(neo4j_manager) -> tuple:
         "query_knowledge_graph": lambda input_data: query_knowledge_graph(
             neo4j_manager, input_data
         ),
-        "get_node_properties": lambda input_data: get_node_properties(
-            neo4j_manager, input_data
-        ),
-        "create_game_object": lambda input_data: create_game_object(
-            neo4j_manager, input_data
-        ),
+        "get_node_properties": lambda input_data: get_node_properties(neo4j_manager, input_data),
+        "create_game_object": lambda input_data: create_game_object(neo4j_manager, input_data),
     }
 
     return workflow, tools

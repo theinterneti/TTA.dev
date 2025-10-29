@@ -1,7 +1,15 @@
-"""Code quality validation checks.
+"""Python-specific validation checks.
 
-This module provides validation checks for code quality standards
-like tests passing, type checking, linting, and formatting.
+This module provides validation checks specific to Python projects:
+- pytest for test execution
+- pyright for type checking
+- ruff for linting and formatting
+
+For other languages, create similar modules (e.g., javascript.py, rust.py)
+with language-appropriate tools:
+- JavaScript: jest, eslint, tsc
+- Rust: cargo test, clippy, rustfmt
+- Go: go test, golangci-lint, gofmt
 """
 
 from __future__ import annotations

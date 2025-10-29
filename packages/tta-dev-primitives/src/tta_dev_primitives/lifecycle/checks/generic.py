@@ -39,14 +39,14 @@ async def check_package_manifest_exists(project_path: Path, context: WorkflowCon
         True if any standard package manifest file exists
     """
     manifest_files = [
-        "pyproject.toml",      # Python
-        "package.json",        # JavaScript/TypeScript
-        "Cargo.toml",          # Rust
-        "go.mod",              # Go
-        "pom.xml",             # Java/Maven
-        "build.gradle",        # Java/Gradle
-        "Gemfile",             # Ruby
-        "composer.json",       # PHP
+        "pyproject.toml",  # Python
+        "package.json",  # JavaScript/TypeScript
+        "Cargo.toml",  # Rust
+        "go.mod",  # Go
+        "pom.xml",  # Java/Maven
+        "build.gradle",  # Java/Gradle
+        "Gemfile",  # Ruby
+        "composer.json",  # PHP
     ]
 
     return any((project_path / manifest).exists() for manifest in manifest_files)
@@ -93,35 +93,56 @@ async def check_tests_directory_exists(project_path: Path, context: WorkflowCont
 
 
 async def check_src_directory_exists(project_path: Path, context: WorkflowContext) -> bool:
-    """Check if src directory exists.
+    """Check if source code directory exists.
+
+    Language-agnostic check for common source code locations:
+    - src/ directory (universal convention)
+    - lib/ directory (common in Ruby, JavaScript)
+    - Source code files in root (flat layout)
 
     Args:
         project_path: Path to project root
         context: Workflow context
 
     Returns:
-        True if src/ directory or package directory exists
+        True if source code directory exists or source files are present
     """
-    # Check for src/ directory
+    # Check for common source directories
     if (project_path / "src").exists():
         return True
+    if (project_path / "lib").exists():
+        return True
 
-    # Check for any .py files in root (simple package structure)
-    py_files = list(project_path.glob("*.py"))
-    return len(py_files) > 0
+    # Check for source code files in root (common extensions)
+    source_extensions = [
+        "*.py",  # Python
+        "*.js",  # JavaScript
+        "*.ts",  # TypeScript
+        "*.rs",  # Rust
+        "*.go",  # Go
+        "*.rb",  # Ruby
+        "*.java",  # Java
+        "*.php",  # PHP
+    ]
+
+    for pattern in source_extensions:
+        if list(project_path.glob(pattern)):
+            return True
+
+    return False
 
 
 # Pre-configured validation checks
 
-HAS_PYPROJECT_TOML = ValidationCheck(
-    name="pyproject.toml exists",
-    description="Project must have a pyproject.toml file",
+HAS_PACKAGE_MANIFEST = ValidationCheck(
+    name="Package manifest exists",
+    description="Project must have a package manifest file",
     severity=Severity.BLOCKER,
-    check_function=check_pyproject_toml_exists,
-    failure_message="No pyproject.toml found. This file is required for Python projects.",
-    success_message="pyproject.toml found",
-    fix_command="Create pyproject.toml with: uv init",
-    documentation_link="https://packaging.python.org/en/latest/guides/writing-pyproject-toml/",
+    check_function=check_package_manifest_exists,
+    failure_message="No package manifest found (pyproject.toml, package.json, Cargo.toml, etc.)",
+    success_message="Package manifest found",
+    fix_command="Create appropriate manifest for your language (e.g., 'uv init' for Python)",
+    documentation_link="https://packaging.python.org/",
 )
 
 HAS_README = ValidationCheck(
@@ -151,31 +172,31 @@ HAS_TESTS_DIRECTORY = ValidationCheck(
     description="Project must have a tests directory",
     severity=Severity.BLOCKER,
     check_function=check_tests_directory_exists,
-    failure_message="No tests/ directory found. Tests are required.",
+    failure_message="No tests/ directory found. Tests are required for all stages beyond experimentation.",
     success_message="tests/ directory found",
-    fix_command="Create tests/ directory: mkdir tests && touch tests/__init__.py",
-    documentation_link="https://docs.pytest.org/en/stable/goodpractices.html",
+    fix_command="Create tests/ directory: mkdir tests",
+    documentation_link="https://en.wikipedia.org/wiki/Test-driven_development",
 )
 
 HAS_SRC_DIRECTORY = ValidationCheck(
-    name="src/ or package directory exists",
+    name="Source code exists",
     description="Project must have source code",
     severity=Severity.BLOCKER,
     check_function=check_src_directory_exists,
-    failure_message="No src/ directory or .py files found. Source code is required.",
+    failure_message="No source code found. Create src/ or lib/ directory, or add source files.",
     success_message="Source code found",
-    fix_command="Create src/ directory: mkdir -p src/your_package",
-    documentation_link="https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/",
+    fix_command="Create src/ directory: mkdir -p src",
+    documentation_link="https://en.wikipedia.org/wiki/Software_project_management",
 )
 
 # Export all checks
 __all__ = [
-    "HAS_PYPROJECT_TOML",
+    "HAS_PACKAGE_MANIFEST",
     "HAS_README",
     "HAS_LICENSE",
     "HAS_TESTS_DIRECTORY",
     "HAS_SRC_DIRECTORY",
-    "check_pyproject_toml_exists",
+    "check_package_manifest_exists",
     "check_readme_exists",
     "check_license_exists",
     "check_tests_directory_exists",

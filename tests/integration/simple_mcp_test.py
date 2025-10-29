@@ -5,22 +5,26 @@ Simple test for MCP servers.
 This script tests the MCP servers by starting them and sending a simple request.
 """
 
-import sys
 import os
 import subprocess
+import sys
 import time
+
 import requests
 
 # Add the project root to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Add the examples directory to the Python path
-examples_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'examples')
+examples_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "examples"
+)
 sys.path.append(examples_path)
 
 # Test constants
 KNOWLEDGE_SERVER_PORT = 8002
 AGENT_TOOL_SERVER_PORT = 8001
+
 
 def start_knowledge_server():
     """Start the Knowledge Resource server."""
@@ -47,10 +51,7 @@ mcp.run('sse')
     # Run the script
     print(f"Running script: {script_path}")
     process = subprocess.Popen(
-        ["python3", script_path],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+        ["python3", script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
 
     # Wait for the server to be ready by polling the endpoint
@@ -80,6 +81,7 @@ mcp.run('sse')
 
     return process
 
+
 def start_agent_tool_server():
     """Start the Agent Tool server."""
     print("Starting Agent Tool server...")
@@ -105,10 +107,7 @@ mcp.run('sse')
     # Run the script
     print(f"Running script: {script_path}")
     process = subprocess.Popen(
-        ["python3", script_path],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
+        ["python3", script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )
 
     # Give the server a moment to start
@@ -124,6 +123,7 @@ mcp.run('sse')
         return None
 
     return process
+
 
 def test_knowledge_server():
     """Test the Knowledge Resource server."""
@@ -142,7 +142,9 @@ def test_knowledge_server():
             print("Testing Knowledge Resource server...")
             try:
                 print(f"Connecting to http://localhost:{KNOWLEDGE_SERVER_PORT}/sse")
-                response = requests.get(f"http://localhost:{KNOWLEDGE_SERVER_PORT}/sse", timeout=10)  # Increased timeout
+                response = requests.get(
+                    f"http://localhost:{KNOWLEDGE_SERVER_PORT}/sse", timeout=10
+                )  # Increased timeout
 
                 if response.status_code == 200:
                     print("Knowledge Resource server is running!")
@@ -181,6 +183,7 @@ def test_knowledge_server():
             print(f"Removing script file: {script_path}")
             os.remove(script_path)
 
+
 def test_agent_tool_server():
     """Test the Agent Tool server."""
     script_path = os.path.join(os.getcwd(), "run_agent_tool_server.py")
@@ -198,7 +201,9 @@ def test_agent_tool_server():
             print("Testing Agent Tool server...")
             try:
                 print(f"Connecting to http://localhost:{AGENT_TOOL_SERVER_PORT}/sse")
-                response = requests.get(f"http://localhost:{AGENT_TOOL_SERVER_PORT}/sse", timeout=10)  # Increased timeout
+                response = requests.get(
+                    f"http://localhost:{AGENT_TOOL_SERVER_PORT}/sse", timeout=10
+                )  # Increased timeout
 
                 if response.status_code == 200:
                     print("Agent Tool server is running!")
@@ -237,6 +242,7 @@ def test_agent_tool_server():
             print(f"Removing script file: {script_path}")
             os.remove(script_path)
 
+
 def main():
     """Main entry point."""
     # Test the Knowledge Resource server
@@ -252,6 +258,7 @@ def main():
 
     # Return success if both tests passed
     return 0 if knowledge_server_success and agent_tool_server_success else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

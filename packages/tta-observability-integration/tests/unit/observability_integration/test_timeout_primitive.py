@@ -25,9 +25,7 @@ class MockPrimitive:
         call_count: Number of times execute() has been called
     """
 
-    def __init__(
-        self, name: str = "mock", delay: float = 0.0, raise_error: bool = False
-    ) -> None:
+    def __init__(self, name: str = "mock", delay: float = 0.0, raise_error: bool = False) -> None:
         """Initialize mock primitive with configurable behavior.
 
         Args:

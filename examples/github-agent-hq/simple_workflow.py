@@ -35,9 +35,7 @@ class AgentResponse:
 class ClaudeAgent(WorkflowPrimitive[dict[str, Any], AgentResponse]):
     """Mock Claude agent for demonstration."""
 
-    async def execute(
-        self, input_data: dict[str, Any], context: WorkflowContext
-    ) -> AgentResponse:
+    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> AgentResponse:
         await asyncio.sleep(0.1)  # Simulate API call
         return AgentResponse(
             agent_name="Claude",
@@ -52,9 +50,7 @@ class ClaudeAgent(WorkflowPrimitive[dict[str, Any], AgentResponse]):
 class CodexAgent(WorkflowPrimitive[dict[str, Any], AgentResponse]):
     """Mock Codex agent for demonstration."""
 
-    async def execute(
-        self, input_data: dict[str, Any], context: WorkflowContext
-    ) -> AgentResponse:
+    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> AgentResponse:
         await asyncio.sleep(0.08)  # Simulate API call
         return AgentResponse(
             agent_name="Codex",
@@ -66,9 +62,7 @@ class CodexAgent(WorkflowPrimitive[dict[str, Any], AgentResponse]):
 class CopilotAgent(WorkflowPrimitive[dict[str, Any], AgentResponse]):
     """Mock Copilot agent for demonstration."""
 
-    async def execute(
-        self, input_data: dict[str, Any], context: WorkflowContext
-    ) -> AgentResponse:
+    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> AgentResponse:
         await asyncio.sleep(0.05)  # Simulate API call
         return AgentResponse(
             agent_name="Copilot",

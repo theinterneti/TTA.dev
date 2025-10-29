@@ -133,9 +133,7 @@ def test_prometheus_configuration():
     assert yaml_config, "No configuration found"
 
     # Check for expected job names (without quotes - Prometheus config format)
-    assert "job_name: prometheus" in yaml_config, (
-        "Missing prometheus self-monitoring job"
-    )
+    assert "job_name: prometheus" in yaml_config, "Missing prometheus self-monitoring job"
     assert "job_name: otel-collector" in yaml_config, "Missing otel-collector job"
     assert "job_name: tta-primitives" in yaml_config, "Missing tta-primitives job"
 

@@ -173,8 +173,7 @@ def example_context_pruning():
         manager.add_message(
             session_id=session_id,
             role="user" if i % 2 == 0 else "assistant",
-            content=f"Message {i}: This is a test message to demonstrate context pruning. "
-            * 5,
+            content=f"Message {i}: This is a test message to demonstrate context pruning. " * 5,
             importance=importance,
             metadata={"message_number": i},
         )
@@ -253,23 +252,17 @@ def example_metadata_usage():
     context = manager.contexts[session_id]
 
     print("\nAll task requests:")
-    task_requests = [
-        msg for msg in context.messages if msg.metadata.get("type") == "task_request"
-    ]
+    task_requests = [msg for msg in context.messages if msg.metadata.get("type") == "task_request"]
     for msg in task_requests:
         print(f"  - {msg.content[:50]}... (priority: {msg.metadata.get('priority')})")
 
     print("\nHigh priority tasks:")
-    high_priority = [
-        msg for msg in task_requests if msg.metadata.get("priority") == "high"
-    ]
+    high_priority = [msg for msg in task_requests if msg.metadata.get("priority") == "high"]
     for msg in high_priority:
         print(f"  - {msg.content[:50]}...")
 
     print("\nPhase 1 tasks:")
-    phase1_tasks = [
-        msg for msg in task_requests if msg.metadata.get("phase") == "phase1"
-    ]
+    phase1_tasks = [msg for msg in task_requests if msg.metadata.get("phase") == "phase1"]
     print(f"  Total: {len(phase1_tasks)} tasks")
     total_days = sum(msg.metadata.get("estimated_days", 0) for msg in phase1_tasks)
     print(f"  Estimated duration: {total_days} days")

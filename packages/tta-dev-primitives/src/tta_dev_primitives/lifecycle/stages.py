@@ -7,7 +7,7 @@ between lifecycle stages, along with recommended actions.
 from tta_dev_primitives.lifecycle.checks import (
     FORMAT_CHECK_PASSES,
     HAS_LICENSE,
-    HAS_PYPROJECT_TOML,
+    HAS_PACKAGE_MANIFEST,
     HAS_README,
     HAS_SRC_DIRECTORY,
     HAS_TESTS_DIRECTORY,
@@ -22,7 +22,7 @@ from tta_dev_primitives.lifecycle.stage_criteria import StageCriteria
 EXPERIMENTATION_TO_TESTING = StageCriteria(
     stage=Stage.TESTING,
     entry_criteria=[
-        HAS_PYPROJECT_TOML,
+        HAS_PACKAGE_MANIFEST,
         HAS_SRC_DIRECTORY,
     ],
     exit_criteria=[
