@@ -5,7 +5,10 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
+from ..observability.logging import get_logger
 from .base import WorkflowContext, WorkflowPrimitive
+
+logger = get_logger(__name__)
 
 
 class ParallelPrimitive(WorkflowPrimitive[Any, list[Any]]):
@@ -40,7 +43,7 @@ class ParallelPrimitive(WorkflowPrimitive[Any, list[Any]]):
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> list[Any]:
         """
-        Execute primitives in parallel.
+        Execute primitives in parallel with comprehensive instrumentation.
 
         Args:
             input_data: Input data sent to all primitives
@@ -52,8 +55,51 @@ class ParallelPrimitive(WorkflowPrimitive[Any, list[Any]]):
         Raises:
             Exception: If any primitive fails
         """
-        tasks = [primitive.execute(input_data, context) for primitive in self.primitives]
-        return await asyncio.gather(*tasks)
+        # Record start checkpoint
+        context.checkpoint("parallel_start")
+
+        logger.info(
+            "parallel_execution_start",
+            branch_count=len(self.primitives),
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
+        # Create child contexts for each branch to maintain trace hierarchy
+        child_contexts = [context.create_child_context() for _ in self.primitives]
+
+        # Execute all branches with their child contexts
+        tasks = [
+            primitive.execute(input_data, child_ctx)
+            for primitive, child_ctx in zip(self.primitives, child_contexts, strict=True)
+        ]
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Check for exceptions
+        exceptions = [r for r in results if isinstance(r, Exception)]
+        if exceptions:
+            logger.error(
+                "parallel_execution_failed",
+                failed_count=len(exceptions),
+                total_count=len(self.primitives),
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+            raise exceptions[0]  # Raise first exception
+
+        # Record end checkpoint
+        context.checkpoint("parallel_end")
+
+        logger.info(
+            "parallel_execution_complete",
+            branch_count=len(self.primitives),
+            elapsed_ms=context.elapsed_ms(),
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
+        return results
 
     def __or__(self, other: WorkflowPrimitive) -> ParallelPrimitive:
         """

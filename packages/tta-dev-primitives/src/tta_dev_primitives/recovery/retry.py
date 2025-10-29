@@ -70,7 +70,7 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """
-        Execute primitive with retry logic.
+        Execute primitive with retry logic and comprehensive instrumentation.
 
         Args:
             input_data: Input data
@@ -84,12 +84,47 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
         """
         last_error = None
 
+        # Log retry configuration
+        logger.info(
+            "retry_primitive_start",
+            primitive=self.primitive.__class__.__name__,
+            max_retries=self.strategy.max_retries,
+            backoff_base=self.strategy.backoff_base,
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
         for attempt in range(self.strategy.max_retries + 1):
             try:
-                return await self.primitive.execute(input_data, context)
+                result = await self.primitive.execute(input_data, context)
+
+                # Log successful execution (especially if after retries)
+                if attempt > 0:
+                    logger.info(
+                        "retry_primitive_success_after_retries",
+                        primitive=self.primitive.__class__.__name__,
+                        attempt=attempt + 1,
+                        total_attempts=self.strategy.max_retries + 1,
+                        workflow_id=context.workflow_id,
+                        correlation_id=context.correlation_id,
+                    )
+
+                # Store retry statistics in context
+                if "retry_statistics" not in context.state:
+                    context.state["retry_statistics"] = []
+                context.state["retry_statistics"].append(
+                    {
+                        "primitive": self.primitive.__class__.__name__,
+                        "attempts": attempt + 1,
+                        "success": True,
+                    }
+                )
+
+                return result
 
             except Exception as e:
                 last_error = e
+                error_type = type(e).__name__
 
                 if attempt < self.strategy.max_retries:
                     delay = self.strategy.calculate_delay(attempt)
@@ -100,6 +135,9 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
                         max_retries=self.strategy.max_retries + 1,
                         delay=delay,
                         error=str(e),
+                        error_type=error_type,
+                        workflow_id=context.workflow_id,
+                        correlation_id=context.correlation_id,
                     )
                     await asyncio.sleep(delay)
                 else:
@@ -108,6 +146,21 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
                         primitive=self.primitive.__class__.__name__,
                         attempts=self.strategy.max_retries + 1,
                         error=str(e),
+                        error_type=error_type,
+                        workflow_id=context.workflow_id,
+                        correlation_id=context.correlation_id,
+                    )
+
+                    # Store failure statistics in context
+                    if "retry_statistics" not in context.state:
+                        context.state["retry_statistics"] = []
+                    context.state["retry_statistics"].append(
+                        {
+                            "primitive": self.primitive.__class__.__name__,
+                            "attempts": attempt + 1,
+                            "success": False,
+                            "error_type": error_type,
+                        }
                     )
 
         raise last_error

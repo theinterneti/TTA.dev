@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
@@ -13,16 +15,82 @@ V = TypeVar("V")
 
 
 class WorkflowContext(BaseModel):
-    """Context passed through workflow execution."""
+    """
+    Context passed through workflow execution with observability support.
+    
+    Includes distributed tracing fields, correlation IDs, and performance tracking
+    for comprehensive workflow observability.
+    """
 
+    # Existing fields
     workflow_id: str | None = None
     session_id: str | None = None
     player_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     state: dict[str, Any] = Field(default_factory=dict)
 
+    # Distributed tracing (W3C Trace Context)
+    trace_id: str | None = Field(default=None, description="OpenTelemetry trace ID")
+    span_id: str | None = Field(default=None, description="Current span ID")
+    parent_span_id: str | None = Field(default=None, description="Parent span ID")
+    trace_flags: int = Field(default=1, description="W3C trace flags (sampled=1)")
+
+    # Correlation and causation
+    correlation_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    causation_id: str | None = Field(default=None, description="Event causation chain")
+
+    # Observability metadata
+    baggage: dict[str, str] = Field(default_factory=dict, description="W3C Baggage")
+    tags: dict[str, str] = Field(default_factory=dict, description="Custom tags")
+
+    # Performance tracking
+    start_time: float = Field(default_factory=time.time)
+    checkpoints: list[tuple[str, float]] = Field(default_factory=list)
+
     class Config:
         arbitrary_types_allowed = True
+
+    def checkpoint(self, name: str) -> None:
+        """
+        Record a timing checkpoint.
+        
+        Args:
+            name: Name of the checkpoint
+        """
+        self.checkpoints.append((name, time.time()))
+
+    def elapsed_ms(self) -> float:
+        """
+        Get elapsed time since workflow start in milliseconds.
+        
+        Returns:
+            Elapsed time in milliseconds
+        """
+        return (time.time() - self.start_time) * 1000
+
+    def create_child_context(self) -> WorkflowContext:
+        """
+        Create a child context for nested workflows or parallel branches.
+        
+        Inherits correlation_id to maintain trace continuity while creating
+        new span hierarchy for proper distributed tracing.
+        
+        Returns:
+            New WorkflowContext with inherited tracing information
+        """
+        return WorkflowContext(
+            workflow_id=self.workflow_id,
+            session_id=self.session_id,
+            player_id=self.player_id,
+            metadata=self.metadata.copy(),
+            state=self.state.copy(),
+            trace_id=self.trace_id,
+            parent_span_id=self.span_id,  # Current span becomes parent
+            correlation_id=self.correlation_id,
+            causation_id=self.correlation_id,  # Chain causation
+            baggage=self.baggage.copy(),
+            tags=self.tags.copy(),
+        )
 
 
 class WorkflowPrimitive(Generic[T, U], ABC):

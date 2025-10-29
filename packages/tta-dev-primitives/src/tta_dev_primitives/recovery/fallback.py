@@ -53,7 +53,7 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """
-        Execute with fallback logic.
+        Execute with fallback logic and comprehensive instrumentation.
 
         Args:
             input_data: Input data
@@ -65,15 +65,49 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: If both primary and fallback fail
         """
+        logger.info(
+            "fallback_primitive_start",
+            primary=self.primary.__class__.__name__,
+            fallback=self.fallback.__class__.__name__,
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
         try:
-            return await self.primary.execute(input_data, context)
+            result = await self.primary.execute(input_data, context)
+
+            logger.info(
+                "fallback_primary_succeeded",
+                primary=self.primary.__class__.__name__,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+
+            # Store success statistics in context
+            if "fallback_statistics" not in context.state:
+                context.state["fallback_statistics"] = []
+            context.state["fallback_statistics"].append(
+                {
+                    "primary": self.primary.__class__.__name__,
+                    "fallback": self.fallback.__class__.__name__,
+                    "used_fallback": False,
+                    "success": True,
+                }
+            )
+
+            return result
 
         except Exception as primary_error:
+            primary_error_type = type(primary_error).__name__
+
             logger.warning(
                 "primitive_fallback_triggered",
                 primary=self.primary.__class__.__name__,
                 fallback=self.fallback.__class__.__name__,
                 error=str(primary_error),
+                error_type=primary_error_type,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
             )
 
             try:
@@ -81,14 +115,51 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
                 logger.info(
                     "primitive_fallback_succeeded",
                     fallback=self.fallback.__class__.__name__,
+                    workflow_id=context.workflow_id,
+                    correlation_id=context.correlation_id,
                 )
+
+                # Store fallback success statistics in context
+                if "fallback_statistics" not in context.state:
+                    context.state["fallback_statistics"] = []
+                context.state["fallback_statistics"].append(
+                    {
+                        "primary": self.primary.__class__.__name__,
+                        "fallback": self.fallback.__class__.__name__,
+                        "used_fallback": True,
+                        "success": True,
+                        "primary_error_type": primary_error_type,
+                    }
+                )
+
                 return result
 
             except Exception as fallback_error:
+                fallback_error_type = type(fallback_error).__name__
+
                 logger.error(
                     "primitive_fallback_failed",
                     primary_error=str(primary_error),
+                    primary_error_type=primary_error_type,
                     fallback_error=str(fallback_error),
+                    fallback_error_type=fallback_error_type,
+                    workflow_id=context.workflow_id,
+                    correlation_id=context.correlation_id,
                 )
+
+                # Store failure statistics in context
+                if "fallback_statistics" not in context.state:
+                    context.state["fallback_statistics"] = []
+                context.state["fallback_statistics"].append(
+                    {
+                        "primary": self.primary.__class__.__name__,
+                        "fallback": self.fallback.__class__.__name__,
+                        "used_fallback": True,
+                        "success": False,
+                        "primary_error_type": primary_error_type,
+                        "fallback_error_type": fallback_error_type,
+                    }
+                )
+
                 # Re-raise the original error
                 raise primary_error
