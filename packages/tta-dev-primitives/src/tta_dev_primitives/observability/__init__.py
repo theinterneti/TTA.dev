@@ -11,6 +11,7 @@ from .enhanced_metrics import (
 )
 from .logging import setup_logging
 from .metrics import PrimitiveMetrics, get_metrics_collector
+from .prometheus_exporter import PrometheusExporter, get_prometheus_exporter
 from .tracing import ObservablePrimitive, setup_tracing
 
 __all__ = [
@@ -28,4 +29,7 @@ __all__ = [
     "CostMetrics",
     "EnhancedMetricsCollector",
     "get_enhanced_metrics_collector",
+    # Prometheus integration (Phase 3)
+    "PrometheusExporter",
+    "get_prometheus_exporter",
 ]
