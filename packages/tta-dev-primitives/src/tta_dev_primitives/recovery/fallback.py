@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
+from opentelemetry import trace
+
 from ..core.base import WorkflowContext, WorkflowPrimitive
+from ..observability.enhanced_collector import get_enhanced_metrics_collector
+from ..observability.instrumented_primitive import TRACING_AVAILABLE
 from ..observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -72,11 +77,6 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: If both primary and fallback fail
         """
-        import time
-
-        from ..observability.enhanced_collector import get_enhanced_metrics_collector
-        from ..observability.instrumented_primitive import TRACING_AVAILABLE
-
         metrics_collector = get_enhanced_metrics_collector()
 
         # Log workflow start
@@ -104,8 +104,6 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
         primary_start_time = time.time()
 
         # Create primary span (if tracing available)
-        from opentelemetry import trace
-
         tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
         try:
