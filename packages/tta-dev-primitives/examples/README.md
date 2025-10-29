@@ -64,6 +64,64 @@ cd packages/tta-dev-primitives
 uv run python examples/apm_example.py
 ```
 
+### 5. `observability_demo.py` ⭐ NEW
+**Comprehensive observability platform demonstration** showcasing production-ready monitoring and metrics.
+
+This demo proves that the TTA.dev observability platform (Phases 1-3) is production-ready and provides real value for monitoring AI workflows.
+
+Topics covered:
+- **Automatic Metrics Collection**: Via `InstrumentedPrimitive` - no manual instrumentation needed
+- **Percentile Latency Tracking**: p50, p90, p95, p99 for performance analysis
+- **SLO Compliance Monitoring**: Real-time SLO tracking with error budget calculation
+- **Throughput Tracking**: Requests per second and concurrent request monitoring
+- **Cost Tracking**: Cost monitoring and savings from cache hits (30-40% typical savings)
+- **Prometheus Integration**: Metrics export for Grafana dashboards and AlertManager
+
+**What the demo does:**
+1. Creates a realistic multi-step AI workflow with:
+   - Fast validation (1-10ms)
+   - LLM calls with retry (50-500ms, 5% failure rate)
+   - Data processing (10-50ms)
+   - Parallel execution
+   - Cache wrapper for cost savings
+2. Runs 20 initial executions (cache misses)
+3. Runs 10 repeated executions (cache hits - demonstrates 33% cache hit rate)
+4. Displays comprehensive metrics for each primitive
+5. Shows Prometheus integration (if prometheus-client installed)
+
+**Run it:**
+```bash
+cd packages/tta-dev-primitives
+uv run python examples/observability_demo.py
+```
+
+**Sample output:**
+```
+📊 Metrics for: llm_generation
+------------------------------------------------------------
+  Latency Percentiles:
+    p50: 227.90ms
+    p90: 463.71ms
+    p95: 466.12ms
+    p99: 472.14ms
+
+  SLO Status: ✅
+    Target: 95.0%
+    Availability: 95.24%
+    Latency Compliance: 100.00%
+    Error Budget Remaining: 100.0%
+
+  Throughput:
+    Total Requests: 21
+    RPS: 2.27
+```
+
+**Next steps after running the demo:**
+- View Grafana dashboards: `dashboards/grafana/`
+- Configure AlertManager: `dashboards/alertmanager/`
+- Install Prometheus client: `uv pip install prometheus-client`
+- Integrate with your monitoring stack
+
 ## Key Concepts Demonstrated
 
 ### Composition Patterns

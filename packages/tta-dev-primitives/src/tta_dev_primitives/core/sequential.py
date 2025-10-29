@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..observability.instrumented_primitive import InstrumentedPrimitive
 from .base import WorkflowContext, WorkflowPrimitive
 
 
-class SequentialPrimitive(WorkflowPrimitive[Any, Any]):
+class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
     """
     Execute primitives in sequence.
 
@@ -35,8 +36,10 @@ class SequentialPrimitive(WorkflowPrimitive[Any, Any]):
         if not primitives:
             raise ValueError("SequentialPrimitive requires at least one primitive")
         self.primitives = primitives
+        # Initialize InstrumentedPrimitive with name
+        super().__init__(name="SequentialPrimitive")
 
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
+    async def _execute_impl(self, input_data: Any, context: WorkflowContext) -> Any:
         """
         Execute primitives sequentially.
 
@@ -51,8 +54,11 @@ class SequentialPrimitive(WorkflowPrimitive[Any, Any]):
             Exception: If any primitive fails
         """
         result = input_data
-        for primitive in self.primitives:
+        for i, primitive in enumerate(self.primitives):
+            # Record step checkpoint
+            context.checkpoint(f"sequential.step_{i}.start")
             result = await primitive.execute(result, context)
+            context.checkpoint(f"sequential.step_{i}.end")
         return result
 
     def __rshift__(self, other: WorkflowPrimitive) -> SequentialPrimitive:
