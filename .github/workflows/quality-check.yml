@@ -50,16 +50,25 @@ jobs:
         run: uvx pyright packages/
 
       - name: Run tests with coverage
-        run: uv run pytest --cov=packages --cov-report=xml --cov-report=term-missing
+        run: |
+          uv run pytest \
+            --cov=packages \
+            --cov-branch \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        if: always()  # Upload coverage even if tests fail
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unit,ubuntu
+          name: quality-check
+          fail_ci_if_error: false
+          verbose: true
 
       - name: Validate PAF Compliance
         run: uv run python scripts/validation/validate-paf-compliance.py
         continue-on-error: false
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
