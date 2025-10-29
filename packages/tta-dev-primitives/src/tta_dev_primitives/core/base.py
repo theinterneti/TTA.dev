@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import time
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -13,16 +15,135 @@ V = TypeVar("V")
 
 
 class WorkflowContext(BaseModel):
-    """Context passed through workflow execution."""
+    """
+    Context passed through workflow execution with full observability support.
 
+    Supports distributed tracing, correlation tracking, and performance monitoring.
+    """
+
+    # Existing fields
     workflow_id: str | None = None
     session_id: str | None = None
     player_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     state: dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        arbitrary_types_allowed = True
+    # Distributed tracing (W3C Trace Context)
+    trace_id: str | None = Field(default=None, description="OpenTelemetry trace ID")
+    span_id: str | None = Field(default=None, description="Current span ID")
+    parent_span_id: str | None = Field(default=None, description="Parent span ID")
+    trace_flags: int = Field(default=1, description="W3C trace flags (sampled=1)")
+
+    # Correlation and causation
+    correlation_id: str = Field(
+        default_factory=lambda: str(uuid.uuid4()),
+        description="Unique ID for tracking related operations",
+    )
+    causation_id: str | None = Field(default=None, description="Event causation chain")
+
+    # Observability metadata
+    baggage: dict[str, str] = Field(
+        default_factory=dict, description="W3C Baggage for context propagation"
+    )
+    tags: dict[str, str] = Field(default_factory=dict, description="Custom tags")
+
+    # Performance tracking
+    start_time: float = Field(default_factory=time.time, description="Workflow start timestamp")
+    checkpoints: list[tuple[str, float]] = Field(
+        default_factory=list, description="Timing checkpoints"
+    )
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    def checkpoint(self, name: str) -> None:
+        """
+        Record a timing checkpoint.
+
+        Args:
+            name: Name of the checkpoint
+
+        Example:
+            ```python
+            context = WorkflowContext(workflow_id="demo")
+            context.checkpoint("validation_complete")
+            context.checkpoint("processing_complete")
+            ```
+        """
+        self.checkpoints.append((name, time.time()))
+
+    def elapsed_ms(self) -> float:
+        """
+        Get elapsed time since workflow start in milliseconds.
+
+        Returns:
+            Elapsed time in milliseconds
+
+        Example:
+            ```python
+            context = WorkflowContext()
+            await some_operation(context)
+            print(f"Took {context.elapsed_ms():.2f}ms")
+            ```
+        """
+        return (time.time() - self.start_time) * 1000
+
+    def create_child_context(self) -> WorkflowContext:
+        """
+        Create a child context for nested workflows.
+
+        Preserves trace context and correlation information while creating
+        a new span hierarchy.
+
+        Returns:
+            New WorkflowContext with inherited trace information
+
+        Example:
+            ```python
+            parent_context = WorkflowContext(workflow_id="parent")
+            child_context = parent_context.create_child_context()
+            # child_context inherits trace_id and correlation_id
+            ```
+        """
+        return WorkflowContext(
+            workflow_id=self.workflow_id,
+            session_id=self.session_id,
+            player_id=self.player_id,
+            metadata=self.metadata.copy(),
+            state=self.state.copy(),
+            trace_id=self.trace_id,
+            parent_span_id=self.span_id,  # Current span becomes parent
+            correlation_id=self.correlation_id,  # Inherit correlation
+            causation_id=self.correlation_id,  # Chain causation
+            baggage=self.baggage.copy(),
+            tags=self.tags.copy(),
+        )
+
+    def to_otel_context(self) -> dict[str, Any]:
+        """
+        Convert to OpenTelemetry context attributes.
+
+        Returns:
+            Dictionary of attributes suitable for span attachment
+
+        Example:
+            ```python
+            from opentelemetry import trace
+
+            context = WorkflowContext(workflow_id="wf-123")
+            span = trace.get_current_span()
+
+            # Add workflow context as span attributes
+            for key, value in context.to_otel_context().items():
+                span.set_attribute(key, value)
+            ```
+        """
+        return {
+            "workflow.id": self.workflow_id or "unknown",
+            "workflow.session_id": self.session_id or "unknown",
+            "workflow.player_id": self.player_id or "unknown",
+            "workflow.correlation_id": self.correlation_id,
+            "workflow.elapsed_ms": self.elapsed_ms(),
+        }
 
 
 class WorkflowPrimitive(Generic[T, U], ABC):

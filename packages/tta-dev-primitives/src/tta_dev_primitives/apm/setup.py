@@ -1,6 +1,13 @@
 """OpenTelemetry APM setup and configuration."""
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from opentelemetry.sdk.metrics import MeterProvider
+    from opentelemetry.sdk.trace import TracerProvider
 
 try:
     from opentelemetry import metrics, trace
@@ -19,8 +26,8 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-_tracer_provider: TracerProvider | None = None
-_meter_provider: MeterProvider | None = None
+_tracer_provider: Any = None
+_meter_provider: Any = None
 _initialized = False
 
 
@@ -30,7 +37,7 @@ def setup_apm(
     enable_prometheus: bool = True,
     enable_console: bool = False,
     prometheus_port: int = 9464,
-) -> tuple[TracerProvider | None, MeterProvider | None]:
+) -> tuple[Any, Any]:
     """Setup OpenTelemetry APM for workflow primitives.
 
     Args:
@@ -98,7 +105,7 @@ def setup_apm(
     return _tracer_provider, _meter_provider
 
 
-def get_tracer(name: str = __name__) -> trace.Tracer | None:
+def get_tracer(name: str = __name__) -> Any:
     """Get a tracer instance.
 
     Args:
@@ -123,7 +130,7 @@ def get_tracer(name: str = __name__) -> trace.Tracer | None:
     return trace.get_tracer(name)
 
 
-def get_meter(name: str = __name__) -> metrics.Meter | None:
+def get_meter(name: str = __name__) -> Any:
     """Get a meter instance.
 
     Args:
