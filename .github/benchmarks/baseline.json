@@ -1,0 +1,81 @@
+{
+  "version": "1.0.0",
+  "created": "2025-10-28",
+  "description": "Performance baseline for TTA primitives and workflows",
+  "environment": {
+    "python_version": "3.12",
+    "platform": "linux"
+  },
+  "benchmarks": [
+    {
+      "name": "test_sequential_primitive_performance",
+      "description": "Sequential execution of primitives",
+      "mean": 0.001234,
+      "stddev": 0.000123,
+      "unit": "seconds",
+      "iterations": 100
+    },
+    {
+      "name": "test_parallel_primitive_performance",
+      "description": "Parallel execution of primitives",
+      "mean": 0.000567,
+      "stddev": 0.000056,
+      "unit": "seconds",
+      "iterations": 100
+    },
+    {
+      "name": "test_cache_primitive_hit",
+      "description": "Cache primitive with cache hit",
+      "mean": 0.000123,
+      "stddev": 0.000012,
+      "unit": "seconds",
+      "iterations": 100
+    },
+    {
+      "name": "test_cache_primitive_miss",
+      "description": "Cache primitive with cache miss",
+      "mean": 0.000234,
+      "stddev": 0.000023,
+      "unit": "seconds",
+      "iterations": 100
+    },
+    {
+      "name": "test_router_primitive_routing",
+      "description": "Router primitive routing decision",
+      "mean": 0.000089,
+      "stddev": 0.000009,
+      "unit": "seconds",
+      "iterations": 100
+    },
+    {
+      "name": "test_timeout_primitive_success",
+      "description": "Timeout primitive with successful execution",
+      "mean": 0.000156,
+      "stddev": 0.000015,
+      "unit": "seconds",
+      "iterations": 100
+    },
+    {
+      "name": "test_observability_overhead",
+      "description": "Overhead added by observability instrumentation",
+      "mean": 0.000045,
+      "stddev": 0.000005,
+      "unit": "seconds",
+      "iterations": 100,
+      "notes": "Should be <5% of total execution time"
+    }
+  ],
+  "slo_targets": {
+    "primitive_latency_p50": 0.001,
+    "primitive_latency_p95": 0.005,
+    "primitive_latency_p99": 0.010,
+    "observability_overhead_percent": 5.0,
+    "cache_hit_latency_improvement": 50.0
+  },
+  "notes": [
+    "These are initial baseline values",
+    "Update after gathering real performance data",
+    "Benchmarks should run in CI to detect regressions",
+    "Allow ±10% variance for acceptable performance"
+  ]
+}

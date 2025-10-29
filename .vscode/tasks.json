@@ -116,6 +116,94 @@
         "panel": "new"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "🔬 Observability Health Check",
+      "type": "shell",
+      "command": "uv run python -c 'from observability_integration import initialize_observability, is_observability_enabled; success = initialize_observability(service_name=\"tta-dev\", enable_prometheus=True, enable_console_traces=True); print(\"✅ Observability OK\" if success and is_observability_enabled() else \"❌ Observability Failed\")'",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Run Keploy API Tests",
+      "type": "shell",
+      "command": "uv run pytest packages/keploy-framework/tests/ -v",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📹 Record Keploy API Tests",
+      "type": "shell",
+      "command": "echo 'Start your API server first, then run: uv run python -m keploy_framework.cli record --app-cmd \"uvicorn main:app\"'",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "💰 Validate Cost Optimization",
+      "type": "shell",
+      "command": "uv run python scripts/validation/validate-cost-optimization.py",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🚀 Validate LLM Efficiency",
+      "type": "shell",
+      "command": "uv run python scripts/validation/validate-llm-efficiency.py",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Start Test Services",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.test.yml up -d && echo '✅ Test services started (Redis, Prometheus)'",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Stop Test Services",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.test.yml down && echo '✅ Test services stopped'",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Run All Integration Tests",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.test.yml up -d && sleep 3 && uv run pytest tests/integration/ -v && docker-compose -f docker-compose.test.yml down",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [

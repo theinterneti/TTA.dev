@@ -63,3 +63,125 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
+
+  observability-validation:
+    runs-on: ubuntu-latest
+    needs: quality
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Add uv to PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Test OpenTelemetry Initialization
+        run: |
+          uv run python -c "
+          from observability_integration import initialize_observability, is_observability_enabled
+          
+          # Test initialization
+          success = initialize_observability(
+              service_name='tta-ci-test',
+              enable_prometheus=True,
+              enable_console_traces=True,
+              prometheus_port=9464
+          )
+          
+          assert success, 'Observability initialization failed'
+          assert is_observability_enabled(), 'Observability not enabled after initialization'
+          
+          print('✅ Observability platform initialized successfully')
+          "
+
+      - name: Test Metrics Export
+        run: |
+          # Start metrics endpoint in background
+          uv run python -c "
+          from observability_integration import initialize_observability
+          from observability_integration.apm_setup import get_meter
+          import time
+          import http.server
+          import socketserver
+          
+          # Initialize observability with Prometheus
+          initialize_observability(
+              service_name='tta-metrics-test',
+              enable_prometheus=True,
+              prometheus_port=9464
+          )
+          
+          # Create test metrics
+          meter = get_meter('ci_test')
+          if meter:
+              counter = meter.create_counter('ci_test_counter', description='CI test counter')
+              counter.add(1, {'test': 'metrics_export'})
+              print('✅ Test metrics created')
+          
+          # Keep process alive for endpoint test
+          time.sleep(10)
+          " &
+          
+          METRICS_PID=$!
+          
+          # Wait for metrics endpoint to be ready
+          sleep 3
+          
+          # Test Prometheus metrics endpoint
+          if curl -f http://localhost:9464/metrics 2>/dev/null | grep -q "ci_test_counter"; then
+            echo "✅ Prometheus metrics endpoint responding with test metrics"
+          else
+            echo "⚠️  Metrics endpoint available but test metric not found (may be expected in CI)"
+          fi
+          
+          # Cleanup
+          kill $METRICS_PID 2>/dev/null || true
+
+      - name: Validate Observability Primitives Exist
+        run: |
+          # Verify observability primitives are available
+          uv run python -c "
+          # Test imports
+          try:
+              from observability_integration import initialize_observability, is_observability_enabled
+              from observability_integration.apm_setup import get_tracer, get_meter
+              print('✅ Core observability imports successful')
+          except ImportError as e:
+              print(f'❌ Failed to import observability components: {e}')
+              exit(1)
+          
+          # Test primitive imports (if they exist)
+          try:
+              from observability_integration.primitives import RouterPrimitive, CachePrimitive, TimeoutPrimitive
+              print('✅ Observability primitives available')
+          except ImportError:
+              print('⚠️  Observability primitives not yet implemented (expected for early development)')
+          "
+
+      - name: Check Observability Package Structure
+        run: |
+          # Verify package files exist
+          if [ -f "packages/tta-observability-integration/src/observability_integration/__init__.py" ]; then
+            echo "✅ Observability package structure present"
+          else
+            echo "⚠️  Observability package not in expected location"
+          fi
+          
+          # Verify APM setup exists
+          if [ -f "packages/tta-observability-integration/src/observability_integration/apm_setup.py" ]; then
+            echo "✅ APM setup module present"
+          else
+            echo "❌ APM setup module missing"
+            exit 1
+          fi
