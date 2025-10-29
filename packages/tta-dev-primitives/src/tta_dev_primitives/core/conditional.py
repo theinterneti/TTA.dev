@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from typing import Any
 
+from opentelemetry import trace
+
+from ..observability.enhanced_collector import get_enhanced_metrics_collector
+from ..observability.instrumented_primitive import TRACING_AVAILABLE
 from ..observability.logging import get_logger
 from .base import WorkflowContext, WorkflowPrimitive
 
@@ -66,11 +71,6 @@ class ConditionalPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: If the selected primitive fails
         """
-        import time
-
-        from ..observability.enhanced_collector import get_enhanced_metrics_collector
-        from ..observability.instrumented_primitive import TRACING_AVAILABLE
-
         metrics_collector = get_enhanced_metrics_collector()
 
         # Log workflow start
@@ -160,8 +160,6 @@ class ConditionalPrimitive(WorkflowPrimitive[Any, Any]):
         branch_start_time = time.time()
 
         # Create branch span (if tracing available)
-        from opentelemetry import trace
-
         tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
         if tracer and TRACING_AVAILABLE:
@@ -276,11 +274,6 @@ class SwitchPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: If the selected primitive fails
         """
-        import time
-
-        from ..observability.enhanced_collector import get_enhanced_metrics_collector
-        from ..observability.instrumented_primitive import TRACING_AVAILABLE
-
         metrics_collector = get_enhanced_metrics_collector()
 
         # Log workflow start
@@ -374,8 +367,6 @@ class SwitchPrimitive(WorkflowPrimitive[Any, Any]):
         case_start_time = time.time()
 
         # Create case span (if tracing available)
-        from opentelemetry import trace
-
         tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
         if tracer and TRACING_AVAILABLE:
