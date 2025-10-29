@@ -227,15 +227,15 @@ class PrometheusExporter:
             if self._check_cardinality(labels_compliance):
                 # Availability compliance
                 if slo_metrics.config.error_rate_threshold:
-                    self.slo_compliance.labels(
-                        primitive_name=name, slo_type="availability"
-                    ).set(slo_metrics.availability)
+                    self.slo_compliance.labels(primitive_name=name, slo_type="availability").set(
+                        slo_metrics.availability
+                    )
 
                 # Latency compliance
                 if slo_metrics.config.threshold_ms:
-                    self.slo_compliance.labels(
-                        primitive_name=name, slo_type="latency"
-                    ).set(slo_metrics.latency_compliance)
+                    self.slo_compliance.labels(primitive_name=name, slo_type="latency").set(
+                        slo_metrics.latency_compliance
+                    )
 
             if self._check_cardinality(labels_budget):
                 # Error budget
@@ -255,18 +255,18 @@ class PrometheusExporter:
 
             if self._check_cardinality(labels_success):
                 # Note: Counter can only increase, so we set to total
-                self.request_total.labels(
-                    primitive_name=name, status="success"
-                )._value.set(throughput_metrics.total_requests)
+                self.request_total.labels(primitive_name=name, status="success")._value.set(
+                    throughput_metrics.total_requests
+                )
 
         # Update cost metrics
         for name, cost_metrics in collector._cost_metrics.items():
             for operation, cost in cost_metrics.cost_by_operation.items():
                 labels_cost = (name, operation)
                 if self._check_cardinality(labels_cost):
-                    self.cost_total.labels(
-                        primitive_name=name, operation=operation
-                    )._value.set(cost)
+                    self.cost_total.labels(primitive_name=name, operation=operation)._value.set(
+                        cost
+                    )
 
             labels_savings = (name,)
             if self._check_cardinality(labels_savings):

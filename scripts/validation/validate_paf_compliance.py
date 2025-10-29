@@ -98,7 +98,9 @@ class PAFComplianceValidator:
                 result = self.paf.validate_file_size(py_file, lines)
 
                 if not result.is_valid:
-                    violations.append(f"  • {py_file.relative_to(project_root)}: {lines} lines")
+                    violations.append(
+                        f"  • {py_file.relative_to(project_root)}: {lines} lines"
+                    )
                     self._record_result(f"File Size: {py_file.name}", result)
 
             except Exception:
@@ -117,9 +119,7 @@ class PAFComplianceValidator:
         uv_lock = project_root / "uv.lock"
 
         result = self.paf.validate_against_paf(
-            "LANG-002",
-            "uv",
-            lambda value, paf: uv_lock.exists()
+            "LANG-002", "uv", lambda value, paf: uv_lock.exists()
         )
         self._record_result("Package Manager (LANG-002)", result)
 
@@ -135,7 +135,7 @@ class PAFComplianceValidator:
                 actual_value="missing",
                 expected_value="exists",
                 reason="PAFCORE.md not found at .universal-instructions/paf/",
-                severity="error"
+                severity="error",
             )
             self._record_result("PAFCORE.md Exists", result)
             return
@@ -149,7 +149,7 @@ class PAFComplianceValidator:
                 actual_value="0 PAFs",
                 expected_value=">0 PAFs",
                 reason="PAFCORE.md contains no PAFs",
-                severity="error"
+                severity="error",
             )
         else:
             result = PAFValidationResult(
@@ -157,7 +157,7 @@ class PAFComplianceValidator:
                 is_valid=True,
                 actual_value=f"{len(pafs)} PAFs loaded",
                 expected_value=">0 PAFs",
-                severity="info"
+                severity="info",
             )
 
         self._record_result("PAFCORE.md Loaded", result)
@@ -221,9 +221,7 @@ def main() -> int:
         description="Validate PAF compliance across the project"
     )
     parser.add_argument(
-        "--strict",
-        action="store_true",
-        help="Treat warnings as errors"
+        "--strict", action="store_true", help="Treat warnings as errors"
     )
 
     args = parser.parse_args()

@@ -83,12 +83,7 @@ class PAFMemoryPrimitive:
                 # Workspace root (when running from repo root)
                 Path.cwd() / ".universal-instructions" / "paf" / "PAFCORE.md",
                 # Two levels up from package (when running from packages/tta-dev-primitives)
-                Path.cwd()
-                / ".."
-                / ".."
-                / ".universal-instructions"
-                / "paf"
-                / "PAFCORE.md",
+                Path.cwd() / ".." / ".." / ".universal-instructions" / "paf" / "PAFCORE.md",
                 # Docs directory
                 Path.cwd() / "docs" / "guides" / "PAFCORE.md",
                 # Two levels up then docs
@@ -104,9 +99,7 @@ class PAFMemoryPrimitive:
 
             if found_path is None:
                 # Default to workspace root for error message
-                found_path = (
-                    Path.cwd() / ".universal-instructions" / "paf" / "PAFCORE.md"
-                )
+                found_path = Path.cwd() / ".universal-instructions" / "paf" / "PAFCORE.md"
 
             self.paf_core_path = found_path
         else:
@@ -286,9 +279,7 @@ class PAFMemoryPrimitive:
             severity="error" if coverage_percent < 70 else "warning",
         )
 
-    def validate_file_size(
-        self, file_path: Path, line_count: int
-    ) -> PAFValidationResult:
+    def validate_file_size(self, file_path: Path, line_count: int) -> PAFValidationResult:
         """
         Validate file size against PAF-QUAL-004.
 
@@ -368,9 +359,7 @@ class PAFMemoryPrimitive:
             )
 
         # Default: just check existence
-        return PAFValidationResult(
-            paf_id=paf_id, is_valid=True, actual_value=actual_value
-        )
+        return PAFValidationResult(paf_id=paf_id, is_valid=True, actual_value=actual_value)
 
     def get_all_validations(self) -> list[str]:
         """

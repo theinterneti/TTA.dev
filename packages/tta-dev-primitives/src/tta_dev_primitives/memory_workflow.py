@@ -125,10 +125,7 @@ class MemoryWorkflowPrimitive:
             candidates = [
                 Path.cwd() / ".universal-instructions" / "paf" / "PAFCORE.md",
                 Path.cwd().parent / ".universal-instructions" / "paf" / "PAFCORE.md",
-                Path.cwd().parent.parent
-                / ".universal-instructions"
-                / "paf"
-                / "PAFCORE.md",
+                Path.cwd().parent.parent / ".universal-instructions" / "paf" / "PAFCORE.md",
             ]
             for candidate in candidates:
                 if candidate.exists():
@@ -188,9 +185,7 @@ class MemoryWorkflowPrimitive:
         if not self.redis_available or self.redis_client is None:
             return []
 
-        result = await self.redis_client.get_working_memory(
-            session_id=session_id, limit=limit
-        )
+        result = await self.redis_client.get_working_memory(session_id=session_id, limit=limit)
         return result.get("messages", [])
 
     # ==================== Layer 2: Cache Memory ====================
@@ -348,27 +343,17 @@ class MemoryWorkflowPrimitive:
 
         # Layer-specific loading based on stage and mode
         if stage == "understand":
-            loaded_context.update(
-                await self._load_understand_context(context, workflow_mode)
-            )
+            loaded_context.update(await self._load_understand_context(context, workflow_mode))
         elif stage == "decompose":
-            loaded_context.update(
-                await self._load_decompose_context(context, workflow_mode)
-            )
+            loaded_context.update(await self._load_decompose_context(context, workflow_mode))
         elif stage == "plan":
             loaded_context.update(await self._load_plan_context(context, workflow_mode))
         elif stage == "implement":
-            loaded_context.update(
-                await self._load_implement_context(context, workflow_mode)
-            )
+            loaded_context.update(await self._load_implement_context(context, workflow_mode))
         elif stage == "validate":
-            loaded_context.update(
-                await self._load_validate_context(context, workflow_mode)
-            )
+            loaded_context.update(await self._load_validate_context(context, workflow_mode))
         elif stage == "reflect":
-            loaded_context.update(
-                await self._load_reflect_context(context, workflow_mode)
-            )
+            loaded_context.update(await self._load_reflect_context(context, workflow_mode))
 
         return loaded_context
 
@@ -383,17 +368,11 @@ class MemoryWorkflowPrimitive:
 
         if mode == WorkflowMode.RAPID:
             # Minimal: Current session only
-            result["session_context"] = await self.get_session_context(
-                context.session_id, limit=10
-            )
+            result["session_context"] = await self.get_session_context(context.session_id, limit=10)
         elif mode == WorkflowMode.STANDARD:
             # Standard: Session + recent cache + some deep memory
-            result["session_context"] = await self.get_session_context(
-                context.session_id
-            )
-            result["cache_memory"] = await self.get_cache_memory(
-                context.session_id, hours=1
-            )
+            result["session_context"] = await self.get_session_context(context.session_id)
+            result["cache_memory"] = await self.get_cache_memory(context.session_id, hours=1)
             if context.workflow_id:
                 result["deep_memory"] = await self.search_deep_memory(
                     query=context.workflow_id, k=5
@@ -401,12 +380,8 @@ class MemoryWorkflowPrimitive:
             result["active_pafs"] = self.get_active_pafs()
         else:  # AUGSTER_RIGOROUS
             # Comprehensive: Full session + 24h cache + extensive deep + all PAFs
-            result["session_context"] = await self.get_session_context(
-                context.session_id
-            )
-            result["cache_memory"] = await self.get_cache_memory(
-                context.session_id, hours=24
-            )
+            result["session_context"] = await self.get_session_context(context.session_id)
+            result["cache_memory"] = await self.get_cache_memory(context.session_id, hours=24)
             if context.workflow_id:
                 result["deep_memory"] = await self.search_deep_memory(
                     query=context.workflow_id, k=20
@@ -414,9 +389,7 @@ class MemoryWorkflowPrimitive:
             result["active_pafs"] = self.get_active_pafs()
 
             # Get session groups
-            session_group_ids = self.session_groups.get_session_groups(
-                context.session_id
-            )
+            session_group_ids = self.session_groups.get_session_groups(context.session_id)
             result["session_groups"] = [
                 self.session_groups.get_group(gid) for gid in session_group_ids
             ]
@@ -434,9 +407,7 @@ class MemoryWorkflowPrimitive:
             return result
 
         # Standard and Augster-Rigorous
-        result["session_context"] = await self.get_session_context(
-            context.session_id, limit=20
-        )
+        result["session_context"] = await self.get_session_context(context.session_id, limit=20)
         result["active_pafs"] = self.get_active_pafs()
 
         if mode == WorkflowMode.AUGSTER_RIGOROUS and context.workflow_id:
@@ -457,22 +428,16 @@ class MemoryWorkflowPrimitive:
 
         if mode == WorkflowMode.RAPID:
             # Minimal planning in rapid mode
-            result["session_context"] = await self.get_session_context(
-                context.session_id, limit=5
-            )
+            result["session_context"] = await self.get_session_context(context.session_id, limit=5)
             return result
 
         # Standard and Augster-Rigorous
         result["session_context"] = await self.get_session_context(context.session_id)
-        result["cache_memory"] = await self.get_cache_memory(
-            context.session_id, hours=1
-        )
+        result["cache_memory"] = await self.get_cache_memory(context.session_id, hours=1)
         result["active_pafs"] = self.get_active_pafs()
 
         if mode == WorkflowMode.AUGSTER_RIGOROUS and context.workflow_id:
-            result["deep_memory"] = await self.search_deep_memory(
-                query=context.workflow_id, k=10
-            )
+            result["deep_memory"] = await self.search_deep_memory(query=context.workflow_id, k=10)
 
         return result
 
@@ -487,9 +452,7 @@ class MemoryWorkflowPrimitive:
 
         # All modes: Current session + cache
         result["session_context"] = await self.get_session_context(context.session_id)
-        result["cache_memory"] = await self.get_cache_memory(
-            context.session_id, hours=1
-        )
+        result["cache_memory"] = await self.get_cache_memory(context.session_id, hours=1)
 
         # Deep memory not needed during implementation
         # PAFs used for validation only in Augster mode
@@ -509,9 +472,7 @@ class MemoryWorkflowPrimitive:
             return result
 
         # Session context for validation errors
-        result["session_context"] = await self.get_session_context(
-            context.session_id, limit=10
-        )
+        result["session_context"] = await self.get_session_context(context.session_id, limit=10)
 
         # PAFs for validation
         result["active_pafs"] = self.get_active_pafs()
