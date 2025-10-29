@@ -66,8 +66,8 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
-          flags: ${{ runner.os }},python-${{ matrix.python-version }}
-          name: ${{ runner.os }}-py${{ matrix.python-version }}
+          flags: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }},python-${{ matrix.python-version }}
+          name: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }}-py${{ matrix.python-version }}
           fail_ci_if_error: false
           verbose: true
 
