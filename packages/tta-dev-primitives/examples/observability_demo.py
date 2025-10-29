@@ -213,9 +213,7 @@ def print_metrics_summary(primitive_name: str, metrics: dict[str, Any]) -> None:
         print(f"    Target: {slo.get('target', 0) * 100:.1f}%")
         print(f"    Availability: {slo.get('availability', 0) * 100:.2f}%")
         print(f"    Latency Compliance: {slo.get('latency_compliance', 0) * 100:.2f}%")
-        print(
-            f"    Error Budget Remaining: {slo.get('error_budget_remaining', 0) * 100:.1f}%"
-        )
+        print(f"    Error Budget Remaining: {slo.get('error_budget_remaining', 0) * 100:.1f}%")
 
     # Throughput
     if "throughput" in metrics and metrics["throughput"]:
