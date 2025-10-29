@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import time
 import uuid
 from abc import ABC, abstractmethod
@@ -30,7 +31,9 @@ class WorkflowContext(BaseModel):
     state: dict[str, Any] = Field(default_factory=dict)
 
     # Distributed tracing (W3C Trace Context)
-    trace_id: str | None = Field(default=None, description="OpenTelemetry trace ID (hex)")
+    trace_id: str | None = Field(
+        default=None, description="OpenTelemetry trace ID (hex)"
+    )
     span_id: str | None = Field(default=None, description="Current span ID (hex)")
     parent_span_id: str | None = Field(default=None, description="Parent span ID (hex)")
     trace_flags: int = Field(default=1, description="W3C trace flags (sampled=1)")
@@ -91,14 +94,14 @@ class WorkflowContext(BaseModel):
             workflow_id=self.workflow_id,
             session_id=self.session_id,
             player_id=self.player_id,
-            metadata=self.metadata.copy(),
-            state=self.state.copy(),
+            metadata=copy.deepcopy(self.metadata),
+            state=copy.deepcopy(self.state),
             trace_id=self.trace_id,
             parent_span_id=self.span_id,  # Current span becomes parent
             correlation_id=self.correlation_id,  # Inherit correlation
             causation_id=self.correlation_id,  # Chain causation
-            baggage=self.baggage.copy(),
-            tags=self.tags.copy(),
+            baggage=copy.deepcopy(self.baggage),
+            tags=copy.deepcopy(self.tags),
         )
 
     def to_otel_context(self) -> dict[str, Any]:
