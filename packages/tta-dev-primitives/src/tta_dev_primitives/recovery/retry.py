@@ -113,6 +113,11 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
         last_error = None
         total_attempts = self.strategy.max_retries + 1
 
+        # Create tracer once outside the loop to avoid repeated initialization overhead
+        from opentelemetry import trace
+
+        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
+
         for attempt in range(total_attempts):
             # Log attempt start
             logger.info(
@@ -127,11 +132,6 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
             # Record attempt checkpoint
             context.checkpoint(f"retry.attempt_{attempt}.start")
             attempt_start_time = time.time()
-
-            # Create attempt span (if tracing available)
-            from opentelemetry import trace
-
-            tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
             try:
                 if tracer and TRACING_AVAILABLE:
