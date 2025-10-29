@@ -1,0 +1,13 @@
+# CODEOWNERS file for TTA.dev
+# This file defines code ownership for automatic reviewer assignment
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global code owners - applies to all files
+# GitHub Copilot is automatically assigned as a reviewer for all PRs
+* @Copilot
+
+# Package-specific ownership (can be extended later)
+# /packages/tta-dev-primitives/ @theinterneti
+# /packages/tta-observability-integration/ @theinterneti
+# /packages/universal-agent-context/ @theinterneti
+
