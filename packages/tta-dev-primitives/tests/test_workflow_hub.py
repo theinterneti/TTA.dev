@@ -250,11 +250,18 @@ def test_use_case_specificity(workflow_hub):
     standard = workflow_hub.get_profile(WorkflowMode.STANDARD)
     augster = workflow_hub.get_profile(WorkflowMode.AUGSTER_RIGOROUS)
 
-    assert "prototyping" in rapid.use_case.lower() or "proof-of-concept" in rapid.use_case.lower()
     assert (
-        "regular development" in standard.use_case.lower() or "feature" in standard.use_case.lower()
+        "prototyping" in rapid.use_case.lower()
+        or "proof-of-concept" in rapid.use_case.lower()
     )
-    assert "production" in augster.use_case.lower() or "critical" in augster.use_case.lower()
+    assert (
+        "regular development" in standard.use_case.lower()
+        or "feature" in standard.use_case.lower()
+    )
+    assert (
+        "production" in augster.use_case.lower()
+        or "critical" in augster.use_case.lower()
+    )
 
 
 def test_profile_completeness(workflow_hub):

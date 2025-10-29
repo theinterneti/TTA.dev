@@ -139,7 +139,7 @@ Before creating a PAF, ask:
 - Is this verifiable? (Can we programmatically check it?)
 - Is this non-negotiable? (Is changing it a major refactor?)
 
-If all YES → Create PAF  
+If all YES → Create PAF
 If any NO → Don't create PAF
 
 ### 3. Add to PAFCORE.md

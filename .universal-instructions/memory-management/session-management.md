@@ -32,7 +32,7 @@
 1. **Create**: New session with mission context
    ```python
    from tta_dev_primitives import SessionGroupPrimitive
-   
+
    groups = SessionGroupPrimitive()
    # Sessions are tracked through memory system
    ```
@@ -40,7 +40,7 @@
 2. **Active**: Add messages, track progress
    ```python
    from tta_dev_primitives import MemoryWorkflowPrimitive
-   
+
    memory = MemoryWorkflowPrimitive(redis_url="http://localhost:8000")
    await memory.add_session_message(
        session_id="user-prefs-feature-2025-10-28",

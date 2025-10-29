@@ -304,5 +304,5 @@ When adding new memory management patterns:
 
 ## Version
 
-Current Version: **Phase 1** (October 2025)  
+Current Version: **Phase 1** (October 2025)
 Next Version: **Phase 2** (A-MEM Integration) - Planned

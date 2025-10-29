@@ -245,10 +245,10 @@ def rapid_prototype():
 # Regular feature with standard quality gates
 def standard_feature(data: dict) -> Result:
     """Standard feature with normal quality gates.
-    
+
     Args:
         data: Input data dictionary
-        
+
     Returns:
         Result object with processed data
     """
@@ -267,17 +267,17 @@ def test_standard_feature():
 # Production-critical with comprehensive validation
 class ProductionFeature:
     """Production-critical feature with full rigor.
-    
+
     Comprehensive documentation, full type coverage,
     security validation, and PAF compliance.
     """
-    
+
     def __init__(self, config: Config) -> None:
         """Initialize with validated configuration."""
         # Validate against PAFs
         paf = PAFMemoryPrimitive()
         # ... comprehensive validation
-        
+
     def execute(self, data: SecureData) -> SecureResult:
         """Execute with full validation."""
         # Comprehensive implementation
@@ -469,7 +469,7 @@ groups.update_group_status(group_id, GroupStatus.CLOSED)
    ```python
    # Good: Let system decide what to load
    ctx = await memory.load_workflow_context(ctx, stage="plan", mode=WorkflowMode.STANDARD)
-   
+
    # Less optimal: Manual assembly (unless you have specific needs)
    ```
 
@@ -489,7 +489,7 @@ groups.update_group_status(group_id, GroupStatus.CLOSED)
    # In understand or plan stage
    coverage_result = await memory.validate_paf("test-coverage", 85.0)
    python_result = await memory.validate_paf("python-version", "3.12.1")
-   
+
    if not coverage_result.is_valid or not python_result.is_valid:
        # Adjust approach to meet PAF requirements
    ```

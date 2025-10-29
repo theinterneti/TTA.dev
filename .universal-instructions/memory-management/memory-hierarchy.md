@@ -28,9 +28,9 @@ The TTA.dev memory system provides a 4-layer hierarchy for different types of da
 
 ## Layer 1: Session Context (Ephemeral)
 
-**Lifetime**: Current workflow execution  
-**Storage**: WorkflowContext.state dictionary  
-**Use**: Passing data between primitives within a single workflow  
+**Lifetime**: Current workflow execution
+**Storage**: WorkflowContext.state dictionary
+**Use**: Passing data between primitives within a single workflow
 **Example**: Intermediate computation results, current step state
 
 ### When to Use
@@ -62,9 +62,9 @@ print(f"Session has {len(context)} messages")
 
 ## Layer 2: Cache Memory (Hours)
 
-**Lifetime**: 1 hour to 24 hours (configurable TTL)  
-**Storage**: Redis (or in-memory dict for testing)  
-**Use**: Recent data, avoid redundant API calls, intermediate results  
+**Lifetime**: 1 hour to 24 hours (configurable TTL)
+**Storage**: Redis (or in-memory dict for testing)
+**Use**: Recent data, avoid redundant API calls, intermediate results
 **Example**: API responses, parsed documentation, recent queries
 
 ### When to Use
@@ -96,9 +96,9 @@ print(f"Found {len(cached_data)} cached items from last 2 hours")
 
 ## Layer 3: Deep Memory (Permanent)
 
-**Lifetime**: Indefinite (manual cleanup)  
-**Storage**: Redis + future A-MEM semantic layer  
-**Use**: Lessons learned, patterns, solutions, failures  
+**Lifetime**: Indefinite (manual cleanup)
+**Storage**: Redis + future A-MEM semantic layer
+**Use**: Lessons learned, patterns, solutions, failures
 **Example**: "How we solved the timeout issue", "JWT implementation pattern"
 
 ### When to Use
@@ -138,9 +138,9 @@ for result in results:
 
 ## Layer 4: PAF Store (Permanent)
 
-**Lifetime**: Project lifetime  
-**Storage**: PAFCORE.md + PAFMemoryPrimitive validation  
-**Use**: Architectural facts, non-negotiable decisions  
+**Lifetime**: Project lifetime
+**Storage**: PAFCORE.md + PAFMemoryPrimitive validation
+**Use**: Architectural facts, non-negotiable decisions
 **Example**: "Package Manager: uv", "Python Version: 3.12+", "Test Coverage: ≥80%"
 
 ### When to Use
