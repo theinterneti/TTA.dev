@@ -119,8 +119,8 @@ The TTA.dev observability infrastructure is **partially implemented** with solid
 
 ### 3.1 Current Implementation
 
-<augment_code_snippet path="packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py" mode="EXCERPT">
 ```python
+# From: packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py
 class WorkflowContext(BaseModel):
     """Context passed through workflow execution."""
     
@@ -130,7 +130,6 @@ class WorkflowContext(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
     state: dict[str, Any] = Field(default_factory=dict)
 ```
-</augment_code_snippet>
 
 ### 3.2 Missing Observability Fields
 
