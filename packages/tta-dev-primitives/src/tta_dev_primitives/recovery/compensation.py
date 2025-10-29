@@ -55,7 +55,7 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """
-        Execute with saga pattern.
+        Execute with saga pattern and instrumentation.
 
         Args:
             input_data: Input data
@@ -68,7 +68,23 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
             Exception: After running compensation
         """
         try:
-            return await self.forward.execute(input_data, context)
+            logger.info(
+                "saga_forward_attempt",
+                forward=self.forward.__class__.__name__,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+            
+            result = await self.forward.execute(input_data, context)
+            
+            logger.info(
+                "saga_forward_succeeded",
+                forward=self.forward.__class__.__name__,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+            
+            return result
 
         except Exception as forward_error:
             logger.warning(
@@ -76,6 +92,9 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
                 forward=self.forward.__class__.__name__,
                 compensation=self.compensation.__class__.__name__,
                 error=str(forward_error),
+                error_type=type(forward_error).__name__,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
             )
 
             try:
@@ -83,13 +102,19 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
                 logger.info(
                     "saga_compensation_succeeded",
                     compensation=self.compensation.__class__.__name__,
+                    workflow_id=context.workflow_id,
+                    correlation_id=context.correlation_id,
                 )
 
             except Exception as compensation_error:
                 logger.error(
                     "saga_compensation_failed",
                     forward_error=str(forward_error),
+                    forward_error_type=type(forward_error).__name__,
                     compensation_error=str(compensation_error),
+                    compensation_error_type=type(compensation_error).__name__,
+                    workflow_id=context.workflow_id,
+                    correlation_id=context.correlation_id,
                 )
 
             # Always re-raise the original error

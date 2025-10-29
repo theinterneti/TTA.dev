@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..observability.logging import get_logger
 from .base import WorkflowContext, WorkflowPrimitive
+
+logger = get_logger(__name__)
 
 
 class SequentialPrimitive(WorkflowPrimitive[Any, Any]):
@@ -38,7 +41,7 @@ class SequentialPrimitive(WorkflowPrimitive[Any, Any]):
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """
-        Execute primitives sequentially.
+        Execute primitives sequentially with instrumentation.
 
         Args:
             input_data: Initial input data
@@ -50,9 +53,58 @@ class SequentialPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: If any primitive fails
         """
+        # Record start checkpoint
+        context.checkpoint("sequential_start")
+
+        logger.info(
+            "sequential_execution_start",
+            total_steps=len(self.primitives),
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
         result = input_data
-        for primitive in self.primitives:
+        for idx, primitive in enumerate(self.primitives):
+            step_name = f"step_{idx}_{primitive.__class__.__name__}"
+
+            # Log step start
+            logger.info(
+                "sequential_step_start",
+                step=idx,
+                total_steps=len(self.primitives),
+                primitive=primitive.__class__.__name__,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+
+            # Execute step
             result = await primitive.execute(result, context)
+
+            # Record checkpoint
+            context.checkpoint(step_name)
+
+            # Log step completion
+            logger.info(
+                "sequential_step_complete",
+                step=idx,
+                total_steps=len(self.primitives),
+                primitive=primitive.__class__.__name__,
+                elapsed_ms=context.elapsed_ms(),
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+
+        # Record end checkpoint
+        context.checkpoint("sequential_end")
+
+        logger.info(
+            "sequential_execution_complete",
+            total_steps=len(self.primitives),
+            elapsed_ms=context.elapsed_ms(),
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
         return result
 
     def __rshift__(self, other: WorkflowPrimitive) -> SequentialPrimitive:

@@ -53,7 +53,7 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """
-        Execute with fallback logic.
+        Execute with fallback logic and instrumentation.
 
         Args:
             input_data: Input data
@@ -66,7 +66,23 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
             Exception: If both primary and fallback fail
         """
         try:
-            return await self.primary.execute(input_data, context)
+            logger.info(
+                "fallback_primary_attempt",
+                primary=self.primary.__class__.__name__,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+            
+            result = await self.primary.execute(input_data, context)
+            
+            logger.info(
+                "fallback_primary_succeeded",
+                primary=self.primary.__class__.__name__,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+            
+            return result
 
         except Exception as primary_error:
             logger.warning(
@@ -74,6 +90,9 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
                 primary=self.primary.__class__.__name__,
                 fallback=self.fallback.__class__.__name__,
                 error=str(primary_error),
+                error_type=type(primary_error).__name__,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
             )
 
             try:
@@ -81,6 +100,8 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
                 logger.info(
                     "primitive_fallback_succeeded",
                     fallback=self.fallback.__class__.__name__,
+                    workflow_id=context.workflow_id,
+                    correlation_id=context.correlation_id,
                 )
                 return result
 
@@ -88,7 +109,11 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
                 logger.error(
                     "primitive_fallback_failed",
                     primary_error=str(primary_error),
+                    primary_error_type=type(primary_error).__name__,
                     fallback_error=str(fallback_error),
+                    fallback_error_type=type(fallback_error).__name__,
+                    workflow_id=context.workflow_id,
+                    correlation_id=context.correlation_id,
                 )
                 # Re-raise the original error
                 raise primary_error

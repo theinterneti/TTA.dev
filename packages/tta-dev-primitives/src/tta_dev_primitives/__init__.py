@@ -1,11 +1,14 @@
 """TTA Workflow Primitives - Composable workflow building blocks."""
 
 from .core.base import LambdaPrimitive, WorkflowContext, WorkflowPrimitive
-from .core.conditional import ConditionalPrimitive
+from .core.conditional import ConditionalPrimitive, SwitchPrimitive
 from .core.parallel import ParallelPrimitive
 from .core.routing import RouterPrimitive
 from .core.sequential import SequentialPrimitive
 from .performance.cache import CachePrimitive
+from .recovery.compensation import SagaPrimitive
+from .recovery.fallback import FallbackPrimitive
+from .recovery.retry import RetryPrimitive
 from .recovery.timeout import TimeoutError, TimeoutPrimitive
 
 # APM support (optional)
@@ -32,10 +35,14 @@ __all__ = [
     "WorkflowPrimitive",
     "LambdaPrimitive",
     "ConditionalPrimitive",
+    "SwitchPrimitive",
     "ParallelPrimitive",
     "SequentialPrimitive",
     "RouterPrimitive",
     "CachePrimitive",
+    "RetryPrimitive",
+    "FallbackPrimitive",
+    "SagaPrimitive",
     "TimeoutPrimitive",
     "TimeoutError",
 ] + _apm_exports

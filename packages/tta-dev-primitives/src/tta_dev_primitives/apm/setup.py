@@ -1,6 +1,13 @@
 """OpenTelemetry APM setup and configuration."""
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from opentelemetry.sdk.metrics import MeterProvider
+    from opentelemetry.sdk.trace import TracerProvider
 
 try:
     from opentelemetry import metrics, trace
