@@ -165,14 +165,10 @@ class ConditionalPrimitive(WorkflowPrimitive[Any, Any]):
         tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
         if tracer and TRACING_AVAILABLE:
-            with tracer.start_as_current_span(
-                f"conditional.branch_{branch_name}"
-            ) as span:
+            with tracer.start_as_current_span(f"conditional.branch_{branch_name}") as span:
                 span.set_attribute("branch.name", branch_name)
                 span.set_attribute("branch.condition_result", condition_result)
-                span.set_attribute(
-                    "branch.primitive_type", selected_primitive.__class__.__name__
-                )
+                span.set_attribute("branch.primitive_type", selected_primitive.__class__.__name__)
 
                 try:
                     result = await selected_primitive.execute(input_data, context)
@@ -261,7 +257,14 @@ class SwitchPrimitive(WorkflowPrimitive[Any, Any]):
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """
-        Execute switch branching.
+        Execute switch branching with comprehensive instrumentation.
+
+        This method provides observability for switch execution:
+        - Creates spans for selector evaluation and case execution
+        - Logs selector evaluation and case selection
+        - Records per-case metrics (duration, success/failure)
+        - Tracks checkpoints for timing analysis
+        - Monitors case selection patterns
 
         Args:
             input_data: Input data for the primitive
@@ -273,12 +276,158 @@ class SwitchPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: If the selected primitive fails
         """
-        case_key = self.selector(input_data, context)
+        import time
 
+        from ..observability.enhanced_collector import get_enhanced_metrics_collector
+        from ..observability.instrumented_primitive import TRACING_AVAILABLE
+
+        metrics_collector = get_enhanced_metrics_collector()
+
+        # Log workflow start
+        logger.info(
+            "switch_workflow_start",
+            case_count=len(self.cases),
+            has_default=self.default is not None,
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
+        # Record start checkpoint
+        context.checkpoint("switch.start")
+        workflow_start_time = time.time()
+
+        # Evaluate selector with instrumentation
+        context.checkpoint("switch.selector_eval.start")
+        selector_start_time = time.time()
+
+        try:
+            case_key = self.selector(input_data, context)
+        except Exception as e:
+            logger.error(
+                "switch_selector_error",
+                error=str(e),
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+            raise
+
+        selector_duration_ms = (time.time() - selector_start_time) * 1000
+        context.checkpoint("switch.selector_eval.end")
+
+        # Log selector evaluation result
+        logger.info(
+            "switch_selector_evaluated",
+            case_key=case_key,
+            duration_ms=selector_duration_ms,
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
+        # Record selector evaluation metrics
+        metrics_collector.record_execution(
+            "SwitchPrimitive.selector_eval",
+            duration_ms=selector_duration_ms,
+            success=True,
+        )
+
+        # Determine which case to execute
         if case_key in self.cases:
-            return await self.cases[case_key].execute(input_data, context)
+            case_name = f"case_{case_key}"
+            selected_primitive = self.cases[case_key]
         elif self.default:
-            return await self.default.execute(input_data, context)
+            case_name = "default"
+            selected_primitive = self.default
         else:
-            # No matching case or default, pass through input
+            # No matching case or default - pass through
+            logger.info(
+                "switch_passthrough",
+                reason="no_matching_case_or_default",
+                case_key=case_key,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
+            context.checkpoint("switch.end")
+            workflow_duration_ms = (time.time() - workflow_start_time) * 1000
+
+            logger.info(
+                "switch_workflow_complete",
+                case_taken="passthrough",
+                case_key=case_key,
+                total_duration_ms=workflow_duration_ms,
+                workflow_id=context.workflow_id,
+                correlation_id=context.correlation_id,
+            )
             return input_data
+
+        # Log case selection
+        logger.info(
+            "switch_case_selected",
+            case_name=case_name,
+            case_key=case_key,
+            primitive_type=selected_primitive.__class__.__name__,
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
+        # Execute selected case with instrumentation
+        context.checkpoint(f"switch.{case_name}.start")
+        case_start_time = time.time()
+
+        # Create case span (if tracing available)
+        from opentelemetry import trace
+
+        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
+
+        if tracer and TRACING_AVAILABLE:
+            with tracer.start_as_current_span(f"switch.{case_name}") as span:
+                span.set_attribute("case.name", case_name)
+                span.set_attribute("case.key", case_key)
+                span.set_attribute("case.primitive_type", selected_primitive.__class__.__name__)
+
+                try:
+                    result = await selected_primitive.execute(input_data, context)
+                    span.set_attribute("case.status", "success")
+                except Exception as e:
+                    span.set_attribute("case.status", "error")
+                    span.set_attribute("case.error", str(e))
+                    span.record_exception(e)
+                    raise
+        else:
+            # Graceful degradation - execute without span
+            result = await selected_primitive.execute(input_data, context)
+
+        # Record checkpoint and metrics
+        context.checkpoint(f"switch.{case_name}.end")
+        case_duration_ms = (time.time() - case_start_time) * 1000
+        metrics_collector.record_execution(
+            f"SwitchPrimitive.{case_name}",
+            duration_ms=case_duration_ms,
+            success=True,
+        )
+
+        # Log case completion
+        logger.info(
+            "switch_case_complete",
+            case_name=case_name,
+            case_key=case_key,
+            primitive_type=selected_primitive.__class__.__name__,
+            duration_ms=case_duration_ms,
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
+        # Record end checkpoint
+        context.checkpoint("switch.end")
+        workflow_duration_ms = (time.time() - workflow_start_time) * 1000
+
+        # Log workflow completion
+        logger.info(
+            "switch_workflow_complete",
+            case_taken=case_name,
+            case_key=case_key,
+            total_duration_ms=workflow_duration_ms,
+            workflow_id=context.workflow_id,
+            correlation_id=context.correlation_id,
+        )
+
+        return result
