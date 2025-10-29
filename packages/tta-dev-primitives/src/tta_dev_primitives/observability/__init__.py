@@ -12,6 +12,7 @@ from .metrics import (
     get_enhanced_metrics_collector,
     get_metrics_collector,
 )
+from .prometheus import PrometheusExporter, get_prometheus_exporter
 from .tracing import ObservablePrimitive, setup_tracing
 
 __all__ = [
@@ -29,4 +30,7 @@ __all__ = [
     "SLOMetrics",
     "ThroughputMetrics",
     "get_enhanced_metrics_collector",
+    # Phase 3 Prometheus Integration
+    "PrometheusExporter",
+    "get_prometheus_exporter",
 ]
