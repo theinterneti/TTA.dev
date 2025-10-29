@@ -170,4 +170,3 @@ def extract_baggage(context: WorkflowContext) -> None:
             context.baggage.update(baggage)
     except ImportError:
         logger.debug("Baggage extraction not available")
-

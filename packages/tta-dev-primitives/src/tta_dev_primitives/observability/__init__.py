@@ -15,6 +15,14 @@ from .enhanced_metrics import (
     SLOMetrics,
     ThroughputMetrics,
 )
+
+# Prometheus exporter (optional dependency)
+try:
+    from .prometheus_exporter import PrometheusExporter, get_prometheus_exporter
+
+    PROMETHEUS_AVAILABLE = True
+except ImportError:
+    PROMETHEUS_AVAILABLE = False
 from .instrumented_primitive import InstrumentedPrimitive
 from .logging import setup_logging
 from .metrics import PrimitiveMetrics, get_metrics_collector
@@ -42,6 +50,10 @@ __all__ = [
     "SLOMetrics",
     "ThroughputMetrics",
     "CostMetrics",
+    # Prometheus exporter (Phase 3 - optional)
+    "PrometheusExporter",
+    "get_prometheus_exporter",
+    "PROMETHEUS_AVAILABLE",
     # Logging
     "setup_logging",
 ]

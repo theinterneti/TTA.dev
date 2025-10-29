@@ -1,0 +1,226 @@
+groups:
+  - name: tta_slo_alerts
+    interval: 30s
+    rules:
+      # SLO Compliance Alerts
+      - alert: SLOComplianceCritical
+        expr: tta_workflow_slo_compliance_ratio < 0.95
+        for: 5m
+        labels:
+          severity: critical
+          component: workflow
+          alert_type: slo
+        annotations:
+          summary: "SLO compliance critical for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} SLO compliance is {{ $value | humanizePercentage }}, below 95% threshold for 5 minutes."
+          runbook_url: "https://docs.tta.dev/runbooks/slo-compliance"
+
+      - alert: SLOComplianceWarning
+        expr: tta_workflow_slo_compliance_ratio < 0.99
+        for: 10m
+        labels:
+          severity: warning
+          component: workflow
+          alert_type: slo
+        annotations:
+          summary: "SLO compliance warning for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} SLO compliance is {{ $value | humanizePercentage }}, below 99% threshold for 10 minutes."
+          runbook_url: "https://docs.tta.dev/runbooks/slo-compliance"
+
+      # Error Budget Alerts
+      - alert: ErrorBudgetCritical
+        expr: tta_workflow_error_budget_remaining < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          component: workflow
+          alert_type: error_budget
+        annotations:
+          summary: "Error budget critically low for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has only {{ $value | humanizePercentage }} error budget remaining. Consider halting deployments."
+          runbook_url: "https://docs.tta.dev/runbooks/error-budget"
+
+      - alert: ErrorBudgetWarning
+        expr: tta_workflow_error_budget_remaining < 0.25
+        for: 10m
+        labels:
+          severity: warning
+          component: workflow
+          alert_type: error_budget
+        annotations:
+          summary: "Error budget low for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value | humanizePercentage }} error budget remaining. Monitor closely."
+          runbook_url: "https://docs.tta.dev/runbooks/error-budget"
+
+  - name: tta_performance_alerts
+    interval: 30s
+    rules:
+      # Latency Alerts
+      - alert: HighLatencyP95
+        expr: histogram_quantile(0.95, rate(tta_workflow_primitive_duration_seconds_bucket[5m])) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          component: workflow
+          alert_type: latency
+        annotations:
+          summary: "High p95 latency for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} p95 latency is {{ $value }}s, exceeding 1s threshold for 5 minutes."
+          runbook_url: "https://docs.tta.dev/runbooks/high-latency"
+
+      - alert: HighLatencyP99
+        expr: histogram_quantile(0.99, rate(tta_workflow_primitive_duration_seconds_bucket[5m])) > 2.0
+        for: 5m
+        labels:
+          severity: critical
+          component: workflow
+          alert_type: latency
+        annotations:
+          summary: "Critical p99 latency for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} p99 latency is {{ $value }}s, exceeding 2s threshold for 5 minutes."
+          runbook_url: "https://docs.tta.dev/runbooks/high-latency"
+
+      # Error Rate Alerts
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(tta_workflow_requests_total{status="failure"}[5m]) /
+            rate(tta_workflow_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: workflow
+          alert_type: error_rate
+        annotations:
+          summary: "High error rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} error rate is {{ $value | humanizePercentage }}, exceeding 5% threshold for 5 minutes."
+          runbook_url: "https://docs.tta.dev/runbooks/high-error-rate"
+
+      - alert: CriticalErrorRate
+        expr: |
+          (
+            rate(tta_workflow_requests_total{status="failure"}[5m]) /
+            rate(tta_workflow_requests_total[5m])
+          ) > 0.10
+        for: 2m
+        labels:
+          severity: critical
+          component: workflow
+          alert_type: error_rate
+        annotations:
+          summary: "Critical error rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} error rate is {{ $value | humanizePercentage }}, exceeding 10% threshold for 2 minutes."
+          runbook_url: "https://docs.tta.dev/runbooks/high-error-rate"
+
+      # Throughput Alerts
+      - alert: LowThroughput
+        expr: rate(tta_workflow_requests_total[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: workflow
+          alert_type: throughput
+        annotations:
+          summary: "Low throughput for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} throughput is {{ $value }} req/s, below expected threshold for 10 minutes."
+          runbook_url: "https://docs.tta.dev/runbooks/low-throughput"
+
+      - alert: NoTraffic
+        expr: rate(tta_workflow_requests_total[5m]) == 0
+        for: 15m
+        labels:
+          severity: critical
+          component: workflow
+          alert_type: throughput
+        annotations:
+          summary: "No traffic for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has received no requests for 15 minutes. Service may be down."
+          runbook_url: "https://docs.tta.dev/runbooks/no-traffic"
+
+  - name: tta_cost_alerts
+    interval: 60s
+    rules:
+      # Cost Alerts
+      - alert: HighCostRate
+        expr: rate(tta_workflow_cost_total[1h]) > 10.0
+        for: 30m
+        labels:
+          severity: warning
+          component: workflow
+          alert_type: cost
+        annotations:
+          summary: "High cost rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} is incurring costs at ${{ $value }}/hour, exceeding $10/hour threshold."
+          runbook_url: "https://docs.tta.dev/runbooks/high-cost"
+
+      - alert: CriticalCostRate
+        expr: rate(tta_workflow_cost_total[1h]) > 50.0
+        for: 15m
+        labels:
+          severity: critical
+          component: workflow
+          alert_type: cost
+        annotations:
+          summary: "Critical cost rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} is incurring costs at ${{ $value }}/hour, exceeding $50/hour threshold. Immediate action required."
+          runbook_url: "https://docs.tta.dev/runbooks/high-cost"
+
+      # Savings Alerts
+      - alert: LowSavingsRate
+        expr: |
+          (
+            sum(rate(tta_workflow_savings_total[1h])) /
+            (sum(rate(tta_workflow_cost_total[1h])) + sum(rate(tta_workflow_savings_total[1h])))
+          ) < 0.20
+        for: 1h
+        labels:
+          severity: info
+          component: workflow
+          alert_type: savings
+        annotations:
+          summary: "Low savings rate detected"
+          description: "Overall savings rate is {{ $value | humanizePercentage }}, below 20% target. Consider optimizing cache usage."
+          runbook_url: "https://docs.tta.dev/runbooks/low-savings"
+
+  - name: tta_availability_alerts
+    interval: 30s
+    rules:
+      # Service Availability
+      - alert: ServiceDown
+        expr: up{job="tta-workflow"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: infrastructure
+          alert_type: availability
+        annotations:
+          summary: "TTA workflow service is down"
+          description: "TTA workflow service has been down for 1 minute. Immediate investigation required."
+          runbook_url: "https://docs.tta.dev/runbooks/service-down"
+
+      # Active Requests Spike
+      - alert: ActiveRequestsSpike
+        expr: tta_workflow_active_requests > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: workflow
+          alert_type: capacity
+        annotations:
+          summary: "High number of active requests for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value }} active concurrent requests, exceeding 100 threshold. May indicate performance issues or traffic spike."
+          runbook_url: "https://docs.tta.dev/runbooks/active-requests-spike"
+
+      - alert: ActiveRequestsCritical
+        expr: tta_workflow_active_requests > 500
+        for: 2m
+        labels:
+          severity: critical
+          component: workflow
+          alert_type: capacity
+        annotations:
+          summary: "Critical number of active requests for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value }} active concurrent requests, exceeding 500 threshold. Service may be overloaded."
+          runbook_url: "https://docs.tta.dev/runbooks/active-requests-spike"
+
