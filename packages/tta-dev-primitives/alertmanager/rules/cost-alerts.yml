@@ -1,0 +1,125 @@
+groups:
+  - name: cost_alerts
+    interval: 1m
+    rules:
+      # Cost Threshold Alerts
+      - alert: HighCostRate
+        expr: rate(primitive_cost_total[5m]) > 0.1
+        for: 15m
+        labels:
+          severity: warning
+          category: cost
+        annotations:
+          summary: "High cost rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} is incurring ${{ $value | humanize }}/sec in costs"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-cost.md"
+
+      - alert: CriticalCostRate
+        expr: rate(primitive_cost_total[5m]) > 1.0
+        for: 10m
+        labels:
+          severity: critical
+          category: cost
+        annotations:
+          summary: "Critical cost rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} is incurring ${{ $value | humanize }}/sec in costs! Immediate review required"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-cost.md"
+
+      # Cost Budget Alerts
+      - alert: DailyCostBudgetExceeded
+        expr: sum(primitive_cost_total) > 100
+        for: 1h
+        labels:
+          severity: warning
+          category: budget
+        annotations:
+          summary: "Daily cost budget exceeded"
+          description: "Total cost is ${{ $value | humanize }}, exceeding daily budget of $100"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/budget-exceeded.md"
+
+      - alert: MonthlyCostProjection
+        expr: sum(primitive_cost_total) * 30 > 3000
+        for: 1h
+        labels:
+          severity: warning
+          category: budget
+        annotations:
+          summary: "Monthly cost projection exceeds budget"
+          description: "Projected monthly cost: ${{ $value | humanize }}, budget: $3000"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/budget-projection.md"
+
+      # Cost Anomaly Alerts
+      - alert: CostSpike
+        expr: |
+          (
+            rate(primitive_cost_total[5m])
+            /
+            rate(primitive_cost_total[1h] offset 1h)
+          ) > 5
+        for: 10m
+        labels:
+          severity: warning
+          category: anomaly
+        annotations:
+          summary: "Cost spike detected for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} cost rate is {{ $value }}x higher than 1h ago"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/cost-spike.md"
+
+      - alert: UnexpectedCost
+        expr: |
+          rate(primitive_cost_total[5m]) > 0
+          and
+          rate(primitive_cost_total[1h] offset 24h) == 0
+        for: 30m
+        labels:
+          severity: warning
+          category: anomaly
+        annotations:
+          summary: "Unexpected cost for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} is incurring costs but had none 24h ago. New usage pattern?"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/unexpected-cost.md"
+
+      # Low Savings Alerts
+      - alert: LowSavingsRate
+        expr: |
+          sum(primitive_cost_savings_total) / (sum(primitive_cost_total) + sum(primitive_cost_savings_total)) < 0.2
+        for: 1h
+        labels:
+          severity: info
+          category: optimization
+        annotations:
+          summary: "Low savings rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value | humanizePercentage }} savings rate. Target: >20%"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/low-savings.md"
+
+      - alert: SavingsDecreasing
+        expr: |
+          (
+            rate(primitive_cost_savings_total[1h])
+            /
+            rate(primitive_cost_savings_total[24h] offset 24h)
+          ) < 0.8
+        for: 2h
+        labels:
+          severity: info
+          category: optimization
+        annotations:
+          summary: "Savings decreasing for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} savings rate decreased by {{ $value | humanizePercentage }} compared to yesterday"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/savings-drop.md"
+
+      # Cost Per Request Alerts
+      - alert: HighCostPerRequest
+        expr: |
+          rate(primitive_cost_total[5m])
+          /
+          rate(primitive_requests_total[5m])
+          > 0.01
+        for: 30m
+        labels:
+          severity: warning
+          category: efficiency
+        annotations:
+          summary: "High cost per request for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} costs ${{ $value | humanize }} per request. Threshold: $0.01"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/cost-efficiency.md"

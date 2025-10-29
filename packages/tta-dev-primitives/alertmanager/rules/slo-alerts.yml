@@ -1,0 +1,91 @@
+groups:
+  - name: slo_alerts
+    interval: 30s
+    rules:
+      # SLO Compliance Alerts
+      - alert: SLOComplianceWarning
+        expr: primitive_slo_compliance < 0.99 and primitive_slo_compliance >= 0.95
+        for: 5m
+        labels:
+          severity: warning
+          category: slo
+        annotations:
+          summary: "SLO compliance below 99% for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} ({{ $labels.slo_name }}) has {{ $value | humanizePercentage }} compliance. Target: 99%+"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/slo-compliance.md"
+
+      - alert: SLOComplianceCritical
+        expr: primitive_slo_compliance < 0.95
+        for: 2m
+        labels:
+          severity: critical
+          category: slo
+        annotations:
+          summary: "SLO compliance critically low for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} ({{ $labels.slo_name }}) has {{ $value | humanizePercentage }} compliance. BELOW TARGET!"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/slo-compliance.md"
+
+      # Error Budget Alerts
+      - alert: ErrorBudgetLow
+        expr: primitive_error_budget_remaining < 0.3 and primitive_error_budget_remaining >= 0.1
+        for: 5m
+        labels:
+          severity: warning
+          category: error_budget
+        annotations:
+          summary: "Error budget running low for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} ({{ $labels.slo_name }}) has {{ $value | humanizePercentage }} error budget remaining"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/error-budget.md"
+
+      - alert: ErrorBudgetCritical
+        expr: primitive_error_budget_remaining < 0.1
+        for: 2m
+        labels:
+          severity: critical
+          category: error_budget
+        annotations:
+          summary: "Error budget critically low for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} ({{ $labels.slo_name }}) has only {{ $value | humanizePercentage }} error budget remaining!"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/error-budget.md"
+
+      - alert: ErrorBudgetExhausted
+        expr: primitive_error_budget_remaining <= 0
+        for: 1m
+        labels:
+          severity: critical
+          category: error_budget
+        annotations:
+          summary: "Error budget exhausted for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} ({{ $labels.slo_name }}) has EXHAUSTED its error budget. Immediate action required!"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/error-budget.md"
+
+      # Error Budget Burn Rate
+      - alert: ErrorBudgetFastBurn
+        expr: |
+          (
+            (1 - primitive_slo_compliance) / (1 - 0.95)
+          ) > 10
+        for: 5m
+        labels:
+          severity: critical
+          category: burn_rate
+        annotations:
+          summary: "Error budget burning too fast for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} is consuming error budget 10x faster than sustainable rate"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/burn-rate.md"
+
+      - alert: ErrorBudgetModerate Burn
+        expr: |
+          (
+            (1 - primitive_slo_compliance) / (1 - 0.95)
+          ) > 5 and (
+            (1 - primitive_slo_compliance) / (1 - 0.95)
+          ) <= 10
+        for: 15m
+        labels:
+          severity: warning
+          category: burn_rate
+        annotations:
+          summary: "Error budget burning faster than expected for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} is consuming error budget 5-10x faster than sustainable rate"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/burn-rate.md"

@@ -1,0 +1,114 @@
+groups:
+  - name: performance_alerts
+    interval: 30s
+    rules:
+      # Latency Alerts
+      - alert: HighP95Latency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(primitive_duration_seconds_bucket[5m])) by (le, primitive_name)
+          ) > 5
+        for: 10m
+        labels:
+          severity: warning
+          category: latency
+        annotations:
+          summary: "High p95 latency for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} p95 latency is {{ $value | humanizeDuration }}. Threshold: 5s"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-latency.md"
+
+      - alert: CriticalP95Latency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(primitive_duration_seconds_bucket[5m])) by (le, primitive_name)
+          ) > 10
+        for: 5m
+        labels:
+          severity: critical
+          category: latency
+        annotations:
+          summary: "Critical p95 latency for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} p95 latency is {{ $value | humanizeDuration }}. Severely degraded!"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-latency.md"
+
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(primitive_duration_seconds_bucket[5m])) by (le, primitive_name)
+          ) > 10
+        for: 10m
+        labels:
+          severity: warning
+          category: latency
+        annotations:
+          summary: "High p99 latency for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} p99 latency is {{ $value | humanizeDuration }}. Threshold: 10s"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-latency.md"
+
+      # Latency Increase Alerts
+      - alert: LatencyIncreasing
+        expr: |
+          (
+            histogram_quantile(0.95, sum(rate(primitive_duration_seconds_bucket[5m])) by (le, primitive_name))
+            /
+            histogram_quantile(0.95, sum(rate(primitive_duration_seconds_bucket[1h] offset 1h)) by (le, primitive_name))
+          ) > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          category: latency
+        annotations:
+          summary: "Latency increasing for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} p95 latency increased by {{ $value | humanizePercentage }} compared to 1h ago"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/latency-regression.md"
+
+      # Throughput Alerts
+      - alert: LowThroughput
+        expr: primitive_requests_per_second < 0.1
+        for: 15m
+        labels:
+          severity: warning
+          category: throughput
+        annotations:
+          summary: "Low throughput for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has only {{ $value | humanize }} req/s. Expected: >0.1 req/s"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/low-throughput.md"
+
+      - alert: ThroughputDrop
+        expr: |
+          (
+            rate(primitive_requests_total[5m])
+            /
+            rate(primitive_requests_total[1h] offset 1h)
+          ) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          category: throughput
+        annotations:
+          summary: "Throughput dropped for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} throughput dropped by {{ $value | humanizePercentage }} compared to 1h ago"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/throughput-drop.md"
+
+      # Concurrency Alerts
+      - alert: HighConcurrency
+        expr: primitive_active_requests > 100
+        for: 10m
+        labels:
+          severity: warning
+          category: concurrency
+        annotations:
+          summary: "High concurrency for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value | humanize }} active requests. Threshold: 100"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-concurrency.md"
+
+      - alert: CriticalConcurrency
+        expr: primitive_active_requests > 500
+        for: 5m
+        labels:
+          severity: critical
+          category: concurrency
+        annotations:
+          summary: "Critical concurrency for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value | humanize }} active requests. System overloaded!"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-concurrency.md"

@@ -1,0 +1,202 @@
+# AlertManager Configuration for TTA.dev Phase 3 Observability
+
+global:
+  # Global settings
+  resolve_timeout: 5m
+  smtp_from: 'alertmanager@tta.dev'
+  smtp_smarthost: 'localhost:25'
+  smtp_require_tls: false
+
+# Templates for notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route tree for alert distribution
+route:
+  # Default receiver for all alerts
+  receiver: 'default'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'primitive_name', 'category']
+  
+  # Wait time before sending initial notification
+  group_wait: 30s
+  
+  # Wait time before sending notification about new alerts in same group
+  group_interval: 5m
+  
+  # Wait time before resending notification
+  repeat_interval: 4h
+  
+  # Child routes for specific alert categories
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'pagerduty-critical'
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: true  # Also send to other receivers
+    
+    # SLO-related alerts
+    - match:
+        category: slo
+      receiver: 'slo-team'
+      group_wait: 1m
+      repeat_interval: 2h
+    
+    # Error budget alerts
+    - match:
+        category: error_budget
+      receiver: 'slo-team'
+      group_wait: 30s
+      repeat_interval: 1h
+    
+    # Performance alerts
+    - match:
+        category: latency
+      receiver: 'performance-team'
+      group_wait: 5m
+      repeat_interval: 3h
+    
+    - match:
+        category: throughput
+      receiver: 'performance-team'
+      group_wait: 5m
+      repeat_interval: 3h
+    
+    # Cost alerts
+    - match:
+        category: cost
+      receiver: 'finance-team'
+      group_wait: 15m
+      repeat_interval: 6h
+    
+    - match:
+        category: budget
+      receiver: 'finance-team'
+      group_wait: 1h
+      repeat_interval: 12h
+    
+    # Availability alerts
+    - match:
+        category: availability
+      receiver: 'oncall-team'
+      group_wait: 1m
+      repeat_interval: 1h
+    
+    - match:
+        category: outage
+      receiver: 'pagerduty-critical'
+      group_wait: 10s
+      repeat_interval: 30m
+    
+    # Info-level alerts (optimization recommendations)
+    - match:
+        severity: info
+      receiver: 'optimization-team'
+      group_wait: 1h
+      repeat_interval: 24h
+
+# Inhibition rules to prevent alert storms
+inhibit_rules:
+  # Inhibit warning alerts if critical alert is firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['primitive_name', 'category']
+  
+  # Inhibit individual error alerts if complete outage is detected
+  - source_match:
+      category: 'outage'
+    target_match:
+      category: 'errors'
+    equal: ['primitive_name']
+  
+  # Inhibit SLO compliance warnings if error budget is already alerting
+  - source_match:
+      category: 'error_budget'
+    target_match:
+      category: 'slo'
+    equal: ['primitive_name', 'slo_name']
+  
+  # Inhibit latency alerts if high concurrency is detected
+  - source_match:
+      category: 'concurrency'
+    target_match:
+      category: 'latency'
+    equal: ['primitive_name']
+
+# Receivers for alert notifications
+receivers:
+  # Default receiver (logs only)
+  - name: 'default'
+    webhook_configs:
+      - url: 'http://localhost:5001/alerts'
+        send_resolved: true
+  
+  # PagerDuty for critical alerts
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - service_key: '<your-pagerduty-service-key>'
+        description: '{{ .GroupLabels.alertname }} - {{ .GroupLabels.primitive_name }}'
+        severity: '{{ .GroupLabels.severity }}'
+        details:
+          firing: '{{ template "pagerduty.default.instances" . }}'
+        client: 'TTA.dev AlertManager'
+        client_url: 'https://alertmanager.tta.dev'
+  
+  # Email for SLO team
+  - name: 'slo-team'
+    email_configs:
+      - to: 'slo-team@tta.dev'
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.default.html" . }}'
+        send_resolved: true
+  
+  # Slack for performance team
+  - name: 'performance-team'
+    slack_configs:
+      - api_url: '<your-slack-webhook-url>'
+        channel: '#performance-alerts'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+        send_resolved: true
+  
+  # Slack for finance team
+  - name: 'finance-team'
+    slack_configs:
+      - api_url: '<your-slack-webhook-url>'
+        channel: '#cost-alerts'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: '{{ if eq .Status "firing" }}warning{{ else }}good{{ end }}'
+        send_resolved: true
+  
+  # Email for on-call team
+  - name: 'oncall-team'
+    email_configs:
+      - to: 'oncall@tta.dev'
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.default.html" . }}'
+        send_resolved: true
+    slack_configs:
+      - api_url: '<your-slack-webhook-url>'
+        channel: '#oncall'
+        title: '{{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        color: 'danger'
+        send_resolved: true
+  
+  # Email for optimization team (low priority)
+  - name: 'optimization-team'
+    email_configs:
+      - to: 'optimization@tta.dev'
+        headers:
+          Subject: '[INFO] {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.default.html" . }}'
+        send_resolved: false  # Don't send resolved notifications for info alerts

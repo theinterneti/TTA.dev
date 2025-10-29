@@ -1,0 +1,126 @@
+groups:
+  - name: availability_alerts
+    interval: 30s
+    rules:
+      # Error Rate Alerts
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(primitive_requests_total{status="error"}[5m])) by (primitive_name)
+            /
+            sum(rate(primitive_requests_total[5m])) by (primitive_name)
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          category: errors
+        annotations:
+          summary: "High error rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value | humanizePercentage }} error rate. Threshold: 5%"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-errors.md"
+
+      - alert: CriticalErrorRate
+        expr: |
+          (
+            sum(rate(primitive_requests_total{status="error"}[5m])) by (primitive_name)
+            /
+            sum(rate(primitive_requests_total[5m])) by (primitive_name)
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          category: errors
+        annotations:
+          summary: "Critical error rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value | humanizePercentage }} error rate. Severely degraded!"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/high-errors.md"
+
+      # Success Rate Alerts
+      - alert: LowSuccessRate
+        expr: |
+          (
+            sum(rate(primitive_requests_total{status="success"}[5m])) by (primitive_name)
+            /
+            sum(rate(primitive_requests_total[5m])) by (primitive_name)
+          ) < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          category: availability
+        annotations:
+          summary: "Low success rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value | humanizePercentage }} success rate. Target: >95%"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/low-availability.md"
+
+      - alert: CriticalSuccessRate
+        expr: |
+          (
+            sum(rate(primitive_requests_total{status="success"}[5m])) by (primitive_name)
+            /
+            sum(rate(primitive_requests_total[5m])) by (primitive_name)
+          ) < 0.90
+        for: 5m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "Critical success rate for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has {{ $value | humanizePercentage }} success rate. Service severely impacted!"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/low-availability.md"
+
+      # Complete Outage Alerts
+      - alert: PrimitiveDown
+        expr: rate(primitive_requests_total[5m]) == 0
+        for: 5m
+        labels:
+          severity: critical
+          category: outage
+        annotations:
+          summary: "{{ $labels.primitive_name }} appears to be down"
+          description: "{{ $labels.primitive_name }} has received no requests in the last 5 minutes"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/service-down.md"
+
+      - alert: AllRequestsFailing
+        expr: |
+          (
+            sum(rate(primitive_requests_total{status="error"}[5m])) by (primitive_name)
+            /
+            sum(rate(primitive_requests_total[5m])) by (primitive_name)
+          ) >= 1.0
+        for: 5m
+        labels:
+          severity: critical
+          category: outage
+        annotations:
+          summary: "All requests failing for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} has 100% error rate. Complete outage!"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/complete-outage.md"
+
+      # Error Rate Increase
+      - alert: ErrorRateIncreasing
+        expr: |
+          (
+            rate(primitive_requests_total{status="error"}[5m])
+            /
+            rate(primitive_requests_total{status="error"}[1h] offset 1h)
+          ) > 3
+        for: 10m
+        labels:
+          severity: warning
+          category: errors
+        annotations:
+          summary: "Error rate increasing for {{ $labels.primitive_name }}"
+          description: "{{ $labels.primitive_name }} error rate is {{ $value }}x higher than 1h ago"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/error-spike.md"
+
+      # Flapping Alerts
+      - alert: ServiceFlapping
+        expr: changes(up{job="tta-dev"}[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: stability
+        annotations:
+          summary: "Service flapping detected"
+          description: "Service up/down state changed {{ $value }} times in 15 minutes"
+          runbook_url: "https://github.com/theinterneti/TTA.dev/blob/main/docs/runbooks/service-flapping.md"
