@@ -1,0 +1,223 @@
+global:
+  # Global configuration
+  resolve_timeout: 5m
+  # SMTP configuration for email alerts
+  smtp_smarthost: 'smtp.example.com:587'
+  smtp_from: 'alerts@tta.dev'
+  smtp_auth_username: 'alerts@tta.dev'
+  smtp_auth_password: 'your-smtp-password'
+  smtp_require_tls: true
+
+# Templates for alert notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route tree for alert routing
+route:
+  # Default receiver for all alerts
+  receiver: 'default'
+  
+  # Group alerts by these labels
+  group_by: ['alertname', 'primitive_name', 'component']
+  
+  # Wait time before sending initial notification
+  group_wait: 10s
+  
+  # Wait time before sending notification about new alerts in group
+  group_interval: 10s
+  
+  # Wait time before re-sending notification
+  repeat_interval: 12h
+
+  # Child routes for specific alert types
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 0s
+      group_interval: 5m
+      repeat_interval: 4h
+      continue: true
+
+    # SLO alerts - notify SRE team
+    - match:
+        alert_type: slo
+      receiver: 'slo-alerts'
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 6h
+
+    # Error budget alerts - notify SRE and product teams
+    - match:
+        alert_type: error_budget
+      receiver: 'error-budget-alerts'
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 6h
+
+    # Cost alerts - notify finance and engineering
+    - match:
+        alert_type: cost
+      receiver: 'cost-alerts'
+      group_wait: 5m
+      group_interval: 30m
+      repeat_interval: 24h
+
+    # Performance alerts - notify engineering
+    - match:
+        alert_type: latency
+      receiver: 'performance-alerts'
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 12h
+
+    - match:
+        alert_type: error_rate
+      receiver: 'performance-alerts'
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 12h
+
+    # Availability alerts - notify on-call
+    - match:
+        alert_type: availability
+      receiver: 'oncall-alerts'
+      group_wait: 0s
+      group_interval: 1m
+      repeat_interval: 2h
+
+    # Info alerts - low priority
+    - match:
+        severity: info
+      receiver: 'info-alerts'
+      group_wait: 10m
+      group_interval: 1h
+      repeat_interval: 24h
+
+# Inhibition rules - suppress alerts when other alerts are firing
+inhibit_rules:
+  # Suppress warning alerts when critical alert is firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'primitive_name']
+
+  # Suppress SLO compliance warning when error budget is critical
+  - source_match:
+      alertname: 'ErrorBudgetCritical'
+    target_match:
+      alertname: 'SLOComplianceWarning'
+    equal: ['primitive_name']
+
+  # Suppress high latency alerts when service is down
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match:
+      alert_type: 'latency'
+    equal: ['component']
+
+  # Suppress throughput alerts when service is down
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match:
+      alert_type: 'throughput'
+    equal: ['component']
+
+# Receivers - notification destinations
+receivers:
+  # Default receiver
+  - name: 'default'
+    email_configs:
+      - to: 'team@tta.dev'
+        headers:
+          Subject: '[TTA Alert] {{ .GroupLabels.alertname }}'
+
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@tta.dev,sre@tta.dev'
+        headers:
+          Subject: '[CRITICAL] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-critical'
+        title: 'Critical Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+    pagerduty_configs:
+      - service_key: 'your-pagerduty-service-key'
+        description: '{{ .GroupLabels.alertname }}'
+
+  # SLO alerts
+  - name: 'slo-alerts'
+    email_configs:
+      - to: 'sre@tta.dev'
+        headers:
+          Subject: '[SLO] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-slo'
+        title: 'SLO Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+  # Error budget alerts
+  - name: 'error-budget-alerts'
+    email_configs:
+      - to: 'sre@tta.dev,product@tta.dev'
+        headers:
+          Subject: '[Error Budget] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-error-budget'
+        title: 'Error Budget Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+  # Cost alerts
+  - name: 'cost-alerts'
+    email_configs:
+      - to: 'finance@tta.dev,engineering@tta.dev'
+        headers:
+          Subject: '[Cost] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-cost'
+        title: 'Cost Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+  # Performance alerts
+  - name: 'performance-alerts'
+    email_configs:
+      - to: 'engineering@tta.dev'
+        headers:
+          Subject: '[Performance] {{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-performance'
+        title: 'Performance Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+  # On-call alerts
+  - name: 'oncall-alerts'
+    pagerduty_configs:
+      - service_key: 'your-pagerduty-service-key'
+        description: '{{ .GroupLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#oncall'
+        title: 'On-Call Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        send_resolved: true
+
+  # Info alerts
+  - name: 'info-alerts'
+    email_configs:
+      - to: 'team@tta.dev'
+        headers:
+          Subject: '[Info] {{ .GroupLabels.alertname }}'
+

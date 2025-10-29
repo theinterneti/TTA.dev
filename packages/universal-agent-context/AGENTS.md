@@ -31,7 +31,7 @@ TTA is an AI-powered therapeutic text adventure platform that combines evidence-
 ## Development Workflow
 
 ### Package Management
-- **Tool**: `uv` (not pip/poetry) - use `uv sync --all-extras` for dependencies
+- **Tooling (Python-specific):** For Python package management and fast environment setup, see `packages/python-pathway/instructions/tooling.md` (uv, uvx). Keep `universal-agent-context` focused on language-agnostic workflows.
 - **Python**: 3.12+ required
 - **Workspace Packages**: `tta-ai-framework`, `tta-narrative-engine`
 
@@ -78,18 +78,18 @@ python scripts/workflow/spec_to_production.py \
 
 **Test Markers**:
 ```python
-@pytest.mark.redis  # Requires Redis
-@pytest.mark.neo4j  # Requires Neo4j
-@pytest.mark.integration  # Integration test
+See `packages/python-pathway/instructions/testing.md` for Python test markers (redis, neo4j, integration, slow) and examples using `pytest`.
 @pytest.mark.slow  # Slow-running test
 @pytest.mark.adversarial  # Edge case test
 ```
 
-**Testing Patterns**:
+**Testing Patterns** (language-agnostic):
 - **AAA Pattern**: Arrange-Act-Assert structure
-- **Pytest Fixtures**: Reusable test setup
-- **Mocking**: Use `unittest.mock` for external dependencies
-- **Async Testing**: `pytest-asyncio` with `@pytest.mark.asyncio`
+- **Fixtures**: Reusable test setup
+- **Mocking**: Mock external dependencies
+- **Async Testing**: Use language-appropriate async test patterns
+
+For Python-specific testing patterns, see `packages/python-pathway/instructions/testing.md`
 
 ## Code Conventions
 
@@ -178,18 +178,15 @@ async def risky_operation():
 
 ```bash
 ```bash
-# Environment setup
-uv sync --all-extras
+# For Python projects, see packages/python-pathway/instructions/
+# - tooling.md (uv, workspace setup)
+# - testing.md (pytest, test markers)
+# - quality.md (ruff, pyright)
 
-# Quality checks
-uv run ruff check src/ tests/ --fix
-uv run ruff format src/ tests/
-uv run pyright src/
-
-# Testing
-uv run pytest tests/unit/ --cov=src --cov-report=html
-uv run pytest -m "redis or neo4j"
-uv run playwright test
+# Example Python commands (see python-pathway for details):
+uv sync --all-extras              # Setup
+uvx ruff check src/ tests/ --fix  # Linting
+uv run pytest tests/unit/         # Testing
 
 # Services
 bash docker/scripts/tta-docker.sh dev up -d  # Start development services
@@ -315,18 +312,20 @@ python .augment/context/cli.py show session-name
 
 ### When Adding Tests
 1. **Follow AAA**: Arrange-Act-Assert pattern
-2. **Use fixtures**: Reuse test setup via pytest fixtures
+2. **Use fixtures**: Reuse test setup via test fixtures
 3. **Mock external**: Mock filesystem, database, API calls
 4. **Test edge cases**: Cover error paths and boundary conditions
 5. **Maintain 100% pass rate**: Never commit failing tests
 
+For Python-specific test patterns, see `packages/python-pathway/instructions/testing.md`
+
 ## Important Notes
 
-- **Package Manager**: Always use `uv`, never pip or poetry
+- **Language Pathways**: Use `packages/python-pathway/` for Python-specific tooling and patterns
 - **Circuit Breakers**: Wrap all external service calls with circuit breakers
 - **Error Handling**: Use retry logic with exponential backoff for transient failures
 - **Testing**: Comprehensive test battery with mock fallbacks for external services
-- **Documentation**: Keep GEMINI.md and AGENTS.md synchronized with project changes
+- **Documentation**: Keep documentation synchronized with project changes
 - **Never commit secrets**: Use `.env` files (gitignored)
 - **Maintain backward compatibility**: Existing tests must pass
 - **Follow component maturity**: Respect quality gate thresholds

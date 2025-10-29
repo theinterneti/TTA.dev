@@ -1,6 +1,9 @@
 """OpenTelemetry APM setup and configuration."""
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Any
 
 try:
     from opentelemetry import metrics, trace
@@ -13,6 +16,9 @@ try:
     OPENTELEMETRY_AVAILABLE = True
 except ImportError:
     OPENTELEMETRY_AVAILABLE = False
+    if not TYPE_CHECKING:
+        TracerProvider = Any  # type: ignore
+        MeterProvider = Any  # type: ignore
     logging.warning(
         "OpenTelemetry not installed. Install with: pip install tta-workflow-primitives[apm]"
     )

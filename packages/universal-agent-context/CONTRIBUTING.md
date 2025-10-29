@@ -138,7 +138,7 @@ python packages/universal-agent-context/scripts/validate-export-package.py
 python packages/universal-agent-context/scripts/validate-export-package.py
 
 # Run tests (if applicable)
-pytest packages/universal-agent-context/tests/
+See Python testing instructions in `packages/python-pathway/instructions/testing.md` for running tests and examples (pytest, pytest-asyncio, pytest-cov).
 
 # Test with AI agents
 # - Claude: Verify instructions load

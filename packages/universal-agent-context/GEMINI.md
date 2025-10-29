@@ -7,9 +7,8 @@ TTA is a therapeutic text adventure game that combines AI-driven storytelling wi
 - **Backend:** Python 3.12, FastAPI, Pydantic
 - **Databases:** Redis (session state), Neo4j (narrative graph)
 - **AI/LLM:** OpenRouter API, multiple model support
-- **Testing:** pytest, pytest-asyncio, pytest-cov
-- **Quality Tools:** ruff (linting), pyright (type checking), detect-secrets (security)
-- **Package Management:** UV (uv run for project env, uvx for standalone tools)
+- **Testing & Quality (Python-specific):** See the Python pathway instructions in `packages/python-pathway/instructions/testing.md` and `packages/python-pathway/instructions/quality.md` for pytest, ruff and pyright usage.
+- **Package Management (Python-specific):** See `packages/python-pathway/instructions/tooling.md` for `uv` usage and workspace guidance.
 - **Frontend:** Next.js, React, TypeScript
 - **Deployment:** Docker, Docker Compose
 
@@ -83,23 +82,25 @@ Improving test coverage for `src/orchestration/orchestrator.py` from 49.4% to 70
 - **Protocol/Interface:** For abstract component discovery
 - **Factory Pattern:** For creating component instances
 
-## Common Commands
+## Common Commands (Python-specific)
+
+For Python projects, see `packages/python-pathway/instructions/` for complete command reference.
 
 ### Development
 ```bash
-# Run tests
+# Run tests (Python)
 uvx pytest tests/test_orchestrator.py -v
 
-# Check coverage
-uvx pytest tests/test_orchestrator.py --cov=src/orchestration --cov-report=term
+# Check coverage (Python)
+uvx pytest tests/ --cov=src --cov-report=term
 
-# Lint code
+# Lint code (Python)
 uvx ruff check src/ tests/
 
-# Type check
+# Type check (Python)
 uvx pyright src/
 
-# Format code
+# Format code (Python)
 uvx ruff format src/ tests/
 ```
 

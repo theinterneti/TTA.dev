@@ -1,0 +1,81 @@
+[project]
+name = "keploy-framework"
+version = "0.1.0"
+description = "Production-ready framework for Keploy API test automation"
+authors = [
+    { name = "TTA Development Team", email = "dev@tta.dev" }
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["testing", "api", "automation", "keploy", "e2e"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+]
+
+dependencies = [
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0.0",
+    "httpx>=0.25.0",
+    "rich>=13.0.0",
+    "typer>=0.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "pyright>=1.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/theinterneti/TTA.dev"
+Documentation = "https://github.com/theinterneti/TTA.dev/tree/main/packages/keploy-framework/docs"
+Repository = "https://github.com/theinterneti/TTA.dev"
+Issues = "https://github.com/theinterneti/TTA.dev/issues"
+
+[project.scripts]
+keploy-setup = "keploy_framework.cli:setup"
+keploy-test = "keploy_framework.cli:test"
+keploy-record = "keploy_framework.cli:record"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/keploy_framework"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "ANN", "S", "B", "A", "C4", "DTZ", "T10", "T20", "RET", "SIM", "ARG", "PTH", "ERA", "PL", "RUF"]
+ignore = ["ANN101", "ANN102", "S101"]
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownArgumentType = false
+reportUnknownVariableType = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--strict-markers --cov=src/keploy_framework --cov-report=term-missing --cov-report=html"
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+    "docker: marks tests that require Docker (deselect with '-m \"not docker\"')",
+]

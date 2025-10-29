@@ -1,0 +1,129 @@
+name: API Testing (Keploy)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/**/*.py'
+      - 'tests/api/**'
+      - 'packages/keploy-framework/**'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**/*.py'
+      - 'tests/api/**'
+
+jobs:
+  keploy-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Add uv to PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Check for Keploy configuration
+        id: check-keploy
+        run: |
+          if [ -f "tests/keploy-config.yml" ] || [ -d "tests/api/keploy" ]; then
+            echo "has_keploy_tests=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_keploy_tests=false" >> $GITHUB_OUTPUT
+            echo "⚠️  No Keploy configuration found. Create tests/keploy-config.yml to enable API testing."
+          fi
+
+      - name: Install Keploy CLI
+        if: steps.check-keploy.outputs.has_keploy_tests == 'true'
+        run: |
+          curl --silent -O -L https://keploy.io/install.sh
+          chmod +x install.sh
+          sudo ./install.sh
+          keploy --version
+
+      - name: Run Keploy Framework Tests
+        if: steps.check-keploy.outputs.has_keploy_tests == 'true'
+        run: |
+          # Test Keploy framework imports
+          uv run python -c "
+          from keploy_framework import KeployConfig, RecordingSession, KeployTestRunner
+          print('✅ Keploy framework imports successful')
+          "
+          
+          # Run framework tests
+          uv run pytest packages/keploy-framework/tests/ -v --tb=short
+
+      - name: Run Recorded API Tests (if available)
+        if: steps.check-keploy.outputs.has_keploy_tests == 'true'
+        continue-on-error: true
+        run: |
+          # Check if recorded tests exist
+          if [ -d "tests/api/keploy/tests" ]; then
+            echo "📹 Running recorded API tests..."
+            uv run python -m keploy_framework.cli test --replay \
+              --test-dir tests/api/keploy \
+              --timeout 30
+          else
+            echo "⚠️  No recorded API tests found. Run recording session first."
+            echo "   Use: uv run python -m keploy_framework.cli record --app-cmd 'your-app-command'"
+          fi
+
+      - name: Generate Keploy Coverage Report
+        if: steps.check-keploy.outputs.has_keploy_tests == 'true' && always()
+        continue-on-error: true
+        run: |
+          # Generate coverage report if tests were run
+          if [ -d "tests/api/keploy/tests" ]; then
+            uv run python -c "
+            import json
+            from pathlib import Path
+            
+            # Basic coverage report
+            test_dir = Path('tests/api/keploy/tests')
+            if test_dir.exists():
+                test_files = list(test_dir.glob('*.yaml'))
+                report = {
+                    'total_tests': len(test_files),
+                    'test_files': [str(f.name) for f in test_files]
+                }
+                
+                with open('keploy-coverage.json', 'w') as f:
+                    json.dump(report, f, indent=2)
+                
+                print(f'✅ Generated coverage report: {len(test_files)} API tests')
+            "
+          fi
+
+      - name: Upload Keploy Results
+        if: steps.check-keploy.outputs.has_keploy_tests == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: keploy-test-results
+          path: |
+            keploy-coverage.json
+            tests/api/keploy/reports/
+          if-no-files-found: warn
+
+      - name: Skip Keploy tests (no configuration)
+        if: steps.check-keploy.outputs.has_keploy_tests == 'false'
+        run: |
+          echo "ℹ️  Keploy API testing skipped - no configuration found"
+          echo ""
+          echo "To enable Keploy API testing:"
+          echo "1. Create tests/keploy-config.yml"
+          echo "2. Record your first API test session"
+          echo "3. Commit the recorded tests to tests/api/keploy/"
+          echo ""
+          echo "See packages/keploy-framework/README.md for details"
