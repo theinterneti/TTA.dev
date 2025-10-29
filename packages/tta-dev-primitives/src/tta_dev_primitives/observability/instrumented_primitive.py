@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import logging
+import time
 from abc import abstractmethod
 from typing import TypeVar
 
 from ..core.base import WorkflowContext, WorkflowPrimitive
 from .context_propagation import create_linked_span, inject_trace_context
+from .enhanced_collector import get_enhanced_metrics_collector
 
 # Check if OpenTelemetry is available
 try:
@@ -74,7 +76,8 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
         2. Span creation with proper parent-child relationships
         3. Adding span attributes from WorkflowContext
         4. Recording checkpoints and timing
-        5. Calling the subclass implementation
+        5. Enhanced metrics collection (percentiles, SLO, throughput, cost)
+        6. Calling the subclass implementation
 
         Args:
             input_data: Input data for the primitive
@@ -88,43 +91,56 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
         """
         # Record checkpoint for timing
         context.checkpoint(f"{self.name}.start")
+        start_time = time.time()
+
+        # Get enhanced metrics collector
+        metrics_collector = get_enhanced_metrics_collector()
+        metrics_collector.start_request(self.name)
 
         # Inject trace context from active span (if available)
         context = inject_trace_context(context)
 
         # Execute with or without tracing
-        if self._tracer and TRACING_AVAILABLE:
-            # Create span linked to context
-            with create_linked_span(self._tracer, f"primitive.{self.name}", context) as span:
-                # Add context attributes to span
-                for key, value in context.to_otel_context().items():
-                    span.set_attribute(key, value)
+        success = False
+        try:
+            if self._tracer and TRACING_AVAILABLE:
+                # Create span linked to context
+                with create_linked_span(self._tracer, f"primitive.{self.name}", context) as span:
+                    # Add context attributes to span
+                    for key, value in context.to_otel_context().items():
+                        span.set_attribute(key, value)
 
-                # Add primitive-specific attributes
-                span.set_attribute("primitive.name", self.name)
-                span.set_attribute("primitive.type", self.__class__.__name__)
+                    # Add primitive-specific attributes
+                    span.set_attribute("primitive.name", self.name)
+                    span.set_attribute("primitive.type", self.__class__.__name__)
 
-                # Execute implementation
-                try:
-                    result = await self._execute_impl(input_data, context)
-                    span.set_attribute("primitive.status", "success")
-                    return result
-                except Exception as e:
-                    # Record exception in span
-                    span.set_attribute("primitive.status", "error")
-                    span.set_attribute("primitive.error", str(e))
-                    span.record_exception(e)
-                    raise
-                finally:
-                    # Record end checkpoint
-                    context.checkpoint(f"{self.name}.end")
-        else:
-            # Execute without tracing (graceful degradation)
-            try:
+                    # Execute implementation
+                    try:
+                        result = await self._execute_impl(input_data, context)
+                        span.set_attribute("primitive.status", "success")
+                        # Mark success immediately before return
+                        success = True
+                        return result
+                    except Exception as e:
+                        # Record exception in span
+                        span.set_attribute("primitive.status", "error")
+                        span.set_attribute("primitive.error", str(e))
+                        span.record_exception(e)
+                        raise
+            else:
+                # Execute without tracing (graceful degradation)
                 result = await self._execute_impl(input_data, context)
+                # Mark success immediately before return
+                success = True
                 return result
-            finally:
-                context.checkpoint(f"{self.name}.end")
+        finally:
+            # Record end checkpoint
+            context.checkpoint(f"{self.name}.end")
+
+            # Calculate duration and record metrics
+            duration_ms = (time.time() - start_time) * 1000
+            metrics_collector.record_execution(self.name, duration_ms=duration_ms, success=success)
+            metrics_collector.end_request(self.name)
 
     @abstractmethod
     async def _execute_impl(self, input_data: T, context: WorkflowContext) -> U:

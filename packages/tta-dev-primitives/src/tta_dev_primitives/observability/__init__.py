@@ -7,6 +7,14 @@ from .context_propagation import (
     inject_trace_context,
     propagate_baggage,
 )
+from .enhanced_collector import get_enhanced_metrics_collector
+from .enhanced_metrics import (
+    CostMetrics,
+    PercentileMetrics,
+    SLOConfig,
+    SLOMetrics,
+    ThroughputMetrics,
+)
 from .instrumented_primitive import InstrumentedPrimitive
 from .logging import setup_logging
 from .metrics import PrimitiveMetrics, get_metrics_collector
@@ -27,6 +35,13 @@ __all__ = [
     # Metrics
     "PrimitiveMetrics",
     "get_metrics_collector",
+    # Enhanced metrics (Phase 3)
+    "get_enhanced_metrics_collector",
+    "PercentileMetrics",
+    "SLOConfig",
+    "SLOMetrics",
+    "ThroughputMetrics",
+    "CostMetrics",
     # Logging
     "setup_logging",
 ]
