@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 from typing import Any
 
 from .enhanced_metrics import (
@@ -292,13 +293,22 @@ class EnhancedMetricsCollector:
                 metrics.reset()
 
 
-# Global enhanced metrics collector
+# Global enhanced metrics collector with thread-safe initialization
 _enhanced_metrics_collector: EnhancedMetricsCollector | None = None
+_collector_lock = threading.Lock()
 
 
 def get_enhanced_metrics_collector() -> EnhancedMetricsCollector:
-    """Get the global enhanced metrics collector."""
+    """
+    Get the global enhanced metrics collector (thread-safe singleton).
+
+    Returns:
+        The global EnhancedMetricsCollector instance
+    """
     global _enhanced_metrics_collector
     if _enhanced_metrics_collector is None:
-        _enhanced_metrics_collector = EnhancedMetricsCollector()
+        with _collector_lock:
+            # Double-check locking pattern
+            if _enhanced_metrics_collector is None:
+                _enhanced_metrics_collector = EnhancedMetricsCollector()
     return _enhanced_metrics_collector

@@ -13,6 +13,9 @@ try:
 except ImportError:
     NUMPY_AVAILABLE = False
 
+# Constants
+DEFAULT_SLO_WINDOW_SECONDS = 30 * 24 * 60 * 60  # 30 days
+
 
 @dataclass
 class PercentileMetrics:
@@ -52,11 +55,17 @@ class PercentileMetrics:
             # Fallback to sorted list approach
             sorted_durations = sorted(self.durations)
             n = len(sorted_durations)
+
+            def percentile_index(percentile: float) -> int:
+                # Calculate index, ensure within bounds
+                idx = int(n * percentile) - 1
+                return max(0, min(n - 1, idx))
+
             return {
-                "p50": sorted_durations[int(n * 0.50)],
-                "p90": sorted_durations[int(n * 0.90)],
-                "p95": sorted_durations[int(n * 0.95)],
-                "p99": sorted_durations[int(n * 0.99)],
+                "p50": sorted_durations[percentile_index(0.50)],
+                "p90": sorted_durations[percentile_index(0.90)],
+                "p95": sorted_durations[percentile_index(0.95)],
+                "p99": sorted_durations[percentile_index(0.99)],
             }
 
     def reset(self) -> None:
@@ -72,7 +81,7 @@ class SLOConfig:
     target: float  # Target compliance (e.g., 0.99 for 99%)
     threshold_ms: float | None = None  # Latency threshold in ms
     error_rate_threshold: float | None = None  # Error rate threshold (e.g., 0.01 for 1%)
-    window_seconds: int = 2592000  # 30 days default
+    window_seconds: int = DEFAULT_SLO_WINDOW_SECONDS
 
 
 @dataclass
@@ -143,6 +152,7 @@ class SLOMetrics:
         if success:
             self.successful_requests += 1
 
+        # Track latency threshold independently of success status
         if self.config.threshold_ms and duration_ms <= self.config.threshold_ms:
             self.requests_within_threshold += 1
 

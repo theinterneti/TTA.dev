@@ -118,6 +118,7 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
                     try:
                         result = await self._execute_impl(input_data, context)
                         span.set_attribute("primitive.status", "success")
+                        # Mark success immediately before return
                         success = True
                         return result
                     except Exception as e:
@@ -129,6 +130,7 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
             else:
                 # Execute without tracing (graceful degradation)
                 result = await self._execute_impl(input_data, context)
+                # Mark success immediately before return
                 success = True
                 return result
         finally:
