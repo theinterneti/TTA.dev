@@ -83,7 +83,7 @@ async def test_instrumented_primitive_basic():
 @pytest.mark.asyncio
 async def test_instrumented_primitive_metrics():
     """Test metrics collection in instrumented primitive."""
-    collector = get_enhanced_metrics_collector()
+    get_enhanced_metrics_collector()
 
     primitive = InstrumentedTestPrimitive()
     context = WorkflowContext(workflow_id="test-metrics")

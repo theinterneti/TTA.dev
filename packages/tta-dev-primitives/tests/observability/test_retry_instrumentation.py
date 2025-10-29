@@ -1,7 +1,5 @@
 """Tests for RetryPrimitive Phase 2 instrumentation."""
 
-import asyncio
-
 import pytest
 
 from tta_dev_primitives.core.base import WorkflowContext
