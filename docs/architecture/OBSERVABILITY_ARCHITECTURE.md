@@ -124,14 +124,14 @@ from tta_dev_primitives.core.base import WorkflowPrimitive
 
 class InstrumentedPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Base primitive with automatic instrumentation."""
-    
+
     def __init__(self, name: str | None = None):
         self.name = name or self.__class__.__name__
         self.tracer = trace.get_tracer(__name__)
-    
+
     async def execute(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         """Execute with automatic span creation."""
@@ -173,13 +173,13 @@ from typing import Dict
 @dataclass
 class PrimitiveMetrics:
     """Collect metrics for primitive execution."""
-    
+
     name: str
     execution_count: int = 0
     error_count: int = 0
     total_duration_ms: float = 0.0
     execution_times: list[float] = field(default_factory=list)
-    
+
     def record_execution(self, duration_ms: float, error: bool = False):
         """Record a single execution."""
         self.execution_count += 1
@@ -187,14 +187,14 @@ class PrimitiveMetrics:
             self.error_count += 1
         self.total_duration_ms += duration_ms
         self.execution_times.append(duration_ms)
-    
+
     @property
     def avg_duration_ms(self) -> float:
         """Average execution time."""
         if self.execution_count == 0:
             return 0.0
         return self.total_duration_ms / self.execution_count
-    
+
     @property
     def error_rate(self) -> float:
         """Error rate as percentage."""
@@ -210,7 +210,7 @@ class MyPrimitive(InstrumentedPrimitive[str, str]):
     def __init__(self):
         super().__init__("my_primitive")
         self.metrics = PrimitiveMetrics(name="my_primitive")
-    
+
     async def _execute_impl(self, context, input_data):
         start_time = time()
         try:
@@ -234,19 +234,19 @@ class MyPrimitive(InstrumentedPrimitive[str, str]):
 @dataclass
 class WorkflowContext:
     """Context passed through workflow execution."""
-    
+
     # Unique correlation ID for request
     correlation_id: str
-    
+
     # User-defined data
     data: dict[str, Any]
-    
+
     # OpenTelemetry span context (optional)
     parent_span_context: SpanContext | None = None
-    
+
     # Metadata
     created_at: datetime = field(default_factory=datetime.now)
-    
+
     @classmethod
     def create(cls, correlation_id: str | None = None, **data) -> "WorkflowContext":
         """Create context with auto-generated correlation ID."""
@@ -307,7 +307,7 @@ def initialize_observability(
                 "service.version": "1.0.0",
             })
         )
-        
+
         # Add exporters
         if otlp_endpoint:
             tracer_provider.add_span_processor(
@@ -315,17 +315,17 @@ def initialize_observability(
                     OTLPSpanExporter(endpoint=otlp_endpoint)
                 )
             )
-        
+
         # Register provider
         trace.set_tracer_provider(tracer_provider)
-        
+
         # Setup Prometheus
         if enable_prometheus:
             start_http_server(prometheus_port)
             logger.info(f"Prometheus metrics on :{prometheus_port}/metrics")
-        
+
         return True
-        
+
     except Exception as e:
         logger.warning(f"Observability init failed: {e}")
         return False  # Graceful degradation
@@ -349,7 +349,7 @@ cache_hits = Counter(
 )
 
 cache_misses = Counter(
-    "cache_miss_total", 
+    "cache_miss_total",
     "Total cache misses",
     ["primitive_name"]
 )
@@ -362,13 +362,13 @@ cache_operation_duration = Histogram(
 
 class EnhancedCachePrimitive(CachePrimitive):
     """CachePrimitive with Prometheus metrics."""
-    
+
     async def _execute_impl(self, context, input_data):
         start_time = time()
-        
+
         # Check cache
         cached = self._get_from_cache(input_data)
-        
+
         if cached:
             cache_hits.labels(primitive_name=self.name).inc()
             duration = time() - start_time
@@ -377,20 +377,20 @@ class EnhancedCachePrimitive(CachePrimitive):
                 operation="hit"
             ).observe(duration)
             return cached
-        
+
         # Cache miss
         cache_misses.labels(primitive_name=self.name).inc()
-        
+
         # Execute and cache
         result = await self.primitive.execute(context, input_data)
         self._store_in_cache(input_data, result)
-        
+
         duration = time() - start_time
         cache_operation_duration.labels(
             primitive_name=self.name,
             operation="miss"
         ).observe(duration)
-        
+
         return result
 ```
 
@@ -519,12 +519,12 @@ async with httpx.AsyncClient() as client:
 **Performance:**
 ```promql
 # Average request duration (last 5min)
-rate(primitive_duration_seconds_sum[5m]) 
-  / 
+rate(primitive_duration_seconds_sum[5m])
+  /
 rate(primitive_duration_seconds_count[5m])
 
 # P95 latency
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(primitive_duration_seconds_bucket[5m])
 )
 
@@ -647,7 +647,7 @@ logger.info(
 1. **Batch Span Export**
    ```python
    from opentelemetry.sdk.trace.export import BatchSpanProcessor
-   
+
    processor = BatchSpanProcessor(
        exporter,
        max_queue_size=2048,
@@ -659,7 +659,7 @@ logger.info(
 2. **Sampling**
    ```python
    from opentelemetry.sdk.trace.sampling import ParentBasedTraceIdRatio
-   
+
    sampler = ParentBasedTraceIdRatio(0.1)  # 10% sampling
    ```
 
@@ -688,14 +688,14 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-  
+
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
     depends_on:
       - prometheus
-  
+
   jaeger:
     image: jaegertracing/all-in-one:latest
     ports:
