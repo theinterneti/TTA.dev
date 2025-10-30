@@ -3119,6 +3119,22 @@ Closes #123
 |-----------|---------|------|--------|---------------|
 | **MockPrimitive** | Testing and mocking | Testing | `from tta_dev_primitives.testing import MockPrimitive` | [mocks.py](packages/tta-dev-primitives/src/tta_dev_primitives/testing/mocks.py) |
 
+### Integration Primitives
+
+| Primitive | Purpose | Type | Import | Documentation |
+|-----------|---------|------|--------|---------------|
+| **OpenAIPrimitive** | OpenAI API integration | LLM | `from tta_dev_primitives.integrations import OpenAIPrimitive` | [openai_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py) |
+| **AnthropicPrimitive** | Anthropic Claude API integration | LLM | `from tta_dev_primitives.integrations import AnthropicPrimitive` | [anthropic_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py) |
+| **OllamaPrimitive** | Ollama local LLM integration | LLM | `from tta_dev_primitives.integrations import OllamaPrimitive` | [ollama_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py) |
+| **SupabasePrimitive** | Supabase database operations | Database | `from tta_dev_primitives.integrations import SupabasePrimitive` | [supabase_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/supabase_primitive.py) |
+| **SQLitePrimitive** | SQLite local database operations | Database | `from tta_dev_primitives.integrations import SQLitePrimitive` | [sqlite_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py) |
+
+### Research Primitives
+
+| Primitive | Purpose | Type | Import | Documentation |
+|-----------|---------|------|--------|---------------|
+| **FreeTierResearchPrimitive** | Automated LLM free tier research | Research | `from tta_dev_primitives.research import FreeTierResearchPrimitive` | [free_tier_research.py](packages/tta-dev-primitives/src/tta_dev_primitives/research/free_tier_research.py) |
+
 ### Agent Coordination Primitives
 
 | Primitive | Purpose | Type | Import | Documentation |
@@ -3571,7 +3587,86 @@ assert mock_llm.last_call_args == (context, input_data)
 
 ---
 
-### 14. AgentHandoffPrimitive
+### 14. FreeTierResearchPrimitive
+
+**Automated LLM free tier research and documentation**
+
+```python
+from tta_dev_primitives.research import FreeTierResearchPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+
+# Create research primitive
+researcher = FreeTierResearchPrimitive()
+
+# Research all providers
+context = WorkflowContext(workflow_id="free-tier-update")
+request = FreeTierResearchRequest(
+    providers=["openai", "anthropic", "google-gemini", "openrouter", "ollama"],
+    existing_guide_path="docs/guides/free-llm-access-guide.md",
+    output_path="docs/guides/free-llm-access-guide.md",
+    generate_changelog=True
+)
+response = await researcher.execute(request, context)
+
+# Check for changes
+if response.changelog:
+    print("Changes detected:")
+    for change in response.changelog:
+        print(f"  - {change}")
+
+# Access provider information
+for provider_name, info in response.providers.items():
+    print(f"{info.name}: {'Free' if info.has_free_tier else 'Paid'}")
+    if info.free_tier_details:
+        print(f"  └─ {info.free_tier_details}")
+```
+
+**Key Features:**
+
+- Automated provider research (OpenAI, Anthropic, Google Gemini, OpenRouter, Ollama)
+- Changelog generation (detects changes from existing guide)
+- Markdown guide generation
+- Structured provider information (rate limits, costs, expiration)
+- CLI tool for easy updates (`scripts/update-free-tiers.py`)
+
+**Provider Information Tracked:**
+
+- Free tier availability
+- Rate limits (RPM, RPD, TPM)
+- Credit card requirements
+- Expiration policies
+- Cost after free tier
+- Setup URLs and pricing URLs
+- Common confusion points
+
+**When to Use:**
+
+- Keeping free tier documentation current
+- Researching provider pricing changes
+- Generating comparison tables
+- Automating documentation updates
+
+**CLI Usage:**
+
+```bash
+# Update all providers
+uv run python scripts/update-free-tiers.py
+
+# Update specific providers
+uv run python scripts/update-free-tiers.py --providers openai ollama
+
+# Write to custom output
+uv run python scripts/update-free-tiers.py --output custom-guide.md
+
+# Disable changelog
+uv run python scripts/update-free-tiers.py --no-changelog
+```
+
+**Example:** [free_tier_research.py](packages/tta-dev-primitives/src/tta_dev_primitives/research/free_tier_research.py)
+
+---
+
+### 15. AgentHandoffPrimitive
 
 **Task handoff between agents**
 
