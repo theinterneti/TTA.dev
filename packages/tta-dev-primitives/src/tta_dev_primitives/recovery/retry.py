@@ -94,6 +94,7 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: If all retries fail
         """
+
         metrics_collector = get_enhanced_metrics_collector()
 
         # Log workflow start
@@ -114,6 +115,7 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
         total_attempts = self.strategy.max_retries + 1
 
         # Create tracer once (if tracing available)
+
         tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
         for attempt in range(total_attempts):
@@ -133,7 +135,9 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
 
             try:
                 if tracer and TRACING_AVAILABLE:
-                    with tracer.start_as_current_span(f"retry.attempt_{attempt}") as span:
+                    with tracer.start_as_current_span(
+                        f"retry.attempt_{attempt}"
+                    ) as span:
                         span.set_attribute("retry.attempt", attempt + 1)
                         span.set_attribute("retry.max_attempts", total_attempts)
                         span.set_attribute(
@@ -143,7 +147,9 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
                         try:
                             result = await self.primitive.execute(input_data, context)
                             span.set_attribute("retry.status", "success")
-                            span.set_attribute("retry.succeeded_on_attempt", attempt + 1)
+                            span.set_attribute(
+                                "retry.succeeded_on_attempt", attempt + 1
+                            )
                         except Exception as e:
                             span.set_attribute("retry.status", "error")
                             span.set_attribute("retry.error", str(e))

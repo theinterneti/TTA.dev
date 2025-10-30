@@ -79,8 +79,8 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: After running compensation
         """
-        metrics_collector = get_enhanced_metrics_collector()
 
+        metrics_collector = get_enhanced_metrics_collector()
         # Log workflow start
         logger.info(
             "saga_workflow_start",
@@ -106,13 +106,16 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
         forward_start_time = time.time()
 
         # Create forward span (if tracing available)
+
         tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
         try:
             if tracer and TRACING_AVAILABLE:
                 with tracer.start_as_current_span("saga.forward") as span:
                     span.set_attribute("saga.execution", "forward")
-                    span.set_attribute("saga.forward_type", self.forward.__class__.__name__)
+                    span.set_attribute(
+                        "saga.forward_type", self.forward.__class__.__name__
+                    )
                     span.set_attribute(
                         "saga.compensation_type", self.compensation.__class__.__name__
                     )
@@ -236,7 +239,9 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
 
                 # Compensation succeeded! Record metrics and log
                 context.checkpoint("saga.compensation.end")
-                compensation_duration_ms = (time.time() - compensation_start_time) * 1000
+                compensation_duration_ms = (
+                    time.time() - compensation_start_time
+                ) * 1000
 
                 metrics_collector.record_execution(
                     "SagaPrimitive.compensation",
@@ -275,7 +280,9 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
             except Exception as compensation_error:
                 # Compensation also failed - record metrics
                 context.checkpoint("saga.compensation.end")
-                compensation_duration_ms = (time.time() - compensation_start_time) * 1000
+                compensation_duration_ms = (
+                    time.time() - compensation_start_time
+                ) * 1000
 
                 metrics_collector.record_execution(
                     "SagaPrimitive.compensation",
