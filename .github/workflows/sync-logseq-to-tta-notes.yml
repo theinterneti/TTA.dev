@@ -1,0 +1,100 @@
+name: Sync Logseq to TTA-notes
+
+on:
+  # Run on push to main when logseq/ files change
+  push:
+    branches: [main]
+    paths:
+      - 'logseq/pages/**'
+      - 'logseq/journals/**'
+  
+  # Run on schedule (daily at 6 AM and 6 PM UTC)
+  schedule:
+    - cron: '0 6,18 * * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  sync-to-tta-notes:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout TTA.dev
+        uses: actions/checkout@v4
+        with:
+          path: TTA.dev
+          fetch-depth: 0
+      
+      - name: Checkout TTA-notes
+        uses: actions/checkout@v4
+        with:
+          repository: theinterneti/TTA-notes
+          token: ${{ secrets.TTA_NOTES_PAT }}
+          path: TTA-notes
+          fetch-depth: 0
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Sync Logseq pages to TTA-notes
+        run: |
+          # Create target directory if it doesn't exist
+          mkdir -p TTA-notes/logseq/pages/TTA.dev
+          
+          # Sync pages from TTA.dev to TTA-notes
+          rsync -av --delete \
+            --exclude='.git' \
+            --exclude='logseq.db' \
+            --exclude='*.transit' \
+            TTA.dev/logseq/pages/ \
+            TTA-notes/logseq/pages/TTA.dev/
+          
+          # Sync journals if they exist
+          if [ -d "TTA.dev/logseq/journals" ]; then
+            mkdir -p TTA-notes/logseq/journals/TTA.dev
+            rsync -av --delete \
+              --exclude='.git' \
+              --exclude='logseq.db' \
+              --exclude='*.transit' \
+              TTA.dev/logseq/journals/ \
+              TTA-notes/logseq/journals/TTA.dev/
+          fi
+      
+      - name: Commit and push to TTA-notes
+        working-directory: TTA-notes
+        run: |
+          git add logseq/
+          
+          # Check if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          # Commit with detailed message
+          COMMIT_COUNT=$(cd ../TTA.dev && git rev-list --count HEAD~1..HEAD 2>/dev/null || echo "1")
+          COMMIT_MSG=$(cd ../TTA.dev && git log -1 --pretty=%B)
+          
+          git commit -m "sync: Update TTA.dev knowledge base from source
+
+Source commit: $(cd ../TTA.dev && git rev-parse --short HEAD)
+Changes: $COMMIT_COUNT commit(s)
+
+Latest commit message:
+$COMMIT_MSG
+
+Synced by GitHub Actions"
+          
+          git push origin main
+      
+      - name: Create sync summary
+        if: success()
+        run: |
+          echo "✅ Sync completed successfully"
+          echo "Files synced from TTA.dev to TTA-notes"
+          cd TTA-notes
+          git log -1 --stat
+

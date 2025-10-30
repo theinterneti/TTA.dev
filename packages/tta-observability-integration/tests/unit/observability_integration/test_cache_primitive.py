@@ -48,10 +48,15 @@ class MockRedis:
             del self.store[key]
 
 
+# Custom MockPrimitive class to control __class__.__name__
+class TestPrimitive(MockPrimitive):
+    pass
+
+
 @pytest.fixture
 def mock_primitive():
     """Create mock primitive."""
-    return MockPrimitive("TestPrimitive", "expensive_result")
+    return TestPrimitive("TestPrimitive", "expensive_result")
 
 
 @pytest.fixture

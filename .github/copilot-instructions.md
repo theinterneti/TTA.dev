@@ -30,6 +30,8 @@ TTA.dev/
 │   ├── universal-agent-context/      # Agent context management
 │   ├── keploy-framework/             # API testing framework
 │   └── python-pathway/               # Python analysis utilities
+├── local/
+│   └── .prompts/                    # Specialized agent mode prompts (NEW!)
 ├── docs/                             # Documentation
 ├── scripts/                          # Automation scripts
 └── tests/                            # Integration tests
@@ -163,6 +165,37 @@ async def test_workflow(mock_llm):
     mock_llm.return_value = {"output": "test"}
     ...
 ```
+
+---
+
+## Prompt Library (Expert Session Templates)
+
+**NEW!** TTA.dev includes a **prompt library** - reusable prompts (not chat modes or primitives) that activate expert behaviors:
+
+📚 **Location:** [`local/.prompts/`](../local/.prompts/)
+
+**What is this?** Copy-paste prompts that transform a generic AI assistant into a specialized expert for a specific task in a new session.
+
+**Available Expert Prompts:**
+- **Logseq Documentation Expert** - Analyze and fix documentation quality
+  - Tool: `local/logseq-tools/doc_assistant.py`
+  - Quick Start: [`QUICK_START_LOGSEQ_EXPERT.md`](../QUICK_START_LOGSEQ_EXPERT.md)
+  - Full Prompt: [`local/.prompts/logseq-doc-expert.md`](../local/.prompts/logseq-doc-expert.md)
+
+**How to use:**
+1. Open a new chat session
+2. Copy the complete "Primary Prompt" from `local/.prompts/[expert-name].md`
+3. Paste to activate that expert behavior
+4. The AI assumes that specialized role for the session
+
+**Creating new expert prompts:** See [`local/.prompts/templates/prompt-template.md`](../local/.prompts/templates/prompt-template.md)
+
+**Note:** This is different from:
+
+- **Chat Modes** (`.github/chatmodes/`) - Universal-agent-context role definitions
+- **Primitives** (`packages/tta-dev-primitives/`) - Workflow building blocks
+
+**Full Integration Guide:** See [`docs/guides/prompt-library-integration-guide.md`](../docs/guides/prompt-library-integration-guide.md) for comprehensive documentation on how prompts act as Agent Primitives and orchestrate Agentic Workflows.
 
 ---
 

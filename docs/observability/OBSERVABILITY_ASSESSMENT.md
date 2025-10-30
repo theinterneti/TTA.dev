@@ -126,7 +126,7 @@ class WorkflowContext(BaseModel):
     
     workflow_id: str | None = None
     session_id: str | None = None
-    player_id: str | None = None
+player_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     state: dict[str, Any] = Field(default_factory=dict)
 ```

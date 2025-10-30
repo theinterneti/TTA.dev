@@ -16,8 +16,8 @@ from typing import Any
 import pytest
 from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
 from tta_dev_primitives.core.routing import RouterPrimitive
-from tta_dev_primitives.recovery import FallbackPrimitive, RetryPrimitive
 from tta_dev_primitives.observability.tracing import ObservablePrimitive
+from tta_dev_primitives.recovery import FallbackPrimitive, RetryPrimitive
 
 # Optional: observability integration
 try:

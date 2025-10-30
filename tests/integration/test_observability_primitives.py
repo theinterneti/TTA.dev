@@ -11,10 +11,10 @@ import time
 import pytest
 from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
 from tta_dev_primitives.observability import InstrumentedPrimitive
-from tta_dev_primitives.observability.tracing import ObservablePrimitive
 from tta_dev_primitives.observability.enhanced_collector import (
     get_enhanced_metrics_collector,
 )
+from tta_dev_primitives.observability.tracing import ObservablePrimitive
 
 # Try to import observability_integration (optional)
 try:
@@ -153,7 +153,7 @@ async def test_observable_primitive_composition():
 
     # Debug: print result to see what we got
     print(f"Result: {result}")
-    
+
     # Result should be doubled twice: 5 * 2 * 2 = 20
     # But Observable may not preserve the exact key structure
     expected_value = 20
@@ -169,9 +169,7 @@ async def test_observable_primitive_composition():
 # ============================================================================
 
 
-@pytest.mark.skipif(
-    not OBSERVABILITY_AVAILABLE, reason="observability_integration not available"
-)
+@pytest.mark.skipif(not OBSERVABILITY_AVAILABLE, reason="observability_integration not available")
 @pytest.mark.asyncio
 async def test_observability_integration_initialization():
     """Test observability integration initialization."""
@@ -179,9 +177,7 @@ async def test_observability_integration_initialization():
     assert isinstance(success, bool)
 
 
-@pytest.mark.skipif(
-    not OBSERVABILITY_AVAILABLE, reason="observability_integration not available"
-)
+@pytest.mark.skipif(not OBSERVABILITY_AVAILABLE, reason="observability_integration not available")
 @pytest.mark.asyncio
 async def test_observability_with_instrumented_primitive():
     """Test observability integration with instrumented primitives."""

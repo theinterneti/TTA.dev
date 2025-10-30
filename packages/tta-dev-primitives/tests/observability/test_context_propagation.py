@@ -116,9 +116,8 @@ async def test_workflow_context_create_child():
     parent = WorkflowContext(
         workflow_id="parent",
         session_id="session1",
-        player_id="player1",
         metadata={"key": "value"},
-        state={"count": 1},
+        state={"count": 1, "player_id": "player1"},
         trace_id="abc123",
         span_id="def456",
         correlation_id="corr123",
@@ -132,7 +131,6 @@ async def test_workflow_context_create_child():
     # Verify inheritance
     assert child.workflow_id == parent.workflow_id
     assert child.session_id == parent.session_id
-    assert child.player_id == parent.player_id
     assert child.metadata == parent.metadata
     assert child.state == parent.state
 
@@ -156,9 +154,9 @@ async def test_workflow_context_to_otel_context():
     context = WorkflowContext(
         workflow_id="wf123",
         session_id="sess456",
-        player_id="player789",
         correlation_id="corr123",
     )
+    context.state["player_id"] = "player789"
 
     # Convert to OTel attributes
     attrs = context.to_otel_context()
@@ -166,7 +164,6 @@ async def test_workflow_context_to_otel_context():
     # Verify attributes
     assert attrs["workflow.id"] == "wf123"
     assert attrs["workflow.session_id"] == "sess456"
-    assert attrs["workflow.player_id"] == "player789"
     assert attrs["workflow.correlation_id"] == "corr123"
     assert "workflow.elapsed_ms" in attrs
     assert isinstance(attrs["workflow.elapsed_ms"], float)
@@ -184,7 +181,6 @@ async def test_workflow_context_defaults():
     # Should have default values
     assert context.workflow_id is None
     assert context.session_id is None
-    assert context.player_id is None
     assert context.metadata == {}
     assert context.state == {}
     assert context.trace_flags == 1

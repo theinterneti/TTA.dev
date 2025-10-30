@@ -22,7 +22,7 @@ These are the high-level principles that guide how to work with AI tools efficie
 
 * **Write docs and comments as you go.** Don’t delay documentation.
 
-* **Implement environment variables yourself.** Don’t trust the LLM with API keys.  
+* **Implement environment variables yourself.** Don’t trust the LLM with API keys.
   [Don’t be this guy.](https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Fxi9k1v2blxpe1.jpeg)
 
 ---
@@ -33,22 +33,22 @@ Before writing any code, it’s important to have a conversation with the LLM to
 
 ### **`PLANNING.md`**
 
-* Purpose: High-level vision, architecture, constraints, tech stack, tools, etc.  
-* Prompt to AI: *“Use the structure and decisions outlined in PLANNING.md.”*  
+* Purpose: High-level vision, architecture, constraints, tech stack, tools, etc.
+* Prompt to AI: *“Use the structure and decisions outlined in PLANNING.md.”*
 * Have the LLM reference this file at the beginning of any new conversation.
 
 ### **`TASK.md`**
 
-* Purpose: Tracks current tasks, backlog, and sub-tasks.  
-* Includes: Bullet list of active work, milestones, and anything discovered mid-process.  
-* Prompt to AI: *“Update TASK.md to mark XYZ as done and add ABC as a new task.”*  
+* Purpose: Tracks current tasks, backlog, and sub-tasks.
+* Includes: Bullet list of active work, milestones, and anything discovered mid-process.
+* Prompt to AI: *“Update TASK.md to mark XYZ as done and add ABC as a new task.”*
 * Can prompt the LLM to automatically update and create tasks as well (through global rules).
 
 ---
 
 ## **3\. ⚙️ Global Rules (For AI IDEs)**
 
-Global (or project level) rules are the best way to enforce the use of the golden rules for your AI coding assistants. 
+Global (or project level) rules are the best way to enforce the use of the golden rules for your AI coding assistants.
 
 Global rules apply to all projects. Project rules apply to your current workspace. All AI IDEs support both.
 
@@ -119,22 +119,22 @@ Use the below example (for our Supabase MCP server) as a starting point to add g
 
 ---
 
-## 
+##
 
 ## **4\. 🧰 Configuring MCP**
 
 MCP enables your AI assistant to interact with services to do things like:
 
-* Use the file system (read/write, refactor, multi-file edits)  
+* Use the file system (read/write, refactor, multi-file edits)
   * [Get this server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)
 
-* Search the web (great for pulling documentation) with Brave  
+* Search the web (great for pulling documentation) with Brave
   * [Get this server](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search)
 
-* Use Git (branching, diffing, committing)  
+* Use Git (branching, diffing, committing)
   * [Get this server](https://github.com/modelcontextprotocol/servers/tree/main/src/git)
 
-* Access memory and other tools  
+* Access memory and other tools
   * For example, [connecting Qdrant](https://github.com/qdrant/mcp-server-qdrant/)
 
 **Want more MCP servers?**
@@ -167,8 +167,8 @@ This can mean a lot of different things depending on your project, but the best 
 
 There are three ways to provide examples and documentation:
 
-1. **Use the built in documentation feature with many AI IDEs.** For example, if I type “@mcp” in Windsurf and hit tab, I’ve now told Windsurf to search the MCP documentation to aid in its coding.  
-2. **Have the LLM use an MCP server like Brave** to find documentation on the internet. For example: “Search the web to find other Python MCP server implementations.”  
+1. **Use the built in documentation feature with many AI IDEs.** For example, if I type “@mcp” in Windsurf and hit tab, I’ve now told Windsurf to search the MCP documentation to aid in its coding.
+2. **Have the LLM use an MCP server like Brave** to find documentation on the internet. For example: “Search the web to find other Python MCP server implementations.”
 3. **Manually provide examples/documentation snippets** in your prompt.
 
 Example prompt to create our initial Supabase MCP server with Python:
@@ -193,7 +193,7 @@ Remember to restart conversations once they get long. You’ll know when it’s 
 
 ## **6\. 🧩 Modular Prompting Process after Initial Prompt**
 
-For any follow up fixes or changes to the project, you generally want to give just a single task at a time unless the tasks are **very** simple. It’s tempting to throw a lot at the LLM at one time, but it always yields more consistent results the more focused its changes are. 
+For any follow up fixes or changes to the project, you generally want to give just a single task at a time unless the tasks are **very** simple. It’s tempting to throw a lot at the LLM at one time, but it always yields more consistent results the more focused its changes are.
 
 **Good example:**
 
@@ -209,7 +209,7 @@ Remember to always have the LLM update `README.md,PLANNING.md`, and `TASK.md` af
 
 ---
 
-## 
+##
 
 ## **7\. ✅ Test After Every Feature**
 
@@ -219,9 +219,9 @@ Unit tests can be annoying and LLMs aren’t perfect writing them either, but tr
 
 **Best practices for testing (the LLM should know this but just in case):**
 
-- Create the tests in a tests/ directory  
-- Always “mock” calls to services like the DB and LLM so you aren’t interacting with anything “for real”.  
-- For each function, test at least one successful scenario, one intentional failure (to ensure proper error handling), and one edge case.
+* Create the tests in a tests/ directory
+* Always “mock” calls to services like the DB and LLM so you aren’t interacting with anything “for real”.
+* For each function, test at least one successful scenario, one intentional failure (to ensure proper error handling), and one edge case.
 
 ---
 
@@ -258,4 +258,3 @@ Example prompt to get this from the LLM:
 ```
 Write a Dockerfile for this MCP server using requirements.txt. Give me the commands to build the container after.
 ```
-

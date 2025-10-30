@@ -26,7 +26,6 @@ class WorkflowContext(BaseModel):
     # Core workflow identifiers
     workflow_id: str | None = None
     session_id: str | None = None
-    player_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     state: dict[str, Any] = Field(default_factory=dict)
 
@@ -91,7 +90,6 @@ class WorkflowContext(BaseModel):
         return WorkflowContext(
             workflow_id=self.workflow_id,
             session_id=self.session_id,
-            player_id=self.player_id,
             metadata=copy.deepcopy(self.metadata),
             state=copy.deepcopy(self.state),
             trace_id=self.trace_id,
@@ -124,7 +122,6 @@ class WorkflowContext(BaseModel):
         return {
             "workflow.id": self.workflow_id or "unknown",
             "workflow.session_id": self.session_id or "unknown",
-            "workflow.player_id": self.player_id or "unknown",
             "workflow.correlation_id": self.correlation_id,
             "workflow.elapsed_ms": self.elapsed_ms(),
         }

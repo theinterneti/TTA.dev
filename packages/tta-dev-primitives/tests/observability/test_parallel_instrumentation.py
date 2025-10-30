@@ -55,9 +55,7 @@ async def test_parallel_logs_workflow_start_and_completion():
 @pytest.mark.asyncio
 async def test_parallel_logs_branch_execution():
     """Verify that ParallelPrimitive logs each branch (verified via checkpoints)."""
-    workflow = ParallelPrimitive(
-        [SimplePrimitive(), CounterPrimitive(), SimplePrimitive()]
-    )
+    workflow = ParallelPrimitive([SimplePrimitive(), CounterPrimitive(), SimplePrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
 
     await workflow.execute({"key": "value"}, context)
@@ -108,12 +106,8 @@ async def test_parallel_records_branch_metrics():
     metrics_collector = get_enhanced_metrics_collector()
 
     # Get metrics for each branch
-    branch_0_metrics = metrics_collector.get_all_metrics(
-        "ParallelPrimitive.branch_0"
-    )
-    branch_1_metrics = metrics_collector.get_all_metrics(
-        "ParallelPrimitive.branch_1"
-    )
+    branch_0_metrics = metrics_collector.get_all_metrics("ParallelPrimitive.branch_0")
+    branch_1_metrics = metrics_collector.get_all_metrics("ParallelPrimitive.branch_1")
 
     # Verify branch metrics exist and have duration
     assert branch_0_metrics is not None
@@ -164,12 +158,8 @@ async def test_parallel_span_attributes():
     )
 
     metrics_collector = get_enhanced_metrics_collector()
-    branch_0_metrics = metrics_collector.get_all_metrics(
-        "ParallelPrimitive.branch_0"
-    )
-    branch_1_metrics = metrics_collector.get_all_metrics(
-        "ParallelPrimitive.branch_1"
-    )
+    branch_0_metrics = metrics_collector.get_all_metrics("ParallelPrimitive.branch_0")
+    branch_1_metrics = metrics_collector.get_all_metrics("ParallelPrimitive.branch_1")
 
     assert branch_0_metrics is not None
     assert branch_1_metrics is not None
@@ -228,9 +218,7 @@ async def test_parallel_concurrency_tracking():
     class SlowPrimitive(InstrumentedPrimitive[dict, dict]):
         """Primitive that takes time to execute."""
 
-        async def _execute_impl(
-            self, input_data: dict, context: WorkflowContext
-        ) -> dict:
+        async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
             await asyncio.sleep(0.1)
             return {**input_data, "slow": True}
 
@@ -254,4 +242,3 @@ async def test_parallel_concurrency_tracking():
     checkpoint_names = [name for name, _ in context.checkpoints]
     assert "parallel.fan_out" in checkpoint_names
     assert "parallel.fan_in" in checkpoint_names
-

@@ -47,9 +47,7 @@ class ParallelPrimitive(InstrumentedPrimitive[Any, list[Any]]):
         # Initialize InstrumentedPrimitive with name
         super().__init__(name="ParallelPrimitive")
 
-    async def _execute_impl(
-        self, input_data: Any, context: WorkflowContext
-    ) -> list[Any]:
+    async def _execute_impl(self, input_data: Any, context: WorkflowContext) -> list[Any]:
         """
         Execute primitives in parallel with branch-level instrumentation.
 
@@ -114,14 +112,10 @@ class ParallelPrimitive(InstrumentedPrimitive[Any, list[Any]]):
 
             # Create branch span (if tracing available)
             if self._tracer and TRACING_AVAILABLE:
-                with self._tracer.start_as_current_span(
-                    f"parallel.branch_{branch_idx}"
-                ) as span:
+                with self._tracer.start_as_current_span(f"parallel.branch_{branch_idx}") as span:
                     span.set_attribute("branch.index", branch_idx)
                     span.set_attribute("branch.name", branch_name)
-                    span.set_attribute(
-                        "branch.primitive_type", primitive.__class__.__name__
-                    )
+                    span.set_attribute("branch.primitive_type", primitive.__class__.__name__)
                     span.set_attribute("branch.total_branches", len(self.primitives))
 
                     try:

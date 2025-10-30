@@ -1,0 +1,122 @@
+name: Sync from TTA-notes
+
+on:
+  # Trigger from TTA-notes repository via repository_dispatch
+  repository_dispatch:
+    types: [sync-to-tta-dev]
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  sync-from-tta-notes:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout TTA.dev
+        uses: actions/checkout@v4
+        with:
+          path: TTA.dev
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Checkout TTA-notes
+        uses: actions/checkout@v4
+        with:
+          repository: theinterneti/TTA-notes
+          token: ${{ secrets.TTA_NOTES_PAT }}
+          path: TTA-notes
+          fetch-depth: 0
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Sync TTA.dev pages from TTA-notes
+        run: |
+          # Sync pages from TTA-notes back to TTA.dev
+          rsync -av --delete \
+            --exclude='.git' \
+            --exclude='logseq.db' \
+            --exclude='*.transit' \
+            TTA-notes/logseq/pages/TTA.dev/ \
+            TTA.dev/logseq/pages/
+          
+          # Sync journals if they exist
+          if [ -d "TTA-notes/logseq/journals/TTA.dev" ]; then
+            rsync -av --delete \
+              --exclude='.git' \
+              --exclude='logseq.db' \
+              --exclude='*.transit' \
+              TTA-notes/logseq/journals/TTA.dev/ \
+              TTA.dev/logseq/journals/
+          fi
+      
+      - name: Create Pull Request
+        working-directory: TTA.dev
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if there are changes
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          # Create a new branch for the sync
+          BRANCH_NAME="sync/logseq-from-tta-notes-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH_NAME"
+          
+          # Stage and commit changes
+          git add logseq/
+          
+          COMMIT_MSG=$(cd ../TTA-notes && git log -1 --pretty=%B)
+          
+          git commit -m "docs(logseq): Sync updates from TTA-notes
+
+Source commit: $(cd ../TTA-notes && git rev-parse --short HEAD)
+
+Latest TTA-notes commit message:
+$COMMIT_MSG
+
+Synced by GitHub Actions"
+          
+          # Push the branch
+          git push origin "$BRANCH_NAME"
+          
+          # Create pull request
+          gh pr create \
+            --title "docs(logseq): Sync updates from TTA-notes" \
+            --body "## 🔄 Logseq Sync from TTA-notes
+
+This PR contains Logseq documentation updates synced from the TTA-notes repository.
+
+### Source
+- **Repository:** TTA-notes
+- **Commit:** \`$(cd ../TTA-notes && git rev-parse --short HEAD)\`
+
+### Changes
+\`\`\`
+$(git diff --stat HEAD~1)
+\`\`\`
+
+### Latest TTA-notes Commit
+$COMMIT_MSG
+
+---
+
+**Automated sync by GitHub Actions**
+" \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --label "documentation" \
+            --label "automated"
+      
+      - name: Create sync summary
+        if: success()
+        run: |
+          echo "✅ Sync completed successfully"
+          echo "Changes synced from TTA-notes to TTA.dev"
+          echo "Pull request created for review"
+

@@ -122,12 +122,8 @@ async def test_conditional_records_branch_metrics():
     metrics_collector = get_enhanced_metrics_collector()
 
     # Get metrics for 'then' branch
-    then_metrics = metrics_collector.get_all_metrics(
-        "ConditionalPrimitive.branch_then"
-    )
-    condition_metrics = metrics_collector.get_all_metrics(
-        "ConditionalPrimitive.condition_eval"
-    )
+    then_metrics = metrics_collector.get_all_metrics("ConditionalPrimitive.branch_then")
+    condition_metrics = metrics_collector.get_all_metrics("ConditionalPrimitive.condition_eval")
 
     # Verify metrics exist
     assert then_metrics is not None
@@ -179,9 +175,7 @@ async def test_conditional_span_attributes():
     )
 
     metrics_collector = get_enhanced_metrics_collector()
-    then_metrics = metrics_collector.get_all_metrics(
-        "ConditionalPrimitive.branch_then"
-    )
+    then_metrics = metrics_collector.get_all_metrics("ConditionalPrimitive.branch_then")
 
     assert then_metrics is not None
 
@@ -279,4 +273,3 @@ async def test_conditional_condition_error_handling():
     # Verify condition evaluation was attempted
     checkpoint_names = [name for name, _ in context.checkpoints]
     assert "conditional.condition_eval.start" in checkpoint_names
-

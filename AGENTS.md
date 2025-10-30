@@ -16,6 +16,33 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 - **Built-in observability** with OpenTelemetry integration
 - **Multi-package monorepo** with focused, reusable components
 
+### 🆕 Prompt Library (Expert Session Templates)
+
+**NEW!** Copy-paste prompts to activate expert behaviors in new chat sessions:
+
+📚 **Location:** [`local/.prompts/`](local/.prompts/)
+
+**What is this?** Reusable prompts (not chat modes or primitives) that transform a generic AI assistant into a specialized expert for specific tasks.
+
+**Available Prompts:**
+- **Logseq Documentation Expert** - Analyze and fix documentation quality ([quick start](QUICK_START_LOGSEQ_EXPERT.md))
+- **More coming** - Template available for creating new expert prompts
+
+**How to use:**
+
+1. Open a new chat session with your AI assistant
+2. Copy the full prompt from `local/.prompts/[expert-name].md`
+3. Paste to activate that expert behavior
+4. The AI will assume that specialized role for the session
+
+**Full documentation:**
+
+- Quick start: [`QUICK_START_LOGSEQ_EXPERT.md`](QUICK_START_LOGSEQ_EXPERT.md)
+- Library overview: [`local/.prompts/README.md`](local/.prompts/README.md)
+- Integration guide: [`docs/guides/prompt-library-integration-guide.md`](docs/guides/prompt-library-integration-guide.md)
+
+---
+
 ### Repository Structure
 
 ```
@@ -490,23 +517,32 @@ When making decisions, prioritize:
 
 ## 🔗 Quick Links
 
-- **GitHub Repository:** https://github.com/theinterneti/TTA.dev
-- **Issues:** https://github.com/theinterneti/TTA.dev/issues
-- **Pull Requests:** https://github.com/theinterneti/TTA.dev/pulls
-- **CI/CD:** https://github.com/theinterneti/TTA.dev/actions
+### Core Documentation
+- **Main Agent Hub:** This file (AGENTS.md)
+- **Prompt Library:** [`local/.prompts/README.md`](local/.prompts/README.md)
+- **Logseq Expert Mode:** [`QUICK_START_LOGSEQ_EXPERT.md`](QUICK_START_LOGSEQ_EXPERT.md)
+- **Getting Started:** [`GETTING_STARTED.md`](GETTING_STARTED.md)
+- **Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](PRIMITIVES_CATALOG.md)
+
+### GitHub
+- **Repository:** <https://github.com/theinterneti/TTA.dev>
+- **Issues:** <https://github.com/theinterneti/TTA.dev/issues>
+- **Pull Requests:** <https://github.com/theinterneti/TTA.dev/pulls>
+- **CI/CD:** <https://github.com/theinterneti/TTA.dev/actions>
 
 ---
 
 ## 📞 Getting Help
 
-1. **Check package AGENTS.md** - Most specific guidance
-2. **Review examples** - Working code in `examples/`
-3. **Search documentation** - `docs/` directory
-4. **Check Copilot toolsets** - `.vscode/copilot-toolsets.jsonc`
-5. **Open an issue** - For bugs or feature requests
+1. **Use specialized agent modes** - See [`local/.prompts/`](local/.prompts/) for expert modes
+2. **Check package AGENTS.md** - Most specific guidance
+3. **Review examples** - Working code in `examples/`
+4. **Search documentation** - `docs/` directory
+5. **Check Copilot toolsets** - `.vscode/copilot-toolsets.jsonc`
+6. **Open an issue** - For bugs or feature requests
 
 ---
 
-**Last Updated:** October 29, 2025
+**Last Updated:** October 30, 2025
 **Maintained by:** TTA.dev Team
 **License:** See individual package licenses
