@@ -19,6 +19,7 @@ defaults:
 jobs:
   invoke:
     runs-on: 'ubuntu-latest'
+    timeout-minutes: 15  # Prevent runaway executions (Karl Stoney's production: 3-5 min for PR reviews)
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -63,12 +64,35 @@ jobs:
           use_vertex_ai: '${{ vars.GOOGLE_GENAI_USE_VERTEXAI }}'
           settings: |-
             {
+              "general": {
+                "disableAutoUpdate": true
+              },
+              "ui": {
+                "hideTips": true,
+                "hideFooter": true
+              },
               "model": {
                 "maxSessionTurns": 25
               },
               "telemetry": {
                 "enabled": ${{ vars.GOOGLE_CLOUD_PROJECT != '' }},
                 "target": "gcp"
+              },
+              "tools": {
+                "autoAccept": true,
+                "core": [
+                  "run_shell_command(cat)",
+                  "run_shell_command(echo)",
+                  "run_shell_command(grep)",
+                  "run_shell_command(head)",
+                  "run_shell_command(tail)"
+                ]
+              },
+              "security": {
+                "folderTrust": {
+                  "featureEnabled": false,
+                  "enabled": true
+                }
               },
               "mcpServers": {
                 "github": {
@@ -105,15 +129,6 @@ jobs:
                     "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
                   }
                 }
-              },
-              "tools": {
-                "core": [
-                  "run_shell_command(cat)",
-                  "run_shell_command(echo)",
-                  "run_shell_command(grep)",
-                  "run_shell_command(head)",
-                  "run_shell_command(tail)"
-                ]
               }
             }
           prompt: |-
@@ -237,4 +252,3 @@ jobs:
 
                   My work on this issue is now complete.
                   ```
-
