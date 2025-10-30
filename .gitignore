@@ -150,3 +150,8 @@ checkpoints/
 artifacts/
 .artifacts/
 uv-x86_64-unknown-linux-gnu/
+
+# === Logseq Knowledge Base ===
+# Private project notes and knowledge management
+# This folder should be synced via a separate private repo (e.g., TTA-notes)
+logseq/
