@@ -7,14 +7,15 @@ and interacting with the server's tools and resources.
 """
 
 import asyncio
-import sys
 import os
+import sys
 
 # Add the parent directory to the path so we can import the MCP modules
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 # Import the server modules for testing
 from examples.mcp.basic_server import mcp as basic_server
+
 
 async def simulate_user_interaction():
     """Simulate a user interacting with the basic MCP server."""
@@ -65,6 +66,7 @@ async def simulate_user_interaction():
     print(f"System info resource:\n{sys_text}")
 
     print("Simulated user test completed successfully!")
+
 
 if __name__ == "__main__":
     asyncio.run(simulate_user_interaction())

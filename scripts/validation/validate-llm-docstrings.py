@@ -111,9 +111,7 @@ def validate_docstring_with_llm(
                 },
                 {
                     "role": "user",
-                    "content": VALIDATION_PROMPT.format(
-                        signature=signature, docstring=docstring
-                    ),
+                    "content": VALIDATION_PROMPT.format(signature=signature, docstring=docstring),
                 },
             ],
             temperature=0.0,
@@ -182,14 +180,18 @@ def main() -> int:
         for func_name, signature, docstring in functions:
             total_functions += 1
 
-            result = validate_docstring_with_llm(
-                client, func_name, signature, docstring
-            )
+            result = validate_docstring_with_llm(client, func_name, signature, docstring)
 
             recommendation = result.get("recommendation", "Unknown")
             score = result.get("overall_score", 0)
 
-            icon = "✅" if recommendation == "Pass" else "⚠️" if recommendation == "Needs Improvement" else "❌"
+            icon = (
+                "✅"
+                if recommendation == "Pass"
+                else "⚠️"
+                if recommendation == "Needs Improvement"
+                else "❌"
+            )
 
             print(f"  {icon} {func_name} - {score}/10 ({recommendation})")
 
@@ -214,9 +216,7 @@ def main() -> int:
         print("\n❌ Validation failed - some docstrings need improvement")
         return 1
     elif needs_improvement > 0:
-        print(
-            "\n⚠️  Validation passed with warnings - consider improving docstrings"
-        )
+        print("\n⚠️  Validation passed with warnings - consider improving docstrings")
         return 0
     else:
         print("\n✅ All docstrings are LLM-friendly!")

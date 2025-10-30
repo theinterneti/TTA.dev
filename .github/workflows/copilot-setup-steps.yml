@@ -1,0 +1,85 @@
+name: "Copilot Setup Steps"
+
+# This workflow customizes the GitHub Copilot coding agent's ephemeral development environment.
+# It pre-installs dependencies and tools so the agent can immediately run tests, linters, and type checkers.
+#
+# Key Benefits:
+# - 4-6x faster agent setup (cached dependencies)
+# - No uv vs pip confusion (explicitly uses uv)
+# - Consistent environment matching CI
+# - Agent can run full test suite and quality checks
+#
+# References:
+# - https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/customize-the-agent-environment
+# - See AGENTS.md for agent guidance documentation
+
+on:
+  # Allow manual testing from Actions tab
+  workflow_dispatch:
+
+  # Auto-test when this file changes (ensures it stays working)
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # MUST be named 'copilot-setup-steps' for GitHub Copilot to recognize it
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # Maximum allowed is 59 minutes
+
+    permissions:
+      # Minimal permissions - just enough to clone the repo
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Add uv to PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: copilot-uv-${{ runner.os }}-${{ hashFiles('uv.lock', 'pyproject.toml', 'packages/*/pyproject.toml') }}
+          restore-keys: |
+            copilot-uv-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Verify installation
+        run: |
+          echo "=== Verifying Python environment ==="
+          uv run python --version
+
+          echo ""
+          echo "=== Verifying test tools ==="
+          uv run pytest --version
+
+          echo ""
+          echo "=== Verifying code quality tools ==="
+          uv run ruff --version
+
+          echo ""
+          echo "=== Verifying installed packages ==="
+          uv pip list | head -20
+
+          echo ""
+          echo "✅ Environment setup complete! Agent can now run tests and linters."

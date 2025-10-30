@@ -1,0 +1,30 @@
+# Prometheus configuration for TTA.dev integration tests
+
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    environment: 'integration-test'
+    service: 'tta-dev-primitives'
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # OpenTelemetry Collector metrics
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8888', 'otel-collector:8889']
+
+  # TTA.dev primitives metrics (exposed by test application)
+  # This will scrape metrics from the test application running on host
+  - job_name: 'tta-primitives'
+    static_configs:
+      - targets: ['host.docker.internal:9464']
+    scrape_interval: 2s
+    scrape_timeout: 1s
+    metrics_path: '/metrics'
+
