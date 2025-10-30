@@ -146,7 +146,7 @@ async def main():
     # Create primitive (uses GPT-4o-mini by default)
     llm = OpenAIPrimitive(api_key=os.getenv("OPENAI_API_KEY"))
     context = WorkflowContext(workflow_id="chatbot")
-    
+
     # Send message
     request = OpenAIRequest(
         messages=[
@@ -155,7 +155,7 @@ async def main():
         ],
         temperature=0.7
     )
-    
+
     response = await llm.execute(request, context)
     print(f"Assistant: {response.content}")
 
@@ -163,8 +163,8 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-**Cost:** ~$0.0001 per request (GPT-4o-mini)  
-**Speed:** ~1-2 seconds  
+**Cost:** ~$0.0001 per request (GPT-4o-mini)
+**Speed:** ~1-2 seconds
 **Quality:** ⭐⭐⭐⭐⭐
 
 ---
@@ -183,11 +183,11 @@ async def main():
     # Create primitive (uses Claude 3.5 Sonnet)
     llm = AnthropicPrimitive(api_key=os.getenv("ANTHROPIC_API_KEY"))
     context = WorkflowContext(workflow_id="doc-analysis")
-    
+
     # Analyze long document (up to 200K tokens)
     with open("long_document.txt") as f:
         document = f.read()
-    
+
     request = AnthropicRequest(
         messages=[
             {"role": "user", "content": f"Summarize this document:\n\n{document}"}
@@ -195,7 +195,7 @@ async def main():
         system="You are a technical document analyst.",
         max_tokens=1000
     )
-    
+
     response = await llm.execute(request, context)
     print(f"Summary: {response.content}")
 
@@ -203,9 +203,9 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-**Cost:** ~$0.003 per request (Claude 3.5 Sonnet)  
-**Speed:** ~2-3 seconds  
-**Quality:** ⭐⭐⭐⭐⭐  
+**Cost:** ~$0.003 per request (Claude 3.5 Sonnet)
+**Speed:** ~2-3 seconds
+**Quality:** ⭐⭐⭐⭐⭐
 **Context:** Up to 200K tokens
 
 ---
@@ -223,7 +223,7 @@ async def main():
     # Create primitive (runs locally, no API key needed)
     llm = OllamaPrimitive(model="llama3.2")
     context = WorkflowContext(workflow_id="private-chat")
-    
+
     # Send message (data never leaves your machine)
     request = OllamaRequest(
         messages=[
@@ -231,7 +231,7 @@ async def main():
         ],
         temperature=0.7
     )
-    
+
     response = await llm.execute(request, context)
     print(f"Assistant: {response.content}")
 
@@ -239,9 +239,9 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-**Cost:** $0 (free)  
-**Speed:** ~5-10 seconds (depends on GPU)  
-**Quality:** ⭐⭐⭐⭐  
+**Cost:** $0 (free)
+**Speed:** ~5-10 seconds (depends on GPU)
+**Quality:** ⭐⭐⭐⭐
 **Privacy:** ✅ 100% local
 
 ---
@@ -334,14 +334,20 @@ def select_route(task):
 
 ## 📚 Related Documentation
 
+### Cost Optimization
+- **💰 LLM Cost Guide:** [llm-cost-guide.md](llm-cost-guide.md) - Free vs paid model comparison, cost analysis
+- **🎯 Cost Optimization Patterns:** [cost-optimization-patterns.md](cost-optimization-patterns.md) - Production patterns for reducing LLM costs (30-70% savings)
+
+### Implementation
 - **OpenAIPrimitive API:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
 - **AnthropicPrimitive API:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
 - **OllamaPrimitive API:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
 - **RouterPrimitive:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md#routerprimitive)
+- **CachePrimitive:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md#cacheprimitive)
+- **FallbackPrimitive:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md#fallbackprimitive)
 
 ---
 
-**Last Updated:** October 30, 2025  
-**For:** AI Agents & Developers (all skill levels)  
+**Last Updated:** October 30, 2025
+**For:** AI Agents & Developers (all skill levels)
 **Maintained by:** TTA.dev Team
-

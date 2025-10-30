@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI tool for updating the Free LLM Access Guide.
+"""CLI tool for updating the LLM Cost Guide.
 
 This script uses FreeTierResearchPrimitive to automatically research
 current free tier information and update the guide.
@@ -30,7 +30,7 @@ from tta_dev_primitives.research import (
 async def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
-        description="Update the Free LLM Access Guide with current provider information"
+        description="Update the LLM Cost Guide with current provider information"
     )
     parser.add_argument(
         "--providers",
@@ -40,7 +40,7 @@ async def main():
     )
     parser.add_argument(
         "--existing-guide",
-        default="docs/guides/free-llm-access-guide.md",
+        default="docs/guides/llm-cost-guide.md",
         help="Path to existing guide for comparison",
     )
     parser.add_argument(
