@@ -25,8 +25,8 @@
 
 ## ADR-001: Monorepo Structure with Focused Packages
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-15  
+**Status:** ✅ Accepted
+**Date:** 2024-03-15
 **Deciders:** Core Team
 
 ### Context
@@ -94,8 +94,8 @@ TTA.dev/
 
 ## ADR-002: WorkflowPrimitive as Base Abstraction
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-16  
+**Status:** ✅ Accepted
+**Date:** 2024-03-16
 **Deciders:** Core Team
 
 ### Context
@@ -118,20 +118,20 @@ We needed a common abstraction for composable workflow components that:
 ```python
 class WorkflowPrimitive(ABC, Generic[TInput, TOutput]):
     """Base class for all workflow primitives."""
-    
+
     async def execute(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         """Public interface for execution."""
         # Observability hooks
         return await self._execute_impl(context, input_data)
-    
+
     @abstractmethod
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         """Subclasses implement this."""
@@ -171,8 +171,8 @@ class WorkflowPrimitive(ABC, Generic[TInput, TOutput]):
 
 ## ADR-003: Two-Package Observability Architecture
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-18  
+**Status:** ✅ Accepted
+**Date:** 2024-03-18
 **Deciders:** Core Team
 
 ### Context
@@ -235,8 +235,8 @@ We needed observability (tracing, metrics, logging) across all primitives, but:
 
 ## ADR-004: Operator Overloading for Composition
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-16  
+**Status:** ✅ Accepted
+**Date:** 2024-03-16
 **Deciders:** Core Team
 
 ### Context
@@ -276,7 +276,7 @@ class WorkflowPrimitive:
     def __rshift__(self, other):
         """>> operator for sequential composition."""
         return SequentialPrimitive([self, other])
-    
+
     def __or__(self, other):
         """| operator for parallel composition."""
         return ParallelPrimitive([self, other])
@@ -315,8 +315,8 @@ class WorkflowPrimitive:
 
 ## ADR-005: UV Package Manager over pip
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-15  
+**Status:** ✅ Accepted
+**Date:** 2024-03-15
 **Deciders:** Core Team
 
 ### Context
@@ -381,8 +381,8 @@ uv run python script.py
 
 ## ADR-006: Python 3.11+ Modern Type Hints
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-15  
+**Status:** ✅ Accepted
+**Date:** 2024-03-15
 **Deciders:** Core Team
 
 ### Context
@@ -441,8 +441,8 @@ def process(data: Optional[str]) -> Dict[str, Any]:
 
 ## ADR-007: OpenTelemetry for Observability
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-18  
+**Status:** ✅ Accepted
+**Date:** 2024-03-18
 **Deciders:** Core Team
 
 ### Context
@@ -508,8 +508,8 @@ async def my_operation():
 
 ## ADR-008: Graceful Degradation Pattern
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-19  
+**Status:** ✅ Accepted
+**Date:** 2024-03-19
 **Deciders:** Core Team
 
 ### Context
@@ -581,8 +581,8 @@ if not success:
 
 ## ADR-009: WorkflowContext for State Management
 
-**Status:** ✅ Accepted  
-**Date:** 2024-03-16  
+**Status:** ✅ Accepted
+**Date:** 2024-03-16
 **Deciders:** Core Team
 
 ### Context
@@ -651,8 +651,8 @@ result = await workflow.execute(context, input_data)
 
 ## ADR-010: GitHub Copilot Toolsets Strategy
 
-**Status:** ✅ Accepted  
-**Date:** 2024-10-28  
+**Status:** ✅ Accepted
+**Date:** 2024-10-28
 **Deciders:** Core Team
 
 ### Context
@@ -724,8 +724,8 @@ Use this template for new ADRs:
 ```markdown
 ## ADR-XXX: [Title]
 
-**Status:** 🚧 Proposed / ✅ Accepted / ❌ Rejected / ⚠️ Deprecated  
-**Date:** YYYY-MM-DD  
+**Status:** 🚧 Proposed / ✅ Accepted / ❌ Rejected / ⚠️ Deprecated
+**Date:** YYYY-MM-DD
 **Deciders:** [Names/Roles]
 
 ### Context

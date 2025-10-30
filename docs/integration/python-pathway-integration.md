@@ -123,13 +123,13 @@ from python_pathway import PathwayConfig
 config = PathwayConfig(
     # Workspace root
     root_path="/home/thein/repos/TTA.dev",
-    
+
     # Python paths
     python_paths=[
         "packages/tta-dev-primitives/src",
         "packages/tta-observability-integration/src",
     ],
-    
+
     # Exclusions
     exclude_patterns=[
         "**/__pycache__",
@@ -137,7 +137,7 @@ config = PathwayConfig(
         "**/node_modules",
         "**/.venv",
     ],
-    
+
     # Analysis options
     analyze_imports=True,
     analyze_complexity=True,
@@ -412,17 +412,17 @@ import sys
 def check_quality():
     pm = PathManager(root=".")
     analyzer = QualityAnalyzer()
-    
+
     # Get changed files
     changed_files = pm.get_changed_files()
-    
+
     # Analyze quality
     issues = []
     for file_path in changed_files:
         if file_path.endswith(".py"):
             result = analyzer.analyze_file(file_path)
             issues.extend(result.errors)
-    
+
     if issues:
         print(f"❌ {len(issues)} quality issues found:")
         for issue in issues[:10]:
@@ -443,19 +443,19 @@ from python_pathway import DependencyAnalyzer
 
 def validate_dependencies():
     analyzer = DependencyAnalyzer()
-    
+
     # Analyze all packages
     packages = [
         "packages/tta-dev-primitives",
         "packages/tta-observability-integration",
         "packages/universal-agent-context",
     ]
-    
+
     all_valid = True
-    
+
     for package_path in packages:
         graph = analyzer.analyze_package(package_path)
-        
+
         # Check for circular dependencies
         circular = graph.find_circular_dependencies()
         if circular:
@@ -463,13 +463,13 @@ def validate_dependencies():
             for cycle in circular:
                 print(f"  - {' → '.join(cycle)}")
             all_valid = False
-        
+
         # Check for external dependencies
         external = graph.get_external_dependencies()
         print(f"\n{package_path} external dependencies:")
         for dep in external:
             print(f"  - {dep}")
-    
+
     if all_valid:
         print("\n✅ All dependencies valid")
     else:
@@ -489,45 +489,45 @@ from pathlib import Path
 def generate_docs():
     struct_analyzer = StructureAnalyzer()
     mod_analyzer = ModuleAnalyzer()
-    
+
     # Analyze package
     package = struct_analyzer.analyze_package("packages/tta-dev-primitives")
-    
+
     # Generate documentation
     docs_dir = Path("docs/api")
     docs_dir.mkdir(exist_ok=True)
-    
+
     # Package overview
     with open(docs_dir / "overview.md", "w") as f:
         f.write(f"# {package.name}\n\n")
         f.write(f"Version: {package.version}\n")
         f.write(f"Modules: {len(package.modules)}\n\n")
-        
+
         f.write("## Modules\n\n")
         for module in package.modules:
             f.write(f"- [{module.name}]({module.name}.md)\n")
-    
+
     # Module documentation
     for module in package.modules:
         analysis = mod_analyzer.analyze_module(module.file_path)
-        
+
         with open(docs_dir / f"{module.name}.md", "w") as f:
             f.write(f"# {module.name}\n\n")
-            
+
             # Classes
             f.write("## Classes\n\n")
             for cls in analysis.classes:
                 f.write(f"### {cls.name}\n\n")
                 if cls.docstring:
                     f.write(f"{cls.docstring}\n\n")
-                
+
                 # Methods
                 if cls.methods:
                     f.write("#### Methods\n\n")
                     for method in cls.methods:
                         f.write(f"- `{method.name}`: {method.docstring or 'No description'}\n")
                 f.write("\n")
-            
+
             # Functions
             f.write("## Functions\n\n")
             for func in analysis.functions:
@@ -535,7 +535,7 @@ def generate_docs():
                 if func.docstring:
                     f.write(f"{func.docstring}\n\n")
                 f.write(f"Parameters: {', '.join(func.parameters)}\n\n")
-    
+
     print(f"✅ Documentation generated in {docs_dir}")
 
 if __name__ == "__main__":
@@ -554,7 +554,7 @@ if __name__ == "__main__":
    # ✅ Good - explicit
    pm = PathManager(root="/home/thein/repos/TTA.dev")
    path = pm.resolve("packages/tta-dev-primitives/src")
-   
+
    # ❌ Bad - ambiguous
    path = "packages/tta-dev-primitives/src"
    ```
@@ -573,7 +573,7 @@ if __name__ == "__main__":
 
    ```python
    from pathlib import Path
-   
+
    # Preferred
    path = Path("/home/thein/repos/TTA.dev")
    file_path = path / "packages" / "tta-dev-primitives" / "src"
@@ -620,12 +620,12 @@ if __name__ == "__main__":
    ```python
    from python_pathway import ModuleAnalyzer
    import asyncio
-   
+
    async def analyze_files(file_paths):
        analyzer = ModuleAnalyzer()
        tasks = [analyzer.analyze_async(path) for path in file_paths]
        return await asyncio.gather(*tasks)
-   
+
    # Analyze files in parallel
    results = asyncio.run(analyze_files(python_files))
    ```
@@ -636,7 +636,7 @@ if __name__ == "__main__":
    # Only analyze changed files
    pm = PathManager(root=".")
    changed = pm.get_changed_files()
-   
+
    analyzer = ModuleAnalyzer()
    for file_path in changed:
        if file_path.endswith(".py"):
@@ -757,7 +757,7 @@ class PathManager:
         root: str | Path,
         python_paths: list[str] | None = None,
     ): ...
-    
+
     def resolve(self, path: str | Path) -> Path: ...
     def relative_to(self, path: str | Path, base: str | Path) -> Path: ...
     def exists(self, path: str | Path) -> bool: ...
@@ -777,7 +777,7 @@ class ModuleAnalyzer:
         python_version: str = "3.11",
         cache_dir: str | Path | None = None,
     ): ...
-    
+
     def analyze_imports(self, file_path: str | Path) -> ImportAnalysis: ...
     def analyze_module(self, file_path: str | Path) -> ModuleAnalysis: ...
     async def analyze_async(self, file_path: str | Path) -> ModuleAnalysis: ...
@@ -791,17 +791,17 @@ class DependencyAnalyzer:
         self,
         exclude_external: bool = False,
     ): ...
-    
+
     def analyze_package(self, package_path: str | Path) -> DependencyGraph: ...
     def analyze_workspace(self, root: str | Path) -> DependencyGraph: ...
 
 class DependencyGraph:
     @property
     def nodes(self) -> list[str]: ...
-    
+
     @property
     def edges(self) -> list[tuple[str, str]]: ...
-    
+
     def find_circular_dependencies(self) -> list[list[str]]: ...
     def get_most_imported(self, limit: int = 10) -> list[tuple[str, int]]: ...
     def export_dot(self, output: str | Path) -> None: ...
@@ -816,7 +816,7 @@ class QualityAnalyzer:
         self,
         exclude_patterns: list[str] | None = None,
     ): ...
-    
+
     def analyze_file(self, file_path: str | Path) -> QualityResult: ...
     def analyze_package(self, package_path: str | Path) -> QualityResult: ...
     def generate_report(

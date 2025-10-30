@@ -123,23 +123,23 @@ from keploy_framework import KeployConfig
 config = KeployConfig(
     # Mode: "record", "replay", or "mock"
     mode="record",
-    
+
     # Storage location
     test_dir="tests/keploy",
-    
+
     # Recording options
     record_config={
         "capture_headers": True,
         "capture_body": True,
         "filter_patterns": ["*/health"],
     },
-    
+
     # Replay options
     replay_config={
         "strict_matching": True,
         "ignore_fields": ["timestamp", "request_id"],
     },
-    
+
     # Mock options
     mock_config={
         "fallback_mode": "error",  # or "passthrough"
@@ -165,7 +165,7 @@ from keploy_framework import KeployConfig, FilterConfig
 config = KeployConfig(
     mode="record",
     test_dir="tests/keploy",
-    
+
     # Advanced filtering
     filter_config=FilterConfig(
         include_paths=["*/api/*"],
@@ -173,14 +173,14 @@ config = KeployConfig(
         include_methods=["GET", "POST", "PUT"],
         exclude_headers=["Authorization", "Cookie"],
     ),
-    
+
     # Coverage tracking
     coverage_config={
         "enabled": True,
         "output_dir": "coverage/keploy",
         "formats": ["json", "html"],
     },
-    
+
     # Performance
     performance_config={
         "max_test_size": "10MB",
@@ -213,7 +213,7 @@ async with recorder.wrap_client(httpx.AsyncClient()) as client:
     # Make API calls - they'll be recorded
     response = await client.get("https://api.example.com/users")
     print(f"Recorded: GET /users")
-    
+
     response = await client.post(
         "https://api.example.com/users",
         json={"name": "Alice", "email": "alice@example.com"}
@@ -378,10 +378,10 @@ replayer = KeployReplayer(test_dir="tests/workflows")
 async with replayer.replay_mode():
     context = WorkflowContext(data={"test": "workflow_replay"})
     results = await workflow.execute(context, {"input": "data"})
-    
+
     # Validate against recorded expectations
     validation = await replayer.validate_results(results)
-    
+
     if validation.passed:
         print("✅ Workflow tests passed")
     else:
@@ -402,15 +402,15 @@ from keploy_framework import KeployRecorder, KeployReplayer
 async def test_api_workflow():
     # 1. Record phase
     recorder = KeployRecorder(test_dir="tests/keploy/workflow")
-    
+
     async with recorder.record_session() as session:
         # Execute workflow
         await execute_api_workflow(session.client)
-    
+
     # 2. Replay phase
     replayer = KeployReplayer(test_dir="tests/keploy/workflow")
     results = await replayer.replay_all()
-    
+
     # 3. Validate
     assert results.passed == results.total
     assert results.failed == 0
@@ -507,7 +507,7 @@ print(f"Missing coverage for: {uncovered}")
    replayer = KeployReplayer(
        replay_config={"strict_matching": True}
    )
-   
+
    # Relaxed for exploratory tests
    replayer = KeployReplayer(
        replay_config={
@@ -521,7 +521,7 @@ print(f"Missing coverage for: {uncovered}")
 
    ```python
    results = await replayer.replay_all()
-   
+
    if results.failed > 0:
        # Generate detailed report
        report = await replayer.generate_report(
@@ -541,7 +541,7 @@ print(f"Missing coverage for: {uncovered}")
        mock_dir="tests/mocks",
        fallback_mode="error"
    )
-   
+
    # Passthrough in development
    server = MockServer(
        mock_dir="tests/mocks",
@@ -557,7 +557,7 @@ print(f"Missing coverage for: {uncovered}")
    outdated = await validator.find_outdated_mocks(
        max_age_days=30
    )
-   
+
    if outdated:
        print(f"⚠️  {len(outdated)} mocks need updating")
    ```
@@ -677,15 +677,15 @@ config = KeployConfig(
     performance_config={
         # Async writes
         "async_writes": True,
-        
+
         # Compression
         "compression": True,
         "compression_level": 6,
-        
+
         # Batching
         "batch_size": 100,
         "flush_interval": 5.0,
-        
+
         # Size limits
         "max_test_size": "10MB",
         "truncate_large_bodies": True,
@@ -702,11 +702,11 @@ replayer = KeployReplayer(
         # Parallel execution
         "parallel": True,
         "max_workers": 4,
-        
+
         # Caching
         "cache_tests": True,
         "cache_mocks": True,
-        
+
         # Fast comparison
         "quick_compare": True,
     }
@@ -729,14 +729,14 @@ class KeployRecorder:
         test_dir: str = "tests/keploy",
         config: KeployConfig | None = None,
     ): ...
-    
+
     def wrap_client(self, client: httpx.AsyncClient) -> AsyncContextManager: ...
-    
+
     async def record_session(
         self,
         context: WorkflowContext | None = None
     ) -> RecordSession: ...
-    
+
     @property
     def test_count(self) -> int: ...
 ```
@@ -751,14 +751,14 @@ class KeployReplayer:
         test_dir: str = "tests/keploy",
         config: KeployConfig | None = None,
     ): ...
-    
+
     async def replay_all(self) -> ReplayResults: ...
-    
+
     async def replay_filtered(
         self,
         filter: TestFilter
     ) -> ReplayResults: ...
-    
+
     async def generate_report(
         self,
         output: str,
@@ -776,9 +776,9 @@ class MockServer:
         port: int = 8080,
         fallback_mode: str = "error",
     ): ...
-    
+
     async def run(self) -> AsyncContextManager: ...
-    
+
     @property
     def url(self) -> str: ...
 ```

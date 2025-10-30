@@ -172,25 +172,25 @@ config = ObservabilityConfig(
     service_name="my-tta-app",
     service_version="1.0.0",
     environment="production",
-    
+
     # OpenTelemetry
     otlp_endpoint="http://localhost:4317",  # Optional: OTLP exporter
     enable_console_exporter=False,  # Debug mode
-    
+
     # Prometheus
     enable_prometheus=True,
     prometheus_port=9464,
     prometheus_endpoint="/metrics",
-    
+
     # Tracing
     trace_sample_rate=1.0,  # 100% sampling
     trace_parent_based=True,
-    
+
     # Logging
     log_level="INFO",
     structured_logging=True,
     log_correlation=True,
-    
+
     # Performance
     batch_span_processor=True,
     max_export_batch_size=512,
@@ -250,16 +250,16 @@ async def my_operation(context, data):
         # Add attributes
         span.set_attribute("input_size", len(data))
         span.set_attribute("user_id", context.data.get("user_id"))
-        
+
         # Do work
         result = await process_data(data)
-        
+
         # Add events
         span.add_event("processing_complete")
-        
+
         # Record result attributes
         span.set_attribute("output_size", len(result))
-        
+
         return result
 ```
 
@@ -374,12 +374,12 @@ async def risky_operation(context, data):
             input_data=data,
             exc_info=True
         )
-        
+
         # Record exception in span
         span = trace.get_current_span()
         span.record_exception(e)
         span.set_status(trace.Status(trace.StatusCode.ERROR))
-        
+
         raise
 ```
 
@@ -472,20 +472,20 @@ async def handle_request(user_id: str, input_data: dict):
         correlation_id=f"req-{uuid.uuid4()}",
         data={"user_id": user_id}
     )
-    
+
     logger.info("request_received", user_id=user_id)
-    
+
     try:
         result = await workflow.execute(context, input_data)
-        
+
         logger.info(
             "request_completed",
             user_id=user_id,
             status="success"
         )
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(
             "request_failed",
@@ -530,42 +530,42 @@ operation_errors = meter.create_counter(
 
 async def monitored_operation(context, data):
     start_time = time.time()
-    
+
     with tracer.start_as_current_span("monitored_operation") as span:
         span.set_attribute("input_size", len(data))
-        
+
         try:
             result = await expensive_operation(data)
-            
+
             duration = time.time() - start_time
             operation_duration.record(duration, {"status": "success"})
-            
+
             span.set_attribute("duration_ms", duration * 1000)
             span.set_attribute("output_size", len(result))
-            
+
             logger.info(
                 "operation_completed",
                 duration_ms=duration * 1000,
                 status="success"
             )
-            
+
             return result
-            
+
         except Exception as e:
             duration = time.time() - start_time
             operation_duration.record(duration, {"status": "error"})
             operation_errors.add(1, {"error_type": type(e).__name__})
-            
+
             span.record_exception(e)
             span.set_status(trace.Status(trace.StatusCode.ERROR))
-            
+
             logger.error(
                 "operation_failed",
                 duration_ms=duration * 1000,
                 error=str(e),
                 exc_info=True
             )
-            
+
             raise
 
 # Query Prometheus:
@@ -607,23 +607,23 @@ llm_cost = meter.create_counter(
 
 async def tracked_llm_call(model: str, prompt: str):
     llm_requests.add(1, {"model": model})
-    
+
     response = await llm_api.call(model=model, prompt=prompt)
-    
+
     # Track usage
     prompt_tokens = response.usage.prompt_tokens
     completion_tokens = response.usage.completion_tokens
     total_tokens = prompt_tokens + completion_tokens
-    
+
     # Cost calculation (example rates)
     cost_per_1k = {
         "gpt-4": 0.03,
         "gpt-4-mini": 0.001,
         "gpt-3.5-turbo": 0.002,
     }
-    
+
     cost = (total_tokens / 1000) * cost_per_1k.get(model, 0)
-    
+
     # Record metrics
     llm_tokens.add(total_tokens, {
         "model": model,
@@ -638,7 +638,7 @@ async def tracked_llm_call(model: str, prompt: str):
         "token_type": "completion"
     })
     llm_cost.add(cost, {"model": model})
-    
+
     # Log
     logger.info(
         "llm_call_completed",
@@ -648,7 +648,7 @@ async def tracked_llm_call(model: str, prompt: str):
         total_tokens=total_tokens,
         cost_usd=cost
     )
-    
+
     return response
 
 # Query Prometheus:
@@ -669,7 +669,7 @@ async def tracked_llm_call(model: str, prompt: str):
    # ✅ Good - clear and hierarchical
    with tracer.start_as_current_span("workflow.user_onboarding.validate_email"):
        ...
-   
+
    # ❌ Bad - vague
    with tracer.start_as_current_span("operation"):
        ...
@@ -710,10 +710,10 @@ async def tracked_llm_call(model: str, prompt: str):
    ```python
    # Counters - monotonically increasing
    requests_total = meter.create_counter("requests_total")
-   
+
    # Gauges - current value (up or down)
    active_users = meter.create_up_down_counter("active_users")
-   
+
    # Histograms - distributions
    response_time = meter.create_histogram("response_time_seconds")
    ```
@@ -723,7 +723,7 @@ async def tracked_llm_call(model: str, prompt: str):
    ```python
    # ✅ Good - consistent label names
    counter.add(1, {"method": "GET", "endpoint": "/users", "status": "200"})
-   
+
    # ❌ Bad - inconsistent
    counter.add(1, {"http_method": "GET", "path": "/users", "code": "200"})
    ```
@@ -733,7 +733,7 @@ async def tracked_llm_call(model: str, prompt: str):
    ```python
    # ❌ Bad - user_id has high cardinality
    counter.add(1, {"user_id": user_id})
-   
+
    # ✅ Good - use aggregated labels
    counter.add(1, {"user_tier": "premium"})
    ```
@@ -745,7 +745,7 @@ async def tracked_llm_call(model: str, prompt: str):
    ```python
    # ✅ Good - structured
    logger.info("user_registered", user_id=user_id, source="web")
-   
+
    # ❌ Bad - unstructured
    logger.info(f"User {user_id} registered from web")
    ```
@@ -889,7 +889,7 @@ def initialize_observability(
 ) -> bool:
     """
     Initialize observability for TTA.dev application.
-    
+
     Returns:
         bool: True if initialization successful, False otherwise (graceful degradation)
     """
@@ -919,25 +919,25 @@ class ObservabilityConfig:
     service_name: str
     service_version: str = "1.0.0"
     environment: str = "development"
-    
+
     # OpenTelemetry
     otlp_endpoint: str | None = None
     enable_console_exporter: bool = False
-    
+
     # Prometheus
     enable_prometheus: bool = True
     prometheus_port: int = 9464
     prometheus_endpoint: str = "/metrics"
-    
+
     # Tracing
     trace_sample_rate: float = 1.0
     trace_parent_based: bool = True
-    
+
     # Logging
     log_level: str = "INFO"
     structured_logging: bool = True
     log_correlation: bool = True
-    
+
     # Performance
     batch_span_processor: bool = True
     max_export_batch_size: int = 512
