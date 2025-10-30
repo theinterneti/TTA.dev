@@ -1,3 +1,8 @@
+---
+type: "agent_requested"
+description: "Example description"
+---
+
 # Scripts Guidelines
 
 ## Core Principle
@@ -62,7 +67,7 @@ def build_workflow(models: list[str]):
             timeout_seconds=30.0
         )
         model_tests.append(inject_name >> test)
-    
+
     # Run all in parallel, cache for 1 hour
     return CachePrimitive(
         ParallelPrimitive(model_tests),
@@ -74,9 +79,9 @@ async def main():
     models = ["phi-4", "qwen-0.5b", "qwen-1.5b"]
     workflow = build_workflow(models)
     context = WorkflowContext(workflow_id="model-eval")
-    
+
     results = await workflow.execute({}, context)
-    
+
     for result in results:
         print(f"{result['model']}: {result['score']}")
 
@@ -132,7 +137,7 @@ def build_startup_workflow(servers: list[str]):
             timeout_seconds=10.0
         )
         server_starts.append(inject_name >> start >> health)
-    
+
     # Start all servers in parallel, then validate
     return SequentialPrimitive([
         ParallelPrimitive(server_starts),
@@ -143,7 +148,7 @@ async def main():
     servers = ["basic", "agent_tool", "knowledge_resource"]
     workflow = build_startup_workflow(servers)
     context = WorkflowContext(workflow_id="mcp-startup")
-    
+
     result = await workflow.execute({}, context)
     print(f"All servers started: {result['status']}")
 
@@ -188,17 +193,17 @@ async def run_tests(data: dict, ctx: WorkflowContext) -> dict:
 def build_validation_workflow(package: str):
     """Build validation workflow with parallel checks."""
     inject_package = LambdaPrimitive(lambda d, c: {"package": package})
-    
+
     # Run format, lint, types in parallel
     parallel_checks = ParallelPrimitive([
         LambdaPrimitive(run_formatter),
         LambdaPrimitive(run_linter),
         LambdaPrimitive(run_type_check),
     ])
-    
+
     # Then run tests (depends on code quality)
     tests = LambdaPrimitive(run_tests)
-    
+
     # Aggregate results
     aggregate = LambdaPrimitive(
         lambda d, c: {
@@ -207,15 +212,15 @@ def build_validation_workflow(package: str):
             "all_passed": all(r["passed"] for r in d if isinstance(r, dict))
         }
     )
-    
+
     return inject_package >> parallel_checks >> tests >> aggregate
 
 async def main():
     workflow = build_validation_workflow("tta-dev-primitives")
     context = WorkflowContext(workflow_id="validation")
-    
+
     result = await workflow.execute({}, context)
-    
+
     print(f"Package: {result['package']}")
     print(f"All checks passed: {result['all_passed']}")
 
@@ -257,10 +262,10 @@ async def main():
     parser = argparse.ArgumentParser(description="Script description")
     # Add arguments
     args = parser.parse_args()
-    
+
     workflow = build_workflow()
     context = WorkflowContext(workflow_id="script-name")
-    
+
     result = await workflow.execute(input_data, context)
     print(f"Result: {result}")
 

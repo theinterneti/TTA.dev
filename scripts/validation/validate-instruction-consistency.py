@@ -41,33 +41,33 @@ def validate_instruction_file(file_path: Path) -> bool:
     # Check for frontmatter
     frontmatter = parse_frontmatter(content)
     if not frontmatter:
-        print(f"  ❌ Missing or invalid YAML frontmatter")
+        print("  ❌ Missing or invalid YAML frontmatter")
         return False
 
     # Validate applyTo field
     if "applyTo" not in frontmatter:
-        print(f"  ❌ Missing 'applyTo' field in frontmatter")
+        print("  ❌ Missing 'applyTo' field in frontmatter")
         return False
 
     apply_to = frontmatter.get("applyTo")
     if not isinstance(apply_to, (str, list)):
-        print(f"  ❌ 'applyTo' must be string or list")
+        print("  ❌ 'applyTo' must be string or list")
         return False
 
     # Validate tags (optional but recommended)
     if "tags" in frontmatter:
         tags = frontmatter.get("tags")
         if not isinstance(tags, list):
-            print(f"  ⚠️  'tags' should be a list")
+            print("  ⚠️  'tags' should be a list")
 
     # Check for required sections (basic heuristics)
     if len(content) < 100:
-        print(f"  ⚠️  File is very short (may not be comprehensive)")
+        print("  ⚠️  File is very short (may not be comprehensive)")
 
     # Check for markdown structure
     headers = re.findall(r"^#+\s+(.+)$", content, re.MULTILINE)
     if not headers:
-        print(f"  ⚠️  No markdown headers found")
+        print("  ⚠️  No markdown headers found")
 
     print(f"  ✅ {file_path.name} is valid")
     return True

@@ -4,15 +4,14 @@ Tests for the memory module.
 This module contains tests for the agent memory functionality.
 """
 
-import unittest
 import os
 import sys
-import datetime
+import unittest
 
 # Add the parent directory to the path so we can import the src package
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.agents.memory import MemoryEntry, AgentMemoryManager, AgentMemoryEnhancer
+from src.agents.memory import AgentMemoryEnhancer, AgentMemoryManager, MemoryEntry
 from src.knowledge import Neo4jManager
 
 
@@ -28,7 +27,7 @@ class TestMemoryEntry(unittest.TestCase):
             memory_type="observation",
             content="This is a test memory",
             created_at=now,
-            last_accessed=now
+            last_accessed=now,
         )
         self.assertEqual(memory.memory_id, "test_memory_001")
         self.assertEqual(memory.agent_id, "test_agent")
@@ -54,7 +53,7 @@ class TestAgentMemoryManager(unittest.TestCase):
             memory_type="observation",
             content="This is a test observation",
             importance=0.8,
-            tags=["test", "observation"]
+            tags=["test", "observation"],
         )
         self.assertTrue(success)
         self.assertEqual(result.agent_id, "test_agent")
@@ -71,14 +70,12 @@ class TestAgentMemoryManager(unittest.TestCase):
             memory_type="observation",
             content="This is a test observation",
             importance=0.8,
-            tags=["test", "observation"]
+            tags=["test", "observation"],
         )
 
         # Get memories
         success, memories = self.memory_manager.get_memories(
-            agent_id="test_agent",
-            memory_type="observation",
-            limit=10
+            agent_id="test_agent", memory_type="observation", limit=10
         )
 
         # In mock mode, this might return an empty list, which is still a success
@@ -93,14 +90,12 @@ class TestAgentMemoryManager(unittest.TestCase):
             memory_type="observation",
             content="The player explored the forest and found a hidden cave",
             importance=0.8,
-            tags=["test", "observation"]
+            tags=["test", "observation"],
         )
 
         # Get relevant memories
         success, memories = self.memory_manager.get_relevant_memories(
-            agent_id="test_agent",
-            query="forest exploration",
-            limit=5
+            agent_id="test_agent", query="forest exploration", limit=5
         )
 
         # In mock mode, this might return an empty list, which is still a success
@@ -115,14 +110,12 @@ class TestAgentMemoryManager(unittest.TestCase):
             memory_type="observation",
             content="The player explored the forest and found a hidden cave",
             importance=0.8,
-            tags=["test", "observation"]
+            tags=["test", "observation"],
         )
 
         # Create a reflection
         success, reflection = self.memory_manager.create_reflection(
-            agent_id="test_agent",
-            observations=[observation],
-            context={"location": "forest"}
+            agent_id="test_agent", observations=[observation], context={"location": "forest"}
         )
 
         self.assertTrue(success)
@@ -138,20 +131,16 @@ class TestAgentMemoryManager(unittest.TestCase):
             memory_type="observation",
             content="The player explored the forest and found a hidden cave",
             importance=0.8,
-            tags=["test", "observation"]
+            tags=["test", "observation"],
         )
 
         success, reflection = self.memory_manager.create_reflection(
-            agent_id="test_agent",
-            observations=[observation],
-            context={"location": "forest"}
+            agent_id="test_agent", observations=[observation], context={"location": "forest"}
         )
 
         # Create a learning
         success, learning = self.memory_manager.create_learning(
-            agent_id="test_agent",
-            reflections=[reflection],
-            context={"theme": "exploration"}
+            agent_id="test_agent", reflections=[reflection], context={"theme": "exploration"}
         )
 
         self.assertTrue(success)
@@ -168,8 +157,7 @@ class TestAgentMemoryEnhancer(unittest.TestCase):
         self.neo4j_manager = Neo4jManager()
         self.memory_manager = AgentMemoryManager(self.neo4j_manager)
         self.memory_enhancer = AgentMemoryEnhancer(
-            neo4j_manager=self.neo4j_manager,
-            memory_manager=self.memory_manager
+            neo4j_manager=self.neo4j_manager, memory_manager=self.memory_manager
         )
 
     def test_enhance_agent_prompt(self):
@@ -180,15 +168,13 @@ class TestAgentMemoryEnhancer(unittest.TestCase):
             memory_type="observation",
             content="The player explored the forest and found a hidden cave",
             importance=0.8,
-            tags=["test", "observation"]
+            tags=["test", "observation"],
         )
 
         # Enhance the prompt
         original_prompt = "You are a helpful assistant."
         enhanced_prompt = self.memory_enhancer.enhance_agent_prompt(
-            agent_name="test_agent",
-            system_prompt=original_prompt,
-            query="forest exploration"
+            agent_name="test_agent", system_prompt=original_prompt, query="forest exploration"
         )
 
         # In mock mode, we might not get any memories, so the enhanced prompt might be the same as the original
@@ -200,13 +186,15 @@ class TestAgentMemoryEnhancer(unittest.TestCase):
         success, observation = self.memory_enhancer.record_observation(
             agent_id="test_agent",
             observation="The player seems interested in the history of the forest",
-            context={"location": "forest", "player_action": "ask about history"}
+            context={"location": "forest", "player_action": "ask about history"},
         )
 
         self.assertTrue(success)
         self.assertEqual(observation.agent_id, "test_agent")
         self.assertEqual(observation.memory_type, "observation")
-        self.assertEqual(observation.content, "The player seems interested in the history of the forest")
+        self.assertEqual(
+            observation.content, "The player seems interested in the history of the forest"
+        )
         self.assertEqual(observation.importance, 0.5)  # Default for observations
         self.assertEqual(observation.tags, ["observation"])
 
@@ -216,13 +204,12 @@ class TestAgentMemoryEnhancer(unittest.TestCase):
         self.memory_enhancer.record_observation(
             agent_id="test_agent",
             observation="The player seems interested in the history of the forest",
-            context={"location": "forest", "player_action": "ask about history"}
+            context={"location": "forest", "player_action": "ask about history"},
         )
 
         # Process interactions
         success, message = self.memory_enhancer.process_agent_interactions(
-            agent_id="test_agent",
-            recent_observations=5
+            agent_id="test_agent", recent_observations=5
         )
 
         # In mock mode, we might get different messages depending on the state
@@ -230,10 +217,10 @@ class TestAgentMemoryEnhancer(unittest.TestCase):
         self.assertTrue(success)
         # The message could be either "Successfully processed" or "Created reflection but no reflections to learn from"
         self.assertTrue(
-            "Successfully processed" in message or
-            "Created reflection but no reflections to learn from" in message
+            "Successfully processed" in message
+            or "Created reflection but no reflections to learn from" in message
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

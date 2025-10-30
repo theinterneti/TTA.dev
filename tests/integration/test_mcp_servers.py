@@ -4,40 +4,39 @@ Integration tests for MCP servers.
 This module contains integration tests for the Knowledge Resource and Agent Tool MCP servers.
 """
 
-import pytest
-import asyncio
-import subprocess
-import time
-import os
-import sys
 import json
-import requests
+import os
+import subprocess
+import sys
+import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Callable, Tuple
+
+import pytest
+import requests
 
 # Add the project root to the Python path
 project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
-from src.mcp import MCPServerManager, MCPServerType
-
 # Import the example MCP servers
 import sys
-import os
+
+from src.mcp import MCPServerManager, MCPServerType
 
 # Add the examples directory to the Python path
-examples_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'examples')
+examples_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "examples"
+)
 sys.path.append(examples_path)
 
 # Import the example MCP servers directly
 sys.path.insert(0, examples_path)
-from examples.mcp.knowledge_resource_server import mcp as knowledge_resource_mcp
-from examples.mcp.agent_tool_server import mcp as agent_tool_mcp
 
 # Test constants
 KNOWLEDGE_SERVER_PORT = 8002
 AGENT_TOOL_SERVER_PORT = 8001
 TIMEOUT = 5  # seconds
+
 
 @pytest.fixture
 def server_manager():
@@ -48,6 +47,7 @@ def server_manager():
         The MCP server manager instance.
     """
     return MCPServerManager()
+
 
 @pytest.fixture
 def knowledge_server():
@@ -62,10 +62,14 @@ def knowledge_server():
     """
     # Create and start the server
     process = subprocess.Popen(
-        ["python3", "-c", f"import sys; sys.path.append('{examples_path}'); from examples.mcp.knowledge_resource_server import mcp; mcp.settings.port = {KNOWLEDGE_SERVER_PORT}; mcp.run('sse')"],
+        [
+            "python3",
+            "-c",
+            f"import sys; sys.path.append('{examples_path}'); from examples.mcp.knowledge_resource_server import mcp; mcp.settings.port = {KNOWLEDGE_SERVER_PORT}; mcp.run('sse')",
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
 
     # Give the server a moment to start
@@ -80,6 +84,7 @@ def knowledge_server():
     except subprocess.TimeoutExpired:
         process.kill()
         process.wait()
+
 
 @pytest.fixture
 def agent_tool_server():
@@ -94,10 +99,14 @@ def agent_tool_server():
     """
     # Create and start the server
     process = subprocess.Popen(
-        ["python3", "-c", f"import sys; sys.path.append('{examples_path}'); from examples.mcp.agent_tool_server import mcp; mcp.settings.port = {AGENT_TOOL_SERVER_PORT}; mcp.run('sse')"],
+        [
+            "python3",
+            "-c",
+            f"import sys; sys.path.append('{examples_path}'); from examples.mcp.agent_tool_server import mcp; mcp.settings.port = {AGENT_TOOL_SERVER_PORT}; mcp.run('sse')",
+        ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
 
     # Give the server a moment to start
@@ -112,6 +121,7 @@ def agent_tool_server():
     except subprocess.TimeoutExpired:
         process.kill()
         process.wait()
+
 
 def test_knowledge_server_http_connection(knowledge_server):
     """Test that the Knowledge Resource server can be connected to via HTTP."""
@@ -134,6 +144,7 @@ def test_knowledge_server_http_connection(knowledge_server):
 
         pytest.fail("Could not connect to Knowledge Resource server")
 
+
 def test_agent_tool_server_http_connection(agent_tool_server):
     """Test that the Agent Tool server can be connected to via HTTP."""
     # Wait a moment for the server to start
@@ -155,23 +166,19 @@ def test_agent_tool_server_http_connection(agent_tool_server):
 
         pytest.fail("Could not connect to Agent Tool server")
 
+
 def test_knowledge_server_mcp_handshake(knowledge_server):
     """Test that the Knowledge Resource server responds to MCP handshake."""
     # Create a simple MCP handshake message
     handshake = {
         "type": "handshake",
         "version": "2025-03-26",
-        "capabilities": {
-            "transports": ["http"]
-        }
+        "capabilities": {"transports": ["http"]},
     }
 
     # Send the handshake
     try:
-        response = requests.post(
-            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp",
-            json=handshake
-        )
+        response = requests.post(f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake)
         assert response.status_code == 200
 
         # Parse the response
@@ -183,23 +190,19 @@ def test_knowledge_server_mcp_handshake(knowledge_server):
     except Exception as e:
         pytest.fail(f"Error during handshake: {e}")
 
+
 def test_agent_tool_server_mcp_handshake(agent_tool_server):
     """Test that the Agent Tool server responds to MCP handshake."""
     # Create a simple MCP handshake message
     handshake = {
         "type": "handshake",
         "version": "2025-03-26",
-        "capabilities": {
-            "transports": ["http"]
-        }
+        "capabilities": {"transports": ["http"]},
     }
 
     # Send the handshake
     try:
-        response = requests.post(
-            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp",
-            json=handshake
-        )
+        response = requests.post(f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake)
         assert response.status_code == 200
 
         # Parse the response
@@ -211,23 +214,19 @@ def test_agent_tool_server_mcp_handshake(agent_tool_server):
     except Exception as e:
         pytest.fail(f"Error during handshake: {e}")
 
+
 def test_knowledge_server_list_resources(knowledge_server):
     """Test that the Knowledge Resource server can list resources."""
     # Create a session
     handshake = {
         "type": "handshake",
         "version": "2025-03-26",
-        "capabilities": {
-            "transports": ["http"]
-        }
+        "capabilities": {"transports": ["http"]},
     }
 
     # Send the handshake
     try:
-        response = requests.post(
-            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp",
-            json=handshake
-        )
+        response = requests.post(f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake)
         assert response.status_code == 200
 
         # Get the session ID
@@ -239,12 +238,11 @@ def test_knowledge_server_list_resources(knowledge_server):
         list_resources_request = {
             "type": "list_resources_request",
             "sessionId": session_id,
-            "requestId": "test-request-1"
+            "requestId": "test-request-1",
         }
 
         response = requests.post(
-            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp",
-            json=list_resources_request
+            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=list_resources_request
         )
         assert response.status_code == 200
 
@@ -267,23 +265,19 @@ def test_knowledge_server_list_resources(knowledge_server):
     except Exception as e:
         pytest.fail(f"Error during resource listing: {e}")
 
+
 def test_agent_tool_server_list_tools(agent_tool_server):
     """Test that the Agent Tool server can list tools."""
     # Create a session
     handshake = {
         "type": "handshake",
         "version": "2025-03-26",
-        "capabilities": {
-            "transports": ["http"]
-        }
+        "capabilities": {"transports": ["http"]},
     }
 
     # Send the handshake
     try:
-        response = requests.post(
-            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp",
-            json=handshake
-        )
+        response = requests.post(f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake)
         assert response.status_code == 200
 
         # Get the session ID
@@ -295,12 +289,11 @@ def test_agent_tool_server_list_tools(agent_tool_server):
         list_tools_request = {
             "type": "list_tools_request",
             "sessionId": session_id,
-            "requestId": "test-request-1"
+            "requestId": "test-request-1",
         }
 
         response = requests.post(
-            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp",
-            json=list_tools_request
+            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=list_tools_request
         )
         assert response.status_code == 200
 
@@ -323,23 +316,19 @@ def test_agent_tool_server_list_tools(agent_tool_server):
     except Exception as e:
         pytest.fail(f"Error during tool listing: {e}")
 
+
 def test_knowledge_server_read_resource(knowledge_server):
     """Test that the Knowledge Resource server can read resources."""
     # Create a session
     handshake = {
         "type": "handshake",
         "version": "2025-03-26",
-        "capabilities": {
-            "transports": ["http"]
-        }
+        "capabilities": {"transports": ["http"]},
     }
 
     # Send the handshake
     try:
-        response = requests.post(
-            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp",
-            json=handshake
-        )
+        response = requests.post(f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake)
         assert response.status_code == 200
 
         # Get the session ID
@@ -352,12 +341,11 @@ def test_knowledge_server_read_resource(knowledge_server):
             "type": "read_resource_request",
             "sessionId": session_id,
             "requestId": "test-request-2",
-            "uri": "kg://info"
+            "uri": "kg://info",
         }
 
         response = requests.post(
-            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp",
-            json=read_resource_request
+            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=read_resource_request
         )
         assert response.status_code == 200
 
@@ -376,23 +364,19 @@ def test_knowledge_server_read_resource(knowledge_server):
     except Exception as e:
         pytest.fail(f"Error during resource reading: {e}")
 
+
 def test_agent_tool_server_call_tool(agent_tool_server):
     """Test that the Agent Tool server can call tools."""
     # Create a session
     handshake = {
         "type": "handshake",
         "version": "2025-03-26",
-        "capabilities": {
-            "transports": ["http"]
-        }
+        "capabilities": {"transports": ["http"]},
     }
 
     # Send the handshake
     try:
-        response = requests.post(
-            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp",
-            json=handshake
-        )
+        response = requests.post(f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake)
         assert response.status_code == 200
 
         # Get the session ID
@@ -406,12 +390,11 @@ def test_agent_tool_server_call_tool(agent_tool_server):
             "sessionId": session_id,
             "requestId": "test-request-2",
             "name": "list_agents",
-            "arguments": {}
+            "arguments": {},
         }
 
         response = requests.post(
-            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp",
-            json=call_tool_request
+            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=call_tool_request
         )
         assert response.status_code == 200
 
@@ -435,13 +418,12 @@ def test_agent_tool_server_call_tool(agent_tool_server):
     except Exception as e:
         pytest.fail(f"Error during tool calling: {e}")
 
+
 def test_server_manager_start_stop(server_manager):
     """Test that the server manager can start and stop servers."""
     # Start the Knowledge Resource server
     success, process_id = server_manager.start_server(
-        server_type=MCPServerType.KNOWLEDGE_RESOURCE,
-        wait=True,
-        timeout=TIMEOUT
+        server_type=MCPServerType.KNOWLEDGE_RESOURCE, wait=True, timeout=TIMEOUT
     )
 
     assert success
@@ -456,20 +438,17 @@ def test_server_manager_start_stop(server_manager):
     # Check that the server is stopped
     assert not server_manager.is_server_running(MCPServerType.KNOWLEDGE_RESOURCE)
 
+
 def test_server_manager_start_multiple_servers(server_manager):
     """Test that the server manager can start multiple servers."""
     # Start the Knowledge Resource server
     success1, process_id1 = server_manager.start_server(
-        server_type=MCPServerType.KNOWLEDGE_RESOURCE,
-        wait=True,
-        timeout=TIMEOUT
+        server_type=MCPServerType.KNOWLEDGE_RESOURCE, wait=True, timeout=TIMEOUT
     )
 
     # Start the Agent Tool server
     success2, process_id2 = server_manager.start_server(
-        server_type=MCPServerType.AGENT_TOOL,
-        wait=True,
-        timeout=TIMEOUT
+        server_type=MCPServerType.AGENT_TOOL, wait=True, timeout=TIMEOUT
     )
 
     assert success1
@@ -488,6 +467,7 @@ def test_server_manager_start_multiple_servers(server_manager):
     assert not server_manager.is_server_running(MCPServerType.KNOWLEDGE_RESOURCE)
     assert not server_manager.is_server_running(MCPServerType.AGENT_TOOL)
 
+
 def test_server_manager_start_script(server_manager):
     """Test that the start_mcp_servers.py script works correctly."""
     # Start the script
@@ -495,7 +475,7 @@ def test_server_manager_start_script(server_manager):
         ["python3", "scripts/start_mcp_servers.py", "--servers", "knowledge_resource", "--wait"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
 
     # Give the script a moment to start the server

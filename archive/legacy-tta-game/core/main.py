@@ -4,15 +4,14 @@ Main entry point for the TTA project.
 This module provides the main entry point for running the Therapeutic Text Adventure.
 """
 
-import logging
 import argparse
-from typing import Dict, Any, Optional, List
+import logging
 
+from ..agents import create_dynamic_agents
 from ..knowledge import get_neo4j_manager
+from ..mcp import MCPConfig, MCPServerManager, MCPServerType
 from ..models import get_llm_client
 from ..tools import get_tool_registry
-from ..agents import create_dynamic_agents
-from ..mcp import MCPServerManager, MCPConfig, MCPServerType
 from .dynamic_game import run_dynamic_game
 
 # Configure logging
@@ -77,9 +76,7 @@ def parse_args():
     )
 
     # Debug options
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug logging"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     return parser.parse_args()
 
@@ -119,10 +116,7 @@ def main():
     tool_registry.load_tools_from_neo4j()
 
     # Initialize dynamic agents
-    agents = create_dynamic_agents(
-        neo4j_manager=neo4j_manager,
-        tools=tool_registry.get_all_tools()
-    )
+    agents = create_dynamic_agents(neo4j_manager=neo4j_manager, tools=tool_registry.get_all_tools())
 
     # Initialize MCP
     mcp_config = MCPConfig(config_path=args.mcp_config)
@@ -139,7 +133,7 @@ def main():
             servers_to_start = [
                 MCPServerType.BASIC,
                 MCPServerType.AGENT_TOOL,
-                MCPServerType.KNOWLEDGE_RESOURCE
+                MCPServerType.KNOWLEDGE_RESOURCE,
             ]
         else:
             for server_name in args.mcp_servers:
@@ -156,9 +150,7 @@ def main():
             logger.info(f"Starting server: {server_type}")
 
             success, process_id = mcp_server_manager.start_server(
-                server_type=server_type,
-                wait=True,
-                timeout=30
+                server_type=server_type, wait=True, timeout=30
             )
 
             if success:
@@ -176,7 +168,7 @@ def main():
             neo4j_manager=neo4j_manager,
             llm_client=llm_client,
             tool_registry=tool_registry,
-            agent_registry=agents
+            agent_registry=agents,
         )
     finally:
         # Stop MCP servers if they were started
