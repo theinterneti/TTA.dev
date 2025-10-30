@@ -3602,8 +3602,8 @@ researcher = FreeTierResearchPrimitive()
 context = WorkflowContext(workflow_id="free-tier-update")
 request = FreeTierResearchRequest(
     providers=["openai", "anthropic", "google-gemini", "openrouter", "ollama"],
-    existing_guide_path="docs/guides/free-llm-access-guide.md",
-    output_path="docs/guides/free-llm-access-guide.md",
+    existing_guide_path="docs/guides/llm-cost-guide.md",
+    output_path="docs/guides/llm-cost-guide.md",
     generate_changelog=True
 )
 response = await researcher.execute(request, context)
