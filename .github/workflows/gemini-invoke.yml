@@ -38,6 +38,12 @@ jobs:
           permission-issues: 'write'
           permission-pull-requests: 'write'
 
+      - name: 'Pre-pull GitHub MCP Server'
+        run: |-
+          echo "Pre-pulling GitHub MCP Server Docker image..."
+          time docker pull ghcr.io/github/github-mcp-server:v0.18.0
+          echo "Docker image pull complete"
+
       - name: 'Run Gemini CLI'
         id: 'run_gemini'
         uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
@@ -57,7 +63,7 @@ jobs:
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION }}'
-          gemini_debug: '${{ fromJSON(vars.DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}'
+          gemini_debug: true  # DIAGNOSTIC: Enable debug logging to identify bottleneck
           gemini_model: '${{ vars.GEMINI_MODEL }}'
           google_api_key: '${{ secrets.GOOGLE_API_KEY }}'
           use_gemini_code_assist: '${{ vars.GOOGLE_GENAI_USE_GCA }}'
@@ -75,8 +81,7 @@ jobs:
                 "maxSessionTurns": 25
               },
               "telemetry": {
-                "enabled": ${{ vars.GOOGLE_CLOUD_PROJECT != '' }},
-                "target": "gcp"
+                "enabled": false
               },
               "tools": {
                 "autoAccept": true,
