@@ -5,9 +5,8 @@ This module contains tests for the basic MCP server's tools and resources.
 """
 
 import pytest
-import json
-import pytest_asyncio
 from fastmcp import FastMCP
+
 
 @pytest.mark.asyncio
 async def test_basic_server_initialization(basic_server):
@@ -19,6 +18,7 @@ async def test_basic_server_initialization(basic_server):
     tools = [tool.name for tool in await basic_server.list_tools()]
     assert "echo" in tools
     assert "calculate" in tools
+
 
 @pytest.mark.asyncio
 async def test_echo_tool(basic_server):
@@ -46,6 +46,7 @@ async def test_echo_tool(basic_server):
     result = await basic_server.call_tool("echo", {"message": "Hello, world!"})
     assert len(result) > 0
     assert result[0].text == "Echo: Hello, world!"
+
 
 @pytest.mark.asyncio
 async def test_calculate_tool(basic_server):
@@ -89,9 +90,12 @@ async def test_calculate_tool(basic_server):
     assert len(result) > 0
     assert any("Error:" in r.text for r in result), "Dangerous expression was not blocked"
 
-    result = await basic_server.call_tool("calculate", {"expression": "__import__('os').system('ls')"})
+    result = await basic_server.call_tool(
+        "calculate", {"expression": "__import__('os').system('ls')"}
+    )
     assert len(result) > 0
     assert "Error:" in result[0].text
+
 
 @pytest.mark.asyncio
 async def test_server_info_resource(basic_server):
@@ -135,6 +139,7 @@ async def test_server_info_resource(basic_server):
         assert "echo" in result
         assert "calculate" in result
 
+
 @pytest.mark.asyncio
 async def test_system_info_resource(basic_server):
     """Test the system info resource."""
@@ -176,6 +181,7 @@ async def test_system_info_resource(basic_server):
         assert "Python version:" in result
         assert "Platform:" in result
         assert "Processor:" in result
+
 
 @pytest.mark.asyncio
 @pytest.mark.skip("Environment variable resource is no longer available in the API")

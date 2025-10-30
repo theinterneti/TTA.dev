@@ -5,15 +5,16 @@ Direct model test script using Hugging Face API.
 This script tests models directly using the Hugging Face API.
 """
 
+import argparse
+import json
+import logging
 import os
 import sys
-import json
 import time
-import argparse
-import logging
-from typing import Dict, Any, List
-from huggingface_hub import InferenceClient
+from typing import Any
+
 from dotenv import load_dotenv
+from huggingface_hub import InferenceClient
 
 # Load environment variables
 load_dotenv()
@@ -30,11 +31,11 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 if not HF_TOKEN:
     logger.error("HF_TOKEN not found in environment. Checking .env file...")
     try:
-        with open('/app/.env', 'r') as f:
+        with open("/app/.env") as f:
             for line in f:
-                if line.startswith('HF_TOKEN='):
-                    HF_TOKEN = line.strip().split('=', 1)[1].strip('"\'')
-                    logger.info(f"Found HF_TOKEN in .env file")
+                if line.startswith("HF_TOKEN="):
+                    HF_TOKEN = line.strip().split("=", 1)[1].strip("\"'")
+                    logger.info("Found HF_TOKEN in .env file")
                     break
     except Exception as e:
         logger.error(f"Error reading .env file: {e}")
@@ -49,18 +50,15 @@ TARGET_MODELS = [
     "Qwen/Qwen2.5-0.5B-Instruct",
     "Qwen/Qwen2.5-1.5B-Instruct",
     "Qwen/Qwen2.5-3B-Instruct",
-    "Qwen/Qwen2.5-7B-Instruct"
+    "Qwen/Qwen2.5-7B-Instruct",
 ]
 
 # Test cases
 TEST_CASES = {
-    "speed": {
-        "prompt": "What is the capital of France?",
-        "expected_tokens": 20
-    },
+    "speed": {"prompt": "What is the capital of France?", "expected_tokens": 20},
     "structured_output": {
         "prompt": "Generate a JSON object representing a user profile with fields for name, age, and email.",
-        "system_prompt": "You are a structured data assistant. Respond with valid JSON only."
+        "system_prompt": "You are a structured data assistant. Respond with valid JSON only.",
     },
     "tool_use": {
         "prompt": "I need to know the weather in Paris for my trip next week.",
@@ -68,11 +66,12 @@ TEST_CASES = {
 - get_weather(location: str, date: str): Get weather forecast for a location
 - search_web(query: str): Search the web for information
 - calculate_route(start: str, end: str): Calculate route between locations""",
-        "expected_tool": "get_weather"
-    }
+        "expected_tool": "get_weather",
+    },
 }
 
-def test_model(model_name: str) -> Dict[str, Any]:
+
+def test_model(model_name: str) -> dict[str, Any]:
     """
     Test a model on key metrics using the Hugging Face API.
 
@@ -89,7 +88,7 @@ def test_model(model_name: str) -> Dict[str, Any]:
         results = {
             "model": model_name,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "tests": {}
+            "tests": {},
         }
 
         # Test speed
@@ -98,10 +97,7 @@ def test_model(model_name: str) -> Dict[str, Any]:
 
         start_time = time.time()
         response = client.text_generation(
-            prompt=speed_test["prompt"],
-            max_new_tokens=100,
-            temperature=0.2,
-            return_full_text=False
+            prompt=speed_test["prompt"], max_new_tokens=100, temperature=0.2, return_full_text=False
         )
         end_time = time.time()
 
@@ -111,7 +107,7 @@ def test_model(model_name: str) -> Dict[str, Any]:
         results["tests"]["speed"] = {
             "duration": duration,
             "tokens_per_second": tokens_per_second,
-            "response": response
+            "response": response,
         }
 
         logger.info(f"  Speed test completed in {duration:.2f}s ({tokens_per_second:.2f} tokens/s)")
@@ -129,10 +125,7 @@ def test_model(model_name: str) -> Dict[str, Any]:
         start_time = time.time()
         try:
             response = client.text_generation(
-                prompt=full_prompt,
-                max_new_tokens=200,
-                temperature=0.2,
-                return_full_text=False
+                prompt=full_prompt, max_new_tokens=200, temperature=0.2, return_full_text=False
             )
 
             # Check if response is valid JSON
@@ -162,10 +155,12 @@ def test_model(model_name: str) -> Dict[str, Any]:
         results["tests"]["structured_output"] = {
             "duration": duration,
             "is_valid_json": is_valid_json,
-            "response": response
+            "response": response,
         }
 
-        logger.info(f"  Structured output test completed in {duration:.2f}s (Valid JSON: {is_valid_json})")
+        logger.info(
+            f"  Structured output test completed in {duration:.2f}s (Valid JSON: {is_valid_json})"
+        )
 
         # Test tool use
         logger.info(f"Testing {model_name} on tool use...")
@@ -180,10 +175,7 @@ def test_model(model_name: str) -> Dict[str, Any]:
         start_time = time.time()
         try:
             response = client.text_generation(
-                prompt=full_prompt,
-                max_new_tokens=200,
-                temperature=0.2,
-                return_full_text=False
+                prompt=full_prompt, max_new_tokens=200, temperature=0.2, return_full_text=False
             )
             tool_mentioned = tool_test["expected_tool"].lower() in response.lower()
         except Exception as e:
@@ -197,10 +189,12 @@ def test_model(model_name: str) -> Dict[str, Any]:
         results["tests"]["tool_use"] = {
             "duration": duration,
             "tool_mentioned": tool_mentioned,
-            "response": response
+            "response": response,
         }
 
-        logger.info(f"  Tool use test completed in {duration:.2f}s (Tool mentioned: {tool_mentioned})")
+        logger.info(
+            f"  Tool use test completed in {duration:.2f}s (Tool mentioned: {tool_mentioned})"
+        )
 
         return results
 
@@ -209,10 +203,11 @@ def test_model(model_name: str) -> Dict[str, Any]:
         return {
             "model": model_name,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "error": str(e)
+            "error": str(e),
         }
 
-def run_tests(models: List[str] = None) -> Dict[str, Any]:
+
+def run_tests(models: list[str] = None) -> dict[str, Any]:
     """
     Run tests on specified models.
 
@@ -227,11 +222,7 @@ def run_tests(models: List[str] = None) -> Dict[str, Any]:
         models = TARGET_MODELS
 
     # Prepare results dictionary
-    results = {
-        "models": models,
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "results": []
-    }
+    results = {"models": models, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "results": []}
 
     # Run tests
     for model in models:
@@ -245,7 +236,8 @@ def run_tests(models: List[str] = None) -> Dict[str, Any]:
 
     return results
 
-def analyze_results(results: Dict[str, Any]) -> Dict[str, Any]:
+
+def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
     """
     Analyze test results and provide insights.
 
@@ -263,7 +255,7 @@ def analyze_results(results: Dict[str, Any]) -> Dict[str, Any]:
         "models": models,
         "timestamp": results["timestamp"],
         "model_performance": {},
-        "overall_ranking": {}
+        "overall_ranking": {},
     }
 
     # Analyze performance by model
@@ -272,9 +264,7 @@ def analyze_results(results: Dict[str, Any]) -> Dict[str, Any]:
 
         # Skip if error
         if "error" in model_result:
-            analysis["model_performance"][model] = {
-                "error": model_result["error"]
-            }
+            analysis["model_performance"][model] = {"error": model_result["error"]}
             continue
 
         tests = model_result.get("tests", {})
@@ -296,18 +286,9 @@ def analyze_results(results: Dict[str, Any]) -> Dict[str, Any]:
 
         # Store model performance
         analysis["model_performance"][model] = {
-            "speed": {
-                "duration": speed_duration,
-                "tokens_per_second": tokens_per_second
-            },
-            "structured_output": {
-                "duration": structured_duration,
-                "is_valid_json": is_valid_json
-            },
-            "tool_use": {
-                "duration": tool_duration,
-                "tool_mentioned": tool_mentioned
-            }
+            "speed": {"duration": speed_duration, "tokens_per_second": tokens_per_second},
+            "structured_output": {"duration": structured_duration, "is_valid_json": is_valid_json},
+            "tool_use": {"duration": tool_duration, "tool_mentioned": tool_mentioned},
         }
 
         # Calculate overall score
@@ -317,30 +298,36 @@ def analyze_results(results: Dict[str, Any]) -> Dict[str, Any]:
 
         # Combined score (adjust weights as needed)
         score = (
-            speed_score * 0.3 +  # 30% weight for speed
-            structured_score * 0.4 +  # 40% weight for structured output
-            tool_score * 0.3  # 30% weight for tool use
+            speed_score * 0.3  # 30% weight for speed
+            + structured_score * 0.4  # 40% weight for structured output
+            + tool_score * 0.3  # 30% weight for tool use
         )
 
         analysis["model_performance"][model]["overall_score"] = score
 
     # Sort models by score
     sorted_models = sorted(
-        [m for m in models if m in analysis["model_performance"] and "error" not in analysis["model_performance"][m]],
+        [
+            m
+            for m in models
+            if m in analysis["model_performance"]
+            and "error" not in analysis["model_performance"][m]
+        ],
         key=lambda m: analysis["model_performance"][m]["overall_score"],
-        reverse=True
+        reverse=True,
     )
 
     # Store overall ranking
     for i, model in enumerate(sorted_models):
         analysis["overall_ranking"][model] = {
             "rank": i + 1,
-            "score": analysis["model_performance"][model]["overall_score"]
+            "score": analysis["model_performance"][model]["overall_score"],
         }
 
     return analysis
 
-def print_analysis(analysis: Dict[str, Any]):
+
+def print_analysis(analysis: dict[str, Any]):
     """
     Print analysis results in a readable format.
 
@@ -369,11 +356,15 @@ def print_analysis(analysis: Dict[str, Any]):
 
         # Structured output metrics
         structured = perf["structured_output"]
-        print(f"  Structured Output: {'Valid' if structured['is_valid_json'] else 'Invalid'} JSON ({structured['duration']:.2f}s)")
+        print(
+            f"  Structured Output: {'Valid' if structured['is_valid_json'] else 'Invalid'} JSON ({structured['duration']:.2f}s)"
+        )
 
         # Tool use metrics
         tool = perf["tool_use"]
-        print(f"  Tool Use: {'Tool mentioned' if tool['tool_mentioned'] else 'Tool not mentioned'} ({tool['duration']:.2f}s)")
+        print(
+            f"  Tool Use: {'Tool mentioned' if tool['tool_mentioned'] else 'Tool not mentioned'} ({tool['duration']:.2f}s)"
+        )
 
         # Overall score
         print(f"  Overall Score: {perf['overall_score']:.2f}")
@@ -382,44 +373,65 @@ def print_analysis(analysis: Dict[str, Any]):
     print("\n----- RECOMMENDATIONS -----")
 
     # Get the top model overall
-    top_model = next(iter(sorted(analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None))[0]
+    top_model = next(
+        iter(sorted(analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None)
+    )[0]
 
     if top_model:
         print(f"Best overall model: {top_model}")
 
         # Get best model for each metric
         best_speed = max(
-            [m for m in analysis["models"] if m in analysis["model_performance"] and "error" not in analysis["model_performance"][m]],
-            key=lambda m: analysis["model_performance"][m]["speed"]["tokens_per_second"]
+            [
+                m
+                for m in analysis["models"]
+                if m in analysis["model_performance"]
+                and "error" not in analysis["model_performance"][m]
+            ],
+            key=lambda m: analysis["model_performance"][m]["speed"]["tokens_per_second"],
         )
 
         best_structured = [
-            m for m in analysis["models"]
-            if m in analysis["model_performance"] and "error" not in analysis["model_performance"][m]
+            m
+            for m in analysis["models"]
+            if m in analysis["model_performance"]
+            and "error" not in analysis["model_performance"][m]
             and analysis["model_performance"][m]["structured_output"]["is_valid_json"]
         ]
 
         best_tool = [
-            m for m in analysis["models"]
-            if m in analysis["model_performance"] and "error" not in analysis["model_performance"][m]
+            m
+            for m in analysis["models"]
+            if m in analysis["model_performance"]
+            and "error" not in analysis["model_performance"][m]
             and analysis["model_performance"][m]["tool_use"]["tool_mentioned"]
         ]
 
         print(f"Best model for speed: {best_speed}")
-        print(f"Models with valid structured output: {', '.join(best_structured) if best_structured else 'None'}")
+        print(
+            f"Models with valid structured output: {', '.join(best_structured) if best_structured else 'None'}"
+        )
         print(f"Models with correct tool use: {', '.join(best_tool) if best_tool else 'None'}")
 
         # Print specific use case recommendations
         print("\nRecommended models by use case:")
         print(f"  Speed-critical applications: {best_speed}")
-        print(f"  API integration/structured data: {best_structured[0] if best_structured else 'None'}")
+        print(
+            f"  API integration/structured data: {best_structured[0] if best_structured else 'None'}"
+        )
         print(f"  Tool/function calling: {best_tool[0] if best_tool else 'None'}")
+
 
 def main():
     """Main function."""
     parser = argparse.ArgumentParser(description="Direct test of models using Hugging Face API")
-    parser.add_argument("--models", nargs="+", choices=TARGET_MODELS + ["all"], default=["all"],
-                      help="Models to test")
+    parser.add_argument(
+        "--models",
+        nargs="+",
+        choices=TARGET_MODELS + ["all"],
+        default=["all"],
+        help="Models to test",
+    )
     parser.add_argument("--output", help="Output file for results (JSON)")
     args = parser.parse_args()
 
@@ -440,15 +452,13 @@ def main():
 
     # Save results if output file specified
     if args.output:
-        output_data = {
-            "results": results,
-            "analysis": analysis
-        }
+        output_data = {"results": results, "analysis": analysis}
 
         with open(args.output, "w") as f:
             json.dump(output_data, f, indent=2)
 
         print(f"\nResults saved to {args.output}")
+
 
 if __name__ == "__main__":
     main()

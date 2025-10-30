@@ -170,8 +170,13 @@ tta-dev-primitives/
 │       ├── decorators.py  # APM decorators
 │       ├── instrumented.py # Instrumented primitives
 │       └── setup.py       # APM setup
-├── tests/                 # 35 comprehensive tests
+├── tests/                 # 95 comprehensive tests
+│   ├── unit/              # 77 unit tests for all primitives
+│   ├── observability/     # Observability instrumentation tests
+│   └── integration/       # 18 integration tests with real backends
 ├── examples/              # Usage examples
+├── scripts/               # Helper scripts (integration-test-env.sh)
+├── docker-compose.integration.yml  # Integration test environment
 ├── pyproject.toml         # Package configuration
 └── apm.yml                # APM metadata
 ```
@@ -189,13 +194,205 @@ uv run pytest --cov=src --cov-report=html
 uv run pytest tests/test_cache.py -v
 ```
 
+## Integration Testing
+
+The package includes comprehensive integration tests that verify observability instrumentation works correctly with real OpenTelemetry backends (Jaeger, Prometheus, Grafana, OpenTelemetry Collector).
+
+### Prerequisites
+
+- **Docker** and **Docker Compose** installed
+- Ports available: 4317, 4318, 8888, 8889, 9090, 3000, 16686, 14268, 14250
+
+### Quick Start
+
+```bash
+# Start integration test environment
+cd packages/tta-dev-primitives
+./scripts/integration-test-env.sh start
+
+# Run integration tests
+uv run pytest tests/integration/ -v
+
+# Stop services when done
+./scripts/integration-test-env.sh stop
+```
+
+### Available Services
+
+Once started, the following services are available:
+
+| Service | URL | Purpose |
+|---------|-----|---------|
+| **Jaeger UI** | http://localhost:16686 | Distributed tracing visualization |
+| **Prometheus** | http://localhost:9090 | Metrics collection and querying |
+| **Grafana** | http://localhost:3000 | Dashboards and visualization (admin/admin) |
+| **OTLP Collector** | http://localhost:4317 (gRPC)<br>http://localhost:4318 (HTTP) | OpenTelemetry data collection |
+
+### Integration Test Suites
+
+#### 1. OpenTelemetry Backend Integration (8 tests)
+
+Tests in `tests/integration/test_otel_backend_integration.py` verify that all workflow primitives create proper spans with correlation IDs:
+
+```bash
+# Run OpenTelemetry integration tests
+uv run pytest tests/integration/test_otel_backend_integration.py -v
+```
+
+**Coverage:**
+- ✅ SequentialPrimitive - Sequential execution tracing
+- ✅ ParallelPrimitive - Concurrent execution tracing
+- ✅ ConditionalPrimitive - Branch execution tracing
+- ✅ SwitchPrimitive - Case-based routing tracing
+- ✅ RetryPrimitive - Retry attempt tracing
+- ✅ FallbackPrimitive - Fallback execution tracing
+- ✅ SagaPrimitive - Compensation tracing
+- ✅ Composed Workflows - End-to-end trace propagation
+
+#### 2. Prometheus Metrics Infrastructure (10 tests)
+
+Tests in `tests/integration/test_prometheus_metrics.py` verify the metrics collection pipeline:
+
+```bash
+# Run Prometheus integration tests
+uv run pytest tests/integration/test_prometheus_metrics.py -v
+```
+
+**Coverage:**
+- ✅ Prometheus health and readiness
+- ✅ Prometheus API accessibility
+- ✅ Scrape job configuration (prometheus, otel-collector, tta-primitives)
+- ✅ Active scrape targets
+- ✅ OpenTelemetry Collector metrics export
+- ✅ Span and metric processing metrics
+- ✅ Prometheus self-monitoring
+
+### Example Queries
+
+#### Jaeger Queries
+
+1. **Find traces by correlation ID:**
+   - Service: `tta-dev-primitives`
+   - Tags: `workflow.correlation_id=<your-correlation-id>`
+
+2. **Find all Sequential primitive executions:**
+   - Service: `tta-dev-primitives`
+   - Operation: `primitive.SequentialPrimitive`
+
+3. **Find failed executions:**
+   - Service: `tta-dev-primitives`
+   - Tags: `error=true`
+
+#### Prometheus Queries (PromQL)
+
+1. **Check OTEL Collector uptime:**
+   ```promql
+   otelcol_process_uptime{job="otel-collector"}
+   ```
+
+2. **Count spans exported:**
+   ```promql
+   otelcol_exporter_sent_spans{job="otel-collector"}
+   ```
+
+3. **Check Prometheus scrape targets:**
+   ```promql
+   up{job=~"prometheus|otel-collector|tta-primitives"}
+   ```
+
+### Troubleshooting
+
+#### Services won't start
+
+```bash
+# Check if ports are already in use
+lsof -i :9090  # Prometheus
+lsof -i :16686 # Jaeger
+lsof -i :3000  # Grafana
+
+# Stop any conflicting services
+docker ps | grep -E "prometheus|jaeger|grafana|otel"
+docker stop <container-id>
+```
+
+#### Tests fail with "backend not available"
+
+```bash
+# Verify services are running
+docker ps | grep tta-
+
+# Check service health
+curl http://localhost:9090/-/healthy  # Prometheus
+curl http://localhost:16686/          # Jaeger
+
+# Restart services
+./scripts/integration-test-env.sh stop
+./scripts/integration-test-env.sh start
+```
+
+#### No spans appearing in Jaeger
+
+1. **Check OTLP Collector logs:**
+   ```bash
+   docker logs tta-otel-collector
+   ```
+
+2. **Verify correlation ID in test:**
+   - Tests use `workflow.correlation_id` tag
+   - Search Jaeger with exact correlation ID from test output
+
+3. **Wait for flush:**
+   - Tests include 5-second wait for span export
+   - Increase wait time if needed in test code
+
+#### No metrics in Prometheus
+
+1. **Check scrape targets:**
+   - Visit http://localhost:9090/targets
+   - Verify all targets are "UP"
+
+2. **Check OTEL Collector metrics endpoint:**
+   ```bash
+   curl http://localhost:8889/metrics
+   ```
+
+3. **Verify Prometheus configuration:**
+   ```bash
+   curl http://localhost:9090/api/v1/status/config
+   ```
+
+### Future Work
+
+The following integration testing tasks are planned for future implementation:
+
+1. **Performance Overhead Measurement** (Issue TBD)
+   - Benchmark tests to measure instrumentation overhead
+   - Compare execution time with and without observability enabled
+   - Target: <5% latency increase with instrumentation
+   - Test with Sequential, Parallel, and composed workflows
+
+2. **Graceful Degradation Tests** (Issue TBD)
+   - Test behavior when OpenTelemetry backends are unavailable
+   - Verify primitives continue to execute correctly without tracing
+   - Test with missing Jaeger, Prometheus, and OTLP Collector
+   - Ensure no exceptions are raised when backends are down
+
+3. **Primitive-Level Metrics Integration** (Issue TBD)
+   - Export execution time, success/failure rates to Prometheus
+   - Add OpenTelemetry metrics instrumentation to InstrumentedPrimitive
+   - Bridge EnhancedMetricsCollector with OpenTelemetry metrics
+   - Verify metrics have correct labels (primitive_type, workflow_id, correlation_id)
+
 ## Quality Metrics
 
-- ✅ 35/35 tests passing (100%)
-- ✅ Core primitives: 88-100% coverage
-- ✅ Type-safe with Pydantic v2
-- ✅ Full async/await support
-- ✅ Production-tested in TTA
+- ✅ **95 tests passing** (100% pass rate)
+  - 77 unit tests (core primitives, recovery, performance, observability)
+  - 18 integration tests (OpenTelemetry backends, Prometheus metrics)
+- ✅ **Core primitives**: 88-100% coverage
+- ✅ **Type-safe** with Pydantic v2 and full type annotations
+- ✅ **Full async/await** support with proper context propagation
+- ✅ **Production-tested** in TTA with real OpenTelemetry backends
+- ✅ **Integration-ready** with Docker Compose test environment
 
 ## Development
 

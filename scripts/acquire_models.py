@@ -8,11 +8,12 @@ This script downloads models specified in model_configs.json and sets them up fo
 It handles authentication for gated models and applies appropriate quantization.
 """
 
-import os
-import json
 import argparse
+import json
 import logging
+import os
 from pathlib import Path
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
@@ -33,28 +34,28 @@ TARGET_MODELS = {
     "microsoft/phi-4-mini-instruct": {
         "description": "Microsoft's Phi-4 Mini Instruct model",
         "quantization": "4bit",
-        "requires_token": True
+        "requires_token": True,
     },
     "Qwen/Qwen2.5-0.5B-Instruct": {
         "description": "Qwen 2.5 0.5B Instruct model",
         "quantization": "4bit",
-        "requires_token": True
+        "requires_token": True,
     },
     "Qwen/Qwen2.5-1.5B-Instruct": {
         "description": "Qwen 2.5 1.5B Instruct model",
         "quantization": "4bit",
-        "requires_token": True
+        "requires_token": True,
     },
     "Qwen/Qwen2.5-3B-Instruct": {
         "description": "Qwen 2.5 3B Instruct model",
         "quantization": "4bit",
-        "requires_token": True
+        "requires_token": True,
     },
     "Qwen/Qwen2.5-7B-Instruct": {
         "description": "Qwen 2.5 7B Instruct model",
         "quantization": "8bit",
-        "requires_token": True
-    }
+        "requires_token": True,
+    },
 }
 
 # Get model cache directory from environment or use default
@@ -64,7 +65,7 @@ MODEL_CACHE_DIR = os.getenv("MODEL_CACHE_DIR", str(Path(__file__).parent.parent 
 def load_model_configs(config_file="model_configs.json"):
     """Load model configurations from JSON file."""
     try:
-        with open(config_file, "r") as f:
+        with open(config_file) as f:
             return json.load(f)
     except FileNotFoundError:
         logger.error(f"Configuration file {config_file} not found.")
@@ -132,7 +133,7 @@ def download_model(model_name, quantization="4bit", force_download=False):
             device_map="auto" if cuda_available else None,
             trust_remote_code=True,
             low_cpu_mem_usage=True,
-            quantization_config=quantization_config
+            quantization_config=quantization_config,
         )
 
         logger.info(f"Successfully downloaded model {model_name}.")
@@ -146,10 +147,17 @@ def download_model(model_name, quantization="4bit", force_download=False):
 def main():
     """Main function."""
     parser = argparse.ArgumentParser(description="Download and set up models from Hugging Face")
-    parser.add_argument("--config", default="model_configs.json", help="Path to model configuration file")
-    parser.add_argument("--model", choices=list(TARGET_MODELS.keys()) + ["all", "config"],
-                      help="Specific model to download, 'all' for all target models, or 'config' to use model_configs.json")
-    parser.add_argument("--force", action="store_true", help="Force re-download even if model exists")
+    parser.add_argument(
+        "--config", default="model_configs.json", help="Path to model configuration file"
+    )
+    parser.add_argument(
+        "--model",
+        choices=list(TARGET_MODELS.keys()) + ["all", "config"],
+        help="Specific model to download, 'all' for all target models, or 'config' to use model_configs.json",
+    )
+    parser.add_argument(
+        "--force", action="store_true", help="Force re-download even if model exists"
+    )
     args = parser.parse_args()
 
     # Check if HF_TOKEN is set
