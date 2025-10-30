@@ -9,6 +9,7 @@
 ## 📖 Table of Contents
 
 - [Free Tier Comparison](#-free-tier-comparison-table)
+- [Free Access to Flagship Models](#-free-access-to-flagship-models)
 - [When to Use Paid Models](#-when-to-use-paid-models)
 - [Paid Model Cost Comparison](#-paid-model-cost-comparison)
 - [Cost Optimization Quick Wins](#-cost-optimization-quick-wins)
@@ -35,12 +36,272 @@
 | **OpenAI API** | ⚠️ $5 credit only | $5 one-time credit | API key | Yes | After $5 used |
 | **Anthropic API** | ❌ No | None | API key | Yes | N/A |
 | **Google Gemini** | ✅ Yes | 1500 RPD free | Google AI Studio | No | Never |
-| **OpenRouter BYOK** | ✅ Yes | 1M requests/month | API key | No | Monthly reset |
+| **OpenRouter** | ✅ Yes | Free flagship models (DeepSeek R1, Qwen) | API key | No | Daily reset |
+| **Groq** | ✅ Yes | 14K-30K RPD (Llama 3.3 70B, Mixtral) | API key | No | Never |
+| **Hugging Face** | ✅ Yes | 300 req/hour (thousands of models) | API key | No | Never |
+| **Together.ai** | ✅ $25 credits | $25 free credits for new users | API key | Yes | After credits used |
 | **Ollama** | ✅ Yes | Unlimited | Local install | No | Never |
 
 **Legend:**
 - RPD = Requests Per Day
 - BYOK = Bring Your Own Key
+
+---
+
+## 🎁 Free Access to Flagship Models
+
+**NEW!** Several providers now offer free access to flagship-quality models that rival GPT-4 and Claude Sonnet. Here's how to access them:
+
+### 🚀 OpenRouter Free Models
+
+OpenRouter provides free access to several high-quality models with daily limits:
+
+| Model | Quality Score | Context Window | Rate Limits | Best For |
+|-------|--------------|----------------|-------------|----------|
+| **DeepSeek R1** | 90/100 | 64K | Daily limit (resets) | Complex reasoning, coding |
+| **DeepSeek R1 Qwen3 8B** | 85/100 | 32K | Daily limit (resets) | General tasks, fast inference |
+| **Qwen 32B** | 88/100 | 32K | Daily limit (resets) | Multilingual, coding |
+
+**Setup:**
+```python
+from tta_dev_primitives.integrations import OpenRouterPrimitive
+
+# Use DeepSeek R1 for free
+deepseek = OpenRouterPrimitive(
+    model="deepseek/deepseek-r1:free",
+    api_key="your-openrouter-key"  # Free tier, no credit card
+)
+
+# Performance on par with OpenAI o1, but free!
+result = await deepseek.execute(context, {
+    "prompt": "Explain quantum computing in simple terms"
+})
+```
+
+**Key Benefits:**
+- ✅ No credit card required
+- ✅ Performance comparable to GPT-4/Claude
+- ✅ Daily limits reset automatically
+- ✅ Open-source models (DeepSeek, Qwen)
+
+**Rate Limits:**
+- Daily limits vary by model
+- Limits reset at midnight UTC
+- No hard cap on total usage per month
+
+---
+
+### 🌟 Google AI Studio (Gemini Pro & Flash)
+
+Google AI Studio provides **free access to Gemini Pro and Flash** models - flagship-quality models with generous limits:
+
+| Model | Quality Score | Context Window | Free Tier Limits | Paid Tier Cost |
+|-------|--------------|----------------|------------------|----------------|
+| **Gemini 2.5 Pro** | 89/100 | 2M tokens | Free of charge | $1.25/$10.00 per 1M tokens |
+| **Gemini 2.5 Flash** | 85/100 | 1M tokens | Free of charge | $0.30/$2.50 per 1M tokens |
+| **Gemini 2.5 Flash-Lite** | 82/100 | 1M tokens | Free of charge | $0.10/$0.40 per 1M tokens |
+
+**Setup:**
+```python
+from tta_dev_primitives.integrations import GoogleAIStudioPrimitive
+
+# Free Gemini Pro access via AI Studio
+gemini_pro = GoogleAIStudioPrimitive(
+    model="gemini-2.5-pro",
+    api_key="your-google-ai-studio-key"  # Free tier, no credit card
+)
+
+# Free Gemini Flash for faster responses
+gemini_flash = GoogleAIStudioPrimitive(
+    model="gemini-2.5-flash",
+    api_key="your-google-ai-studio-key"
+)
+```
+
+**Key Benefits:**
+- ✅ **Free Gemini Pro** - Flagship model at no cost
+- ✅ 1500 requests per day (RPD) free tier
+- ✅ No credit card required
+- ✅ 2M token context window (Pro)
+- ✅ Grounding with Google Search (500 RPD free)
+
+**Rate Limits (Free Tier):**
+- **Gemini Pro:** 1500 RPD, 32K RPM (requests per minute)
+- **Gemini Flash:** 1500 RPD, 15 RPM
+- **Gemini Flash-Lite:** 1500 RPD, 15 RPM
+
+**⚠️ Important:** Google AI Studio vs Vertex AI
+- **AI Studio:** Free tier with generous limits (recommended for development)
+- **Vertex AI:** Paid only, enterprise features, higher rate limits
+
+---
+
+### ⚡ Groq (Ultra-Fast Inference)
+
+Groq provides **free access to several models** with ultra-fast inference speeds:
+
+| Model | Quality Score | Speed | Free Tier Limits | Best For |
+|-------|--------------|-------|------------------|----------|
+| **Llama 3.3 70B** | 87/100 | 300+ tokens/sec | 14,400 RPD | General tasks, coding |
+| **Llama 3.1 8B** | 82/100 | 500+ tokens/sec | 30,000 RPD | Fast responses, simple tasks |
+| **Mixtral 8x7B** | 85/100 | 400+ tokens/sec | 14,400 RPD | Multilingual, reasoning |
+
+**Setup:**
+```python
+from tta_dev_primitives.integrations import GroqPrimitive
+
+# Ultra-fast inference with Llama 3.3 70B
+groq = GroqPrimitive(
+    model="llama-3.3-70b-versatile",
+    api_key="your-groq-key"  # Free tier, no credit card
+)
+
+# 300+ tokens/second - fastest free LLM API
+result = await groq.execute(context, {
+    "prompt": "Write a Python function to sort a list"
+})
+```
+
+**Key Benefits:**
+- ✅ **Ultra-fast inference** (300-500 tokens/sec)
+- ✅ No credit card required
+- ✅ High daily rate limits (14K-30K RPD)
+- ✅ Production-ready quality
+
+**Rate Limits (Free Tier):**
+- **Llama 3.3 70B:** 14,400 RPD, 30 RPM
+- **Llama 3.1 8B:** 30,000 RPD, 30 RPM
+- **Mixtral 8x7B:** 14,400 RPD, 30 RPM
+
+---
+
+### 🤗 Hugging Face Inference API
+
+Hugging Face provides free access to thousands of models via their Inference API:
+
+| Tier | Rate Limits | Models Available | Best For |
+|------|-------------|------------------|----------|
+| **Unregistered** | 1 request/hour | All public models | Testing |
+| **Registered (Free)** | 300 requests/hour | All public models | Development |
+| **Pro ($9/month)** | 10,000 requests/hour | All models + priority | Production |
+
+**Setup:**
+```python
+from tta_dev_primitives.integrations import HuggingFacePrimitive
+
+# Free access to Llama, Mistral, and more
+hf = HuggingFacePrimitive(
+    model="meta-llama/Llama-3.3-70B-Instruct",
+    api_key="your-hf-token"  # Free tier, no credit card
+)
+
+# Access thousands of open-source models
+result = await hf.execute(context, {
+    "prompt": "Explain machine learning"
+})
+```
+
+**Key Benefits:**
+- ✅ Access to **thousands of models**
+- ✅ 300 requests/hour (free tier)
+- ✅ No credit card required
+- ✅ Includes Llama, Mistral, Falcon, and more
+
+**Rate Limits (Free Tier):**
+- **Registered:** 300 requests/hour
+- **Unregistered:** 1 request/hour
+- **Pro ($9/month):** 10,000 requests/hour
+
+---
+
+### 💡 Together.ai Free Credits
+
+Together.ai offers **$25 in free credits** for new users:
+
+| Model | Quality Score | Free Credits | Cost After Credits | Best For |
+|-------|--------------|--------------|-------------------|----------|
+| **Llama 4 Scout** | 88/100 | $25 free | $0.20/$0.80 per 1M tokens | General tasks |
+| **FLUX.1 Schnell** | N/A | 3 months free | Image generation | Image generation |
+
+**Setup:**
+```python
+from tta_dev_primitives.integrations import TogetherAIPrimitive
+
+# $25 in free credits for new users
+together = TogetherAIPrimitive(
+    model="meta-llama/Llama-4-Scout",
+    api_key="your-together-key"  # $25 free credits
+)
+
+# Use credits for text or image generation
+result = await together.execute(context, {
+    "prompt": "Generate a business plan"
+})
+```
+
+**Key Benefits:**
+- ✅ **$25 in free credits** for new users
+- ✅ 3 months of unlimited FLUX.1 image generation
+- ✅ Access to latest Llama models
+- ✅ Fast inference speeds
+
+**Free Credits:**
+- **New users:** $25 in credits
+- **FLUX.1 Schnell:** 3 months unlimited (image generation)
+- **After credits:** Pay-as-you-go pricing
+
+---
+
+### 📊 Free Flagship Model Comparison
+
+| Provider | Best Free Model | Quality vs GPT-4 | Rate Limits | Credit Card? | Best For |
+|----------|----------------|------------------|-------------|--------------|----------|
+| **OpenRouter** | DeepSeek R1 | 90% | Daily limits | ❌ No | Complex reasoning |
+| **Google AI Studio** | Gemini 2.5 Pro | 89% | 1500 RPD | ❌ No | Production apps |
+| **Groq** | Llama 3.3 70B | 87% | 14,400 RPD | ❌ No | Ultra-fast inference |
+| **Hugging Face** | Llama 3.3 70B | 87% | 300 req/hour | ❌ No | Model variety |
+| **Together.ai** | Llama 4 Scout | 88% | $25 credits | ✅ Yes | New users |
+
+**Quality Scoring:**
+- 90-100: Matches or exceeds GPT-4/Claude Sonnet
+- 85-89: Flagship-quality, suitable for production
+- 80-84: High-quality, suitable for most tasks
+
+---
+
+### 🎯 Recommended Free Flagship Strategy
+
+**For Production Apps:**
+1. **Primary:** Google AI Studio (Gemini 2.5 Pro) - Free, flagship quality, 1500 RPD
+2. **Fallback:** OpenRouter (DeepSeek R1) - Free, daily limits reset
+3. **Speed:** Groq (Llama 3.3 70B) - Ultra-fast, 14,400 RPD
+
+**For Development:**
+1. **Primary:** Hugging Face (300 req/hour) - Model variety
+2. **Testing:** OpenRouter (DeepSeek R1) - Free, no limits
+3. **Prototyping:** Together.ai ($25 credits) - Latest models
+
+**Example Workflow:**
+```python
+from tta_dev_primitives.recovery import FallbackPrimitive
+from tta_dev_primitives.integrations import (
+    GoogleAIStudioPrimitive,
+    OpenRouterPrimitive,
+    GroqPrimitive
+)
+
+# Free flagship model fallback chain
+workflow = FallbackPrimitive(
+    primary=GoogleAIStudioPrimitive(model="gemini-2.5-pro"),  # Free, flagship
+    fallbacks=[
+        OpenRouterPrimitive(model="deepseek/deepseek-r1:free"),  # Free, daily limits
+        GroqPrimitive(model="llama-3.3-70b-versatile")  # Free, ultra-fast
+    ]
+)
+
+# 100% uptime with free flagship models!
+result = await workflow.execute(context, input_data)
+```
 
 ---
 
