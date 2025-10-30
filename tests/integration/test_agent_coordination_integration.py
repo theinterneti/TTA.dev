@@ -183,7 +183,7 @@ async def test_coordination_with_memory_aggregate():
 
     # Execute
     context = WorkflowContext(workflow_id="coordination-memory-test")
-    result = await workflow.execute({"data": "test"}, context)
+    await workflow.execute({"data": "test"}, context)
 
     # Verify result contains expected agent outputs
     assert isinstance(result, dict)
@@ -448,7 +448,7 @@ async def test_handoff_preserves_large_context():
     # Add large metadata
     context.metadata["large_data"] = {f"key{i}": f"value{i}" for i in range(1000)}
 
-    result = await workflow.execute({"data": "test"}, context)
+    await workflow.execute({"data": "test"}, context)
 
     # Large metadata should be preserved
     assert len(context.metadata["large_data"]) == 1000

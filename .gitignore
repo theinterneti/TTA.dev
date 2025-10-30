@@ -149,3 +149,4 @@ checkpoints/
 # Ignore common artifact directories
 artifacts/
 .artifacts/
+uv-x86_64-unknown-linux-gnu/
