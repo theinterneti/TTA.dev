@@ -3119,6 +3119,30 @@ Closes #123
 |-----------|---------|------|--------|---------------|
 | **MockPrimitive** | Testing and mocking | Testing | `from tta_dev_primitives.testing import MockPrimitive` | [mocks.py](packages/tta-dev-primitives/src/tta_dev_primitives/testing/mocks.py) |
 
+### Integration Primitives
+
+| Primitive | Purpose | Type | Import | Documentation |
+|-----------|---------|------|--------|---------------|
+| **OpenAIPrimitive** | OpenAI API integration | LLM | `from tta_dev_primitives.integrations import OpenAIPrimitive` | [openai_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py) |
+| **AnthropicPrimitive** | Anthropic Claude API integration | LLM | `from tta_dev_primitives.integrations import AnthropicPrimitive` | [anthropic_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py) |
+| **OllamaPrimitive** | Ollama local LLM integration | LLM | `from tta_dev_primitives.integrations import OllamaPrimitive` | [ollama_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py) |
+| **SupabasePrimitive** | Supabase database operations | Database | `from tta_dev_primitives.integrations import SupabasePrimitive` | [supabase_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/supabase_primitive.py) |
+| **SQLitePrimitive** | SQLite local database operations | Database | `from tta_dev_primitives.integrations import SQLitePrimitive` | [sqlite_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py) |
+
+### Research Primitives
+
+| Primitive | Purpose | Type | Import | Documentation |
+|-----------|---------|------|--------|---------------|
+| **FreeTierResearchPrimitive** | Automated LLM free tier research | Research | `from tta_dev_primitives.research import FreeTierResearchPrimitive` | [free_tier_research.py](packages/tta-dev-primitives/src/tta_dev_primitives/research/free_tier_research.py) |
+
+### Orchestration Primitives
+
+| Primitive | Purpose | Type | Import | Documentation |
+|-----------|---------|------|--------|---------------|
+| **TaskClassifierPrimitive** | Classify tasks by complexity | Orchestration | `from tta_dev_primitives.orchestration import TaskClassifierPrimitive` | [task_classifier.py](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/task_classifier.py) |
+| **DelegationPrimitive** | Delegate tasks to executors | Orchestration | `from tta_dev_primitives.orchestration import DelegationPrimitive` | [delegation_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/delegation_primitive.py) |
+| **MultiModelWorkflow** | Orchestrate multi-model workflows | Orchestration | `from tta_dev_primitives.orchestration import MultiModelWorkflow` | [multi_model_workflow.py](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py) |
+
 ### Agent Coordination Primitives
 
 | Primitive | Purpose | Type | Import | Documentation |
@@ -3571,7 +3595,289 @@ assert mock_llm.last_call_args == (context, input_data)
 
 ---
 
-### 14. AgentHandoffPrimitive
+### 14. FreeTierResearchPrimitive
+
+**Automated LLM free tier research and documentation**
+
+```python
+from tta_dev_primitives.research import FreeTierResearchPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+
+# Create research primitive
+researcher = FreeTierResearchPrimitive()
+
+# Research all providers
+context = WorkflowContext(workflow_id="free-tier-update")
+request = FreeTierResearchRequest(
+    providers=["openai", "anthropic", "google-gemini", "openrouter", "ollama"],
+    existing_guide_path="docs/guides/llm-cost-guide.md",
+    output_path="docs/guides/llm-cost-guide.md",
+    generate_changelog=True
+)
+response = await researcher.execute(request, context)
+
+# Check for changes
+if response.changelog:
+    print("Changes detected:")
+    for change in response.changelog:
+        print(f"  - {change}")
+
+# Access provider information
+for provider_name, info in response.providers.items():
+    print(f"{info.name}: {'Free' if info.has_free_tier else 'Paid'}")
+    if info.free_tier_details:
+        print(f"  └─ {info.free_tier_details}")
+```
+
+**Key Features:**
+
+- Automated provider research (OpenAI, Anthropic, Google Gemini, OpenRouter, Ollama)
+- Changelog generation (detects changes from existing guide)
+- Markdown guide generation
+- Structured provider information (rate limits, costs, expiration)
+- CLI tool for easy updates (`scripts/update-free-tiers.py`)
+
+**Provider Information Tracked:**
+
+- Free tier availability
+- Rate limits (RPM, RPD, TPM)
+- Credit card requirements
+- Expiration policies
+- Cost after free tier
+- Setup URLs and pricing URLs
+- Common confusion points
+
+**When to Use:**
+
+- Keeping free tier documentation current
+- Researching provider pricing changes
+- Generating comparison tables
+- Automating documentation updates
+
+**CLI Usage:**
+
+```bash
+# Update all providers
+uv run python scripts/update-free-tiers.py
+
+# Update specific providers
+uv run python scripts/update-free-tiers.py --providers openai ollama
+
+# Write to custom output
+uv run python scripts/update-free-tiers.py --output custom-guide.md
+
+# Disable changelog
+uv run python scripts/update-free-tiers.py --no-changelog
+```
+
+**Example:** [free_tier_research.py](packages/tta-dev-primitives/src/tta_dev_primitives/research/free_tier_research.py)
+
+---
+
+### 15. TaskClassifierPrimitive
+
+**Classify tasks by complexity for intelligent routing**
+
+```python
+from tta_dev_primitives.orchestration import TaskClassifierPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+
+# Create classifier
+classifier = TaskClassifierPrimitive(prefer_free=True)
+
+# Classify a task
+context = WorkflowContext(workflow_id="task-classification")
+task_description = "Generate unit tests for a Python function"
+
+classification = await classifier.execute(task_description, context)
+
+# Check classification
+print(f"Complexity: {classification['complexity']}")  # "MODERATE"
+print(f"Recommended Model: {classification['recommended_model']}")  # "gemini-2.5-pro"
+print(f"Reasoning: {classification['reasoning']}")
+```
+
+**Complexity Levels:**
+
+- **SIMPLE** - Simple queries, factual questions → Groq (ultra-fast, free)
+- **MODERATE** - Analysis, summarization, basic reasoning → Gemini Pro (flagship quality, free)
+- **COMPLEX** - Multi-step reasoning, planning, creative tasks → DeepSeek R1 (on par with o1, free)
+- **EXPERT** - Advanced reasoning, code generation, research → Claude Sonnet 4.5 (paid, highest quality)
+
+**Key Features:**
+
+- Intelligent task complexity classification
+- Free model preference (when `prefer_free=True`)
+- Quality-aware routing (uses free models when quality sufficient)
+- Detailed reasoning for classification decisions
+- Configurable complexity thresholds
+
+**When to Use:**
+
+- Multi-model orchestration workflows
+- Cost optimization (route simple tasks to free models)
+- Quality-aware task delegation
+- Intelligent LLM selection
+
+**Example:** [task_classifier.py](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/task_classifier.py)
+
+---
+
+### 16. DelegationPrimitive
+
+**Delegate tasks to executor models**
+
+```python
+from tta_dev_primitives.orchestration import DelegationPrimitive, DelegationRequest
+from tta_dev_primitives.integrations import GoogleAIStudioPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+
+# Create delegation primitive with executors
+delegation = DelegationPrimitive(
+    executor_primitives={
+        "gemini-2.5-pro": GoogleAIStudioPrimitive(model="gemini-2.5-pro"),
+        "llama-3.3-70b": GroqPrimitive(model="llama-3.3-70b-versatile"),
+    }
+)
+
+# Create delegation request
+request = DelegationRequest(
+    task_description="Generate unit tests for this function",
+    executor_model="gemini-2.5-pro",
+    messages=[{"role": "user", "content": "def add(a, b): return a + b"}],
+    metadata={"complexity": "MODERATE"}
+)
+
+# Execute delegation
+context = WorkflowContext(workflow_id="delegation")
+response = await delegation.execute(request, context)
+
+# Access results
+print(f"Response: {response.content}")
+print(f"Cost: ${response.cost}")
+print(f"Tokens: {response.usage['total_tokens']}")
+```
+
+**Key Features:**
+
+- Delegates tasks to configured executor models
+- Tracks execution metrics (tokens, cost, duration)
+- Supports multiple executor types (Gemini, Groq, OpenRouter, etc.)
+- Automatic cost calculation
+- Detailed usage tracking
+
+**When to Use:**
+
+- Executing tasks with specific models
+- Cost tracking for delegated operations
+- Multi-model workflows
+- Executor abstraction layer
+
+**Example:** [delegation_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/delegation_primitive.py)
+
+---
+
+### 17. MultiModelWorkflow
+
+**Orchestrate multi-model workflows with 80-95% cost savings**
+
+```python
+from tta_dev_primitives.orchestration import MultiModelWorkflow
+from tta_dev_primitives.integrations import GoogleAIStudioPrimitive, GroqPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+
+# Create workflow with executors
+workflow = MultiModelWorkflow(
+    executor_primitives={
+        "gemini-2.5-pro": GoogleAIStudioPrimitive(model="gemini-2.5-pro"),
+        "llama-3.3-70b": GroqPrimitive(model="llama-3.3-70b-versatile"),
+    },
+    prefer_free=True  # Prefer free models when quality sufficient
+)
+
+# Execute workflow
+context = WorkflowContext(workflow_id="multi-model-orchestration")
+task_description = "Generate comprehensive unit tests for a Python module"
+
+result = await workflow.execute(task_description, context)
+
+# Access results
+print(f"Task: {result['task_description']}")
+print(f"Complexity: {result['classification']['complexity']}")
+print(f"Executor Used: {result['delegation']['executor_model']}")
+print(f"Response: {result['delegation']['content']}")
+print(f"Total Cost: ${result['delegation']['cost']}")
+```
+
+**Workflow Architecture:**
+
+```
+User Task → TaskClassifier (Claude) → DelegationPrimitive (Gemini/Groq/etc.) → Result
+            ↓                          ↓
+            Classify complexity        Execute with free model
+            Recommend model            Track cost/tokens
+```
+
+**Key Features:**
+
+- **Intelligent Classification** - Claude classifies task complexity
+- **Cost-Optimized Delegation** - Routes to free models when possible
+- **Full Observability** - Tracks all metrics (tokens, cost, duration)
+- **Configurable** - Supports YAML configuration via `.tta/orchestration-config.yaml`
+- **80-95% Cost Savings** - Compared to all-Claude approach
+
+**Cost Savings Examples:**
+
+| Use Case | All-Claude | Orchestration | Savings |
+|----------|-----------|---------------|---------|
+| Test Generation | $0.50/file | $0.009/file | 98% |
+| PR Review | $2.00/PR | $0.30/PR | 85% |
+| Documentation | $1.50/file | $0.15/file | 90% |
+
+**When to Use:**
+
+- Production workflows requiring cost optimization
+- Multi-model orchestration
+- Quality-aware task delegation
+- Workflows with mixed complexity tasks
+
+**Configuration:**
+
+```yaml
+# .tta/orchestration-config.yaml
+orchestration:
+  enabled: true
+  prefer_free_models: true
+  quality_threshold: 0.85
+
+  orchestrator:
+    model: claude-sonnet-4.5
+    api_key_env: ANTHROPIC_API_KEY
+
+  executors:
+    - model: gemini-2.5-pro
+      provider: google-ai-studio
+      api_key_env: GOOGLE_API_KEY
+      use_cases: [moderate, complex]
+```
+
+**Examples:**
+
+- [orchestration_test_generation.py](packages/tta-dev-primitives/examples/orchestration_test_generation.py) - Automated test generation
+- [orchestration_pr_review.py](packages/tta-dev-primitives/examples/orchestration_pr_review.py) - PR review automation
+- [orchestration_doc_generation.py](packages/tta-dev-primitives/examples/orchestration_doc_generation.py) - Documentation generation
+
+**Documentation:**
+
+- [ORCHESTRATION_DEMO_GUIDE.md](packages/tta-dev-primitives/examples/ORCHESTRATION_DEMO_GUIDE.md) - Test generation guide
+- [PR_REVIEW_GUIDE.md](packages/tta-dev-primitives/examples/PR_REVIEW_GUIDE.md) - PR review guide
+- [DOC_GENERATION_GUIDE.md](packages/tta-dev-primitives/examples/DOC_GENERATION_GUIDE.md) - Documentation generation guide
+- [orchestration-configuration-guide.md](docs/guides/orchestration-configuration-guide.md) - Configuration reference
+- [MULTI_MODEL_ORCHESTRATION_SUMMARY.md](docs/guides/MULTI_MODEL_ORCHESTRATION_SUMMARY.md) - Complete implementation summary
+
+---
+
+### 18. AgentHandoffPrimitive
 
 **Task handoff between agents**
 

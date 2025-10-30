@@ -163,10 +163,14 @@ class ConditionalPrimitive(WorkflowPrimitive[Any, Any]):
         tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
         if tracer and TRACING_AVAILABLE:
-            with tracer.start_as_current_span(f"conditional.branch_{branch_name}") as span:
+            with tracer.start_as_current_span(
+                f"conditional.branch_{branch_name}"
+            ) as span:
                 span.set_attribute("branch.name", branch_name)
                 span.set_attribute("branch.condition_result", condition_result)
-                span.set_attribute("branch.primitive_type", selected_primitive.__class__.__name__)
+                span.set_attribute(
+                    "branch.primitive_type", selected_primitive.__class__.__name__
+                )
 
                 try:
                     result = await selected_primitive.execute(input_data, context)
@@ -373,7 +377,9 @@ class SwitchPrimitive(WorkflowPrimitive[Any, Any]):
             with tracer.start_as_current_span(f"switch.{case_name}") as span:
                 span.set_attribute("case.name", case_name)
                 span.set_attribute("case.key", case_key)
-                span.set_attribute("case.primitive_type", selected_primitive.__class__.__name__)
+                span.set_attribute(
+                    "case.primitive_type", selected_primitive.__class__.__name__
+                )
 
                 try:
                     result = await selected_primitive.execute(input_data, context)
