@@ -305,6 +305,150 @@ result = await workflow.execute(context, input_data)
 
 ---
 
+### 🚀 Quick Start Guide: Set Up Free Flagship Access in 10 Minutes
+
+Follow these steps to get free flagship model access working immediately:
+
+#### Step 1: Install TTA.dev Primitives
+
+```bash
+cd packages/tta-dev-primitives
+uv sync --extra integrations
+```
+
+#### Step 2: Obtain API Keys
+
+**Google AI Studio (Recommended - Best Free Flagship):**
+1. Go to [https://aistudio.google.com/](https://aistudio.google.com/)
+2. Click "Get API key" in the top right
+3. Create new API key
+4. Copy the key (starts with `AIza...`)
+
+**OpenRouter (DeepSeek R1 - On Par with OpenAI o1):**
+1. Go to [https://openrouter.ai/](https://openrouter.ai/)
+2. Sign up for free account (no credit card required)
+3. Go to "Keys" in dashboard
+4. Create new API key
+5. Copy the key (starts with `sk-or-...`)
+
+**Groq (Ultra-Fast Inference):**
+1. Go to [https://console.groq.com/](https://console.groq.com/)
+2. Sign up for free account (no credit card required)
+3. Go to "API Keys" in dashboard
+4. Create new API key
+5. Copy the key (starts with `gsk_...`)
+
+#### Step 3: Set Environment Variables
+
+Create a `.env` file in your project root:
+
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit .env and add your keys
+GOOGLE_API_KEY=AIza...your-key-here
+OPENROUTER_API_KEY=sk-or-...your-key-here
+GROQ_API_KEY=gsk_...your-key-here
+```
+
+#### Step 4: Test Your Setup
+
+Run the free flagship models example:
+
+```bash
+cd packages/tta-dev-primitives
+uv run python examples/free_flagship_models.py
+```
+
+**Expected Output:**
+```
+✅ Model: gemini-2.5-pro
+📝 Response: [AI-generated response]
+📊 Usage: {'prompt_tokens': 10, 'completion_tokens': 50, 'total_tokens': 60}
+🎯 Quality: 89/100 (flagship)
+💰 Cost: $0.00 (FREE)
+```
+
+#### Step 5: Verify Free Tier Access
+
+**Google AI Studio:**
+- Check usage: [https://aistudio.google.com/](https://aistudio.google.com/)
+- Free tier: 1500 RPD
+- No credit card required
+
+**OpenRouter:**
+- Check usage: [https://openrouter.ai/activity](https://openrouter.ai/activity)
+- Free tier: Daily limits reset at midnight UTC
+- No credit card required
+
+**Groq:**
+- Check usage: [https://console.groq.com/](https://console.groq.com/)
+- Free tier: 14,400-30,000 RPD
+- No credit card required
+
+#### Step 6: Implement in Your App
+
+Use the fallback chain pattern for 100% uptime:
+
+```python
+from tta_dev_primitives.recovery import FallbackPrimitive
+from tta_dev_primitives.integrations import (
+    GoogleAIStudioPrimitive,
+    OpenRouterPrimitive,
+    GroqPrimitive
+)
+
+# Create fallback chain
+llm = FallbackPrimitive(
+    primary=GoogleAIStudioPrimitive(model="gemini-2.5-pro"),
+    fallbacks=[
+        OpenRouterPrimitive(model="deepseek/deepseek-r1:free"),
+        GroqPrimitive(model="llama-3.3-70b-versatile")
+    ]
+)
+
+# Use in your app
+response = await llm.execute(request, context)
+```
+
+#### Troubleshooting
+
+**Issue: "Invalid API key"**
+- Solution: Verify key is correct and not expired
+- Check environment variable is set: `echo $GOOGLE_API_KEY`
+
+**Issue: "Rate limit exceeded"**
+- Solution: Switch to fallback provider or wait for limit reset
+- Google AI Studio: 1500 RPD limit
+- OpenRouter: Daily limits reset at midnight UTC
+- Groq: 14,400-30,000 RPD limit
+
+**Issue: "Model not found"**
+- Solution: Verify model name is correct
+- Google AI Studio: `gemini-2.5-pro`, `gemini-2.5-flash`
+- OpenRouter: `deepseek/deepseek-r1:free`, `qwen/qwen-32b:free`
+- Groq: `llama-3.3-70b-versatile`, `llama-3.1-8b-instant`
+
+**Issue: "Connection timeout"**
+- Solution: Check internet connection and provider status
+- Use fallback chain for automatic failover
+
+#### Next Steps
+
+1. **Monitor Usage:** Check provider dashboards regularly
+2. **Set Up Alerts:** Configure alerts before hitting limits
+3. **Optimize Routing:** Use RouterPrimitive to route simple queries to faster models
+4. **Add Caching:** Use CachePrimitive to reduce API calls by 30-40%
+5. **Production Deployment:** Implement fallback chain for 100% uptime
+
+**Full Documentation:**
+- [Free Flagship Models Example](../../packages/tta-dev-primitives/examples/free_flagship_models.py)
+- [Cost Optimization Patterns](./cost-optimization-patterns.md)
+- [Integration Primitives Quick Reference](./integration-primitives-quickref.md)
+
+---
+
 ## 💰 When to Use Paid Models
 
 While free tiers are great for learning and prototyping, production use cases often require paid models. Here's when to make the switch:
