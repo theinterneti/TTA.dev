@@ -1,3 +1,29 @@
+#!/bin/bash
+# Enhance GitHub Copilot Setup Workflow - Phase 1 Optimizations
+# Implements low-hanging fruit improvements from COPILOT_ENVIRONMENT_OPTIMIZATION.md
+
+set -euo pipefail
+
+echo "🚀 Enhancing GitHub Copilot Setup Workflow - Phase 1"
+echo ""
+
+WORKFLOW_FILE=".github/workflows/copilot-setup-steps.yml"
+
+if [ ! -f "$WORKFLOW_FILE" ]; then
+    echo "❌ Error: $WORKFLOW_FILE not found"
+    exit 1
+fi
+
+echo "📝 Backing up current workflow..."
+cp "$WORKFLOW_FILE" "${WORKFLOW_FILE}.backup"
+echo "✅ Backup created: ${WORKFLOW_FILE}.backup"
+echo ""
+
+echo "🔧 Applying Phase 1 optimizations..."
+echo ""
+
+# Create enhanced workflow with all Phase 1 improvements
+cat > "$WORKFLOW_FILE" << 'EOF'
 name: "Copilot Setup Steps"
 
 # This workflow configures the GitHub Copilot coding agent's ephemeral environment.
@@ -96,3 +122,34 @@ jobs:
           echo "  • Format code: uv run ruff format ."
           echo "  • Type check: uvx pyright packages/"
           echo "  • Verify env: ./scripts/check-environment.sh"
+EOF
+
+echo "✅ Phase 1 optimizations applied:"
+echo "   1. Documentation comments added"
+echo "   2. Environment variables configured"
+echo "   3. Enhanced verification output with agent guidance"
+echo ""
+
+echo "📊 Changes summary:"
+git diff --stat "$WORKFLOW_FILE" || echo "(No git repo detected, showing file size)"
+wc -l "$WORKFLOW_FILE"
+echo ""
+
+echo "🎯 Next steps:"
+echo "   1. Review changes: git diff $WORKFLOW_FILE"
+echo "   2. Test locally: Check verification output makes sense"
+echo "   3. Test on GitHub: git commit & push, then monitor workflow run"
+echo "   4. Monitor performance: gh run list --workflow=copilot-setup-steps.yml"
+echo ""
+
+echo "📖 Full optimization guide: docs/development/COPILOT_ENVIRONMENT_OPTIMIZATION.md"
+echo ""
+
+read -p "Would you like to see the diff now? (y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    git diff "$WORKFLOW_FILE" || cat "$WORKFLOW_FILE"
+fi
+
+echo ""
+echo "✨ Enhancement complete! Backup available at: ${WORKFLOW_FILE}.backup"
