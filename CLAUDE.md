@@ -64,7 +64,6 @@ Claude supports Extended Thinking mode for complex reasoning:
 - Useful for architecture decisions, debugging complex issues
 - Access via chat mode selection in supported tools
 
-
 # Claude-Specific Workflows
 
 ## When Working with tta-dev-primitives
@@ -128,7 +127,6 @@ When optimizing performance:
 3. Add `CachePrimitive` to avoid redundant work
 4. Measure impact with benchmarks
 
-
 # Claude-Specific Preferences
 
 ## Response Format
@@ -158,7 +156,6 @@ Claude offers different chat modes for different tasks:
 - **Code Mode**: Optimized for code generation and editing
 
 Choose the appropriate mode based on task complexity and user needs.
-
 
 # MCP Integration with Claude
 
@@ -266,7 +263,6 @@ class DocLookupPrimitive(WorkflowPrimitive[str, str]):
 ```
 
 Consider creating primitives that wrap MCP tools for reusable workflows.
-
 
 ---
 

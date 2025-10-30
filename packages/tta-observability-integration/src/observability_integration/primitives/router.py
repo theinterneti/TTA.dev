@@ -133,10 +133,7 @@ class RouterPrimitive(WorkflowPrimitive[Any, Any]):
             self._cost_savings_counter = None
             self._errors_counter = None
 
-        logger.info(
-            f"RouterPrimitive initialized with {len(routes)} routes: "
-            f"{list(routes.keys())}"
-        )
+        logger.info(f"RouterPrimitive initialized with {len(routes)} routes: {list(routes.keys())}")
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """
@@ -171,9 +168,7 @@ class RouterPrimitive(WorkflowPrimitive[Any, Any]):
                     routing_reason = "invalid_route_fallback"
 
             except Exception as e:
-                logger.warning(
-                    f"Routing function failed: {e}, using default route", exc_info=True
-                )
+                logger.warning(f"Routing function failed: {e}, using default route", exc_info=True)
                 selected_route = self.default_route
                 routing_reason = "routing_error_fallback"
 
@@ -184,9 +179,7 @@ class RouterPrimitive(WorkflowPrimitive[Any, Any]):
 
             # Record routing decision
             if self._decisions_counter:
-                self._decisions_counter.add(
-                    1, {"route": selected_route, "reason": routing_reason}
-                )
+                self._decisions_counter.add(1, {"route": selected_route, "reason": routing_reason})
 
             logger.info(f"Routing to '{selected_route}' (reason: {routing_reason})")
 
@@ -214,7 +207,4 @@ class RouterPrimitive(WorkflowPrimitive[Any, Any]):
 
     def __repr__(self) -> str:
         """String representation of router."""
-        return (
-            f"RouterPrimitive(routes={list(self.routes.keys())}, "
-            f"default='{self.default_route}')"
-        )
+        return f"RouterPrimitive(routes={list(self.routes.keys())}, default='{self.default_route}')"

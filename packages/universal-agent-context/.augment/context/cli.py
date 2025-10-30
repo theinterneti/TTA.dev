@@ -94,9 +94,7 @@ def cmd_show(args):
     # Show recent messages
     print("\nRecent messages:")
     for msg in context.messages[-5:]:
-        role_emoji = {"system": "⚙️", "user": "👤", "assistant": "🤖"}.get(
-            msg.role, "💬"
-        )
+        role_emoji = {"system": "⚙️", "user": "👤", "assistant": "🤖"}.get(msg.role, "💬")
 
         content_preview = msg.content[:100].replace("\n", " ")
         if len(msg.content) > 100:
@@ -152,9 +150,7 @@ def cmd_add(args):
     manager.load_session(session_file)
 
     # Add message
-    manager.add_message(
-        session_id=session_id, role=role, content=message, importance=importance
-    )
+    manager.add_message(session_id=session_id, role=role, content=message, importance=importance)
 
     print(f"✓ Added {role} message to session: {session_id}")
     print(f"  Importance: {importance}")

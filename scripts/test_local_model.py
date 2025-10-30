@@ -3,12 +3,12 @@
 Simple script to test a local model directly.
 """
 
+import logging
 import os
 import sys
 import time
+
 import torch
-import logging
-from pathlib import Path
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 # Configure logging
@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Get model cache directory from environment or use default
 MODEL_CACHE_DIR = os.getenv("MODEL_CACHE_DIR", "/app/.model_cache")
+
 
 def test_model(model_name):
     """Test a model with a simple prompt."""
@@ -88,7 +89,9 @@ def test_model(model_name):
         tokens_generated = len(outputs[0]) - len(input_ids[0])
         tokens_per_second = tokens_generated / duration if duration > 0 else 0
 
-        logger.info(f"Generated {tokens_generated} tokens in {duration:.2f}s ({tokens_per_second:.2f} tokens/s)")
+        logger.info(
+            f"Generated {tokens_generated} tokens in {duration:.2f}s ({tokens_per_second:.2f} tokens/s)"
+        )
         logger.info(f"Response: {output_text}")
 
         return {
@@ -96,15 +99,13 @@ def test_model(model_name):
             "duration": duration,
             "tokens_generated": tokens_generated,
             "tokens_per_second": tokens_per_second,
-            "response": output_text
+            "response": output_text,
         }
 
     except Exception as e:
         logger.error(f"Error testing model {model_name}: {e}")
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

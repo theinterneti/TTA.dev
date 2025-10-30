@@ -5,27 +5,24 @@ This module contains tests for the LangGraph engine functionality.
 """
 
 import unittest
-import os
-import sys
 
 # Note: There is no conftest.py handling sys.path modification in this directory.
-
 from src.core.langgraph_engine import (
-    CharacterState,
-    GameState,
     AgentState,
-    QueryKnowledgeGraphInput,
-    GetNodePropertiesInput,
+    CharacterState,
     CreateGameObjectInput,
-    query_knowledge_graph,
-    get_node_properties,
+    GameState,
+    GetNodePropertiesInput,
+    QueryKnowledgeGraphInput,
     create_game_object,
-    parse_input_rule_based,
+    create_workflow,
+    generate_fallback_narrative,
+    get_node_properties,
     ipa_node,
     nga_node,
-    generate_fallback_narrative,
+    parse_input_rule_based,
+    query_knowledge_graph,
     router,
-    create_workflow
 )
 from src.knowledge import Neo4jManager
 
@@ -36,9 +33,7 @@ class TestLangGraphModels(unittest.TestCase):
     def test_character_state(self):
         """Test that CharacterState can be initialized."""
         state = CharacterState(
-            character_id="test_character",
-            name="Test Character",
-            location_id="test_location"
+            character_id="test_character", name="Test Character", location_id="test_location"
         )
         self.assertEqual(state.character_id, "test_character")
         self.assertEqual(state.name, "Test Character")
@@ -49,8 +44,7 @@ class TestLangGraphModels(unittest.TestCase):
     def test_game_state(self):
         """Test that GameState can be initialized."""
         state = GameState(
-            current_location_id="test_location",
-            current_location_name="Test Location"
+            current_location_id="test_location", current_location_name="Test Location"
         )
         self.assertEqual(state.current_location_id, "test_location")
         self.assertEqual(state.current_location_name, "Test Location")
@@ -61,12 +55,9 @@ class TestLangGraphModels(unittest.TestCase):
     def test_agent_state(self):
         """Test that AgentState can be initialized."""
         game_state = GameState(
-            current_location_id="test_location",
-            current_location_name="Test Location"
+            current_location_id="test_location", current_location_name="Test Location"
         )
-        state = AgentState(
-            game_state=game_state
-        )
+        state = AgentState(game_state=game_state)
         self.assertEqual(state.current_agent, "ipa")  # Default value
         self.assertIsNone(state.player_input)  # Default value
         self.assertIsNone(state.parsed_input)  # Default value
@@ -93,10 +84,7 @@ class TestLangGraphTools(unittest.TestCase):
         """Test the get_node_properties tool."""
         # This test might fail if the mock database doesn't have the expected data
         # We'll modify it to handle both success and failure cases
-        input_data = GetNodePropertiesInput(
-            node_id="Forest Clearing",
-            node_type="Location"
-        )
+        input_data = GetNodePropertiesInput(node_id="Forest Clearing", node_type="Location")
         result = get_node_properties(self.neo4j_manager, input_data)
 
         # Check that we got a result object with the expected structure
@@ -110,7 +98,7 @@ class TestLangGraphTools(unittest.TestCase):
             object_type="Item",
             name="Test Item",
             description="A test item",
-            location_name="Forest Clearing"
+            location_name="Forest Clearing",
         )
         result = create_game_object(self.neo4j_manager, input_data)
         self.assertTrue(result.success)
@@ -150,13 +138,9 @@ class TestInputProcessing(unittest.TestCase):
     def test_ipa_node(self):
         """Test the IPA node."""
         game_state = GameState(
-            current_location_id="test_location",
-            current_location_name="Test Location"
+            current_location_id="test_location", current_location_name="Test Location"
         )
-        state = AgentState(
-            game_state=game_state,
-            player_input="look"
-        )
+        state = AgentState(game_state=game_state, player_input="look")
 
         # Process the input
         result = ipa_node(state)
@@ -167,13 +151,10 @@ class TestInputProcessing(unittest.TestCase):
     def test_nga_node(self):
         """Test the NGA node."""
         game_state = GameState(
-            current_location_id="test_location",
-            current_location_name="Test Location"
+            current_location_id="test_location", current_location_name="Test Location"
         )
         state = AgentState(
-            game_state=game_state,
-            player_input="look",
-            parsed_input={"intent": "look"}
+            game_state=game_state, player_input="look", parsed_input={"intent": "look"}
         )
 
         # Process the input
@@ -185,30 +166,31 @@ class TestInputProcessing(unittest.TestCase):
     def test_generate_fallback_narrative(self):
         """Test the fallback narrative generation."""
         # Test location look
-        result = generate_fallback_narrative("location_look", {
-            "name": "Test Location",
-            "items": ["sword", "shield"],
-            "characters": ["guardian"]
-        })
+        result = generate_fallback_narrative(
+            "location_look",
+            {"name": "Test Location", "items": ["sword", "shield"], "characters": ["guardian"]},
+        )
         self.assertIn("Test Location", result)
         self.assertIn("sword", result)
         self.assertIn("guardian", result)
 
         # Test action result - move
-        result = generate_fallback_narrative("action_result", {
-            "action": "move",
-            "success": True,
-            "direction": "north",
-            "destination": "Test Location"
-        })
+        result = generate_fallback_narrative(
+            "action_result",
+            {
+                "action": "move",
+                "success": True,
+                "direction": "north",
+                "destination": "Test Location",
+            },
+        )
         self.assertIn("move north", result)
         self.assertIn("Test Location", result)
 
         # Test action result - inventory
-        result = generate_fallback_narrative("action_result", {
-            "action": "inventory",
-            "items": ["sword", "shield"]
-        })
+        result = generate_fallback_narrative(
+            "action_result", {"action": "inventory", "items": ["sword", "shield"]}
+        )
         self.assertIn("carrying", result)
         self.assertIn("sword", result)
         self.assertIn("shield", result)
@@ -216,24 +198,16 @@ class TestInputProcessing(unittest.TestCase):
     def test_router(self):
         """Test the router function."""
         game_state = GameState(
-            current_location_id="test_location",
-            current_location_name="Test Location"
+            current_location_id="test_location", current_location_name="Test Location"
         )
 
         # Test routing to IPA
-        state = AgentState(
-            game_state=game_state,
-            player_input="look",
-            parsed_input=None
-        )
+        state = AgentState(game_state=game_state, player_input="look", parsed_input=None)
         self.assertEqual(router(state), "ipa")
 
         # Test routing to NGA
         state = AgentState(
-            game_state=game_state,
-            player_input="look",
-            parsed_input={"intent": "look"},
-            response=""
+            game_state=game_state, player_input="look", parsed_input={"intent": "look"}, response=""
         )
         self.assertEqual(router(state), "nga")
 
@@ -242,7 +216,7 @@ class TestInputProcessing(unittest.TestCase):
             game_state=game_state,
             player_input="look",
             parsed_input={"intent": "look"},
-            response="You look around."
+            response="You look around.",
         )
         self.assertEqual(router(state), "END")
 
@@ -275,5 +249,5 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(result.game_state.current_location_name, "Forest Clearing")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

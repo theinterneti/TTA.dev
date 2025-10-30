@@ -4,11 +4,11 @@ Unit tests for the knowledge resource MCP server.
 This module contains tests for the knowledge resource MCP server's tools and resources.
 """
 
-import pytest
-import json
-import pytest_asyncio
-from fastmcp import FastMCP
 from typing import Any
+
+import pytest
+from fastmcp import FastMCP
+
 
 @pytest.mark.asyncio
 async def test_knowledge_resource_server_initialization(knowledge_resource_server):
@@ -20,6 +20,7 @@ async def test_knowledge_resource_server_initialization(knowledge_resource_serve
     tools = [tool.name for tool in await knowledge_resource_server.list_tools()]
     assert "query_knowledge_graph" in tools
     assert "get_entity_by_name" in tools
+
 
 @pytest.mark.asyncio
 async def test_query_knowledge_graph_tool(knowledge_resource_server: FastMCP):
@@ -47,7 +48,9 @@ async def test_query_knowledge_graph_tool(knowledge_resource_server: FastMCP):
     # Test the tool's function by calling the server's call_tool method
 
     # Test with a valid query
-    result = await knowledge_resource_server.call_tool("query_knowledge_graph", {"query": "MATCH (l:Location) RETURN l"})
+    result = await knowledge_resource_server.call_tool(
+        "query_knowledge_graph", {"query": "MATCH (l:Location) RETURN l"}
+    )
     # The result might be a string or a list of TextContent objects
     if isinstance(result, list):
         assert len(result) > 0
@@ -62,7 +65,9 @@ async def test_query_knowledge_graph_tool(knowledge_resource_server: FastMCP):
         assert "Crystal Caverns" in result
 
     # Test with a valid query for characters
-    result = await knowledge_resource_server.call_tool("query_knowledge_graph", {"query": "MATCH (c:Character) RETURN c"})
+    result = await knowledge_resource_server.call_tool(
+        "query_knowledge_graph", {"query": "MATCH (c:Character) RETURN c"}
+    )
     # The result might be a string or a list of TextContent objects
     if isinstance(result, list):
         assert len(result) > 0
@@ -77,7 +82,9 @@ async def test_query_knowledge_graph_tool(knowledge_resource_server: FastMCP):
         assert "Lyra" in result
 
     # Test with a valid query for items
-    result = await knowledge_resource_server.call_tool("query_knowledge_graph", {"query": "MATCH (i:Item) RETURN i"})
+    result = await knowledge_resource_server.call_tool(
+        "query_knowledge_graph", {"query": "MATCH (i:Item) RETURN i"}
+    )
     # The result might be a string or a list of TextContent objects
     if isinstance(result, list):
         assert len(result) > 0
@@ -92,7 +99,9 @@ async def test_query_knowledge_graph_tool(knowledge_resource_server: FastMCP):
         assert "Ancient Tome" in result
 
     # Test with a dangerous query
-    result: Any = await knowledge_resource_server.call_tool("query_knowledge_graph", {"query": "CREATE (n:Test) RETURN n"})
+    result: Any = await knowledge_resource_server.call_tool(
+        "query_knowledge_graph", {"query": "CREATE (n:Test) RETURN n"}
+    )
     # The result might be a string or a list of TextContent objects
     if isinstance(result, list):
         assert len(result) > 0
@@ -101,6 +110,7 @@ async def test_query_knowledge_graph_tool(knowledge_resource_server: FastMCP):
     else:
         assert "Error:" in result
         assert "Query contains potentially dangerous operations" in result
+
 
 @pytest.mark.asyncio
 async def test_get_entity_by_name_tool(knowledge_resource_server):
@@ -129,7 +139,9 @@ async def test_get_entity_by_name_tool(knowledge_resource_server):
     # Test the tool's function by calling the server's call_tool method
 
     # Test with a valid entity type and name
-    result = await knowledge_resource_server.call_tool("get_entity_by_name", {"entity_type": "Location", "name": "The Nexus"})
+    result = await knowledge_resource_server.call_tool(
+        "get_entity_by_name", {"entity_type": "Location", "name": "The Nexus"}
+    )
     # The result might be a string or a list of TextContent objects
     if isinstance(result, list):
         assert len(result) > 0
@@ -148,7 +160,9 @@ async def test_get_entity_by_name_tool(knowledge_resource_server):
             assert "Description: A central hub connecting all universes" in result
 
     # Test with a valid entity type but invalid name
-    result = await knowledge_resource_server.call_tool("get_entity_by_name", {"entity_type": "Location", "name": "Nonexistent Location"})
+    result = await knowledge_resource_server.call_tool(
+        "get_entity_by_name", {"entity_type": "Location", "name": "Nonexistent Location"}
+    )
     # The result might be a string or a list of TextContent objects
     if isinstance(result, list):
         assert len(result) > 0
@@ -157,13 +171,16 @@ async def test_get_entity_by_name_tool(knowledge_resource_server):
         assert "No Location found with name 'Nonexistent Location'" in result
 
     # Test with an invalid entity type
-    result = await knowledge_resource_server.call_tool("get_entity_by_name", {"entity_type": "InvalidType", "name": "The Nexus"})
+    result = await knowledge_resource_server.call_tool(
+        "get_entity_by_name", {"entity_type": "InvalidType", "name": "The Nexus"}
+    )
     # The result might be a string or a list of TextContent objects
     if isinstance(result, list):
         assert len(result) > 0
         assert "Error: Invalid entity type 'InvalidType'" in result[0].text
     else:
         assert "Error: Invalid entity type 'InvalidType'" in result
+
 
 @pytest.mark.asyncio
 async def test_locations_resource(knowledge_resource_server):
@@ -188,7 +205,9 @@ async def test_locations_resource(knowledge_resource_server):
     assert str(locations_resource.uri) == "knowledge://locations"
     # The description might be None in the new API
     if locations_resource.description is not None:
-        assert "Get a list of all locations in the knowledge graph" in locations_resource.description
+        assert (
+            "Get a list of all locations in the knowledge graph" in locations_resource.description
+        )
 
     # Test the resource by reading it
     result = await knowledge_resource_server.read_resource("knowledge://locations")
@@ -206,6 +225,7 @@ async def test_locations_resource(knowledge_resource_server):
         assert "## The Nexus" in result
         assert "## Emerald Forest" in result
         assert "## Crystal Caverns" in result
+
 
 @pytest.mark.asyncio
 async def test_characters_resource(knowledge_resource_server):
@@ -230,7 +250,9 @@ async def test_characters_resource(knowledge_resource_server):
     assert str(characters_resource.uri) == "knowledge://characters"
     # The description might be None in the new API
     if characters_resource.description is not None:
-        assert "Get a list of all characters in the knowledge graph" in characters_resource.description
+        assert (
+            "Get a list of all characters in the knowledge graph" in characters_resource.description
+        )
 
     # Test the resource by reading it
     result = await knowledge_resource_server.read_resource("knowledge://characters")
@@ -248,6 +270,7 @@ async def test_characters_resource(knowledge_resource_server):
         assert "## Elara" in result
         assert "## Thorne" in result
         assert "## Lyra" in result
+
 
 @pytest.mark.asyncio
 async def test_items_resource(knowledge_resource_server):
@@ -291,6 +314,7 @@ async def test_items_resource(knowledge_resource_server):
         assert "## Healing Potion" in result
         assert "## Ancient Tome" in result
 
+
 @pytest.mark.asyncio
 @pytest.mark.skip("Entity resource with parameters is no longer available in the API")
 async def test_entity_resource(knowledge_resource_server):
@@ -315,7 +339,10 @@ async def test_entity_resource(knowledge_resource_server):
     assert str(entity_resource.uri) == "knowledge://{entity_type}/{name}"
     # The description might be None in the new API
     if entity_resource.description is not None:
-        assert "Get an entity from the knowledge graph by its type and name" in entity_resource.description
+        assert (
+            "Get an entity from the knowledge graph by its type and name"
+            in entity_resource.description
+        )
 
     # Test the resource by reading it
 
@@ -336,7 +363,9 @@ async def test_entity_resource(knowledge_resource_server):
 
     # Test with a valid entity type but invalid name
     try:
-        result = await knowledge_resource_server.read_resource("knowledge://locations/Nonexistent Location")
+        result = await knowledge_resource_server.read_resource(
+            "knowledge://locations/Nonexistent Location"
+        )
         # The result might be a string or a list of TextContent objects
         if isinstance(result, list):
             assert len(result) > 0
