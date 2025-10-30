@@ -4,15 +4,18 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from typing import Any
+from typing import Any, TypeVar
 
 from ..core.base import WorkflowContext, WorkflowPrimitive
 from ..observability.logging import get_logger
 
 logger = get_logger(__name__)
 
+T = TypeVar("T")
+U = TypeVar("U")
 
-class CachePrimitive(WorkflowPrimitive[Any, Any]):
+
+class CachePrimitive(WorkflowPrimitive[T, U]):
     """
     Cache primitive execution results.
 
@@ -25,7 +28,7 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
         # Cache expensive LLM calls
         cached_llm = CachePrimitive(
             primitive=expensive_llm_call,
-            cache_key_fn=lambda data, ctx: f"{data['prompt']}:{ctx.player_id}",
+            cache_key_fn=lambda data, ctx: f"{data['prompt']}:{ctx.state.get('player_id')}",
             ttl_seconds=3600.0  # 1 hour TTL
         )
 
@@ -49,9 +52,9 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
 
     def __init__(
         self,
-        primitive: WorkflowPrimitive,
-        cache_key_fn: Callable[[Any, WorkflowContext], str],
-        ttl_seconds: float = 3600.0,
+        primitive: WorkflowPrimitive[T, U],
+        ttl_seconds: int,
+        cache_key_fn: Callable[[T, WorkflowContext], str] | None = None,
     ) -> None:
         """
         Initialize cache primitive.
@@ -62,7 +65,14 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
             ttl_seconds: Time-to-live for cached values (default 1 hour)
         """
         self.primitive = primitive
-        self.cache_key_fn = cache_key_fn
+        if cache_key_fn is None:
+            # Default cache key fn, updated to use state
+            self.cache_key_fn = (
+                lambda data,
+                ctx: f"{data.get('prompt', '')}:{ctx.state.get('player_id', 'unknown')}"
+            )
+        else:
+            self.cache_key_fn = cache_key_fn
         self.ttl_seconds = ttl_seconds
         self._cache: dict[str, tuple[Any, float]] = {}
         self._stats = {
@@ -71,7 +81,7 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
             "expirations": 0,
         }
 
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
+    async def execute(self, input_data: T, context: WorkflowContext) -> U:
         """
         Execute with caching.
 

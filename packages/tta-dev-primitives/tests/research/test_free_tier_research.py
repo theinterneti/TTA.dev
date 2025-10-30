@@ -250,9 +250,7 @@ class TestFreeTierResearchPrimitive:
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-ranking")
 
-        request = FreeTierResearchRequest(
-            providers=["openai", "google-gemini", "ollama"]
-        )
+        request = FreeTierResearchRequest(providers=["openai", "google-gemini", "ollama"])
         response = await primitive.execute(request, context)
 
         # Generate ranking
@@ -280,9 +278,7 @@ class TestFreeTierResearchPrimitive:
         response = await primitive.execute(request, context)
 
         # Generate fallback strategy
-        strategy_code = primitive.generate_fallback_strategy(
-            "code generation", response.providers
-        )
+        strategy_code = primitive.generate_fallback_strategy("code generation", response.providers)
 
         # Verify code structure
         assert "from tta_dev_primitives.integrations import" in strategy_code
@@ -301,15 +297,11 @@ class TestFreeTierResearchPrimitive:
         response = await primitive.execute(request, context)
 
         # Generate fallback strategy
-        strategy_code = primitive.generate_fallback_strategy(
-            "creative writing", response.providers
-        )
+        strategy_code = primitive.generate_fallback_strategy("creative writing", response.providers)
 
         # Verify code structure
         assert "creative writing" in strategy_code.lower()
-        assert (
-            "claude" in strategy_code.lower()
-        )  # Anthropic is best for creative writing
+        assert "claude" in strategy_code.lower()  # Anthropic is best for creative writing
 
     async def test_fallback_strategy_generation_reasoning(self):
         """Test fallback strategy generation for reasoning use case."""
@@ -320,9 +312,7 @@ class TestFreeTierResearchPrimitive:
         response = await primitive.execute(request, context)
 
         # Generate fallback strategy
-        strategy_code = primitive.generate_fallback_strategy(
-            "reasoning", response.providers
-        )
+        strategy_code = primitive.generate_fallback_strategy("reasoning", response.providers)
 
         # Verify code structure
         assert "reasoning" in strategy_code.lower()

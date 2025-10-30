@@ -11,6 +11,8 @@ dependencies = [
     "opentelemetry-api>=1.24.0",
     "opentelemetry-sdk>=1.24.0",
     "tenacity>=8.2.3",
+    "google-generativeai",
+    "groq",
 ]
 
 [project.optional-dependencies]
@@ -28,7 +30,7 @@ tracing = [
 ]
 apm = [
     "opentelemetry-api>=1.20.0",
-    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-sdk>=1.10.0",
     "opentelemetry-exporter-prometheus>=0.41b0",
     "opentelemetry-instrumentation>=0.41b0",
 ]

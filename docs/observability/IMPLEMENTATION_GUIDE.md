@@ -28,7 +28,7 @@ class WorkflowContext(BaseModel):
     # Existing fields
     workflow_id: str | None = None
     session_id: str | None = None
-    player_id: str | None = None
+    # player_id is removed, should be stored in state or metadata
     metadata: dict[str, Any] = Field(default_factory=dict)
     state: dict[str, Any] = Field(default_factory=dict)
 
@@ -68,7 +68,6 @@ class WorkflowContext(BaseModel):
         return WorkflowContext(
             workflow_id=self.workflow_id,
             session_id=self.session_id,
-            player_id=self.player_id,
             metadata=self.metadata.copy(),
             state=self.state.copy(),
             trace_id=self.trace_id,
@@ -98,7 +97,7 @@ class WorkflowContext(BaseModel):
         return {
             "workflow.id": self.workflow_id or "unknown",
             "workflow.session_id": self.session_id or "unknown",
-            "workflow.player_id": self.player_id or "unknown",
+            # "workflow.player_id" is removed
             "workflow.correlation_id": self.correlation_id,
             "workflow.elapsed_ms": self.elapsed_ms(),
         }

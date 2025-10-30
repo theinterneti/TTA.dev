@@ -6,6 +6,7 @@ members = [
     "packages/tta-dev-primitives",
     "packages/tta-observability-integration",
     "packages/universal-agent-context",
+    "packages/tta-application",
 ]
 
 [tool.uv]
@@ -15,6 +16,7 @@ dev-dependencies = [
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.14.0",
     "ruff>=0.8.0",
+    "pydantic>=2.0.0",
 ]
 
 [tool.ruff]
@@ -39,12 +41,23 @@ pythonVersion = "3.11"
 typeCheckingMode = "basic"
 reportMissingImports = true
 reportMissingTypeStubs = false
-include = ["packages"]
+include = [
+    "packages/tta-dev-primitives/src",
+    "packages/tta-observability-integration/src",
+    "packages/universal-agent-context/src",
+    "packages/tta-application/src",
+]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
-testpaths = ["packages/tta-dev-primitives/tests"]
+pythonpath = [
+    ".",
+    "packages/tta-dev-primitives",
+    "packages/tta-observability-integration",
+    "packages/universal-agent-context",
+    "packages/tta-application",
+]
+testpaths = ["packages/"]
 asyncio_mode = "auto"
 addopts = "-v --strict-markers"
 markers = [
