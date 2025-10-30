@@ -13,6 +13,7 @@
 - [Pattern 2: Fallback (Paid → Free)](#pattern-2-fallback-paid--free)
 - [Pattern 3: Budget-Aware Routing](#pattern-3-budget-aware-routing)
 - [Pattern 4: Retry with Cost Control](#pattern-4-retry-with-cost-control)
+- [Pattern 5: Multi-Model Orchestration](#pattern-5-multi-model-orchestration)
 - [Real-World Examples](#real-world-examples)
 - [Monitoring & Alerting](#monitoring--alerting)
 - [Troubleshooting](#troubleshooting)
@@ -36,8 +37,9 @@ This guide provides production-ready patterns for optimizing LLM costs using TTA
 | Fallback (Paid → Free) | 20-40% | Medium | Non-critical workloads |
 | Budget-Aware Routing | Variable | High | Cost-sensitive applications |
 | Retry with Cost Control | 5-10% | Low | All applications |
+| **Multi-Model Orchestration** | **80-95%** | **Medium** | **Orchestrator + executor pattern** |
 
-**Combined Impact:** Using all 4 patterns together can reduce costs by **50-70%** while maintaining quality.
+**Combined Impact:** Using all 5 patterns together can reduce costs by **80-95%** while maintaining quality.
 
 ---
 
@@ -416,8 +418,258 @@ result = await workflow.execute({"prompt": "Your query"}, context)
 
 ---
 
+## Pattern 5: Multi-Model Orchestration
 
+**Cost Reduction:** 80-95%
+**Complexity:** Medium
+**Best For:** Applications where an orchestrator can delegate tasks to specialized models
 
+### How It Works
+
+Multi-model orchestration uses a high-quality orchestrator model (e.g., Claude Sonnet 4.5) to analyze tasks and delegate execution to appropriate free flagship models. The orchestrator handles planning and validation (small token usage), while free models handle bulk execution (large token usage).
+
+**Key Insight:** Most AI applications spend 80%+ of tokens on execution, not planning. By delegating execution to free models, you can achieve 80-95% cost reduction while maintaining quality.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Orchestrator Model                        │
+│              (Claude Sonnet 4.5 - Paid)                     │
+│                                                              │
+│  1. Analyze task requirements                               │
+│  2. Classify complexity                                     │
+│  3. Select best executor model                              │
+│  4. Validate output quality                                 │
+└──────────────────┬──────────────────────────────────────────┘
+                   │
+                   ├─────────────┬─────────────┬──────────────┐
+                   ▼             ▼             ▼              ▼
+         ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+         │  Gemini Pro │ │ DeepSeek R1 │ │  Groq Llama │ │ HuggingFace │
+         │   (FREE)    │ │   (FREE)    │ │   (FREE)    │ │   (FREE)    │
+         │             │ │             │ │             │ │             │
+         │ General     │ │ Complex     │ │ Ultra-fast  │ │ Model       │
+         │ Purpose     │ │ Reasoning   │ │ Inference   │ │ Variety     │
+         └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
+```
+
+### Implementation
+
+**Step 1: Create Task Classifier**
+
+```python
+from tta_dev_primitives.orchestration import TaskClassifierPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+
+# Create classifier
+classifier = TaskClassifierPrimitive(prefer_free=True)
+
+# Classify task
+context = WorkflowContext(workflow_id="classify-demo")
+request = TaskClassifierRequest(
+    task_description="Summarize this article in 3 bullet points",
+    user_preferences={"prefer_free": True}
+)
+classification = await classifier.execute(request, context)
+
+print(f"Recommended: {classification.recommended_model}")
+print(f"Reasoning: {classification.reasoning}")
+print(f"Cost: ${classification.estimated_cost}")
+```
+
+**Step 2: Create Delegation Primitive**
+
+```python
+from tta_dev_primitives.orchestration import DelegationPrimitive
+from tta_dev_primitives.integrations import (
+    GoogleAIStudioPrimitive,
+    GroqPrimitive,
+    OpenRouterPrimitive
+)
+
+# Create delegation primitive with executors
+delegation = DelegationPrimitive(
+    executor_primitives={
+        "gemini-2.5-pro": GoogleAIStudioPrimitive(model="gemini-2.5-pro"),
+        "llama-3.3-70b-versatile": GroqPrimitive(model="llama-3.3-70b-versatile"),
+        "deepseek/deepseek-r1:free": OpenRouterPrimitive(model="deepseek/deepseek-r1:free")
+    }
+)
+
+# Delegate task
+request = DelegationRequest(
+    task_description="Summarize article",
+    executor_model="gemini-2.5-pro",
+    messages=[{"role": "user", "content": "Summarize: [article text]"}]
+)
+response = await delegation.execute(request, context)
+
+print(f"Executor: {response.executor_model}")
+print(f"Cost: ${response.cost}")  # $0.00 (FREE!)
+```
+
+**Step 3: Create Multi-Model Workflow**
+
+```python
+from tta_dev_primitives.orchestration import MultiModelWorkflow
+
+# Create workflow with automatic routing
+workflow = MultiModelWorkflow(
+    executor_primitives={
+        "gemini-2.5-pro": GoogleAIStudioPrimitive(),
+        "llama-3.3-70b-versatile": GroqPrimitive(),
+        "deepseek/deepseek-r1:free": OpenRouterPrimitive()
+    },
+    prefer_free=True
+)
+
+# Execute task (automatic classification + delegation)
+request = MultiModelRequest(
+    task_description="Analyze renewable energy benefits",
+    messages=[{"role": "user", "content": "Analyze: [content]"}],
+    user_preferences={"prefer_free": True},
+    validate_output=True
+)
+response = await workflow.execute(request, context)
+
+print(f"Executor: {response.executor_model}")
+print(f"Complexity: {response.classification['complexity']}")
+print(f"Cost: ${response.cost}")
+print(f"Validation: {'Passed' if response.validation_passed else 'Failed'}")
+```
+
+### Orchestration Patterns
+
+#### Pattern A: Claude Plans → Free Models Execute
+
+**Use Case:** Research, analysis, content generation
+
+```python
+# Claude's role: Analyze requirements and create execution plan
+claude_plan = """
+Task: Research renewable energy from 3 perspectives
+Sub-tasks:
+1. Environmental benefits → Gemini Pro
+2. Economic impact → DeepSeek R1
+3. Technical challenges → Groq (Llama 3.3 70B)
+"""
+
+# Execute sub-tasks in parallel with free models
+tasks = [
+    DelegationRequest(
+        task_description="Environmental benefits",
+        executor_model="gemini-2.5-pro",
+        messages=[{"role": "user", "content": "Explain environmental benefits..."}]
+    ),
+    DelegationRequest(
+        task_description="Economic impact",
+        executor_model="deepseek/deepseek-r1:free",
+        messages=[{"role": "user", "content": "Analyze economic impact..."}]
+    ),
+    DelegationRequest(
+        task_description="Technical challenges",
+        executor_model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": "Describe technical challenges..."}]
+    )
+]
+
+# Execute in parallel
+responses = await asyncio.gather(*[delegation.execute(task, context) for task in tasks])
+
+# Claude's role: Aggregate and validate results
+# Total cost: ~$0.01 (Claude planning) + $0.00 (free execution) = $0.01
+# vs. $0.50 (Claude for everything) = 98% savings
+```
+
+#### Pattern B: Claude Validates → Free Model Outputs
+
+**Use Case:** Quality assurance, fact-checking
+
+```python
+# Free model executes
+gemini_response = await delegation.execute(
+    DelegationRequest(
+        task_description="Generate summary",
+        executor_model="gemini-2.5-pro",
+        messages=[{"role": "user", "content": "Summarize: [content]"}]
+    ),
+    context
+)
+
+# Claude validates (small token usage)
+validation_prompt = f"""
+Validate this summary for accuracy and completeness:
+{gemini_response.content}
+
+Original content: [content]
+"""
+
+# Cost: $0.00 (Gemini) + $0.005 (Claude validation) = $0.005
+# vs. $0.05 (Claude for everything) = 90% savings
+```
+
+### Cost Analysis
+
+**Scenario:** AI content generation tool (10K requests/day)
+
+| Approach | Model | Tokens/Request | Cost/1M Tokens | Daily Cost | Monthly Cost |
+|----------|-------|----------------|----------------|------------|--------------|
+| **All Claude** | Claude Sonnet 4.5 | 2,000 | $3.00 | $60.00 | $1,800 |
+| **All Gemini** | Gemini Pro (free) | 2,000 | $0.00 | $0.00 | $0.00 |
+| **Orchestration** | Claude (plan) + Gemini (execute) | 200 + 1,800 | $3.00 + $0.00 | $6.00 | $180 |
+
+**Cost Savings:**
+- Orchestration vs. All Claude: **90% reduction** ($1,800 → $180/month)
+- Orchestration vs. All Gemini: **Quality maintained** (Claude planning ensures quality)
+
+### When to Use Multi-Model Orchestration
+
+✅ **Use When:**
+- Tasks can be decomposed into planning + execution
+- Execution is the bulk of token usage (80%+)
+- Quality requirements vary by sub-task
+- You have access to free flagship models
+
+❌ **Don't Use When:**
+- Tasks require single-model consistency
+- Planning overhead exceeds execution cost
+- Real-time latency is critical (orchestration adds ~100ms)
+- Tasks are too simple to benefit from orchestration
+
+### Monitoring
+
+Track these metrics for orchestration workflows:
+
+```python
+# Add to observability
+context.data["orchestration_metrics"] = {
+    "orchestrator_tokens": 200,
+    "executor_tokens": 1800,
+    "orchestrator_cost": 0.006,
+    "executor_cost": 0.0,
+    "total_cost": 0.006,
+    "cost_savings_vs_all_paid": 0.90,  # 90% savings
+    "executor_model": "gemini-2.5-pro",
+    "classification": "moderate"
+}
+```
+
+### Troubleshooting
+
+**Issue: Orchestrator overhead too high**
+- Solution: Batch multiple tasks in single orchestration call
+- Example: Plan 10 tasks at once instead of 1 at a time
+
+**Issue: Free model quality insufficient**
+- Solution: Use fallback chain with paid model as last resort
+- Example: Gemini → DeepSeek → Claude (if both free models fail)
+
+**Issue: Latency increased**
+- Solution: Use parallel execution for independent sub-tasks
+- Example: Execute 3 sub-tasks in parallel instead of sequential
+
+---
 
 ## Real-World Examples
 
