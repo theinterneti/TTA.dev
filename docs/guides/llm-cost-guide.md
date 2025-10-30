@@ -1,8 +1,20 @@
-# Free LLM Access Guide
+# LLM Cost Optimization Guide: Free Tiers & Paid Models
 
-**For AI Agents & Developers:** Navigate the confusing landscape of free LLM access
+**For AI Agents & Developers:** Navigate the landscape of LLM costs and optimize your spending
 
-**Last Updated:** October 30, 2025 *(Free tiers change frequently - verify current limits)*
+**Last Updated:** October 30, 2025 *(Pricing changes frequently - verify current rates)*
+
+---
+
+## 📖 Table of Contents
+
+- [Free Tier Comparison](#-free-tier-comparison-table)
+- [When to Use Paid Models](#-when-to-use-paid-models)
+- [Paid Model Cost Comparison](#-paid-model-cost-comparison)
+- [Cost Optimization Quick Wins](#-cost-optimization-quick-wins)
+- [Provider Details](#provider-details)
+- [Decision Guide](#-decision-guide-which-free-tier)
+- [Related Documentation](#-related-documentation)
 
 ---
 
@@ -31,6 +43,150 @@
 - BYOK = Bring Your Own Key
 
 ---
+
+## 💰 When to Use Paid Models
+
+While free tiers are great for learning and prototyping, production use cases often require paid models. Here's when to make the switch:
+
+### ✅ Use Paid Models When:
+
+**1. Quality Requirements Exceed Free Tier Capabilities**
+- Complex reasoning tasks (legal analysis, medical research, advanced coding)
+- Creative writing requiring nuance and consistency
+- Multi-step problem solving with high accuracy requirements
+- **Example:** Claude Sonnet 4.5 (90/100 quality) vs Llama 3.2 8B (78/100 quality)
+
+**2. Rate Limits Become a Bottleneck**
+- Processing >1500 requests/day (exceeds Gemini free tier)
+- Batch processing large datasets
+- Production applications with unpredictable traffic
+- **Example:** Google Gemini free tier = 1500 RPD, paid tier = unlimited
+
+**3. Latency/Reliability Requirements**
+- Real-time applications (chatbots, live coding assistants)
+- SLA requirements (99.9% uptime)
+- Consistent response times (<2s)
+- **Example:** Paid APIs offer guaranteed uptime, free tiers have no SLA
+
+**4. Context Window Requirements**
+- Processing long documents (>8K tokens)
+- Multi-turn conversations with extensive history
+- Code analysis across multiple files
+- **Example:** GPT-4o (128K context) vs free local models (4K-8K context)
+
+### ❌ Stick with Free Models When:
+
+- **Learning/Prototyping:** Experimenting with AI features
+- **Low-volume use:** <100 requests/day
+- **Privacy-critical:** Data cannot leave your infrastructure (use Ollama)
+- **Budget constraints:** No budget for API costs
+- **Simple tasks:** Basic text generation, simple Q&A
+
+### 🎯 Hybrid Approach (Best Practice)
+
+Use TTA.dev primitives to combine free and paid models intelligently:
+
+```python
+from tta_dev_primitives.integrations import OpenAIPrimitive, OllamaPrimitive
+from tta_dev_primitives.recovery import FallbackPrimitive
+
+# Start with paid (quality), fallback to free (cost savings)
+workflow = FallbackPrimitive(
+    primary=OpenAIPrimitive(model="gpt-4o"),  # Paid, high quality
+    fallbacks=[
+        OllamaPrimitive(model="llama3.2:8b")  # Free, unlimited
+    ]
+)
+```
+
+---
+
+## 💵 Paid Model Cost Comparison
+
+**Cost per 1M tokens (October 2025):**
+
+| Model | Provider | Input Cost | Output Cost | Quality Score | Best For |
+|-------|----------|-----------|-------------|---------------|----------|
+| **GPT-4o** | OpenAI | $2.50 | $10.00 | 92/100 | Complex reasoning, code generation |
+| **GPT-4o-mini** | OpenAI | $0.15 | $0.60 | 82/100 | General purpose, cost-effective |
+| **Claude Sonnet 4.5** | Anthropic | $3.00 | $15.00 | 90/100 | Creative writing, analysis |
+| **Claude Opus** | Anthropic | $15.00 | $75.00 | 88/100 | Highest quality, complex tasks |
+| **Gemini Pro 2.5** | Google | $1.25 | $5.00 | 89/100 | Multimodal, cost-effective |
+| **Gemini Flash 2.5** | Google | $0.075 | $0.30 | 85/100 | Fast, cheap, good quality |
+
+**Cost Calculation Example:**
+
+```python
+# Example: 10K requests/day, 500 tokens input, 1000 tokens output
+
+# GPT-4o-mini (most cost-effective paid option)
+daily_cost = (10000 * 500 / 1_000_000 * 0.15) + (10000 * 1000 / 1_000_000 * 0.60)
+# = $0.75 + $6.00 = $6.75/day = $202.50/month
+
+# Gemini Flash 2.5 (cheapest paid option)
+daily_cost = (10000 * 500 / 1_000_000 * 0.075) + (10000 * 1000 / 1_000_000 * 0.30)
+# = $0.375 + $3.00 = $3.375/day = $101.25/month
+
+# Claude Sonnet 4.5 (highest quality)
+daily_cost = (10000 * 500 / 1_000_000 * 3.00) + (10000 * 1000 / 1_000_000 * 15.00)
+# = $15.00 + $150.00 = $165.00/day = $4,950/month
+```
+
+**💡 Cost Optimization Insight:**
+
+Using TTA.dev's `CachePrimitive` can reduce costs by **30-40%** by avoiding redundant API calls:
+
+```python
+from tta_dev_primitives.performance import CachePrimitive
+
+# Cache expensive LLM calls
+cached_llm = CachePrimitive(
+    primitive=OpenAIPrimitive(model="gpt-4o"),
+    ttl_seconds=3600,  # 1 hour cache
+    max_size=1000
+)
+
+# 30-40% of requests hit cache → 30-40% cost reduction
+# $202.50/month → $121.50-$141.75/month savings
+```
+
+---
+
+## 🎯 Cost Optimization Quick Wins
+
+TTA.dev primitives help you maximize value from paid models:
+
+### 1. **Cache Expensive Calls** (30-40% cost reduction)
+Use `CachePrimitive` to avoid redundant API calls for identical inputs.
+- **Savings:** $60-80/month on a $200/month budget
+- **See:** [Cost Optimization Patterns Guide](cost-optimization-patterns.md#pattern-1-cache--router)
+
+### 2. **Route to Cheaper Models** (20-50% cost reduction)
+Use `RouterPrimitive` to route simple tasks to cheaper models (GPT-4o-mini, Gemini Flash).
+- **Savings:** $40-100/month on a $200/month budget
+- **See:** [Cost Optimization Patterns Guide](cost-optimization-patterns.md#pattern-1-cache--router)
+
+### 3. **Fallback to Free Models** (Reliability + Cost Control)
+Use `FallbackPrimitive` to start with paid models, fall back to free when budget exceeded.
+- **Savings:** Prevents unexpected overages
+- **See:** [Cost Optimization Patterns Guide](cost-optimization-patterns.md#pattern-2-fallback-paid--free)
+
+### 4. **Retry with Exponential Backoff** (Prevent Wasted Calls)
+Use `RetryPrimitive` to avoid wasting API calls on transient failures.
+- **Savings:** 5-10% reduction in failed requests
+- **See:** [Cost Optimization Patterns Guide](cost-optimization-patterns.md#pattern-4-retry-with-cost-control)
+
+### 📚 For Detailed Implementation
+
+See the comprehensive [**Cost Optimization Patterns Guide**](cost-optimization-patterns.md) for:
+- Production-ready code examples
+- Real-world case studies
+- Monitoring and alerting best practices
+- Troubleshooting common issues (e.g., Gemini Pro → Flash downgrades)
+
+---
+
+## Provider Details
 
 ## 🟢 OpenAI API - $5 Credit (Then Paid)
 
@@ -317,15 +473,15 @@ class UsageTracker:
         self.daily_limit = daily_limit
         self.requests_today = 0
         self.last_reset = time.time()
-    
+
     def can_make_request(self):
         # Reset counter daily
         if time.time() - self.last_reset > 86400:
             self.requests_today = 0
             self.last_reset = time.time()
-        
+
         return self.requests_today < self.daily_limit
-    
+
     def record_request(self):
         self.requests_today += 1
 
@@ -335,7 +491,7 @@ tracker = UsageTracker(daily_limit=1500)
 async def safe_llm_call(prompt):
     if not tracker.can_make_request():
         raise Exception("Daily limit reached - use fallback")
-    
+
     tracker.record_request()
     # Make API call...
 ```
@@ -392,16 +548,25 @@ def select_route(task):
 
 ## 📚 Related Documentation
 
-- **LLM Selection Guide:** [llm-selection-guide.md](llm-selection-guide.md)
-- **Integration Primitives Quick Reference:** [integration-primitives-quickref.md](integration-primitives-quickref.md)
+### Cost Optimization
+- **🎯 Cost Optimization Patterns Guide:** [cost-optimization-patterns.md](cost-optimization-patterns.md) - Detailed implementation patterns for reducing LLM costs with TTA.dev primitives
+
+### LLM Selection
+- **LLM Selection Guide:** [llm-selection-guide.md](llm-selection-guide.md) - Decision matrix for choosing the right LLM
+- **Integration Primitives Quick Reference:** [integration-primitives-quickref.md](integration-primitives-quickref.md) - Quick reference for all integration primitives
+
+### Implementation
 - **OpenAI Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
+- **Anthropic Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
 - **Ollama Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
+- **Cache Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py)
+- **Router Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py)
+- **Fallback Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py)
 
 ---
 
-**Last Updated:** October 30, 2025  
-**For:** AI Agents & Developers (all skill levels)  
+**Last Updated:** October 30, 2025
+**For:** AI Agents & Developers (all skill levels)
 **Maintained by:** TTA.dev Team
 
 **⚠️ Important:** Free tier limits change frequently. Always verify current limits on provider websites before relying on this information for production use.
-
