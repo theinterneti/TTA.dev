@@ -16,7 +16,9 @@ import sys
 from pathlib import Path
 
 # Add packages to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "packages" / "tta-dev-primitives" / "src"))
+sys.path.insert(
+    0, str(Path(__file__).parent.parent / "packages" / "tta-dev-primitives" / "src")
+)
 
 from tta_dev_primitives.core.base import WorkflowContext
 from tta_dev_primitives.research import (
@@ -55,6 +57,17 @@ async def main():
         "--quiet",
         action="store_true",
         help="Suppress informational output",
+    )
+    parser.add_argument(
+        "--include-quality-rankings",
+        action="store_true",
+        help="Include best free models ranking in output",
+    )
+    parser.add_argument(
+        "--generate-fallback-strategy",
+        type=str,
+        metavar="USE_CASE",
+        help="Generate fallback strategy for use case (e.g., 'code-generation', 'reasoning')",
     )
 
     args = parser.parse_args()
@@ -99,6 +112,39 @@ async def main():
                 print(f"      └─ {info.free_tier_details}")
         print()
 
+    # Display quality rankings if requested
+    if args.include_quality_rankings:
+        print("🏆 Best Free Models (Ranked):")
+        print("=" * 80)
+        ranked_models = primitive.generate_best_free_models_ranking(response.providers)
+
+        # Print header
+        print(f"{'Rank':<6} {'Model':<35} {'Provider':<20} {'Score':<8} {'Best For'}")
+        print("-" * 80)
+
+        # Print top 10 models
+        for rank, model, provider in ranked_models[:10]:
+            best_for = ", ".join(model.best_for[:2])  # Show first 2 use cases
+            print(
+                f"{rank:<6} {model.model_name:<35} {provider.name:<20} "
+                f"{model.overall_score:<8.1f} {best_for}"
+            )
+        print("=" * 80)
+        print()
+
+    # Generate fallback strategy if requested
+    if args.generate_fallback_strategy:
+        print(
+            f"🎯 Recommended Fallback Strategy for: {args.generate_fallback_strategy}"
+        )
+        print("=" * 80)
+        strategy_code = primitive.generate_fallback_strategy(
+            args.generate_fallback_strategy, response.providers
+        )
+        print(strategy_code)
+        print("=" * 80)
+        print()
+
     # Output guide
     if response.updated_guide:
         if args.output:
@@ -122,4 +168,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
