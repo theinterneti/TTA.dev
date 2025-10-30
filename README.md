@@ -157,10 +157,16 @@ TTA.dev follows a **composable, modular architecture**:
 - **[MCP Integration](docs/mcp/README.md)** - Model Context Protocol guides
 - **[Package Documentation](packages/tta-dev-primitives/README.md)** - Detailed API reference
 
+### Cost Optimization
+
+- **[LLM Cost Guide](docs/guides/llm-cost-guide.md)** - Free vs paid model comparison, pricing analysis
+- **[Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md)** - Production patterns for 50-70% cost reduction
+
 ### Additional Resources
 
 - [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
 - [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
+- [LLM Selection Guide](docs/guides/llm-selection-guide.md)
 - [Examples](packages/tta-dev-primitives/examples/)
 
 ---
