@@ -66,3 +66,6 @@ exclude = ["**/__pycache__"]
 pythonVersion = "3.11"
 pythonPlatform = "Linux"
 typeCheckingMode = "basic"
+
+[tool.uv.sources]
+tta-dev-primitives = { workspace = true }

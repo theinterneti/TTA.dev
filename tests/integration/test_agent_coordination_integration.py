@@ -183,16 +183,17 @@ async def test_coordination_with_memory_aggregate():
 
     # Execute
     context = WorkflowContext(workflow_id="coordination-memory-test")
-    await workflow.execute({"data": "test"}, context)
+    result = await workflow.execute({"data": "test"}, context)
 
     # Verify result contains expected agent outputs
     assert isinstance(result, dict)
-    assert "security" in result
-    assert "performance" in result
-    assert "quality" in result
+    assert "security" in result["memory_value"]["agent_results"]
+    assert "performance" in result["memory_value"]["agent_results"]
+    assert "quality" in result["memory_value"]["agent_results"]
     for agent_name in ["security", "performance", "quality"]:
-        assert result[agent_name]["analyzed"] is True
-        assert result[agent_name]["agent"] == agent_name
+        assert result["memory_value"]["agent_results"][agent_name]["analysis"] == f"{agent_name} analysis complete"
+        assert result["memory_value"]["agent_results"][agent_name]["agent"] == f"analyzer_{agent_name}"
+
     # Verify all agents executed (coordination metadata stored in context)
     coord_metadata = context.metadata["agent_coordination"]
     assert coord_metadata["total_agents"] == 3
