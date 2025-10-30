@@ -13,6 +13,7 @@ from tta_dev_primitives.research.free_tier_research import (
     FreeTierResearchPrimitive,
     FreeTierResearchRequest,
     FreeTierResearchResponse,
+    ModelQualityMetrics,
     ProviderInfo,
 )
 
@@ -20,6 +21,6 @@ __all__ = [
     "FreeTierResearchPrimitive",
     "FreeTierResearchRequest",
     "FreeTierResearchResponse",
+    "ModelQualityMetrics",
     "ProviderInfo",
 ]
-
