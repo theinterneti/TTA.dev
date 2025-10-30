@@ -1,7 +1,5 @@
 """Tests for RetryPrimitive Phase 2 instrumentation."""
 
-import asyncio
-
 import pytest
 
 from tta_dev_primitives.core.base import WorkflowContext
@@ -120,7 +118,9 @@ async def test_retry_records_backoff_checkpoints():
     fail_once = FailOncePrimitive()
     workflow = RetryPrimitive(
         fail_once,
-        strategy=RetryStrategy(max_retries=3, backoff_base=0.01),  # Fast backoff for testing
+        strategy=RetryStrategy(
+            max_retries=3, backoff_base=0.01
+        ),  # Fast backoff for testing
     )
     context = WorkflowContext(workflow_id="test-workflow")
 

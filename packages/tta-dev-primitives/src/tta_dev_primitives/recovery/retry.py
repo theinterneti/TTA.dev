@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import asyncio
 import random
+import time
 from dataclasses import dataclass
 from typing import Any
 
+from opentelemetry import trace
+
 from ..core.base import WorkflowContext, WorkflowPrimitive
+from ..observability.enhanced_collector import get_enhanced_metrics_collector
+from ..observability.instrumented_primitive import TRACING_AVAILABLE
 from ..observability.logging import get_logger
 
 logger = get_logger(__name__)
@@ -89,10 +94,6 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
         Raises:
             Exception: If all retries fail
         """
-        import time
-
-        from ..observability.enhanced_collector import get_enhanced_metrics_collector
-        from ..observability.instrumented_primitive import TRACING_AVAILABLE
 
         metrics_collector = get_enhanced_metrics_collector()
 
@@ -113,6 +114,10 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
         last_error = None
         total_attempts = self.strategy.max_retries + 1
 
+        # Create tracer once (if tracing available)
+
+        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
+
         for attempt in range(total_attempts):
             # Log attempt start
             logger.info(
@@ -128,14 +133,11 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
             context.checkpoint(f"retry.attempt_{attempt}.start")
             attempt_start_time = time.time()
 
-            # Create attempt span (if tracing available)
-            from opentelemetry import trace
-
-            tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
-
             try:
                 if tracer and TRACING_AVAILABLE:
-                    with tracer.start_as_current_span(f"retry.attempt_{attempt}") as span:
+                    with tracer.start_as_current_span(
+                        f"retry.attempt_{attempt}"
+                    ) as span:
                         span.set_attribute("retry.attempt", attempt + 1)
                         span.set_attribute("retry.max_attempts", total_attempts)
                         span.set_attribute(
@@ -145,7 +147,9 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
                         try:
                             result = await self.primitive.execute(input_data, context)
                             span.set_attribute("retry.status", "success")
-                            span.set_attribute("retry.succeeded_on_attempt", attempt + 1)
+                            span.set_attribute(
+                                "retry.succeeded_on_attempt", attempt + 1
+                            )
                         except Exception as e:
                             span.set_attribute("retry.status", "error")
                             span.set_attribute("retry.error", str(e))

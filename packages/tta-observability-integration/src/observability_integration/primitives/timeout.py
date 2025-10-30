@@ -134,9 +134,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
             self._timeout_rate_gauge = meter.create_observable_gauge(
                 name="timeout_rate",
                 description="Timeout failure rate (0.0-1.0)",
-                callbacks=[
-                    lambda _: [(get_timeout_rate(), {"operation": self.operation_name})]
-                ],
+                callbacks=[lambda _: [(get_timeout_rate(), {"operation": self.operation_name})]],
             )
         else:
             self._successes_counter = None
@@ -182,9 +180,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
                 self._successes_counter.add(1, {"operation": self.operation_name})
 
             if self._execution_histogram:
-                self._execution_histogram.record(
-                    duration, {"operation": self.operation_name}
-                )
+                self._execution_histogram.record(duration, {"operation": self.operation_name})
 
             # Warn if operation completed but was slow (within grace period)
             if duration > self.timeout_seconds:
@@ -211,9 +207,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
                 self._failures_counter.add(1, {"operation": self.operation_name})
 
             if self._execution_histogram:
-                self._execution_histogram.record(
-                    duration, {"operation": self.operation_name}
-                )
+                self._execution_histogram.record(duration, {"operation": self.operation_name})
 
             logger.error(
                 f"'{self.operation_name}' TIMEOUT after {duration:.2f}s "
@@ -237,9 +231,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
                 self._successes_counter.add(1, {"operation": self.operation_name})
 
             if self._execution_histogram:
-                self._execution_histogram.record(
-                    duration, {"operation": self.operation_name}
-                )
+                self._execution_histogram.record(duration, {"operation": self.operation_name})
 
             # Re-raise the original exception
             raise
