@@ -2,6 +2,11 @@
 
 Combines task classification, delegation, and validation in a single workflow
 for intelligent multi-model orchestration.
+
+**Configuration:**
+- Can be configured via `.tta/orchestration-config.yaml`
+- Supports environment variable overrides
+- Falls back to sensible defaults if no config found
 """
 
 import logging
@@ -19,6 +24,16 @@ from tta_dev_primitives.orchestration.task_classifier_primitive import (
     TaskClassifierPrimitive,
     TaskClassifierRequest,
 )
+
+# Try to import configuration
+try:
+    from tta_dev_primitives.config import OrchestrationConfig, load_orchestration_config
+
+    CONFIG_AVAILABLE = True
+except ImportError:
+    CONFIG_AVAILABLE = False
+    OrchestrationConfig = None  # type: ignore
+    load_orchestration_config = None  # type: ignore
 
 # Try to import OpenTelemetry for metrics
 try:
@@ -119,14 +134,39 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
         self,
         executor_primitives: dict[str, WorkflowPrimitive[Any, Any]] | None = None,
         prefer_free: bool = True,
+        config_path: str | None = None,
     ) -> None:
         """Initialize multi-model workflow.
 
         Args:
             executor_primitives: Map of model names to executor primitives
             prefer_free: If True, prefer free models when quality is sufficient
+            config_path: Path to orchestration config file (optional)
+
+        Example:
+            >>> # Use defaults
+            >>> workflow = MultiModelWorkflow()
+            >>>
+            >>> # Load from config file
+            >>> workflow = MultiModelWorkflow(config_path=".tta/orchestration-config.yaml")
+            >>>
+            >>> # Provide executors manually
+            >>> workflow = MultiModelWorkflow(
+            ...     executor_primitives={"gemini-2.5-pro": gemini_primitive}
+            ... )
         """
         super().__init__()
+
+        # Load configuration if available
+        self.config = None
+        if CONFIG_AVAILABLE and config_path:
+            try:
+                self.config = load_orchestration_config(config_path)
+                prefer_free = self.config.prefer_free_models
+                logger.info(f"✅ Loaded orchestration config from {config_path}")
+            except Exception as e:
+                logger.warning(f"⚠️  Failed to load config: {e}, using defaults")
+
         self.classifier = TaskClassifierPrimitive(prefer_free=prefer_free)
         self.delegation = DelegationPrimitive(executor_primitives=executor_primitives)
         self._init_metrics()
