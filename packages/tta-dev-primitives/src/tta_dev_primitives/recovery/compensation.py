@@ -5,6 +5,8 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from opentelemetry import trace
+
 from ..core.base import WorkflowContext, WorkflowPrimitive
 from ..observability.enhanced_collector import get_enhanced_metrics_collector
 from ..observability.instrumented_primitive import TRACING_AVAILABLE
@@ -104,8 +106,6 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
         forward_start_time = time.time()
 
         # Create forward span (if tracing available)
-        from opentelemetry import trace
-
         tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
 
         try:
