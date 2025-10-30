@@ -271,7 +271,34 @@ category:: [[Database]]
 
 ---
 
+## 🚨 CRITICAL DISCOVERY
+
+**The `logseq/` directory is intentionally gitignored!**
+
+From `.gitignore` lines 154-157:
+```
+# === Logseq Knowledge Base ===
+# Private project notes and knowledge management
+# This folder should be synced via a separate private repo (e.g., TTA-notes)
+logseq/
+```
+
+**Implication:** Logseq documentation is NOT meant to be in the main TTA.dev repository. It's a separate private knowledge base.
+
+**Revised Strategy:**
+1. ✅ Logseq property fixes completed (100% compliance achieved)
+2. ❌ Do NOT commit logseq/ changes to main repo
+3. ✅ Logseq changes should be committed to separate TTA-notes repo (if it exists)
+4. ✅ Focus main repo cleanup on root-level markdown files only
+
+**Success Metrics (Revised):**
+- Logseq compliance: 100% ✅ (47/47 files)
+- Logseq changes: Local only (not committed to main repo)
+- Root directory cleanup: Proceed as planned
+
+---
+
 **Decision Authority:** AI Agent (Augment)
 **Execution Date:** 2025-10-30
 **Review Status:** Autonomous (full authority granted)
-
+**Critical Discovery:** Logseq is separate repo - do not commit to main
