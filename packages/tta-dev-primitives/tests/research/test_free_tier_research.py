@@ -221,3 +221,110 @@ class TestFreeTierResearchPrimitive:
         assert len(response.research_date) == 10  # YYYY-MM-DD format
         assert "-" in response.research_date
 
+    async def test_quality_metrics_included(self):
+        """Test that quality metrics are included for providers."""
+        primitive = FreeTierResearchPrimitive()
+        context = WorkflowContext(workflow_id="test-quality")
+
+        request = FreeTierResearchRequest(providers=["openai", "ollama"])
+        response = await primitive.execute(request, context)
+
+        # Verify OpenAI has quality metrics
+        openai_info = response.providers["openai"]
+        assert len(openai_info.models) > 0
+        gpt4o_mini = openai_info.models[0]
+        assert gpt4o_mini.model_name == "gpt-4o-mini"
+        assert gpt4o_mini.overall_score == 82.0
+        assert gpt4o_mini.code_generation_score == 88.0
+        assert "code generation" in gpt4o_mini.best_for
+
+        # Verify Ollama has quality metrics
+        ollama_info = response.providers["ollama"]
+        assert len(ollama_info.models) >= 3  # llama3.2, mistral, gemma2
+        llama_model = ollama_info.models[0]
+        assert "llama" in llama_model.model_name.lower()
+        assert llama_model.overall_score > 0
+
+    async def test_best_free_models_ranking(self):
+        """Test best free models ranking generation."""
+        primitive = FreeTierResearchPrimitive()
+        context = WorkflowContext(workflow_id="test-ranking")
+
+        request = FreeTierResearchRequest(
+            providers=["openai", "google-gemini", "ollama"]
+        )
+        response = await primitive.execute(request, context)
+
+        # Generate ranking
+        ranked_models = primitive.generate_best_free_models_ranking(response.providers)
+
+        # Verify ranking structure
+        assert len(ranked_models) > 0
+        rank, model, provider = ranked_models[0]
+        assert rank == 1
+        assert model.overall_score > 0
+        assert provider.has_free_tier is True
+
+        # Verify ranking is sorted (higher quality first)
+        for i in range(len(ranked_models) - 1):
+            current_rank, current_model, current_provider = ranked_models[i]
+            next_rank, next_model, next_provider = ranked_models[i + 1]
+            assert current_rank < next_rank  # Ranks increase
+
+    async def test_fallback_strategy_generation_code_generation(self):
+        """Test fallback strategy generation for code generation use case."""
+        primitive = FreeTierResearchPrimitive()
+        context = WorkflowContext(workflow_id="test-fallback-code")
+
+        request = FreeTierResearchRequest(providers=["openai", "ollama"])
+        response = await primitive.execute(request, context)
+
+        # Generate fallback strategy
+        strategy_code = primitive.generate_fallback_strategy(
+            "code generation", response.providers
+        )
+
+        # Verify code structure
+        assert "from tta_dev_primitives.integrations import" in strategy_code
+        assert "FallbackPrimitive" in strategy_code
+        assert "primary =" in strategy_code
+        assert "fallback" in strategy_code
+        assert "code generation" in strategy_code.lower()
+        assert "gpt-4o-mini" in strategy_code  # Best for code generation
+
+    async def test_fallback_strategy_generation_creative_writing(self):
+        """Test fallback strategy generation for creative writing use case."""
+        primitive = FreeTierResearchPrimitive()
+        context = WorkflowContext(workflow_id="test-fallback-creative")
+
+        request = FreeTierResearchRequest(providers=["anthropic", "ollama"])
+        response = await primitive.execute(request, context)
+
+        # Generate fallback strategy
+        strategy_code = primitive.generate_fallback_strategy(
+            "creative writing", response.providers
+        )
+
+        # Verify code structure
+        assert "creative writing" in strategy_code.lower()
+        assert (
+            "claude" in strategy_code.lower()
+        )  # Anthropic is best for creative writing
+
+    async def test_fallback_strategy_generation_reasoning(self):
+        """Test fallback strategy generation for reasoning use case."""
+        primitive = FreeTierResearchPrimitive()
+        context = WorkflowContext(workflow_id="test-fallback-reasoning")
+
+        request = FreeTierResearchRequest()  # All providers
+        response = await primitive.execute(request, context)
+
+        # Generate fallback strategy
+        strategy_code = primitive.generate_fallback_strategy(
+            "reasoning", response.providers
+        )
+
+        # Verify code structure
+        assert "reasoning" in strategy_code.lower()
+        assert "primary =" in strategy_code
+        assert "Score:" in strategy_code  # Should include quality scores
