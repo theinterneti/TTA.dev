@@ -255,22 +255,24 @@ class PrometheusExporter:
 
             if self._check_cardinality(labels_success):
                 # Note: Counter can only increase, so we set to total
-                self.request_total.labels(primitive_name=name, status="success")._value.set(
-                    throughput_metrics.total_requests
-                )
+                # If request_total is a Counter, increment by the difference
+                current = self.request_total.labels(primitive_name=name, status="success")._value.get()
+                increment = throughput_metrics.total_requests - current
+                if increment > 0:
+                    self.request_total.labels(primitive_name=name, status="success").inc(increment)
 
         # Update cost metrics
         for name, cost_metrics in collector._cost_metrics.items():
             for operation, cost in cost_metrics.cost_by_operation.items():
                 labels_cost = (name, operation)
                 if self._check_cardinality(labels_cost):
-                    self.cost_total.labels(primitive_name=name, operation=operation)._value.set(
+                    self.cost_total.labels(primitive_name=name, operation=operation).set(
                         cost
                     )
 
             labels_savings = (name,)
             if self._check_cardinality(labels_savings):
-                self.savings_total.labels(primitive_name=name)._value.set(
+                self.savings_total.labels(primitive_name=name).set(
                     cost_metrics.total_savings
                 )
 
