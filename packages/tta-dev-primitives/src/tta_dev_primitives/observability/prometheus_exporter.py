@@ -74,6 +74,11 @@ class PrometheusExporter:
         # Track label cardinality
         self._label_combinations: set[tuple[str, ...]] = set()
 
+        # Track previous counter values for proper incrementing
+        self._prev_request_totals: dict[tuple[str, str], float] = {}
+        self._prev_cost_totals: dict[tuple[str, str], float] = {}
+        self._prev_savings_totals: dict[str, float] = {}
+
         # Initialize Prometheus metrics
         self._init_metrics()
 
@@ -254,25 +259,40 @@ class PrometheusExporter:
                 )
 
             if self._check_cardinality(labels_success):
-                # Note: Counter can only increase, so we set to total
-                self.request_total.labels(primitive_name=name, status="success")._value.set(
-                    throughput_metrics.total_requests
-                )
+                # Increment counter by the difference since last update
+                key = (name, "success")
+                current_total = throughput_metrics.total_requests
+                prev_total = self._prev_request_totals.get(key, 0.0)
+                if current_total > prev_total:
+                    self.request_total.labels(primitive_name=name, status="success").inc(
+                        current_total - prev_total
+                    )
+                    self._prev_request_totals[key] = current_total
 
         # Update cost metrics
         for name, cost_metrics in collector._cost_metrics.items():
             for operation, cost in cost_metrics.cost_by_operation.items():
                 labels_cost = (name, operation)
                 if self._check_cardinality(labels_cost):
-                    self.cost_total.labels(primitive_name=name, operation=operation)._value.set(
-                        cost
-                    )
+                    # Increment counter by the difference since last update
+                    key = (name, operation)
+                    prev_cost = self._prev_cost_totals.get(key, 0.0)
+                    if cost > prev_cost:
+                        self.cost_total.labels(primitive_name=name, operation=operation).inc(
+                            cost - prev_cost
+                        )
+                        self._prev_cost_totals[key] = cost
 
             labels_savings = (name,)
             if self._check_cardinality(labels_savings):
-                self.savings_total.labels(primitive_name=name)._value.set(
-                    cost_metrics.total_savings
-                )
+                # Increment counter by the difference since last update
+                prev_savings = self._prev_savings_totals.get(name, 0.0)
+                current_savings = cost_metrics.total_savings
+                if current_savings > prev_savings:
+                    self.savings_total.labels(primitive_name=name).inc(
+                        current_savings - prev_savings
+                    )
+                    self._prev_savings_totals[name] = current_savings
 
     def export(self) -> bytes:
         """
