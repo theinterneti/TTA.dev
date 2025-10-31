@@ -1,0 +1,92 @@
+name: 🧪 Test Gemini CLI (No MCP)
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Command to test'
+        required: true
+        default: 'help'
+        type: choice
+        options:
+          - help
+          - 'What is TTA.dev?'
+          - 'Say hello'
+
+jobs:
+  test-no-mcp:
+    name: Test Gemini CLI without MCP server
+    runs-on: ubuntu-latest
+    timeout-minutes: 5  # Shorter timeout for testing
+    
+    steps:
+      - name: Test Gemini CLI (No MCP Server)
+        uses: google-github-actions/run-gemini-cli@v1
+        with:
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
+          gemini_model: 'gemini-2.5-flash'  # Use valid model name
+          use_vertex_ai: false
+          use_gemini_code_assist: false
+          gemini_debug: true
+          prompt: '${{ inputs.command }}'
+          # NO MCP server configuration
+          settings: |-
+            {
+              "general": {
+                "disableAutoUpdate": true
+              },
+              "ui": {
+                "hideTips": true,
+                "hideFooter": true
+              },
+              "model": {
+                "maxSessionTurns": 25
+              },
+              "telemetry": {
+                "enabled": false
+              },
+              "tools": {
+                "autoAccept": true,
+                "core": [
+                  "run_shell_command(cat)",
+                  "run_shell_command(echo)",
+                  "run_shell_command(grep)",
+                  "run_shell_command(head)",
+                  "run_shell_command(tail)"
+                ]
+              },
+              "security": {
+                "folderTrust": {
+                  "featureEnabled": false,
+                  "enabled": true
+                }
+              }
+            }
+          
+      - name: Summary
+        if: always()
+        run: |
+          echo ""
+          echo "=== Test Summary ==="
+          echo ""
+          echo "Command tested: ${{ inputs.command }}"
+          echo "Model used: gemini-2.5-flash"
+          echo "MCP Server: DISABLED"
+          echo ""
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Test PASSED - Gemini CLI works without MCP server!"
+            echo ""
+            echo "This means:"
+            echo "  - API key is valid"
+            echo "  - Model name is correct"
+            echo "  - Gemini CLI itself works fine"
+            echo "  - The issue is likely with MCP server integration"
+          else
+            echo "❌ Test FAILED - Gemini CLI has issues even without MCP server"
+            echo ""
+            echo "This means:"
+            echo "  - The issue is with Gemini CLI itself"
+            echo "  - OR the model parameter is not being passed correctly"
+            echo "  - OR there's an authentication issue"
+          fi
+
