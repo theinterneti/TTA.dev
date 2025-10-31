@@ -38,6 +38,13 @@ jobs:
           permission-issues: 'write'
           permission-pull-requests: 'write'
 
+      - name: 'Pre-pull GitHub MCP Server Docker Image'
+        id: 'prepull_mcp_server'
+        run: |-
+          echo "🐳 Pre-pulling GitHub MCP Server image to measure pull time..."
+          time docker pull ghcr.io/github/github-mcp-server:v0.18.0
+          echo "✅ Image pull complete"
+
       - name: 'Run Gemini CLI'
         id: 'run_gemini'
         uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
@@ -57,7 +64,7 @@ jobs:
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'  # AI Studio API key (free tier)
           gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION }}'
-          gemini_debug: '${{ fromJSON(vars.DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}'
+          gemini_debug: true
           gemini_model: '${{ vars.GEMINI_MODEL }}'
           # NOTE: google_api_key is for Vertex AI (paid). We use gemini_api_key for AI Studio (free).
           use_gemini_code_assist: false  # Must be false when using gemini_api_key
@@ -75,8 +82,7 @@ jobs:
                 "maxSessionTurns": 25
               },
               "telemetry": {
-                "enabled": ${{ vars.GOOGLE_CLOUD_PROJECT != '' }},
-                "target": "gcp"
+                "enabled": false
               },
               "tools": {
                 "autoAccept": true,
