@@ -1,6 +1,6 @@
 # Gemini CLI Integration Guide
 
-**Last Updated**: October 31, 2025  
+**Last Updated**: October 31, 2025
 **Status**: ✅ Production-Ready (MCP Server v0.20.1)
 
 ---
@@ -204,7 +204,7 @@ mcpServers:
 
 ### 1. Be Specific
 
-❌ **Vague**: `@gemini-cli review this`  
+❌ **Vague**: `@gemini-cli review this`
 ✅ **Specific**: `@gemini-cli /review` or `@gemini-cli Review the changes in src/core/base.py for potential bugs`
 
 ### 2. Use Commands for Common Tasks
@@ -216,8 +216,8 @@ mcpServers:
 ### 3. Provide Context for Complex Requests
 
 ```markdown
-@gemini-cli Analyze the timeout issue investigation in this PR. 
-What was the root cause and how was it resolved? 
+@gemini-cli Analyze the timeout issue investigation in this PR.
+What was the root cause and how was it resolved?
 Include specific workflow run numbers and execution times.
 ```
 
@@ -280,14 +280,33 @@ Include specific workflow run numbers and execution times.
 
 ---
 
-## Limitations
+## Capabilities and Limitations
 
-### Current Limitations
+### ✅ Supported Operations (MCP Server v0.20.1)
 
-1. **No File Creation**: Gemini cannot create new files in the repository
-2. **No Direct Commits**: Gemini cannot commit changes directly
-3. **No PR Merging**: Gemini cannot merge pull requests
-4. **Read-Only by Default**: Most operations are read-only unless explicitly configured
+**IMPORTANT**: Initial assessment was incorrect. The MCP server **DOES support write operations**.
+
+| Capability | Status | MCP Tool | Use Case |
+|------------|--------|----------|----------|
+| **File Creation** | ✅ Supported | `create_or_update_file` | Documentation, tests, examples |
+| **File Updates** | ✅ Supported | `create_or_update_file` | Bug fixes, refactoring |
+| **File Deletion** | ✅ Supported | `delete_file` | Cleanup, deprecation |
+| **Branch Creation** | ✅ Supported | `create_branch` | Feature branches, fixes |
+| **PR Creation** | ✅ Supported | `create_pull_request` | Automated PRs |
+| **Commits/Push** | ✅ Supported | `push_files` | Code changes |
+| **Code Review** | ✅ Supported | `pull_request_read` | Review feedback |
+| **Issue Management** | ✅ Supported | `get_issue`, `list_issues` | Triage, queries |
+
+**See**: [`docs/gemini-cli-capabilities-analysis.md`](gemini-cli-capabilities-analysis.md) for detailed analysis
+
+### ❌ Intentional Limitations (Security)
+
+1. **No PR Merging**: `merge_pull_request` not enabled (can be added if needed)
+2. **No Workflow Modification**: Prevents malicious code injection into CI/CD
+3. **No Secrets Access**: Prevents credential exposure
+4. **No Repository Settings**: Prevents accidental configuration changes
+
+**These are correct security decisions.**
 
 ### Rate Limits
 
@@ -354,4 +373,3 @@ To improve Gemini CLI integration:
 ---
 
 **Questions?** Post in [Discussions](https://github.com/theinterneti/TTA.dev/discussions) or create an [Issue](https://github.com/theinterneti/TTA.dev/issues).
-
