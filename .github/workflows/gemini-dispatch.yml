@@ -129,7 +129,7 @@ jobs:
       ${{ needs.dispatch.outputs.command == 'invoke' }}
     uses: './.github/workflows/gemini-invoke.yml'
     permissions:
-      contents: 'read'
+      contents: 'write'  # Required for file creation, commits, and branch creation
       id-token: 'write'
       issues: 'write'
       pull-requests: 'write'
@@ -172,4 +172,3 @@ jobs:
           gh issue comment "${ISSUE_NUMBER}" \
             --body "${MESSAGE}" \
             --repo "${REPOSITORY}"
-
