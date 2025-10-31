@@ -55,13 +55,13 @@ jobs:
           gcp_project_id: '${{ vars.GOOGLE_CLOUD_PROJECT }}'
           gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
           gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
-          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'  # AI Studio API key (free tier)
           gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION }}'
           gemini_debug: '${{ fromJSON(vars.DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}'
           gemini_model: '${{ vars.GEMINI_MODEL }}'
-          google_api_key: '${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}'  # FIXED: Use correct secret name
-          use_gemini_code_assist: false  # FIXED: Must be false when using google_api_key
-          use_vertex_ai: false  # FIXED: Must be false when using google_api_key
+          # NOTE: google_api_key is for Vertex AI (paid). We use gemini_api_key for AI Studio (free).
+          use_gemini_code_assist: false  # Must be false when using gemini_api_key
+          use_vertex_ai: false  # Must be false when using gemini_api_key
           settings: |-
             {
               "general": {
