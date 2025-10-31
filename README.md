@@ -307,6 +307,7 @@ Before submitting a PR, ensure:
 - Google-style docstrings
 - README for each package
 - Examples for all features
+- **Phase 3 Examples:** See [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
 
 ---
 

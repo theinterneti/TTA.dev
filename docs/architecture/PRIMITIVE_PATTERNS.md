@@ -37,29 +37,29 @@ TOutput = TypeVar("TOutput")
 
 class WorkflowPrimitive(ABC, Generic[TInput, TOutput]):
     """Base class for all workflow primitives."""
-    
+
     async def execute(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         """Public interface - adds observability."""
         # Observability hooks (tracing, metrics, logging)
         return await self._execute_impl(context, input_data)
-    
+
     @abstractmethod
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         """Subclasses implement actual logic here."""
         pass
-    
+
     def __rshift__(self, other):
         """>> operator for sequential composition."""
         return SequentialPrimitive([self, other])
-    
+
     def __or__(self, other):
         """| operator for parallel composition."""
         return ParallelPrimitive([self, other])
@@ -78,13 +78,13 @@ class WorkflowPrimitive(ABC, Generic[TInput, TOutput]):
 ```python
 class LLMPrimitive(WorkflowPrimitive[str, str]):
     """Call LLM with prompt."""
-    
+
     def __init__(self, model: str):
         self.model = model
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: str
     ) -> str:
         # Call LLM API
@@ -111,13 +111,13 @@ result = await llm.execute(context, "What is AI?")
 ```python
 class SequentialPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Execute primitives in sequence."""
-    
+
     def __init__(self, primitives: list[WorkflowPrimitive]):
         self.primitives = primitives
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         result = input_data
@@ -156,13 +156,13 @@ import asyncio
 
 class ParallelPrimitive(WorkflowPrimitive[TInput, list[Any]]):
     """Execute primitives in parallel."""
-    
+
     def __init__(self, primitives: list[WorkflowPrimitive]):
         self.primitives = primitives
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> list[Any]:
         # Execute all primitives concurrently
@@ -196,17 +196,17 @@ workflow = (
 workflow = (
     # Sequential: Step 1
     input_validator >>
-    
+
     # Parallel: Step 2 (3 branches)
     (
         sentiment_analyzer |
         entity_extractor |
         summarizer
     ) >>
-    
+
     # Sequential: Step 3
     result_combiner >>
-    
+
     # Sequential: Step 4
     output_formatter
 )
@@ -231,7 +231,7 @@ workflow = (
 ```python
 class ConditionalPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Execute different primitives based on condition."""
-    
+
     def __init__(
         self,
         condition: Callable[[WorkflowContext, TInput], bool],
@@ -241,10 +241,10 @@ class ConditionalPrimitive(WorkflowPrimitive[TInput, TOutput]):
         self.condition = condition
         self.true_primitive = true_primitive
         self.false_primitive = false_primitive
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         if self.condition(context, input_data):
@@ -273,7 +273,7 @@ workflow = ConditionalPrimitive(
 ```python
 class RouterPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Route to different primitives based on runtime logic."""
-    
+
     def __init__(
         self,
         routes: dict[str, WorkflowPrimitive[TInput, TOutput]],
@@ -283,24 +283,24 @@ class RouterPrimitive(WorkflowPrimitive[TInput, TOutput]):
         self.routes = routes
         self.selector = selector
         self.default_route = default_route
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         # Select route
         route_name = self.selector(context, input_data)
-        
+
         # Get primitive
         primitive = self.routes.get(
             route_name,
             self.routes.get(self.default_route) if self.default_route else None
         )
-        
+
         if not primitive:
             raise ValueError(f"Unknown route: {route_name}")
-        
+
         # Execute
         return await primitive.execute(context, input_data)
 ```
@@ -341,7 +341,7 @@ router = RouterPrimitive(
 ```python
 class RetryPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Retry primitive with exponential backoff."""
-    
+
     def __init__(
         self,
         primitive: WorkflowPrimitive[TInput, TOutput],
@@ -353,27 +353,27 @@ class RetryPrimitive(WorkflowPrimitive[TInput, TOutput]):
         self.max_retries = max_retries
         self.backoff_strategy = backoff_strategy
         self.initial_delay = initial_delay
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         last_exception = None
-        
+
         for attempt in range(self.max_retries + 1):
             try:
                 return await self.primitive.execute(context, input_data)
             except Exception as e:
                 last_exception = e
-                
+
                 if attempt < self.max_retries:
                     delay = self._calculate_delay(attempt)
                     await asyncio.sleep(delay)
                     continue
                 else:
                     raise last_exception
-    
+
     def _calculate_delay(self, attempt: int) -> float:
         if self.backoff_strategy == "exponential":
             return self.initial_delay * (2 ** attempt)
@@ -406,7 +406,7 @@ api_call_with_retry = RetryPrimitive(
 ```python
 class FallbackPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Try primary, fallback if fails."""
-    
+
     def __init__(
         self,
         primary: WorkflowPrimitive[TInput, TOutput],
@@ -414,10 +414,10 @@ class FallbackPrimitive(WorkflowPrimitive[TInput, TOutput]):
     ):
         self.primary = primary
         self.fallbacks = fallbacks
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         # Try primary
@@ -430,7 +430,7 @@ class FallbackPrimitive(WorkflowPrimitive[TInput, TOutput]):
                     return await fallback.execute(context, input_data)
                 except Exception:
                     continue
-            
+
             # All failed
             raise primary_error
 ```
@@ -456,7 +456,7 @@ llm_with_fallback = FallbackPrimitive(
 ```python
 class TimeoutPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Execute with timeout."""
-    
+
     def __init__(
         self,
         primitive: WorkflowPrimitive[TInput, TOutput],
@@ -464,10 +464,10 @@ class TimeoutPrimitive(WorkflowPrimitive[TInput, TOutput]):
     ):
         self.primitive = primitive
         self.timeout_seconds = timeout_seconds
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         try:
@@ -507,7 +507,7 @@ from time import time
 
 class CachePrimitive(WorkflowPrimitive[TInput, TOutput]):
     """LRU cache with TTL."""
-    
+
     def __init__(
         self,
         primitive: WorkflowPrimitive[TInput, TOutput],
@@ -518,19 +518,19 @@ class CachePrimitive(WorkflowPrimitive[TInput, TOutput]):
         self.cache: OrderedDict = OrderedDict()
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         # Create cache key
         key = self._make_key(input_data)
-        
+
         # Check cache
         if key in self.cache:
             value, timestamp = self.cache[key]
-            
+
             # Check TTL
             if self.ttl_seconds is None or (time() - timestamp) < self.ttl_seconds:
                 # Cache hit - move to end (LRU)
@@ -539,25 +539,25 @@ class CachePrimitive(WorkflowPrimitive[TInput, TOutput]):
             else:
                 # Expired - remove
                 del self.cache[key]
-        
+
         # Cache miss - execute
         result = await self.primitive.execute(context, input_data)
-        
+
         # Store in cache
         self.cache[key] = (result, time())
         self.cache.move_to_end(key)
-        
+
         # Evict if over size
         if len(self.cache) > self.max_size:
             self.cache.popitem(last=False)
-        
+
         return result
-    
+
     def _make_key(self, input_data: TInput) -> str:
         """Create cache key from input."""
         import hashlib
         import json
-        
+
         # Hash input data
         data_str = json.dumps(input_data, sort_keys=True)
         return hashlib.md5(data_str.encode()).hexdigest()
@@ -587,7 +587,7 @@ cached_llm = CachePrimitive(
 ```python
 class MockPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Mock primitive for testing."""
-    
+
     def __init__(
         self,
         return_value: TOutput | None = None,
@@ -597,21 +597,21 @@ class MockPrimitive(WorkflowPrimitive[TInput, TOutput]):
         self.side_effect = side_effect
         self.call_count = 0
         self.calls: list[tuple[WorkflowContext, TInput]] = []
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         self.call_count += 1
         self.calls.append((context, input_data))
-        
+
         if self.side_effect:
             if isinstance(self.side_effect, Exception):
                 raise self.side_effect
             elif callable(self.side_effect):
                 return await self.side_effect(context, input_data)
-        
+
         return self.return_value
 ```
 
@@ -626,13 +626,13 @@ async def test_workflow():
     mock_llm = MockPrimitive(
         return_value={"response": "mocked output"}
     )
-    
+
     # Build workflow with mock
     workflow = input_processor >> mock_llm >> output_formatter
-    
+
     # Execute
     result = await workflow.execute(context, input_data)
-    
+
     # Assert
     assert mock_llm.call_count == 1
     assert result["response"] == "mocked output"
@@ -651,7 +651,7 @@ Handle distributed transactions with compensating actions.
 ```python
 class CompensationPrimitive(WorkflowPrimitive[TInput, TOutput]):
     """Execute with compensation on failure."""
-    
+
     def __init__(
         self,
         primitive: WorkflowPrimitive[TInput, TOutput],
@@ -659,10 +659,10 @@ class CompensationPrimitive(WorkflowPrimitive[TInput, TOutput]):
     ):
         self.primitive = primitive
         self.compensate = compensate
-    
+
     async def _execute_impl(
-        self, 
-        context: WorkflowContext, 
+        self,
+        context: WorkflowContext,
         input_data: TInput
     ) -> TOutput:
         try:

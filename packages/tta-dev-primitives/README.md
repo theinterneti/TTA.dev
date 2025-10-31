@@ -142,6 +142,73 @@ async def process_pipeline(data):
     return await transform(data)
 ```
 
+## Production Examples
+
+The `examples/` directory contains **5 validated, production-ready workflows** demonstrating key patterns:
+
+### Quick Links
+
+| Example | Pattern | Features | Use When |
+|---------|---------|----------|----------|
+| [**rag_workflow.py**](examples/rag_workflow.py) | RAG Pipeline | Caching, Fallback, Retry, Sequential | Building document retrieval systems |
+| [**agentic_rag_workflow.py**](examples/agentic_rag_workflow.py) | Agentic RAG | Router, Grading, Validation, Hallucination Detection | Production RAG with quality control |
+| [**cost_tracking_workflow.py**](examples/cost_tracking_workflow.py) | Cost Management | Budget Enforcement, Per-Model Tracking | Managing LLM API costs |
+| [**streaming_workflow.py**](examples/streaming_workflow.py) | Token Streaming | AsyncIterator, Buffering, Metrics | Real-time response streaming |
+| [**multi_agent_workflow.py**](examples/multi_agent_workflow.py) | Multi-Agent | Coordinator, Parallel Specialists, Aggregation | Complex agent orchestration |
+
+### Example Highlights
+
+**Agentic RAG (Production Pattern):**
+```python
+# Complete RAG pipeline with quality controls
+workflow = (
+    QueryRouterPrimitive() >>                    # Route simple vs complex
+    VectorstoreRetrieverPrimitive() >>           # Cached retrieval
+    DocumentGraderPrimitive() >>                 # Filter irrelevant docs
+    AnswerGeneratorPrimitive() >>                # Generate response
+    AnswerGraderPrimitive() >>                   # Validate quality
+    HallucinationGraderPrimitive()               # Detect hallucinations
+)
+```
+
+**Multi-Agent Coordination:**
+```python
+# Decompose task and execute with specialist agents
+workflow = (
+    CoordinatorAgentPrimitive() >>               # Analyze and plan
+    ParallelPrimitive([                          # Execute in parallel
+        DataAnalystAgentPrimitive(),
+        ResearcherAgentPrimitive(),
+        FactCheckerAgentPrimitive(),
+        SummarizerAgentPrimitive()
+    ]) >>
+    AggregatorAgentPrimitive()                   # Combine results
+)
+```
+
+**Cost Tracking:**
+```python
+# Track and enforce budget across LLM calls
+cost_tracker = CostTrackingPrimitive(llm_primitive)
+enforcer = BudgetEnforcementPrimitive(
+    cost_tracker,
+    budget_usd=10.0
+)
+
+# Automatic cost reporting
+report = await enforcer.get_cost_report()
+```
+
+### Implementation Guide
+
+All examples follow the **InstrumentedPrimitive pattern** with:
+- ✅ Automatic OpenTelemetry tracing
+- ✅ Structured logging with correlation IDs
+- ✅ Prometheus metrics
+- ✅ Type-safe composition
+
+**Detailed Guide:** See [PHASE3_EXAMPLES_COMPLETE.md](../../PHASE3_EXAMPLES_COMPLETE.md) for complete implementation details, test results, and pattern documentation.
+
 ## Package Structure
 
 ```

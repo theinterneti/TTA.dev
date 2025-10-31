@@ -22,7 +22,6 @@ while maintaining quality.
 
 import argparse
 import asyncio
-import json
 import logging
 import os
 import sys
@@ -37,7 +36,6 @@ from tta_dev_primitives.integrations import GoogleAIStudioPrimitive
 from tta_dev_primitives.observability import get_enhanced_metrics_collector
 from tta_dev_primitives.orchestration import (
     DelegationPrimitive,
-    MultiModelWorkflow,
 )
 from tta_dev_primitives.orchestration.delegation_primitive import DelegationRequest
 
@@ -161,7 +159,7 @@ class PRReviewWorkflow:
         Returns:
             Analysis results with review plan
         """
-        logger.info(f"🧠 [Orchestrator] Analyzing PR scope...")
+        logger.info("🧠 [Orchestrator] Analyzing PR scope...")
 
         # Simulate Claude's analysis
         analysis = {
@@ -197,7 +195,7 @@ class PRReviewWorkflow:
         Returns:
             Detailed review comments in markdown format
         """
-        logger.info(f"🤖 [Executor] Performing code review with Gemini Pro...")
+        logger.info("🤖 [Executor] Performing code review with Gemini Pro...")
 
         # Create detailed prompt for code review
         prompt = f"""Perform a detailed code review for the following pull request.
@@ -262,7 +260,7 @@ Format your review as structured markdown with clear sections.
         Returns:
             Validation results with quality score
         """
-        logger.info(f"🔍 [Orchestrator] Validating review quality...")
+        logger.info("🔍 [Orchestrator] Validating review quality...")
 
         # Simple validation heuristics
         validations = {
@@ -316,7 +314,7 @@ Format your review as structured markdown with clear sections.
         # POST /repos/{owner}/{repo}/pulls/{pr_number}/reviews
         # with body: {"body": review_content, "event": "COMMENT"}
 
-        logger.info(f"✅ Review posted to GitHub (simulated)")
+        logger.info("✅ Review posted to GitHub (simulated)")
         return True
 
     async def run(self, repo: str, pr_number: int) -> dict[str, Any]:

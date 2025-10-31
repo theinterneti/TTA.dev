@@ -2,7 +2,100 @@
 
 This directory contains practical examples demonstrating how to use the tta-dev-primitives package to build robust AI application workflows.
 
-## Examples Overview
+## 🆕 New Examples (Phase 3)
+
+Phase 3 examples have been updated to align with the current `InstrumentedPrimitive` patterns and observability changes. The following examples are functional and tested in this branch:
+
+- `rag_workflow.py` — Basic RAG example (retrieval + LLM generation)
+- `agentic_rag_workflow.py` — Production-grade agentic RAG (routing, grading, hallucination checks)
+- `cost_tracking_workflow.py` — Cost tracking and budget enforcement
+- `streaming_workflow.py` — Token-by-token streaming with metrics and aggregation
+
+`multi_agent_workflow.py` is being recreated to follow the same pattern and will be available shortly.
+
+### RAG (Retrieval-Augmented Generation) - `rag_workflow.py` ✅
+Demonstrates a working RAG workflow: vector retrieval (simulated), context augmentation, and LLM generation with caching and fallback.
+
+Features:
+- Vector DB retrieval (simulated)
+- Context augmentation with relevance scoring
+- LLM generation with fallback
+- Cost optimization through caching
+- Source attribution
+
+**Run it:**
+```bash
+cd packages/tta-dev-primitives
+uv run python examples/rag_workflow.py
+```
+
+### Agentic RAG (Production) - `agentic_rag_workflow.py` ✅
+Production-grade agentic RAG implementation based on the NVIDIA agentic pattern. This example demonstrates a 6-stage pipeline with routing, retrieval, document grading, answer generation, answer grading, and hallucination checking.
+
+Features:
+- Dynamic routing (vectorstore vs web search)
+- Cached vectorstore retrieval with fallback to web search
+- Document and answer grading for quality control
+- Hallucination detection (source grounding)
+- Retry and iterative refinement
+
+**Run it:**
+```bash
+cd packages/tta-dev-primitives
+uv run python examples/agentic_rag_workflow.py
+```
+
+### Multi-Agent Coordination - `multi_agent_workflow.py`
+**Multi-agent coordination pattern** with task decomposition and parallel execution.
+
+Features:
+- Coordinator agent decomposes tasks
+- Specialist agents execute in parallel
+- Result aggregation and synthesis
+- Timeout protection per agent
+- Type-safe agent composition
+
+**Run it:**
+```bash
+cd packages/tta-dev-primitives
+uv run python examples/multi_agent_workflow.py
+```
+
+### Cost Tracking - `cost_tracking_workflow.py`
+**Cost tracking and budget enforcement** with detailed metrics and attribution.
+
+Features:
+- Token usage tracking per model
+- Cost calculation based on pricing
+- Budget enforcement (per-request and daily)
+- Cost attribution by user and workflow
+- Real-time cost reporting
+
+**Run it:**
+```bash
+cd packages/tta-dev-primitives
+uv run python examples/cost_tracking_workflow.py
+```
+
+### Streaming LLM - `streaming_workflow.py`
+**Streaming LLM responses** with token-by-token delivery and performance metrics.
+
+Features:
+- Token-by-token streaming (SSE pattern)
+- Stream buffering for smooth delivery
+- Performance metrics tracking
+- Stream aggregation
+- Cancellation support
+
+**Run it:**
+```bash
+cd packages/tta-dev-primitives
+uv run python examples/streaming_workflow.py
+```
+
+---
+
+## Core Examples
 
 ### 1. `quick_wins_demo.py`
 **Quick start demonstration** showing basic primitive usage and composition.
