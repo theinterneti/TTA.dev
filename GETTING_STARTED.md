@@ -238,13 +238,41 @@ async def test_my_workflow():
 - 🔧 [MCP Integration](docs/mcp/README.md) - Model Context Protocol
 - 📦 [Package README](packages/tta-dev-primitives/README.md) - Detailed docs
 
-### Examples
+### Production Examples
 
-Check out the examples directory:
-- [Basic workflows](packages/tta-dev-primitives/examples/basic_workflow.py)
-- [Composition patterns](packages/tta-dev-primitives/examples/composition.py)
-- [Error handling](packages/tta-dev-primitives/examples/error_handling.py)
-- [Observability](packages/tta-dev-primitives/examples/observability.py)
+**Start here!** 5 validated, working examples ready to run:
+
+| Example | What It Shows | Use When |
+|---------|---------------|----------|
+| [**RAG Workflow**](packages/tta-dev-primitives/examples/rag_workflow.py) | Caching + Fallback + Retry | Building document retrieval systems |
+| [**Agentic RAG**](packages/tta-dev-primitives/examples/agentic_rag_workflow.py) | Router + Grading + Validation | Production RAG with quality controls |
+| [**Cost Tracking**](packages/tta-dev-primitives/examples/cost_tracking_workflow.py) | Budget Enforcement + Metrics | Managing LLM API costs |
+| [**Streaming**](packages/tta-dev-primitives/examples/streaming_workflow.py) | AsyncIterator + Buffering | Real-time response streaming |
+| [**Multi-Agent**](packages/tta-dev-primitives/examples/multi_agent_workflow.py) | Coordinator + Parallel Execution | Complex agent orchestration |
+
+**Quick Start:**
+
+```bash
+# Run any example
+uv run python packages/tta-dev-primitives/examples/rag_workflow.py
+
+# Or explore all examples
+ls packages/tta-dev-primitives/examples/
+```
+
+**Implementation Guide:** [PHASE3_EXAMPLES_COMPLETE.md](PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
+- Complete implementation details for all examples
+- InstrumentedPrimitive pattern guide
+- Test results and validation
+- Production usage recommendations
+
+### Additional Examples
+
+More patterns in the examples directory:
+- [Basic workflows](packages/tta-dev-primitives/examples/basic_workflow.py) - Foundation patterns
+- [Composition patterns](packages/tta-dev-primitives/examples/composition.py) - Combining primitives
+- [Error handling](packages/tta-dev-primitives/examples/error_handling.py) - Recovery patterns
+- [Observability](packages/tta-dev-primitives/examples/observability.py) - Tracing and metrics
 
 ### Get Help
 

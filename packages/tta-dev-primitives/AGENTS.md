@@ -516,3 +516,27 @@ git commit -m "feat: add new feature with tests"
 - ✅ Composability
 - ✅ Reliability
 - ✅ Maintainability
+
+---
+
+# Quick Reference
+
+## Key Documentation
+
+- **Examples README**: [`examples/README.md`](examples/README.md) - All example workflows
+- **Phase 3 Complete**: [`../../PHASE3_EXAMPLES_COMPLETE.md`](../../PHASE3_EXAMPLES_COMPLETE.md) - InstrumentedPrimitive pattern guide
+- **Package README**: [`README.md`](README.md) - API documentation
+- **Main AGENTS.md**: [`../../AGENTS.md`](../../AGENTS.md) - Repository-wide agent instructions
+- **Primitives Catalog**: [`../../PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md) - Complete primitive reference
+
+## Working Examples
+
+All Phase 3 examples now use the **InstrumentedPrimitive pattern**:
+
+1. **RAG Workflow** (`examples/rag_workflow.py`) - Basic retrieval-augmented generation
+2. **Agentic RAG** (`examples/agentic_rag_workflow.py`) - Production RAG with grading
+3. **Cost Tracking** (`examples/cost_tracking_workflow.py`) - Token/cost tracking
+4. **Streaming** (`examples/streaming_workflow.py`) - Token-by-token streaming
+5. **Multi-Agent** (`examples/multi_agent_workflow.py`) - Agent coordination
+
+See [`PHASE3_EXAMPLES_COMPLETE.md`](../../PHASE3_EXAMPLES_COMPLETE.md) for implementation details.

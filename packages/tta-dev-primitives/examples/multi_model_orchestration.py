@@ -34,7 +34,6 @@ from tta_dev_primitives.orchestration.task_classifier_primitive import (
     TaskClassifierRequest,
 )
 
-
 # ============================================================================
 # Example 1: Task Classification - Intelligent Model Selection
 # ============================================================================
@@ -128,7 +127,7 @@ async def example_claude_to_gemini():
     print(f"📝 Response:\n{response.content}")
     print(f"📊 Usage: {response.usage}")
     print(f"💰 Cost: ${response.cost} (FREE!)")
-    print(f"\n💡 Cost Savings: 95%+ vs. using Claude for execution")
+    print("\n💡 Cost Savings: 95%+ vs. using Claude for execution")
 
 
 # ============================================================================
@@ -307,8 +306,8 @@ async def example_parallel_execution():
         total_cost += response.cost
 
     print(f"\n💰 Total Cost: ${total_cost} (FREE!)")
-    print(f"💡 Cost Savings: 90%+ vs. using Claude for all sub-tasks")
-    print(f"⚡ Execution: Parallel (3x faster than sequential)")
+    print("💡 Cost Savings: 90%+ vs. using Claude for all sub-tasks")
+    print("⚡ Execution: Parallel (3x faster than sequential)")
 
 
 # ============================================================================

@@ -581,11 +581,12 @@ Closes #123
 
 ## Quick Links
 
-- **Main Agent Instructions:** [`AGENTS.md`](AGENTS.md)
-- **Primitive Catalog:** [`PRIMITIVES_CATALOG.md`](PRIMITIVES_CATALOG.md)
-- **MCP Servers:** [`MCP_SERVERS.md`](MCP_SERVERS.md)
-- **Toolsets Guide:** [`docs/guides/copilot-toolsets-guide.md`](docs/guides/copilot-toolsets-guide.md)
-- **Getting Started:** [`GETTING_STARTED.md`](GETTING_STARTED.md)
+- **Main Agent Instructions:** [`AGENTS.md`](../AGENTS.md)
+- **Primitive Catalog:** [`PRIMITIVES_CATALOG.md`](../PRIMITIVES_CATALOG.md)
+- **Phase 3 Examples Complete:** [`PHASE3_EXAMPLES_COMPLETE.md`](../PHASE3_EXAMPLES_COMPLETE.md) - InstrumentedPrimitive pattern guide
+- **MCP Servers:** [`MCP_SERVERS.md`](../MCP_SERVERS.md)
+- **Toolsets Guide:** [`docs/guides/copilot-toolsets-guide.md`](../docs/guides/copilot-toolsets-guide.md)
+- **Getting Started:** [`GETTING_STARTED.md`](../GETTING_STARTED.md)
 
 ---
 

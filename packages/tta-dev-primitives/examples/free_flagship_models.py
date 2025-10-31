@@ -42,7 +42,6 @@ from tta_dev_primitives.integrations.openrouter_primitive import OpenRouterReque
 from tta_dev_primitives.integrations.together_ai_primitive import TogetherAIRequest
 from tta_dev_primitives.recovery import FallbackPrimitive
 
-
 # ============================================================================
 # Example 1: Google AI Studio (Gemini 2.5 Pro) - FREE Flagship Model
 # ============================================================================
@@ -85,8 +84,8 @@ async def example_google_ai_studio():
     print(f"\n✅ Model: {response.model}")
     print(f"📝 Response: {response.content}")
     print(f"📊 Usage: {response.usage}")
-    print(f"🎯 Quality: 89/100 (flagship)")
-    print(f"💰 Cost: $0.00 (FREE)")
+    print("🎯 Quality: 89/100 (flagship)")
+    print("💰 Cost: $0.00 (FREE)")
 
 
 # ============================================================================
@@ -129,8 +128,8 @@ async def example_openrouter():
     print(f"\n✅ Model: {response.model}")
     print(f"📝 Response: {response.content}")
     print(f"📊 Usage: {response.usage}")
-    print(f"🎯 Quality: 90/100 (flagship)")
-    print(f"💰 Cost: $0.00 (FREE)")
+    print("🎯 Quality: 90/100 (flagship)")
+    print("💰 Cost: $0.00 (FREE)")
 
 
 # ============================================================================
@@ -176,8 +175,8 @@ async def example_groq():
     print(f"📝 Response: {response.content}")
     print(f"📊 Usage: {response.usage}")
     print(f"⚡ Speed: {response.usage['completion_tokens'] / elapsed:.0f} tokens/sec")
-    print(f"🎯 Quality: 87/100 (production-ready)")
-    print(f"💰 Cost: $0.00 (FREE)")
+    print("🎯 Quality: 87/100 (production-ready)")
+    print("💰 Cost: $0.00 (FREE)")
 
 
 # ============================================================================
@@ -220,8 +219,8 @@ async def example_huggingface():
     print(f"\n✅ Model: {response.model}")
     print(f"📝 Response: {response.content}")
     print(f"📊 Usage: {response.usage} (estimated)")
-    print(f"🎯 Quality: 87/100 (production-ready)")
-    print(f"💰 Cost: $0.00 (FREE)")
+    print("🎯 Quality: 87/100 (production-ready)")
+    print("💰 Cost: $0.00 (FREE)")
 
 
 # ============================================================================
@@ -265,8 +264,8 @@ async def example_together_ai():
     print(f"\n✅ Model: {response.model}")
     print(f"📝 Response: {response.content}")
     print(f"📊 Usage: {response.usage}")
-    print(f"🎯 Quality: 88/100 (flagship)")
-    print(f"💰 Cost: Uses free credits ($25 total)")
+    print("🎯 Quality: 88/100 (flagship)")
+    print("💰 Cost: Uses free credits ($25 total)")
 
 
 # ============================================================================
@@ -319,9 +318,9 @@ async def example_fallback_chain():
     print(f"\n✅ Model: {response.model}")
     print(f"📝 Response: {response.content}")
     print(f"📊 Usage: {response.usage}")
-    print(f"🎯 Strategy: Free flagship fallback chain")
-    print(f"💰 Cost: $0.00 (100% FREE)")
-    print(f"⏱️  Uptime: 100% (automatic failover)")
+    print("🎯 Strategy: Free flagship fallback chain")
+    print("💰 Cost: $0.00 (100% FREE)")
+    print("⏱️  Uptime: 100% (automatic failover)")
 
 
 # ============================================================================

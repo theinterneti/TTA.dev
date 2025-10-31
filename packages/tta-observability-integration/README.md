@@ -40,6 +40,27 @@ workflow = (
 )
 ```
 
+## Working Examples
+
+The `tta-dev-primitives` package includes **5 production-ready examples** showcasing observability integration:
+
+### Recommended Examples
+
+| Example | Features | Benefits |
+|---------|----------|----------|
+| [**agentic_rag_workflow.py**](../tta-dev-primitives/examples/agentic_rag_workflow.py) | Router, Cache, Validation | Production RAG pattern with automatic tracing |
+| [**cost_tracking_workflow.py**](../tta-dev-primitives/examples/cost_tracking_workflow.py) | Budget enforcement, per-model metrics | Cost management with Prometheus integration |
+| [**streaming_workflow.py**](../tta-dev-primitives/examples/streaming_workflow.py) | AsyncIterator, throughput metrics | Real-time monitoring of streaming responses |
+
+### Key Features in Examples
+
+- ✅ **Automatic Tracing**: Every primitive creates OpenTelemetry spans
+- ✅ **Prometheus Metrics**: Hit rates, latencies, costs tracked automatically
+- ✅ **Correlation IDs**: Full request tracing across distributed workflows
+- ✅ **Graceful Degradation**: Works even if OpenTelemetry unavailable
+
+**Implementation Guide:** See [PHASE3_EXAMPLES_COMPLETE.md](../../PHASE3_EXAMPLES_COMPLETE.md) for detailed patterns and InstrumentedPrimitive architecture.
+
 ## Documentation
 
 See `docs/` directory for complete documentation:

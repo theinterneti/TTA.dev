@@ -156,7 +156,7 @@ class DocGenerationWorkflow:
         Returns:
             Generated documentation in Logseq markdown format
         """
-        logger.info(f"🤖 [Executor] Generating documentation with Gemini Pro...")
+        logger.info("🤖 [Executor] Generating documentation with Gemini Pro...")
 
         # Read file content
         with open(file_path) as f:
@@ -252,7 +252,7 @@ Generate complete, production-ready documentation following this structure.
         Returns:
             Validation results with quality score
         """
-        logger.info(f"🔍 [Orchestrator] Validating documentation quality...")
+        logger.info("🔍 [Orchestrator] Validating documentation quality...")
 
         # Validation heuristics
         validations = {

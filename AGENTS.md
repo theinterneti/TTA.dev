@@ -421,6 +421,7 @@ Tradeoff: Slightly more memory, but better reliability
 | [`README.md`](README.md) | Project overview and quick start |
 | [`GETTING_STARTED.md`](GETTING_STARTED.md) | Detailed setup guide |
 | [`PRIMITIVES_CATALOG.md`](PRIMITIVES_CATALOG.md) | Complete primitive reference |
+| [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) | Phase 3 examples implementation guide |
 | [`MCP_SERVERS.md`](MCP_SERVERS.md) | MCP server integrations |
 | [`docs/architecture/`](docs/architecture/) | Architecture decisions and patterns |
 | [`docs/guides/`](docs/guides/) | Usage guides and tutorials |
@@ -439,10 +440,11 @@ Each package has:
 ### For Agent Development
 
 1. **Start with examples:** [`packages/tta-dev-primitives/examples/`](packages/tta-dev-primitives/examples/)
-2. **Use composition:** Chain primitives with `>>` and `|`
-3. **Add observability:** Use `WorkflowContext` for all workflows
-4. **Test with mocks:** Use `MockPrimitive` for unit tests
-5. **Check toolsets:** Use `#tta-agent-dev` in Copilot for agent-specific tools
+2. **Review Phase 3 patterns:** See [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) for production patterns
+3. **Use composition:** Chain primitives with `>>` and `|`
+4. **Add observability:** Use `WorkflowContext` for all workflows
+5. **Test with mocks:** Use `MockPrimitive` for unit tests
+6. **Check toolsets:** Use `#tta-agent-dev` in Copilot for agent-specific tools
 
 ### For Observability Work
 

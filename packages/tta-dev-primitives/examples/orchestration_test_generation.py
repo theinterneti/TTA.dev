@@ -38,10 +38,8 @@ from tta_dev_primitives.observability import get_enhanced_metrics_collector
 from tta_dev_primitives.orchestration import (
     DelegationPrimitive,
     MultiModelWorkflow,
-    TaskClassifierPrimitive,
 )
 from tta_dev_primitives.orchestration.delegation_primitive import DelegationRequest
-from tta_dev_primitives.orchestration.multi_model_workflow import MultiModelRequest
 
 # Try to import observability integration
 try:
@@ -169,7 +167,7 @@ class TestGenerationWorkflow:
         Returns:
             Generated test code
         """
-        logger.info(f"🤖 [Executor] Generating tests with Gemini Pro...")
+        logger.info("🤖 [Executor] Generating tests with Gemini Pro...")
 
         # Create detailed prompt for test generation
         prompt = f"""Generate comprehensive unit tests for the following Python code.
@@ -229,7 +227,7 @@ Generate complete, runnable test code with proper imports and fixtures.
         Returns:
             True if tests pass validation, False otherwise
         """
-        logger.info(f"🔍 [Orchestrator] Validating generated tests...")
+        logger.info("🔍 [Orchestrator] Validating generated tests...")
 
         # Simple validation heuristics
         validations = {
@@ -273,7 +271,7 @@ Generate complete, runnable test code with proper imports and fixtures.
 
         try:
             # Read code file
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 code_content = f.read()
 
             # Step 1: Orchestrator analyzes code
