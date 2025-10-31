@@ -9,6 +9,35 @@ Practical guides for working with TTA.dev components.
 
 ## Development Guides
 
+### TTA.dev How-To Guides (NEW! ✨)
+
+**Practical, step-by-step guides for working with TTA.dev primitives:**
+
+- **[How to Create a New Primitive](how-to-create-primitive.md)** - Complete guide for implementing custom workflow primitives
+  - Type annotations and inheritance
+  - Observability integration
+  - Testing strategies
+  - Time: 2-4 hours
+
+- **[How to Add Observability to Workflows](how-to-add-observability.md)** - Comprehensive observability integration guide
+  - OpenTelemetry tracing setup
+  - Prometheus metrics
+  - Structured logging
+  - Grafana dashboards
+  - Time: 1-2 hours
+
+- **[How to Compose Complex Workflows](how-to-compose-workflows.md)** - *(Coming soon)*
+  - Sequential and parallel patterns
+  - Router-based workflows
+  - Recovery pattern stacking
+  - Real-world examples
+
+- **[How to Test Primitives](how-to-test-primitives.md)** - *(Coming soon)*
+  - Unit and integration testing
+  - MockPrimitive usage
+  - Coverage strategies
+  - CI/CD integration
+
 ### AI & Agent Development
 
 - **[Full Process for Coding with AI Coding Assistants](Full%20Process%20for%20Coding%20with%20AI%20Coding%20Assistants.md)** - Best practices for AI-assisted development
