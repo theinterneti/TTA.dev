@@ -9,6 +9,7 @@ members = [
     "packages/tta-dev-primitives",
     "packages/tta-observability-integration",
     "packages/universal-agent-context",
+    "packages/tta-documentation-primitives",
 ]
 
 [tool.uv]
