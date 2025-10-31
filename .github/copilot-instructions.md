@@ -16,6 +16,37 @@ This file provides workspace-level guidance for GitHub Copilot when working with
 - **Recovery Patterns**: Retry, Fallback, Timeout, Compensation primitives
 - **Monorepo Structure**: Multiple focused packages in `/packages`
 
+### 📋 TODO Management (Required for All Agents)
+
+**ALL agents must use the Logseq TODO management system:**
+
+- **System Documentation:** `logseq/pages/TODO Management System.md`
+- **Daily Journals:** `logseq/journals/YYYY_MM_DD.md`
+- **Tag Convention:**
+  - `#dev-todo` - Development tasks (code, tests, CI/CD, infrastructure)
+  - `#user-todo` - User/agent tasks (learning, onboarding, examples)
+
+**Agent Requirements:**
+
+1. **Add TODOs:** When creating work items, add to today's journal with proper tags/properties
+2. **Update Status:** Mark tasks as DOING when starting, DONE when complete
+3. **Link Context:** Use `related::` property to link Logseq pages
+4. **Document Blockers:** Use `blocked::` and `blocker::` properties
+5. **Daily Review:** Check TODO dashboards before/after work sessions
+
+**Properties to Use:**
+
+```markdown
+- TODO [Task] #dev-todo
+  type:: implementation | testing | documentation | infrastructure
+  priority:: high | medium | low
+  package:: [package-name]
+  related:: [[Page Reference]]
+  status:: not-started | in-progress | blocked | waiting
+```
+
+**See:** `logseq/ADVANCED_FEATURES.md` for complete Logseq usage guide.
+
 ---
 
 ## Monorepo Structure
@@ -270,6 +301,7 @@ TTA.dev uses **path-based instruction files** in `.github/instructions/`:
 | `**/tests/**/*.py` | `tests.instructions.md` | 100% coverage, pytest-asyncio, MockPrimitive usage |
 | `scripts/**/*.py` | `scripts.instructions.md` | Use primitives for orchestration, clear documentation |
 | `**/*.md`, `**/README.md` | `documentation.instructions.md` | Clear, actionable, with code examples |
+| `**` (all files) | `logseq-knowledge-base.instructions.md` | Use Logseq for TODOs, journals, and knowledge management |
 
 **Always check the relevant instruction file** before editing files of that type.
 
@@ -587,9 +619,11 @@ Closes #123
 - **MCP Servers:** [`MCP_SERVERS.md`](../MCP_SERVERS.md)
 - **Toolsets Guide:** [`docs/guides/copilot-toolsets-guide.md`](../docs/guides/copilot-toolsets-guide.md)
 - **Getting Started:** [`GETTING_STARTED.md`](../GETTING_STARTED.md)
+- **TODO Management:** [`logseq/pages/TODO Management System.md`](../logseq/pages/TODO Management System.md) - Required for all agents
+- **Logseq Guide:** [`logseq/ADVANCED_FEATURES.md`](../logseq/ADVANCED_FEATURES.md) - Knowledge base features
 
 ---
 
-**Last Updated:** October 29, 2025
+**Last Updated:** October 31, 2025
 **For:** GitHub Copilot in VS Code
 **Maintained by:** TTA.dev Team

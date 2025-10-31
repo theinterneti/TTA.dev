@@ -16,17 +16,59 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 - **Built-in observability** with OpenTelemetry integration
 - **Multi-package monorepo** with focused, reusable components
 
+### 📋 TODO Management & Knowledge Base
+
+**IMPORTANT:** All agents must use the Logseq TODO management system:
+
+- **TODO System:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO Management System.md)
+- **Daily Journal:** Add TODOs to `logseq/journals/YYYY_MM_DD.md`
+- **Tag Convention:**
+  - `#dev-todo` - Development work (implementation, testing, CI/CD, infrastructure)
+  - `#user-todo` - User/agent learning tasks (onboarding, examples, education)
+
+**When to Update:**
+
+1. **Creating TODOs:** Add to today's journal with appropriate tags and properties
+2. **Completing Work:** Mark tasks as DONE in journal
+3. **Documentation:** Link related Logseq pages in your work
+4. **Blocking Issues:** Document blockers in TODO properties
+5. **Daily Standup:** Review TODO dashboards in Logseq
+
+**Quick Example:**
+
+```markdown
+## [[2025-10-31]] Daily TODOs
+
+- TODO Implement CachePrimitive metrics #dev-todo
+  type:: implementation
+  priority:: high
+  package:: tta-observability-integration
+  related:: [[TTA Primitives/CachePrimitive]]
+
+- TODO Create flashcards for retry patterns #user-todo
+  type:: learning
+  audience:: intermediate-users
+  time-estimate:: 20 minutes
+```
+
+**See:** [`logseq/ADVANCED_FEATURES.md`](logseq/ADVANCED_FEATURES.md) for complete Logseq guide.
+
 ### Repository Structure
 
 ```
 TTA.dev/
 ├── packages/
-│   ├── tta-dev-primitives/          # Core workflow primitives
-│   ├── tta-observability-integration/  # OpenTelemetry integration
-│   ├── universal-agent-context/      # Agent context management
-│   ├── keploy-framework/             # API testing framework
-│   └── python-pathway/               # Python analysis utilities
+│   ├── tta-dev-primitives/          # ✅ Core workflow primitives
+│   ├── tta-observability-integration/  # ✅ OpenTelemetry integration
+│   ├── universal-agent-context/      # ✅ Agent context management
+│   ├── keploy-framework/             # ⚠️ Under review - minimal implementation
+│   ├── python-pathway/               # ⚠️ Under review - unclear use case
+│   └── js-dev-primitives/            # 🚧 Planned - not implemented
 ├── docs/                             # Comprehensive documentation
+│   ├── planning/                     # Planning documents (moved from root)
+│   └── ...
+├── archive/
+│   └── status-reports/               # Historical status files
 ├── scripts/                          # Automation and validation scripts
 └── tests/                            # Integration tests
 ```
@@ -37,15 +79,23 @@ TTA.dev/
 
 Each package has detailed agent instructions. **Always read the package-specific AGENTS.md before working on that package:**
 
-### Core Packages
+### ✅ Production Packages (Active in Workspace)
 
-| Package | AGENTS.md | Purpose |
-|---------|-----------|---------|
-| **tta-dev-primitives** | [`packages/tta-dev-primitives/AGENTS.md`](packages/tta-dev-primitives/AGENTS.md) | Core workflow primitives (Sequential, Parallel, Router, Retry, Fallback, Cache, etc.) |
-| **tta-observability-integration** | [`packages/tta-observability-integration/README.md`](packages/tta-observability-integration/README.md) | OpenTelemetry tracing, metrics, logging |
-| **universal-agent-context** | [`packages/universal-agent-context/AGENTS.md`](packages/universal-agent-context/AGENTS.md) | Agent context management and orchestration |
-| **keploy-framework** | [`packages/keploy-framework/README.md`](packages/keploy-framework/README.md) | API test recording and replay |
-| **python-pathway** | [`packages/python-pathway/README.md`](packages/python-pathway/README.md) | Python code analysis utilities |
+| Package | Status | AGENTS.md | Purpose |
+|---------|--------|-----------|---------|
+| **tta-dev-primitives** | ✅ Active | [`packages/tta-dev-primitives/AGENTS.md`](packages/tta-dev-primitives/AGENTS.md) | Core workflow primitives (Sequential, Parallel, Router, Retry, Fallback, Cache, etc.) |
+| **tta-observability-integration** | ✅ Active | [`packages/tta-observability-integration/README.md`](packages/tta-observability-integration/README.md) | OpenTelemetry tracing, metrics, logging |
+| **universal-agent-context** | ✅ Active | [`packages/universal-agent-context/AGENTS.md`](packages/universal-agent-context/AGENTS.md) | Agent context management and orchestration |
+
+### ⚠️ Packages Under Review
+
+| Package | Status | Documentation | Issue |
+|---------|--------|---------------|-------|
+| **keploy-framework** | ⚠️ Under Review | Minimal | No pyproject.toml, no tests, not in workspace. **Decision needed by Nov 7, 2025** |
+| **python-pathway** | ⚠️ Under Review | Minimal | No clear use case documented, not in workspace. **Decision needed by Nov 7, 2025** |
+| **js-dev-primitives** | 🚧 Placeholder | None | Directory structure only, no implementation. **Decision needed by Nov 14, 2025** |
+
+**Note:** Only the 3 production packages above are included in the uv workspace and fully supported. Packages under review require architectural decisions before use.
 
 ---
 
