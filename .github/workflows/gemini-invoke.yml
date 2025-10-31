@@ -21,7 +21,29 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 15  # Prevent runaway executions (Karl Stoney's production: 3-5 min for PR reviews)
     permissions:
-      contents: 'write'  # Required for file creation, commits, and branch creation
+      # Security Note: contents:write is required for MCP server tools that modify repository files
+      # Specific operations requiring write access (via includeTools whitelist on lines 108-127):
+      # - create_or_update_file: Create/modify files in feature branches
+      # - push_files: Commit and push changes to branches
+      # - create_branch: Create feature branches for PRs
+      # - delete_file: Remove files (used for cleanup operations)
+      # - create_pull_request: Create PRs from feature branches
+      # 
+      # Safeguards in place:
+      # 1. Explicit tool whitelist (lines 108-127) - only 17 specific MCP tools enabled
+      # 2. Branch protection rules require PR review before merge to main
+      # 3. All changes are auditable via Git history and PR review
+      # 4. Workflow cannot modify .github/workflows or other protected paths
+      # 5. 15-minute timeout prevents runaway operations
+      # 6. Human approval required via /approve command (see prompt lines 218-226)
+      #
+      # Alternative considered: Separate service account with restricted permissions
+      # Decision: Current approach acceptable because:
+      # - Changes always go through PR review before merge
+      # - Tool whitelist provides granular control
+      # - Audit trail is maintained
+      # - No access to workflow files or secrets
+      contents: 'write'
       id-token: 'write'
       issues: 'write'
       pull-requests: 'write'
@@ -34,7 +56,9 @@ jobs:
         with:
           app-id: '${{ vars.APP_ID }}'
           private-key: '${{ secrets.APP_PRIVATE_KEY }}'
-          permission-contents: 'write'  # Required for file creation, commits, and branch creation
+          # Mirror the job-level permissions for consistency
+          # See lines 23-48 for detailed security documentation
+          permission-contents: 'write'
           permission-issues: 'write'
           permission-pull-requests: 'write'
 
@@ -166,6 +190,15 @@ jobs:
             6. **Resource Consciousness**: Be mindful of the number of operations you perform. Your plans should be efficient. Avoid proposing actions that would result in an excessive number of tool calls (e.g., > 50).
 
             7. **Command Substitution**: When generating shell commands, you **MUST NOT** use command substitution with `$(...)`, `<(...)`, or `>(...)`. This is a security measure to prevent unintended command execution.
+
+            8. **Protected Paths Restriction**: You **MUST NOT** modify files in the following protected paths:
+                - `.github/workflows/` - Workflow files (security-critical)
+                - `.github/actions/` - Custom actions (security-critical)
+                - `.github/scripts/` - Workflow scripts (security-critical)
+                - `CODEOWNERS` - Code ownership rules
+                - Any file containing secrets, keys, or credentials
+                
+                If a user requests changes to protected paths, you **MUST** refuse and explain that these paths can only be modified through direct human PR review. All other changes must go through feature branches and PR review before reaching main branch.
 
             -----
 
