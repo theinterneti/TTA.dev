@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/theinterneti/TTA.dev/workflows/CI/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
 [![Quality](https://github.com/theinterneti/TTA.dev/workflows/Quality%20Checks/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
+[![TODO Compliance](https://github.com/theinterneti/TTA.dev/workflows/TODO%20Compliance%20Validation/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Type checked: Pyright](https://img.shields.io/badge/type%20checked-pyright-blue.svg)](https://github.com/microsoft/pyright)
@@ -244,8 +245,27 @@ Before submitting a PR, ensure:
 - ✅ Test coverage >80%
 - ✅ Documentation complete
 - ✅ Ruff + Pyright checks pass
+- ✅ **TODO compliance (100%)** - All Logseq TODOs properly formatted
 - ✅ Real-world usage validation
 - ✅ No known critical bugs
+
+#### TODO Compliance Requirement
+
+All TODOs in Logseq journals must follow the [TODO Management System](logseq/pages/TODO%20Management%20System.md):
+
+- **Category tag required**: `#dev-todo` or `#user-todo`
+- **For `#dev-todo`**: Must include `type::`, `priority::`, `package::` properties
+- **For `#user-todo`**: Must include `type::`, `audience::`, `difficulty::` properties
+
+**Validation:**
+```bash
+# Check TODO compliance locally
+uv run python scripts/validate-todos.py
+
+# Expected output: 100.0% compliance
+```
+
+The CI will automatically validate TODO compliance on all PRs. Non-compliant TODOs will block the merge.
 
 ### Contribution Workflow
 

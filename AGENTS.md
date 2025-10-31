@@ -11,6 +11,7 @@ Welcome to TTA.dev! This file is your entry point for understanding and working 
 ### What is TTA.dev?
 
 TTA.dev is a production-ready **AI development toolkit** providing:
+
 - **Agentic primitives** for building reliable AI workflows
 - **Composable patterns** with type-safe operators (`>>`, `|`)
 - **Built-in observability** with OpenTelemetry integration
@@ -311,6 +312,7 @@ workflow = (
 ```
 
 **Benefits:**
+
 - 30-40% cost reduction (via Cache + Router)
 - Real-time metrics in Prometheus/Grafana
 - Distributed tracing across workflows
@@ -375,12 +377,14 @@ uv run pytest -v
 ### VS Code Configuration
 
 **Recommended Extensions:**
+
 - GitHub Copilot (required for toolsets)
 - Python + Pylance (type checking)
 - Ruff (linting/formatting)
 - GitLens (Git integration)
 
 **Copilot Toolsets:** See [`.vscode/copilot-toolsets.jsonc`](.vscode/copilot-toolsets.jsonc)
+
 - Use `#tta-package-dev` for primitive development
 - Use `#tta-testing` for test development
 - Use `#tta-observability` for tracing/metrics work
@@ -479,6 +483,7 @@ Tradeoff: Slightly more memory, but better reliability
 ### Per-Package Documentation
 
 Each package has:
+
 - `README.md` - Package overview and API docs
 - `AGENTS.md` (or `.github/copilot-instructions.md`) - Agent-specific guidance
 - `examples/` - Working code examples
@@ -542,10 +547,10 @@ When making decisions, prioritize:
 
 ## 🔗 Quick Links
 
-- **GitHub Repository:** https://github.com/theinterneti/TTA.dev
-- **Issues:** https://github.com/theinterneti/TTA.dev/issues
-- **Pull Requests:** https://github.com/theinterneti/TTA.dev/pulls
-- **CI/CD:** https://github.com/theinterneti/TTA.dev/actions
+- **GitHub Repository:** <https://github.com/theinterneti/TTA.dev>
+- **Issues:** <https://github.com/theinterneti/TTA.dev/issues>
+- **Pull Requests:** <https://github.com/theinterneti/TTA.dev/pulls>
+- **CI/CD:** <https://github.com/theinterneti/TTA.dev/actions>
 
 ---
 
