@@ -65,7 +65,9 @@ class CostMetrics:
     tokens_by_model: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     requests_by_model: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     cost_by_user: dict[str, float] = field(default_factory=lambda: defaultdict(float))
-    cost_by_workflow: dict[str, float] = field(default_factory=lambda: defaultdict(float))
+    cost_by_workflow: dict[str, float] = field(
+        default_factory=lambda: defaultdict(float)
+    )
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -102,7 +104,9 @@ class CostTrackingPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]
         self.pricing = MODEL_PRICING.get(model_name)
 
         if not self.pricing:
-            raise ValueError(f"Unknown model: {model_name}. Add pricing to MODEL_PRICING.")
+            raise ValueError(
+                f"Unknown model: {model_name}. Add pricing to MODEL_PRICING."
+            )
 
     async def _execute_impl(
         self, input_data: dict[str, Any], context: WorkflowContext
@@ -226,7 +230,9 @@ class BudgetEnforcementPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str,
 class MockLLMPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """Mock LLM primitive for demonstration."""
 
-    def __init__(self, model: str, avg_prompt_tokens: int = 100, avg_completion_tokens: int = 50) -> None:
+    def __init__(
+        self, model: str, avg_prompt_tokens: int = 100, avg_completion_tokens: int = 50
+    ) -> None:
         """Initialize mock LLM."""
         super().__init__(name=f"mock_llm_{model}")
         self.model = model
@@ -320,9 +326,15 @@ async def main() -> None:
     print()
 
     # Create mock LLM primitives
-    gpt4_llm = MockLLMPrimitive("gpt-4", avg_prompt_tokens=150, avg_completion_tokens=100)
-    gpt4_mini_llm = MockLLMPrimitive("gpt-4-mini", avg_prompt_tokens=120, avg_completion_tokens=80)
-    claude_llm = MockLLMPrimitive("claude-3-sonnet", avg_prompt_tokens=140, avg_completion_tokens=90)
+    gpt4_llm = MockLLMPrimitive(
+        "gpt-4", avg_prompt_tokens=150, avg_completion_tokens=100
+    )
+    gpt4_mini_llm = MockLLMPrimitive(
+        "gpt-4-mini", avg_prompt_tokens=120, avg_completion_tokens=80
+    )
+    claude_llm = MockLLMPrimitive(
+        "claude-3-sonnet", avg_prompt_tokens=140, avg_completion_tokens=90
+    )
 
     # Wrap with cost tracking
     gpt4_tracked = CostTrackingPrimitive(gpt4_llm, "gpt-4")
@@ -389,7 +401,9 @@ async def main() -> None:
         )
 
         # Execute
-        result = await test_case["model"]._execute_impl({"prompt": test_case["prompt"]}, context)
+        result = await test_case["model"]._execute_impl(
+            {"prompt": test_case["prompt"]}, context
+        )
 
         # Display result
         cost_info = result["cost"]

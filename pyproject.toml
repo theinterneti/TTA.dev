@@ -2,6 +2,9 @@
 # This is NOT a buildable package - individual packages are in packages/
 
 [tool.uv.workspace]
+# Active production packages only
+# Note: keploy-framework, python-pathway, and js-dev-primitives are under review
+# and not included in workspace until architectural decisions are made
 members = [
     "packages/tta-dev-primitives",
     "packages/tta-observability-integration",

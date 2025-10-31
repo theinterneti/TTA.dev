@@ -12,9 +12,9 @@ During batch-fixing of `multi_agent_workflow.py`, parallel `replace_string_in_fi
 
 ## What Was Attempted
 
-✅ Added `__init__` methods to all 6 agent primitives  
-❌ Parallel edits caused file corruption  
-❌ File not in git history (untracked)  
+✅ Added `__init__` methods to all 6 agent primitives
+❌ Parallel edits caused file corruption
+❌ File not in git history (untracked)
 
 ---
 
@@ -24,7 +24,7 @@ During batch-fixing of `multi_agent_workflow.py`, parallel `replace_string_in_fi
 Since the file is untracked and corrupted beyond repair, **manually recreate** using the working examples as templates:
 
 1. Use `rag_workflow.py` as the pattern template (fully working)
-2. Use `agentic_rag_workflow.py` for modern best practices  
+2. Use `agentic_rag_workflow.py` for modern best practices
 3. Implement 6 agent primitives:
    - CoordinatorAgentPrimitive
    - DataAnalystAgentPrimitive
@@ -52,7 +52,7 @@ class AgentNamePrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 The conversation summary contains the class names and structure. Could manually rebuild from that.
 
 ### Option 3: Skip for Now
-- Mark as "needs recreation" 
+- Mark as "needs recreation"
 - Focus on completing `cost_tracking_workflow.py` and `streaming_workflow.py`
 - Come back to multi_agent later
 
@@ -76,7 +76,7 @@ from tta_dev_primitives.observability import InstrumentedPrimitive
 class MyPrimitive(InstrumentedPrimitive[InputT, OutputT]):
     def __init__(self) -> None:
         super().__init__(name="my_primitive")
-    
+
     async def _execute_impl(self, input_data: InputT, context: WorkflowContext) -> OutputT:
         ...
 ```
@@ -95,7 +95,7 @@ class MyPrimitive(InstrumentedPrimitive[InputT, OutputT]):
 **Skip multi_agent_workflow.py for now.** Focus on:
 
 1. ✅ **rag_workflow.py** - Already working
-2. ✅ **agentic_rag_workflow.py** - Already working  
+2. ✅ **agentic_rag_workflow.py** - Already working
 3. ⚠️ **cost_tracking_workflow.py** - Apply fixes systematically (one file at a time!)
 4. ⚠️ **streaming_workflow.py** - Apply fixes systematically
 5. ⚠️ **multi_agent_workflow.py** - Recreate from scratch last
@@ -119,7 +119,7 @@ This avoids further corruption and ensures we have 2 fully working examples alre
 ## Next Steps
 
 1. **Fix cost_tracking_workflow.py** (single-file, careful edits)
-2. **Fix streaming_workflow.py** (single-file, careful edits)  
+2. **Fix streaming_workflow.py** (single-file, careful edits)
 3. **Update README.md** (documentation only)
 4. **Test all 4 working examples**
 5. **Recreate multi_agent_workflow.py** (if time permits)

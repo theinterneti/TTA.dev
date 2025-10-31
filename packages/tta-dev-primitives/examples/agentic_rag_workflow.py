@@ -27,7 +27,7 @@ from tta_dev_primitives.recovery import FallbackPrimitive, RetryPrimitive, Retry
 class QueryRouterPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """
     Route user query to appropriate data source.
-    
+
     Uses LLM to determine if query should go to:
     - vectorstore: For RAG-specific topics (LLM agents, prompt engineering)
     - web_search: For general knowledge or recent information
@@ -144,7 +144,7 @@ class WebSearchPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 class DocumentGraderPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """
     Grade document relevance to question.
-    
+
     Returns binary yes/no score for each document.
     Filters out irrelevant documents to reduce noise.
     """
@@ -204,7 +204,7 @@ class AnswerGeneratorPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, A
 
         # Format context (in production, pass to LLM prompt)
         _ = "\n\n".join(
-            f"[{i+1}] {doc.get('content', '')}" for i, doc in enumerate(documents)
+            f"[{i + 1}] {doc.get('content', '')}" for i, doc in enumerate(documents)
         )
 
         # Simulate LLM generation (in production, use actual LLM API)
@@ -229,7 +229,7 @@ class AnswerGeneratorPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, A
 class AnswerGraderPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """
     Grade if answer is useful to resolve the question.
-    
+
     Returns binary yes/no score.
     Triggers retry if answer is not useful.
     """
@@ -267,7 +267,7 @@ class HallucinationGraderPrimitive(
 ):
     """
     Check if answer is grounded in provided documents.
-    
+
     Prevents hallucinations by verifying answer against sources.
     """
 

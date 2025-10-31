@@ -57,7 +57,9 @@ class StreamMetrics:
 # ==============================================================================
 
 
-class StreamingPrimitive(InstrumentedPrimitive[dict[str, Any], AsyncIterator[StreamChunk]]):
+class StreamingPrimitive(
+    InstrumentedPrimitive[dict[str, Any], AsyncIterator[StreamChunk]]
+):
     """Base class for streaming primitives."""
 
     def __init__(self, name: str = "streaming_base") -> None:
@@ -147,7 +149,9 @@ The framework enables building reliable AI workflows with minimal boilerplate.""
                 is_final=is_final,
                 metadata={
                     "model": self.model,
-                    "prompt": prompt if i == 0 else None,  # Include prompt in first chunk
+                    "prompt": prompt
+                    if i == 0
+                    else None,  # Include prompt in first chunk
                 },
             )
 
@@ -157,7 +161,9 @@ The framework enables building reliable AI workflows with minimal boilerplate.""
 # ==============================================================================
 
 
-class StreamBufferPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], AsyncIterator[StreamChunk]]):
+class StreamBufferPrimitive(
+    InstrumentedPrimitive[AsyncIterator[StreamChunk], AsyncIterator[StreamChunk]]
+):
     """Buffer stream chunks for smoother delivery."""
 
     def __init__(self, buffer_size: int = 5) -> None:
@@ -186,7 +192,9 @@ class StreamBufferPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], As
                 buffer = []
 
 
-class StreamFilterPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], AsyncIterator[StreamChunk]]):
+class StreamFilterPrimitive(
+    InstrumentedPrimitive[AsyncIterator[StreamChunk], AsyncIterator[StreamChunk]]
+):
     """Filter stream chunks based on criteria."""
 
     def __init__(self, filter_fn: Any) -> None:
@@ -208,7 +216,11 @@ class StreamFilterPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], As
                 yield chunk
 
 
-class StreamMetricsPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], tuple[AsyncIterator[StreamChunk], StreamMetrics]]):
+class StreamMetricsPrimitive(
+    InstrumentedPrimitive[
+        AsyncIterator[StreamChunk], tuple[AsyncIterator[StreamChunk], StreamMetrics]
+    ]
+):
     """Track metrics for streaming performance."""
 
     def __init__(self) -> None:
@@ -232,8 +244,12 @@ class StreamMetricsPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], t
             end_time = asyncio.get_event_loop().time()
             metrics.duration_seconds = end_time - start_time
             if metrics.duration_seconds > 0:
-                metrics.chunks_per_second = metrics.total_chunks / metrics.duration_seconds
-                metrics.chars_per_second = metrics.total_chars / metrics.duration_seconds
+                metrics.chunks_per_second = (
+                    metrics.total_chunks / metrics.duration_seconds
+                )
+                metrics.chars_per_second = (
+                    metrics.total_chars / metrics.duration_seconds
+                )
 
         return tracked_stream(), metrics
 
@@ -243,7 +259,9 @@ class StreamMetricsPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], t
 # ==============================================================================
 
 
-class StreamAggregatorPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], dict[str, Any]]):
+class StreamAggregatorPrimitive(
+    InstrumentedPrimitive[AsyncIterator[StreamChunk], dict[str, Any]]
+):
     """Aggregate streaming chunks into final result."""
 
     def __init__(self) -> None:
