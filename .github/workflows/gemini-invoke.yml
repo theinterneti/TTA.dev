@@ -21,7 +21,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     timeout-minutes: 15  # Prevent runaway executions (Karl Stoney's production: 3-5 min for PR reviews)
     permissions:
-      contents: 'read'
+      contents: 'write'  # Required for file creation, commits, and branch creation
       id-token: 'write'
       issues: 'write'
       pull-requests: 'write'
@@ -34,7 +34,7 @@ jobs:
         with:
           app-id: '${{ vars.APP_ID }}'
           private-key: '${{ secrets.APP_PRIVATE_KEY }}'
-          permission-contents: 'read'
+          permission-contents: 'write'  # Required for file creation, commits, and branch creation
           permission-issues: 'write'
           permission-pull-requests: 'write'
 
