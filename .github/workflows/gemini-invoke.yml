@@ -53,23 +53,23 @@ jobs:
           # Map tier to model
           case "$TIER" in
             "thinking")
-              PRIMARY="gemini-2.0-flash-thinking-exp"
+              PRIMARY="gemini-2.0-flash-thinking-exp-1219"
               FALLBACK="gemini-1.5-pro-002"
               echo "🧠 Quality mode: Extended reasoning with thinking model"
               ;;
             "pro")
               PRIMARY="gemini-1.5-pro-002"
-              FALLBACK="gemini-2.0-flash-thinking-exp"
+              FALLBACK="gemini-2.0-flash-thinking-exp-1219"
               echo "⚖️ Balanced mode: Proven quality with Pro model"
               ;;
             "fast")
               PRIMARY="gemini-2.0-flash-exp"
-              FALLBACK="gemini-2.0-flash-thinking-exp"
+              FALLBACK="gemini-2.0-flash-thinking-exp-1219"
               echo "⚡ Speed mode: Fast responses"
               ;;
             *)
               # Default to thinking for quality
-              PRIMARY="gemini-2.0-flash-thinking-exp"
+              PRIMARY="gemini-2.0-flash-thinking-exp-1219"
               FALLBACK="gemini-1.5-pro-002"
               echo "🧠 Default: Quality mode with thinking model"
               ;;
