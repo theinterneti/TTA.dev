@@ -23,11 +23,10 @@ When this PR is opened, the `gemini-dispatch.yml` workflow should:
 
 Once the PR is open and the workflow triggers, we can post this command to test write operations:
 
+> **Note:** The command should be posted as a single line (line breaks are for formatting only).
+
 ```markdown
-@gemini-cli Create a test file at docs/test-gemini-write-success.md with the content 
-"This file was created by Gemini CLI on October 31, 2025 to verify write capabilities. 
-The GitHub MCP server v0.20.1 supports file creation, commits, and PR creation." 
-Create a PR titled "test: verify Gemini CLI write capabilities - automated test".
+@gemini-cli Create a test file at docs/test-gemini-write-success.md with the content "This file was created by Gemini CLI on October 31, 2025 to verify write capabilities. The GitHub MCP server v0.20.1 supports file creation, commits, and PR creation." Create a PR titled "test: verify Gemini CLI write capabilities - automated test".
 ```
 
 ## Success Criteria
