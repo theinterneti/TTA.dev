@@ -14,8 +14,8 @@ This PR will trigger the Gemini dispatch workflow on `pull_request.opened` event
 
 When this PR is opened, the `gemini-dispatch.yml` workflow should:
 
-- Trigger on `pull_request.opened` event (line 10-12)
-- Meet the dispatch condition (line 51-52): `github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false`
+- Trigger on `pull_request.opened` event (see `.github/workflows/gemini-dispatch.yml` `on.pull_request`)
+- Meet the dispatch condition in `.github/workflows/gemini-dispatch.yml` (`if` condition on the `invoke` job): `github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false`
 - Execute the `invoke` job with write permissions
 - Run Gemini CLI with the PR title and description as context
 
