@@ -33,9 +33,9 @@ jobs:
         run: |
           TIER="${{ inputs.model_tier }}"
           PROMPT="${{ inputs.additional_context }}"
-
+          
           echo "🎯 Model tier requested: $TIER"
-
+          
           # Auto-detect complexity from prompt keywords if tier is 'auto'
           if [ "$TIER" = "auto" ]; then
             if echo "$PROMPT" | grep -qiE "(architect|design|complex|refactor|analyze deeply)"; then
@@ -49,7 +49,7 @@ jobs:
               TIER="fast"
             fi
           fi
-
+          
           # Map tier to model
           case "$TIER" in
             "thinking")
@@ -74,7 +74,7 @@ jobs:
               echo "🧠 Default: Quality mode with thinking model"
               ;;
           esac
-
+          
           echo "primary_model=$PRIMARY" >> $GITHUB_OUTPUT
           echo "fallback_model=$FALLBACK" >> $GITHUB_OUTPUT
           echo "✅ Selected: $PRIMARY (fallback: $FALLBACK)"
@@ -123,7 +123,6 @@ jobs:
       - name: 'Run Gemini CLI'
         id: 'run_gemini'
         uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
-        continue-on-error: true
         env:
           TITLE: '${{ github.event.pull_request.title || github.event.issue.title }}'
           DESCRIPTION: '${{ github.event.pull_request.body || github.event.issue.body }}'
@@ -264,38 +263,6 @@ jobs:
 
             -----
 
-            ## Response Quality Standards
-
-            When posting comments, follow these guidelines for professional, helpful responses:
-
-            1. **Formatting Excellence**:
-               - Use proper Markdown formatting with clear hierarchy
-               - Include code blocks with language tags (```python, ```yaml, etc.)
-               - Use tables for structured data comparison
-               - Add emojis sparingly for visual hierarchy (✅, ❌, ⚠️, 📊, 🔍)
-               - Use headers (##, ###) to organize complex responses
-
-            2. **Content Structure**:
-               - Start with executive summary for complex analysis
-               - Use bullet points for lists, numbered lists for sequences
-               - Provide concrete examples when explaining concepts
-               - Link to relevant files, issues, or PRs in the repository
-               - Include "Next Steps" section when appropriate
-
-            3. **Code Examples**:
-               - Always include file path and line numbers for context
-               - Show before/after for proposed changes
-               - Explain the "why" behind changes, not just the "what"
-               - Use syntax highlighting for all code blocks
-               - Keep examples concise but complete
-
-            4. **Error Handling Communication**:
-               - **Transient Errors** (rate limits, network): "⚠️ Temporary issue: [type]. Retrying in [N] seconds..."
-               - **Permanent Errors** (invalid request): "❌ Unable to complete: [error]. **Reason**: [explanation]. **Suggestion**: [how to fix]"
-               - **Partial Success**: "⚠️ Partially completed: [success]. **Issue**: [failure]. **Next Steps**: [manual action needed]"
-
-            -----
-
             ## Step 1: Context Gathering & Initial Analysis
 
             Begin every task by building a complete picture of the situation.
@@ -379,54 +346,3 @@ jobs:
 
                   My work on this issue is now complete.
                   ```
-
-      - name: 'Retry with Fallback Model (if needed)'
-        id: 'retry_gemini'
-        if: failure() && steps.run_gemini.outcome == 'failure'
-        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
-        env:
-          TITLE: '${{ github.event.pull_request.title || github.event.issue.title }}'
-          DESCRIPTION: '${{ github.event.pull_request.body || github.event.issue.body }}'
-          EVENT_NAME: '${{ github.event_name }}'
-          GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
-          IS_PULL_REQUEST: '${{ !!github.event.pull_request }}'
-          ISSUE_NUMBER: '${{ github.event.pull_request.number || github.event.issue.number }}'
-          REPOSITORY: '${{ github.repository }}'
-          ADDITIONAL_CONTEXT: 'RETRY ATTEMPT: ${{ inputs.additional_context }}'
-        with:
-          gcp_location: '${{ vars.GOOGLE_CLOUD_LOCATION }}'
-          gcp_project_id: '${{ vars.GOOGLE_CLOUD_PROJECT }}'
-          gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
-          gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
-          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
-          gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION }}'
-          gemini_debug: true
-          gemini_model: '${{ needs.select-model.outputs.fallback_model }}'
-          use_gemini_code_assist: false
-          use_vertex_ai: false
-          settings: |-
-            {
-              "general": {"disableAutoUpdate": true},
-              "ui": {"hideTips": true, "hideFooter": true},
-              "model": {"maxSessionTurns": 25},
-              "telemetry": {"enabled": false},
-              "tools": {
-                "autoAccept": true,
-                "core": ["run_shell_command(cat)", "run_shell_command(echo)", "run_shell_command(grep)", "run_shell_command(head)", "run_shell_command(tail)"]
-              },
-              "security": {"folderTrust": {"featureEnabled": false, "enabled": true}},
-              "mcpServers": {
-                "github": {
-                  "command": "docker",
-                  "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server:v0.20.1"],
-                  "includeTools": ["add_issue_comment", "get_issue", "get_issue_comments", "list_issues", "search_issues", "create_pull_request", "pull_request_read", "list_pull_requests", "search_pull_requests", "create_branch", "create_or_update_file", "delete_file", "fork_repository", "get_commit", "get_file_contents", "list_commits", "push_files", "search_code"],
-                  "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"}
-                },
-                "context7": {
-                  "command": "npx",
-                  "args": ["-y", "@context7/mcp-server"],
-                  "includeTools": ["resolve-library-id", "get-library-docs"]
-                }
-              }
-            }
-          prompt: 'Note: This is a retry attempt with fallback model due to initial failure. Please complete the request.'
