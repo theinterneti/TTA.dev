@@ -31,14 +31,12 @@ jobs:
       - name: 'Select Model Based on Tier'
         id: 'select'
         run: |
-          # Use repository variable GEMINI_MODEL as default (currently: gemini-2.5-flash)
-          DEFAULT_MODEL="${{ vars.GEMINI_MODEL }}"
           TIER="${{ inputs.model_tier }}"
           PROMPT="${{ inputs.additional_context }}"
-
+          
           echo "🎯 Model tier requested: $TIER"
-          echo "📝 Default model from vars.GEMINI_MODEL: $DEFAULT_MODEL"
-
+          echo "📝 Repository variable GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}"
+          
           # Auto-detect complexity from prompt keywords if tier is 'auto'
           if [ "$TIER" = "auto" ]; then
             if echo "$PROMPT" | grep -qiE "(architect|design|complex|refactor|analyze deeply)"; then
@@ -52,7 +50,7 @@ jobs:
               TIER="default"
             fi
           fi
-
+          
           # Map tier to model (using actual model names from Context7 docs)
           case "$TIER" in
             "thinking")
@@ -74,18 +72,16 @@ jobs:
               echo "⚡ Speed mode: Fast responses with Flash"
               ;;
             *)
-              # Use repository variable (default)
-              PRIMARY="${DEFAULT_MODEL:-gemini-2.5-flash}"
+              # Use repository variable or fallback to gemini-2.5-flash
+              PRIMARY="${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}"
               FALLBACK="gemini-1.5-pro-002"
               echo "🎯 Using default model: $PRIMARY"
               ;;
           esac
-
+          
           echo "primary_model=$PRIMARY" >> $GITHUB_OUTPUT
           echo "fallback_model=$FALLBACK" >> $GITHUB_OUTPUT
-          echo "✅ Selected: $PRIMARY (fallback: $FALLBACK)"
-
-  invoke:
+          echo "✅ Selected: $PRIMARY (fallback: $FALLBACK)"  invoke:
     needs: select-model
     runs-on: 'ubuntu-latest'
     timeout-minutes: 15  # Prevent runaway executions (Karl Stoney's production: 3-5 min for PR reviews)
