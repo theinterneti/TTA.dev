@@ -31,50 +31,56 @@ jobs:
       - name: 'Select Model Based on Tier'
         id: 'select'
         run: |
+          # Use repository variable GEMINI_MODEL as default (currently: gemini-2.5-flash)
+          DEFAULT_MODEL="${{ vars.GEMINI_MODEL }}"
           TIER="${{ inputs.model_tier }}"
           PROMPT="${{ inputs.additional_context }}"
-          
+
           echo "🎯 Model tier requested: $TIER"
-          
+          echo "📝 Default model from vars.GEMINI_MODEL: $DEFAULT_MODEL"
+
           # Auto-detect complexity from prompt keywords if tier is 'auto'
           if [ "$TIER" = "auto" ]; then
             if echo "$PROMPT" | grep -qiE "(architect|design|complex|refactor|analyze deeply)"; then
-              echo "📊 Detected complex task - using thinking model"
-              TIER="thinking"
-            elif echo "$PROMPT" | grep -qiE "(review|analyze|explain|document)"; then
-              echo "📊 Detected medium complexity - using pro model"
+              echo "📊 Detected complex task - using pro model"
               TIER="pro"
+            elif echo "$PROMPT" | grep -qiE "(review|analyze|explain|document)"; then
+              echo "📊 Detected medium complexity - using flash model"
+              TIER="flash"
             else
-              echo "📊 Detected simple task - using fast model"
-              TIER="fast"
+              echo "📊 Detected simple task - using default model"
+              TIER="default"
             fi
           fi
-          
-          # Map tier to model
+
+          # Map tier to model (using actual model names from Context7 docs)
           case "$TIER" in
             "thinking")
-              PRIMARY="gemini-2.0-flash-thinking-exp-1219"
+              # Thinking models for complex reasoning
+              PRIMARY="gemini-2.0-flash-thinking-exp"
               FALLBACK="gemini-1.5-pro-002"
               echo "🧠 Quality mode: Extended reasoning with thinking model"
               ;;
             "pro")
+              # Pro model for balanced quality
               PRIMARY="gemini-1.5-pro-002"
-              FALLBACK="gemini-2.0-flash-thinking-exp-1219"
+              FALLBACK="gemini-2.5-flash"
               echo "⚖️ Balanced mode: Proven quality with Pro model"
               ;;
-            "fast")
-              PRIMARY="gemini-2.0-flash-exp"
-              FALLBACK="gemini-2.0-flash-thinking-exp-1219"
-              echo "⚡ Speed mode: Fast responses"
+            "flash"|"fast")
+              # Flash model for speed
+              PRIMARY="gemini-2.5-flash"
+              FALLBACK="gemini-1.5-pro-002"
+              echo "⚡ Speed mode: Fast responses with Flash"
               ;;
             *)
-              # Default to thinking for quality
-              PRIMARY="gemini-2.0-flash-thinking-exp-1219"
+              # Use repository variable (default)
+              PRIMARY="${DEFAULT_MODEL:-gemini-2.5-flash}"
               FALLBACK="gemini-1.5-pro-002"
-              echo "🧠 Default: Quality mode with thinking model"
+              echo "🎯 Using default model: $PRIMARY"
               ;;
           esac
-          
+
           echo "primary_model=$PRIMARY" >> $GITHUB_OUTPUT
           echo "fallback_model=$FALLBACK" >> $GITHUB_OUTPUT
           echo "✅ Selected: $PRIMARY (fallback: $FALLBACK)"
