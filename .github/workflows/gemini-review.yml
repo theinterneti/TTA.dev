@@ -41,9 +41,9 @@ jobs:
       - name: 'Checkout repository'
         uses: 'actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8' # ratchet:actions/checkout@v5
 
-      - name: 'Run Gemini pull request review'
-        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
-        id: 'gemini_pr_review'
+      - name: 'Run Gemini CLI'
+        id: 'run_gemini'
+        uses: 'google-github-actions/run-gemini-cli@v0.1.14' # ratchet:exclude
         env:
           GITHUB_TOKEN: '${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}'
           ISSUE_TITLE: '${{ github.event.pull_request.title || github.event.issue.title }}'
