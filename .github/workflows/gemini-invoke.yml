@@ -44,3 +44,28 @@ jobs:
           gemini_api_key: '${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}'
           gemini_model: 'gemini-2.5-flash'
           prompt: '${{ inputs.additional_context }}'
+
+      - name: 'Post Gemini Response'
+        if: '${{ steps.run_gemini.outputs.gemini_response }}'
+        uses: 'actions/github-script@v7'
+        with:
+          github-token: '${{ steps.mint_identity_token.outputs.token || github.token }}'
+          script: |
+            const response = `${{ steps.run_gemini.outputs.gemini_response }}`;
+            
+            // Post to issue or PR
+            if (context.payload.issue) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.issue.number,
+                body: response
+              });
+            } else if (context.payload.pull_request) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: response
+              });
+            }
