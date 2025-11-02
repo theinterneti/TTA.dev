@@ -25,6 +25,9 @@ dependencies:
 # Workflow Scripts
 # Define reusable agent workflows that can be triggered via APM
 scripts:
+  # Custom prompt mode - accepts dynamic input
+  custom: "gemini --yolo --model gemini-2.5-flash --output-format json"
+
   # Automated PR Review
   pr-review: "gemini --yolo -p .github/prompts/pr-review.prompt.md"
 

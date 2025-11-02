@@ -50,17 +50,10 @@ jobs:
         uses: 'danielmeppiel/action-apm-cli@v1'
         with:
           script: '${{ inputs.apm_script || ''custom'' }}'
-          custom-command: |
-            if [ -z "${{ inputs.apm_script }}" ]; then
-              # Custom prompt mode (no predefined script)
-              gemini --yolo \
-                --model gemini-2.5-flash \
-                --prompt "${{ inputs.additional_context }}" \
-                --output-format json > gemini_output.json
-            fi
+          args: '--prompt "${{ inputs.additional_context }}"'
         env:
-          # GitHub MCP Server authentication
-          GITHUB_COPILOT_CHAT: '${{ secrets.GITHUB_COPILOT_CHAT }}'
+          # GitHub MCP Server authentication  
+          GITHUB_COPILOT_PAT: '${{ secrets.GITHUB_COPILOT_CHAT }}'
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
           # Gemini API authentication
