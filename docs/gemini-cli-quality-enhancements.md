@@ -2,8 +2,8 @@
 
 **Quality-first improvements with generous Pro tier + expanded MCP capabilities**
 
-**Date:** October 31, 2025  
-**Status:** Ready for Implementation  
+**Date:** October 31, 2025
+**Status:** Ready for Implementation
 **Priority:** Quality over Speed
 
 ---
@@ -200,13 +200,13 @@ on:
           - thinking
           - pro
           - fast
-      
+
       enable_ab_testing:
         description: 'Enable A/B testing (compare models)'
         required: false
         default: false
         type: boolean
-      
+
       mcp_servers:
         description: 'MCP servers to enable (comma-separated)'
         required: false
@@ -219,17 +219,17 @@ jobs:
       primary_model: ${{ steps.select.outputs.primary_model }}
       fallback_model: ${{ steps.select.outputs.fallback_model }}
       test_models: ${{ steps.select.outputs.test_models }}
-    
+
     steps:
       - name: Select Model Based on Context
         id: select
         run: |
           TIER="${{ github.event.inputs.model_tier }}"
-          
+
           if [ "$TIER" = "auto" ]; then
             # Auto-select based on complexity hints in prompt
             PROMPT="${{ github.event.inputs.prompt }}"
-            
+
             if echo "$PROMPT" | grep -iE "(architect|design|complex|refactor)"; then
               PRIMARY="gemini-2.0-flash-thinking-exp-1219"
               FALLBACK="gemini-1.5-pro-002"
@@ -250,10 +250,10 @@ jobs:
             PRIMARY="gemini-2.0-flash-exp"
             FALLBACK="gemini-2.0-flash-thinking-exp-1219"
           fi
-          
+
           echo "primary_model=$PRIMARY" >> $GITHUB_OUTPUT
           echo "fallback_model=$FALLBACK" >> $GITHUB_OUTPUT
-          
+
           # For A/B testing
           if [ "${{ github.event.inputs.enable_ab_testing }}" = "true" ]; then
             echo "test_models=$PRIMARY,$FALLBACK,gemini-2.0-flash-exp" >> $GITHUB_OUTPUT
@@ -262,15 +262,15 @@ jobs:
   invoke-gemini:
     needs: select-model
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         model: ${{ fromJson(format('["{0}"]', needs.select-model.outputs.primary_model)) }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Mint GitHub App Token
         id: mint-token
         uses: actions/create-github-app-token@v1
@@ -283,28 +283,28 @@ jobs:
               "issues": "write",
               "pull_requests": "write"
             }
-      
+
       - name: Setup MCP Servers Config
         id: setup-mcps
         run: |
           # Generate MCP config based on input
           SERVERS="${{ github.event.inputs.mcp_servers }}"
-          
+
           # Start with GitHub (always included)
           MCP_CONFIG='{"github": {...}}'  # Existing config
-          
+
           # Add Context7 if requested
           if echo "$SERVERS" | grep -q "context7"; then
             # Add context7 config
           fi
-          
+
           # Add Universal Agent Context if requested
           if echo "$SERVERS" | grep -q "agent-context"; then
             # Add agent-context config
           fi
-          
+
           echo "mcp_config=$MCP_CONFIG" >> $GITHUB_OUTPUT
-      
+
       - name: Run Gemini CLI
         uses: google-github-actions/run-gemini-cli@v0
         with:
@@ -326,32 +326,32 @@ jobs:
             }
           prompt: |-
             ## Persona
-            
+
             You are a world-class software engineering agent with access to:
             - GitHub operations (18 tools)
             - Library documentation (Context7)
             - Architectural memory (Universal Agent Context)
-            
+
             ## Task Context
-            
+
             Repository: ${{ github.repository }}
             Branch: ${{ github.ref_name }}
             Model: ${{ matrix.model }}
-            
+
             ## Your Task
-            
+
             ${{ github.event.inputs.prompt }}
-            
+
             ## Quality Standards
-            
+
             - Prioritize correctness over speed
             - Use architectural memory to maintain consistency
             - Look up documentation when unsure
             - Store important decisions for future reference
             - Show your reasoning process
-          
+
           github_token: ${{ steps.mint-token.outputs.token }}
-      
+
       - name: Track Model Performance
         if: always()
         run: |
@@ -359,7 +359,7 @@ jobs:
           echo "Model: ${{ matrix.model }}"
           echo "Duration: ${{ steps.run-gemini.outputs.duration }}"
           echo "Status: ${{ job.status }}"
-          
+
           # Store for later analysis
           mkdir -p .github/metrics
           cat > ".github/metrics/model-performance-$(date +%s).json" <<EOF
@@ -371,7 +371,7 @@ jobs:
             "task_type": "$(echo '${{ github.event.inputs.prompt }}' | head -c 50)"
           }
           EOF
-      
+
       - name: Fallback on Rate Limit
         if: failure() && contains(steps.run-gemini.outputs.error, 'rate limit')
         uses: google-github-actions/run-gemini-cli@v0
@@ -384,11 +384,11 @@ jobs:
     if: github.event.inputs.enable_ab_testing == 'true'
     needs: invoke-gemini
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         model: ${{ fromJson(format('[{0}]', needs.select-model.outputs.test_models)) }}
-    
+
     steps:
       - name: Run Parallel Tests
         # Run same prompt with different models
@@ -408,17 +408,17 @@ from datetime import datetime, timedelta
 def analyze_model_performance():
     """Analyze model performance from stored metrics."""
     metrics_dir = Path(".github/metrics")
-    
+
     if not metrics_dir.exists():
         print("No metrics found")
         return
-    
+
     # Load all metrics
     metrics = []
     for file in metrics_dir.glob("model-performance-*.json"):
         with open(file) as f:
             metrics.append(json.load(f))
-    
+
     # Group by model
     by_model = {}
     for m in metrics:
@@ -426,34 +426,34 @@ def analyze_model_performance():
         if model not in by_model:
             by_model[model] = []
         by_model[model].append(m)
-    
+
     # Analyze each model
     print("## Model Performance Summary\n")
     for model, runs in by_model.items():
         total = len(runs)
         successful = sum(1 for r in runs if r["status"] == "success")
         avg_duration = sum(float(r["duration_seconds"]) for r in runs) / total
-        
+
         print(f"### {model}")
         print(f"- Total runs: {total}")
         print(f"- Success rate: {successful/total*100:.1f}%")
         print(f"- Avg duration: {avg_duration:.1f}s")
         print(f"- Success rate: {successful}/{total}")
         print()
-    
+
     # Recommendations
     print("\n## Recommendations\n")
-    
+
     # Best for quality (highest success rate)
-    best_quality = max(by_model.items(), 
+    best_quality = max(by_model.items(),
                       key=lambda x: sum(1 for r in x[1] if r["status"]=="success")/len(x[1]))
     print(f"**Best for Quality:** {best_quality[0]}")
-    
+
     # Best for speed (lowest avg duration with good success rate)
-    fast_reliable = [(m, runs) for m, runs in by_model.items() 
+    fast_reliable = [(m, runs) for m, runs in by_model.items()
                      if sum(1 for r in runs if r["status"]=="success")/len(runs) > 0.8]
     if fast_reliable:
-        best_speed = min(fast_reliable, 
+        best_speed = min(fast_reliable,
                         key=lambda x: sum(float(r["duration_seconds"]) for r in x[1])/len(x[1]))
         print(f"**Best for Speed:** {best_speed[0]}")
 
@@ -500,7 +500,7 @@ async def list_tools() -> list[Tool]:
                     "key": {"type": "string", "description": "Memory key"},
                     "value": {"type": "object", "description": "Data to store"},
                     "scope": {
-                        "type": "string", 
+                        "type": "string",
                         "enum": ["session", "workflow", "global"],
                         "description": "Memory scope"
                     }
@@ -554,22 +554,22 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
         )
         # Execute primitive and return result
         # ... implementation ...
-        
+
     elif name == "retrieve_memory":
         memory_primitive = AgentMemoryPrimitive(
             operation="retrieve",
             memory_key=arguments["key"]
         )
         # ... implementation ...
-    
+
     elif name == "query_decisions":
         # Query implementation
         pass
-    
+
     elif name == "list_architecture_decisions":
         # List implementation
         pass
-    
+
     return [TextContent(type="text", text=json.dumps(result))]
 
 async def main():
@@ -587,7 +587,7 @@ if __name__ == "__main__":
 mcpServers:
   agent-context:
     command: "python"
-    args: 
+    args:
       - "-m"
       - "universal_agent_context.mcp_server"
     includeTools:
@@ -611,11 +611,11 @@ mcpServers:
   if: failure()
   run: |
     ERROR="${{ steps.run-gemini.outputs.error }}"
-    
+
     if echo "$ERROR" | grep -q "rate limit"; then
       echo "⚠️ Rate limit hit on ${{ matrix.model }}"
       echo "Falling back to ${{ needs.select-model.outputs.fallback_model }}"
-      
+
       # Trigger fallback workflow
       gh workflow run gemini-invoke.yml \
         -f model_tier=fast \
@@ -640,7 +640,7 @@ def check_rate_limits():
     """Check recent usage against rate limits."""
     metrics_dir = Path(".github/metrics")
     now = datetime.now()
-    
+
     # Last hour
     recent_metrics = []
     for file in metrics_dir.glob("model-performance-*.json"):
@@ -649,26 +649,26 @@ def check_rate_limits():
             timestamp = datetime.fromisoformat(m["timestamp"].replace("Z", "+00:00"))
             if now - timestamp < timedelta(hours=1):
                 recent_metrics.append(m)
-    
+
     # Count by model
     usage = Counter(m["model"] for m in recent_metrics)
-    
+
     # Check against limits
     limits = {
         "gemini-1.5-pro-002": {"rpm": 2, "rpd": 1500},
         "gemini-2.0-flash-thinking-exp-1219": {"rpm": 10, "rpd": 5000},  # Estimated
         "gemini-2.0-flash-exp": {"rpm": 15, "rpd": 10000}  # Estimated
     }
-    
+
     print("## Rate Limit Status\n")
     for model, count in usage.items():
         limit = limits.get(model, {"rpm": 10, "rpd": 1000})
         rpm_used = count
         rpm_limit = limit["rpm"]
-        
+
         percent = (rpm_used / rpm_limit) * 100
         status = "🟢" if percent < 50 else "🟡" if percent < 80 else "🔴"
-        
+
         print(f"{status} **{model}**")
         print(f"   - RPM: {rpm_used}/{rpm_limit} ({percent:.0f}%)")
         print()

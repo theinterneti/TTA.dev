@@ -107,11 +107,54 @@ uv run ruff check . --fix
 # Type check
 uvx pyright packages/
 
+# Validate TODO compliance (REQUIRED!)
+uv run python scripts/validate-todos.py
+
 # Run all quality checks
 uv run task "✅ Quality Check (All)"
 ```
 
 All checks must pass before submitting PR.
+
+#### TODO Compliance Requirement ⚠️
+
+**All TODOs in Logseq journals must be 100% compliant with the [TODO Management System](logseq/pages/TODO%20Management%20System.md).**
+
+Every TODO must have:
+1. **Category tag**: `#dev-todo` or `#user-todo`
+2. **Required properties** (based on category)
+
+**For `#dev-todo` (Development Work):**
+```markdown
+- TODO Implement feature #dev-todo
+  type:: implementation
+  priority:: high
+  package:: tta-dev-primitives
+  related:: [[TTA.dev/Primitives/FeatureName]]
+```
+
+Required properties: `type::`, `priority::`, `package::`, `related::`
+
+**For `#user-todo` (Learning/Documentation):**
+```markdown
+- TODO Create guide #user-todo
+  type:: learning
+  audience:: intermediate-users
+  difficulty:: intermediate
+  related:: [[TTA.dev/Guides/GuideName]]
+```
+
+Required properties: `type::`, `audience::`, `difficulty::`, `related::`
+
+**Validation:**
+```bash
+# Check compliance locally
+uv run python scripts/validate-todos.py
+
+# Expected output: 100.0% compliance
+```
+
+The CI will automatically validate TODO compliance on all PRs. Non-compliant TODOs will block the merge.
 
 ### 7. Commit Changes
 
@@ -238,23 +281,23 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 class MyPrimitive(WorkflowPrimitive):
     """One-line summary of what this primitive does.
-    
+
     Longer description with more details about usage, behavior,
     and any important considerations.
-    
+
     Args:
         param: Description of parameter
-        
+
     Example:
         >>> primitive = MyPrimitive()
         >>> result = await primitive.execute(data, context)
         {"status": "success"}
     """
-    
+
     def __init__(self, param: str) -> None:
         super().__init__()
         self.param = param
-    
+
     async def _execute(
         self,
         data: dict[str, Any],
@@ -287,10 +330,10 @@ async def test_my_primitive_success(context):
     # Arrange
     primitive = MyPrimitive(param="test")
     data = {"input": "value"}
-    
+
     # Act
     result = await primitive.execute(data, context)
-    
+
     # Assert
     assert result["result"] == "value"
     assert "input" in result
@@ -301,7 +344,7 @@ async def test_my_primitive_handles_error(context):
     # Arrange
     primitive = MyPrimitive(param="test")
     data = {}  # Missing required field
-    
+
     # Act & Assert
     with pytest.raises(ValueError, match="Missing required field"):
         await primitive.execute(data, context)

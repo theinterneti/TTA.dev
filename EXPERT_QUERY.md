@@ -1,6 +1,6 @@
 # ✅ SOLVED: Gemini CLI Output Capture
 
-**Repo:** theinterneti/TTA.dev  
+**Repo:** theinterneti/TTA.dev
 **Issue:** `run-gemini-cli@v0` action succeeded but produced empty output (0 bytes)
 
 ## Root Cause

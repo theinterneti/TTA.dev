@@ -20,7 +20,7 @@ We've successfully implemented a **dual-track Gemini CLI integration** for TTA.d
 - ✅ MCP tools via APM framework
 - ✅ GitHub API integration
 - ✅ Complex workflow support
-- ⏳ Requires GITHUB_COPILOT_PAT secret
+- ⏳ Requires GITHUB_COPILOT_CHAT secret
 
 ---
 
@@ -117,7 +117,7 @@ User Query → Routing Decision
 2. **Authentication**
    ```yaml
    env:
-     GITHUB_COPILOT_PAT: ${{ secrets.GITHUB_COPILOT_PAT }}
+     GITHUB_COPILOT_CHAT: ${{ secrets.GITHUB_COPILOT_CHAT }}
    ```
    → MCP server uses PAT for GitHub API
 
@@ -240,12 +240,12 @@ async def test_feature(context):
 
 ```bash
 # Using GitHub CLI
-gh secret set GITHUB_COPILOT_PAT --body "ghp_your_token_here"
+gh secret set GITHUB_COPILOT_CHAT --body "ghp_your_token_here"
 
 # Or via Web UI:
 # 1. Go to: Repository → Settings → Secrets and variables → Actions
 # 2. Click: "New repository secret"
-# 3. Name: GITHUB_COPILOT_PAT
+# 3. Name: GITHUB_COPILOT_CHAT
 # 4. Value: [paste token]
 # 5. Click: "Add secret"
 ```
@@ -338,16 +338,16 @@ from tta_dev_primitives.testing import MockPrimitive
 
 class TestNewPrimitive:
     """Test suite for NewPrimitive."""
-    
+
     @pytest.fixture
     def context(self):
         return WorkflowContext(correlation_id="test-123")
-    
+
     @pytest.mark.asyncio
     async def test_success_case(self, context):
         """Test successful execution."""
         # Test implementation
-    
+
     @pytest.mark.asyncio
     async def test_error_handling(self, context):
         """Test error handling."""
@@ -452,10 +452,10 @@ permissions:
   read:
     - packages/**/*.py
     - docs/**/*.md
-  
+
   write:
     - docs/**/*.md  # Can update documentation
-  
+
   restricted:
     - .github/workflows/**/*.yml  # Requires human review
 ```
@@ -541,9 +541,9 @@ Tool 'create_issue' execution failed: 401 Unauthorized
 ```
 
 **Solution:**
-1. Verify `GITHUB_COPILOT_PAT` secret exists:
+1. Verify `GITHUB_COPILOT_CHAT` secret exists:
    ```bash
-   gh secret list | grep GITHUB_COPILOT_PAT
+   gh secret list | grep GITHUB_COPILOT_CHAT
    ```
 2. Check PAT scopes include `repo`
 3. Verify PAT hasn't expired
@@ -571,7 +571,7 @@ Agent executes but doesn't post to issue
 
 1. **Add PAT Secret** ⏳
    ```bash
-   gh secret set GITHUB_COPILOT_PAT
+   gh secret set GITHUB_COPILOT_CHAT
    ```
 
 2. **Test Advanced Mode** ⏳
@@ -681,7 +681,7 @@ We've successfully implemented a **production-ready dual-track Gemini CLI integr
 - ✅ **Advanced Mode**: APM + MCP framework implemented
 - ✅ **MCP Tools**: GitHub API integration configured
 - ✅ **Workflows**: PR review, test gen, issue triage defined
-- ⏳ **Activation**: Awaiting GITHUB_COPILOT_PAT secret
+- ⏳ **Activation**: Awaiting GITHUB_COPILOT_CHAT secret
 
 ### Key Achievements
 
@@ -692,11 +692,11 @@ We've successfully implemented a **production-ready dual-track Gemini CLI integr
 5. **Tool Integration**: MCP enables GitHub API access
 6. **Documentation**: Complete guides for all use cases
 
-The integration is **ready for production use** in both modes. Simple mode is already working perfectly. Advanced mode will be operational immediately upon adding the GITHUB_COPILOT_PAT secret.
+The integration is **ready for production use** in both modes. Simple mode is already working perfectly. Advanced mode will be operational immediately upon adding the GITHUB_COPILOT_CHAT secret.
 
 ---
 
 **Last Updated:** November 1, 2025
 **Implementation:** Complete
 **Status:** Simple Mode PRODUCTION, Advanced Mode READY
-**Next Action:** Add GITHUB_COPILOT_PAT secret for advanced mode testing
+**Next Action:** Add GITHUB_COPILOT_CHAT secret for advanced mode testing
