@@ -97,6 +97,11 @@ jobs:
               core.setOutput('command', 'review');
             } else if (['issues.opened', 'issues.reopened'].includes(eventType)) {
               core.setOutput('command', 'triage');
+            } else if (request.startsWith("@gemini-cli-advanced")) {
+              // Advanced mode with MCP tools
+              const additionalContext = request.replace(/^@gemini-cli-advanced/, '').trim();
+              core.setOutput('command', 'invoke-advanced');
+              core.setOutput('additional_context', additionalContext);
             } else if (request.startsWith("@gemini-cli /review")) {
               core.setOutput('command', 'review');
               const additionalContext = request.replace(/^@gemini-cli \/review/, '').trim();
@@ -167,12 +172,31 @@ jobs:
       is_pull_request: '${{ github.event.pull_request != null }}'
     secrets: 'inherit'
 
+  invoke-advanced:
+    needs: 'dispatch'
+    if: |-
+      ${{ needs.dispatch.outputs.command == 'invoke-advanced' }}
+    uses: './.github/workflows/gemini-invoke-advanced.yml'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      issues: 'write'
+      pull-requests: 'write'
+      models: 'read'
+    with:
+      additional_context: '${{ needs.dispatch.outputs.additional_context }}'
+      issue_number: '${{ github.event.issue.number || github.event.pull_request.number }}'
+      is_pull_request: '${{ github.event.pull_request != null }}'
+      enable_mcp: true
+    secrets: 'inherit'
+
   fallthrough:
     needs:
       - 'dispatch'
       - 'review'
       - 'triage'
       - 'invoke'
+      - 'invoke-advanced'
     if: |-
       ${{ always() && !cancelled() && (failure() || needs.dispatch.outputs.command == 'fallthrough') }}
     runs-on: 'ubuntu-latest'
