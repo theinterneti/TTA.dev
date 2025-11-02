@@ -60,13 +60,12 @@ jobs:
             fi
         env:
           # GitHub MCP Server authentication
-          GITHUB_COPILOT_PAT: '${{ secrets.GITHUB_COPILOT_PAT }}'
+          # Note: Cannot use GITHUB_* prefix for secret names (reserved by GitHub)
+          GEMINI_MCP_PAT: '${{ secrets.GEMINI_MCP_PAT }}'
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
           # Gemini API authentication
-          GEMINI_API_KEY: '${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}'
-
-          # Context variables
+          GEMINI_API_KEY: '${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}'          # Context variables
           PR_NUMBER: '${{ github.event.pull_request.number || '''' }}'
           ISSUE_NUMBER: '${{ inputs.issue_number || github.event.issue.number || '''' }}'
           REPO_OWNER: '${{ github.repository_owner }}'
