@@ -39,7 +39,7 @@ jobs:
               }]
             }" \
             "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}")
-          
+
           http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
           body=$(echo "$response" | sed '/HTTP_CODE:/d')          http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
           body=$(echo "$response" | sed '/HTTP_CODE:/d')

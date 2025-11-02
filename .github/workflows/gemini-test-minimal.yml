@@ -35,5 +35,5 @@ jobs:
             }
           prompt: |-
             You are a helpful assistant. Respond to the user's request briefly and clearly.
-            
+
             User request: ${{ github.event.comment.body }}
