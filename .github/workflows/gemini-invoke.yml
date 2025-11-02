@@ -65,10 +65,12 @@ jobs:
             --model gemini-2.5-flash \
             --prompt "${PROMPT}" \
             --output-format json > gemini_output.json
-          
+
           # Extract the response text from JSON
           # Gemini CLI JSON format: {"response": "text", "stats": {...}}
-          RESPONSE=$(jq -r '.response // empty' gemini_output.json)          # Debug output
+          RESPONSE=$(jq -r '.response // empty' gemini_output.json)
+          
+          # Debug output
           echo "Response length: ${#RESPONSE}"
           echo "Response preview: ${RESPONSE:0:200}"
 
