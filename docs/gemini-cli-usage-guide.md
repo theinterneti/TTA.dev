@@ -28,7 +28,7 @@ The system uses **gemini-2.0-flash-thinking-exp-1219** by default for highest qu
 
 **Available Tiers:**
 - **thinking** (default) - Extended reasoning, shows thought process, highest quality
-- **pro** - Proven quality, balanced performance  
+- **pro** - Proven quality, balanced performance
 - **fast** - Quick responses for simple tasks
 - **auto** - Automatically selects based on task complexity
 
@@ -47,7 +47,7 @@ This uses the thinking model for deep analysis showing reasoning steps.
 ### Complex Architectural Decision
 
 ```bash
-@gemini-cli Should we refactor this module to use dependency injection? 
+@gemini-cli Should we refactor this module to use dependency injection?
 Consider our existing patterns and the long-term maintainability.
 ```
 
@@ -136,7 +136,7 @@ Triggered by keywords:
 - Security reviews
 - Performance analysis
 
-### Pro Model (Balanced)  
+### Pro Model (Balanced)
 Triggered by keywords:
 - review, analyze, explain, document
 - Standard code reviews
@@ -159,9 +159,9 @@ Default: **thinking** (quality over speed)
 Gemini can chain multiple tools:
 
 ```bash
-@gemini-cli 
+@gemini-cli
 1. Search our codebase for similar authentication patterns
-2. Look up the latest OAuth2 best practices using Context7  
+2. Look up the latest OAuth2 best practices using Context7
 3. Review this PR's auth implementation
 4. Create a security checklist as an issue
 ```
@@ -177,7 +177,7 @@ Gemini will:
 ```bash
 @gemini-cli Review this API implementation:
 1. Check against FastAPI docs (use Context7)
-2. Verify our internal API guidelines (search codebase)  
+2. Verify our internal API guidelines (search codebase)
 3. Suggest improvements with references
 ```
 
@@ -203,7 +203,7 @@ Gemini will:
 ✅ Read all repository files
 ✅ Create and update files
 ✅ Create branches
-✅ Create pull requests  
+✅ Create pull requests
 ✅ Add comments to issues/PRs
 ✅ Search code and documentation
 ✅ Query external documentation (Context7)
@@ -225,13 +225,13 @@ Gemini will:
 - Best for: Complex analysis, architectural decisions
 - Free tier: Generous limits
 
-### Pro Model  
+### Pro Model
 - Response time: 20-60 seconds
 - Best for: Standard code reviews
 - Free tier: 1,500 requests/day
 
 ### Fast Model
-- Response time: 10-30 seconds  
+- Response time: 10-30 seconds
 - Best for: Quick questions, triage
 - Free tier: High limits
 
@@ -246,7 +246,7 @@ Gemini will:
 @gemini-cli check this
 
 # ✅ Specific
-@gemini-cli Review the authentication logic in auth.py for security vulnerabilities, 
+@gemini-cli Review the authentication logic in auth.py for security vulnerabilities,
 focusing on token validation and session management
 ```
 
@@ -257,7 +257,7 @@ focusing on token validation and session management
 @gemini-cli Is this FastAPI code correct?
 
 # ✅ Leverages docs
-@gemini-cli Using Context7, verify this FastAPI code follows the official 
+@gemini-cli Using Context7, verify this FastAPI code follows the official
 dependency injection patterns and best practices
 ```
 
@@ -279,7 +279,7 @@ dependency injection patterns and best practices
 
 ```bash
 # ✅ Structured approach
-@gemini-cli 
+@gemini-cli
 1. Analyze the performance bottleneck in this code
 2. Research best practices for optimization using Context7
 3. Propose 3 specific improvements with tradeoffs
@@ -379,7 +379,7 @@ Provide a detailed analysis with recommendation.
 ### Chaining Operations
 
 ```bash
-@gemini-cli 
+@gemini-cli
 1. Create a branch called 'feature/add-logging'
 2. Add structured logging to all database operations
 3. Update the logging configuration

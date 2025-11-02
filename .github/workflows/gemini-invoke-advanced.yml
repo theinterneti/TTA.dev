@@ -60,8 +60,7 @@ jobs:
             fi
         env:
           # GitHub MCP Server authentication
-          # Note: Cannot use GITHUB_* prefix for secret names (reserved by GitHub)
-          GEMINI_MCP_PAT: '${{ secrets.GEMINI_MCP_PAT }}'
+          GITHUB_COPILOT_CHAT: '${{ secrets.GITHUB_COPILOT_CHAT }}'
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 
           # Gemini API authentication

@@ -109,7 +109,7 @@ GitHub Actions workflow using APM:
   with:
     script: '${{ inputs.apm_script }}'
   env:
-    GITHUB_COPILOT_PAT: '${{ secrets.GITHUB_COPILOT_PAT }}'
+    GITHUB_COPILOT_CHAT: '${{ secrets.GITHUB_COPILOT_CHAT }}'
     GEMINI_API_KEY: '${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}'
 ```
 
@@ -128,17 +128,21 @@ Specialized agent instructions:
 ### Step 1: Create GitHub PAT
 
 1. Go to GitHub Settings → Developer Settings → Personal Access Tokens
-2. Create new token (classic) with scopes:
-   - `repo` (full repository access)
-   - `write:discussion`
-   - `read:org`
+2. Create new **fine-grained token** with:
+   - Resource owner: [your organization/user]
+   - Repository access: Select TTA.dev repository
+   - Permissions:
+     - Contents: Read and write
+     - Issues: Read and write
+     - Pull requests: Read and write
+     - Metadata: Read-only (automatic)
 3. Copy token value
 
 ### Step 2: Add Repository Secret
 
 1. Go to repository Settings → Secrets and variables → Actions
 2. Click "New repository secret"
-3. Name: `GITHUB_COPILOT_PAT`
+3. Name: `GITHUB_COPILOT_CHAT`
 4. Value: [paste token]
 5. Click "Add secret"
 
@@ -369,7 +373,7 @@ Error: MCP server 'github/github-mcp-server' not found
 
 3. Ensure PAT secret exists:
    ```bash
-   gh secret list | grep GITHUB_COPILOT_PAT
+   gh secret list | grep GITHUB_COPILOT_CHAT
    ```
 
 ### Issue: Tool Calls Failing
@@ -387,7 +391,7 @@ Tool 'create_issue' execution failed: 401 Unauthorized
 2. Ensure environment variable:
    ```yaml
    env:
-     GITHUB_COPILOT_PAT: '${{ secrets.GITHUB_COPILOT_PAT }}'
+     GITHUB_COPILOT_CHAT: '${{ secrets.GITHUB_COPILOT_CHAT }}'
    ```
 
 3. Check workflow permissions:
@@ -587,4 +591,4 @@ telemetry:
 
 **Last Updated:** November 1, 2025
 **Status:** Implementation Complete - Awaiting PAT Configuration
-**Next Action:** Add GITHUB_COPILOT_PAT secret for advanced mode testing
+**Next Action:** Add GITHUB_COPILOT_CHAT secret for advanced mode testing

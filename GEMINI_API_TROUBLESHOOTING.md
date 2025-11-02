@@ -132,9 +132,9 @@ export GCP_LOCATION='us-central1'
            }]
          }' \
          "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}")
-       
+
        answer=$(echo "$response" | jq -r '.candidates[0].content.parts[0].text')
-       
+
        gh issue comment ${{ github.event.issue.number }} --body "$answer"
    ```
 
