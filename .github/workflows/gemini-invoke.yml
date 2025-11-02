@@ -7,6 +7,15 @@ on:
         type: 'string'
         description: 'Any additional context from the request'
         required: false
+      issue_number:
+        type: 'number'
+        description: 'The issue or PR number to comment on'
+        required: false
+      is_pull_request:
+        type: 'boolean'
+        description: 'Whether this is a pull request'
+        required: false
+        default: false
 
 concurrency:
   group: '${{ github.workflow }}-invoke-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}'
@@ -52,28 +61,27 @@ jobs:
           github-token: '${{ steps.mint_identity_token.outputs.token || github.token }}'
           script: |
             const response = `${{ steps.run_gemini.outputs.gemini_response }}`;
-            
+            const issueNumber = ${{ inputs.issue_number || 0 }};
+
             console.log('DEBUG: Response length:', response.length);
             console.log('DEBUG: Response preview:', response.substring(0, 100));
-            
+            console.log('DEBUG: Issue number:', issueNumber);
+
             if (!response || response.trim() === '') {
               console.log('No response from Gemini, skipping comment');
               return;
             }
 
-            // Post to issue or PR
-            if (context.payload.issue) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.issue.number,
-                body: `**Gemini Response:**\n\n${response}`
-              });
-            } else if (context.payload.pull_request) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: `**Gemini Response:**\n\n${response}`
-              });
+            if (!issueNumber) {
+              console.log('No issue number provided, skipping comment');
+              return;
             }
+
+            // Post to issue or PR
+            console.log('Posting response to issue/PR #' + issueNumber);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: `**Gemini Response:**\n\n${response}`
+            });
