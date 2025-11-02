@@ -14,11 +14,11 @@ jobs:
     runs-on: 'ubuntu-latest'
     permissions:
       contents: 'read'
-    
+
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@v4'
-      
+
       - name: 'Test AI Studio Key'
         id: 'test_ai_studio'
         env:
@@ -26,10 +26,11 @@ jobs:
           TEST_MESSAGE: '${{ inputs.test_message }}'
         run: |
           echo "::group::Testing AI Studio API Key"
-          echo "Model: gemini-1.5-flash"
-          echo "Endpoint: generativelanguage.googleapis.com"
+          echo "Trying multiple model name formats..."
           echo ""
           
+          # Try v1 API with gemini-1.5-flash-latest
+          echo "Attempt 1: v1/models/gemini-1.5-flash-latest"
           response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
             -H "Content-Type: application/json" \
             -d "{
@@ -37,14 +38,51 @@ jobs:
                 \"parts\": [{\"text\": \"${TEST_MESSAGE}\"}]
               }]
             }" \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}")
+            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}")
           
           http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
           body=$(echo "$response" | sed '/HTTP_CODE:/d')
           
           echo "HTTP Status: $http_code"
-          echo ""
           
+          if [ "$http_code" != "200" ]; then
+            echo "Failed. Trying v1beta/models/gemini-1.5-flash-latest..."
+            response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"contents\": [{
+                  \"parts\": [{\"text\": \"${TEST_MESSAGE}\"}]
+                }]
+              }" \
+              "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}")
+            
+            http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
+            body=$(echo "$response" | sed '/HTTP_CODE:/d')
+            echo "HTTP Status: $http_code"
+          fi
+          
+          if [ "$http_code" != "200" ]; then
+            echo "Failed. Trying v1/models/gemini-pro..."
+            response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"contents\": [{
+                  \"parts\": [{\"text\": \"${TEST_MESSAGE}\"}]
+                }]
+              }" \
+              "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}")
+            
+            http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
+            body=$(echo "$response" | sed '/HTTP_CODE:/d')
+            echo "HTTP Status: $http_code"
+          fi
+
+          http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
+          body=$(echo "$response" | sed '/HTTP_CODE:/d')
+
+          echo "HTTP Status: $http_code"
+          echo ""
+
           if [ "$http_code" = "200" ]; then
             echo "✅ SUCCESS! AI Studio API key works"
             echo ""
@@ -65,7 +103,7 @@ jobs:
             echo "EOF" >> $GITHUB_OUTPUT
           fi
           echo "::endgroup::"
-      
+
       - name: 'Test Vertex AI Key (Alternative Method)'
         id: 'test_vertex'
         continue-on-error: true
@@ -80,10 +118,10 @@ jobs:
           echo "Location: ${LOCATION:-us-central1}"
           echo "Model: gemini-1.5-flash"
           echo ""
-          
+
           PROJECT="${PROJECT_ID:-604126426981}"
           LOC="${LOCATION:-us-central1}"
-          
+
           response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${API_KEY}" \
@@ -94,13 +132,13 @@ jobs:
               }]
             }" \
             "https://${LOC}-aiplatform.googleapis.com/v1/projects/${PROJECT}/locations/${LOC}/publishers/google/models/gemini-1.5-flash:generateContent")
-          
+
           http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
           body=$(echo "$response" | sed '/HTTP_CODE:/d')
-          
+
           echo "HTTP Status: $http_code"
           echo ""
-          
+
           if [ "$http_code" = "200" ]; then
             echo "✅ SUCCESS! Vertex AI key works"
             echo ""
@@ -115,7 +153,7 @@ jobs:
             echo "vertex_works=false" >> $GITHUB_OUTPUT
           fi
           echo "::endgroup::"
-      
+
       - name: 'Test Legacy GEMINI_API_KEY'
         id: 'test_legacy'
         env:
@@ -126,7 +164,7 @@ jobs:
           echo "Model: gemini-1.5-flash"
           echo "Endpoint: generativelanguage.googleapis.com"
           echo ""
-          
+
           response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
             -H "Content-Type: application/json" \
             -d "{
@@ -135,13 +173,13 @@ jobs:
               }]
             }" \
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}")
-          
+
           http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
           body=$(echo "$response" | sed '/HTTP_CODE:/d')
-          
+
           echo "HTTP Status: $http_code"
           echo ""
-          
+
           if [ "$http_code" = "200" ]; then
             echo "✅ SUCCESS! Legacy GEMINI_API_KEY works"
             echo ""
@@ -156,12 +194,12 @@ jobs:
             echo "legacy_works=false" >> $GITHUB_OUTPUT
           fi
           echo "::endgroup::"
-      
+
       - name: 'Summary Report'
         run: |
           echo "## 🧪 API Key Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.test_ai_studio.outputs.ai_studio_works }}" = "true" ]; then
             echo "### ✅ AI Studio Key (GOOGLE_AI_STUDIO_API_KEY)" >> $GITHUB_STEP_SUMMARY
             echo "**Status**: Working" >> $GITHUB_STEP_SUMMARY
@@ -175,9 +213,9 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Error**: See logs above" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ steps.test_legacy.outputs.legacy_works }}" = "true" ]; then
             echo "### ✅ Legacy Key (GEMINI_API_KEY)" >> $GITHUB_STEP_SUMMARY
             echo "**Status**: Working" >> $GITHUB_STEP_SUMMARY
@@ -187,11 +225,11 @@ jobs:
             echo "### ❌ Legacy Key (GEMINI_API_KEY)" >> $GITHUB_STEP_SUMMARY
             echo "**Status**: Failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Determine next steps
           if [ "${{ steps.test_ai_studio.outputs.ai_studio_works }}" = "true" ]; then
             echo "### 🎯 Next Steps" >> $GITHUB_STEP_SUMMARY
