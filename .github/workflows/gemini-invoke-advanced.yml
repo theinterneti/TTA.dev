@@ -1,0 +1,145 @@
+name: '▶️ Gemini Invoke (Advanced with MCP)'
+
+on:
+  workflow_call:
+    inputs:
+      additional_context:
+        type: 'string'
+        description: 'Context and prompt for the agent'
+        required: true
+      issue_number:
+        type: 'number'
+        description: 'Issue or PR number to comment on'
+        required: false
+      is_pull_request:
+        type: 'boolean'
+        description: 'Whether this is a pull request'
+        required: false
+        default: false
+      apm_script:
+        type: 'string'
+        description: 'APM script to run (pr-review, generate-tests, etc.)'
+        required: false
+        default: ''
+      enable_mcp:
+        type: 'boolean'
+        description: 'Enable MCP server integration'
+        required: false
+        default: true
+
+jobs:
+  invoke-advanced:
+    runs-on: 'ubuntu-latest'
+    permissions:
+      contents: 'read'
+      issues: 'write'
+      pull-requests: 'write'
+      models: 'read'  # Required for AI model access
+
+    steps:
+      - name: 'Checkout Repository'
+        uses: 'actions/checkout@v4'
+
+      - name: 'Setup Node.js for APM'
+        uses: 'actions/setup-node@v4'
+        with:
+          node-version: '20'
+
+      - name: 'Run Agent with APM (MCP Enabled)'
+        if: ${{ inputs.enable_mcp }}
+        uses: 'danielmeppiel/action-apm-cli@v1'
+        with:
+          script: '${{ inputs.apm_script || ''custom'' }}'
+          custom-command: |
+            if [ -z "${{ inputs.apm_script }}" ]; then
+              # Custom prompt mode (no predefined script)
+              gemini --yolo \
+                --model gemini-2.5-flash \
+                --prompt "${{ inputs.additional_context }}" \
+                --output-format json > gemini_output.json
+            fi
+        env:
+          # GitHub MCP Server authentication
+          GITHUB_COPILOT_PAT: '${{ secrets.GITHUB_COPILOT_PAT }}'
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+
+          # Gemini API authentication
+          GEMINI_API_KEY: '${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}'
+
+          # Context variables
+          PR_NUMBER: '${{ github.event.pull_request.number || '''' }}'
+          ISSUE_NUMBER: '${{ inputs.issue_number || github.event.issue.number || '''' }}'
+          REPO_OWNER: '${{ github.repository_owner }}'
+          REPO_NAME: '${{ github.event.repository.name }}'
+
+      - name: 'Extract Response from JSON'
+        if: always()
+        id: 'extract_response'
+        run: |
+          if [ -f gemini_output.json ]; then
+            RESPONSE=$(jq -r '.response // empty' gemini_output.json)
+
+            # Debug output
+            echo "Response length: ${#RESPONSE}"
+            echo "Response preview: ${RESPONSE:0:200}..."
+
+            # Save to GitHub output using multiline format
+            {
+              echo "gemini_response<<EOF"
+              echo "${RESPONSE}"
+              echo "EOF"
+            } >> "${GITHUB_OUTPUT}"
+
+            # Show full JSON for debugging
+            echo "Full JSON output:"
+            cat gemini_output.json
+          else
+            echo "No gemini_output.json found"
+            echo "gemini_response=" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: 'Post Response to Issue/PR'
+        if: always() && (inputs.issue_number != 0 || github.event.issue.number != 0)
+        uses: 'actions/github-script@v7'
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          script: |
+            const response = `${{ steps.extract_response.outputs.gemini_response }}`;
+            const issueNumber = ${{ inputs.issue_number || github.event.issue.number || github.event.pull_request.number || 0 }};
+            const isPR = ${{ inputs.is_pull_request }};
+
+            console.log('DEBUG: Response length:', response.length);
+            console.log('DEBUG: Issue/PR number:', issueNumber);
+            console.log('DEBUG: Is Pull Request:', isPR);
+
+            if (!response || response.trim() === '') {
+              console.log('⚠️ No response from Gemini, skipping comment');
+              return;
+            }
+
+            if (!issueNumber) {
+              console.log('⚠️ No issue/PR number provided, skipping comment');
+              return;
+            }
+
+            // Post comment
+            const body = `**🤖 Gemini Analysis (with MCP Tools):**\n\n${response}\n\n---\n*Powered by [APM](https://github.com/danielmeppiel/action-apm-cli) + MCP + Gemini 2.5 Flash*`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: body
+            });
+
+            console.log('✅ Successfully posted response');
+
+      - name: 'Upload Execution Artifacts'
+        if: always()
+        uses: 'actions/upload-artifact@v4'
+        with:
+          name: 'gemini-execution-${{ github.run_id }}'
+          path: |
+            gemini_output.json
+            apm-debug.log
+          retention-days: 7

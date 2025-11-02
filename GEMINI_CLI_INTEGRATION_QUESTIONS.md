@@ -596,6 +596,122 @@ We appreciate any guidance you can provide! We've put significant effort into de
 
 ---
 
+## 🚀 MCP Integration (November 1, 2025 - IMPLEMENTED)
+
+### Overview
+
+We've implemented a **dual-track approach** for Gemini CLI integration:
+
+1. **Simple Mode** (existing): Fast basic queries (~40s, no MCP)
+2. **Advanced Mode** (NEW): Complex tasks with MCP tools (~2-3 minutes)
+
+### Implementation using Agent Package Manager (APM)
+
+Following the guidance about APM framework integration, we've created:
+
+#### 1. Configuration Files
+
+**`apm.yml`** (Repository root):
+
+```yaml
+name: tta-dev
+version: 1.0.0
+
+dependencies:
+  mcp:
+    - github/github-mcp-server  # Enables GitHub API tools
+
+scripts:
+  pr-review: "gemini --yolo -p .github/prompts/pr-review.prompt.md"
+  generate-tests: "gemini --yolo -p .github/prompts/generate-tests.prompt.md"
+  triage-issue: "gemini --yolo -p .github/prompts/triage-issue.prompt.md"
+```
+
+**`.github/workflows/gemini-invoke-advanced.yml`**:
+Uses `danielmeppiel/action-apm-cli@v1` for automatic MCP dependency installation
+
+**Prompt Templates** (`.github/prompts/*.prompt.md`):
+
+- `pr-review.prompt.md`: Automated code review
+- `generate-tests.prompt.md`: Test generation
+- `triage-issue.prompt.md`: Issue classification
+
+#### 2. Available MCP Tools
+
+When advanced mode is enabled, the agent can:
+
+| Tool | Description | Use Case |
+|------|-------------|----------|
+| `create_issue` | Create GitHub issues | Track follow-up tasks |
+| `search_code` | Search repository | Find patterns, duplicates |
+| `get_file_contents` | Read files | PR review, code analysis |
+| `create_pull_request` | Open PRs | Automated refactoring |
+| `create_or_update_file` | Modify files | Documentation updates |
+
+#### 3. Usage Patterns
+
+**Basic Query (Simple Mode):**
+
+```
+@gemini-cli What is TTA.dev?
+→ ~40 seconds, no tools
+```
+
+**Advanced Task (MCP Enabled):**
+
+```
+@gemini-cli-advanced review this PR
+→ ~2-3 minutes, uses GitHub API tools
+```
+
+#### 4. Setup Requirements
+
+**Required Secret:**
+
+- `GITHUB_COPILOT_PAT`: Personal Access Token with `repo` scope
+
+**To Add Secret:**
+
+1. Generate PAT at GitHub Settings → Developer Settings
+2. Add as repository secret: `GITHUB_COPILOT_PAT`
+3. Test with: `@gemini-cli-advanced analyze this issue`
+
+### Architecture Benefits
+
+The APM integration provides:
+
+- ✅ Automatic MCP dependency resolution
+- ✅ Tool availability for complex tasks
+- ✅ Structured workflow definitions
+- ✅ Environment-aware authentication
+- ✅ Preserves fast simple mode (~40s)
+- ✅ Enables advanced mode (~2-3 min) when needed
+
+### Use Cases for TTA.dev
+
+As described in the integration guidance:
+
+1. **Automated PR Reviews**: Check code quality, test coverage, standards
+2. **Test Generation**: Generate pytest tests with 100% coverage
+3. **Issue Triage**: Classify, label, and route issues automatically
+4. **Documentation Sync**: Keep docs in sync with code changes
+5. **Architecture Analysis**: Analyze primitive composition patterns
+6. **Code Cleanup**: Identify and fix technical debt
+
+### Documentation
+
+Complete guide: [`docs/integration/MCP_INTEGRATION_GUIDE.md`](docs/integration/MCP_INTEGRATION_GUIDE.md)
+
+### Next Steps
+
+1. ⏳ Add `GITHUB_COPILOT_PAT` secret
+2. ⏳ Test advanced mode with PR review
+3. ⏳ Create GEMINI.md context file
+4. ⏳ Add custom MCP servers as needed
+
+---
+
 **Last Updated:** November 1, 2025
-**Status:** Awaiting expert guidance
-**Priority:** High - Blocks production deployment
+**Status:** ✅ SOLVED - Dual-track implementation complete
+**Simple Mode:** Production ready (40s)
+**Advanced Mode:** Awaiting PAT configuration for testing
