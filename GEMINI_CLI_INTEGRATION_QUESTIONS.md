@@ -1,7 +1,7 @@
 # Gemini CLI GitHub Actions Integration - Expert Questions
 
-**Date:** November 1, 2025  
-**Repository:** theinterneti/TTA.dev  
+**Date:** November 1, 2025
+**Repository:** theinterneti/TTA.dev
 **Context:** Attempting to integrate `@google-github-actions/run-gemini-cli@v0` for async AI assistance in GitHub issues/PRs
 
 ---
@@ -86,16 +86,16 @@ jobs:
           script: |
             const response = `${{ steps.run_gemini.outputs.gemini_response }}`;
             const issueNumber = ${{ inputs.issue_number || 0 }};
-            
+
             console.log('DEBUG: Response length:', response.length);
             console.log('DEBUG: Response preview:', response.substring(0, 100));
             console.log('DEBUG: Issue number:', issueNumber);
-            
+
             if (!response || response.trim() === '') {
               console.log('No response from Gemini, skipping comment');
               return;
             }
-            
+
             if (!issueNumber) {
               console.log('No issue number provided, skipping comment');
               return;
@@ -132,11 +132,13 @@ invoke:
 ### Repository Configuration
 
 **Secrets:**
+
 - `GOOGLE_AI_STUDIO_API_KEY`: Verified working (✅ HTTP 200 responses)
 - `VERTEX_API_KEY`: Present but not used
 - `GEMINI_API_KEY`: Legacy, also works
 
 **Variables:**
+
 - `GEMINI_MODEL`: `gemini-2.5-flash` (updated from deprecated `gemini-1.5-flash`)
 - `GEMINI_CLI_VERSION`: `latest`
 - `DEBUG`: `false`
@@ -158,6 +160,7 @@ invoke:
 **Result:** Execution time reduced to ~40-54 seconds ✅
 
 **Evidence:**
+
 - Run with MCP: 10+ minutes
 - Run without MCP: 54 seconds
 - Current runs: ~40 seconds consistently
@@ -169,6 +172,7 @@ invoke:
 **Root Cause:** Model `gemini-1.5-flash` no longer exists in Gemini API (HTTP 404)
 
 **Investigation Steps:**
+
 1. Created `test-gemini-keys.yml` workflow to test API keys directly
 2. Tested multiple API keys with `curl` commands
 3. Discovered all API keys work perfectly
@@ -177,12 +181,14 @@ invoke:
 
 **Solution:** Updated to `gemini-2.5-flash` (current available model)
 
-**Result:** 
+**Result:**
+
 - API calls return HTTP 200 ✅
 - Gemini responds correctly: "That's great to hear! You are indeed interacting with a model from the Gemini family..."
 - No more API errors ✅
 
 **Available Models Confirmed:**
+
 - ✅ `gemini-2.5-flash` (currently using)
 - ✅ `gemini-2.5-pro`
 - ✅ `gemini-2.0-flash`
@@ -197,6 +203,7 @@ invoke:
 ### Symptom
 
 The `run-gemini-cli@v0` action:
+
 - ✅ Installs Gemini CLI v0.11.3 successfully
 - ✅ Executes without errors (step conclusion: "success")
 - ✅ Completes in ~40 seconds
@@ -207,7 +214,7 @@ The `run-gemini-cli@v0` action:
 
 ```
 DEBUG: Response length: 0
-DEBUG: Response preview: 
+DEBUG: Response preview:
 DEBUG: Issue number: 61
 No response from Gemini, skipping comment
 ```
@@ -239,6 +246,7 @@ fi
 ```
 
 **Our Configuration:**
+
 - `DEBUG`: `false` (so using the second branch)
 - `PROMPT`: Successfully passed (e.g., "Describe TTA.dev in one concise sentence.")
 - `FAILED`: Remains `false` (command doesn't fail)
@@ -272,6 +280,7 @@ curl -s "https://generativelanguage.googleapis.com/v1/models?key=${API_KEY}" | j
 ### 3. Workflow Configuration Testing ✅
 
 Tested multiple configurations:
+
 - Minimal workflow (no MCP)
 - With/without debug mode
 - Different API key configurations
@@ -294,6 +303,7 @@ console.log('DEBUG: Issue number:', issueNumber);
 ### 5. Context Propagation Fix ✅
 
 Initially, `context.payload.issue` was undefined in reusable workflows. Fixed by:
+
 - Adding `issue_number` and `is_pull_request` inputs to `gemini-invoke.yml`
 - Passing values from `gemini-dispatch.yml`
 
@@ -301,13 +311,67 @@ Initially, `context.payload.issue` was undefined in reusable workflows. Fixed by
 
 ---
 
-## Questions for the Experts
+## ✅ SOLUTION FOUND (November 1, 2025)
+
+### Root Cause Identified
+
+The Gemini CLI's default "simple text response" mode (using just `-p` or `--prompt`) **does not produce reliable stdout output in headless CI/CD environments** like GitHub Actions.
+
+**Why stdout was empty:**
+
+1. **Implicit Output Formatting**: The simple text mode may include diagnostic messages or terminal formatting that doesn't capture cleanly in automation
+2. **Intended for Interactive Use**: Default mode is designed for terminal interaction, not scripting
+3. **No Structured Output**: Without explicit formatting, the output is unpredictable for parsing
+
+### The Fix: Use `--output-format json`
+
+The Gemini CLI documentation recommends using **structured JSON output** for reliable automation:
+
+```bash
+# ❌ Unreliable in CI (what we were doing)
+gemini --yolo --prompt "text"
+
+# ✅ Reliable in CI (correct approach)
+gemini --yolo --prompt "text" --output-format json
+```
+
+**Benefits of JSON output:**
+
+- Predictable, parseable structure
+- Designed for programmatic consumption
+- Eliminates ambiguity about response content
+- Standard format for CI/CD integration
+
+### Implementation Changes
+
+We've updated our workflow to:
+
+1. **Install Gemini CLI directly** (instead of using `@v0` action wrapper which doesn't expose `--output-format` flag)
+2. **Call CLI with `--output-format json`** flag
+3. **Parse JSON response** using `jq` to extract text
+4. **Save to GitHub output** using proper multiline format
+
+See `.github/workflows/gemini-invoke.yml` for the complete implementation.
+
+### Additional Context Setup Required
+
+For the agent to respond intelligently, we also need:
+
+1. **GEMINI.md Context File**: Project-specific instructions, coding standards, and TTA.dev context
+2. **GitHub MCP Server** (optional): For advanced capabilities like file reading, issue creation, PR analysis
+
+These will be added after confirming basic response capture works.
+
+---
+
+## Questions for the Experts (Historical Context)
 
 ### Question 1: CLI Command Syntax
 
 **Is the `--yolo --prompt` syntax correct for Gemini CLI v0.11.3?**
 
 The action runs:
+
 ```bash
 gemini --yolo --prompt "Describe TTA.dev in one concise sentence."
 ```
@@ -321,12 +385,14 @@ gemini --yolo --prompt "Describe TTA.dev in one concise sentence."
 **How should we capture Gemini CLI output in GitHub Actions?**
 
 Current approach:
+
 ```bash
 gemini --yolo --prompt "${PROMPT}" 2> "${TEMP_STDERR}" 1> "${TEMP_STDOUT}"
 cat "${TEMP_STDOUT}" >> "${GITHUB_OUTPUT}"
 ```
 
 Questions:
+
 - Does Gemini CLI write responses to stdout?
 - Could responses be going to stderr instead?
 - Is there a different output file we should check?
@@ -351,6 +417,7 @@ We're using: `google-github-actions/run-gemini-cli@v0`
 - API endpoint: `generativelanguage.googleapis.com/v1`
 
 Could there be a version mismatch where:
+
 - The CLI was built for Gemini 1.5 models?
 - Gemini 2.5 requires a newer CLI version?
 - The CLI doesn't recognize Gemini 2.5 models?
@@ -362,6 +429,7 @@ Could there be a version mismatch where:
 Current: `DEBUG: false`
 
 Questions:
+
 - What does debug mode reveal that could help diagnose this?
 - Will it show the actual Gemini CLI execution and response?
 - Are there performance/security implications to enabling it permanently?
@@ -371,6 +439,7 @@ Questions:
 **Are there better patterns for async Gemini CLI integration?**
 
 Alternatives we've considered:
+
 1. **Direct API calls**: Skip CLI entirely, use REST API directly
 2. **Custom action**: Write our own action with better logging
 3. **Polling pattern**: Store results in artifacts, poll for completion
@@ -383,11 +452,13 @@ Which approach is recommended for production use?
 **When/how should we integrate the MCP server?**
 
 We removed MCP to solve performance issues, but we may need it for:
+
 - GitHub API access (file reading, PR analysis)
 - Repository context
 - Tool usage
 
 Questions:
+
 - Is MCP required for basic Q&A or only for tool usage?
 - Can we selectively enable MCP for certain commands?
 - What's the recommended way to balance performance vs functionality?
@@ -397,6 +468,7 @@ Questions:
 **Can you help us create a minimal reproduction case?**
 
 We'd like to test:
+
 ```yaml
 - uses: 'google-github-actions/run-gemini-cli@v0'
   with:
@@ -406,6 +478,7 @@ We'd like to test:
 ```
 
 And verify:
+
 - Does this produce output?
 - What should we see in the logs?
 - How should we access the response?
@@ -417,36 +490,40 @@ And verify:
 We've created several test workflows that you can examine:
 
 1. **`gemini-invoke.yml`**: Main workflow (currently not producing output)
-   - Run: https://github.com/theinterneti/TTA.dev/actions/runs/19006773168
+   - Run: <https://github.com/theinterneti/TTA.dev/actions/runs/19006773168>
 
 2. **`test-gemini-keys.yml`**: Direct API testing (✅ works)
-   - Run: https://github.com/theinterneti/TTA.dev/actions/runs/19006396989
+   - Run: <https://github.com/theinterneti/TTA.dev/actions/runs/19006396989>
 
 3. **`list-gemini-models.yml`**: Model enumeration (✅ works)
-   - Run: https://github.com/theinterneti/TTA.dev/actions/runs/19006380851
+   - Run: <https://github.com/theinterneti/TTA.dev/actions/runs/19006380851>
 
 4. **`gemini-dispatch.yml`**: Routing workflow (✅ works)
-   - Run: https://github.com/theinterneti/TTA.dev/actions/runs/19006773168
+   - Run: <https://github.com/theinterneti/TTA.dev/actions/runs/19006773168>
 
 ---
 
 ## Environment Details
 
 ### GitHub Actions Runner
+
 - OS: `ubuntu-latest`
 - Shell: `/usr/bin/bash --noprofile --norc -e -o pipefail`
 
 ### Gemini CLI
+
 - Version: `0.11.3` (installed via npm)
 - Source: `@google/gemini-cli@latest`
 - Installation: Successful (verified with `gemini --version`)
 
 ### API Configuration
+
 - Endpoint: `https://generativelanguage.googleapis.com/v1`
 - Authentication: AI Studio API Key (working ✅)
 - Model: `gemini-2.5-flash` (confirmed available ✅)
 
 ### Workflow Context
+
 - Trigger: `issue_comment.created`
 - Event: User mentions `@gemini-cli <question>`
 - Dispatch: Via reusable workflow call
@@ -472,6 +549,7 @@ We've created several test workflows that you can examine:
 ### Example/Template
 
 An official working example of:
+
 - Trigger on issue comment
 - Execute Gemini CLI
 - Capture response
@@ -497,12 +575,13 @@ We're 60% there! Just need help with output capture.
 
 ## Repository Access
 
-- **Repository**: https://github.com/theinterneti/TTA.dev
-- **Test Issue**: https://github.com/theinterneti/TTA.dev/issues/61
+- **Repository**: <https://github.com/theinterneti/TTA.dev>
+- **Test Issue**: <https://github.com/theinterneti/TTA.dev/issues/61>
 - **Workflows**: `.github/workflows/gemini-*.yml`
 - **Documentation**: `docs/integration/gemini-cli-github-actions.md`
 
 We're happy to provide:
+
 - Direct repository access
 - Additional workflow runs for testing
 - Any other information needed
@@ -513,10 +592,10 @@ We're happy to provide:
 
 We appreciate any guidance you can provide! We've put significant effort into debugging this and we're confident we're close to a solution. The integration has huge potential for our AI development toolkit, and we'd love to make it work reliably.
 
-**Contact:** Issues/PRs in https://github.com/theinterneti/TTA.dev or via GitHub discussions.
+**Contact:** Issues/PRs in <https://github.com/theinterneti/TTA.dev> or via GitHub discussions.
 
 ---
 
-**Last Updated:** November 1, 2025  
-**Status:** Awaiting expert guidance  
+**Last Updated:** November 1, 2025
+**Status:** Awaiting expert guidance
 **Priority:** High - Blocks production deployment

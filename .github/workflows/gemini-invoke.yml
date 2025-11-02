@@ -46,13 +46,43 @@ jobs:
           permission-issues: 'write'
           permission-pull-requests: 'write'
 
-      - name: 'Run Gemini CLI'
+      - name: 'Install Gemini CLI'
+        run: |
+          npm install -g @google/gemini-cli@latest
+          gemini --version
+
+      - name: 'Run Gemini CLI with JSON output'
         id: 'run_gemini'
-        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
-        with:
-          gemini_api_key: '${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}'
-          gemini_model: 'gemini-2.5-flash'
-          prompt: '${{ inputs.additional_context }}'
+        env:
+          GEMINI_API_KEY: '${{ secrets.GOOGLE_AI_STUDIO_API_KEY }}'
+          PROMPT: '${{ inputs.additional_context }}'
+        run: |
+          # Run Gemini CLI with JSON output for reliable parsing
+          echo "Executing Gemini CLI with prompt: ${PROMPT:0:100}..."
+
+          # Run with --output-format json for structured output
+          gemini --yolo \
+            --model gemini-2.5-flash \
+            --prompt "${PROMPT}" \
+            --output-format json > gemini_output.json
+
+          # Extract the response text from JSON
+          RESPONSE=$(jq -r '.candidates[0].content.parts[0].text // .text // empty' gemini_output.json)
+
+          # Debug output
+          echo "Response length: ${#RESPONSE}"
+          echo "Response preview: ${RESPONSE:0:200}"
+
+          # Save to GitHub output using proper multiline format
+          {
+            echo "gemini_response<<EOF"
+            echo "${RESPONSE}"
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+          # Also save full JSON for debugging
+          echo "Full JSON output:"
+          cat gemini_output.json
 
       - name: 'Post Gemini Response'
         if: always()  # Always run to debug, will check response inside script
