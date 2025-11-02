@@ -28,9 +28,9 @@ jobs:
           echo "::group::Testing AI Studio API Key"
           echo "Trying multiple model name formats..."
           echo ""
-          
-          # Try v1 API with gemini-1.5-flash-latest
-          echo "Attempt 1: v1/models/gemini-1.5-flash-latest"
+
+          # Use correct model name: gemini-2.5-flash (current available model)
+          echo "Testing with v1/models/gemini-2.5-flash"
           response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
             -H "Content-Type: application/json" \
             -d "{
@@ -38,46 +38,10 @@ jobs:
                 \"parts\": [{\"text\": \"${TEST_MESSAGE}\"}]
               }]
             }" \
-            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}")
+            "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${API_KEY}")
           
           http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
-          body=$(echo "$response" | sed '/HTTP_CODE:/d')
-          
-          echo "HTTP Status: $http_code"
-          
-          if [ "$http_code" != "200" ]; then
-            echo "Failed. Trying v1beta/models/gemini-1.5-flash-latest..."
-            response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-              -H "Content-Type: application/json" \
-              -d "{
-                \"contents\": [{
-                  \"parts\": [{\"text\": \"${TEST_MESSAGE}\"}]
-                }]
-              }" \
-              "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}")
-            
-            http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
-            body=$(echo "$response" | sed '/HTTP_CODE:/d')
-            echo "HTTP Status: $http_code"
-          fi
-          
-          if [ "$http_code" != "200" ]; then
-            echo "Failed. Trying v1/models/gemini-pro..."
-            response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-              -H "Content-Type: application/json" \
-              -d "{
-                \"contents\": [{
-                  \"parts\": [{\"text\": \"${TEST_MESSAGE}\"}]
-                }]
-              }" \
-              "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}")
-            
-            http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
-            body=$(echo "$response" | sed '/HTTP_CODE:/d')
-            echo "HTTP Status: $http_code"
-          fi
-
-          http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
+          body=$(echo "$response" | sed '/HTTP_CODE:/d')          http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
           body=$(echo "$response" | sed '/HTTP_CODE:/d')
 
           echo "HTTP Status: $http_code"
