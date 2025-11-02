@@ -88,10 +88,12 @@ jobs:
       - name: 'Post Gemini Response'
         if: always()  # Always run to debug, will check response inside script
         uses: 'actions/github-script@v7'
+        env:
+          GEMINI_RESPONSE: '${{ steps.run_gemini.outputs.gemini_response }}'
         with:
           github-token: '${{ steps.mint_identity_token.outputs.token || github.token }}'
           script: |
-            const response = `${{ steps.run_gemini.outputs.gemini_response }}`;
+            const response = process.env.GEMINI_RESPONSE || '';
             const issueNumber = ${{ inputs.issue_number || 0 }};
 
             console.log('DEBUG: Response length:', response.length);
