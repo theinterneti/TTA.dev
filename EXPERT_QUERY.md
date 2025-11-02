@@ -1,18 +1,33 @@
-# Quick Help Needed: Gemini CLI Output Capture
+# ✅ SOLVED: Gemini CLI Output Capture
 
-**Repo:** theinterneti/TTA.dev
-**Issue:** `run-gemini-cli@v0` action succeeds but `gemini_response` output is empty (0 bytes)
+**Repo:** theinterneti/TTA.dev  
+**Issue:** `run-gemini-cli@v0` action succeeded but produced empty output (0 bytes)
 
-## What Works ✅
-- Workflow triggers correctly
-- Gemini CLI v0.11.3 installs
-- API auth with gemini-2.5-flash (HTTP 200)
-- Step completes without errors
+## Root Cause
 
-## What Doesn't ❌
-- `steps.run_gemini.outputs.gemini_response` is always empty
-- No response posted to issues
+Default `--prompt` mode doesn't produce reliable stdout in CI/CD environments.
 
-**See:** `GEMINI_CLI_INTEGRATION_QUESTIONS.md` for full details
+## Solution
 
-**Question:** Why is stdout empty when `gemini --yolo --prompt "text"` runs successfully in the action?
+Use `--output-format json` flag for structured, parseable output:
+
+```bash
+# ❌ What we were doing (unreliable)
+gemini --yolo --prompt "text"
+
+# ✅ Correct approach (reliable)
+gemini --yolo --prompt "text" --output-format json
+```
+
+## Implementation
+
+Updated workflow to:
+
+1. Install Gemini CLI directly (not via action wrapper)
+2. Run with `--output-format json`
+3. Parse JSON with `jq` to extract response text
+4. Save to GitHub output properly
+
+**Status:** Ready for testing in Issue #61
+
+**See:** `GEMINI_CLI_INTEGRATION_QUESTIONS.md` for complete journey
