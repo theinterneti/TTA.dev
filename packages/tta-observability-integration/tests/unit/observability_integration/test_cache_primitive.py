@@ -86,9 +86,7 @@ def cache_primitive(mock_primitive, mock_redis, simple_cache_key_fn):
 class TestCachePrimitiveInit:
     """Test CachePrimitive initialization."""
 
-    def test_initialization_with_redis(
-        self, mock_primitive, mock_redis, simple_cache_key_fn
-    ):
+    def test_initialization_with_redis(self, mock_primitive, mock_redis, simple_cache_key_fn):
         """Test initialization with Redis client."""
         cache = CachePrimitive(
             primitive=mock_primitive,
@@ -129,9 +127,7 @@ class TestCacheHitBehavior:
         assert mock_primitive.call_count == initial_call_count + 1
 
     @pytest.mark.asyncio
-    async def test_cache_hit_skips_primitive(
-        self, mock_primitive, mock_redis, simple_cache_key_fn
-    ):
+    async def test_cache_hit_skips_primitive(self, mock_primitive, mock_redis, simple_cache_key_fn):
         """Test cache hit returns cached value without calling primitive."""
         # Pre-populate cache with serialized JSON (as real implementation does)
         # Cache key format: cache:{operation_name}:{user_key}
@@ -242,9 +238,7 @@ class TestGracefulDegradation:
         assert mock_primitive.call_count == 1
 
     @pytest.mark.asyncio
-    async def test_handles_redis_errors_gracefully(
-        self, mock_primitive, simple_cache_key_fn
-    ):
+    async def test_handles_redis_errors_gracefully(self, mock_primitive, simple_cache_key_fn):
         """Test handles Redis errors by calling primitive."""
         # Create failing Redis mock
         failing_redis = MagicMock()

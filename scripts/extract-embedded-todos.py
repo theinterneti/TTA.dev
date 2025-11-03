@@ -37,9 +37,7 @@ class TodoExtractor:
         self.logseq_journals = workspace_root / "logseq" / "journals"
         self.todos: list[dict[str, Any]] = []
 
-    def scan_directory(
-        self, directory: Path, exclude_dirs: list[str] | None = None
-    ) -> None:
+    def scan_directory(self, directory: Path, exclude_dirs: list[str] | None = None) -> None:
         """Scan directory for markdown files with TODOs."""
         if exclude_dirs is None:
             exclude_dirs = [
@@ -96,19 +94,11 @@ class TodoExtractor:
         text_lower = todo_text.lower()
 
         # Check for explicit markers
-        if (
-            "learning" in text_lower
-            or "tutorial" in text_lower
-            or "example" in text_lower
-        ):
+        if "learning" in text_lower or "tutorial" in text_lower or "example" in text_lower:
             return "learning-todo"
         if "template" in text_lower:
             return "template-todo"
-        if (
-            "deploy" in text_lower
-            or "ci/cd" in text_lower
-            or "infrastructure" in text_lower
-        ):
+        if "deploy" in text_lower or "ci/cd" in text_lower or "infrastructure" in text_lower:
             return "ops-todo"
 
         # Infer from file location

@@ -134,13 +134,19 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
 
         # Extract response data
         content = response.text if hasattr(response, "text") else ""
-        
+
         # Extract usage metadata (if available)
         usage_metadata = getattr(response, "usage_metadata", None)
         usage = {
-            "prompt_tokens": getattr(usage_metadata, "prompt_token_count", 0) if usage_metadata else 0,
-            "completion_tokens": getattr(usage_metadata, "candidates_token_count", 0) if usage_metadata else 0,
-            "total_tokens": getattr(usage_metadata, "total_token_count", 0) if usage_metadata else 0,
+            "prompt_tokens": getattr(usage_metadata, "prompt_token_count", 0)
+            if usage_metadata
+            else 0,
+            "completion_tokens": getattr(usage_metadata, "candidates_token_count", 0)
+            if usage_metadata
+            else 0,
+            "total_tokens": getattr(usage_metadata, "total_token_count", 0)
+            if usage_metadata
+            else 0,
         }
 
         # Extract finish reason
@@ -156,4 +162,3 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
             usage=usage,
             finish_reason=finish_reason,
         )
-

@@ -181,9 +181,9 @@ Code:
 
 Requirements:
 - Use pytest framework
-- Test all functions: {', '.join(analysis['functions_to_test'])}
+- Test all functions: {", ".join(analysis["functions_to_test"])}
 - Mock external dependencies
-- Aim for {analysis['coverage_target']}% coverage
+- Aim for {analysis["coverage_target"]}% coverage
 - Include edge cases and error handling
 - Follow best practices for test organization
 
@@ -313,7 +313,7 @@ Generate complete, runnable test code with proper imports and fixtures.
             logger.info(f"Executor (Gemini): ${context.data['executor_cost']:.4f}")
             logger.info(f"Total: ${total_cost:.4f}")
             logger.info(f"vs. All-Claude: ${all_claude_cost:.2f}")
-            logger.info(f"Cost Savings: {cost_savings*100:.0f}%")
+            logger.info(f"Cost Savings: {cost_savings * 100:.0f}%")
             logger.info("=" * 80)
 
             # Write test file
@@ -356,4 +356,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

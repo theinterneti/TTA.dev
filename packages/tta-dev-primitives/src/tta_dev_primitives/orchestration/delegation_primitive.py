@@ -16,9 +16,7 @@ class DelegationRequest(BaseModel):
 
     task_description: str = Field(description="Description of the task to delegate")
     executor_model: str = Field(description="Model to execute the task")
-    messages: list[dict[str, str]] = Field(
-        description="Messages to send to executor model"
-    )
+    messages: list[dict[str, str]] = Field(description="Messages to send to executor model")
     temperature: float | None = Field(default=None, description="Sampling temperature")
     max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
     metadata: dict[str, Any] = Field(
@@ -33,9 +31,7 @@ class DelegationResponse(BaseModel):
     executor_model: str = Field(description="Model that executed the task")
     usage: dict[str, int] = Field(description="Token usage statistics")
     cost: float = Field(description="Estimated cost in USD (0.0 for free models)")
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class DelegationPrimitive(WorkflowPrimitive[DelegationRequest, DelegationResponse]):
@@ -100,9 +96,7 @@ class DelegationPrimitive(WorkflowPrimitive[DelegationRequest, DelegationRespons
         super().__init__()
         self.executor_primitives = executor_primitives or {}
 
-    def register_executor(
-        self, model_name: str, primitive: WorkflowPrimitive[Any, Any]
-    ) -> None:
+    def register_executor(self, model_name: str, primitive: WorkflowPrimitive[Any, Any]) -> None:
         """Register an executor primitive.
 
         Args:
@@ -261,4 +255,3 @@ class DelegationPrimitive(WorkflowPrimitive[DelegationRequest, DelegationRespons
         # Calculate cost
         total_tokens = usage.get("total_tokens", 0)
         return (total_tokens / 1_000_000) * cost_rate
-

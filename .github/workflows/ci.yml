@@ -53,13 +53,7 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run tests with coverage
-        run: |
-          uv run pytest -v --tb=short \
-            -m "not integration and not slow and not external" \
-            --cov=packages \
-            --cov-branch \
-            --cov-report=xml:coverage.xml \
-            --cov-report=term-missing
+        run: uv run pytest -v --tb=short -m "not integration and not slow and not external" --cov=packages --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: always()  # Upload coverage even if tests fail

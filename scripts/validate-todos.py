@@ -271,15 +271,10 @@ class TODOValidator:
         for page_name in matches:
             # Convert page name to file name (Logseq uses ___ for /)
             # Try both formats: "Page/Name" -> "Page___Name.md" and "Page/Name.md"
-            page_file_with_underscores = (
-                self.pages_dir / f"{page_name.replace('/', '___')}.md"
-            )
+            page_file_with_underscores = self.pages_dir / f"{page_name.replace('/', '___')}.md"
             page_file_with_slash = self.pages_dir / f"{page_name}.md"
 
-            if (
-                not page_file_with_underscores.exists()
-                and not page_file_with_slash.exists()
-            ):
+            if not page_file_with_underscores.exists() and not page_file_with_slash.exists():
                 result.missing_kb_pages.add(page_name)
 
 
@@ -335,9 +330,7 @@ def main() -> int:
         help="Path to Logseq root directory",
     )
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
-    parser.add_argument(
-        "--fix", action="store_true", help="Auto-fix issues (not implemented yet)"
-    )
+    parser.add_argument("--fix", action="store_true", help="Auto-fix issues (not implemented yet)")
 
     args = parser.parse_args()
 

@@ -104,9 +104,7 @@ def create_ai_enhanced_sync_workflow(
     if config.ai.fallback:
         fallback_extractor = AIMetadataExtractorPrimitive(
             provider="ollama",
-            model=config.ai.fallback.split(":")[
-                -1
-            ],  # Extract model from "ollama:model"
+            model=config.ai.fallback.split(":")[-1],  # Extract model from "ollama:model"
         )
 
         # Use fallback pattern
@@ -233,9 +231,7 @@ def create_batch_sync_workflow(
         config = load_config()
 
     # Create individual sync workflows
-    sync_workflows = [
-        create_production_sync_workflow(config) for _ in range(max_parallel)
-    ]
+    sync_workflows = [create_production_sync_workflow(config) for _ in range(max_parallel)]
 
     # Compose with | operator (parallel)
     workflow = ParallelPrimitive(primitives=sync_workflows)

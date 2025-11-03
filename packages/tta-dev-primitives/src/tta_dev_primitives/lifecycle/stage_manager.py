@@ -76,9 +76,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         ```
     """
 
-    def __init__(
-        self, stage_criteria_map: dict[Stage, StageCriteria] | None = None
-    ) -> None:
+    def __init__(self, stage_criteria_map: dict[Stage, StageCriteria] | None = None) -> None:
         """Initialize stage manager.
 
         Args:
@@ -88,9 +86,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         super().__init__()
         self.stage_criteria_map = stage_criteria_map or {}
 
-    async def execute(
-        self, context: WorkflowContext, input_data: StageRequest
-    ) -> StageReadiness:
+    async def execute(self, context: WorkflowContext, input_data: StageRequest) -> StageReadiness:
         """Check project readiness for target stage.
 
         Args:
@@ -263,9 +259,8 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         if not can_proceed:
             # Transition blocked
             blocker_messages = [f"  - {b.message}" for b in readiness.blockers]
-            message = (
-                f"Cannot transition from {from_stage} to {to_stage}. Blockers:\n"
-                + "\n".join(blocker_messages)
+            message = f"Cannot transition from {from_stage} to {to_stage}. Blockers:\n" + "\n".join(
+                blocker_messages
             )
 
             result = TransitionResult(

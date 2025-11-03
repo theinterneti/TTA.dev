@@ -44,6 +44,11 @@ class MarkdownChecker:
         link_pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 
         for md_file in md_files:
+            # Skip broken symlinks
+            if not md_file.exists():
+                print(f"⚠️  Skipping broken symlink: {md_file}")
+                continue
+
             content = md_file.read_text(encoding="utf-8", errors="ignore")
             for match in link_pattern.finditer(content):
                 link_text, link_target = match.groups()

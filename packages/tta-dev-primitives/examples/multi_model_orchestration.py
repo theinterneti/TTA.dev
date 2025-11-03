@@ -292,14 +292,12 @@ async def example_parallel_execution():
     ]
 
     # Execute in parallel
-    responses = await asyncio.gather(
-        *[delegation.execute(task, context) for task in tasks]
-    )
+    responses = await asyncio.gather(*[delegation.execute(task, context) for task in tasks])
 
     # Display results
     total_cost = 0.0
     for i, response in enumerate(responses, 1):
-        print(f"\n📝 Sub-task {i}: {tasks[i-1].task_description}")
+        print(f"\n📝 Sub-task {i}: {tasks[i - 1].task_description}")
         print(f"🤖 Executor: {response.executor_model}")
         print(f"📝 Response: {response.content[:100]}...")
         print(f"💰 Cost: ${response.cost}")
@@ -342,4 +340,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

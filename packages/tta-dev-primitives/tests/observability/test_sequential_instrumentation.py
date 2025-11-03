@@ -71,9 +71,7 @@ async def test_sequential_logs_workflow_start_and_completion(caplog):
 @pytest.mark.asyncio
 async def test_sequential_logs_step_execution():
     """Verify that SequentialPrimitive logs each step (verified via checkpoints)."""
-    workflow = SequentialPrimitive(
-        [SimplePrimitive(), CounterPrimitive(), SimplePrimitive()]
-    )
+    workflow = SequentialPrimitive([SimplePrimitive(), CounterPrimitive(), SimplePrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
 
     await workflow.execute({"key": "value"}, context)

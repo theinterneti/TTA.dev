@@ -27,19 +27,13 @@ class TaskCharacteristics(BaseModel):
     requires_reasoning: bool = Field(
         default=False, description="Task requires multi-step reasoning"
     )
-    requires_creativity: bool = Field(
-        default=False, description="Task requires creative output"
-    )
+    requires_creativity: bool = Field(default=False, description="Task requires creative output")
     requires_code: bool = Field(default=False, description="Task involves code generation")
-    requires_speed: bool = Field(
-        default=False, description="Task requires ultra-fast response"
-    )
+    requires_speed: bool = Field(default=False, description="Task requires ultra-fast response")
     requires_long_context: bool = Field(
         default=False, description="Task requires >100K context window"
     )
-    requires_accuracy: bool = Field(
-        default=True, description="Task requires high accuracy"
-    )
+    requires_accuracy: bool = Field(default=True, description="Task requires high accuracy")
 
 
 class TaskClassification(BaseModel):
@@ -64,9 +58,7 @@ class TaskClassifierRequest(BaseModel):
     )
 
 
-class TaskClassifierPrimitive(
-    WorkflowPrimitive[TaskClassifierRequest, TaskClassification]
-):
+class TaskClassifierPrimitive(WorkflowPrimitive[TaskClassifierRequest, TaskClassification]):
     """Classifies tasks to determine the best model for execution.
 
     This primitive analyzes task characteristics and recommends the most appropriate
@@ -265,4 +257,3 @@ class TaskClassifierPrimitive(
             estimated_cost=0.0,
             fallback_models=["llama-3.3-70b-versatile", "deepseek/deepseek-r1:free"],
         )
-

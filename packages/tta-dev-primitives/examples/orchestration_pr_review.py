@@ -200,18 +200,18 @@ class PRReviewWorkflow:
         # Create detailed prompt for code review
         prompt = f"""Perform a detailed code review for the following pull request.
 
-PR Title: {pr_data['title']}
-PR Description: {pr_data['description']}
+PR Title: {pr_data["title"]}
+PR Description: {pr_data["description"]}
 
-Files Changed: {pr_data['files_changed']}
-Additions: +{pr_data['additions']}
-Deletions: -{pr_data['deletions']}
+Files Changed: {pr_data["files_changed"]}
+Additions: +{pr_data["additions"]}
+Deletions: -{pr_data["deletions"]}
 
 Review Areas (from orchestrator):
-{chr(10).join(f'- {area}' for area in analysis['review_areas'])}
+{chr(10).join(f"- {area}" for area in analysis["review_areas"])}
 
 Priority Files:
-{chr(10).join(f'- {file}' for file in analysis['priority_files'])}
+{chr(10).join(f"- {file}" for file in analysis["priority_files"])}
 
 Please provide:
 1. Overall assessment (approve/request changes/comment)
@@ -247,7 +247,9 @@ Format your review as structured markdown with clear sections.
 
         return response.content
 
-    async def validate_review(self, review_content: str, analysis: dict[str, Any]) -> dict[str, Any]:
+    async def validate_review(
+        self, review_content: str, analysis: dict[str, Any]
+    ) -> dict[str, Any]:
         """Validate review quality (orchestrator role).
 
         In production, this would be Claude Sonnet 4.5 validating the review.
@@ -291,9 +293,7 @@ Format your review as structured markdown with clear sections.
             "validations": validations,
         }
 
-    async def post_review_to_github(
-        self, repo: str, pr_number: int, review_content: str
-    ) -> bool:
+    async def post_review_to_github(self, repo: str, pr_number: int, review_content: str) -> bool:
         """Post review comments to GitHub PR.
 
         Args:
@@ -393,7 +393,7 @@ Format your review as structured markdown with clear sections.
             logger.info(f"Executor (Gemini): ${context.data['executor_cost']:.4f}")
             logger.info(f"Total: ${total_cost:.4f}")
             logger.info(f"vs. All-Claude: ${all_claude_cost:.2f}")
-            logger.info(f"Cost Savings: {cost_savings*100:.0f}%")
+            logger.info(f"Cost Savings: {cost_savings * 100:.0f}%")
             logger.info("=" * 80)
 
             return {
@@ -428,4 +428,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

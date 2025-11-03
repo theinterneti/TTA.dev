@@ -65,22 +65,16 @@ def get_git_info():
     try:
         # Get current branch
         branch = (
-            subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
-            .decode()
-            .strip()
+            subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode().strip()
         )
 
         # Get author
         author = (
-            subprocess.check_output(["git", "log", "-1", "--pretty=format:%an"])
-            .decode()
-            .strip()
+            subprocess.check_output(["git", "log", "-1", "--pretty=format:%an"]).decode().strip()
         )
 
         # Get commit hash
-        commit_hash = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
-        )
+        commit_hash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
 
         # Get stats from last commit
         stats = (

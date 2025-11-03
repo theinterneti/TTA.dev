@@ -129,9 +129,7 @@ class HuggingFacePrimitive(WorkflowPrimitive[HuggingFaceRequest, HuggingFaceResp
             "Content-Type": "application/json",
         }
 
-        response = await self.client.post(
-            f"{self.base_url}/{model}", json=params, headers=headers
-        )
+        response = await self.client.post(f"{self.base_url}/{model}", json=params, headers=headers)
         response.raise_for_status()
         data = response.json()
 
@@ -192,4 +190,3 @@ class HuggingFacePrimitive(WorkflowPrimitive[HuggingFaceRequest, HuggingFaceResp
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
         await self.client.aclose()
-
