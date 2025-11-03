@@ -12,12 +12,17 @@ from tta_dev_primitives.integrations.anthropic_primitive import AnthropicPrimiti
 from tta_dev_primitives.integrations.google_ai_studio_primitive import (
     GoogleAIStudioPrimitive,
 )
-from tta_dev_primitives.integrations.groq_primitive import GroqPrimitive
 from tta_dev_primitives.integrations.huggingface_primitive import HuggingFacePrimitive
 from tta_dev_primitives.integrations.ollama_primitive import OllamaPrimitive
 from tta_dev_primitives.integrations.openai_primitive import OpenAIPrimitive
 from tta_dev_primitives.integrations.openrouter_primitive import OpenRouterPrimitive
 from tta_dev_primitives.integrations.sqlite_primitive import SQLitePrimitive
+
+# Optional integrations (require additional dependencies)
+try:
+    from tta_dev_primitives.integrations.groq_primitive import GroqPrimitive
+except ImportError:
+    GroqPrimitive = None  # type: ignore
 from tta_dev_primitives.integrations.supabase_primitive import SupabasePrimitive
 from tta_dev_primitives.integrations.together_ai_primitive import TogetherAIPrimitive
 

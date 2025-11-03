@@ -76,7 +76,9 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         ```
     """
 
-    def __init__(self, stage_criteria_map: dict[Stage, StageCriteria] | None = None) -> None:
+    def __init__(
+        self, stage_criteria_map: dict[Stage, StageCriteria] | None = None
+    ) -> None:
         """Initialize stage manager.
 
         Args:
@@ -86,7 +88,9 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         super().__init__()
         self.stage_criteria_map = stage_criteria_map or {}
 
-    async def execute(self, context: WorkflowContext, input_data: StageRequest) -> StageReadiness:
+    async def execute(
+        self, context: WorkflowContext, input_data: StageRequest
+    ) -> StageReadiness:
         """Check project readiness for target stage.
 
         Args:
@@ -109,6 +113,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         target_stage: Stage,
         project_path: Path,
         context: WorkflowContext,
+        kb: WorkflowPrimitive | None = None,
     ) -> StageReadiness:
         """Check if project is ready to transition to target stage.
 
@@ -117,6 +122,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
             target_stage: Target lifecycle stage
             project_path: Path to project root
             context: Workflow context
+            kb: Optional KnowledgeBasePrimitive for contextual guidance
 
         Returns:
             StageReadiness assessment with detailed feedback
@@ -170,6 +176,42 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
             if critical.fix_command:
                 next_steps.append(f"{critical.check_name}: {critical.fix_command}")
 
+        # Query KB for contextual guidance if available
+        kb_recommendations = []
+        if kb:
+            try:
+                # Query for target stage best practices
+                from tta_dev_primitives.knowledge import KBQuery
+
+                best_practices_query = KBQuery(
+                    query_type="best_practices",
+                    topic=target_stage.value,
+                    stage=target_stage.value,
+                    max_results=3,
+                    include_content=False,
+                )
+                best_practices_result = await kb.execute(context, best_practices_query)
+
+                # Query for common mistakes in current stage
+                mistakes_query = KBQuery(
+                    query_type="common_mistakes",
+                    topic=current_stage.value,
+                    stage=current_stage.value,
+                    max_results=3,
+                    include_content=False,
+                )
+                mistakes_result = await kb.execute(context, mistakes_query)
+
+                # Add best practices pages to recommendations
+                kb_recommendations.extend(best_practices_result.pages)
+
+                # Add common mistakes pages to recommendations
+                kb_recommendations.extend(mistakes_result.pages)
+
+            except Exception:
+                # Gracefully ignore KB errors - don't fail validation
+                pass
+
         return StageReadiness(
             current_stage=current_stage,
             target_stage=target_stage,
@@ -181,6 +223,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
             all_results=check_result.all_results,
             recommended_actions=recommended_actions,
             next_steps=next_steps,
+            kb_recommendations=kb_recommendations,
         )
 
     async def transition(
@@ -220,8 +263,9 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         if not can_proceed:
             # Transition blocked
             blocker_messages = [f"  - {b.message}" for b in readiness.blockers]
-            message = f"Cannot transition from {from_stage} to {to_stage}. Blockers:\n" + "\n".join(
-                blocker_messages
+            message = (
+                f"Cannot transition from {from_stage} to {to_stage}. Blockers:\n"
+                + "\n".join(blocker_messages)
             )
 
             result = TransitionResult(

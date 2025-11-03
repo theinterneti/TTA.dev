@@ -18,6 +18,7 @@ dev-dependencies = [
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.14.0",
+    "pytest-timeout>=2.2.0",
     "ruff>=0.8.0",
 ]
 
@@ -50,9 +51,13 @@ exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 pythonpath = ["."]
 testpaths = ["packages/tta-dev-primitives/tests"]
 asyncio_mode = "auto"
-addopts = "-v --strict-markers"
+addopts = "-v --strict-markers --timeout=60"
+timeout = 60
+timeout_method = "thread"
 markers = [
     "asyncio: mark test as async",
     "integration: mark test as integration test",
     "unit: mark test as unit test",
+    "slow: mark test as slow running",
+    "external: mark test as requiring external services",
 ]

@@ -1,6 +1,12 @@
 # MCP Server Integration Registry
 
-**Model Context Protocol (MCP) servers available in TTA.dev**
+## 🖥️ LOCAL ONLY: GitHub Copilot VS Code Extension
+
+**⚠️ IMPORTANT CONTEXT:**
+
+- **VS Code Extension?** ✅ This documentation is FOR YOU
+- **Coding Agent (GitHub Actions)?** ❌ You do NOT have access to MCP servers
+- **GitHub CLI?** ❌ MCP servers not available in terminal
 
 ---
 
@@ -15,6 +21,26 @@
 - Execute operations
 
 **Official Documentation:** <https://modelcontextprotocol.io>
+
+### Context-Specific Availability
+
+| MCP Feature | VS Code Extension (LOCAL) | Coding Agent (CLOUD) | GitHub CLI |
+|-------------|---------------------------|----------------------|------------|
+| Context7 | ✅ Yes | ❌ No | ❌ No |
+| AI Toolkit | ✅ Yes | ❌ No | ❌ No |
+| Grafana | ✅ Yes | ❌ No | ❌ No |
+| Pylance | ✅ Yes | ❌ No | ❌ No |
+| Database Client | ✅ Yes | ❌ No | ❌ No |
+| GitHub PR Tools | ✅ Yes | ⚠️ Different | ❌ No |
+| Sift (Docker) | ✅ Yes | ❌ No | ❌ No |
+| LogSeq | ✅ Yes | ❌ No | ❌ No |
+
+**Why MCP isn't available in GitHub Actions:**
+
+- MCP servers run on your local machine with VS Code
+- GitHub Actions runs in ephemeral cloud containers
+- No VS Code extension system in GitHub Actions
+- Coding Agent uses installed tools (uv, pytest, ruff) instead
 
 ---
 
@@ -40,10 +66,12 @@ How do I use async/await with httpx library?
 ```
 
 **Configuration:**
+
 - Integrated in `.vscode/copilot-toolsets.jsonc`
 - Available in `#tta-agent-dev` toolset
 
 **Use Cases:**
+
 - Learning new libraries
 - API reference lookup
 - Best practices research
@@ -74,10 +102,12 @@ What are best practices for creating an AI agent that uses multiple LLMs?
 ```
 
 **Configuration:**
+
 - Available in `#tta-agent-dev` toolset
 - Complements TTA.dev primitives
 
 **Use Cases:**
+
 - Agent architecture decisions
 - Model selection
 - Tracing and observability
@@ -109,10 +139,12 @@ Show me the error rate for the last hour
 ```
 
 **Configuration:**
+
 - Available in `#tta-observability` toolset
 - Requires `docker-compose.test.yml` running
 
 **Use Cases:**
+
 - Debugging production issues
 - Analyzing metrics
 - Investigating errors
@@ -143,10 +175,12 @@ Check for syntax errors in this file
 ```
 
 **Configuration:**
+
 - Integrated automatically with Pylance extension
 - Available across all toolsets
 
 **Use Cases:**
+
 - Syntax validation
 - Import resolution
 - Environment management
@@ -175,10 +209,12 @@ Show me the schema for the users table
 ```
 
 **Configuration:**
+
 - Available in `#tta-full-stack` toolset
 - Requires database connection config
 
 **Use Cases:**
+
 - Schema exploration
 - Data analysis
 - Query testing
@@ -207,10 +243,12 @@ Summarize the changes in this PR
 ```
 
 **Configuration:**
+
 - Available in `#tta-pr-review` toolset
 - Automatically discovers PRs
 
 **Use Cases:**
+
 - PR reviews
 - Change analysis
 - Async agent tasks
@@ -239,14 +277,136 @@ Show me recent investigations
 ```
 
 **Configuration:**
+
 - Available in `#tta-troubleshoot` toolset
 - Requires Docker MCP integration
 
 **Use Cases:**
+
 - Debugging workflows
 - Investigation tracking
 - Analysis review
 - Historical context
+
+---
+
+### 8. LogSeq - Knowledge Base Integration
+
+**Purpose:** Interact with LogSeq knowledge base - read, create, search, and manage pages
+
+**Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `list_pages` | Browse your LogSeq graph | List all pages in knowledge base |
+| `get_page_content` | Read page content | Retrieve specific page content |
+| `create_page` | Add new pages | Create new knowledge base pages |
+| `update_page` | Modify existing pages | Update page content |
+| `delete_page` | Remove pages | Delete pages from graph |
+| `search` | Find content across graph | Search for terms across all pages |
+
+**Example Usage:**
+
+```text
+@workspace #tta-docs
+
+Show me all pages related to TTA Primitives in my LogSeq graph
+```
+
+```text
+@workspace #tta-mcp-integration
+
+Create a new LogSeq page called "Meeting Notes 2025-11-01" with the summary from this conversation
+```
+
+**Configuration:**
+
+- Location: `~/.config/mcp/mcp_settings.json`
+- Status: Disabled by default (requires LogSeq setup)
+- Required environment variables:
+  - `LOGSEQ_API_TOKEN` - Your LogSeq API token
+  - `LOGSEQ_API_URL` - LogSeq API endpoint (default: <http://localhost:12315>)
+
+**Setup Steps:**
+
+1. **Enable Developer Mode (Required):**
+   - Open LogSeq → Settings → Advanced
+   - Enable "Developer mode"
+   - Click Apply
+
+2. **Enable LogSeq HTTP API:**
+   - Settings → Features
+   - Check "Enable HTTP APIs server"
+   - **Restart LogSeq** (required)
+
+3. **Start API Server:**
+   - Click the API button (🔌) in LogSeq
+   - Select "Start server"
+   - Server runs on <http://127.0.0.1:12315>
+
+4. **Generate API Token:**
+   - In API panel → "Authorization"
+   - Click "Add" to create new token
+   - Copy token value (not the name)
+
+5. **Update MCP Configuration:**
+
+   ```bash
+   # Edit ~/.config/mcp/mcp_settings.json
+   # Find "mcp-logseq" section
+   # Replace YOUR_TOKEN_HERE with your actual token
+   # Change URL to http://127.0.0.1:12315
+   # Set "disabled": false
+   ```
+
+6. **Reload VS Code:**
+   - Command Palette → "Developer: Reload Window"
+
+**API Details:**
+
+- **Base URL:** `http://127.0.0.1:12315/api`
+- **Method:** POST with JSON body
+- **Auth:** Bearer token in Authorization header
+- **API Docs:** <http://127.0.0.1:12315/> (when server running)
+- **Full API:** [LogSeq Plugins API](https://plugins-doc.logseq.com/)
+- **CORS:** Enabled for browser extensions and web pages
+
+**Use Cases:**
+
+- Zero-context switching between code and notes
+- AI-powered knowledge organization
+- Automated page creation from conversations
+- Smart search across your knowledge base
+- Task and TODO management from Copilot
+- Meeting notes integration
+- Documentation generation from code analysis
+
+**TTA.dev Integration:**
+
+- Query TODO dashboards from LogSeq
+- Access architecture decision records
+- Search learning materials
+- Update daily journals
+- Manage development tasks
+- Link code changes to knowledge pages
+
+**Example Workflows:**
+
+```text
+# Search your LogSeq knowledge base
+@workspace Find all my notes about RetryPrimitive patterns
+
+# Create documentation from conversation
+@workspace Create a LogSeq page summarizing this implementation discussion
+
+# Update existing pages
+@workspace Add today's progress to my LogSeq project journal
+
+# Task management
+@workspace Show me high-priority TODOs from my LogSeq graph
+```
+
+**Repository:** <https://github.com/ergut/mcp-logseq>
 
 ---
 
@@ -335,6 +495,7 @@ Edit `.vscode/copilot-toolsets.jsonc`:
 ### Step 3: Document Here
 
 Add entry to this file with:
+
 - Purpose
 - Tools provided
 - Example usage
@@ -361,6 +522,7 @@ Test the new MCP integration
 **Solutions:**
 
 1. Check MCP server is running:
+
    ```bash
    # For Docker-based services
    docker-compose -f docker-compose.test.yml ps

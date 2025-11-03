@@ -2,9 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "🧪 Run All Tests",
+      "label": "🧪 Run Fast Tests (Unit Only)",
       "type": "shell",
-      "command": "uv run pytest -v",
+      "command": "./scripts/test_fast.sh",
       "group": {
         "kind": "test",
         "isDefault": true
@@ -17,9 +17,45 @@
       "problemMatcher": []
     },
     {
+      "label": "🧪 Run All Tests",
+      "type": "shell",
+      "command": "uv run pytest -v",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Run Integration Tests (Safe)",
+      "type": "shell",
+      "command": "RUN_INTEGRATION=true ./scripts/test_integration.sh",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "🧪 Run Tests with Coverage",
       "type": "shell",
-      "command": "uv run pytest --cov=packages --cov-report=html --cov-report=term-missing",
+      "command": "uv run pytest --cov=packages --cov-report=html --cov-report=term-missing -m 'not integration and not slow'",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📝 Check Markdown Docs",
+      "type": "shell",
+      "command": "python scripts/docs/check_md.py --all",
       "group": "test",
       "presentation": {
         "reveal": "always",
@@ -116,6 +152,21 @@
         "panel": "new"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "🔭 Verify Observability Setup",
+      "type": "shell",
+      "command": "./scripts/verify-and-setup-persistence.sh",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
     }
   ],
   "inputs": [

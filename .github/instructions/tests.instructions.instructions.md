@@ -28,10 +28,10 @@ async def test_workflow_success():
     mock2 = MockPrimitive("step2", return_value="result2")
     workflow = mock1 >> mock2
     context = WorkflowContext(workflow_id="test")
-    
+
     # Act
     result = await workflow.execute("input", context)
-    
+
     # Assert
     assert mock1.call_count == 1
     assert mock2.call_count == 1
@@ -45,7 +45,7 @@ async def test_workflow_failure():
     error = ValueError("Test error")
     mock_fail = MockPrimitive("fail", side_effect=error)
     context = WorkflowContext()
-    
+
     # Act & Assert
     with pytest.raises(ValueError, match="Test error"):
         await mock_fail.execute("input", context)
@@ -83,17 +83,17 @@ async def test_sequential_pipeline():
     mock1 = MockPrimitive("validate", return_value={"valid": True})
     mock2 = MockPrimitive("process", return_value={"processed": True})
     mock3 = MockPrimitive("save", return_value={"saved": True})
-    
+
     workflow = mock1 >> mock2 >> mock3
     context = WorkflowContext()
-    
+
     result = await workflow.execute({"input": "data"}, context)
-    
+
     # Verify execution order
     assert mock1.call_count == 1
     assert mock2.call_count == 1
     assert mock3.call_count == 1
-    
+
     # Verify data flow
     assert mock1.last_input == {"input": "data"}
     assert mock2.last_input == {"valid": True}
@@ -110,22 +110,22 @@ async def test_parallel_execution():
     mock1 = MockPrimitive("branch1", return_value="result1")
     mock2 = MockPrimitive("branch2", return_value="result2")
     mock3 = MockPrimitive("branch3", return_value="result3")
-    
+
     workflow = mock1 | mock2 | mock3
     context = WorkflowContext()
-    
+
     results = await workflow.execute("input", context)
-    
+
     # All branches executed
     assert mock1.call_count == 1
     assert mock2.call_count == 1
     assert mock3.call_count == 1
-    
+
     # All receive same input
     assert mock1.last_input == "input"
     assert mock2.last_input == "input"
     assert mock3.last_input == "input"
-    
+
     # Results collected
     assert results == ["result1", "result2", "result3"]
 ```
@@ -137,7 +137,7 @@ async def test_parallel_execution():
 async def test_retry_on_failure():
     """Test retry primitive retries on failure."""
     from tta_dev_primitives.recovery.retry import RetryPrimitive
-    
+
     call_count = 0
     async def flaky_operation(data, ctx):
         nonlocal call_count
@@ -145,16 +145,16 @@ async def test_retry_on_failure():
         if call_count < 3:
             raise ValueError("Temporary error")
         return "success"
-    
+
     retry_workflow = RetryPrimitive(
         MockPrimitive("flaky", side_effect=flaky_operation),
         max_attempts=3,
         backoff_factor=1.0
     )
-    
+
     context = WorkflowContext()
     result = await retry_workflow.execute("input", context)
-    
+
     assert call_count == 3
     assert result == "success"
 
@@ -162,18 +162,18 @@ async def test_retry_on_failure():
 async def test_timeout_enforced():
     """Test timeout primitive enforces time limits."""
     from tta_dev_primitives.recovery.timeout import TimeoutPrimitive, TimeoutError
-    
+
     async def slow_operation(data, ctx):
         await asyncio.sleep(10.0)  # Too slow
         return "done"
-    
+
     timeout_workflow = TimeoutPrimitive(
         MockPrimitive("slow", side_effect=slow_operation),
         timeout_seconds=0.1
     )
-    
+
     context = WorkflowContext()
-    
+
     with pytest.raises(TimeoutError):
         await timeout_workflow.execute("input", context)
 ```
@@ -185,31 +185,31 @@ async def test_timeout_enforced():
 async def test_cache_hits_and_misses():
     """Test cache primitive caches results correctly."""
     from tta_dev_primitives.performance.cache import CachePrimitive
-    
+
     call_count = 0
     async def expensive_op(data, ctx):
         nonlocal call_count
         call_count += 1
         return f"result-{call_count}"
-    
+
     cached = CachePrimitive(
         MockPrimitive("expensive", side_effect=expensive_op),
         cache_key_fn=lambda d, c: str(d),
         ttl_seconds=60.0
     )
-    
+
     context = WorkflowContext()
-    
+
     # First call - cache miss
     result1 = await cached.execute("input", context)
     assert result1 == "result-1"
     assert call_count == 1
-    
+
     # Second call - cache hit
     result2 = await cached.execute("input", context)
     assert result2 == "result-1"  # Same result
     assert call_count == 1  # Not called again
-    
+
     # Different input - cache miss
     result3 = await cached.execute("different", context)
     assert result3 == "result-2"
@@ -253,10 +253,10 @@ async def test_multiple_inputs(input_data, expected):
     """Test with multiple input scenarios."""
     async def double_value(data, ctx):
         return {"result": data["value"] * 2}
-    
+
     workflow = MockPrimitive("double", side_effect=double_value)
     context = WorkflowContext()
-    
+
     result = await workflow.execute(input_data, context)
     assert result == expected
 ```
@@ -268,19 +268,19 @@ async def test_multiple_inputs(input_data, expected):
 async def test_context_propagation():
     """Test that context is passed through workflow."""
     contexts_seen = []
-    
+
     async def capture_context(data, ctx):
         contexts_seen.append(ctx)
         return data
-    
+
     mock1 = MockPrimitive("step1", side_effect=capture_context)
     mock2 = MockPrimitive("step2", side_effect=capture_context)
-    
+
     workflow = mock1 >> mock2
     context = WorkflowContext(workflow_id="test-propagation")
-    
+
     await workflow.execute("input", context)
-    
+
     # Same context instance passed to both
     assert len(contexts_seen) == 2
     assert contexts_seen[0] is contexts_seen[1]
@@ -292,7 +292,7 @@ async def test_context_propagation():
 ```
 tests/
 ├── test_core.py          # Core primitive tests
-├── test_recovery.py      # Recovery pattern tests  
+├── test_recovery.py      # Recovery pattern tests
 ├── test_performance.py   # Performance utility tests
 ├── test_routing.py       # Router tests
 └── integration/          # Integration tests
@@ -314,3 +314,159 @@ tests/
 - [ ] Uses descriptive test names and docstrings
 - [ ] No external dependencies (no network, DB, filesystem)
 - [ ] Fast execution (< 1s per test)
+
+---
+
+## Testing Methodology (Updated Nov 2025)
+
+### Test Categories & Markers
+
+TTA.dev uses pytest markers to categorize tests by resource requirements:
+
+```python
+@pytest.mark.unit  # Fast, isolated, safe for local development (default)
+@pytest.mark.integration  # Requires MCP servers, ports, external resources
+@pytest.mark.slow  # Takes > 30 seconds to execute
+@pytest.mark.external  # Requires network, APIs, or external services
+```
+
+**Default behavior**: Unit tests run by default. Integration/slow/external tests are opt-in.
+
+### Fast vs. Integration Tests
+
+#### Fast Tests (Safe for Local Development)
+
+```bash
+# Run unit tests only (safe, fast, WSL-friendly)
+./scripts/test_fast.sh
+
+# Or with pytest directly
+uv run pytest -m "not integration and not slow and not external"
+```
+
+**Characteristics:**
+- Execute in < 60 seconds total
+- No network servers or ports
+- No external dependencies
+- Safe in resource-constrained environments (WSL)
+
+#### Integration Tests (CI/CD or Explicit Opt-In)
+
+```bash
+# Opt-in to integration tests (requires resources)
+RUN_INTEGRATION=true ./scripts/test_integration.sh
+
+# Integration tests should be marked:
+@pytest.mark.integration
+async def test_mcp_server_coordination():
+    """Test real MCP server coordination."""
+    # This starts actual servers on ports 8001, 8002
+    ...
+```
+
+**Characteristics:**
+- May take 5-30 minutes
+- Starts network servers (MCP servers on ports 8001, 8002)
+- Spawns child processes
+- Requires explicit `RUN_INTEGRATION=true` environment variable
+
+### Timeout Protection
+
+All tests have automatic timeout protection to prevent hangs:
+
+```python
+# Configured in pyproject.toml
+[tool.pytest.ini_options]
+timeout = 60  # Default 60 second timeout
+timeout_method = "thread"  # Thread-based killing
+
+# Override for specific tests
+@pytest.mark.timeout(300)  # 5 minute timeout for integration test
+@pytest.mark.integration
+async def test_long_running_integration():
+    ...
+```
+
+### Emergency Recovery
+
+If tests hang or crash WSL:
+
+```bash
+# Kill all stale test and server processes
+./scripts/emergency_stop.sh
+
+# This will:
+# - Find pytest, test_*, mcp*server processes
+# - Prompt for confirmation
+# - Kill processes and free ports 8001, 8002
+```
+
+### VS Code Tasks
+
+Quick access via Command Palette (`Ctrl+Shift+P` → "Tasks: Run Task"):
+
+- **🧪 Run Fast Tests (Unit Only)** - Default test task (F5)
+- **🧪 Run Integration Tests (Safe)** - With RUN_INTEGRATION=true
+- **🧪 Run Tests with Coverage** - Coverage report (excluding integration)
+- **📝 Check Markdown Docs** - Validate documentation
+- **🧹 Emergency Stop Tests** - Kill stale processes
+
+### CI/CD Strategy
+
+GitHub Actions uses split workflow (`.github/workflows/tests-split.yml`):
+
+1. **quick-checks** (10 min): Format, lint, type check, unit tests
+2. **docs-checks** (5 min): Markdown validation (links, code blocks, frontmatter)
+3. **integration-tests** (30 min): Heavy tests, main branch only
+4. **coverage** (15 min): Coverage report with Codecov upload
+
+**Note**: tests-split.yml is newly created and not yet run in CI. May require refinement after first execution.
+
+### Marking New Tests
+
+When creating integration tests, always mark them:
+
+```python
+import pytest
+
+@pytest.mark.integration  # Marks as heavy test requiring resources
+@pytest.mark.timeout(300)  # Override default 60s timeout
+@pytest.mark.asyncio  # For async test support
+async def test_mcp_server_integration():
+    """Test MCP server coordination with real servers."""
+    # Test implementation
+    ...
+```
+
+### Documentation Validation
+
+Validate markdown files before committing:
+
+```bash
+# Check internal links
+python3 scripts/docs/check_md.py --links
+
+# Check code blocks for syntax
+python3 scripts/docs/check_md.py --code-blocks
+
+# Check frontmatter consistency
+python3 scripts/docs/check_md.py --frontmatter
+
+# Run all checks
+python3 scripts/docs/check_md.py --all
+```
+
+### Best Practices Summary
+
+1. **Default to unit tests**: Mark integration tests explicitly with `@pytest.mark.integration`
+2. **Use timeout protection**: Tests should complete in < 60s (unit) or < 300s (integration)
+3. **Guard heavy tests**: Integration tests require `RUN_INTEGRATION=true` locally
+4. **Emergency recovery**: Use `emergency_stop.sh` if tests hang or crash WSL
+5. **Validate docs**: Run markdown checker before committing documentation changes
+6. **Fast feedback**: Run `./scripts/test_fast.sh` during development for quick validation
+
+### References
+
+- **Comprehensive Guide**: `docs/TESTING_GUIDE.md` - Full testing methodology
+- **Quick Reference**: `docs/TESTING_QUICKREF.md` - Common commands and troubleshooting
+- **Implementation Details**: `docs/TESTING_METHODOLOGY_SUMMARY.md` - What changed and why
