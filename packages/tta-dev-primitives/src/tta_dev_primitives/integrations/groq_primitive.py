@@ -6,7 +6,14 @@ Provides ultra-fast inference with free tier access.
 
 from typing import Any
 
-from groq import AsyncGroq
+try:
+    from groq import AsyncGroq
+
+    GROQ_AVAILABLE = True
+except ImportError:
+    GROQ_AVAILABLE = False
+    AsyncGroq = None  # type: ignore
+
 from pydantic import BaseModel, Field
 
 from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
@@ -15,12 +22,18 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class GroqRequest(BaseModel):
     """Request model for Groq primitive."""
 
-    messages: list[dict[str, str]] = Field(description="List of messages in chat format")
+    messages: list[dict[str, str]] = Field(
+        description="List of messages in chat format"
+    )
     model: str | None = Field(
         default=None, description="Model to use (overrides primitive default)"
     )
-    temperature: float | None = Field(default=None, description="Sampling temperature (0-2)")
-    max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
+    temperature: float | None = Field(
+        default=None, description="Sampling temperature (0-2)"
+    )
+    max_tokens: int | None = Field(
+        default=None, description="Maximum tokens to generate"
+    )
 
 
 class GroqResponse(BaseModel):
@@ -82,12 +95,22 @@ class GroqPrimitive(WorkflowPrimitive[GroqRequest, GroqResponse]):
             model: Default model to use (e.g., "llama-3.3-70b-versatile", "llama-3.1-8b-instant")
             api_key: Groq API key (defaults to GROQ_API_KEY env var)
             **kwargs: Additional arguments passed to AsyncGroq client
+
+        Raises:
+            ImportError: If groq package is not installed
         """
         super().__init__()
-        self.client = AsyncGroq(api_key=api_key, **kwargs)
+        if not GROQ_AVAILABLE:
+            raise ImportError(
+                "groq package is required for GroqPrimitive. "
+                "Install it with: uv pip install groq"
+            )
+        self.client = AsyncGroq(api_key=api_key, **kwargs)  # type: ignore
         self.model = model
 
-    async def execute(self, input_data: GroqRequest, context: WorkflowContext) -> GroqResponse:
+    async def execute(
+        self, input_data: GroqRequest, context: WorkflowContext
+    ) -> GroqResponse:
         """Execute Groq chat completion.
 
         Args:
@@ -132,4 +155,3 @@ class GroqPrimitive(WorkflowPrimitive[GroqRequest, GroqResponse]):
             },
             finish_reason=choice.finish_reason or "unknown",
         )
-

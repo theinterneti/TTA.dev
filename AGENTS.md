@@ -21,11 +21,30 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 
 **IMPORTANT:** All agents must use the Logseq TODO management system:
 
-- **TODO System:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO Management System.md)
-- **Daily Journal:** Add TODOs to `logseq/journals/YYYY_MM_DD.md`
-- **Tag Convention:**
-  - `#dev-todo` - Development work (implementation, testing, CI/CD, infrastructure)
-  - `#user-todo` - User/agent learning tasks (onboarding, examples, education)
+- **📐 TODO Architecture:** [`logseq/pages/TTA.dev/TODO Architecture.md`](logseq/pages/TTA.dev___TODO Architecture.md) - Complete system design
+- **📊 Main Dashboard:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO Management System.md) - Active queries
+- **📋 Templates:** [`logseq/pages/TODO Templates.md`](logseq/pages/TODO Templates.md) - Copy-paste patterns
+- **🎓 Learning Paths:** [`logseq/pages/TTA.dev/Learning Paths.md`](logseq/pages/TTA.dev___Learning Paths.md) - Structured sequences
+- **📈 Metrics:** [`logseq/pages/TTA.dev/TODO Metrics Dashboard.md`](logseq/pages/TTA.dev___TODO Metrics Dashboard.md) - Analytics
+- **⚡ Quick Reference:** [`logseq/pages/TODO Architecture Quick Reference.md`](logseq/pages/TODO Architecture Quick Reference.md) - Fast lookup
+
+**Package Dashboards:**
+- [`TTA.dev/Packages/tta-dev-primitives/TODOs`](logseq/pages/TTA.dev___Packages___tta-dev-primitives___TODOs.md) - Core primitives ✅
+- [`TTA.dev/Packages/tta-observability-integration/TODOs`](logseq/pages/TTA.dev___Packages___tta-observability-integration___TODOs.md) - Observability ✅
+- [`TTA.dev/Packages/universal-agent-context/TODOs`](logseq/pages/TTA.dev___Packages___universal-agent-context___TODOs.md) - Agent context ✅
+
+**Migration Documentation:**
+- [`docs/TODO_ARCHITECTURE_APPLICATION_COMPLETE.md`](docs/TODO_ARCHITECTURE_APPLICATION_COMPLETE.md) - **28 active TODOs** migrated/created
+- [`docs/TODO_LIFECYCLE_GUIDE.md`](docs/TODO_LIFECYCLE_GUIDE.md) - Completion, archival, and embedded TODO workflows ✅
+- [`docs/TODO_LIFECYCLE_IMPLEMENTATION_SUMMARY.md`](docs/TODO_LIFECYCLE_IMPLEMENTATION_SUMMARY.md) - Implementation summary
+
+**Daily Journal:** Add TODOs to `logseq/journals/YYYY_MM_DD.md`
+
+**Tag Convention:**
+  - `#dev-todo` - Development work (building TTA.dev itself)
+  - `#learning-todo` - User education (tutorials, flashcards, exercises)
+  - `#template-todo` - Reusable patterns (for agents/users)
+  - `#ops-todo` - Infrastructure (deployment, monitoring)
 
 **When to Update:**
 
@@ -53,6 +72,18 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 ```
 
 **See:** [`logseq/ADVANCED_FEATURES.md`](logseq/ADVANCED_FEATURES.md) for complete Logseq guide.
+
+### 🎯 Know Your Copilot Context
+
+**CRITICAL:** If you're GitHub Copilot, understand which context you're in:
+
+- **🖥️ VS Code Extension (LOCAL):** You have MCP servers, toolsets, local filesystem
+- **☁️ Coding Agent (CLOUD):** You run in GitHub Actions, NO MCP/toolsets
+- **💻 GitHub CLI (TERMINAL):** You run in terminal via `gh copilot`
+
+**Full details:** See `.github/copilot-instructions.md` section "📍 CRITICAL: Know Your Context"
+
+**Why this matters:** Configuration, tools, and capabilities differ by context. Don't assume LOCAL features are available in CLOUD environment or vice versa.
 
 ### Repository Structure
 

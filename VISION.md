@@ -1,8 +1,64 @@
 # TTA.dev Vision: Democratizing AI-Native Software Development
 
-**Date:** October 29, 2025
+**Date:** October 29, 2025 | **Updated:** November 2, 2025
 **Author:** TTA.dev Core Team
 **Status:** Living Document
+
+---
+
+## ⚠️ IMPORTANT: Current State vs Future Vision
+
+**This document contains BOTH what exists today and what we plan to build.**
+
+### ✅ Current State (Production-Ready)
+
+**What you can use RIGHT NOW:**
+
+1. **✅ Development Lifecycle Meta-Framework** - Stage management with validation
+   - `Stage` enum (EXPERIMENTATION → TESTING → STAGING → DEPLOYMENT → PRODUCTION)
+   - `StageManager` primitive for orchestrating transitions
+   - `StageCriteria` for entry/exit validation
+   - Parallel validation checks with detailed feedback
+   - See: `packages/tta-dev-primitives/src/tta_dev_primitives/lifecycle/`
+
+2. **✅ Core Workflow Primitives** - Composable building blocks
+   - Sequential (`>>`), Parallel (`|`), Router, Conditional
+   - Retry, Fallback, Timeout, Compensation
+   - Cache, Batch, RateLimit
+   - See: `PRIMITIVES_CATALOG.md`
+
+3. **✅ Orchestration Patterns** - Multi-agent coordination
+   - `DelegationPrimitive` (Orchestrator → Executor)
+   - `MultiModelWorkflow` (Multi-model coordination)
+   - `TaskClassifierPrimitive` (Task routing)
+   - See: `packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/`
+
+4. **✅ Observability** - Built-in tracing and metrics
+   - `InstrumentedPrimitive` with OpenTelemetry
+   - Prometheus metrics integration
+   - WorkflowContext for correlation
+   - See: `packages/tta-observability-integration/`
+
+### 🔮 Future Vision (Planned)
+
+**What we're planning to build:**
+
+1. **📋 Role-Based Agent System** - Specialized domain experts (Phase 2, Q1 2026)
+   - `DeveloperAgent`, `QAAgent`, `DevOpsAgent`, etc.
+   - Agent coordination and knowledge bases
+   - Contextual advice system
+
+2. **📋 Guided Workflow System** - Interactive step-by-step guidance (Phase 3, Q2 2026)
+   - `GuidedWorkflow` primitive
+   - Interactive execution with progress persistence
+   - Workflow templates for common tasks
+
+3. **📋 Knowledge Integration** - Best practices and contextual advice (Phase 4, Q3 2026)
+   - `KnowledgeBase` for storing domain knowledge
+   - Contextual querying
+   - Community contributions
+
+**⚠️ WARNING:** Code examples below may reference these future features. Check the "Current State" section above to see what's actually available.
 
 ---
 
@@ -94,9 +150,12 @@ if not readiness.ready:
 
 ### 2. Role-Based Agent System
 
+**📋 FUTURE VISION** - Not yet implemented. See "Current State" section above.
+
 **Core Concept:** Different roles provide different expertise at different stages.
 
 ```python
+# ⚠️ ASPIRATIONAL CODE - These imports don't exist yet
 from tta_dev_primitives.agents import (
     DeveloperAgent,
     QAAgent,
@@ -135,9 +194,12 @@ guidance = await deployment_team.assess_readiness(
 
 ### 3. Guided Workflow System
 
+**📋 FUTURE VISION** - Not yet implemented. See "Current State" section above.
+
 **Core Concept:** Interactive, step-by-step guidance through complex tasks.
 
 ```python
+# ⚠️ ASPIRATIONAL CODE - These imports don't exist yet
 from tta_dev_primitives.guided import GuidedWorkflow, Step
 
 # Define a guided workflow for MCP server deployment
@@ -187,9 +249,12 @@ result = await mcp_deployment.execute(interactive=True)
 
 ### 4. Knowledge Integration System
 
+**📋 FUTURE VISION** - Not yet implemented. See "Current State" section above.
+
 **Core Concept:** Capture and surface best practices contextually.
 
 ```python
+# ⚠️ ASPIRATIONAL CODE - These imports don't exist yet
 from tta_dev_primitives.knowledge import KnowledgeBase, Topic
 
 kb = KnowledgeBase()
@@ -230,11 +295,34 @@ advice = kb.query(
 
 ### 5. Validation & Safety Primitives
 
+**✅ CURRENT IMPLEMENTATION** - Available via lifecycle validation checks.
+
 **Core Concept:** Prevent mistakes before they happen.
 
 ```python
+# ✅ CURRENT APPROACH - Use lifecycle validation
+from tta_dev_primitives.lifecycle import StageManager, Stage
+
+manager = StageManager()
+readiness = await manager.check_readiness(
+    project_path=project_path,
+    current_stage=Stage.TESTING,
+    target_stage=Stage.DEPLOYMENT,
+    context=context
+)
+
+# Validation checks run automatically
+if not readiness.is_ready():
+    for blocker in readiness.blockers:
+        print(f"❌ {blocker.message}")
+        print(f"   Fix: {blocker.fix_command}")
+```
+
+**Alternative Future Vision:**
+
+```python
+# 📋 ASPIRATIONAL CODE - These imports don't exist yet
 from tta_dev_primitives.validation import (
-    ValidationPrimitive,
     PreventMistakePrimitive,
     SafetyCheckPrimitive,
 )

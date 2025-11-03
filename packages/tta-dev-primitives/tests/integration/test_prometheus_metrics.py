@@ -10,6 +10,8 @@ Tests verify that:
 Note: Full primitive-level metrics integration (execution time, success/failure rates)
 requires OpenTelemetry metrics instrumentation in InstrumentedPrimitive, which is
 tracked as a follow-up task. These tests focus on infrastructure readiness.
+
+NOTE: All tests in this module require Docker containers and should run as integration tests.
 """
 
 from __future__ import annotations
@@ -19,6 +21,9 @@ from typing import Any
 
 import pytest
 import requests
+
+# Mark all tests in this module as integration tests
+pytestmark = pytest.mark.integration
 
 # Prometheus endpoint
 PROMETHEUS_URL = "http://localhost:9090"
@@ -133,7 +138,9 @@ def test_prometheus_configuration():
     assert yaml_config, "No configuration found"
 
     # Check for expected job names (without quotes - Prometheus config format)
-    assert "job_name: prometheus" in yaml_config, "Missing prometheus self-monitoring job"
+    assert "job_name: prometheus" in yaml_config, (
+        "Missing prometheus self-monitoring job"
+    )
     assert "job_name: otel-collector" in yaml_config, "Missing otel-collector job"
     assert "job_name: tta-primitives" in yaml_config, "Missing tta-primitives job"
 

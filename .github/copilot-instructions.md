@@ -4,7 +4,40 @@ This file provides workspace-level guidance for GitHub Copilot when working with
 
 ---
 
-## Project Overview
+## 📍 CRITICAL: Know Your Context
+
+**This file is read by MULTIPLE Copilot contexts. Know which one YOU are:**
+
+### 🖥️ **Are you the VS Code Extension? (LOCAL)**
+
+- ✅ Running in developer's VS Code on local machine
+- ✅ Have access to: MCP servers, Copilot toolsets, local filesystem
+- ✅ Read sections marked: 🎯 (all), 🖥️ (local only)
+- ❌ Ignore sections marked: ☁️ (cloud only - not for you)
+
+### ☁️ **Are you the Coding Agent? (CLOUD/GitHub Actions)**
+
+- ✅ Running in ephemeral GitHub Actions environment
+- ✅ Have access to: GitHub Actions tools, installed packages
+- ✅ Read sections marked: 🎯 (all), ☁️ (cloud only)
+- ❌ Ignore sections marked: 🖥️ (local only - not available to you)
+- ⚠️ **You do NOT have access to:** MCP servers, VS Code extensions, Copilot toolsets
+
+### 💻 **Are you the GitHub CLI? (TERMINAL)**
+
+- ✅ Running in terminal via `gh copilot`
+- ✅ Have access to: Terminal environment, GitHub API
+- ✅ Read sections marked: 🎯 (all)
+- ❌ Ignore sections marked: 🖥️ (local) and ☁️ (cloud)
+
+**Not sure which you are?**
+- In VS Code with chat UI? → 🖥️ VS Code Extension
+- In GitHub Actions workflow logs? → ☁️ Coding Agent
+- In terminal with `gh copilot`? → 💻 GitHub CLI
+
+---
+
+## 🎯 FOR ALL CONTEXTS: Project Overview
 
 **TTA.dev** is a production-ready AI development toolkit providing composable agentic primitives for building reliable AI workflows.
 
@@ -16,7 +49,29 @@ This file provides workspace-level guidance for GitHub Copilot when working with
 - **Recovery Patterns**: Retry, Fallback, Timeout, Compensation primitives
 - **Monorepo Structure**: Multiple focused packages in `/packages`
 
-### 📋 TODO Management (Required for All Agents)
+### � Observability Persistence Check (Required for Local Sessions)
+
+**🖥️ LOCAL ONLY:** If you're the VS Code Extension, verify observability infrastructure on session start:
+
+```bash
+./scripts/verify-and-setup-persistence.sh
+```
+
+**What this checks:**
+- ✅ Agent activity tracker (systemd service)
+- ✅ Docker containers (Jaeger, Prometheus, Grafana, OTLP, Pushgateway)
+- ✅ Restart policies configured
+- ✅ Git post-commit hook installed
+
+**If not set up:** The script will offer to run `./scripts/setup-persistence.sh` automatically.
+
+**Why this matters:** TTA.dev's observability infrastructure must be running to track agent activity, capture metrics, and provide distributed tracing. Without it, you're working blind.
+
+**Documentation:** See `scripts/PERSISTENCE_SETUP.md` for details.
+
+---
+
+### �📋 TODO Management (Required for All Agents)
 
 **ALL agents must use the Logseq TODO management system:**
 
@@ -49,7 +104,7 @@ This file provides workspace-level guidance for GitHub Copilot when working with
 
 ---
 
-## Monorepo Structure
+## 🎯 FOR ALL CONTEXTS: Monorepo Structure
 
 ### Package Architecture
 
@@ -197,7 +252,9 @@ async def test_workflow(mock_llm):
 
 ---
 
-## Copilot Toolsets
+## 🖥️ FOR VS CODE EXTENSION ONLY: Copilot Toolsets
+
+**⚠️ Coding Agent:** This section is NOT for you. Toolsets are a VS Code feature not available in GitHub Actions.
 
 TTA.dev provides **focused toolsets** to optimize your workflow. Use the appropriate toolset hashtag in your Copilot chat:
 
@@ -608,6 +665,235 @@ Closes #123
 - [ ] Ruff formatting applied
 - [ ] All quality checks pass
 - [ ] Examples added (if new feature)
+
+---
+
+## ☁️ FOR CODING AGENT ONLY: Your GitHub Actions Environment
+
+**⚠️ VS Code Extension:** This section is NOT for you. This describes the cloud environment where the Coding Agent runs.
+
+**For Coding Agent:** This section describes your ephemeral development environment.
+
+### ⚠️ IMPORTANT: You are NOT the VS Code Extension
+
+You run in **GitHub Actions**, not in VS Code. You do NOT have access to:
+
+- ❌ **MCP servers** (only available in VS Code locally)
+- ❌ **Copilot toolsets** (VS Code-specific feature)
+- ❌ **VS Code extensions** (you're in a terminal environment)
+- ❌ **Local filesystem** (you have ephemeral Actions runner)
+- ❌ **Persistent state** (environment resets each session)
+
+### Your Environment Setup
+
+When you (the Copilot coding agent) work on tasks, you run in an **ephemeral GitHub Actions environment** configured by:
+
+**Setup Workflow:** `.github/workflows/copilot-setup-steps.yml`
+
+**Your Environment Includes:**
+
+- Ubuntu latest runner (2 CPU, 7GB RAM, 14GB disk)
+- Python 3.11
+- `uv` package manager (preferred over pip)
+- Full dependency tree from `uv sync --all-extras`
+- Cached dependencies (~9-11s startup with cache)
+- All testing, linting, and type checking tools
+
+**Available Commands:**
+
+```bash
+# Run tests
+uv run pytest -v
+uv run pytest --cov=packages --cov-report=html
+
+# Check code quality
+uv run ruff check . --fix
+uv run ruff format .
+uvx pyright packages/
+
+# Verify environment
+./scripts/check-environment.sh
+
+# Use VS Code tasks
+# See: .vscode/tasks.json for all available tasks
+```
+
+**Environment Variables:**
+
+- `PYTHONPATH=$PWD/packages` - Package discovery
+- `PYTHONUTF8=1` - UTF-8 encoding
+- `PYTHONDONTWRITEBYTECODE=1` - No .pyc files
+- `UV_CACHE_DIR=~/.cache/uv` - Dependency cache
+
+**Performance:**
+
+- **Setup time:** 9-11 seconds (with cache), 14 seconds (cold start)
+- **Cache size:** ~43MB
+- **Cache hit rate:** ~90%
+- **Session timeout:** 60 minutes maximum
+
+### How to Customize Your Environment
+
+If you need additional tools or dependencies:
+
+1. **Update** `.github/workflows/copilot-setup-steps.yml`
+2. **Add steps** to the `copilot-setup-steps` job
+3. **Test changes** - Workflow auto-runs on modifications
+4. **Commit** to default branch for agent to use
+
+**Example - Adding a new tool:**
+
+```yaml
+- name: Install custom tool
+  run: uv pip install custom-package
+
+- name: Verify installation
+  run: custom-package --version
+```
+
+**Allowed Customizations:**
+
+- `steps` - Add installation/setup steps
+- `permissions` - Adjust permissions (minimize to necessary)
+- `runs-on` - Change runner size (ubuntu-latest, ubuntu-4-core, etc.)
+- `services` - Add service containers (databases, etc.)
+- `timeout-minutes` - Max 59 minutes
+- `snapshot` - Snapshot configuration
+
+**Prohibited Customizations:**
+
+- Cannot change job name (must be `copilot-setup-steps`)
+- Cannot use non-Ubuntu runners (Windows/macOS not supported)
+- Cannot use self-hosted runners (without ARC setup)
+
+### Environment Variables and Secrets
+
+**Current Approach:** Variables set directly in workflow
+
+**GitHub Feature:** Can also use `copilot` environment in repository settings:
+
+1. Go to Settings → Environments → `copilot`
+2. Add variables or secrets
+3. Access in workflow: `${{ vars.VARIABLE_NAME }}` or `${{ secrets.SECRET_NAME }}`
+
+**When to Use:**
+
+- Authentication tokens for external services
+- Configuration values that change per branch
+- Sensitive data (use secrets, not variables)
+
+**Current TTA.dev Variables:** None configured (not needed yet)
+
+### Performance Considerations
+
+**Current Resources (Standard Runner):**
+
+- **CPU:** 2 cores
+- **RAM:** 7GB
+- **Disk:** 14GB SSD
+- **Network:** GitHub Actions network with firewall
+
+**Larger Runners Available:**
+
+- `ubuntu-4-core` (4 CPU, 16GB RAM, 14GB SSD)
+- `ubuntu-8-core` (8 CPU, 32GB RAM, 14GB SSD)
+- `ubuntu-16-core` (16 CPU, 64GB RAM, 14GB SSD)
+- And larger sizes available
+
+**When to Upgrade:**
+
+- Test suite consistently takes >5 minutes
+- Out of memory errors
+- Heavy compilation or ML model work
+- Large dependency graphs
+
+**Current Performance:** ✅ Standard runner is adequate
+
+### Limitations and Constraints
+
+**Network:**
+
+- ✅ Firewall enabled (protects repository)
+- ✅ Can access public internet (PyPI, GitHub, etc.)
+- ❌ Cannot access private networks without VPN setup
+
+**File System:**
+
+- ✅ Full read/write access to workspace
+- ✅ Can create temporary files
+- ❌ Changes don't persist (ephemeral environment)
+
+**Time:**
+
+- ✅ 60 minutes per session
+- ✅ Multiple sessions allowed per task
+- ❌ Long-running processes need checkpointing
+
+**Resources:**
+
+- ✅ Sufficient for most Python development
+- ✅ Can cache dependencies effectively
+- ❌ Limited for ML training or large compilations
+
+### Requesting Environment Changes
+
+If you encounter limitations:
+
+1. **Document the issue** in session logs:
+   - What you tried
+   - Error messages
+   - Resource constraints hit
+2. **Suggest specific changes** to workflow
+3. **Provide rationale** for the change
+4. **Reference this documentation**
+
+**Example Request:**
+
+> "The test suite is timing out after 45 minutes. I recommend upgrading to `ubuntu-4-core` runner for faster parallel test execution. Update `.github/workflows/copilot-setup-steps.yml` line 29 to `runs-on: ubuntu-4-core`."
+
+### Verification and Debugging
+
+**Check your environment:**
+
+```bash
+# Run verification script
+./scripts/check-environment.sh
+
+# Manual checks
+uv --version
+python --version
+uv run pytest --version
+uv pip list
+
+# Check what's cached
+du -sh ~/.cache/uv
+```
+
+**If setup fails:**
+
+1. Check workflow logs in GitHub Actions
+2. Verify all dependencies are installable
+3. Check for network issues (PyPI down, etc.)
+4. Try without cache (workflow will auto-retry)
+
+**Common Issues:**
+
+- **Missing dependencies:** Add to `pyproject.toml` or `packages/*/pyproject.toml`
+- **Import errors:** Check `PYTHONPATH` is set correctly
+- **Tool not found:** Add installation step to workflow
+- **Timeout:** Consider larger runner or optimization
+
+### Self-Awareness Checklist
+
+When working on tasks, remember:
+
+- ✅ I run in GitHub Actions (not VS Code or local machine)
+- ✅ My environment is configured by `.github/workflows/copilot-setup-steps.yml`
+- ✅ I can suggest workflow changes if I need different tools
+- ✅ My sessions are ephemeral (nothing persists except commits)
+- ✅ I have access to all tools listed in verification output
+- ✅ I should use `uv` not `pip` for Python packages
+- ✅ I can reference this documentation to understand my limits
 
 ---
 

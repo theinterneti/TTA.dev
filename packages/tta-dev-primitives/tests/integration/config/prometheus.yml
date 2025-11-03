@@ -28,3 +28,20 @@ scrape_configs:
     scrape_timeout: 1s
     metrics_path: '/metrics'
 
+  # Agent Activity Tracker - Indirect Copilot monitoring
+  # Tracks file system changes and session activity
+  - job_name: 'agent-activity-tracker'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+    scrape_interval: 5s
+    scrape_timeout: 2s
+    metrics_path: '/metrics'
+
+  # Pushgateway - Git commit metrics from short-lived processes
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
+    scrape_interval: 5s
+    scrape_timeout: 2s
+    metrics_path: '/metrics'
