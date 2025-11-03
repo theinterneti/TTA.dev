@@ -46,9 +46,7 @@ class ExecutorConfig(BaseModel):
         valid_cases = {"simple", "moderate", "complex", "expert", "speed-critical", "reasoning"}
         invalid = set(v) - valid_cases
         if invalid:
-            raise ValueError(
-                f"Invalid use_cases: {invalid}. Must be one of: {valid_cases}"
-            )
+            raise ValueError(f"Invalid use_cases: {invalid}. Must be one of: {valid_cases}")
         return v
 
 
@@ -56,9 +54,7 @@ class CostTrackingConfig(BaseModel):
     """Configuration for cost tracking and budgeting."""
 
     enabled: bool = Field(default=True, description="Enable cost tracking")
-    budget_limit_usd: float = Field(
-        default=100.0, description="Monthly budget limit in USD"
-    )
+    budget_limit_usd: float = Field(default=100.0, description="Monthly budget limit in USD")
     alert_threshold: float = Field(
         default=0.8,
         description="Alert when budget reaches this percentage (0.0-1.0)",
@@ -322,4 +318,3 @@ def create_default_config(output_path: str | Path = ".tta/orchestration-config.y
         yaml.dump(default_config, f, default_flow_style=False, sort_keys=False)
 
     logger.info(f"✅ Created default configuration at {output_path}")
-

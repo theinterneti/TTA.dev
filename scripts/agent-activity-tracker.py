@@ -71,9 +71,7 @@ class AgentActivityHandler(FileSystemEventHandler):
         self.workspace_path = workspace_path
         self.session_start = None
         self.last_activity = None
-        self.file_stats: dict[str, Any] = defaultdict(
-            lambda: {"count": 0, "last_modified": None}
-        )
+        self.file_stats: dict[str, Any] = defaultdict(lambda: {"count": 0, "last_modified": None})
         self.session_timeout = 300  # 5 minutes of inactivity ends session
 
     def _should_track(self, path: str) -> bool:
@@ -161,10 +159,7 @@ class AgentActivityHandler(FileSystemEventHandler):
 
     def _check_session_timeout(self) -> None:
         """Check if session has timed out due to inactivity."""
-        if (
-            self.last_activity
-            and (time.time() - self.last_activity) > self.session_timeout
-        ):
+        if self.last_activity and (time.time() - self.last_activity) > self.session_timeout:
             self._end_session()
 
     def on_modified(self, event: FileSystemEvent):
@@ -233,9 +228,7 @@ class AgentActivityHandler(FileSystemEventHandler):
         """Get current session statistics."""
         return {
             "session_active": self.session_start is not None,
-            "session_duration": (
-                time.time() - self.session_start if self.session_start else 0
-            ),
+            "session_duration": (time.time() - self.session_start if self.session_start else 0),
             "files_tracked": len(self.file_stats),
             "most_edited": sorted(
                 self.file_stats.items(), key=lambda x: x[1]["count"], reverse=True
@@ -245,9 +238,7 @@ class AgentActivityHandler(FileSystemEventHandler):
 
 def main() -> None:
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Track agent activity via file system monitoring"
-    )
+    parser = argparse.ArgumentParser(description="Track agent activity via file system monitoring")
     parser.add_argument(
         "--workspace",
         type=Path,

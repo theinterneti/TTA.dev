@@ -58,20 +58,16 @@ jobs:
       - name: Start Docker services for integration tests
         run: |
           cd packages/tta-dev-primitives
-          docker-compose -f docker-compose.integration.yml up -d
+          docker compose -f docker-compose.integration.yml up -d
           sleep 10  # Wait for services to be ready
 
       - name: Run integration tests
         env:
           RUN_INTEGRATION: true
-        run: |
-          uv run pytest -v \
-            -m "integration" \
-            --timeout=300 \
-            --maxfail=3
+        run: uv run pytest -v -m "integration" --timeout=300 --maxfail=3
 
       - name: Stop Docker services
         if: always()
         run: |
           cd packages/tta-dev-primitives
-          docker-compose -f docker-compose.integration.yml down -v
+          docker compose -f docker-compose.integration.yml down -v

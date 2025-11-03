@@ -165,9 +165,9 @@ class DocGenerationWorkflow:
         # Create detailed prompt for documentation generation
         prompt = f"""Generate comprehensive Logseq-formatted documentation for the following Python code.
 
-File: {analysis['file_name']}
-Module: {analysis['module_name']}
-Lines of Code: {analysis['lines_of_code']}
+File: {analysis["file_name"]}
+Module: {analysis["module_name"]}
+Lines of Code: {analysis["lines_of_code"]}
 
 Code:
 ```python
@@ -175,7 +175,7 @@ Code:
 ```
 
 Documentation Outline (from orchestrator):
-{chr(10).join(f'- {section}' for section in analysis['outline']['sections'])}
+{chr(10).join(f"- {section}" for section in analysis["outline"]["sections"])}
 
 Requirements:
 1. Use Logseq markdown format with properties and block IDs
@@ -188,7 +188,7 @@ Requirements:
 
 Template to follow:
 ```markdown
-# {analysis['outline']['title']}
+# {analysis["outline"]["title"]}
 
 type:: [[Module]]
 category:: [[Documentation]]
@@ -198,15 +198,15 @@ status:: [[Draft]]
 ---
 
 ## Overview
-- id:: {analysis['module_name']}-overview
+- id:: {analysis["module_name"]}-overview
   Brief description...
 
 ## API Reference
-- id:: {analysis['module_name']}-api
+- id:: {analysis["module_name"]}-api
   ...
 
 ## Examples
-- id:: {analysis['module_name']}-examples
+- id:: {analysis["module_name"]}-examples
   ...
 ```
 
@@ -381,7 +381,7 @@ Generate complete, production-ready documentation following this structure.
             logger.info(f"Executor (Gemini): ${context.data['executor_cost']:.4f}")
             logger.info(f"Total: ${total_cost:.4f}")
             logger.info(f"vs. All-Claude: ${all_claude_cost:.2f}")
-            logger.info(f"Cost Savings: {cost_savings*100:.0f}%")
+            logger.info(f"Cost Savings: {cost_savings * 100:.0f}%")
             logger.info("=" * 80)
 
             return {
@@ -421,4 +421,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

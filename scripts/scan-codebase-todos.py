@@ -107,9 +107,7 @@ class CodebaseScanner:
         }
 
         # TODO patterns
-        self.todo_pattern = re.compile(
-            r"(TODO|FIXME|XXX|HACK|NOTE|BUG)[\s:]*(.+)", re.IGNORECASE
-        )
+        self.todo_pattern = re.compile(r"(TODO|FIXME|XXX|HACK|NOTE|BUG)[\s:]*(.+)", re.IGNORECASE)
 
     def scan(self) -> ScanResult:
         """Scan codebase for TODOs."""
@@ -239,9 +237,7 @@ def export_csv(result: ScanResult, output_path: Path) -> None:
     """Export results to CSV."""
     with output_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(
-            ["File", "Line", "Category", "Type", "TODO Text", "Context"]
-        )
+        writer.writerow(["File", "Line", "Category", "Type", "TODO Text", "Context"])
 
         for todo in result.todos:
             writer.writerow(
@@ -266,12 +262,8 @@ def export_json(result: ScanResult) -> None:
             "files_scanned": result.files_scanned,
             "files_with_todos": result.files_with_todos,
         },
-        "by_category": {
-            cat: len(todos) for cat, todos in result.by_category().items()
-        },
-        "by_file_type": {
-            ft: len(todos) for ft, todos in result.by_file_type().items()
-        },
+        "by_category": {cat: len(todos) for cat, todos in result.by_category().items()},
+        "by_file_type": {ft: len(todos) for ft, todos in result.by_file_type().items()},
         "todos": [
             {
                 "file": str(todo.file_path),
@@ -325,4 +317,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

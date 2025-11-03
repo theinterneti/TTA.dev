@@ -24,18 +24,14 @@ class KBPage(BaseModel):
 class KBQuery(BaseModel):
     """Query to knowledge base."""
 
-    query_type: Literal[
-        "best_practices", "common_mistakes", "examples", "related", "tags"
-    ] = Field(description="Type of query to perform")
+    query_type: Literal["best_practices", "common_mistakes", "examples", "related", "tags"] = Field(
+        description="Type of query to perform"
+    )
     topic: str = Field(description="Topic to search for")
     tags: list[str] = Field(default_factory=list, description="Tags to filter by")
-    stage: str | None = Field(
-        default=None, description="Lifecycle stage context (optional)"
-    )
+    stage: str | None = Field(default=None, description="Lifecycle stage context (optional)")
     max_results: int = Field(default=5, description="Maximum pages to return")
-    include_content: bool = Field(
-        default=True, description="Include page content in results"
-    )
+    include_content: bool = Field(default=True, description="Include page content in results")
 
 
 class KBResult(BaseModel):
@@ -99,9 +95,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         super().__init__(name="knowledge_base")
         self.logseq_available = logseq_available
 
-    async def _execute_impl(
-        self, input_data: KBQuery, context: WorkflowContext
-    ) -> KBResult:
+    async def _execute_impl(self, input_data: KBQuery, context: WorkflowContext) -> KBResult:
         """Execute knowledge base query.
 
         Args:
@@ -190,9 +184,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         # TODO: Call LogSeq MCP search tool
         return []
 
-    async def _query_examples_impl(
-        self, query: KBQuery, context: WorkflowContext
-    ) -> list[KBPage]:
+    async def _query_examples_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
         """Query example pages.
 
         Searches for pages tagged with #examples and matching topic.
@@ -207,9 +199,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         # TODO: Call LogSeq MCP search tool with tags ["examples", query.topic]
         return []
 
-    async def _query_related_impl(
-        self, query: KBQuery, context: WorkflowContext
-    ) -> list[KBPage]:
+    async def _query_related_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
         """Query related pages.
 
         Finds pages related to the specified topic.
@@ -224,9 +214,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         # TODO: Call LogSeq MCP get related pages tool
         return []
 
-    async def _query_by_tags_impl(
-        self, query: KBQuery, context: WorkflowContext
-    ) -> list[KBPage]:
+    async def _query_by_tags_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
         """Query by tags directly.
 
         Args:

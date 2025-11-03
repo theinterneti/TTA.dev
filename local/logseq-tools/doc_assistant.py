@@ -291,9 +291,7 @@ class LogseqDocumentAnalyzer:
         has_heading = any(line.startswith("#") for line in lines)
         return not has_heading and len(lines) > 10
 
-    def _calculate_quality_score(
-        self, total_lines: int, issues: list[LogseqDocIssue]
-    ) -> float:
+    def _calculate_quality_score(self, total_lines: int, issues: list[LogseqDocIssue]) -> float:
         """Calculate a quality score (0-100) based on issues found."""
         if total_lines == 0:
             return 0.0
@@ -347,9 +345,7 @@ class LogseqDocumentFixer:
         fixes_applied = 0
 
         # Sort issues by line number (descending) so we can modify without affecting line numbers
-        sorted_issues = sorted(
-            analysis.issues, key=lambda x: x.line_number, reverse=True
-        )
+        sorted_issues = sorted(analysis.issues, key=lambda x: x.line_number, reverse=True)
 
         for issue in sorted_issues:
             # Skip if not in fix_types (if specified)
@@ -406,11 +402,7 @@ async def analyze_logseq_docs(logseq_root: str = "logseq") -> dict[str, Any]:
 
     # Find all markdown files
     pages = list(analyzer.pages_dir.glob("*.md")) if analyzer.pages_dir.exists() else []
-    journals = (
-        list(analyzer.journals_dir.glob("*.md"))
-        if analyzer.journals_dir.exists()
-        else []
-    )
+    journals = list(analyzer.journals_dir.glob("*.md")) if analyzer.journals_dir.exists() else []
 
     all_files = pages + journals
 

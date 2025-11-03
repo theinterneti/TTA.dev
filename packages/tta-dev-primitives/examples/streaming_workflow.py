@@ -57,9 +57,7 @@ class StreamMetrics:
 # ==============================================================================
 
 
-class StreamingPrimitive(
-    InstrumentedPrimitive[dict[str, Any], AsyncIterator[StreamChunk]]
-):
+class StreamingPrimitive(InstrumentedPrimitive[dict[str, Any], AsyncIterator[StreamChunk]]):
     """Base class for streaming primitives."""
 
     def __init__(self, name: str = "streaming_base") -> None:
@@ -149,9 +147,7 @@ The framework enables building reliable AI workflows with minimal boilerplate.""
                 is_final=is_final,
                 metadata={
                     "model": self.model,
-                    "prompt": prompt
-                    if i == 0
-                    else None,  # Include prompt in first chunk
+                    "prompt": prompt if i == 0 else None,  # Include prompt in first chunk
                 },
             )
 
@@ -244,12 +240,8 @@ class StreamMetricsPrimitive(
             end_time = asyncio.get_event_loop().time()
             metrics.duration_seconds = end_time - start_time
             if metrics.duration_seconds > 0:
-                metrics.chunks_per_second = (
-                    metrics.total_chunks / metrics.duration_seconds
-                )
-                metrics.chars_per_second = (
-                    metrics.total_chars / metrics.duration_seconds
-                )
+                metrics.chunks_per_second = metrics.total_chunks / metrics.duration_seconds
+                metrics.chars_per_second = metrics.total_chars / metrics.duration_seconds
 
         return tracked_stream(), metrics
 
@@ -259,9 +251,7 @@ class StreamMetricsPrimitive(
 # ==============================================================================
 
 
-class StreamAggregatorPrimitive(
-    InstrumentedPrimitive[AsyncIterator[StreamChunk], dict[str, Any]]
-):
+class StreamAggregatorPrimitive(InstrumentedPrimitive[AsyncIterator[StreamChunk], dict[str, Any]]):
     """Aggregate streaming chunks into final result."""
 
     def __init__(self) -> None:

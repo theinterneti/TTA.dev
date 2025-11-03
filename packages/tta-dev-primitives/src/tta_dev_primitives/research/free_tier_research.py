@@ -14,12 +14,8 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class ModelQualityMetrics(BaseModel):
     """Quality metrics for a specific model."""
 
-    model_name: str = Field(
-        description="Model name (e.g., 'gpt-4o-mini', 'claude-3-5-sonnet')"
-    )
-    overall_score: float = Field(
-        description="Overall quality score (0-100)", ge=0, le=100
-    )
+    model_name: str = Field(description="Model name (e.g., 'gpt-4o-mini', 'claude-3-5-sonnet')")
+    overall_score: float = Field(description="Overall quality score (0-100)", ge=0, le=100)
     reasoning_score: float | None = Field(
         default=None, description="Reasoning ability score (0-100)", ge=0, le=100
     )
@@ -57,9 +53,7 @@ class ProviderInfo(BaseModel):
     free_tier_details: str | None = Field(
         default=None, description="Description of free tier (e.g., '$5 credit')"
     )
-    rate_limits: str | None = Field(
-        default=None, description="Rate limits (e.g., '1500 RPD')"
-    )
+    rate_limits: str | None = Field(default=None, description="Rate limits (e.g., '1500 RPD')")
     credit_card_required: bool | None = Field(
         default=None, description="Whether credit card is required"
     )
@@ -70,9 +64,7 @@ class ProviderInfo(BaseModel):
         default=None, description="Cost after free tier (e.g., '$0.15/1M tokens')"
     )
     setup_url: str | None = Field(default=None, description="URL for getting started")
-    pricing_url: str | None = Field(
-        default=None, description="URL for pricing information"
-    )
+    pricing_url: str | None = Field(default=None, description="URL for pricing information")
     last_verified: str = Field(
         default_factory=lambda: datetime.now().strftime("%Y-%m-%d"),
         description="Date when information was last verified",
@@ -97,9 +89,7 @@ class FreeTierResearchRequest(BaseModel):
     existing_guide_path: str | None = Field(
         default=None, description="Path to existing guide for comparison"
     )
-    output_path: str | None = Field(
-        default=None, description="Path to write updated guide"
-    )
+    output_path: str | None = Field(default=None, description="Path to write updated guide")
     generate_changelog: bool = Field(
         default=True, description="Whether to generate a changelog of changes"
     )
@@ -108,15 +98,9 @@ class FreeTierResearchRequest(BaseModel):
 class FreeTierResearchResponse(BaseModel):
     """Response model for free tier research primitive."""
 
-    providers: dict[str, ProviderInfo] = Field(
-        description="Researched provider information"
-    )
-    changelog: list[str] | None = Field(
-        default=None, description="List of changes detected"
-    )
-    updated_guide: str | None = Field(
-        default=None, description="Generated markdown guide content"
-    )
+    providers: dict[str, ProviderInfo] = Field(description="Researched provider information")
+    changelog: list[str] | None = Field(default=None, description="List of changes detected")
+    updated_guide: str | None = Field(default=None, description="Generated markdown guide content")
     research_date: str = Field(
         default_factory=lambda: datetime.now().strftime("%Y-%m-%d"),
         description="Date when research was performed",
@@ -538,9 +522,7 @@ class FreeTierResearchPrimitive(
 
                 # Calculate composite score
                 # Weight: 60% quality, 40% availability
-                composite_score = (model.overall_score * 0.6) + (
-                    availability_score * 0.4
-                )
+                composite_score = (model.overall_score * 0.6) + (availability_score * 0.4)
 
                 all_models.append((composite_score, model, provider_info))
 
@@ -549,15 +531,12 @@ class FreeTierResearchPrimitive(
 
         # Add rank numbers
         ranked_models = [
-            (rank + 1, model, provider)
-            for rank, (score, model, provider) in enumerate(all_models)
+            (rank + 1, model, provider) for rank, (score, model, provider) in enumerate(all_models)
         ]
 
         return ranked_models
 
-    def generate_fallback_strategy(
-        self, use_case: str, providers: dict[str, ProviderInfo]
-    ) -> str:
+    def generate_fallback_strategy(self, use_case: str, providers: dict[str, ProviderInfo]) -> str:
         """Generate intelligent fallback strategy for a use case.
 
         Args:

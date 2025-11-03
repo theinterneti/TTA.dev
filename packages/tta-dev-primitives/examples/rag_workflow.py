@@ -120,9 +120,9 @@ class VectorRetrievalPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, A
         ]
 
         # Filter by threshold and limit to top_k
-        relevant_docs = [
-            doc for doc in documents if doc["score"] >= self.similarity_threshold
-        ][: self.top_k]
+        relevant_docs = [doc for doc in documents if doc["score"] >= self.similarity_threshold][
+            : self.top_k
+        ]
 
         return {
             **input_data,
@@ -136,9 +136,7 @@ class VectorRetrievalPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, A
 # ==============================================================================
 
 
-class ContextAugmentationPrimitive(
-    InstrumentedPrimitive[dict[str, Any], dict[str, Any]]
-):
+class ContextAugmentationPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """Augment user query with retrieved context."""
 
     def __init__(self, max_context_length: int = 2000) -> None:
@@ -216,9 +214,7 @@ class LLMGenerationPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any
 
         # Simulate LLM generation (in production, call actual LLM API)
         # Example: response = await openai_client.chat.completions.create(...)
-        generated_answer = (
-            f"Based on the context, here's an answer to: {augmented_query}"
-        )
+        generated_answer = f"Based on the context, here's an answer to: {augmented_query}"
 
         return {
             "response": generated_answer,
@@ -289,9 +285,7 @@ def create_rag_workflow(
         )
 
     # Compose complete workflow
-    workflow = (
-        query_processor >> vector_retrieval >> context_augmentation >> llm_with_fallback
-    )
+    workflow = query_processor >> vector_retrieval >> context_augmentation >> llm_with_fallback
 
     return workflow
 

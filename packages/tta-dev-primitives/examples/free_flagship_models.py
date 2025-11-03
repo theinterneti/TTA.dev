@@ -66,16 +66,12 @@ async def example_google_ai_studio():
     print("=" * 80)
 
     # Create primitive
-    llm = GoogleAIStudioPrimitive(
-        model="gemini-2.5-pro", api_key=os.getenv("GOOGLE_API_KEY")
-    )
+    llm = GoogleAIStudioPrimitive(model="gemini-2.5-pro", api_key=os.getenv("GOOGLE_API_KEY"))
 
     # Create request
     context = WorkflowContext(workflow_id="gemini-demo")
     request = GoogleAIStudioRequest(
-        messages=[
-            {"role": "user", "content": "Explain quantum computing in 2 sentences."}
-        ]
+        messages=[{"role": "user", "content": "Explain quantum computing in 2 sentences."}]
     )
 
     # Execute
@@ -160,9 +156,7 @@ async def example_groq():
 
     # Create request
     context = WorkflowContext(workflow_id="groq-demo")
-    request = GroqRequest(
-        messages=[{"role": "user", "content": "Write a haiku about coding."}]
-    )
+    request = GroqRequest(messages=[{"role": "user", "content": "Write a haiku about coding."}])
 
     # Execute
     import time
@@ -300,9 +294,7 @@ async def example_fallback_chain():
             OpenRouterPrimitive(
                 model="deepseek/deepseek-r1:free", api_key=os.getenv("OPENROUTER_API_KEY")
             ),
-            GroqPrimitive(
-                model="llama-3.3-70b-versatile", api_key=os.getenv("GROQ_API_KEY")
-            ),
+            GroqPrimitive(model="llama-3.3-70b-versatile", api_key=os.getenv("GROQ_API_KEY")),
         ],
     )
 
@@ -357,4 +349,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

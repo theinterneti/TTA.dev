@@ -228,10 +228,7 @@ class TestKnowledgeBasePrimitive:
         result4 = await kb.query_examples(topic="test")
         result5 = await kb.get_related_pages(page_title="test")
 
-        assert all(
-            isinstance(r, KBResult)
-            for r in [result1, result2, result3, result4, result5]
-        )
+        assert all(isinstance(r, KBResult) for r in [result1, result2, result3, result4, result5])
 
     @pytest.mark.asyncio
     async def test_query_time_measured(self) -> None:

@@ -147,9 +147,7 @@ class MemoryAwareAgentPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, 
 # ==============================================================================
 
 
-class AggregatorAgentPrimitive(
-    InstrumentedPrimitive[list[dict[str, Any]], dict[str, Any]]
-):
+class AggregatorAgentPrimitive(InstrumentedPrimitive[list[dict[str, Any]], dict[str, Any]]):
     """Aggregator agent that combines results from multiple agents."""
 
     def __init__(self) -> None:

@@ -55,9 +55,7 @@ class MultiModelRequest(BaseModel):
     user_preferences: dict[str, Any] = Field(
         default_factory=dict, description="User preferences (e.g., prefer_free=True)"
     )
-    validate_output: bool = Field(
-        default=False, description="If True, validate output quality"
-    )
+    validate_output: bool = Field(default=False, description="If True, validate output quality")
 
 
 class MultiModelResponse(BaseModel):
@@ -70,9 +68,7 @@ class MultiModelResponse(BaseModel):
     validation_passed: bool | None = Field(
         default=None, description="Validation result (if validation enabled)"
     )
-    metadata: dict[str, Any] = Field(
-        default_factory=dict, description="Additional metadata"
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
 class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse]):
@@ -274,9 +270,7 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
         except Exception as e:
             logger.warning(f"⚠️  Failed to initialize orchestration metrics: {e}")
 
-    def register_executor(
-        self, model_name: str, primitive: WorkflowPrimitive[Any, Any]
-    ) -> None:
+    def register_executor(self, model_name: str, primitive: WorkflowPrimitive[Any, Any]) -> None:
         """Register an executor primitive.
 
         Args:
@@ -314,9 +308,7 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
         # Record classification
         if METRICS_AVAILABLE and hasattr(self, "_classifications_counter"):
-            self._classifications_counter.add(
-                1, {"complexity": classification.complexity.value}
-            )
+            self._classifications_counter.add(1, {"complexity": classification.complexity.value})
 
         # Step 2: Delegate to executor model
         delegation_request = DelegationRequest(
@@ -332,9 +324,7 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
         # Record delegation
         if METRICS_AVAILABLE and hasattr(self, "_delegations_counter"):
-            self._delegations_counter.add(
-                1, {"executor_model": delegation_response.executor_model}
-            )
+            self._delegations_counter.add(1, {"executor_model": delegation_response.executor_model})
             self._delegations_success_counter.add(
                 1, {"executor_model": delegation_response.executor_model}
             )
@@ -369,9 +359,7 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
             # Calculate cost savings (assuming $0.50 for all-Claude approach)
             all_claude_cost = 0.50
             cost_savings = (
-                (all_claude_cost - total_cost) / all_claude_cost * 100
-                if all_claude_cost > 0
-                else 0
+                (all_claude_cost - total_cost) / all_claude_cost * 100 if all_claude_cost > 0 else 0
             )
             self._cost_savings_gauge.add(int(cost_savings))
 

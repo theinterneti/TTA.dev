@@ -81,9 +81,7 @@ class TestOpenAIPrimitive:
         mock_response = MagicMock()
         mock_response.choices = [mock_choice]
         mock_response.model = "gpt-4o-mini"
-        mock_response.usage = MagicMock(
-            prompt_tokens=5, completion_tokens=3, total_tokens=8
-        )
+        mock_response.usage = MagicMock(prompt_tokens=5, completion_tokens=3, total_tokens=8)
 
         primitive = OpenAIPrimitive(api_key="test-key")
         primitive.client.chat.completions.create = AsyncMock(return_value=mock_response)
@@ -110,9 +108,7 @@ class TestOpenAIPrimitive:
         mock_response = MagicMock()
         mock_response.choices = [mock_choice]
         mock_response.model = "gpt-4"
-        mock_response.usage = MagicMock(
-            prompt_tokens=5, completion_tokens=3, total_tokens=8
-        )
+        mock_response.usage = MagicMock(prompt_tokens=5, completion_tokens=3, total_tokens=8)
 
         primitive = OpenAIPrimitive(model="gpt-4o-mini", api_key="test-key")
         primitive.client.chat.completions.create = AsyncMock(return_value=mock_response)
@@ -325,9 +321,7 @@ class TestSupabasePrimitive:
         primitive.client.table = MagicMock(
             return_value=MagicMock(
                 select=MagicMock(
-                    return_value=MagicMock(
-                        execute=MagicMock(return_value=mock_response)
-                    )
+                    return_value=MagicMock(execute=MagicMock(return_value=mock_response))
                 )
             )
         )
@@ -353,17 +347,13 @@ class TestSupabasePrimitive:
         primitive.client.table = MagicMock(
             return_value=MagicMock(
                 insert=MagicMock(
-                    return_value=MagicMock(
-                        execute=MagicMock(return_value=mock_response)
-                    )
+                    return_value=MagicMock(execute=MagicMock(return_value=mock_response))
                 )
             )
         )
 
         context = WorkflowContext(workflow_id="test")
-        request = SupabaseRequest(
-            operation="insert", table="users", data={"name": "Charlie"}
-        )
+        request = SupabaseRequest(operation="insert", table="users", data={"name": "Charlie"})
         response = await primitive.execute(request, context)
 
         assert response.data == [{"id": 3, "name": "Charlie"}]
@@ -386,9 +376,7 @@ class TestSupabasePrimitive:
         )
 
         context = WorkflowContext(workflow_id="test")
-        request = SupabaseRequest(
-            operation="select", table="users", filters={"age": 25}
-        )
+        request = SupabaseRequest(operation="select", table="users", filters={"age": 25})
         response = await primitive.execute(request, context)
 
         # Verify filter was applied

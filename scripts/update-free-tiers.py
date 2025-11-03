@@ -16,9 +16,7 @@ import sys
 from pathlib import Path
 
 # Add packages to path
-sys.path.insert(
-    0, str(Path(__file__).parent.parent / "packages" / "tta-dev-primitives" / "src")
-)
+sys.path.insert(0, str(Path(__file__).parent.parent / "packages" / "tta-dev-primitives" / "src"))
 
 from tta_dev_primitives.core.base import WorkflowContext
 from tta_dev_primitives.research import (
@@ -134,9 +132,7 @@ async def main():
 
     # Generate fallback strategy if requested
     if args.generate_fallback_strategy:
-        print(
-            f"🎯 Recommended Fallback Strategy for: {args.generate_fallback_strategy}"
-        )
+        print(f"🎯 Recommended Fallback Strategy for: {args.generate_fallback_strategy}")
         print("=" * 80)
         strategy_code = primitive.generate_fallback_strategy(
             args.generate_fallback_strategy, response.providers

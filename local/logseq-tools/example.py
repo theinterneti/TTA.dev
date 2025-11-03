@@ -136,9 +136,7 @@ async def example_chat_mode():
         print("✨ Your documentation is perfect! No issues found.")
         return
 
-    print(
-        f"📊 Found {results['total_issues']} issues across {results['total_files']} files"
-    )
+    print(f"📊 Found {results['total_issues']} issues across {results['total_files']} files")
     print(f"⭐ Average quality score: {results['average_quality_score']}/100")
     print()
 

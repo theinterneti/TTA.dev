@@ -103,9 +103,7 @@ class FileChangeProcessor(InstrumentedPrimitive[FileChangeEvent, MetricsUpdate])
         super().__init__(name="file_change_processor")
         self.session_start: float | None = None
         self.last_activity: float | None = None
-        self.file_stats: dict[str, Any] = defaultdict(
-            lambda: {"count": 0, "last_modified": None}
-        )
+        self.file_stats: dict[str, Any] = defaultdict(lambda: {"count": 0, "last_modified": None})
         self.session_timeout = 300  # 5 minutes
 
     async def _execute_impl(
@@ -141,11 +139,11 @@ class FileChangeProcessor(InstrumentedPrimitive[FileChangeEvent, MetricsUpdate])
 
         # Track in session stats
         self.file_stats[input_data.relative_path]["count"] += 1
-        self.file_stats[input_data.relative_path]["last_modified"] = (
-            input_data.timestamp
-        )
+        self.file_stats[input_data.relative_path]["last_modified"] = input_data.timestamp
 
-        message = f"{input_data.operation.title()}: {input_data.relative_path} ({input_data.file_type})"
+        message = (
+            f"{input_data.operation.title()}: {input_data.relative_path} ({input_data.file_type})"
+        )
         logger.info(
             message,
             extra={
@@ -166,10 +164,7 @@ class FileChangeProcessor(InstrumentedPrimitive[FileChangeEvent, MetricsUpdate])
 
     def check_session_timeout(self) -> None:
         """Check if session has timed out due to inactivity."""
-        if (
-            self.last_activity
-            and (time.time() - self.last_activity) > self.session_timeout
-        ):
+        if self.last_activity and (time.time() - self.last_activity) > self.session_timeout:
             self._end_session()
 
     def _end_session(self) -> None:

@@ -22,9 +22,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable, Tuple
 
 # Add the project root to the Python path
-sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from src.mcp import MCPServerManager, MCPServerType
 
@@ -61,18 +59,14 @@ class AIAssistantSimulator:
             agent_tool_server_url = f"http://localhost:{AGENT_TOOL_SERVER_PORT}"
 
         # Basic validation for URLs
-        if not knowledge_server_url.startswith(
-            "http://"
-        ) and not knowledge_server_url.startswith("https://"):
-            raise ValueError(
-                "Invalid knowledge_server_url: must start with http:// or https://"
-            )
-        if not agent_tool_server_url.startswith(
-            "http://"
-        ) and not agent_tool_server_url.startswith("https://"):
-            raise ValueError(
-                "Invalid agent_tool_server_url: must start with http:// or https://"
-            )
+        if not knowledge_server_url.startswith("http://") and not knowledge_server_url.startswith(
+            "https://"
+        ):
+            raise ValueError("Invalid knowledge_server_url: must start with http:// or https://")
+        if not agent_tool_server_url.startswith("http://") and not agent_tool_server_url.startswith(
+            "https://"
+        ):
+            raise ValueError("Invalid agent_tool_server_url: must start with http:// or https://")
 
         self.knowledge_server_url = knowledge_server_url
         self.agent_tool_server_url = agent_tool_server_url
@@ -109,9 +103,7 @@ class AIAssistantSimulator:
                 return False
 
             # Connect to Agent Tool server
-            response = requests.post(
-                f"{self.agent_tool_server_url}/mcp", json=handshake
-            )
+            response = requests.post(f"{self.agent_tool_server_url}/mcp", json=handshake)
 
             if response.status_code != 200:
                 return False
@@ -144,9 +136,7 @@ class AIAssistantSimulator:
             "requestId": "list-resources-1",
         }
 
-        response = requests.post(
-            f"{self.knowledge_server_url}/mcp", json=list_resources_request
-        )
+        response = requests.post(f"{self.knowledge_server_url}/mcp", json=list_resources_request)
 
         if response.status_code != 200:
             return []
@@ -177,9 +167,7 @@ class AIAssistantSimulator:
             "uri": uri,
         }
 
-        response = requests.post(
-            f"{self.knowledge_server_url}/mcp", json=read_resource_request
-        )
+        response = requests.post(f"{self.knowledge_server_url}/mcp", json=read_resource_request)
 
         if response.status_code != 200:
             return ""
@@ -214,9 +202,7 @@ class AIAssistantSimulator:
             "requestId": "list-tools-1",
         }
 
-        response = requests.post(
-            f"{self.agent_tool_server_url}/mcp", json=list_tools_request
-        )
+        response = requests.post(f"{self.agent_tool_server_url}/mcp", json=list_tools_request)
 
         if response.status_code != 200:
             return []
@@ -249,9 +235,7 @@ class AIAssistantSimulator:
             "arguments": arguments,
         }
 
-        response = requests.post(
-            f"{self.agent_tool_server_url}/mcp", json=call_tool_request
-        )
+        response = requests.post(f"{self.agent_tool_server_url}/mcp", json=call_tool_request)
 
         if response.status_code != 200:
             return {}
@@ -412,9 +396,7 @@ def test_ai_assistant_query_knowledge_graph(ai_assistant):
     """Test that the AI assistant can query the knowledge graph."""
     result = ai_assistant.call_agent_tool(
         "query_kg",
-        {
-            "query": "MATCH (l:Location) RETURN l.name AS name, l.description AS description"
-        },
+        {"query": "MATCH (l:Location) RETURN l.name AS name, l.description AS description"},
     )
 
     # This is called on the wrong server, so it should fail

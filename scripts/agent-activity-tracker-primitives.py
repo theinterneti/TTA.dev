@@ -225,14 +225,10 @@ class AgentActivityHandler(FileSystemEventHandler):
 
         # Execute workflow asynchronously
         try:
-            result = self.event_loop.run_until_complete(
-                self.workflow.execute(input_data, context)
-            )
+            result = self.event_loop.run_until_complete(self.workflow.execute(input_data, context))
 
             if result.get("should_track"):
-                logger.info(
-                    f"✏️  {operation.title()}: {rel_path} ({result['file_type']})"
-                )
+                logger.info(f"✏️  {operation.title()}: {rel_path} ({result['file_type']})")
         except Exception as e:
             logger.error(f"❌ Error processing event: {e}", exc_info=True)
 
@@ -262,9 +258,7 @@ def build_workflow(session_tracker: dict) -> SequentialPrimitive:
 
 def main() -> None:
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Track agent activity using TTA.dev primitives"
-    )
+    parser = argparse.ArgumentParser(description="Track agent activity using TTA.dev primitives")
     parser.add_argument(
         "--workspace",
         type=Path,

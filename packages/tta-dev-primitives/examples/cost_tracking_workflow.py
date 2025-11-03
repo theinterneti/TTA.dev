@@ -65,9 +65,7 @@ class CostMetrics:
     tokens_by_model: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     requests_by_model: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     cost_by_user: dict[str, float] = field(default_factory=lambda: defaultdict(float))
-    cost_by_workflow: dict[str, float] = field(
-        default_factory=lambda: defaultdict(float)
-    )
+    cost_by_workflow: dict[str, float] = field(default_factory=lambda: defaultdict(float))
     timestamp: datetime = field(default_factory=datetime.now)
 
 
@@ -104,9 +102,7 @@ class CostTrackingPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]
         self.pricing = MODEL_PRICING.get(model_name)
 
         if not self.pricing:
-            raise ValueError(
-                f"Unknown model: {model_name}. Add pricing to MODEL_PRICING."
-            )
+            raise ValueError(f"Unknown model: {model_name}. Add pricing to MODEL_PRICING.")
 
     async def _execute_impl(
         self, input_data: dict[str, Any], context: WorkflowContext
@@ -123,9 +119,7 @@ class CostTrackingPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]
 
         # Calculate cost
         prompt_cost = (prompt_tokens / 1000) * self.pricing.cost_per_1k_prompt_tokens
-        completion_cost = (
-            completion_tokens / 1000
-        ) * self.pricing.cost_per_1k_completion_tokens
+        completion_cost = (completion_tokens / 1000) * self.pricing.cost_per_1k_completion_tokens
         total_cost = prompt_cost + completion_cost
 
         # Extract attribution info from context
@@ -285,21 +279,15 @@ def print_cost_report(cost_tracker: CostMetrics) -> None:
     print("\n" + "-" * 80)
     print("COST BY MODEL")
     print("-" * 80)
-    for model, cost in sorted(
-        cost_tracker.cost_by_model.items(), key=lambda x: x[1], reverse=True
-    ):
+    for model, cost in sorted(cost_tracker.cost_by_model.items(), key=lambda x: x[1], reverse=True):
         tokens = cost_tracker.tokens_by_model[model]
         requests = cost_tracker.requests_by_model[model]
-        print(
-            f"{model:20s} ${cost:10.6f}  |  {tokens:8,} tokens  |  {requests:4d} requests"
-        )
+        print(f"{model:20s} ${cost:10.6f}  |  {tokens:8,} tokens  |  {requests:4d} requests")
 
     print("\n" + "-" * 80)
     print("COST BY USER")
     print("-" * 80)
-    for user, cost in sorted(
-        cost_tracker.cost_by_user.items(), key=lambda x: x[1], reverse=True
-    ):
+    for user, cost in sorted(cost_tracker.cost_by_user.items(), key=lambda x: x[1], reverse=True):
         print(f"{user:20s} ${cost:10.6f}")
 
     print("\n" + "-" * 80)
@@ -326,12 +314,8 @@ async def main() -> None:
     print()
 
     # Create mock LLM primitives
-    gpt4_llm = MockLLMPrimitive(
-        "gpt-4", avg_prompt_tokens=150, avg_completion_tokens=100
-    )
-    gpt4_mini_llm = MockLLMPrimitive(
-        "gpt-4-mini", avg_prompt_tokens=120, avg_completion_tokens=80
-    )
+    gpt4_llm = MockLLMPrimitive("gpt-4", avg_prompt_tokens=150, avg_completion_tokens=100)
+    gpt4_mini_llm = MockLLMPrimitive("gpt-4-mini", avg_prompt_tokens=120, avg_completion_tokens=80)
     claude_llm = MockLLMPrimitive(
         "claude-3-sonnet", avg_prompt_tokens=140, avg_completion_tokens=90
     )
@@ -401,9 +385,7 @@ async def main() -> None:
         )
 
         # Execute
-        result = await test_case["model"]._execute_impl(
-            {"prompt": test_case["prompt"]}, context
-        )
+        result = await test_case["model"]._execute_impl({"prompt": test_case["prompt"]}, context)
 
         # Display result
         cost_info = result["cost"]

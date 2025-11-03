@@ -12,9 +12,7 @@ from pydantic import BaseModel, Field
 class AIConfig(BaseModel):
     """AI provider configuration."""
 
-    provider: str = Field(
-        default="gemini", description="AI provider (gemini, ollama, none)"
-    )
+    provider: str = Field(default="gemini", description="AI provider (gemini, ollama, none)")
     model: str = Field(
         default="gemini-2.0-flash-exp",
         description="Model name for the provider",
@@ -29,9 +27,7 @@ class AIConfig(BaseModel):
 class SyncConfig(BaseModel):
     """Synchronization configuration."""
 
-    auto: bool = Field(
-        default=True, description="Enable automatic sync on file changes"
-    )
+    auto: bool = Field(default=True, description="Enable automatic sync on file changes")
     debounce_ms: int = Field(default=500, description="Debounce delay in milliseconds")
     bidirectional: bool = Field(
         default=True,
@@ -42,15 +38,9 @@ class SyncConfig(BaseModel):
 class FormatConfig(BaseModel):
     """Format configuration."""
 
-    dual_format: bool = Field(
-        default=True, description="Generate AI-optimized metadata section"
-    )
-    preserve_code_blocks: bool = Field(
-        default=True, description="Preserve code block formatting"
-    )
-    convert_links: bool = Field(
-        default=True, description="Convert markdown links to [[Logseq]]"
-    )
+    dual_format: bool = Field(default=True, description="Generate AI-optimized metadata section")
+    preserve_code_blocks: bool = Field(default=True, description="Preserve code block formatting")
+    convert_links: bool = Field(default=True, description="Convert markdown links to [[Logseq]]")
 
 
 class TTADocsConfig(BaseModel):
@@ -60,16 +50,10 @@ class TTADocsConfig(BaseModel):
         default=["docs/", "packages/*/README.md"],
         description="Paths to monitor for documentation changes",
     )
-    logseq_path: str = Field(
-        default="logseq/pages/", description="Path to Logseq pages directory"
-    )
+    logseq_path: str = Field(default="logseq/pages/", description="Path to Logseq pages directory")
     ai: AIConfig = Field(default_factory=AIConfig, description="AI configuration")
-    sync: SyncConfig = Field(
-        default_factory=SyncConfig, description="Sync configuration"
-    )
-    format: FormatConfig = Field(
-        default_factory=FormatConfig, description="Format configuration"
-    )
+    sync: SyncConfig = Field(default_factory=SyncConfig, description="Sync configuration")
+    format: FormatConfig = Field(default_factory=FormatConfig, description="Format configuration")
 
     @classmethod
     def load(cls, config_path: Path | None = None) -> "TTADocsConfig":

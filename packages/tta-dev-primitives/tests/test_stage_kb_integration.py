@@ -37,24 +37,16 @@ class MockKBPrimitive(KnowledgeBasePrimitive):
         self.mock_pages = mock_pages or []
         self.query_count = 0
 
-    async def _execute_impl(
-        self, context: WorkflowContext, input_data: KBQuery
-    ) -> KBResult:
+    async def _execute_impl(self, context: WorkflowContext, input_data: KBQuery) -> KBResult:
         """Return mock KB results."""
         self.query_count += 1
 
         # Filter mock pages by query type
         filtered_pages = []
         for page in self.mock_pages:
-            if (
-                input_data.query_type == "best_practices"
-                and "best-practices" in page.tags
-            ):
+            if input_data.query_type == "best_practices" and "best-practices" in page.tags:
                 filtered_pages.append(page)
-            elif (
-                input_data.query_type == "common_mistakes"
-                and "common-mistakes" in page.tags
-            ):
+            elif input_data.query_type == "common_mistakes" and "common-mistakes" in page.tags:
                 filtered_pages.append(page)
 
         return KBResult(

@@ -46,9 +46,7 @@ class QueryRouterPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]
         # Prompt: "Route to vectorstore for RAG/agent topics, else web_search"
         keywords = ["rag", "agent", "workflow", "primitive", "tta.dev", "compose"]
         datasource: Literal["vectorstore", "web_search"] = (
-            "vectorstore"
-            if any(kw in query.lower() for kw in keywords)
-            else "web_search"
+            "vectorstore" if any(kw in query.lower() for kw in keywords) else "web_search"
         )
 
         return {
@@ -63,9 +61,7 @@ class QueryRouterPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]
 # ==============================================================================
 
 
-class VectorstoreRetrieverPrimitive(
-    InstrumentedPrimitive[dict[str, Any], dict[str, Any]]
-):
+class VectorstoreRetrieverPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """Retrieve documents from vector database."""
 
     def __init__(self, top_k: int = 5) -> None:
@@ -203,15 +199,19 @@ class AnswerGeneratorPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, A
         documents = input_data.get("documents", [])
 
         # Format context (in production, pass to LLM prompt)
-        _ = "\n\n".join(
-            f"[{i + 1}] {doc.get('content', '')}" for i, doc in enumerate(documents)
-        )
+        _ = "\n\n".join(f"[{i + 1}] {doc.get('content', '')}" for i, doc in enumerate(documents))
 
         # Simulate LLM generation (in production, use actual LLM API)
         # Prompt: "Answer based on the following context: {context_text}\n\nQuestion: {question}"
-        generation = f"Based on the provided documents, {question.lower()} can be understood as follows: "
-        generation += "TTA.dev provides composable workflow primitives with built-in observability. "
-        generation += "You can compose workflows using >> for sequential and | for parallel execution."
+        generation = (
+            f"Based on the provided documents, {question.lower()} can be understood as follows: "
+        )
+        generation += (
+            "TTA.dev provides composable workflow primitives with built-in observability. "
+        )
+        generation += (
+            "You can compose workflows using >> for sequential and | for parallel execution."
+        )
 
         return {
             "question": question,
@@ -262,9 +262,7 @@ class AnswerGraderPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]
 # ==============================================================================
 
 
-class HallucinationGraderPrimitive(
-    InstrumentedPrimitive[dict[str, Any], dict[str, Any]]
-):
+class HallucinationGraderPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """
     Check if answer is grounded in provided documents.
 
@@ -413,9 +411,7 @@ async def main() -> None:
             print(f"✓ Grounded: {result.get('is_grounded', 'N/A')}")
             print(f"✓ Useful: {result.get('is_useful', 'N/A')}")
             print(f"✓ Sources: {len(result.get('documents', []))} documents")
-            print(
-                f"✓ Retrieval Method: {result.get('retrieval_method', 'N/A').upper()}"
-            )
+            print(f"✓ Retrieval Method: {result.get('retrieval_method', 'N/A').upper()}")
 
         except Exception as e:
             print(f"✗ Error: {e}")

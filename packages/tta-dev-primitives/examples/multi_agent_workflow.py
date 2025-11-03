@@ -149,9 +149,7 @@ class SummarizerAgentPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, A
 # ------------------------------------------------------------------------------
 
 
-class AggregatorAgentPrimitive(
-    InstrumentedPrimitive[list[dict[str, Any]], dict[str, Any]]
-):
+class AggregatorAgentPrimitive(InstrumentedPrimitive[list[dict[str, Any]], dict[str, Any]]):
     """Combine results from multiple agents into coherent output."""
 
     def __init__(self) -> None:

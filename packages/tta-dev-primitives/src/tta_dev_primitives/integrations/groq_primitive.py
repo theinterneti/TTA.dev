@@ -22,18 +22,12 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class GroqRequest(BaseModel):
     """Request model for Groq primitive."""
 
-    messages: list[dict[str, str]] = Field(
-        description="List of messages in chat format"
-    )
+    messages: list[dict[str, str]] = Field(description="List of messages in chat format")
     model: str | None = Field(
         default=None, description="Model to use (overrides primitive default)"
     )
-    temperature: float | None = Field(
-        default=None, description="Sampling temperature (0-2)"
-    )
-    max_tokens: int | None = Field(
-        default=None, description="Maximum tokens to generate"
-    )
+    temperature: float | None = Field(default=None, description="Sampling temperature (0-2)")
+    max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
 
 
 class GroqResponse(BaseModel):
@@ -102,15 +96,12 @@ class GroqPrimitive(WorkflowPrimitive[GroqRequest, GroqResponse]):
         super().__init__()
         if not GROQ_AVAILABLE:
             raise ImportError(
-                "groq package is required for GroqPrimitive. "
-                "Install it with: uv pip install groq"
+                "groq package is required for GroqPrimitive. Install it with: uv pip install groq"
             )
         self.client = AsyncGroq(api_key=api_key, **kwargs)  # type: ignore
         self.model = model
 
-    async def execute(
-        self, input_data: GroqRequest, context: WorkflowContext
-    ) -> GroqResponse:
+    async def execute(self, input_data: GroqRequest, context: WorkflowContext) -> GroqResponse:
         """Execute Groq chat completion.
 
         Args:
