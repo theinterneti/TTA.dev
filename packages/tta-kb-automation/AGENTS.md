@@ -21,33 +21,49 @@
 
 ## 🚀 Primary Workflows
 
-### 1. Starting a Session (Build Synthetic Context)
+### 1. Starting a Session (Manual Context Building)
 
 **When:** Beginning work on a feature/bug/documentation
 
-**What:** Build context from minimal input
+**What:** Build context using available tools
 
 **How:**
 
 ```python
-from tta_kb_automation import build_session_context
+from tta_kb_automation.tools import LinkValidator, TODOSync, CrossReferenceBuilder
+from pathlib import Path
 
-# Agent provides minimal info (topic/task)
-context = await build_session_context(
-    topic="implement CachePrimitive timeout",
-    include_related=True,
-    max_depth=2
+# Step 1: Validate KB health
+validator = LinkValidator(kb_path=Path("logseq/"))
+kb_health = await validator.validate()
+print(f"KB Health Score: {kb_health['stats']['health_score']:.2f}")
+
+# Step 2: Find related TODOs
+todo_sync = TODOSync(
+    code_paths=[Path("packages/tta-dev-primitives/src")],
+    kb_path=Path("logseq/")
 )
+todos = await todo_sync.scan()
+relevant_todos = [t for t in todos if "CachePrimitive" in t['text']]
+print(f"Found {len(relevant_todos)} related TODOs")
 
-# Result: Everything you need
-print(context.kb_pages)      # [[TTA Primitives/CachePrimitive]], related pages
-print(context.code_files)    # cache.py, base primitives
-print(context.todos)         # Related TODOs from journal
-print(context.tests)         # Existing test files
-print(context.summary)       # High-level overview
+# Step 3: Check cross-references
+xref_builder = CrossReferenceBuilder(
+    kb_path=Path("logseq/"),
+    code_path=Path("packages/")
+)
+xrefs = await xref_builder.build()
+print(f"Bidirectional links: {xrefs['stats']['bidirectional_links']}")
+
+# Now you have context:
+# - KB health status
+# - Related work items
+# - Code ↔ KB connections
 ```
 
-**Output:** You now have synthetic context without manually searching.
+**Note:** SessionContextBuilder (automated context generation) is planned but not yet implemented. Use manual workflow above for now.
+
+**Output:** You now have comprehensive context about KB state, related work, and cross-references.
 
 ---
 
@@ -55,28 +71,92 @@ print(context.summary)       # High-level overview
 
 **When:** Completed code implementation
 
-**What:** Auto-document the work
+**What:** Validate references and sync TODOs
 
 **How:**
 
 ```python
-from tta_kb_automation import document_feature
+from tta_kb_automation.tools import CrossReferenceBuilder, TODOSync
+from pathlib import Path
 
-result = await document_feature(
-    feature_name="TimeoutPrimitive",
-    code_files=["packages/tta-dev-primitives/src/.../timeout.py"],
-    test_files=["tests/unit/recovery/test_timeout.py"],
-    generate_flashcards=True,
-    create_kb_page=True
+# Step 1: Check if code references KB (or should)
+xref_builder = CrossReferenceBuilder(
+    kb_path=Path("logseq/"),
+    code_path=Path("packages/")
 )
+xrefs = await xref_builder.build()
 
-# Result: Documentation created
-print(result.kb_page_path)    # New KB page created
-print(result.flashcards)      # Flashcards generated
-print(result.cross_refs)      # Links added to related pages
+# Find your new file
+new_file = "packages/tta-dev-primitives/src/.../timeout.py"
+if new_file in xrefs['code_files_missing_kb']:
+    suggestions = xrefs['code_files_missing_kb'][new_file]
+    print(f"Consider adding KB links: {suggestions['suggested_pages']}")
+
+# Step 2: Sync any TODOs from implementation
+todo_sync = TODOSync(
+    code_paths=[Path("packages/tta-dev-primitives/src")],
+    kb_path=Path("logseq/")
+)
+todos = await todo_sync.scan()
+await todo_sync.create_journal_entries(todos)
+print(f"Synced {len(todos)} TODOs to journal")
+
+# Step 3: Manually create KB page if needed
+# - Add to logseq/pages/TTA Primitives___TimeoutPrimitive.md
+# - Link to implementation: `timeout.py`
+# - Reference in related pages
+
+print("✅ Code implemented, references checked, TODOs synced")
 ```
 
-**Output:** KB is updated, learning materials created, cross-references added.
+**Note:** Automatic KB page generation (planned feature) is not yet implemented. Create KB pages manually following TTA.dev patterns.
+
+**Output:** Code ↔ KB references validated, TODOs synced to journal.
+
+---
+
+### 3. Before Committing (Validate KB)
+
+**When:** Ready to commit changes
+
+**What:** Ensure KB is consistent
+
+**How:**
+
+```python
+from tta_kb_automation.tools import LinkValidator
+from pathlib import Path
+
+# Run full KB validation
+validator = LinkValidator(kb_path=Path("logseq/"))
+result = await validator.validate()
+
+# Check health
+health_score = result['stats']['health_score']
+if health_score < 0.8:
+    print(f"⚠️ KB health: {health_score:.2%}")
+    print(f"Broken links: {len(result['broken_links'])}")
+    print(f"Orphaned pages: {len(result['orphaned_pages'])}")
+
+    # Review issues
+    for broken in result['broken_links'][:5]:  # Show first 5
+        print(f"  {broken['source']}: [[{broken['target']]}")
+
+    # Generate full report
+    report = await validator.generate_report(result)
+    Path("kb_validation_report.md").write_text(report)
+    print("Full report: kb_validation_report.md")
+else:
+    print(f"✅ KB is healthy! ({health_score:.2%})")
+
+# Decision
+if len(result['broken_links']) > 0:
+    print("\n⚠️ Fix broken links before committing")
+else:
+    print("\n✅ Safe to commit")
+```
+
+**Output:** Confidence that KB links work, no new broken references introduced.
 
 ---
 
@@ -113,136 +193,365 @@ else:
 
 **Purpose:** Validate [[Wiki Links]] in KB
 
+**Status:** ✅ Implemented and tested
+
 **When to use:**
-- Before committing
+- Before committing (always!)
 - After adding new pages
-- Weekly maintenance
+- Weekly KB health checks
+- After refactoring/moving files
 
 **Usage:**
 
 ```python
-from tta_kb_automation import LinkValidator
+from tta_kb_automation.tools import LinkValidator
+from pathlib import Path
 
-validator = LinkValidator(kb_path="logseq/")
+# Initialize
+validator = LinkValidator(kb_path=Path("logseq/"))
+
+# Validate KB
 result = await validator.validate()
 
 # Check results
+print(f"Total links: {result['stats']['total_links']}")
+print(f"Valid links: {result['stats']['valid_links']}")
 print(f"Broken links: {len(result['broken_links'])}")
 print(f"Orphaned pages: {len(result['orphaned_pages'])}")
 
-# Generate report
-await validator.validate_and_report("kb_report.md")
+# View broken links
+for broken in result['broken_links']:
+    print(f"  {broken['source']}: [[{broken['target']]}")
+
+# View orphans
+for orphan in result['orphaned_pages']:
+    print(f"  {orphan['path']} (no incoming links)")
+
+# Generate detailed report
+report = await validator.generate_report(result)
+Path("kb_validation_report.md").write_text(report)
 ```
 
 **What it checks:**
-- ✅ [[Page]] links resolve to existing pages
-- ✅ Code file paths exist
-- ✅ Bi-directional linking complete
-- ✅ No orphaned pages
+- ✅ `[[Page]]` links resolve to existing pages
+- ✅ `[[Namespace/Page]]` hierarchical links
+- ✅ `[[Page___Subpage]]` underscore notation
+- ✅ Code file path references (`` `file.py` ``)
+- ✅ Orphaned pages (no incoming links)
+- ✅ Missing pages (linked but don't exist)
+
+**Output structure:**
+
+```python
+{
+    "broken_links": [
+        {
+            "source": "pages/A.md",
+            "target": "NonExistent",
+            "line": 5,
+            "context": "See [[NonExistent]] for details"
+        }
+    ],
+    "valid_links": [
+        {
+            "source": "pages/A.md",
+            "target": "B",
+            "resolved_path": "pages/B.md"
+        }
+    ],
+    "orphaned_pages": [
+        {
+            "path": "pages/Unused.md",
+            "title": "Unused Page"
+        }
+    ],
+    "stats": {
+        "total_links": 1500,
+        "valid_links": 1200,
+        "broken_links": 300,
+        "orphaned_pages": 5,
+        "health_score": 0.80  # (valid - broken) / total
+    }
+}
+```
+
+**See:** [[TTA KB Automation/LinkValidator]] for complete documentation
 
 ---
 
 ### TODO Sync
 
-**Purpose:** Bridge code comments and KB
+**Purpose:** Bridge code comments and KB journal system
+
+**Status:** ✅ Implemented and tested
 
 **When to use:**
-- After adding # TODO: comments in code
+- After adding `# TODO:` comments in code
 - Daily/weekly to keep journal updated
-- Finding work items across codebase
+- Finding all work items across codebase
+- Syncing code TODOs to Logseq
 
 **Usage:**
 
 ```python
-from tta_kb_automation import TODOSync
+from tta_kb_automation.tools import TODOSync
+from pathlib import Path
 
-sync = TODOSync()
-todos = await sync.scan_and_create(
-    paths=["packages/tta-dev-primitives"],
-    create_journal_entries=True
+# Initialize
+sync = TODOSync(
+    code_paths=[Path("packages/tta-dev-primitives/src")],
+    kb_path=Path("logseq/"),
+    auto_classify=True  # Automatically classify as dev/learning/ops
 )
 
-print(f"Found {len(todos)} TODOs")
-print(f"Created {todos.created_count} journal entries")
+# Scan for TODOs
+todos = await sync.scan()
+
+print(f"Found {len(todos)} TODOs across {len(set(t['file'] for t in todos))} files")
+
+# Create journal entries
+created = await sync.create_journal_entries(
+    todos=todos,
+    date="2025-11-03"  # Optional, defaults to today
+)
+
+print(f"Created {len(created)} new journal entries")
+
+# Get classification breakdown
+from collections import Counter
+by_type = Counter(t['type'] for t in todos)
+print(f"Development: {by_type['dev-todo']}")
+print(f"Learning: {by_type['learning-todo']}")
+print(f"Operations: {by_type['ops-todo']}")
 ```
 
 **What it does:**
-- Scans Python files for `# TODO:` comments
-- Creates journal entries with proper tags
-- Links to relevant KB pages
-- Tracks completion status
+- ✅ Scans Python files for `# TODO:` comments
+- ✅ Extracts context (function/class name, line number)
+- ✅ Auto-classifies as #dev-todo, #learning-todo, or #ops-todo
+- ✅ Creates Logseq journal entries with proper formatting
+- ✅ Links to relevant KB pages if mentioned
+- ✅ Preserves file path and line number for traceability
+
+**TODO Format Detection:**
+
+```python
+# Simple TODO
+# TODO: Add caching support
+
+# With classifier hints (priority)
+# TODO[HIGH]: Fix memory leak in CachePrimitive
+
+# With KB page reference
+# TODO: Update [[TTA Primitives/CachePrimitive]] documentation
+
+# With context
+# TODO: Implement timeout (related to [[RetryPrimitive]])
+```
+
+**Output format:**
+
+```python
+{
+    "file": "packages/tta-dev-primitives/src/.../cache.py",
+    "line": 156,
+    "text": "Add metrics for cache hit rate",
+    "context": "class CachePrimitive",
+    "type": "dev-todo",  # or learning-todo, ops-todo
+    "priority": "medium",  # extracted from [HIGH], [MED], [LOW]
+    "related_pages": ["TTA Primitives/CachePrimitive"]
+}
+```
+
+**Journal entry format:**
+
+```markdown
+## TODOs from Code
+
+- TODO Add metrics for cache hit rate #dev-todo
+  file:: cache.py:156
+  context:: CachePrimitive class
+  related:: [[TTA Primitives/CachePrimitive]]
+  priority:: medium
+```
+
+**See:** [[TTA KB Automation/TODO Sync]] for complete documentation
 
 ---
 
 ### Cross-Reference Builder
 
-**Purpose:** Suggest missing links between code ↔ KB
+**Purpose:** Analyze and suggest missing links between code ↔ KB
+
+**Status:** ✅ Implemented and tested
 
 **When to use:**
 - After implementing features
-- During KB tightening sessions
-- Finding related work
+- During KB maintenance sessions
+- Finding bidirectional reference gaps
+- Improving code ↔ documentation links
 
 **Usage:**
 
 ```python
-from tta_kb_automation import CrossReferenceBuilder
+from tta_kb_automation.tools import CrossReferenceBuilder
+from pathlib import Path
 
-builder = CrossReferenceBuilder()
+# Initialize
+builder = CrossReferenceBuilder(
+    kb_path=Path("logseq/"),
+    code_path=Path("packages/")
+)
+
+# Build cross-reference graph
 graph = await builder.build()
 
-# Review suggestions
-print("Code files needing KB links:")
-for suggestion in graph.code_updates:
-    print(f"  {suggestion.file}:{suggestion.line}")
-    print(f"    Suggest: {suggestion.link}")
+# Review statistics
+print("=== Cross-Reference Statistics ===")
+print(f"KB pages analyzed: {graph['stats']['kb_pages']}")
+print(f"Code files analyzed: {graph['stats']['code_files']}")
+print(f"KB → Code references: {graph['stats']['kb_to_code_refs']}")
+print(f"Code → KB references: {graph['stats']['code_to_kb_refs']}")
+print(f"Bidirectional links: {graph['stats']['bidirectional_links']}")
 
-print("\nKB pages needing code refs:")
-for suggestion in graph.kb_updates:
-    print(f"  {suggestion.page}")
-    print(f"    Suggest: {suggestion.code_ref}")
+# View KB pages missing code references
+print("\n=== KB Pages Needing Code References ===")
+for page, info in graph['kb_pages_missing_code'].items():
+    print(f"\n{page}:")
+    print(f"  Mentioned in code: {info['mentioned_in_code']}")
+    print(f"  Has code refs: {info['has_code_refs']}")
+    print(f"  Suggested refs: {info['suggested_refs']}")
+
+# View code files missing KB links
+print("\n=== Code Files Needing KB Links ===")
+for file, info in graph['code_files_missing_kb'].items():
+    print(f"\n{file}:")
+    print(f"  Has KB mentions: {info['has_kb_mentions']}")
+    print(f"  Suggested pages: {info['suggested_pages']}")
+
+# Generate detailed report
+report = await builder.generate_report(graph)
+Path("cross_reference_report.md").write_text(report)
 ```
 
-**What it suggests:**
-- Code docstrings → KB page links
-- KB pages → source code references
-- Test files → implementation links
+**What it detects:**
+
+**KB → Code:**
+- ✅ KB pages mentioning code files (`` `cache.py` ``)
+- ✅ KB pages referencing classes/functions
+- ✅ Missing implementation links in documentation
+
+**Code → KB:**
+- ✅ Docstrings with `See: [[Page]]` style links
+- ✅ Comments mentioning KB pages
+- ✅ Missing documentation links in code
+
+**Bidirectional Analysis:**
+- ✅ One-way references (code → KB but not KB → code)
+- ✅ Complete bidirectional links (both directions)
+- ✅ Orphaned references (link to non-existent targets)
+
+**Output structure:**
+
+```python
+{
+    "kb_pages_missing_code": {
+        "pages/TTA Primitives/CachePrimitive.md": {
+            "mentioned_in_code": ["cache.py", "test_cache.py"],
+            "has_code_refs": False,
+            "suggested_refs": [
+                "packages/tta-dev-primitives/src/.../cache.py"
+            ]
+        }
+    },
+    "code_files_missing_kb": {
+        "packages/tta-dev-primitives/src/.../cache.py": {
+            "has_kb_mentions": ["CachePrimitive"],
+            "suggested_pages": [
+                "[[TTA Primitives/CachePrimitive]]"
+            ]
+        }
+    },
+    "stats": {
+        "kb_pages": 150,
+        "code_files": 45,
+        "kb_to_code_refs": 87,
+        "code_to_kb_refs": 62,
+        "bidirectional_links": 34,
+        "kb_orphans": 5,
+        "code_orphans": 3
+    }
+}
+```
+
+**See:** [[TTA KB Automation/CrossReferenceBuilder]] for complete documentation
 
 ---
 
 ### Session Context Builder
 
-**Purpose:** Generate synthetic context for agents
+**Purpose:** Generate synthetic context for agents (PLANNED)
 
-**When to use:**
+**Status:** ⚠️ Stub implementation - Not yet functional
+
+**When to use (planned):**
 - Starting any work session
 - Minimal context available
 - Need comprehensive overview
+- Onboarding new agents
 
-**Usage:**
+**Planned Usage:**
 
 ```python
-from tta_kb_automation import SessionContextBuilder
+from tta_kb_automation.tools import SessionContextBuilder
+from pathlib import Path
 
-builder = SessionContextBuilder()
-context = await builder.build(
-    topic="add metrics to RouterPrimitive",
-    include_examples=True
+# Initialize
+builder = SessionContextBuilder(
+    kb_path=Path("logseq/"),
+    code_path=Path("packages/"),
+    max_files=20  # Limit context size
 )
 
-# Context is now available
-print(context.summary)         # High-level overview
-print(context.kb_pages)        # Relevant KB pages
-print(context.code_examples)   # Working code patterns
-print(context.related_todos)   # Connected work items
-print(context.test_patterns)   # How to test this
+# Build context from minimal input
+context = await builder.build_context(
+    topic="CachePrimitive"
+)
+
+# Use generated context
+print(f"Found {len(context['kb_pages'])} relevant KB pages")
+print(f"Found {len(context['code_files'])} relevant code files")
+print(f"Found {len(context['todos'])} related TODOs")
+
+# Context structure
+for page in context['kb_pages']:
+    print(f"  {page['path']} (relevance: {page['relevance']})")
+
+for code_file in context['code_files']:
+    print(f"  {code_file['path']} ({code_file['type']})")
 ```
 
-**Benefits:**
-- ✅ No manual KB searching
-- ✅ No manual code browsing
-- ✅ No manual TODO hunting
-- ✅ Start working immediately
+**Planned Features:**
+- ✅ Automatic KB page discovery by topic
+- ✅ Related code file detection
+- ✅ TODO extraction from relevant files
+- ✅ Cross-reference mapping
+- ✅ Relevance scoring and ranking
+- ✅ Size-bounded context (configurable max)
+
+**Current Status:**
+- ⚠️ Stub implementation exists (68 lines)
+- ⚠️ Returns placeholder data
+- ⚠️ Not integrated into workflows
+- ⚠️ No tests written yet
+
+**Implementation Plan:**
+- Phase 1 (Week 1): Basic context aggregation
+- Phase 2 (Week 2): Intelligent relevance scoring
+- Phase 3 (Week 3): Advanced features (semantic search, LLM ranking)
+- Phase 4 (Week 4): Agent workflow integration
+
+**See:** [[TTA KB Automation/SessionContextBuilder]] for complete specification
 
 ---
 
@@ -594,6 +903,29 @@ await document_feature(
 
 ---
 
+## 📊 Current Implementation Status
+
+### ✅ Implemented Tools
+- **LinkValidator** - Full implementation with tests
+- **TODO Sync** - Full implementation with tests
+- **CrossReferenceBuilder** - Full implementation with tests
+
+### ⚠️ Planned Tools
+- **SessionContextBuilder** - Stub only, not yet functional
+
+### 🧪 Test Coverage
+- Unit tests: ✅ Complete
+- Integration tests: ✅ Complete (4 end-to-end workflows)
+- Coverage: ✅ High (all implemented tools)
+
+### 📚 Documentation
+- Tool-specific KB pages: ✅ Complete
+- Agent guide (this file): ✅ Updated with real usage
+- API documentation: ✅ Available in KB
+
+---
+
 **Last Updated:** November 3, 2025
-**Status:** 🚧 Phase 1 Implementation
+**Status:** ✅ Phase 4 Complete (Integration tests, KB documentation, agent guides)
 **For:** AI Agents working on TTA.dev
+**Package Version:** 0.1.0

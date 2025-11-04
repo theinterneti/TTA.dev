@@ -11,6 +11,7 @@ resolution-markers = [
 members = [
     "tta-dev-primitives",
     "tta-documentation-primitives",
+    "tta-kb-automation",
     "tta-observability-integration",
     "universal-agent-context",
 ]
@@ -2021,6 +2022,38 @@ requires-dist = [
     { name = "watchdog", specifier = ">=4.0.0" },
 ]
 provides-extras = ["dev", "ollama"]
+
+[[package]]
+name = "tta-kb-automation"
+version = "0.1.0"
+source = { editable = "packages/tta-kb-automation" }
+dependencies = [
+    { name = "tta-dev-primitives" },
+    { name = "tta-observability-integration" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pyright" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-timeout" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.380" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
+    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.0" },
+    { name = "tta-dev-primitives", editable = "packages/tta-dev-primitives" },
+    { name = "tta-observability-integration", editable = "packages/tta-observability-integration" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "tta-observability-integration"
