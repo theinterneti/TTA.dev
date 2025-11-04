@@ -353,6 +353,65 @@ cached_llm = CachePrimitive(
 
 ---
 
+### MemoryPrimitive
+
+**Hybrid conversational memory with zero-setup fallback.**
+
+**Import:**
+
+```python
+from tta_dev_primitives.performance import MemoryPrimitive, InMemoryStore, create_memory_key
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/performance/memory.py`](packages/tta-dev-primitives/src/tta_dev_primitives/performance/memory.py)
+
+**Documentation:** [`packages/tta-dev-primitives/docs/memory/README.md`](packages/tta-dev-primitives/docs/memory/README.md)
+
+**Usage:**
+
+```python
+# Zero-setup mode (no Redis required)
+memory = MemoryPrimitive(max_size=100)
+
+# Add conversation turns
+await memory.add("What is a primitive?", {"role": "user"})
+await memory.add("A primitive is...", {"role": "assistant"})
+
+# Retrieve by key
+result = await memory.get("What is a primitive?")
+
+# Search by keyword
+results = await memory.search("primitive")
+```
+
+**Hybrid Architecture:**
+
+- **Zero Setup**: Works immediately with in-memory storage
+- **Optional Enhancement**: Automatic upgrade to Redis if available
+- **Graceful Degradation**: Falls back to in-memory if Redis fails
+- **Same API**: No code changes when upgrading backends
+
+**Benefits:**
+
+- ✅ Works without Docker/Redis setup
+- ✅ Clear upgrade path when scaling
+- ✅ LRU eviction for memory management
+- ✅ Keyword search built-in
+- ✅ Task-specific memory namespaces
+
+**When to Use:**
+
+- Multi-turn conversations requiring history
+- Task context that spans multiple operations
+- Personalization based on past interactions
+- Agent workflows needing memory recall
+
+**Pattern Established:**
+
+This primitive demonstrates the **"Fallback first, enhancement optional"** pattern for external integrations - future TTA.dev components should follow this approach.
+
+---
+
 ## Orchestration Primitives
 
 ### DelegationPrimitive

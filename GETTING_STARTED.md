@@ -147,6 +147,62 @@ workflow = ParallelPrimitive([
 results = await workflow.execute({"user_id": 123}, context)
 ```
 
+### Pattern 4: Conversational Memory
+
+```python
+from tta_dev_primitives.performance import MemoryPrimitive
+
+# Zero-setup conversational memory (no Docker/Redis required)
+memory = MemoryPrimitive(max_size=100)
+
+async def handle_conversation(user_input: str) -> str:
+    # Store user message
+    await memory.add(
+        f"user_{timestamp}",
+        {"role": "user", "content": user_input, "timestamp": timestamp}
+    )
+
+    # Search conversation history for context
+    history = await memory.search(keywords=user_input.split()[:3])
+
+    # Generate response with context
+    response = await llm_generate(user_input, history)
+
+    # Store assistant response
+    await memory.add(
+        f"assistant_{timestamp}",
+        {"role": "assistant", "content": response, "timestamp": timestamp}
+    )
+
+    return response
+
+# Multi-turn conversation
+response1 = await handle_conversation("What is a primitive?")
+response2 = await handle_conversation("Can you give me an example?")  # Has context from turn 1
+
+# Optional: Enable Redis for persistence and scaling
+memory_persistent = MemoryPrimitive(
+    redis_url="redis://localhost:6379",
+    enable_redis=True
+)
+# Same API, enhanced backend - automatic fallback if Redis unavailable
+```
+
+**Benefits:**
+
+- ✅ **Zero Setup**: Works immediately without Docker or Redis
+- ✅ **Hybrid Architecture**: Automatic upgrade to Redis if available
+- ✅ **Graceful Degradation**: Falls back to in-memory if Redis fails
+- ✅ **Search**: Keyword search across conversation history
+- ✅ **LRU Eviction**: Built-in memory management
+
+**Use Cases:**
+
+- Multi-turn conversational agents
+- Task context spanning operations
+- Agent memory and recall
+- Personalization based on history
+
 ## Cost Optimization
 
 ### Smart Caching
@@ -249,6 +305,7 @@ async def test_my_workflow():
 | [**Cost Tracking**](packages/tta-dev-primitives/examples/cost_tracking_workflow.py) | Budget Enforcement + Metrics | Managing LLM API costs |
 | [**Streaming**](packages/tta-dev-primitives/examples/streaming_workflow.py) | AsyncIterator + Buffering | Real-time response streaming |
 | [**Multi-Agent**](packages/tta-dev-primitives/examples/multi_agent_workflow.py) | Coordinator + Parallel Execution | Complex agent orchestration |
+| [**Memory Workflow**](packages/tta-dev-primitives/examples/memory_workflow.py) | Conversational Memory + Search | Multi-turn conversations with context |
 
 **Quick Start:**
 
