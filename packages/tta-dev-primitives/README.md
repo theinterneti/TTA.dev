@@ -121,6 +121,54 @@ stats = expensive_computation.cache_stats()
 print(f"Hit rate: {stats.hit_rate:.2%}")
 ```
 
+### Memory Primitives
+
+```python
+from tta_dev_primitives.performance import MemoryPrimitive
+
+# Zero-setup mode (works immediately, no Docker/Redis required)
+memory = MemoryPrimitive(max_size=100)
+
+# Multi-turn conversation with memory
+await memory.add("What is a primitive?", {"role": "user", "timestamp": "..."})
+await memory.add("A primitive is a composable workflow component", {"role": "assistant"})
+
+# Retrieve conversation history
+response = await memory.get("What is a primitive?")
+print(response)  # {"role": "assistant", ...}
+
+# Search across conversation
+results = await memory.search("primitive")  # Find all mentions
+
+# Optional: Enable Redis for persistence and scaling
+memory_redis = MemoryPrimitive(
+    redis_url="redis://localhost:6379",
+    max_size=1000,
+    enable_redis=True
+)
+
+# Same API, enhanced backend - automatic fallback if Redis unavailable
+await memory_redis.add(key, value)  # Uses Redis if available, in-memory otherwise
+```
+
+**Benefits:**
+
+- ✅ **Zero Setup**: Works immediately without Docker or Redis
+- ✅ **Hybrid Architecture**: In-memory fallback + optional Redis enhancement
+- ✅ **Graceful Degradation**: Automatic fallback if Redis fails
+- ✅ **Same API**: No code changes when upgrading backends
+- ✅ **LRU Eviction**: Built-in memory management
+- ✅ **Keyword Search**: Find conversation history by content
+
+**Use Cases:**
+
+- Multi-turn conversational agents
+- Task context spanning multiple operations
+- Agent memory and recall
+- Personalization based on interaction history
+
+**Documentation:** See [docs/memory/README.md](docs/memory/README.md) for complete guide.
+
 ### Observability
 
 ```python
