@@ -1,0 +1,334 @@
+name: KB Validation
+
+on:
+  pull_request:
+    paths:
+      - 'logseq/**'
+      - 'packages/tta-kb-automation/**'
+      - 'scripts/kb-*.sh'
+  push:
+    branches: [ main ]
+    paths:
+      - 'logseq/**'
+      - 'packages/tta-kb-automation/**'
+  schedule:
+    # Run daily at 3 AM UTC to catch drift
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  kb-link-validation:
+    name: Validate KB Links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install tta-kb-automation
+        run: |
+          uv sync --all-extras
+          uv pip install -e packages/tta-kb-automation
+
+      - name: Run LinkValidator
+        run: |
+          uv run python -m tta_kb_automation.tools.link_validator \
+            --kb-root logseq \
+            --output kb-validation-report.md \
+            --fail-on-broken
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kb-validation-report
+          path: kb-validation-report.md
+          retention-days: 30
+
+      - name: Comment on PR with results
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('kb-validation-report.md', 'utf8');
+            const summary = report.split('\n').slice(0, 50).join('\n');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ❌ KB Validation Failed\n\n${summary}\n\nSee full report in artifacts.`
+            });
+
+  kb-orphan-detection:
+    name: Detect Orphaned Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install tta-kb-automation
+        run: |
+          uv sync --all-extras
+          uv pip install -e packages/tta-kb-automation
+
+      - name: Find orphaned pages
+        run: |
+          uv run python -c "
+          import asyncio
+          from pathlib import Path
+          from tta_kb_automation import FindOrphanedPages, WorkflowContext
+
+          async def main():
+              finder = FindOrphanedPages(kb_root=Path('logseq'))
+              context = WorkflowContext(workflow_id='ci-orphan-check')
+              result = await finder.execute({}, context)
+
+              orphans = result['orphaned_pages']
+              if orphans:
+                  print(f'⚠️  Found {len(orphans)} orphaned pages:')
+                  for page in orphans[:10]:
+                      print(f'  - {page}')
+                  if len(orphans) > 10:
+                      print(f'  ... and {len(orphans) - 10} more')
+              else:
+                  print('✅ No orphaned pages found')
+
+          asyncio.run(main())
+          "
+
+  kb-structure-validation:
+    name: Validate KB Structure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required KB pages exist
+        run: |
+          # Check for critical KB pages
+          required_pages=(
+            "logseq/pages/TODO Management System.md"
+            "logseq/pages/TTA.dev___TODO Architecture.md"
+            "logseq/pages/TODO Templates.md"
+          )
+
+          missing=()
+          for page in "${required_pages[@]}"; do
+            if [ ! -f "$page" ]; then
+              missing+=("$page")
+            fi
+          done
+
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "❌ Missing required KB pages:"
+            printf '  - %s\n' "${missing[@]}"
+            exit 1
+          else
+            echo "✅ All required KB pages present"
+          fi
+
+      - name: Validate journal structure
+        run: |
+          # Check that journals directory exists and has recent entries
+          if [ ! -d "logseq/journals" ]; then
+            echo "❌ logseq/journals directory not found"
+            exit 1
+          fi
+
+          journal_count=$(find logseq/journals -name "*.md" | wc -l)
+          if [ "$journal_count" -eq 0 ]; then
+            echo "❌ No journal entries found"
+            exit 1
+          fi
+
+          echo "✅ Found $journal_count journal entries"
+
+  kb-todo-sync:
+    name: KB TODO Sync Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install tta-kb-automation
+        run: |
+          uv sync --all-extras
+          uv pip install -e packages/tta-kb-automation
+
+      - name: Check for new TODOs in code
+        run: |
+          # Get changed Python files
+          git diff --name-only origin/main...HEAD | grep '\.py$' > changed_files.txt || true
+
+          if [ ! -s changed_files.txt ]; then
+            echo "No Python files changed, skipping TODO sync check"
+            exit 0
+          fi
+
+          echo "Checking for TODOs in changed files:"
+          cat changed_files.txt
+
+          # Run TODO extraction on changed files
+          uv run python -c "
+          import asyncio
+          from pathlib import Path
+          from tta_kb_automation import ExtractTODOs, WorkflowContext
+
+          async def main():
+              changed_files = Path('changed_files.txt').read_text().strip().split('\n')
+              changed_files = [f for f in changed_files if f]
+
+              if not changed_files:
+                  print('No files to check')
+                  return
+
+              extractor = ExtractTODOs()
+              context = WorkflowContext(workflow_id='ci-todo-check')
+
+              all_todos = []
+              for file in changed_files:
+                  result = await extractor.execute({'file_path': Path(file)}, context)
+                  all_todos.extend(result['todos'])
+
+              if all_todos:
+                  print(f'⚠️  Found {len(all_todos)} TODOs in changed files:')
+                  for todo in all_todos[:5]:
+                      print(f'  - {todo[\"file\"]}:{todo[\"line\"]}: {todo[\"text\"][:60]}...')
+                  if len(all_todos) > 5:
+                      print(f'  ... and {len(all_todos) - 5} more')
+                  print('')
+                  print('💡 Consider syncing these TODOs to today\\'s journal entry.')
+              else:
+                  print('✅ No TODOs found in changed files')
+
+          asyncio.run(main())
+          "
+
+  kb-metrics:
+    name: KB Metrics Report
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install tta-kb-automation
+        run: |
+          uv sync --all-extras
+          uv pip install -e packages/tta-kb-automation
+
+      - name: Generate KB metrics
+        run: |
+          uv run python -c "
+          import asyncio
+          from pathlib import Path
+          from tta_kb_automation import ParseLogseqPages, WorkflowContext
+
+          async def main():
+              parser = ParseLogseqPages(kb_root=Path('logseq'))
+              context = WorkflowContext(workflow_id='ci-metrics')
+              result = await parser.execute({}, context)
+
+              pages = result['pages']
+              print('# KB Metrics Report')
+              print('')
+              print(f'- Total pages: {len(pages)}')
+              print(f'- Total journals: {len([p for p in pages if \"journals\" in str(p)])}')
+              print(f'- Total knowledge pages: {len([p for p in pages if \"journals\" not in str(p)])}')
+              print('')
+
+              # Category breakdown
+              categories = {}
+              for page in pages:
+                  if 'journals' in str(page):
+                      continue
+                  parts = page.stem.split('___')
+                  if len(parts) > 1:
+                      category = parts[0]
+                      categories[category] = categories.get(category, 0) + 1
+
+              if categories:
+                  print('## Knowledge Pages by Category')
+                  print('')
+                  for cat, count in sorted(categories.items(), key=lambda x: x[1], reverse=True):
+                      print(f'- {cat}: {count} pages')
+
+          asyncio.run(main())
+          "
+
+      - name: Post metrics to summary
+        if: always()
+        run: |
+          echo "## KB Metrics" >> $GITHUB_STEP_SUMMARY
+          uv run python -c "
+          import asyncio
+          from pathlib import Path
+          from tta_kb_automation import ParseLogseqPages, WorkflowContext
+
+          async def main():
+              parser = ParseLogseqPages(kb_root=Path('logseq'))
+              context = WorkflowContext(workflow_id='ci-metrics')
+              result = await parser.execute({}, context)
+
+              pages = result['pages']
+              print(f'- **Total pages:** {len(pages)}')
+              print(f'- **Journals:** {len([p for p in pages if \"journals\" in str(p)])}')
+              print(f'- **Knowledge pages:** {len([p for p in pages if \"journals\" not in str(p)])}')
+
+          asyncio.run(main())
+          " >> $GITHUB_STEP_SUMMARY
