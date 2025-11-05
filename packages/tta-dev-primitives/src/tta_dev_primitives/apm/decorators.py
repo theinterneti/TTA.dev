@@ -148,14 +148,14 @@ def track_metric(
             except Exception as e:
                 # Record error metric
                 if metric_type == "counter":
-                    instrument.add(
+                    instrument.add(  # type: ignore[attr-defined]  # OpenTelemetry stub incomplete
                         1, {"status": "error", "error_type": type(e).__name__}
-                    )  # type: ignore[attr-defined]
+                    )
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(
+                    instrument.record(  # type: ignore[attr-defined]  # OpenTelemetry stub incomplete
                         duration, {"status": "error", "error_type": type(e).__name__}
-                    )  # type: ignore[attr-defined]
+                    )
                 raise
 
         @wraps(func)
@@ -197,14 +197,14 @@ def track_metric(
             except Exception as e:
                 # Record error metric
                 if metric_type == "counter":
-                    instrument.add(
+                    instrument.add(  # type: ignore[attr-defined]  # OpenTelemetry stub incomplete
                         1, {"status": "error", "error_type": type(e).__name__}
-                    )  # type: ignore[attr-defined]
+                    )
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(
+                    instrument.record(  # type: ignore[attr-defined]  # OpenTelemetry stub incomplete
                         duration, {"status": "error", "error_type": type(e).__name__}
-                    )  # type: ignore[attr-defined]
+                    )
                 raise
 
         # Return appropriate wrapper based on function type
