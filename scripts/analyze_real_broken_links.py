@@ -143,13 +143,13 @@ async def main():
         else:
             real_broken.append(link)
 
-    print(f"\n📊 Analysis Results:")
+    print("\n📊 Analysis Results:")
     print(f"  ✅ Valid links: {valid_count}")
     print(f"  ❌ Total broken links: {len(all_broken)}")
     print(f"  🗑️  False positives: {len(all_broken) - len(real_broken)}")
     print(f"  ⚠️  REAL broken links: {len(real_broken)}")
 
-    print(f"\n🔍 False Positive Breakdown:")
+    print("\n🔍 False Positive Breakdown:")
     for reason, links in sorted(
         false_positives.items(), key=lambda x: len(x[1]), reverse=True
     ):
@@ -163,12 +163,12 @@ async def main():
         by_source[link["source"]].append(link["target"])
         by_target[link["target"]].append(link["source"])
 
-    print(f"\n📋 Top 20 pages with REAL broken links:")
+    print("\n📋 Top 20 pages with REAL broken links:")
     sorted_sources = sorted(by_source.items(), key=lambda x: len(x[1]), reverse=True)
     for i, (source, targets) in enumerate(sorted_sources[:20], 1):
         print(f"  {i}. {source}: {len(targets)} broken links")
 
-    print(f"\n🎯 Top 20 REAL missing pages (high impact fixes):")
+    print("\n🎯 Top 20 REAL missing pages (high impact fixes):")
     sorted_targets = sorted(by_target.items(), key=lambda x: len(x[1]), reverse=True)
     for i, (target, sources) in enumerate(sorted_targets[:20], 1):
         print(f"  {i}. {target} (referenced by {len(sources)} pages)")
@@ -215,7 +215,7 @@ async def main():
                 count = sources.count(source)
                 f.write(f"   <- {source} ({count}x)\n")
             if len(set(sources)) > 10:
-                f.write(f"   ... and {len(set(sources))-10} more sources\n")
+                f.write(f"   ... and {len(set(sources)) - 10} more sources\n")
             f.write("\n")
 
         f.write("\n" + "=" * 80 + "\n")
@@ -230,10 +230,10 @@ async def main():
                 f.write(f"  -> {target}{suffix}\n")
 
     print(f"\n✅ Detailed report saved to {report_path}")
-    print(f"\n💡 Next Steps:")
-    print(f"   1. Review top 20 missing pages - these have the highest impact")
-    print(f"   2. Decide: Create missing pages or remove broken references?")
-    print(f"   3. Focus on pages with many broken links (easier to fix in bulk)")
+    print("\n💡 Next Steps:")
+    print("   1. Review top 20 missing pages - these have the highest impact")
+    print("   2. Decide: Create missing pages or remove broken references?")
+    print("   3. Focus on pages with many broken links (easier to fix in bulk)")
 
 
 if __name__ == "__main__":

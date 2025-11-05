@@ -155,7 +155,7 @@ Resources for AI/ML engineers using TTA.dev.
 
 **Problem:** Links to external files that may or may not exist
 
-**Solution:** 
+**Solution:**
 1. Check if file exists
 2. If yes, verify link format
 3. If no, remove link or update to correct location
