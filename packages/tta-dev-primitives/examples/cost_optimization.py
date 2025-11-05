@@ -244,7 +244,7 @@ async def pattern_2_fallback() -> None:
 class BudgetTracker:
     """Track daily spending and enforce budget limits"""
 
-    def __init__(self, daily_budget: float):
+    def __init__(self, daily_budget: float) -> None:
         self.daily_budget = daily_budget
         self.daily_spend = 0.0
         self.last_reset = datetime.now()
@@ -414,7 +414,7 @@ async def pattern_4_retry_cost_control() -> None:
 class GeminiUsageTracker:
     """Track Gemini usage to prevent unexpected downgrades"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.hourly_tokens = 0
         self.hourly_requests = 0
         self.last_reset = datetime.now()

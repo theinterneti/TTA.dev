@@ -32,7 +32,7 @@ class CounterPrimitive(InstrumentedPrimitive[dict, dict]):
 
 
 @pytest.mark.asyncio
-async def test_instrumented_primitive_basic_execution():
+async def test_instrumented_primitive_basic_execution() -> None:
     """Test basic execution of instrumented primitive."""
     primitive = SimplePrimitive(name="test_primitive")
     context = WorkflowContext(workflow_id="test")
@@ -44,7 +44,7 @@ async def test_instrumented_primitive_basic_execution():
 
 
 @pytest.mark.asyncio
-async def test_instrumented_primitive_default_name():
+async def test_instrumented_primitive_default_name() -> None:
     """Test that primitive uses class name if no name provided."""
     primitive = SimplePrimitive()
     context = WorkflowContext(workflow_id="test")
@@ -56,7 +56,7 @@ async def test_instrumented_primitive_default_name():
 
 
 @pytest.mark.asyncio
-async def test_instrumented_primitive_checkpoints():
+async def test_instrumented_primitive_checkpoints() -> None:
     """Test that primitive records checkpoints."""
     primitive = SimplePrimitive(name="test")
     context = WorkflowContext(workflow_id="test")
@@ -70,7 +70,7 @@ async def test_instrumented_primitive_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_instrumented_primitive_trace_context_injection():
+async def test_instrumented_primitive_trace_context_injection() -> None:
     """Test that primitive injects trace context."""
     primitive = SimplePrimitive(name="test")
     context = WorkflowContext(workflow_id="test")
@@ -86,7 +86,7 @@ async def test_instrumented_primitive_trace_context_injection():
 
 
 @pytest.mark.asyncio
-async def test_instrumented_primitive_error_handling():
+async def test_instrumented_primitive_error_handling() -> None:
     """Test that primitive handles errors correctly."""
 
     class FailingPrimitive(InstrumentedPrimitive[dict, dict]):
@@ -106,7 +106,7 @@ async def test_instrumented_primitive_error_handling():
 
 
 @pytest.mark.asyncio
-async def test_sequential_primitive_instrumentation():
+async def test_sequential_primitive_instrumentation() -> None:
     """Test that SequentialPrimitive is properly instrumented."""
     step1 = CounterPrimitive(name="step1")
     step2 = CounterPrimitive(name="step2")
@@ -138,7 +138,7 @@ async def test_sequential_primitive_instrumentation():
 
 
 @pytest.mark.asyncio
-async def test_sequential_primitive_trace_propagation():
+async def test_sequential_primitive_trace_propagation() -> None:
     """Test that trace context propagates through sequential steps."""
     step1 = SimplePrimitive(name="step1")
     step2 = SimplePrimitive(name="step2")
@@ -158,7 +158,7 @@ async def test_sequential_primitive_trace_propagation():
 
 
 @pytest.mark.asyncio
-async def test_parallel_primitive_instrumentation():
+async def test_parallel_primitive_instrumentation() -> None:
     """Test that ParallelPrimitive is properly instrumented."""
     branch1 = CounterPrimitive(name="branch1")
     branch2 = CounterPrimitive(name="branch2")
@@ -185,7 +185,7 @@ async def test_parallel_primitive_instrumentation():
 
 
 @pytest.mark.asyncio
-async def test_parallel_primitive_child_contexts():
+async def test_parallel_primitive_child_contexts() -> None:
     """Test that ParallelPrimitive creates child contexts for branches."""
 
     class ContextCapturePrimitive(InstrumentedPrimitive[dict, dict]):
@@ -232,7 +232,7 @@ async def test_parallel_primitive_child_contexts():
 
 
 @pytest.mark.asyncio
-async def test_sequential_operator_still_works():
+async def test_sequential_operator_still_works() -> None:
     """Test that >> operator still works with instrumented primitives."""
     step1 = SimplePrimitive(name="step1")
     step2 = SimplePrimitive(name="step2")
@@ -248,7 +248,7 @@ async def test_sequential_operator_still_works():
 
 
 @pytest.mark.asyncio
-async def test_parallel_operator_still_works():
+async def test_parallel_operator_still_works() -> None:
     """Test that | operator still works with instrumented primitives."""
     branch1 = SimplePrimitive(name="branch1")
     branch2 = SimplePrimitive(name="branch2")

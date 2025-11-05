@@ -314,7 +314,7 @@ class CircuitBreaker:
         failure_threshold: int = 5,
         recovery_timeout: float = 60.0,
         expected_exception: type[Exception] = Exception,
-    ):
+    ) -> None:
         """
         Initialize circuit breaker.
 

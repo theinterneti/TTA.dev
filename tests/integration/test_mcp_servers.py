@@ -11,25 +11,23 @@ but needs proper package integration.
 import pytest
 
 pytest.skip("MCP module integration pending", allow_module_level=True)
-import asyncio
-import subprocess
-import time
-import os
-import sys
 import json
-import requests
+import os
+import subprocess
+import sys
+import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Callable, Tuple
+
+import requests
 
 # Add the project root to the Python path
 project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
-from src.mcp import MCPServerManager, MCPServerType
-
 # Import the example MCP servers
 import sys
-import os
+
+from src.mcp import MCPServerManager, MCPServerType
 
 # Add the examples directory to the Python path
 examples_path = os.path.join(
@@ -40,8 +38,6 @@ sys.path.append(examples_path)
 
 # Import the example MCP servers directly
 sys.path.insert(0, examples_path)
-from examples.mcp.knowledge_resource_server import mcp as knowledge_resource_mcp
-from examples.mcp.agent_tool_server import mcp as agent_tool_mcp
 
 # Test constants
 KNOWLEDGE_SERVER_PORT = 8002

@@ -81,7 +81,7 @@ def workflow_context():
 class TestPlanPrimitiveInitialization:
     """Test PlanPrimitive initialization."""
 
-    def test_initialization_default(self):
+    def test_initialization_default(self) -> None:
         """Test initialization with default parameters."""
         plan = PlanPrimitive()
 
@@ -91,7 +91,7 @@ class TestPlanPrimitiveInitialization:
         assert plan.include_architecture_decisions is True
         assert plan.estimate_effort is True
 
-    def test_initialization_custom(self, temp_output_dir):
+    def test_initialization_custom(self, temp_output_dir) -> None:
         """Test initialization with custom parameters."""
         plan = PlanPrimitive(
             output_dir=str(temp_output_dir),
@@ -107,7 +107,7 @@ class TestPlanPrimitiveInitialization:
         assert plan.include_architecture_decisions is False
         assert plan.estimate_effort is False
 
-    def test_output_directory_created(self, tmp_path):
+    def test_output_directory_created(self, tmp_path) -> None:
         """Test that output directory is created if it doesn't exist."""
         output_dir = tmp_path / "new_output"
         assert not output_dir.exists()
@@ -127,7 +127,7 @@ class TestSpecParsing:
     """Test spec file parsing."""
 
     @pytest.mark.asyncio
-    async def test_parse_valid_spec(self, sample_spec_file):
+    async def test_parse_valid_spec(self, sample_spec_file) -> None:
         """Test parsing a valid spec file."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -140,7 +140,7 @@ class TestSpecParsing:
         assert spec_content["path"] == str(sample_spec_file)
 
     @pytest.mark.asyncio
-    async def test_parse_spec_extracts_sections(self, sample_spec_file):
+    async def test_parse_spec_extracts_sections(self, sample_spec_file) -> None:
         """Test that all sections are extracted correctly."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -151,7 +151,7 @@ class TestSpecParsing:
         assert "Cache reduces costs" in sections["Acceptance Criteria"]
 
     @pytest.mark.asyncio
-    async def test_parse_missing_file(self):
+    async def test_parse_missing_file(self) -> None:
         """Test parsing non-existent file raises error."""
         plan = PlanPrimitive()
 
@@ -168,7 +168,7 @@ class TestPhaseGeneration:
     """Test implementation phase generation."""
 
     @pytest.mark.asyncio
-    async def test_generate_phases_basic(self, sample_spec_file):
+    async def test_generate_phases_basic(self, sample_spec_file) -> None:
         """Test basic phase generation."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -180,7 +180,7 @@ class TestPhaseGeneration:
         assert phases[-1].name == "Testing & Deployment"
 
     @pytest.mark.asyncio
-    async def test_generate_phases_with_data_requirements(self, sample_spec_file):
+    async def test_generate_phases_with_data_requirements(self, sample_spec_file) -> None:
         """Test that data requirements create data model phase."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -191,7 +191,7 @@ class TestPhaseGeneration:
         assert "Data Model Setup" in phase_names
 
     @pytest.mark.asyncio
-    async def test_generate_phases_with_api_requirements(self, sample_spec_file):
+    async def test_generate_phases_with_api_requirements(self, sample_spec_file) -> None:
         """Test that API requirements create API phase."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -202,7 +202,7 @@ class TestPhaseGeneration:
         assert "API & Interface Development" in phase_names
 
     @pytest.mark.asyncio
-    async def test_generate_phases_respects_max_phases(self, tmp_path):
+    async def test_generate_phases_respects_max_phases(self, tmp_path) -> None:
         """Test that max_phases limit is respected."""
         plan = PlanPrimitive(max_phases=2)
 
@@ -227,7 +227,7 @@ class TestPhaseGeneration:
         assert len(phases) <= 2
 
     @pytest.mark.asyncio
-    async def test_phase_dependencies(self, sample_spec_file):
+    async def test_phase_dependencies(self, sample_spec_file) -> None:
         """Test that phases have correct dependencies."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -251,7 +251,7 @@ class TestDataModelExtraction:
     """Test data model extraction from specs."""
 
     @pytest.mark.asyncio
-    async def test_extract_data_models_basic(self, tmp_path):
+    async def test_extract_data_models_basic(self, tmp_path) -> None:
         """Test basic data model extraction."""
         plan = PlanPrimitive()
 
@@ -279,7 +279,7 @@ class TestDataModelExtraction:
         assert "Comment" in model_names
 
     @pytest.mark.asyncio
-    async def test_extract_data_models_with_attributes(self, sample_spec_file):
+    async def test_extract_data_models_with_attributes(self, sample_spec_file) -> None:
         """Test that extracted models have basic attributes."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -292,7 +292,7 @@ class TestDataModelExtraction:
             assert "updated_at" in model.attributes
 
     @pytest.mark.asyncio
-    async def test_extract_data_models_disabled(self, sample_spec_file):
+    async def test_extract_data_models_disabled(self, sample_spec_file) -> None:
         """Test that data model extraction can be disabled."""
         plan = PlanPrimitive(include_data_models=False)
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -313,7 +313,7 @@ class TestArchitectureDecisions:
     """Test architecture decision generation."""
 
     @pytest.mark.asyncio
-    async def test_generate_architecture_decisions_basic(self, sample_spec_file):
+    async def test_generate_architecture_decisions_basic(self, sample_spec_file) -> None:
         """Test basic architecture decision generation."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -329,7 +329,7 @@ class TestArchitectureDecisions:
             assert decision.tradeoffs
 
     @pytest.mark.asyncio
-    async def test_generate_architecture_decisions_with_context(self, sample_spec_file):
+    async def test_generate_architecture_decisions_with_context(self, sample_spec_file) -> None:
         """Test architecture decisions with existing context."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -344,7 +344,7 @@ class TestArchitectureDecisions:
         assert len(arch_decisions) >= 0  # May or may not generate decisions based on context
 
     @pytest.mark.asyncio
-    async def test_generate_architecture_decisions_disabled(self, sample_spec_file):
+    async def test_generate_architecture_decisions_disabled(self, sample_spec_file) -> None:
         """Test that architecture decisions can be disabled."""
         plan = PlanPrimitive(include_architecture_decisions=False)
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -365,7 +365,7 @@ class TestEffortEstimation:
     """Test effort estimation."""
 
     @pytest.mark.asyncio
-    async def test_estimate_effort_basic(self, sample_spec_file):
+    async def test_estimate_effort_basic(self, sample_spec_file) -> None:
         """Test basic effort estimation."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -384,7 +384,7 @@ class TestEffortEstimation:
         assert 0 < effort["confidence"] <= 1.0
 
     @pytest.mark.asyncio
-    async def test_estimate_effort_scales_with_complexity(self):
+    async def test_estimate_effort_scales_with_complexity(self) -> None:
         """Test that effort scales with complexity."""
         plan = PlanPrimitive()
 
@@ -408,7 +408,7 @@ class TestEffortEstimation:
         assert complex_effort["confidence"] <= simple_effort["confidence"]
 
     @pytest.mark.asyncio
-    async def test_estimate_effort_disabled(self, sample_spec_file):
+    async def test_estimate_effort_disabled(self, sample_spec_file) -> None:
         """Test that effort estimation can be disabled."""
         plan = PlanPrimitive(estimate_effort=False)
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -430,7 +430,7 @@ class TestDependencyIdentification:
     """Test dependency identification."""
 
     @pytest.mark.asyncio
-    async def test_identify_dependencies_basic(self, sample_spec_file):
+    async def test_identify_dependencies_basic(self, sample_spec_file) -> None:
         """Test basic dependency identification."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -448,7 +448,7 @@ class TestDependencyIdentification:
             assert "description" in dep
 
     @pytest.mark.asyncio
-    async def test_identify_dependencies_with_auth(self, sample_spec_file):
+    async def test_identify_dependencies_with_auth(self, sample_spec_file) -> None:
         """Test that auth service is identified as dependency."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -461,7 +461,7 @@ class TestDependencyIdentification:
         assert any("auth" in name.lower() for name in dep_names)
 
     @pytest.mark.asyncio
-    async def test_identify_dependencies_internal(self, sample_spec_file):
+    async def test_identify_dependencies_internal(self, sample_spec_file) -> None:
         """Test that phase dependencies are identified."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -483,7 +483,7 @@ class TestPlanGeneration:
     """Test plan.md file generation."""
 
     @pytest.mark.asyncio
-    async def test_generate_plan_md_creates_file(self, sample_spec_file, temp_output_dir):
+    async def test_generate_plan_md_creates_file(self, sample_spec_file, temp_output_dir) -> None:
         """Test that plan.md file is created."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -498,7 +498,7 @@ class TestPlanGeneration:
         assert plan_path.read_text(encoding="utf-8")
 
     @pytest.mark.asyncio
-    async def test_generate_plan_md_content_structure(self, sample_spec_file, temp_output_dir):
+    async def test_generate_plan_md_content_structure(self, sample_spec_file, temp_output_dir) -> None:
         """Test that plan.md has correct structure."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -533,7 +533,7 @@ class TestPlanGeneration:
             assert "## Data Models" in content
 
     @pytest.mark.asyncio
-    async def test_generate_plan_md_includes_effort(self, sample_spec_file, temp_output_dir):
+    async def test_generate_plan_md_includes_effort(self, sample_spec_file, temp_output_dir) -> None:
         """Test that plan.md includes effort estimation."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -558,7 +558,7 @@ class TestDataModelGeneration:
     """Test data-model.md file generation."""
 
     @pytest.mark.asyncio
-    async def test_generate_data_model_md_creates_file(self, temp_output_dir):
+    async def test_generate_data_model_md_creates_file(self, temp_output_dir) -> None:
         """Test that data-model.md file is created."""
         plan = PlanPrimitive()
 
@@ -578,7 +578,7 @@ class TestDataModelGeneration:
         assert data_model_path.read_text(encoding="utf-8")
 
     @pytest.mark.asyncio
-    async def test_generate_data_model_md_content(self, temp_output_dir):
+    async def test_generate_data_model_md_content(self, temp_output_dir) -> None:
         """Test data-model.md content structure."""
         plan = PlanPrimitive()
 
@@ -627,7 +627,7 @@ class TestFullExecution:
     """Test full execution of PlanPrimitive."""
 
     @pytest.mark.asyncio
-    async def test_execute_basic(self, sample_spec_file, temp_output_dir, workflow_context):
+    async def test_execute_basic(self, sample_spec_file, temp_output_dir, workflow_context) -> None:
         """Test basic execution."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
@@ -646,7 +646,7 @@ class TestFullExecution:
             assert Path(result["data_model_path"]).exists()
 
     @pytest.mark.asyncio
-    async def test_execute_missing_spec_file(self, temp_output_dir, workflow_context):
+    async def test_execute_missing_spec_file(self, temp_output_dir, workflow_context) -> None:
         """Test execution with missing spec file."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
@@ -656,7 +656,7 @@ class TestFullExecution:
     @pytest.mark.asyncio
     async def test_execute_minimal_features(
         self, sample_spec_file, temp_output_dir, workflow_context
-    ):
+    ) -> None:
         """Test execution with minimal features enabled."""
         plan = PlanPrimitive(
             output_dir=str(temp_output_dir),
@@ -674,7 +674,7 @@ class TestFullExecution:
     @pytest.mark.asyncio
     async def test_execute_with_architecture_context(
         self, sample_spec_file, temp_output_dir, workflow_context
-    ):
+    ) -> None:
         """Test execution with architecture context."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
@@ -694,7 +694,7 @@ class TestFullExecution:
     @pytest.mark.asyncio
     async def test_execute_overrides_output_dir(
         self, sample_spec_file, temp_output_dir, tmp_path, workflow_context
-    ):
+    ) -> None:
         """Test that output_dir in input overrides instance default."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
@@ -718,7 +718,7 @@ class TestObservability:
     """Test observability integration."""
 
     @pytest.mark.asyncio
-    async def test_execute_creates_span(self, sample_spec_file, temp_output_dir, workflow_context):
+    async def test_execute_creates_span(self, sample_spec_file, temp_output_dir, workflow_context) -> None:
         """Test that execution creates observability span."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
@@ -728,7 +728,7 @@ class TestObservability:
         assert result is not None  # Execution completed successfully
 
     @pytest.mark.asyncio
-    async def test_workflow_context_propagation(self, sample_spec_file, temp_output_dir):
+    async def test_workflow_context_propagation(self, sample_spec_file, temp_output_dir) -> None:
         """Test that workflow context is propagated."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
@@ -747,7 +747,7 @@ class TestObservability:
 class TestHelperMethods:
     """Test helper methods."""
 
-    def test_phase_to_dict(self):
+    def test_phase_to_dict(self) -> None:
         """Test Phase to dict conversion."""
         plan = PlanPrimitive()
 
@@ -769,7 +769,7 @@ class TestHelperMethods:
         assert phase_dict["estimated_hours"] == 16.0
         assert phase_dict["dependencies"] == ["Phase 0"]
 
-    def test_decision_to_dict(self):
+    def test_decision_to_dict(self) -> None:
         """Test ArchitectureDecision to dict conversion."""
         plan = PlanPrimitive()
 

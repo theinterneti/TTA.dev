@@ -10,7 +10,7 @@ from tta_dev_primitives import WorkflowContext
 from tta_dev_primitives.speckit import SpecifyPrimitive
 
 
-async def basic_specification_example():
+async def basic_specification_example() -> None:
     """Basic example: Generate spec from simple requirement."""
     print("\n" + "=" * 70)
     print("Example 1: Basic Specification Generation")
@@ -44,7 +44,7 @@ async def basic_specification_example():
             print(f"  - {gap}")
 
 
-async def complex_specification_example():
+async def complex_specification_example() -> None:
     """Complex example: Specification with project context."""
     print("\n" + "=" * 70)
     print("Example 2: Specification with Project Context")
@@ -91,7 +91,7 @@ async def complex_specification_example():
         print(f"  {emoji} {section}: {status_val}")
 
 
-async def workflow_composition_example():
+async def workflow_composition_example() -> None:
     """Example: SpecifyPrimitive in a workflow."""
     print("\n" + "=" * 70)
     print("Example 3: Specification Workflow (Specify → Review → Iterate)")
@@ -148,7 +148,7 @@ Typical workflow after SpecifyPrimitive:
     """)
 
 
-async def batch_specification_example():
+async def batch_specification_example() -> None:
     """Example: Generate multiple specs in batch."""
     print("\n" + "=" * 70)
     print("Example 4: Batch Specification Generation")
@@ -183,7 +183,7 @@ async def batch_specification_example():
     print("All specifications generated successfully!")
 
 
-async def main():
+async def main() -> None:
     """Run all examples."""
     print("\n" + "=" * 70)
     print("SpecifyPrimitive Examples")

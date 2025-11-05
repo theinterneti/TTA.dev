@@ -47,7 +47,7 @@ from tta_dev_primitives.recovery import FallbackPrimitive
 # ============================================================================
 
 
-async def example_google_ai_studio():
+async def example_google_ai_studio() -> None:
     """Demonstrate free Gemini Pro access via Google AI Studio.
 
     **Free Tier:**
@@ -89,7 +89,7 @@ async def example_google_ai_studio():
 # ============================================================================
 
 
-async def example_openrouter():
+async def example_openrouter() -> None:
     """Demonstrate free DeepSeek R1 access via OpenRouter.
 
     **Free Tier:**
@@ -133,7 +133,7 @@ async def example_openrouter():
 # ============================================================================
 
 
-async def example_groq():
+async def example_groq() -> None:
     """Demonstrate ultra-fast free inference via Groq.
 
     **Free Tier:**
@@ -178,7 +178,7 @@ async def example_groq():
 # ============================================================================
 
 
-async def example_huggingface():
+async def example_huggingface() -> None:
     """Demonstrate free access to thousands of models via Hugging Face.
 
     **Free Tier:**
@@ -222,7 +222,7 @@ async def example_huggingface():
 # ============================================================================
 
 
-async def example_together_ai():
+async def example_together_ai() -> None:
     """Demonstrate $25 free credits via Together.ai.
 
     **Free Credits:**
@@ -267,7 +267,7 @@ async def example_together_ai():
 # ============================================================================
 
 
-async def example_fallback_chain():
+async def example_fallback_chain() -> None:
     """Demonstrate 100% uptime using free flagship model fallback chain.
 
     **Strategy:**
@@ -320,7 +320,7 @@ async def example_fallback_chain():
 # ============================================================================
 
 
-async def main():
+async def main() -> None:
     """Run all free flagship model examples."""
     print("\n" + "=" * 80)
     print("FREE FLAGSHIP MODEL ACCESS EXAMPLES")

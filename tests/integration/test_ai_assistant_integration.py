@@ -11,15 +11,12 @@ but needs proper package integration.
 import pytest
 
 pytest.skip("MCP module integration pending", allow_module_level=True)
-import asyncio
-import subprocess
-import time
+import json
 import os
 import sys
-import json
+from typing import Any
+
 import requests
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Callable, Tuple
 
 # Add the project root to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -42,8 +39,8 @@ class AIAssistantSimulator:
 
     def __init__(
         self,
-        knowledge_server_url: Optional[str] = None,
-        agent_tool_server_url: Optional[str] = None,
+        knowledge_server_url: str | None = None,
+        agent_tool_server_url: str | None = None,
     ):
         """
         Initialize the AI assistant simulator.
@@ -120,7 +117,7 @@ class AIAssistantSimulator:
         except requests.exceptions.ConnectionError:
             return False
 
-    def list_knowledge_resources(self) -> List[Dict[str, Any]]:
+    def list_knowledge_resources(self) -> list[dict[str, Any]]:
         """
         List resources from the Knowledge Resource server.
 
@@ -186,7 +183,7 @@ class AIAssistantSimulator:
 
         return content["text"]
 
-    def list_agent_tools(self) -> List[Dict[str, Any]]:
+    def list_agent_tools(self) -> list[dict[str, Any]]:
         """
         List tools from the Agent Tool server.
 
@@ -213,7 +210,7 @@ class AIAssistantSimulator:
 
         return response_data.get("tools", [])
 
-    def call_agent_tool(self, name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+    def call_agent_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         """
         Call a tool from the Agent Tool server.
 

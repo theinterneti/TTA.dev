@@ -61,7 +61,7 @@ class LLMCallPrimitive(InstrumentedPrimitive[dict, dict]):
     - Occasional failures (5% error rate) for SLO tracking
     """
 
-    def __init__(self, name: str = "llm_call", fail_rate: float = 0.05):
+    def __init__(self, name: str = "llm_call", fail_rate: float = 0.05) -> None:
         super().__init__(name=name)
         self.fail_rate = fail_rate
 
@@ -94,7 +94,7 @@ class DataProcessingPrimitive(InstrumentedPrimitive[dict, dict]):
     - High success rate (99.9%) for SLO compliance
     """
 
-    def __init__(self, name: str = "data_processing"):
+    def __init__(self, name: str = "data_processing") -> None:
         super().__init__(name=name)
 
     async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
@@ -117,7 +117,7 @@ class ValidationPrimitive(InstrumentedPrimitive[dict, dict]):
     - Perfect success rate for SLO compliance
     """
 
-    def __init__(self, name: str = "validation"):
+    def __init__(self, name: str = "validation") -> None:
         super().__init__(name=name)
 
     async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
@@ -293,7 +293,7 @@ async def run_demo() -> None:
         )
 
         try:
-            result = await workflow.execute(
+            await workflow.execute(
                 {"query": f"What is the meaning of life? (run {i + 1})"}, context
             )
             print(f"  ✓ Run {i + 1} completed")
@@ -325,7 +325,7 @@ async def run_demo() -> None:
         )
 
         try:
-            result = await workflow.execute(
+            await workflow.execute(
                 {"query": "What is the meaning of life? (run 1)"},  # Same query
                 context,
             )
@@ -347,7 +347,7 @@ async def run_demo() -> None:
     if PROMETHEUS_AVAILABLE:
         print_section_header("Prometheus Metrics Export")
         try:
-            exporter = get_prometheus_exporter()
+            get_prometheus_exporter()
             print("✅ Prometheus exporter initialized")
             print("\n📊 Sample Prometheus metrics would be available at:")
             print("   http://localhost:8000/metrics")

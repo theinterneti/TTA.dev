@@ -490,7 +490,7 @@ async def example_multi_pr_deployment():
 
         tasks = [
             pipeline.run_pipeline(pr, branch, "Dockerfile")
-            for pr, branch in zip(pr_numbers, branches)
+            for pr, branch in zip(pr_numbers, branches, strict=False)
         ]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -500,7 +500,7 @@ async def example_multi_pr_deployment():
         print("📊 Multi-PR Summary")
         print("=" * 80 + "\n")
 
-        for pr, result in zip(pr_numbers, results):
+        for pr, result in zip(pr_numbers, results, strict=False):
             if isinstance(result, Exception):
                 print(f"❌ PR #{pr}: {result}")
             else:
