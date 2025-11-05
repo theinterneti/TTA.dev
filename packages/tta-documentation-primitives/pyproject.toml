@@ -108,8 +108,24 @@ ignore = [
 "tests/*" = [
     "S101",
     "PLR2004",
-    "ANN201",
-] # Allow assert and magic values in tests
+    "ANN",
+    "E501",
+    "ARG002",
+    "PLC0415",
+    "TRY003",
+] # Allow assert, magic values, missing annotations, long lines, unused args, and test patterns
+"examples/*" = [
+    "ANN",
+    "E501",
+    "SIM105",
+    "S110",
+] # Allow missing annotations, long lines, and intentional error swallowing in examples
+"src/tta_documentation_primitives/config.py" = [
+    "PTH123",
+] # Allow open() in config file
+"src/tta_documentation_primitives/primitives.py" = [
+    "TRY003",
+] # Allow long error messages
 
 [tool.mypy]
 python_version = "3.11"
