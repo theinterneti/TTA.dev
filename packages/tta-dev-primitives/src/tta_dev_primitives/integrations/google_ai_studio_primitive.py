@@ -21,8 +21,12 @@ class GoogleAIStudioRequest(BaseModel):
     model: str | None = Field(
         default=None, description="Model to use (overrides primitive default)"
     )
-    temperature: float | None = Field(default=None, description="Sampling temperature (0-2)")
-    max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
+    temperature: float | None = Field(
+        default=None, description="Sampling temperature (0-2)"
+    )
+    max_tokens: int | None = Field(
+        default=None, description="Maximum tokens to generate"
+    )
 
 
 class GoogleAIStudioResponse(BaseModel):
@@ -34,7 +38,9 @@ class GoogleAIStudioResponse(BaseModel):
     finish_reason: str = Field(description="Reason for completion")
 
 
-class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIStudioResponse]):
+class GoogleAIStudioPrimitive(
+    WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIStudioResponse]
+):
     """Wrapper around official Google Generative AI SDK.
 
     This primitive provides a consistent TTA.dev interface for Google AI Studio's
@@ -85,7 +91,7 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
             **kwargs: Additional arguments for configuration
         """
         super().__init__()
-        genai.configure(api_key=api_key)
+        genai.configure(api_key=api_key)  # type: ignore[attr-defined]  # Private module API
         self.model = model
         self.generation_config = kwargs.get("generation_config", {})
 
@@ -108,7 +114,7 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
         model_name = input_data.model or self.model
 
         # Create model instance
-        model = genai.GenerativeModel(model_name)
+        model = genai.GenerativeModel(model_name)  # type: ignore[attr-defined]  # Private module API
 
         # Convert messages to Gemini format
         # Gemini expects alternating user/model messages
