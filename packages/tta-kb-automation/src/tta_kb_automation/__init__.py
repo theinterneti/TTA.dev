@@ -52,6 +52,8 @@ from tta_kb_automation.workflows import (
 __version__ = "0.1.0"
 
 __all__ = [
+    # Re-exported from tta-dev-primitives
+    "WorkflowContext",
     # Core primitives
     "ParseLogseqPages",
     "ExtractLinks",
