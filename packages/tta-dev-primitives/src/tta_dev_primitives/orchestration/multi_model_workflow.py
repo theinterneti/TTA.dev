@@ -55,7 +55,9 @@ class MultiModelRequest(BaseModel):
     user_preferences: dict[str, Any] = Field(
         default_factory=dict, description="User preferences (e.g., prefer_free=True)"
     )
-    validate_output: bool = Field(default=False, description="If True, validate output quality")
+    validate_output: bool = Field(
+        default=False, description="If True, validate output quality"
+    )
 
 
 class MultiModelResponse(BaseModel):
@@ -68,7 +70,9 @@ class MultiModelResponse(BaseModel):
     validation_passed: bool | None = Field(
         default=None, description="Validation result (if validation enabled)"
     )
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional metadata"
+    )
 
 
 class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse]):
@@ -155,7 +159,7 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
         # Load configuration if available
         self.config = None
-        if CONFIG_AVAILABLE and config_path:
+        if CONFIG_AVAILABLE and config_path and load_orchestration_config is not None:
             try:
                 self.config = load_orchestration_config(config_path)
                 prefer_free = self.config.prefer_free_models
@@ -169,7 +173,7 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
     def _init_metrics(self) -> None:
         """Initialize Prometheus metrics for orchestration."""
-        if not METRICS_AVAILABLE:
+        if not METRICS_AVAILABLE or metrics is None:
             return
 
         try:
@@ -270,7 +274,9 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
         except Exception as e:
             logger.warning(f"⚠️  Failed to initialize orchestration metrics: {e}")
 
-    def register_executor(self, model_name: str, primitive: WorkflowPrimitive[Any, Any]) -> None:
+    def register_executor(
+        self, model_name: str, primitive: WorkflowPrimitive[Any, Any]
+    ) -> None:
         """Register an executor primitive.
 
         Args:
@@ -308,7 +314,9 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
         # Record classification
         if METRICS_AVAILABLE and hasattr(self, "_classifications_counter"):
-            self._classifications_counter.add(1, {"complexity": classification.complexity.value})
+            self._classifications_counter.add(
+                1, {"complexity": classification.complexity.value}
+            )
 
         # Step 2: Delegate to executor model
         delegation_request = DelegationRequest(
@@ -324,7 +332,9 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
         # Record delegation
         if METRICS_AVAILABLE and hasattr(self, "_delegations_counter"):
-            self._delegations_counter.add(1, {"executor_model": delegation_response.executor_model})
+            self._delegations_counter.add(
+                1, {"executor_model": delegation_response.executor_model}
+            )
             self._delegations_success_counter.add(
                 1, {"executor_model": delegation_response.executor_model}
             )
@@ -344,9 +354,9 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
         # Record metrics from context
         if METRICS_AVAILABLE and hasattr(self, "_orchestrator_tokens_counter"):
-            orchestrator_tokens = context.data.get("orchestrator_tokens", 0)
-            executor_tokens = context.data.get("executor_tokens", 0)
-            orchestrator_cost = context.data.get("orchestrator_cost", 0.0)
+            orchestrator_tokens = context.metadata.get("orchestrator_tokens", 0)
+            executor_tokens = context.metadata.get("executor_tokens", 0)
+            orchestrator_cost = context.metadata.get("orchestrator_cost", 0.0)
             executor_cost = delegation_response.cost
             total_cost = orchestrator_cost + executor_cost
 
@@ -359,7 +369,9 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
             # Calculate cost savings (assuming $0.50 for all-Claude approach)
             all_claude_cost = 0.50
             cost_savings = (
-                (all_claude_cost - total_cost) / all_claude_cost * 100 if all_claude_cost > 0 else 0
+                (all_claude_cost - total_cost) / all_claude_cost * 100
+                if all_claude_cost > 0
+                else 0
             )
             self._cost_savings_gauge.add(int(cost_savings))
 
