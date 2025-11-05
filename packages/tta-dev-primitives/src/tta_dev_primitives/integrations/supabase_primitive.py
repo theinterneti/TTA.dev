@@ -14,7 +14,9 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class SupabaseRequest(BaseModel):
     """Request model for Supabase primitive."""
 
-    operation: str = Field(description="Database operation: 'select', 'insert', 'update', 'delete'")
+    operation: str = Field(
+        description="Database operation: 'select', 'insert', 'update', 'delete'"
+    )
     table: str = Field(description="Table name to operate on")
     data: dict[str, Any] | list[dict[str, Any]] | None = Field(
         default=None, description="Data for insert/update operations"
@@ -22,13 +24,17 @@ class SupabaseRequest(BaseModel):
     filters: dict[str, Any] | None = Field(
         default=None, description="Filter conditions for select/update/delete"
     )
-    columns: str | None = Field(default=None, description="Columns to select (default: '*')")
+    columns: str | None = Field(
+        default=None, description="Columns to select (default: '*')"
+    )
 
 
 class SupabaseResponse(BaseModel):
     """Response model for Supabase primitive."""
 
-    data: list[dict[str, Any]] | dict[str, Any] | None = Field(description="Query result data")
+    data: list[dict[str, Any]] | dict[str, Any] | None = Field(
+        description="Query result data"
+    )
     count: int | None = Field(default=None, description="Number of rows affected")
     status: str = Field(description="Operation status")
 
@@ -127,7 +133,9 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
                     query = query.eq(key, value)
 
         response = query.execute()
-        return SupabaseResponse(data=response.data, count=len(response.data), status="success")
+        return SupabaseResponse(
+            data=response.data, count=len(response.data), status="success"
+        )  # type: ignore[arg-type]  # Supabase JSON type variance
 
     async def _execute_insert(self, input_data: SupabaseRequest) -> SupabaseResponse:
         """Execute INSERT operation."""
@@ -135,7 +143,9 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
             raise ValueError("INSERT operation requires 'data' field")
 
         response = self.client.table(input_data.table).insert(input_data.data).execute()
-        return SupabaseResponse(data=response.data, count=len(response.data), status="success")
+        return SupabaseResponse(
+            data=response.data, count=len(response.data), status="success"
+        )  # type: ignore[arg-type]  # Supabase JSON type variance
 
     async def _execute_update(self, input_data: SupabaseRequest) -> SupabaseResponse:
         """Execute UPDATE operation."""
@@ -154,7 +164,9 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
                     query = query.eq(key, value)
 
         response = query.execute()
-        return SupabaseResponse(data=response.data, count=len(response.data), status="success")
+        return SupabaseResponse(
+            data=response.data, count=len(response.data), status="success"
+        )  # type: ignore[arg-type]  # Supabase JSON type variance
 
     async def _execute_delete(self, input_data: SupabaseRequest) -> SupabaseResponse:
         """Execute DELETE operation."""
@@ -170,4 +182,6 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
                     query = query.eq(key, value)
 
         response = query.execute()
-        return SupabaseResponse(data=response.data, count=len(response.data), status="success")
+        return SupabaseResponse(
+            data=response.data, count=len(response.data), status="success"
+        )  # type: ignore[arg-type]  # Supabase JSON type variance
