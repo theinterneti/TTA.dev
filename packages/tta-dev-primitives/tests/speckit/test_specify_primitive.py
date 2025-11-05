@@ -83,7 +83,9 @@ class TestSpecifyPrimitiveExecution:
         assert isinstance(result["gaps"], list)
 
     @pytest.mark.asyncio
-    async def test_execute_with_complex_requirement(self, specify_primitive, workflow_context) -> None:
+    async def test_execute_with_complex_requirement(
+        self, specify_primitive, workflow_context
+    ) -> None:
         """Test execution with a complex multi-part requirement."""
         result = await specify_primitive.execute(
             {
@@ -200,7 +202,9 @@ class TestSpecificationContent:
     """Test generated specification content."""
 
     @pytest.mark.asyncio
-    async def test_spec_contains_required_sections(self, specify_primitive, workflow_context) -> None:
+    async def test_spec_contains_required_sections(
+        self, specify_primitive, workflow_context
+    ) -> None:
         """Test generated spec contains all required sections."""
         result = await specify_primitive.execute(
             {"requirement": "Add caching layer to database queries"},
@@ -239,7 +243,9 @@ class TestSpecificationContent:
         assert "**Last Updated**:" in spec_content
 
     @pytest.mark.asyncio
-    async def test_spec_includes_validation_checklist(self, specify_primitive, workflow_context) -> None:
+    async def test_spec_includes_validation_checklist(
+        self, specify_primitive, workflow_context
+    ) -> None:
         """Test specification includes human validation checklist."""
         result = await specify_primitive.execute(
             {"requirement": "Add WebSocket support for real-time updates"},

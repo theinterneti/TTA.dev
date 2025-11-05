@@ -49,7 +49,6 @@ async def main() -> None:
         Path("GETTING_STARTED.md"),
     ]
 
-
     # Process each file with observability
     for file_path in example_files:
         if not file_path.exists():
@@ -63,7 +62,6 @@ async def main() -> None:
             data={"file": str(file_path)},
         )
 
-
         try:
             # Execute workflow (composition of primitives)
             # Flow: Markdown → Logseq Converter (timeout)
@@ -71,16 +69,13 @@ async def main() -> None:
             #       → Logseq Sync (retry)
             await workflow.execute(file_path, context)
 
-
         except Exception:
             # Errors are automatically logged with trace context
             pass
-
 
     if success:
         pass
 
 
 if __name__ == "__main__":
-
     asyncio.run(main())

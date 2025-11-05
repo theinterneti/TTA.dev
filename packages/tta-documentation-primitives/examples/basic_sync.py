@@ -24,6 +24,5 @@ async def main() -> None:
     return await workflow.execute(file_path, context)
 
 
-
 if __name__ == "__main__":
     asyncio.run(main())

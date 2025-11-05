@@ -57,7 +57,6 @@ def create_basic_sync_workflow(
     return converter >> syncer
 
 
-
 def create_ai_enhanced_sync_workflow(
     config: TTADocsConfig | None = None,
 ) -> SequentialPrimitive:
@@ -118,7 +117,6 @@ def create_ai_enhanced_sync_workflow(
 
     # Compose workflow: Convert >> AI Enhance >> Sync
     return converter >> metadata_extractor >> syncer
-
 
 
 def create_production_sync_workflow(
@@ -202,7 +200,6 @@ def create_production_sync_workflow(
     return converter >> metadata_extractor >> syncer
 
 
-
 def create_batch_sync_workflow(
     config: TTADocsConfig | None = None,
     max_parallel: int = 5,
@@ -232,7 +229,6 @@ def create_batch_sync_workflow(
 
     # Compose with | operator (parallel)
     return ParallelPrimitive(primitives=sync_workflows)
-
 
 
 # Workflow examples demonstrating TTA.dev patterns
