@@ -3,6 +3,8 @@
 from tta_agent_coordination.managers.cicd_manager import (
     CICDManager,
     CICDManagerConfig,
+    CICDOperation,
+    CICDResult,
 )
 from tta_agent_coordination.managers.infrastructure_manager import (
     InfrastructureManager,
@@ -20,6 +22,8 @@ from tta_agent_coordination.managers.quality_manager import (
 __all__ = [
     "CICDManager",
     "CICDManagerConfig",
+    "CICDOperation",
+    "CICDResult",
     "InfrastructureManager",
     "InfrastructureManagerConfig",
     "InfrastructureOperation",
