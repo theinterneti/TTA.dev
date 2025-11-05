@@ -228,7 +228,9 @@ class TestClarifyPrimitiveExecution:
         assert result["coverage_improvement"] == 0.0
 
     @pytest.mark.asyncio
-    async def test_execute_reaches_target_coverage(self, sample_spec_file, workflow_context) -> None:
+    async def test_execute_reaches_target_coverage(
+        self, sample_spec_file, workflow_context
+    ) -> None:
         """Test execution stops when target coverage is reached."""
         primitive = ClarifyPrimitive(max_iterations=5, target_coverage=0.3)
 
@@ -551,7 +553,9 @@ class TestErrorHandling:
     """Test error handling in ClarifyPrimitive."""
 
     @pytest.mark.asyncio
-    async def test_handles_malformed_spec(self, clarify_primitive, tmp_specs_dir, workflow_context) -> None:
+    async def test_handles_malformed_spec(
+        self, clarify_primitive, tmp_specs_dir, workflow_context
+    ) -> None:
         """Test handling of malformed specification files."""
         # Create malformed spec (missing sections)
         malformed_spec = tmp_specs_dir / "malformed.spec.md"

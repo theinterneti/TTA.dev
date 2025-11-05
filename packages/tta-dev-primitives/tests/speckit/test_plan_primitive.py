@@ -498,7 +498,9 @@ class TestPlanGeneration:
         assert plan_path.read_text(encoding="utf-8")
 
     @pytest.mark.asyncio
-    async def test_generate_plan_md_content_structure(self, sample_spec_file, temp_output_dir) -> None:
+    async def test_generate_plan_md_content_structure(
+        self, sample_spec_file, temp_output_dir
+    ) -> None:
         """Test that plan.md has correct structure."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -533,7 +535,9 @@ class TestPlanGeneration:
             assert "## Data Models" in content
 
     @pytest.mark.asyncio
-    async def test_generate_plan_md_includes_effort(self, sample_spec_file, temp_output_dir) -> None:
+    async def test_generate_plan_md_includes_effort(
+        self, sample_spec_file, temp_output_dir
+    ) -> None:
         """Test that plan.md includes effort estimation."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -718,7 +722,9 @@ class TestObservability:
     """Test observability integration."""
 
     @pytest.mark.asyncio
-    async def test_execute_creates_span(self, sample_spec_file, temp_output_dir, workflow_context) -> None:
+    async def test_execute_creates_span(
+        self, sample_spec_file, temp_output_dir, workflow_context
+    ) -> None:
         """Test that execution creates observability span."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 

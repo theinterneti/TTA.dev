@@ -276,7 +276,9 @@ async def test_sequential_primitive_creates_spans(otel_tracer_provider, test_con
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_parallel_primitive_creates_concurrent_spans(otel_tracer_provider, test_context) -> None:
+async def test_parallel_primitive_creates_concurrent_spans(
+    otel_tracer_provider, test_context
+) -> None:
     """Test that ParallelPrimitive creates concurrent spans in Jaeger."""
     # Create workflow with parallel branches
     workflow = ParallelPrimitive(
@@ -339,7 +341,9 @@ async def test_parallel_primitive_creates_concurrent_spans(otel_tracer_provider,
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_conditional_primitive_creates_branch_spans(otel_tracer_provider, test_context) -> None:
+async def test_conditional_primitive_creates_branch_spans(
+    otel_tracer_provider, test_context
+) -> None:
     """Test that ConditionalPrimitive creates branch spans in Jaeger."""
     # Create workflow with conditional
     workflow = ConditionalPrimitive(
@@ -512,7 +516,9 @@ async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_fallback_primitive_creates_execution_spans(otel_tracer_provider, test_context) -> None:
+async def test_fallback_primitive_creates_execution_spans(
+    otel_tracer_provider, test_context
+) -> None:
     """Test that FallbackPrimitive creates primary and fallback spans in Jaeger."""
     # Create workflow with fallback
     workflow = FallbackPrimitive(
@@ -565,7 +571,9 @@ async def test_fallback_primitive_creates_execution_spans(otel_tracer_provider, 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_saga_primitive_creates_compensation_spans(otel_tracer_provider, test_context) -> None:
+async def test_saga_primitive_creates_compensation_spans(
+    otel_tracer_provider, test_context
+) -> None:
     """Test that SagaPrimitive creates forward and compensation spans in Jaeger."""
     # Create workflow with saga
     workflow = SagaPrimitive(
