@@ -395,7 +395,7 @@ class TestOperationExecution:
 
         # Assert
         assert result.success is False
-        assert "does not exist" in result.error
+        assert result.error is not None and "does not exist" in result.error
 
 
 class TestFileHashComputation:

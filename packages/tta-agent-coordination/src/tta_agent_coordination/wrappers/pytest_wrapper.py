@@ -474,7 +474,7 @@ class PyTestCLIWrapper(WorkflowPrimitive[PyTestOperation, PyTestResult]):
 
     def _parse_pytest_output(self, stdout: str, stderr: str) -> dict[str, Any]:
         """Parse pytest text output for key information."""
-        data = {"stdout": stdout, "stderr": stderr}
+        data: dict[str, Any] = {"stdout": stdout, "stderr": stderr}
 
         # Extract test counts
         if match := re.search(

@@ -35,7 +35,9 @@ def docker_expert(mock_docker_wrapper):
 @pytest.fixture
 def workflow_context():
     """Create test workflow context."""
-    return WorkflowContext(correlation_id="test-123", data={"test_key": "test_value"})
+    return WorkflowContext(
+        correlation_id="test-123", metadata={"test_key": "test_value"}
+    )
 
 
 # ========== Initialization Tests ==========
