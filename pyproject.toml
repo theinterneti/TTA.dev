@@ -11,6 +11,7 @@ members = [
     "packages/universal-agent-context",
     "packages/tta-documentation-primitives",
     "packages/tta-kb-automation",
+    "packages/tta-agent-coordination",
 ]
 
 [tool.uv]
