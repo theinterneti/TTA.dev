@@ -44,10 +44,43 @@ jobs:
 
       - name: Run LinkValidator
         run: |
-          uv run python -m tta_kb_automation.tools.link_validator \
-            --kb-root logseq \
-            --output kb-validation-report.md \
-            --fail-on-broken
+          uv run python -c "
+          import asyncio
+          from pathlib import Path
+          from tta_kb_automation import ParseLogseqPages, ExtractLinks, ValidateLinks, WorkflowContext
+
+          async def main():
+              context = WorkflowContext(workflow_id='ci-link-validation')
+              kb_root = Path('logseq')
+
+              # Step 1: Parse pages
+              parser = ParseLogseqPages()
+              parse_result = await parser.execute({'kb_root': kb_root}, context)
+
+              # Step 2: Extract links
+              extractor = ExtractLinks()
+              links_result = await extractor.execute({'pages': parse_result['pages']}, context)
+
+              # Step 3: Validate links
+              validator = ValidateLinks()
+              result = await validator.execute({
+                  'pages': parse_result['pages'],
+                  'links': links_result['links']
+              }, context)
+
+              broken = result['broken_links']
+              if broken:
+                  print(f'❌ Found {len(broken)} broken links:')
+                  for link in broken[:10]:
+                      print(f'  - {link[\"source\"]} -> {link[\"target\"]} (missing)')
+                  if len(broken) > 10:
+                      print(f'  ... and {len(broken) - 10} more')
+                  exit(1)
+              else:
+                  print('✅ All links valid')
+
+          asyncio.run(main())
+          "
 
       - name: Upload validation report
         if: always()
@@ -102,18 +135,32 @@ jobs:
           uv run python -c "
           import asyncio
           from pathlib import Path
-          from tta_kb_automation import FindOrphanedPages, WorkflowContext
+          from tta_kb_automation import ParseLogseqPages, ExtractLinks, FindOrphanedPages, WorkflowContext
 
           async def main():
-              finder = FindOrphanedPages(kb_root=Path('logseq'))
               context = WorkflowContext(workflow_id='ci-orphan-check')
-              result = await finder.execute({}, context)
+              kb_root = Path('logseq')
+
+              # Step 1: Parse pages
+              parser = ParseLogseqPages()
+              parse_result = await parser.execute({'kb_root': kb_root}, context)
+
+              # Step 2: Extract links
+              extractor = ExtractLinks()
+              links_result = await extractor.execute({'pages': parse_result['pages']}, context)
+
+              # Step 3: Find orphaned pages
+              finder = FindOrphanedPages()
+              result = await finder.execute({
+                  'pages': parse_result['pages'],
+                  'links': links_result['links']
+              }, context)
 
               orphans = result['orphaned_pages']
               if orphans:
                   print(f'⚠️  Found {len(orphans)} orphaned pages:')
                   for page in orphans[:10]:
-                      print(f'  - {page}')
+                      print(f'  - {page[\"title\"]}')
                   if len(orphans) > 10:
                       print(f'  ... and {len(orphans) - 10} more')
               else:
@@ -233,15 +280,14 @@ jobs:
               extractor = ExtractTODOs()
               context = WorkflowContext(workflow_id='ci-todo-check')
 
-              all_todos = []
-              for file in changed_files:
-                  result = await extractor.execute({'file_path': Path(file)}, context)
-                  all_todos.extend(result['todos'])
+              # ExtractTODOs expects {'files': [list of paths]}
+              result = await extractor.execute({'files': changed_files}, context)
+              all_todos = result['todos']
 
               if all_todos:
                   print(f'⚠️  Found {len(all_todos)} TODOs in changed files:')
                   for todo in all_todos[:5]:
-                      print(f'  - {todo[\"file\"]}:{todo[\"line\"]}: {todo[\"text\"][:60]}...')
+                      print(f'  - {todo[\"file\"]}:{todo[\"line_number\"]}: {todo[\"todo_text\"][:60]}...')
                   if len(all_todos) > 5:
                       print(f'  ... and {len(all_todos) - 5} more')
                   print('')
