@@ -11,7 +11,9 @@ from .setup import get_meter, get_tracer, is_apm_enabled
 logger = logging.getLogger(__name__)
 
 
-def trace_workflow(span_name: str | None = None, attributes: dict[str, Any] | None = None):
+def trace_workflow(
+    span_name: str | None = None, attributes: dict[str, Any] | None = None
+):
     """Decorator to trace workflow function execution.
 
     Args:
@@ -87,7 +89,10 @@ def trace_workflow(span_name: str | None = None, attributes: dict[str, Any] | No
 
 
 def track_metric(
-    metric_name: str, metric_type: str = "counter", description: str = "", unit: str = "1"
+    metric_name: str,
+    metric_type: str = "counter",
+    description: str = "",
+    unit: str = "1",
 ):
     """Decorator to track metrics for function execution.
 
@@ -115,9 +120,13 @@ def track_metric(
 
             # Create appropriate metric instrument
             if metric_type == "counter":
-                instrument = meter.create_counter(metric_name, description=description, unit=unit)
+                instrument = meter.create_counter(
+                    metric_name, description=description, unit=unit
+                )
             elif metric_type == "histogram":
-                instrument = meter.create_histogram(metric_name, description=description, unit=unit)
+                instrument = meter.create_histogram(
+                    metric_name, description=description, unit=unit
+                )
             else:
                 logger.warning(f"Unknown metric type: {metric_type}")
                 return await func(*args, **kwargs)
@@ -129,20 +138,24 @@ def track_metric(
 
                 # Record metric
                 if metric_type == "counter":
-                    instrument.add(1, {"status": "success"})
+                    instrument.add(1, {"status": "success"})  # type: ignore[attr-defined]
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(duration, {"status": "success"})
+                    instrument.record(duration, {"status": "success"})  # type: ignore[attr-defined]
 
                 return result
 
             except Exception as e:
                 # Record error metric
                 if metric_type == "counter":
-                    instrument.add(1, {"status": "error", "error_type": type(e).__name__})
+                    instrument.add(
+                        1, {"status": "error", "error_type": type(e).__name__}
+                    )  # type: ignore[attr-defined]
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(duration, {"status": "error", "error_type": type(e).__name__})
+                    instrument.record(
+                        duration, {"status": "error", "error_type": type(e).__name__}
+                    )  # type: ignore[attr-defined]
                 raise
 
         @wraps(func)
@@ -156,9 +169,13 @@ def track_metric(
 
             # Create appropriate metric instrument
             if metric_type == "counter":
-                instrument = meter.create_counter(metric_name, description=description, unit=unit)
+                instrument = meter.create_counter(
+                    metric_name, description=description, unit=unit
+                )
             elif metric_type == "histogram":
-                instrument = meter.create_histogram(metric_name, description=description, unit=unit)
+                instrument = meter.create_histogram(
+                    metric_name, description=description, unit=unit
+                )
             else:
                 logger.warning(f"Unknown metric type: {metric_type}")
                 return func(*args, **kwargs)
@@ -170,20 +187,24 @@ def track_metric(
 
                 # Record metric
                 if metric_type == "counter":
-                    instrument.add(1, {"status": "success"})
+                    instrument.add(1, {"status": "success"})  # type: ignore[attr-defined]
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(duration, {"status": "success"})
+                    instrument.record(duration, {"status": "success"})  # type: ignore[attr-defined]
 
                 return result
 
             except Exception as e:
                 # Record error metric
                 if metric_type == "counter":
-                    instrument.add(1, {"status": "error", "error_type": type(e).__name__})
+                    instrument.add(
+                        1, {"status": "error", "error_type": type(e).__name__}
+                    )  # type: ignore[attr-defined]
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(duration, {"status": "error", "error_type": type(e).__name__})
+                    instrument.record(
+                        duration, {"status": "error", "error_type": type(e).__name__}
+                    )  # type: ignore[attr-defined]
                 raise
 
         # Return appropriate wrapper based on function type
