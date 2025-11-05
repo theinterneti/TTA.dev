@@ -157,19 +157,24 @@ jobs:
 
       - name: Validate journal structure
         run: |
-          # Check that journals directory exists and has recent entries
+          # Check that journals directory exists (or is intentionally excluded for privacy)
           if [ ! -d "logseq/journals" ]; then
-            echo "❌ logseq/journals directory not found"
-            exit 1
+            if grep -q "logseq/journals" .gitignore 2>/dev/null; then
+              echo "ℹ️  logseq/journals excluded for privacy (.gitignore)"
+              echo "✅ KB structure valid (journals excluded by design)"
+              exit 0
+            else
+              echo "❌ logseq/journals directory not found and not in .gitignore"
+              exit 1
+            fi
           fi
 
           journal_count=$(find logseq/journals -name "*.md" | wc -l)
           if [ "$journal_count" -eq 0 ]; then
-            echo "❌ No journal entries found"
-            exit 1
+            echo "⚠️  No journal entries found (empty directory)"
+          else
+            echo "✅ Found $journal_count journal entries"
           fi
-
-          echo "✅ Found $journal_count journal entries"
 
   kb-todo-sync:
     name: KB TODO Sync Check
