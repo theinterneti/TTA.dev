@@ -402,7 +402,7 @@ uv run pytest --cov=packages/tta-dev-primitives --cov-report=html
 
 - **Package README:** `packages/tta-dev-primitives/README.md`
 - **Agent Instructions:** `packages/tta-dev-primitives/AGENTS.md`
-- **Catalog:** [[PRIMITIVES_CATALOG.md]]
+- **Catalog:** [[PRIMITIVES_CATALOG]]
 - **Architecture:** `docs/architecture/primitives-design.md`
 
 ---

@@ -103,7 +103,7 @@ Performance:
 2. Implement `WorkflowPrimitive[InputType, OutputType]`
 3. Add comprehensive tests (100% coverage required)
 4. Create example in `examples/`
-5. Update [[PRIMITIVES_CATALOG.md]]
+5. Update [[PRIMITIVES_CATALOG]]
 6. Update package README
 
 **Reference:** [[TTA Primitives/Development Guide]]
