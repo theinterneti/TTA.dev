@@ -12,25 +12,10 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-try:
-    from tta_dev_primitives.core.base import (
-        WorkflowContext,
-        WorkflowPrimitive,
-    )
-except ImportError:
-    # Fallback for development/testing
-    from typing import Protocol
-
-    class WorkflowContext:  # type: ignore
-        """Mock WorkflowContext for testing."""
-
-        pass
-
-    class WorkflowPrimitive(Protocol):  # type: ignore
-        """Minimal WorkflowPrimitive protocol for testing."""
-
-        pass
-
+from tta_dev_primitives.core.base import (
+    WorkflowContext,
+    WorkflowPrimitive,
+)
 
 from ..apm_setup import get_meter
 
@@ -133,7 +118,9 @@ class RouterPrimitive(WorkflowPrimitive[Any, Any]):
             self._cost_savings_counter = None
             self._errors_counter = None
 
-        logger.info(f"RouterPrimitive initialized with {len(routes)} routes: {list(routes.keys())}")
+        logger.info(
+            f"RouterPrimitive initialized with {len(routes)} routes: {list(routes.keys())}"
+        )
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """
@@ -168,7 +155,9 @@ class RouterPrimitive(WorkflowPrimitive[Any, Any]):
                     routing_reason = "invalid_route_fallback"
 
             except Exception as e:
-                logger.warning(f"Routing function failed: {e}, using default route", exc_info=True)
+                logger.warning(
+                    f"Routing function failed: {e}, using default route", exc_info=True
+                )
                 selected_route = self.default_route
                 routing_reason = "routing_error_fallback"
 
@@ -179,7 +168,9 @@ class RouterPrimitive(WorkflowPrimitive[Any, Any]):
 
             # Record routing decision
             if self._decisions_counter:
-                self._decisions_counter.add(1, {"route": selected_route, "reason": routing_reason})
+                self._decisions_counter.add(
+                    1, {"route": selected_route, "reason": routing_reason}
+                )
 
             logger.info(f"Routing to '{selected_route}' (reason: {routing_reason})")
 
