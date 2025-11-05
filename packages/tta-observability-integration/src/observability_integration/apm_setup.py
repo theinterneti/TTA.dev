@@ -47,7 +47,7 @@ def initialize_observability(
     service_name: str = "tta",
     service_version: str = "0.1.0",
     enable_prometheus: bool = True,
-    enable_console_traces: bool = None,
+    enable_console_traces: bool | None = None,
     prometheus_port: int = 9464,
 ) -> bool:
     """
@@ -123,7 +123,9 @@ def initialize_observability(
         if enable_prometheus:
             # Prometheus metrics reader
             prometheus_reader = PrometheusMetricReader()
-            _meter_provider = MeterProvider(resource=resource, metric_readers=[prometheus_reader])
+            _meter_provider = MeterProvider(
+                resource=resource, metric_readers=[prometheus_reader]
+            )
             metrics.set_meter_provider(_meter_provider)
             logger.info(
                 f"Prometheus metrics enabled on port {prometheus_port}. "

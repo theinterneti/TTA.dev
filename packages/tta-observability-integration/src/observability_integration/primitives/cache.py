@@ -14,25 +14,10 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-try:
-    from tta_dev_primitives.core.base import (
-        WorkflowContext,
-        WorkflowPrimitive,
-    )
-except ImportError:
-    # Fallback for development/testing
-    from typing import Protocol
-
-    class WorkflowContext:  # type: ignore
-        """Mock WorkflowContext for testing."""
-
-        pass
-
-    class WorkflowPrimitive(Protocol):  # type: ignore
-        """Minimal WorkflowPrimitive protocol for testing."""
-
-        pass
-
+from tta_dev_primitives.core.base import (
+    WorkflowContext,
+    WorkflowPrimitive,
+)
 
 from ..apm_setup import get_meter
 
@@ -141,7 +126,11 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
             self._hit_rate_gauge = meter.create_observable_gauge(
                 name="cache_hit_rate",
                 description="Cache hit rate (0.0-1.0)",
-                callbacks=[lambda options: [(get_hit_rate(), {"operation": self.operation_name})]],
+                callbacks=[
+                    lambda options: [
+                        (get_hit_rate(), {"operation": self.operation_name})
+                    ]
+                ],
             )
         else:
             self._hits_counter = None
@@ -266,7 +255,9 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
             if self._misses_counter:
                 self._misses_counter.add(1, {"operation": self.operation_name})
 
-            logger.debug(f"Cache MISS for '{self.operation_name}' (key: {cache_key[:50]}...)")
+            logger.debug(
+                f"Cache MISS for '{self.operation_name}' (key: {cache_key[:50]}...)"
+            )
 
         # Execute wrapped primitive
         result = await self.primitive.execute(input_data, context)
