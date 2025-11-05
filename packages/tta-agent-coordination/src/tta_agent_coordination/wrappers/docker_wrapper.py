@@ -315,8 +315,10 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         # Process build logs
         log_lines = []
         for log in build_logs:
-            if "stream" in log:
-                log_lines.append(log["stream"].strip())
+            if isinstance(log, dict) and "stream" in log:
+                stream = log.get("stream")
+                if isinstance(stream, str):
+                    log_lines.append(stream.strip())
 
         return {
             "image_id": image.id,

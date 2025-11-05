@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from github import Auth, Github, GithubException, RateLimitExceededException
+from github.GithubObject import NotSet
 from github.PullRequest import PullRequest
 from github.Repository import Repository
 from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
@@ -163,7 +164,7 @@ class GitHubAPIWrapper(WorkflowPrimitive[GitHubOperation, GitHubResult]):
 
             # Get rate limit info
             rate_limit = self.client.get_rate_limit()
-            remaining = rate_limit.core.remaining
+            remaining = rate_limit.core.remaining  # type: ignore[attr-defined]
 
             return GitHubResult(
                 success=True,
@@ -173,10 +174,11 @@ class GitHubAPIWrapper(WorkflowPrimitive[GitHubOperation, GitHubResult]):
             )
 
         except RateLimitExceededException as e:
+            reset_time = e.headers.get("X-RateLimit-Reset") if e.headers else "unknown"
             return GitHubResult(
                 success=False,
                 operation=input_data.operation,
-                error=f"Rate limit exceeded. Reset at: {e.headers.get('X-RateLimit-Reset')}",
+                error=f"Rate limit exceeded. Reset at: {reset_time}",
                 rate_limit_remaining=0,
             )
 
@@ -280,12 +282,12 @@ class GitHubAPIWrapper(WorkflowPrimitive[GitHubOperation, GitHubResult]):
         pr: PullRequest = repo.get_pull(params["number"])
 
         merge_method = params.get("merge_method", "merge")
-        commit_title = params.get("commit_title")
-        commit_message = params.get("commit_message")
+        commit_title: str | None = params.get("commit_title")
+        commit_message: str | None = params.get("commit_message")
 
         result = pr.merge(
-            commit_title=commit_title,
-            commit_message=commit_message,
+            commit_title=commit_title or NotSet,
+            commit_message=commit_message or NotSet,
             merge_method=merge_method,
         )
 
@@ -321,10 +323,10 @@ class GitHubAPIWrapper(WorkflowPrimitive[GitHubOperation, GitHubResult]):
 
     def _list_commits(self, repo: Repository, params: dict[str, Any]) -> dict[str, Any]:
         """List commits."""
-        sha = params.get("sha")
-        path = params.get("path")
+        sha: str | None = params.get("sha")
+        path: str | None = params.get("path")
 
-        commits = repo.get_commits(sha=sha, path=path)
+        commits = repo.get_commits(sha=sha or NotSet, path=path or NotSet)
 
         # Limit results
         max_results = params.get("max_results", 30)
@@ -393,7 +395,10 @@ class GitHubAPIWrapper(WorkflowPrimitive[GitHubOperation, GitHubResult]):
                 "sha": result["commit"].sha,
                 "message": result["commit"].commit.message,
             },
-            "content": {"path": result["content"].path, "sha": result["content"].sha},
+            "content": {
+                "path": getattr(result["content"], "path", params.get("path", "")),
+                "sha": result["content"].sha,
+            },
         }
 
     def _create_issue(self, repo: Repository, params: dict[str, Any]) -> dict[str, Any]:
@@ -403,9 +408,10 @@ class GitHubAPIWrapper(WorkflowPrimitive[GitHubOperation, GitHubResult]):
         if missing:
             raise ValueError(f"Missing required parameters: {missing}")
 
+        body: str | None = params.get("body")
         issue = repo.create_issue(
             title=params["title"],
-            body=params.get("body"),
+            body=body or NotSet,
             labels=params.get("labels", []),
         )
 
