@@ -43,24 +43,24 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      
+
       - name: Sync dependencies
         run: uv sync --all-extras
-      
+
       - name: Run tests
         run: uv run pytest -v --cov=packages --cov-report=xml
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
@@ -91,16 +91,16 @@ on: [push, pull_request]
 jobs:
   quality:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Format check
         run: uv run ruff format --check .
-      
+
       - name: Lint
         run: uv run ruff check .
-      
+
       - name: Type check
         run: uvx pyright packages/
 ```
@@ -128,27 +128,27 @@ jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
     timeout-minutes: 59
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install uv
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      
+
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: ~/.cache/uv
           key: uv-${{ hashFiles('**/pyproject.toml') }}
-      
+
       - name: Sync dependencies
         run: uv sync --all-extras
-      
+
       - name: Verify environment
         run: |
           uv --version
@@ -269,17 +269,17 @@ jobs:
       matrix:
         python-version: ['3.11', '3.12']
         os: [ubuntu-latest, macos-latest, windows-latest]
-    
+
     runs-on: ${{ matrix.os }}
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      
+
       - name: Run tests
         run: uv run pytest -v
 ```
@@ -314,13 +314,13 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Build package
         run: uv build
-      
+
       - name: Publish to PyPI
         env:
           TWINE_USERNAME: __token__
@@ -446,7 +446,7 @@ jobs:
     steps:
       - name: Lint
         run: uv run ruff check .
-  
+
   test:
     needs: lint  # Wait for lint to pass
     runs-on: ubuntu-latest
@@ -474,7 +474,7 @@ jobs:
     environment:
       name: production
       url: https://tta.dev
-    
+
     steps:
       - name: Deploy
         run: ./scripts/deploy.sh

@@ -49,14 +49,14 @@ async def test_simple_workflow():
     mock_llm = MockPrimitive(
         return_value={"response": "Mocked LLM output"}
     )
-    
+
     # Use in workflow
     workflow = input_processor >> mock_llm >> output_formatter
-    
+
     # Execute
     context = WorkflowContext(correlation_id="test-1")
     result = await workflow.execute({"input": "test"}, context)
-    
+
     # Verify
     assert result["formatted_response"] == "Mocked LLM output"
     assert mock_llm.call_count == 1
@@ -75,16 +75,16 @@ async def test_retry_logic():
             {"data": "success"}
         ]
     )
-    
+
     # Workflow with retry
     workflow = RetryPrimitive(
         primitive=mock_api,
         max_retries=3
     )
-    
+
     # Execute
     result = await workflow.execute({"request": "data"}, context)
-    
+
     # Verify retry worked
     assert result["data"] == "success"
     assert mock_api.call_count == 3
@@ -115,21 +115,21 @@ async def test_llm_workflow():
             }
         }
     )
-    
+
     # Build workflow
     workflow = (
         prepare_prompt >>
         mock_llm >>  # No actual LLM call
         extract_response
     )
-    
+
     # Test
     result = await workflow.execute({"input": "test"}, context)
-    
+
     # Verify
     assert "test response" in result["output"]
     assert mock_llm.call_count == 1
-    
+
     # Check what was passed to LLM
     call_data = mock_llm.call_history[0]
     assert "prompt" in call_data["input_data"]
@@ -150,16 +150,16 @@ async def test_api_integration():
             }
         }
     )
-    
+
     # Workflow with fallback
     workflow = FallbackPrimitive(
         primary=mock_api,
         fallback=local_cache
     )
-    
+
     # Test
     result = await workflow.execute({"user_id": "user-123"}, context)
-    
+
     assert result["data"]["user_id"] == "user-123"
 ```
 
@@ -175,17 +175,17 @@ async def test_database_workflow():
             {"id": 2, "name": "Document 2", "content": "..."},
         ]
     )
-    
+
     # RAG workflow with mock retrieval
     workflow = (
         mock_db >>  # No actual DB query
         rerank_documents >>
         generate_response
     )
-    
+
     # Test
     result = await workflow.execute({"query": "test"}, context)
-    
+
     assert len(result["sources"]) == 2
 ```
 
@@ -198,16 +198,16 @@ async def test_error_recovery():
     mock_failing = MockPrimitive(
         return_value=Exception("Simulated failure")
     )
-    
+
     # Workflow with fallback
     workflow = FallbackPrimitive(
         primary=mock_failing,
         fallback=MockPrimitive(return_value={"status": "fallback used"})
     )
-    
+
     # Test fallback triggered
     result = await workflow.execute({"input": "test"}, context)
-    
+
     assert result["status"] == "fallback used"
 ```
 
@@ -228,17 +228,17 @@ async def test_dynamic_mock():
             "response": f"Processed: {query}",
             "length": len(query)
         }
-    
+
     mock_processor = MockPrimitive(
         return_value=compute_response
     )
-    
+
     # Test
     result = await mock_processor.execute(
         {"query": "hello world"},
         context
     )
-    
+
     assert result["response"] == "Processed: hello world"
     assert result["length"] == 11
 ```
@@ -249,21 +249,21 @@ async def test_dynamic_mock():
 @pytest.mark.asyncio
 async def test_call_tracking():
     mock_step = MockPrimitive(return_value={"status": "ok"})
-    
+
     # Execute multiple times
     workflow = step1 >> mock_step >> step3
-    
+
     await workflow.execute({"a": 1}, context)
     await workflow.execute({"b": 2}, context)
     await workflow.execute({"c": 3}, context)
-    
+
     # Inspect all calls
     assert mock_step.call_count == 3
-    
+
     # Check first call
     first_call = mock_step.call_history[0]
     assert first_call["input_data"]["a"] == 1
-    
+
     # Check correlation IDs
     for call in mock_step.call_history:
         assert "correlation_id" in call["context"].data
@@ -280,16 +280,16 @@ async def test_conditional_behavior():
             return {"result": "fast response", "cost": 0.001}
         else:
             return {"result": "quality response", "cost": 0.01}
-    
+
     mock_router = MockPrimitive(return_value=conditional_response)
-    
+
     # Test fast path
     fast_result = await mock_router.execute(
         {"type": "fast", "query": "test"},
         context
     )
     assert fast_result["cost"] == 0.001
-    
+
     # Test quality path
     quality_result = await mock_router.execute(
         {"type": "quality", "query": "test"},
@@ -327,7 +327,7 @@ def test_context():
 async def test_with_fixtures(mock_llm, test_context):
     workflow = input_processor >> mock_llm >> output_formatter
     result = await workflow.execute({"input": "test"}, test_context)
-    
+
     assert "Test response" in result["output"]
 ```
 
@@ -344,7 +344,7 @@ async def test_parametrized(input_data, expected):
     mock_processor = MockPrimitive(
         return_value=lambda d, c: {"result": d["query"]}
     )
-    
+
     result = await mock_processor.execute(input_data, context)
     assert result["result"] == expected
 ```
@@ -402,13 +402,13 @@ async def test_failure():
 @pytest.mark.asyncio
 async def test_caching():
     mock_llm = MockPrimitive(return_value={"response": "cached"})
-    
+
     workflow = CachePrimitive(mock_llm, ttl=60)
-    
+
     # First call
     await workflow.execute({"input": "test"}, context)
     assert mock_llm.call_count == 1
-    
+
     # Second call (should use cache)
     await workflow.execute({"input": "test"}, context)
     assert mock_llm.call_count == 1  # Still 1, cache hit!
@@ -425,7 +425,7 @@ MockPrimitive(
     return_value=None,          # Single return value (any type)
     return_values=None,         # List of values for sequential calls
     side_effect=None,           # Callable for dynamic behavior
-    
+
     # Advanced options
     record_calls=True,          # Track call history
     max_history_size=100,       # Limit history size
@@ -466,17 +466,17 @@ async def test_multi_agent():
     mock_research = MockPrimitive(return_value={"data": "research"})
     mock_analysis = MockPrimitive(return_value={"insights": "analysis"})
     mock_writing = MockPrimitive(return_value={"content": "written"})
-    
+
     # Build multi-agent workflow
     workflow = ParallelPrimitive([
         mock_research,
         mock_analysis,
         mock_writing
     ]) >> aggregate_results
-    
+
     # Test
     result = await workflow.execute({"task": "test"}, context)
-    
+
     # Verify all agents called
     assert mock_research.call_count == 1
     assert mock_analysis.call_count == 1
@@ -495,13 +495,13 @@ async def test_rag_workflow():
             {"id": 2, "content": "Doc 2", "score": 0.8},
         ]
     })
-    
+
     # Mock LLM
     mock_llm = MockPrimitive(return_value={
         "response": "Answer based on docs",
         "sources": [1, 2]
     })
-    
+
     # RAG workflow
     workflow = (
         mock_retriever >>
@@ -510,10 +510,10 @@ async def test_rag_workflow():
         mock_llm >>
         format_response
     )
-    
+
     # Test
     result = await workflow.execute({"query": "test"}, context)
-    
+
     assert "Answer based on docs" in result["text"]
     assert len(result["sources"]) == 2
 ```
@@ -533,12 +533,12 @@ async def test_timeout_handling():
     async def slow_response(data, context):
         await asyncio.sleep(5)  # Simulate slow API
         return {"result": "slow"}
-    
+
     mock_slow = MockPrimitive(return_value=slow_response)
-    
+
     # Workflow with timeout
     workflow = TimeoutPrimitive(mock_slow, timeout=1.0)
-    
+
     # Test timeout triggered
     with pytest.raises(TimeoutError):
         await workflow.execute({"input": "test"}, context)
@@ -550,17 +550,17 @@ async def test_timeout_handling():
 @pytest.mark.asyncio
 async def test_parallel_load():
     mock_api = MockPrimitive(return_value={"status": "ok"})
-    
+
     # Simulate 100 concurrent requests
     workflow = mock_api
-    
+
     tasks = [
         workflow.execute({"request": i}, context)
         for i in range(100)
     ]
-    
+
     results = await asyncio.gather(*tasks)
-    
+
     assert len(results) == 100
     assert mock_api.call_count == 100
 ```
@@ -579,13 +579,13 @@ logging.basicConfig(level=logging.DEBUG)
 @pytest.mark.asyncio
 async def test_with_logging():
     mock = MockPrimitive(return_value={"result": "test"})
-    
+
     # Logs will show:
     # - When mock is called
     # - Input data passed
     # - Return value
     # - Call count
-    
+
     result = await mock.execute({"input": "debug"}, context)
 ```
 
@@ -595,10 +595,10 @@ async def test_with_logging():
 @pytest.mark.asyncio
 async def test_debug_calls():
     mock = MockPrimitive(return_value={"status": "ok"})
-    
+
     # Execute workflow
     await workflow.execute({"input": "test"}, context)
-    
+
     # Debug: Print all calls
     for i, call in enumerate(mock.call_history):
         print(f"Call {i}:")

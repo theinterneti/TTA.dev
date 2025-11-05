@@ -247,19 +247,19 @@
   package:: tta-dev-primitives
   due:: [[2025-11-15]]
   estimate:: 3 days
-  
+
   ## Requirements
   - Add cost-based routing
   - Improve tier selection
   - Update documentation
-  
+
   ## Tasks
   - [ ] Design API (0.5d)
   - [ ] Implement routing logic (1d)
   - [ ] Add tests (0.5d)
   - [ ] Update docs (0.5d)
   - [ ] Review (0.5d)
-  
+
   related:: [[TTA Primitives/RouterPrimitive]]
 ```
 
@@ -319,23 +319,23 @@
   package:: tta-observability-integration
   estimate:: 2 days
   due:: [[2025-11-15]]
-  
+
   ## Feature
   Export Prometheus metrics for cache operations
-  
+
   ## Metrics
   - cache_hit_rate (gauge)
   - cache_miss_total (counter)
   - cache_eviction_total (counter)
   - cache_size_bytes (gauge)
-  
+
   ## Tasks
   - [ ] Design metrics (0.5d)
   - [ ] Implement collection (0.5d)
   - [ ] Add tests (0.5d)
   - [ ] Document usage (0.25d)
   - [ ] Update examples (0.25d)
-  
+
   related:: [[TTA Primitives/CachePrimitive]], [[Performance]]
 ```
 
@@ -350,22 +350,22 @@
   package:: tta-dev-primitives
   estimate:: 3 days
   technical-debt:: true
-  
+
   ## Issue
   Error handling inconsistent across primitives
-  
+
   ## Improvements
   - Standardize exception hierarchy
   - Add error context propagation
   - Improve error messages
   - Update documentation
-  
+
   ## Tasks
   - [ ] Design error hierarchy (0.5d)
   - [ ] Implement changes (1.5d)
   - [ ] Update tests (0.5d)
   - [ ] Update docs (0.5d)
-  
+
   related:: [[Recovery]], [[TTA.dev/Technical Debt]]
 ```
 
@@ -379,18 +379,18 @@
   priority:: medium
   estimate:: 1 day
   due:: [[2025-11-10]]
-  
+
   ## Updates Needed
   - Add MemoryPrimitive section
   - Update RouterPrimitive examples
   - Add cost optimization guide
   - Update best practices
-  
+
   ## Tasks
   - [ ] Review recent changes (0.25d)
   - [ ] Write new sections (0.5d)
   - [ ] Update examples (0.25d)
-  
+
   related:: [[PRIMITIVES_CATALOG]], [[Documentation]]
 ```
 

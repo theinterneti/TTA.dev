@@ -43,7 +43,7 @@ async def task_agent(task: str) -> dict:
         execute_plan >>
         validate_result
     )
-    
+
     context = WorkflowContext(correlation_id=f"task-{task}")
     result = await workflow.execute({"task": task}, context)
     return result
@@ -59,7 +59,7 @@ async def retrieval_agent(query: str) -> list[dict]:
         rank_results >>
         return_top_k
     )
-    
+
     result = await workflow.execute({"query": query}, context)
     return result
 ```
@@ -82,7 +82,7 @@ async def orchestrated_workflow():
         orchestrator=claude_sonnet,  # Smart planner
         executor=gemini_flash         # Fast executor
     )
-    
+
     result = await workflow.execute(complex_task, context)
     return result
 ```
@@ -106,7 +106,7 @@ async def parallel_agents():
         analysis_agent |
         synthesis_agent
     ) >> aggregator_agent
-    
+
     # All agents run concurrently
     results = await workflow.execute(query, context)
     return results
@@ -127,7 +127,7 @@ async def agent_pipeline():
         execution_agent >>
         validation_agent
     )
-    
+
     result = await workflow.execute(input_data, context)
     return result
 ```
@@ -154,7 +154,7 @@ async def classify_and_route():
             "creative": creative_agent
         }
     )
-    
+
     result = await classifier.execute(task, context)
     return result
 ```
@@ -177,7 +177,7 @@ async def multi_model_agent():
         },
         coordinator=gpt4_mini
     )
-    
+
     result = await workflow.execute(request, context)
     return result
 ```
@@ -201,11 +201,11 @@ async def stateful_agent():
         agent_id="research-agent-001",
         session_id="session-123"
     )
-    
+
     # Track history
     agent_ctx.add_message("user", "Research topic X")
     agent_ctx.add_message("assistant", "Found 3 papers...")
-    
+
     # Use in workflow
     workflow = research_agent >> synthesize_agent
     result = await workflow.execute(query, agent_ctx)
@@ -223,23 +223,23 @@ from tta_dev_primitives.performance import MemoryPrimitive
 async def conversational_agent():
     """Agent with conversation memory."""
     memory = MemoryPrimitive(max_size=100)
-    
+
     # Store conversation
     await memory.add("turn_1", {
         "role": "user",
         "content": "What is a primitive?"
     })
-    
+
     # Search history for context
     history = await memory.search(keywords=["primitive"])
-    
+
     # Generate response with context
     workflow = (
         retrieve_history >>
         generate_response >>
         store_response
     )
-    
+
     result = await workflow.execute(user_input, context)
     return result
 ```
@@ -328,7 +328,7 @@ async def collaborative_workflow():
         paper_research_agent |
         code_research_agent
     ).execute(topic, context)
-    
+
     # Phase 2: Sequential synthesis
     workflow = (
         aggregation_agent >>
@@ -336,7 +336,7 @@ async def collaborative_workflow():
         synthesis_agent >>
         validation_agent
     )
-    
+
     final_result = await workflow.execute(research_results, context)
     return final_result
 ```
@@ -363,7 +363,7 @@ async def agent_pipeline():
         validation_agent >>      # Validate results
         formatting_agent         # Format output
     )
-    
+
     result = await pipeline.execute(request, context)
     return result
 ```
@@ -388,20 +388,20 @@ from opentelemetry import trace
 async def observable_agent():
     """Agent with full tracing."""
     tracer = trace.get_tracer(__name__)
-    
+
     with tracer.start_as_current_span("agent_workflow") as span:
         # Add agent metadata
         span.set_attribute("agent.type", "orchestrator")
         span.set_attribute("agent.model", "claude-sonnet")
-        
+
         # Execute workflow
         workflow = orchestrator >> executor
         result = await workflow.execute(task, context)
-        
+
         # Record completion
         span.set_attribute("agent.result_size", len(result))
         span.add_event("agent_completed")
-        
+
         return result
 ```
 
@@ -560,7 +560,7 @@ async def basic_agent(task: str) -> str:
         execute_task >>
         format_result
     )
-    
+
     context = WorkflowContext(correlation_id=f"task-{task}")
     result = await workflow.execute({"task": task}, context)
     return result
@@ -585,16 +585,16 @@ async def multi_agent_system(query: str) -> dict:
         paper_agent |
         code_agent
     )
-    
+
     # Synthesis phase (sequential)
     synthesis = DelegationPrimitive(
         orchestrator=planning_agent,
         executor=synthesis_agent
     )
-    
+
     # Complete workflow
     workflow = research >> synthesis
-    
+
     context = WorkflowContext(correlation_id=f"query-{query}")
     result = await workflow.execute({"query": query}, context)
     return result
@@ -620,7 +620,7 @@ async def rag_agent(query: str) -> str:
         synthesis_agent >>                        # Generate answer
         validation_agent                          # Validate output
     )
-    
+
     result = await workflow.execute({"query": query}, context)
     return result
 ```
@@ -655,11 +655,11 @@ async def test_agent():
     mock_llm = MockPrimitive(
         return_value={"output": "test response"}
     )
-    
+
     # Test workflow
     workflow = preprocessing >> mock_llm >> postprocessing
     result = await workflow.execute(test_input, context)
-    
+
     # Assertions
     assert mock_llm.call_count == 1
     assert result["output"] == "test response"

@@ -61,7 +61,7 @@ from tta_dev_primitives import WorkflowContext
 
 class CustomPrimitive(InstrumentedPrimitive[dict, dict]):
     """My custom primitive with automatic observability."""
-    
+
     async def _execute_impl(
         self,
         input_data: dict,
@@ -81,15 +81,15 @@ from opentelemetry import trace
 class AdvancedPrimitive(InstrumentedPrimitive[dict, dict]):
     async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
         # Automatic parent span already created
-        
+
         tracer = trace.get_tracer(__name__)
-        
+
         # Add child span for sub-operation
         with tracer.start_as_current_span("sub_operation") as span:
             span.set_attribute("input_size", len(input_data))
             result = await detailed_processing(input_data)
             span.add_event("processing_complete")
-        
+
         return result
 ```
 
@@ -106,10 +106,10 @@ class CachedPrimitive(InstrumentedPrimitive[dict, dict]):
         if result := self.cache.get(input_data):
             cache_hits.inc()  # Custom metric
             return result
-        
+
         with query_duration.time():  # Custom metric
             result = await expensive_query(input_data)
-        
+
         return result
 ```
 
@@ -139,7 +139,7 @@ class InstrumentedPrimitive:
         # 6. Record metrics
         # 7. End span
         # 8. Return result
-    
+
     async def _execute_impl(self, input_data: TInput, context: WorkflowContext) -> TOutput:
         """Subclasses implement this - observability automatic."""
         raise NotImplementedError

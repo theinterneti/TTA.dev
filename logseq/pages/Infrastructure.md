@@ -93,11 +93,11 @@ services:
   prometheus:
     image: prom/prometheus
     ports: ["9090:9090"]
-  
+
   grafana:
     image: grafana/grafana
     ports: ["3000:3000"]
-  
+
   jaeger:
     image: jaegertracing/all-in-one
     ports: ["16686:16686"]
@@ -195,19 +195,19 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-    
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      
+
       - name: Install dependencies
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           uv sync --all-extras
-      
+
       - name: Run tests
         run: uv run pytest -v --cov=packages
 ```
@@ -233,14 +233,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Lint
         run: uv run ruff check .
-  
+
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Format check
         run: uv run ruff format --check .
-  
+
   typecheck:
     runs-on: ubuntu-latest
     steps:
@@ -269,15 +269,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Build package
         run: uv build
-      
+
       - name: Publish to PyPI
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: uv publish --token $PYPI_TOKEN
-      
+
       - name: Create GitHub Release
         uses: actions/create-release@v1
         with:
@@ -333,7 +333,7 @@ scrape_configs:
   - job_name: 'tta-primitives'
     static_configs:
       - targets: ['localhost:9464']
-    
+
   - job_name: 'application'
     static_configs:
       - targets: ['localhost:8000']
@@ -547,7 +547,7 @@ docker push tta-dev:latest
 
 ```promql
 # CI/CD metrics
-github_workflow_runs_total{status="success"} / 
+github_workflow_runs_total{status="success"} /
 github_workflow_runs_total
 
 # Test pass rate

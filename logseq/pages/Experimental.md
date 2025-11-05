@@ -138,11 +138,11 @@ async def test_experimental_feature():
     """Test experimental database primitive."""
     # Test in isolated environment
     primitive = ExperimentalPrimitive()
-    
+
     # Expect potential issues
     with pytest.warns(UserWarning):
         result = await primitive.execute(data, context)
-    
+
     # Document behavior
     assert "result" in result
 ```
@@ -345,10 +345,10 @@ from supabase import create_client
 
 class CustomSupabasePrimitive(WorkflowPrimitive):
     """Custom Supabase primitive."""
-    
+
     def __init__(self, url: str, key: str):
         self.client = create_client(url, key)
-    
+
     async def _execute_impl(self, context, input_data):
         # Your Supabase logic
         result = self.client.table("users").select("*").execute()
@@ -362,10 +362,10 @@ from tta_dev_primitives import WorkflowPrimitive
 
 class CustomSQLitePrimitive(WorkflowPrimitive):
     """Custom SQLite primitive."""
-    
+
     def __init__(self, db_path: str):
         self.db_path = db_path
-    
+
     async def _execute_impl(self, context, input_data):
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()

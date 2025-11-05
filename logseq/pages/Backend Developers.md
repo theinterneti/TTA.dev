@@ -70,7 +70,7 @@ app = Flask(__name__)
 def process():
     data = request.json
     context = WorkflowContext()
-    
+
     # Run async workflow in sync context
     result = asyncio.run(workflow.execute(data, context))
     return jsonify(result)
@@ -126,7 +126,7 @@ async def db_workflow(session: AsyncSession, data: dict):
         transform_results >>
         update_database(session)
     )
-    
+
     context = WorkflowContext()
     return await workflow.execute(data, context)
 ```
@@ -212,7 +212,7 @@ class Settings(BaseSettings):
     openai_api_key: str
     cache_ttl: int = 3600
     max_retries: int = 3
-    
+
     class Config:
         env_file = ".env"
 
@@ -310,7 +310,7 @@ from pydantic import BaseModel, validator
 class WorkflowInput(BaseModel):
     text: str
     max_length: int
-    
+
     @validator("max_length")
     def check_max_length(cls, v):
         if v > 10000:

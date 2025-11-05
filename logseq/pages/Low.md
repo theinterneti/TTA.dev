@@ -196,13 +196,13 @@
   priority:: low
   type:: documentation
   estimate:: 1 hour
-  
+
   ## Description
   Code examples in docs lack syntax highlighting
-  
+
   ## Impact
   Minor readability improvement
-  
+
   related:: [[Documentation]]
 ```
 
@@ -276,16 +276,16 @@ Total: 3 hours, batch together
   priority:: low
   estimate:: 2 hours
   batch:: documentation-cleanup
-  
+
   ## Improvements
   - Add emoji for visual interest
   - Consistent section headers
   - Better table formatting
   - Cross-reference links
-  
+
   ## Value
   Minor readability improvement
-  
+
   related:: [[PRIMITIVES_CATALOG]], [[Documentation]]
 ```
 
@@ -299,16 +299,16 @@ Total: 3 hours, batch together
   priority:: low
   estimate:: 3 hours
   technical-debt:: minor
-  
+
   ## Issue
   Some variable names don't follow conventions
-  
+
   ## Impact
   No functional change, minor readability
-  
+
   ## Opportunity
   Batch with related refactoring work
-  
+
   related:: [[TTA.dev/Technical Debt]]
 ```
 
@@ -322,18 +322,18 @@ Total: 3 hours, batch together
   priority:: low
   estimate:: unknown
   future:: true
-  
+
   ## Idea
   Explore GraphQL as alternative to REST API
-  
+
   ## Value
   Potential future enhancement
-  
+
   ## Next Steps
   - Review user requests
   - Assess feasibility
   - Prototype if promising
-  
+
   related:: [[TTA.dev/Future Features]]
 ```
 

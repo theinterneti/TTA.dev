@@ -47,7 +47,7 @@ Tasks use completion markers in journals:
 ```markdown
 - TODO Implement feature #dev-todo
   status:: in-progress
-  
+
 - DOING Working on tests #dev-todo
   status:: in-progress
 
@@ -72,20 +72,20 @@ async def wait_for_completion(
 ) -> bool:
     """Wait for workflow to complete."""
     start_time = asyncio.get_event_loop().time()
-    
+
     while True:
         context = await get_workflow_context(workflow_id)
-        
+
         if context.is_complete():
             return True
-        
+
         if context.is_failed():
             raise WorkflowError(f"Workflow {workflow_id} failed")
-        
+
         elapsed = asyncio.get_event_loop().time() - start_time
         if elapsed > timeout_seconds:
             raise TimeoutError(f"Workflow {workflow_id} did not complete")
-        
+
         await asyncio.sleep(1.0)
 
 # Usage
@@ -98,11 +98,11 @@ await wait_for_completion("workflow-123")
 async def check_batch_complete(workflow_ids: list[str]) -> dict[str, bool]:
     """Check completion status of multiple workflows."""
     results = {}
-    
+
     for workflow_id in workflow_ids:
         context = await get_workflow_context(workflow_id)
         results[workflow_id] = context.is_complete()
-    
+
     return results
 
 # Usage
@@ -126,18 +126,18 @@ from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
 
 class CallbackPrimitive(WorkflowPrimitive):
     """Primitive with completion callback."""
-    
+
     def __init__(self, on_complete: callable):
         super().__init__()
         self.on_complete = on_complete
-    
+
     async def _execute_impl(self, data: dict, context: WorkflowContext) -> dict:
         try:
             result = await self.process(data, context)
-            
+
             # Call completion handler
             await self.on_complete(result, context)
-            
+
             return result
         except Exception as e:
             await self.on_complete(None, context, error=e)
@@ -167,11 +167,11 @@ workflow = CallbackPrimitive(on_complete=handle_complete)
 rate(workflow_completions_total[5m])
 
 # Success vs failure ratio
-workflow_completions_total{status="complete"} / 
+workflow_completions_total{status="complete"} /
 workflow_completions_total
 
 # Average time to completion
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   workflow_completion_duration_seconds_bucket
 )
 ```
@@ -288,9 +288,9 @@ async def handle_workflow_complete(event: dict):
     """Handle workflow completion events."""
     workflow_id = event["workflow_id"]
     duration = event["duration_seconds"]
-    
+
     logger.info(f"Workflow {workflow_id} completed in {duration}s")
-    
+
     # Trigger dependent workflows
     await trigger_dependent_workflows(workflow_id)
 
@@ -312,9 +312,9 @@ from tta_dev_primitives import WorkflowContext
 async def test_workflow_completes():
     """Test workflow completes successfully."""
     context = WorkflowContext(workflow_id="test")
-    
+
     result = await workflow.execute({"input": "test"}, context)
-    
+
     assert result is not None
     assert context.is_complete()
 
@@ -322,14 +322,14 @@ async def test_workflow_completes():
 async def test_workflow_completion_callback():
     """Test completion callback is called."""
     callback_called = False
-    
+
     async def on_complete(result, context):
         nonlocal callback_called
         callback_called = True
-    
+
     workflow = CallbackPrimitive(on_complete=on_complete)
     await workflow.execute({"input": "test"}, context)
-    
+
     assert callback_called
 ```
 

@@ -261,7 +261,7 @@ logger = structlog.get_logger(__name__)
 
 async def error_aware_operation(data: dict, context: WorkflowContext) -> dict:
     """Operation that tracks errors in context."""
-    
+
     try:
         result = await risky_operation(data)
         return result
@@ -273,14 +273,14 @@ async def error_aware_operation(data: dict, context: WorkflowContext) -> dict:
             error=str(e),
             exc_info=True
         )
-        
+
         # Store error in context for downstream handling
         context.set("last_error", {
             "type": type(e).__name__,
             "message": str(e),
             "operation": "risky_operation"
         })
-        
+
         raise  # Re-raise for primitive error handling
 ```
 
@@ -308,32 +308,32 @@ operation_duration = Histogram(
 
 async def monitored_operation(data: dict, context: WorkflowContext) -> dict:
     """Operation with error metrics."""
-    
+
     start_time = time.time()
-    
+
     try:
         result = await risky_operation(data)
-        
+
         # Record success
         operation_duration.labels(
             operation="risky_operation",
             status="success"
         ).observe(time.time() - start_time)
-        
+
         return result
-        
+
     except Exception as e:
         # Record failure
         operation_errors.labels(
             operation="risky_operation",
             error_type=type(e).__name__
         ).inc()
-        
+
         operation_duration.labels(
             operation="risky_operation",
             status="error"
         ).observe(time.time() - start_time)
-        
+
         raise
 ```
 
@@ -401,22 +401,22 @@ import pytest
 @pytest.mark.asyncio
 async def test_retry_on_transient_failure():
     """Test retry behavior."""
-    
+
     call_count = 0
-    
+
     async def flaky_operation(data, context):
         nonlocal call_count
         call_count += 1
-        
+
         if call_count < 3:
             raise ValueError("Transient failure")
-        
+
         return {"success": True}
-    
+
     retry_op = RetryPrimitive(flaky_operation, max_retries=5)
-    
+
     result = await retry_op.execute({}, WorkflowContext())
-    
+
     assert result["success"]
     assert call_count == 3  # Failed twice, succeeded third time
 ```

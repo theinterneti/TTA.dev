@@ -89,17 +89,17 @@ from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
 
 class MyCustomPrimitive(WorkflowPrimitive[str, dict]):
     """Custom primitive that processes strings."""
-    
+
     async def _execute_impl(
         self,
         data: str,
         context: WorkflowContext
     ) -> dict:
         """Process the input string."""
-        
+
         # Your custom logic here
         processed = data.upper()
-        
+
         return {"result": processed}
 
 # Use it
@@ -113,28 +113,28 @@ result = await primitive.execute("hello", WorkflowContext())
 ```python
 class ConfigurablePrimitive(WorkflowPrimitive[dict, dict]):
     """Primitive with configuration options."""
-    
+
     def __init__(self, mode: str = "fast", max_retries: int = 3):
         super().__init__()
         self.mode = mode
         self.max_retries = max_retries
-    
+
     async def _execute_impl(
         self,
         data: dict,
         context: WorkflowContext
     ) -> dict:
         """Execute with configured behavior."""
-        
+
         if self.mode == "fast":
             return await self._fast_process(data)
         else:
             return await self._quality_process(data)
-    
+
     async def _fast_process(self, data: dict) -> dict:
         """Fast processing mode."""
         return {"result": "fast", "data": data}
-    
+
     async def _quality_process(self, data: dict) -> dict:
         """Quality processing mode."""
         return {"result": "quality", "data": data}
@@ -247,15 +247,15 @@ from tta_dev_primitives import WorkflowContext
 @pytest.mark.asyncio
 async def test_primitive1_basic_functionality():
     """Test basic primitive behavior."""
-    
+
     # Arrange
     primitive = MyCustomPrimitive()
     context = WorkflowContext(workflow_id="test")
     input_data = "hello world"
-    
+
     # Act
     result = await primitive.execute(input_data, context)
-    
+
     # Assert
     assert result["result"] == "HELLO WORLD"
     assert "error" not in result
@@ -263,10 +263,10 @@ async def test_primitive1_basic_functionality():
 @pytest.mark.asyncio
 async def test_primitive1_error_handling():
     """Test primitive error handling."""
-    
+
     primitive = MyCustomPrimitive()
     context = WorkflowContext(workflow_id="test")
-    
+
     with pytest.raises(ValueError):
         await primitive.execute(None, context)  # Should raise
 ```
@@ -277,15 +277,15 @@ async def test_primitive1_error_handling():
 @pytest.mark.asyncio
 async def test_primitive1_in_workflow():
     """Test primitive in composed workflow."""
-    
+
     primitive1 = PreprocessPrimitive()
     primitive2 = MyCustomPrimitive()
     primitive3 = PostprocessPrimitive()
-    
+
     workflow = primitive1 >> primitive2 >> primitive3
-    
+
     result = await workflow.execute({"input": "test"}, WorkflowContext())
-    
+
     assert result["status"] == "completed"
 ```
 
@@ -316,29 +316,29 @@ from prometheus_client import Counter, Histogram
 
 class MetricsPrimitive(WorkflowPrimitive[dict, dict]):
     """Primitive with custom metrics."""
-    
+
     execution_count = Counter(
         'primitive_executions_total',
         'Total primitive executions',
         ['primitive_name']
     )
-    
+
     execution_duration = Histogram(
         'primitive_duration_seconds',
         'Primitive execution duration',
         ['primitive_name']
     )
-    
+
     async def _execute_impl(self, data: dict, context: WorkflowContext) -> dict:
         with self.execution_duration.labels(
             primitive_name=self.__class__.__name__
         ).time():
             result = await self._process(data)
-            
+
             self.execution_count.labels(
                 primitive_name=self.__class__.__name__
             ).inc()
-            
+
             return result
 ```
 

@@ -38,7 +38,7 @@ from tta_dev_primitives import WorkflowContext
 async def basic_sequential():
     """Simple sequential workflow."""
     workflow = step1 >> step2 >> step3
-    
+
     context = WorkflowContext(correlation_id="demo")
     result = await workflow.execute(input_data, context)
     return result
@@ -49,7 +49,7 @@ async def basic_sequential():
 async def basic_parallel():
     """Concurrent execution."""
     workflow = branch1 | branch2 | branch3
-    
+
     results = await workflow.execute(input_data, context)
     return results  # [result1, result2, result3]
 ```
@@ -74,7 +74,7 @@ async def retry_example():
         initial_delay=1.0,
         jitter=True
     )
-    
+
     workflow = retry >> api_call
     result = await workflow.execute(data, context)
     return result
@@ -90,7 +90,7 @@ async def fallback_example():
         primary=openai_gpt4,
         fallbacks=[anthropic_claude, google_gemini]
     )
-    
+
     result = await fallback.execute(prompt, context)
     return result
 ```
@@ -113,7 +113,7 @@ async def cache_example():
         ttl_seconds=3600,  # 1 hour
         max_size=1000
     )
-    
+
     workflow = cache >> expensive_llm_call
     result = await workflow.execute(prompt, context)
     return result
@@ -126,10 +126,10 @@ from tta_dev_primitives.performance import MemoryPrimitive
 async def memory_example():
     """Conversational memory."""
     memory = MemoryPrimitive(max_size=100)
-    
+
     # Store conversation
     await memory.add("user_msg_1", {"role": "user", "content": "Hello"})
-    
+
     # Search history
     history = await memory.search(keywords=["hello"])
     return history
@@ -156,26 +156,26 @@ async def rag_workflow(query: str):
         ttl_seconds=3600,
         max_size=10000
     )
-    
+
     # Retry retrieval
     retry_retrieval = RetryPrimitive(
         max_retries=3,
         backoff_strategy="exponential"
     )
-    
+
     # Fallback LLM
     fallback_llm = FallbackPrimitive(
         primary=gpt4,
         fallbacks=[claude, gemini]
     )
-    
+
     # Compose workflow
     workflow = (
         cached_embeddings >>
         retry_retrieval >>
         fallback_llm
     )
-    
+
     context = WorkflowContext(correlation_id=f"rag-{query}")
     result = await workflow.execute({"query": query}, context)
     return result
@@ -195,10 +195,10 @@ async def cost_tracking_example():
         daily_limit_usd=100.0,
         alert_threshold=0.8
     )
-    
+
     workflow = budget >> expensive_operation
     result = await workflow.execute(data, context)
-    
+
     # Check usage
     usage = budget.get_usage()
     print(f"Spent: ${usage['spent']:.2f} / ${usage['limit']:.2f}")
@@ -219,7 +219,7 @@ async def multi_agent_example():
         orchestrator=claude_sonnet,  # Plan
         executor=gemini_flash         # Execute
     )
-    
+
     result = await workflow.execute(complex_task, context)
     return result
 ```
@@ -238,11 +238,11 @@ from tta_dev_primitives import WorkflowPrimitive
 
 class SupabasePrimitive(WorkflowPrimitive):
     """Custom Supabase primitive."""
-    
+
     def __init__(self, supabase_client):
         super().__init__()
         self.client = supabase_client
-    
+
     async def _execute(self, data, context):
         """Query Supabase."""
         result = await self.client.table('data').select('*').execute()
@@ -258,7 +258,7 @@ async def github_integration_example():
         classify_issues >>
         route_to_agent
     )
-    
+
     result = await workflow.execute({"repo": "owner/repo"}, context)
     return result
 ```
@@ -283,16 +283,16 @@ async def observability_example():
         service_name="my-app",
         enable_prometheus=True
     )
-    
+
     # Create workflow with tracing
     tracer = trace.get_tracer(__name__)
-    
+
     with tracer.start_as_current_span("my_workflow") as span:
         span.set_attribute("input_size", len(data))
-        
+
         workflow = step1 >> step2 >> step3
         result = await workflow.execute(data, context)
-        
+
         span.set_attribute("output_size", len(result))
         return result
 ```
@@ -340,13 +340,13 @@ async def main():
     """Main example function."""
     # Setup
     context = WorkflowContext(correlation_id="example")
-    
+
     # Example workflow
     workflow = step1 >> step2 >> step3
-    
+
     # Execute
     result = await workflow.execute(input_data, context)
-    
+
     # Display results
     print(f"Result: {result}")
     return result
@@ -455,7 +455,7 @@ async def complete_example():
     """Working retry example."""
     retry = RetryPrimitive(max_retries=3)
     workflow = retry >> api_call
-    
+
     context = WorkflowContext(correlation_id="demo")
     result = await workflow.execute({"url": "..."}, context)
     return result
@@ -486,10 +486,10 @@ When to use:
 async def example_with_output():
     """Example with expected results."""
     result = await workflow.execute(data, context)
-    
+
     print(f"Expected: {{'status': 'success', 'data': [...]}}")
     print(f"Actual:   {result}")
-    
+
     assert result['status'] == 'success'
     return result
 ```
@@ -633,28 +633,28 @@ async def production_llm_service():
     """Complete production service."""
     # Initialize observability
     initialize_observability(service_name="llm-service")
-    
+
     # Layer 1: Cache
     cache = CachePrimitive(ttl_seconds=3600, max_size=10000)
-    
+
     # Layer 2: Router
     router = RouterPrimitive(
         routes={"fast": gpt4_mini, "quality": gpt4},
         router_fn=select_model
     )
-    
+
     # Layer 3: Retry
     retry = RetryPrimitive(max_retries=3)
-    
+
     # Layer 4: Fallback
     fallback = FallbackPrimitive(
         primary=router,
         fallbacks=[claude, gemini]
     )
-    
+
     # Compose
     workflow = cache >> retry >> fallback
-    
+
     # Execute
     context = WorkflowContext(correlation_id="prod-123")
     result = await workflow.execute(prompt, context)

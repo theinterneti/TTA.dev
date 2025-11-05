@@ -294,21 +294,21 @@
   impact:: Production memory exhaustion
   due:: [[2025-11-06]]
   assigned:: @performance-team
-  
+
   ## Context
   Cache grows unbounded in long-running processes
-  
+
   ## Impact
   - Affects: All production deployments using cache
   - Severity: High - causes OOM after 24 hours
   - Workaround: Restart services daily
-  
+
   ## Fix Plan
   1. Add max_size enforcement (2 hours)
   2. Add memory monitoring (1 hour)
   3. Add tests (2 hours)
   4. Review and deploy (2 hours)
-  
+
   related:: [[TTA Primitives/CachePrimitive]]
 ```
 
@@ -324,22 +324,22 @@
   security:: critical
   due:: [[2025-11-05]]
   assigned:: @security-team
-  
+
   ## Vulnerability
   JWT validation can be bypassed with crafted tokens
-  
+
   ## Impact
   - CVSS Score: 9.1 (Critical)
   - Affected: All authenticated endpoints
   - Exploitation: Low complexity
-  
+
   ## Response
   1. Immediate: Disable vulnerable endpoint (1 hour)
   2. Fix: Implement proper validation (4 hours)
   3. Test: Security test suite (2 hours)
   4. Deploy: Emergency release (1 hour)
   5. Notify: Security advisory (1 hour)
-  
+
   related:: [[Security]], [[Authentication]]
 ```
 
@@ -355,21 +355,21 @@
   blocking:: production-deploy
   due:: [[2025-11-06]]
   assigned:: @observability-team
-  
+
   ## Blocker
   Metrics not exported, preventing production monitoring
-  
+
   ## Impact
   - Blocks: Production deployment
   - Affects: Operations team visibility
   - Risk: Blind production deployment
-  
+
   ## Fix Plan
   1. Debug export failure (2 hours)
   2. Fix configuration (1 hour)
   3. Verify in staging (1 hour)
   4. Unblock deployment (today)
-  
+
   related:: [[TTA.dev/Observability]], [[Production]]
 ```
 

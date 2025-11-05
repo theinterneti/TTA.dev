@@ -80,14 +80,14 @@ index = pinecone.Index("document-embeddings")
 async def retrieve_documents(data, context):
     # Get embedding for query
     query_embedding = await get_embedding(data["query"])
-    
+
     # Query Pinecone
     results = index.query(
         vector=query_embedding,
         top_k=data.get("top_k", 5),
         include_metadata=True
     )
-    
+
     return {
         "documents": [
             {
@@ -184,7 +184,7 @@ async def publish_event(data, context):
 async def subscribe_events(data, context):
     pubsub = redis_client.pubsub()
     await pubsub.subscribe(data["channel"])
-    
+
     async for message in pubsub.listen():
         if message["type"] == "message":
             event_data = json.loads(message["data"])
@@ -290,17 +290,17 @@ from tta_dev_primitives import WorkflowPrimitive
 
 class LangChainPrimitive(WorkflowPrimitive):
     """Wrap LangChain agent as TTA primitive."""
-    
+
     def __init__(self, agent: AgentExecutor):
         super().__init__()
         self.agent = agent
-    
+
     async def _execute_impl(self, data: dict, context: WorkflowContext) -> dict:
         result = await self.agent.ainvoke({
             "input": data["input"],
             "chat_history": context.get_state("chat_history", [])
         })
-        
+
         return {
             "output": result["output"],
             "intermediate_steps": result.get("intermediate_steps", [])
@@ -328,19 +328,19 @@ async def execute_workflow(
     background_tasks: BackgroundTasks
 ):
     """Execute TTA workflow via HTTP endpoint."""
-    
+
     # Create context
     context = WorkflowContext(
         workflow_id=f"req-{uuid.uuid4()}",
         correlation_id=request.headers.get("X-Correlation-ID")
     )
-    
+
     # Execute workflow
     result = await workflow.execute(request.data, context)
-    
+
     # Schedule background cleanup
     background_tasks.add_task(cleanup_context, context)
-    
+
     return {
         "workflow_id": context.workflow_id,
         "result": result
@@ -364,18 +364,18 @@ if st.button("Execute"):
         workflow_id=f"session-{st.session_state.get('session_id')}",
         user_id=st.session_state.get("user_id")
     )
-    
+
     # Execute with progress
     with st.spinner("Processing..."):
         result = await workflow.execute(
             {"query": user_input},
             context
         )
-    
+
     # Display result
     st.success("Complete!")
     st.json(result)
-    
+
     # Show metrics
     st.metric("Duration", f"{result['duration_ms']}ms")
     st.metric("Cost", f"${result['cost']:.4f}")
@@ -399,7 +399,7 @@ def with_api_key(key_name: str):
             api_key = os.getenv(key_name)
             if not api_key:
                 raise ValueError(f"Missing API key: {key_name}")
-            
+
             data["api_key"] = api_key
             return await func(data, context)
         return wrapper
@@ -419,13 +419,13 @@ from authlib.integrations.httpx_client import AsyncOAuth2Client
 
 async def oauth_authenticated_api(data, context):
     """Call API with OAuth token."""
-    
+
     # Get or refresh token
     token = await get_oauth_token(
         client_id=os.getenv("CLIENT_ID"),
         client_secret=os.getenv("CLIENT_SECRET")
     )
-    
+
     # Make authenticated request
     async with httpx.AsyncClient() as client:
         response = await client.get(
@@ -487,16 +487,16 @@ app = FastAPI()
 @app.get("/health")
 async def health_check():
     """Check health of all integrations."""
-    
+
     checks = {
         "database": await check_database_connection(),
         "redis": await check_redis_connection(),
         "vector_db": await check_vector_db_connection(),
         "llm_api": await check_llm_api_availability()
     }
-    
+
     all_healthy = all(checks.values())
-    
+
     return {
         "status": "healthy" if all_healthy else "degraded",
         "checks": checks
@@ -509,12 +509,12 @@ async def health_check():
 # Query integration health
 
 # API response time
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(integration_api_duration_seconds_bucket[5m])
 )
 
 # Error rate by integration
-rate(integration_errors_total[5m]) 
+rate(integration_errors_total[5m])
   by (integration_name)
 
 # Integration availability
