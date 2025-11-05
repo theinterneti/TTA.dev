@@ -138,7 +138,7 @@ class SimplePrimitive(InstrumentedPrimitive[dict, dict]):
 class MultiplyPrimitive(InstrumentedPrimitive[dict, dict]):
     """Primitive that multiplies a value."""
 
-    def __init__(self, multiplier: int = 2):
+    def __init__(self, multiplier: int = 2) -> None:
         super().__init__()
         self.multiplier = multiplier
 
@@ -213,7 +213,7 @@ def query_prometheus_metrics(metric_name: str) -> dict[str, Any]:
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_sequential_primitive_creates_spans(otel_tracer_provider, test_context):
+async def test_sequential_primitive_creates_spans(otel_tracer_provider, test_context) -> None:
     """Test that SequentialPrimitive creates spans in Jaeger."""
     # Create workflow
     workflow = SequentialPrimitive(
@@ -276,7 +276,7 @@ async def test_sequential_primitive_creates_spans(otel_tracer_provider, test_con
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_parallel_primitive_creates_concurrent_spans(otel_tracer_provider, test_context):
+async def test_parallel_primitive_creates_concurrent_spans(otel_tracer_provider, test_context) -> None:
     """Test that ParallelPrimitive creates concurrent spans in Jaeger."""
     # Create workflow with parallel branches
     workflow = ParallelPrimitive(
@@ -339,7 +339,7 @@ async def test_parallel_primitive_creates_concurrent_spans(otel_tracer_provider,
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_conditional_primitive_creates_branch_spans(otel_tracer_provider, test_context):
+async def test_conditional_primitive_creates_branch_spans(otel_tracer_provider, test_context) -> None:
     """Test that ConditionalPrimitive creates branch spans in Jaeger."""
     # Create workflow with conditional
     workflow = ConditionalPrimitive(
@@ -390,7 +390,7 @@ async def test_conditional_primitive_creates_branch_spans(otel_tracer_provider, 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_switch_primitive_creates_case_spans(otel_tracer_provider, test_context):
+async def test_switch_primitive_creates_case_spans(otel_tracer_provider, test_context) -> None:
     """Test that SwitchPrimitive creates case spans in Jaeger."""
     # Create workflow with switch
     workflow = SwitchPrimitive(
@@ -444,13 +444,13 @@ async def test_switch_primitive_creates_case_spans(otel_tracer_provider, test_co
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_context):
+async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_context) -> None:
     """Test that RetryPrimitive creates attempt spans in Jaeger."""
 
     class FlakeyPrimitive(InstrumentedPrimitive[dict, dict]):
         """Primitive that fails first time, succeeds second time."""
 
-        def __init__(self):
+        def __init__(self) -> None:
             super().__init__()
             self.attempt_count = 0
 
@@ -512,7 +512,7 @@ async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_fallback_primitive_creates_execution_spans(otel_tracer_provider, test_context):
+async def test_fallback_primitive_creates_execution_spans(otel_tracer_provider, test_context) -> None:
     """Test that FallbackPrimitive creates primary and fallback spans in Jaeger."""
     # Create workflow with fallback
     workflow = FallbackPrimitive(
@@ -565,7 +565,7 @@ async def test_fallback_primitive_creates_execution_spans(otel_tracer_provider, 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_saga_primitive_creates_compensation_spans(otel_tracer_provider, test_context):
+async def test_saga_primitive_creates_compensation_spans(otel_tracer_provider, test_context) -> None:
     """Test that SagaPrimitive creates forward and compensation spans in Jaeger."""
     # Create workflow with saga
     workflow = SagaPrimitive(
@@ -618,7 +618,7 @@ async def test_saga_primitive_creates_compensation_spans(otel_tracer_provider, t
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
 @pytest.mark.asyncio
-async def test_composed_workflow_trace_propagation(otel_tracer_provider, test_context):
+async def test_composed_workflow_trace_propagation(otel_tracer_provider, test_context) -> None:
     """Test that trace context propagates across composed primitives."""
     # Create complex composed workflow
     workflow = (

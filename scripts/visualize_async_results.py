@@ -276,31 +276,31 @@ def create_html_report(results, model_results, output_dir):
     <body>
         <h1>Async Model Test Results</h1>
         <p>Timestamp: {timestamp}</p>
-        
+
         <h2>Overview</h2>
         <p>Models tested: {num_models}</p>
         <p>Configurations: {configs}</p>
-        
+
         <div class="chart">
             <h3>Average Tokens per Second by Model</h3>
             <img src="tokens_per_second.png" alt="Tokens per Second Chart">
         </div>
-        
+
         <div class="chart">
             <h3>Average Load Time by Model</h3>
             <img src="load_time.png" alt="Load Time Chart">
         </div>
-        
+
         <div class="chart">
             <h3>Average Memory Usage by Model</h3>
             <img src="memory_usage.png" alt="Memory Usage Chart">
         </div>
-        
+
         <div class="chart">
             <h3>Performance by Prompt Type</h3>
             <img src="prompt_type_performance.png" alt="Prompt Type Performance Chart">
         </div>
-        
+
         <h2>Model Details</h2>
     """.format(
         timestamp=results["timestamp"],
@@ -321,7 +321,7 @@ def create_html_report(results, model_results, output_dir):
         <div class="model-section">
             <h3>{model_name}</h3>
             <p>Configuration: Quantization={result["quantization"]}, Flash Attention={result["use_flash_attention"]}, Temperature={result["temperature"]}</p>
-            
+
             <h4>Performance Metrics</h4>
             <table>
                 <tr>
@@ -337,7 +337,7 @@ def create_html_report(results, model_results, output_dir):
                     <td>{result["memory"].get("model_size_mb", "N/A"):.2f} MB</td>
                 </tr>
             </table>
-            
+
             <h4>Test Results</h4>
         """
 
@@ -363,7 +363,7 @@ def create_html_report(results, model_results, output_dir):
                     <td>{test_result["tokens_per_second"]:.2f}</td>
                 </tr>
             </table>
-            
+
             <p>Response:</p>
             <div class="response">{test_result["response"]}</div>
             """

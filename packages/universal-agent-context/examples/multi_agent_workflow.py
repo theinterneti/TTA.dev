@@ -123,7 +123,7 @@ class ImplementationAgent(WorkflowPrimitive[dict, dict]):
         architecture = input_data.get("architecture_decision", {})
         security = input_data.get("security_requirements", {})
         performance = input_data.get("performance_requirements", {})
-        infrastructure = input_data.get("infrastructure_plan", {})
+        input_data.get("infrastructure_plan", {})
 
         print(f"   Using architecture: {architecture.get('value', {}).get('architecture')}")
         print(f"   Security compliance: {security.get('value', {}).get('compliance', [])}")
@@ -155,8 +155,8 @@ class QAAgent(WorkflowPrimitive[dict, dict]):
     async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
         print("🔍 QA: Validating implementation...")
 
-        impl_status = input_data.get("implementation_status")
-        tests_passed = input_data.get("tests_passed")
+        input_data.get("implementation_status")
+        input_data.get("tests_passed")
 
         await asyncio.sleep(0.3)
 

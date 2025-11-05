@@ -136,16 +136,13 @@ def test_model(model_name: str) -> dict[str, Any]:
                 json_end = response.rfind("}") + 1
                 if json_start >= 0 and json_end > json_start:
                     json_str = response[json_start:json_end]
-                    json_response = json.loads(json_str)
+                    json.loads(json_str)
                 else:
                     is_valid_json = False
-                    json_response = None
             except Exception:
                 is_valid_json = False
-                json_response = None
         except Exception as e:
             is_valid_json = False
-            json_response = None
             response = str(e)
             logger.error(f"  Error in structured output test: {e}")
 

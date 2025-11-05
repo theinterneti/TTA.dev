@@ -126,14 +126,14 @@ def workflow_context():
 class TestClarifyPrimitiveInitialization:
     """Test ClarifyPrimitive initialization."""
 
-    def test_init_with_defaults(self):
+    def test_init_with_defaults(self) -> None:
         """Test initialization with default parameters."""
         primitive = ClarifyPrimitive()
         assert primitive.max_iterations == 3
         assert primitive.target_coverage == 0.9
         assert primitive.questions_per_gap == 2
 
-    def test_init_with_custom_parameters(self):
+    def test_init_with_custom_parameters(self) -> None:
         """Test initialization with custom parameters."""
         primitive = ClarifyPrimitive(max_iterations=5, target_coverage=0.95, questions_per_gap=3)
         assert primitive.max_iterations == 5
@@ -147,7 +147,7 @@ class TestClarifyPrimitiveExecution:
     @pytest.mark.asyncio
     async def test_execute_with_batch_answers(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test execution with pre-provided answers."""
         # Provide answers for gaps
         answers = {
@@ -190,13 +190,13 @@ class TestClarifyPrimitiveExecution:
         assert answers["Success Criteria"] in updated_content
 
     @pytest.mark.asyncio
-    async def test_execute_missing_spec_path(self, clarify_primitive, workflow_context):
+    async def test_execute_missing_spec_path(self, clarify_primitive, workflow_context) -> None:
         """Test execution with missing spec_path raises error."""
         with pytest.raises(ValueError, match="spec_path is required"):
             await clarify_primitive.execute({}, workflow_context)
 
     @pytest.mark.asyncio
-    async def test_execute_nonexistent_spec(self, clarify_primitive, workflow_context):
+    async def test_execute_nonexistent_spec(self, clarify_primitive, workflow_context) -> None:
         """Test execution with nonexistent spec file raises error."""
         with pytest.raises(FileNotFoundError):
             await clarify_primitive.execute(
@@ -211,7 +211,7 @@ class TestClarifyPrimitiveExecution:
     @pytest.mark.asyncio
     async def test_execute_with_empty_gaps(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test execution with no gaps to clarify."""
         result = await clarify_primitive.execute(
             {
@@ -228,7 +228,7 @@ class TestClarifyPrimitiveExecution:
         assert result["coverage_improvement"] == 0.0
 
     @pytest.mark.asyncio
-    async def test_execute_reaches_target_coverage(self, sample_spec_file, workflow_context):
+    async def test_execute_reaches_target_coverage(self, sample_spec_file, workflow_context) -> None:
         """Test execution stops when target coverage is reached."""
         primitive = ClarifyPrimitive(max_iterations=5, target_coverage=0.3)
 
@@ -262,7 +262,7 @@ class TestQuestionGeneration:
     @pytest.mark.asyncio
     async def test_generates_questions_for_gaps(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test that questions are generated for each gap."""
         result = await clarify_primitive.execute(
             {
@@ -289,7 +289,7 @@ class TestQuestionGeneration:
     @pytest.mark.asyncio
     async def test_question_templates_for_known_sections(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test that appropriate question templates are used for known sections."""
         result = await clarify_primitive.execute(
             {
@@ -314,11 +314,11 @@ class TestSpecificationUpdates:
     @pytest.mark.asyncio
     async def test_updates_spec_with_answers(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test that specification is updated with provided answers."""
         answer_text = "This is the detailed problem statement"
 
-        result = await clarify_primitive.execute(
+        await clarify_primitive.execute(
             {
                 "spec_path": str(sample_spec_file),
                 "gaps": ["Problem Statement"],
@@ -340,9 +340,9 @@ class TestSpecificationUpdates:
     @pytest.mark.asyncio
     async def test_adds_clarification_history(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test that clarification history is added to spec."""
-        result = await clarify_primitive.execute(
+        await clarify_primitive.execute(
             {
                 "spec_path": str(sample_spec_file),
                 "gaps": ["Problem Statement"],
@@ -368,7 +368,7 @@ class TestIterativeRefinement:
     """Test iterative refinement functionality."""
 
     @pytest.mark.asyncio
-    async def test_multiple_iterations(self, sample_spec_file, workflow_context):
+    async def test_multiple_iterations(self, sample_spec_file, workflow_context) -> None:
         """Test that multiple iterations work correctly."""
         primitive = ClarifyPrimitive(max_iterations=2, target_coverage=0.9)
 
@@ -402,7 +402,7 @@ class TestIterativeRefinement:
             assert "gaps_addressed" in iteration
 
     @pytest.mark.asyncio
-    async def test_max_iterations_limit(self, sample_spec_file, workflow_context):
+    async def test_max_iterations_limit(self, sample_spec_file, workflow_context) -> None:
         """Test that max iterations limit is respected."""
         primitive = ClarifyPrimitive(max_iterations=2, target_coverage=1.0)
 
@@ -422,7 +422,7 @@ class TestIterativeRefinement:
     @pytest.mark.asyncio
     async def test_coverage_improvement_tracking(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test that coverage improvement is tracked correctly."""
         initial_coverage = 0.13
 
@@ -447,7 +447,7 @@ class TestCoverageAnalysis:
     @pytest.mark.asyncio
     async def test_recalculates_coverage_after_updates(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test that coverage is recalculated after each update."""
         result = await clarify_primitive.execute(
             {
@@ -472,7 +472,7 @@ class TestCoverageAnalysis:
     @pytest.mark.asyncio
     async def test_identifies_remaining_gaps(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test that remaining gaps are identified correctly."""
         # Read initial spec to count total [CLARIFY] markers
         initial_content = sample_spec_file.read_text()
@@ -510,7 +510,7 @@ class TestIntegrationWithSpecifyPrimitive:
     """Test integration with SpecifyPrimitive."""
 
     @pytest.mark.asyncio
-    async def test_clarify_after_specify(self, tmp_specs_dir, workflow_context):
+    async def test_clarify_after_specify(self, tmp_specs_dir, workflow_context) -> None:
         """Test ClarifyPrimitive works with SpecifyPrimitive output."""
         # First, create spec with SpecifyPrimitive
         specify = SpecifyPrimitive(output_dir=str(tmp_specs_dir))
@@ -551,7 +551,7 @@ class TestErrorHandling:
     """Test error handling in ClarifyPrimitive."""
 
     @pytest.mark.asyncio
-    async def test_handles_malformed_spec(self, clarify_primitive, tmp_specs_dir, workflow_context):
+    async def test_handles_malformed_spec(self, clarify_primitive, tmp_specs_dir, workflow_context) -> None:
         """Test handling of malformed specification files."""
         # Create malformed spec (missing sections)
         malformed_spec = tmp_specs_dir / "malformed.spec.md"
@@ -577,7 +577,7 @@ class TestObservability:
     @pytest.mark.asyncio
     async def test_observability_integration(
         self, clarify_primitive, sample_spec_file, workflow_context
-    ):
+    ) -> None:
         """Test observability is properly integrated."""
         result = await clarify_primitive.execute(
             {

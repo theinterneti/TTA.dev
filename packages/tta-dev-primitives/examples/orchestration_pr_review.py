@@ -411,7 +411,7 @@ Format your review as structured markdown with clear sections.
             return {"success": False, "error": str(e)}
 
 
-async def main():
+async def main() -> None:
     """Main entry point for CLI usage."""
     parser = argparse.ArgumentParser(description="Review PR using multi-model orchestration")
     parser.add_argument("--repo", default="theinterneti/TTA.dev", help="Repository (owner/repo)")

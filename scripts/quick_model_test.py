@@ -119,10 +119,9 @@ async def test_model(model_name: str) -> dict[str, Any]:
 
             # Check if response is valid JSON
             is_valid_json = True
-            json_response = json.loads(response) if isinstance(response, str) else response
+            json.loads(response) if isinstance(response, str) else response
         except Exception as e:
             is_valid_json = False
-            json_response = None
             logger.error(f"  Error in structured output test: {e}")
 
         end_time = time.time()

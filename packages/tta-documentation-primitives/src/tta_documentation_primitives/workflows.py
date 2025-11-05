@@ -54,9 +54,8 @@ def create_basic_sync_workflow(
     syncer = LogseqSyncPrimitive(create_directories=True)
 
     # Compose with >> operator (sequential)
-    workflow = converter >> syncer
+    return converter >> syncer
 
-    return workflow
 
 
 def create_ai_enhanced_sync_workflow(
@@ -118,9 +117,8 @@ def create_ai_enhanced_sync_workflow(
     syncer = LogseqSyncPrimitive(create_directories=True)
 
     # Compose workflow: Convert >> AI Enhance >> Sync
-    workflow = converter >> metadata_extractor >> syncer
+    return converter >> metadata_extractor >> syncer
 
-    return workflow
 
 
 def create_production_sync_workflow(
@@ -201,9 +199,8 @@ def create_production_sync_workflow(
     )
 
     # Compose complete workflow
-    workflow = converter >> metadata_extractor >> syncer
+    return converter >> metadata_extractor >> syncer
 
-    return workflow
 
 
 def create_batch_sync_workflow(
@@ -234,9 +231,8 @@ def create_batch_sync_workflow(
     sync_workflows = [create_production_sync_workflow(config) for _ in range(max_parallel)]
 
     # Compose with | operator (parallel)
-    workflow = ParallelPrimitive(primitives=sync_workflows)
+    return ParallelPrimitive(primitives=sync_workflows)
 
-    return workflow
 
 
 # Workflow examples demonstrating TTA.dev patterns

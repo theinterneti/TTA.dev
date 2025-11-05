@@ -56,7 +56,7 @@ class AlwaysFailPrimitive(InstrumentedPrimitive[dict, dict]):
 
 
 @pytest.mark.asyncio
-async def test_retry_logs_workflow_start_and_completion():
+async def test_retry_logs_workflow_start_and_completion() -> None:
     """Verify that RetryPrimitive logs workflow start and completion."""
     workflow = RetryPrimitive(
         SuccessfulPrimitive(),
@@ -73,7 +73,7 @@ async def test_retry_logs_workflow_start_and_completion():
 
 
 @pytest.mark.asyncio
-async def test_retry_logs_attempt_execution():
+async def test_retry_logs_attempt_execution() -> None:
     """Verify that RetryPrimitive logs each retry attempt."""
     workflow = RetryPrimitive(
         SuccessfulPrimitive(),
@@ -90,7 +90,7 @@ async def test_retry_logs_attempt_execution():
 
 
 @pytest.mark.asyncio
-async def test_retry_records_attempt_checkpoints():
+async def test_retry_records_attempt_checkpoints() -> None:
     """Verify that RetryPrimitive records checkpoints for each attempt."""
     fail_once = FailOncePrimitive()
     workflow = RetryPrimitive(
@@ -113,7 +113,7 @@ async def test_retry_records_attempt_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_retry_records_backoff_checkpoints():
+async def test_retry_records_backoff_checkpoints() -> None:
     """Verify that RetryPrimitive records backoff delay checkpoints."""
     fail_once = FailOncePrimitive()
     workflow = RetryPrimitive(
@@ -131,7 +131,7 @@ async def test_retry_records_backoff_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_retry_records_attempt_metrics():
+async def test_retry_records_attempt_metrics() -> None:
     """Verify that RetryPrimitive records per-attempt metrics."""
     from tta_dev_primitives.observability.enhanced_collector import (
         get_enhanced_metrics_collector,
@@ -162,7 +162,7 @@ async def test_retry_records_attempt_metrics():
 
 
 @pytest.mark.asyncio
-async def test_retry_creates_attempt_spans():
+async def test_retry_creates_attempt_spans() -> None:
     """Verify that RetryPrimitive attempts to create spans when tracing available."""
     workflow = RetryPrimitive(
         SuccessfulPrimitive(),
@@ -181,7 +181,7 @@ async def test_retry_creates_attempt_spans():
 
 
 @pytest.mark.asyncio
-async def test_retry_span_attributes():
+async def test_retry_span_attributes() -> None:
     """Verify that retry execution includes proper attribute tracking."""
     workflow = RetryPrimitive(
         SuccessfulPrimitive(),
@@ -206,7 +206,7 @@ async def test_retry_span_attributes():
 
 
 @pytest.mark.asyncio
-async def test_retry_error_handling_and_exhaustion():
+async def test_retry_error_handling_and_exhaustion() -> None:
     """Verify that errors are properly tracked and retry exhaustion is logged."""
     workflow = RetryPrimitive(
         AlwaysFailPrimitive(),
@@ -228,7 +228,7 @@ async def test_retry_error_handling_and_exhaustion():
 
 
 @pytest.mark.asyncio
-async def test_retry_success_on_first_attempt():
+async def test_retry_success_on_first_attempt() -> None:
     """Verify that RetryPrimitive handles success on first attempt (no retries)."""
     workflow = RetryPrimitive(
         SuccessfulPrimitive(),
@@ -250,7 +250,7 @@ async def test_retry_success_on_first_attempt():
 
 
 @pytest.mark.asyncio
-async def test_retry_success_after_n_retries():
+async def test_retry_success_after_n_retries() -> None:
     """Verify that RetryPrimitive tracks success after multiple retries."""
     fail_twice = FailTwicePrimitive()
     workflow = RetryPrimitive(
@@ -276,7 +276,7 @@ async def test_retry_success_after_n_retries():
 
 
 @pytest.mark.asyncio
-async def test_retry_backoff_strategy_tracking():
+async def test_retry_backoff_strategy_tracking() -> None:
     """Verify that RetryPrimitive tracks backoff delays correctly."""
     from tta_dev_primitives.observability.enhanced_collector import (
         get_enhanced_metrics_collector,
@@ -302,7 +302,7 @@ async def test_retry_backoff_strategy_tracking():
 
 
 @pytest.mark.asyncio
-async def test_retry_preserves_existing_functionality():
+async def test_retry_preserves_existing_functionality() -> None:
     """Verify that Phase 2 changes don't break existing functionality."""
     # Test success on first attempt
     workflow1 = RetryPrimitive(

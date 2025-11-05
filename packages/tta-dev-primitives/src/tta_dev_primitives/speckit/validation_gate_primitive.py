@@ -63,7 +63,7 @@ class ValidationGatePrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, An
         timeout_seconds: int = 3600,
         auto_approve_on_timeout: bool = False,
         require_feedback_on_rejection: bool = True,
-    ):
+    ) -> None:
         """Initialize ValidationGatePrimitive.
 
         Args:
@@ -283,7 +283,7 @@ Example rejection:
         """
         return json.loads(approval_path.read_text(encoding="utf-8"))
 
-    def _save_approval(self, approval_path: Path, approval_record: dict[str, Any]):
+    def _save_approval(self, approval_path: Path, approval_record: dict[str, Any]) -> None:
         """Save approval record to file.
 
         Args:

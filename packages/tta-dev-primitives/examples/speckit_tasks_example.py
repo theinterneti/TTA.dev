@@ -16,7 +16,7 @@ from tta_dev_primitives import WorkflowContext
 from tta_dev_primitives.speckit import PlanPrimitive, TasksPrimitive
 
 
-async def example_1_basic():
+async def example_1_basic() -> None:
     """Example 1: Basic task generation"""
     print("\n" + "=" * 80)
     print("Example 1: Basic Task Generation")
@@ -58,7 +58,7 @@ async def example_1_basic():
         print(f"🎯 Critical path: {len(result['critical_path'])} tasks")
 
 
-async def example_2_dependencies():
+async def example_2_dependencies() -> None:
     """Example 2: Dependency ordering"""
     print("\n" + "=" * 80)
     print("Example 2: Task Ordering with Dependencies")
@@ -94,7 +94,7 @@ async def example_2_dependencies():
         print(f"   {task['id']}: {task['title']}{dep_str}")
 
 
-async def example_3_formats():
+async def example_3_formats() -> None:
     """Example 3: Multiple output formats"""
     print("\n" + "=" * 80)
     print("Example 3: Multiple Output Formats")
@@ -119,7 +119,7 @@ async def example_3_formats():
         print(f"✅ {fmt:10s}: {result['tasks_path']}")
 
 
-async def example_4_workflow():
+async def example_4_workflow() -> None:
     """Example 4: Complete Spec → Plan → Tasks workflow"""
     print("\n" + "=" * 80)
     print("Example 4: Complete Workflow")
@@ -155,7 +155,7 @@ async def example_4_workflow():
     print("\n✅ Complete workflow: Spec → Plan → Tasks")
 
 
-async def example_5_parallel():
+async def example_5_parallel() -> None:
     """Example 5: Parallel work streams"""
     print("\n" + "=" * 80)
     print("Example 5: Parallel Work Streams")
@@ -199,7 +199,7 @@ async def example_5_parallel():
                 print(f"   - {t['title']}")
 
 
-async def main():
+async def main() -> None:
     """Run all examples"""
     print("\n" + "=" * 80)
     print("TasksPrimitive - Comprehensive Examples")

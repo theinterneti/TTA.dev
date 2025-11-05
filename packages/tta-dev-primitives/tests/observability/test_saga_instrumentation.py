@@ -42,7 +42,7 @@ class FailingPrimitive(InstrumentedPrimitive[dict, dict]):
 
 
 @pytest.mark.asyncio
-async def test_saga_logs_workflow_start_and_completion():
+async def test_saga_logs_workflow_start_and_completion() -> None:
     """Verify that SagaPrimitive logs workflow start and completion."""
     workflow = SagaPrimitive(
         forward=ForwardPrimitive(),
@@ -59,7 +59,7 @@ async def test_saga_logs_workflow_start_and_completion():
 
 
 @pytest.mark.asyncio
-async def test_saga_logs_forward_execution():
+async def test_saga_logs_forward_execution() -> None:
     """Verify that SagaPrimitive logs forward execution."""
     workflow = SagaPrimitive(
         forward=ForwardPrimitive(),
@@ -76,7 +76,7 @@ async def test_saga_logs_forward_execution():
 
 
 @pytest.mark.asyncio
-async def test_saga_logs_compensation_trigger():
+async def test_saga_logs_compensation_trigger() -> None:
     """Verify that SagaPrimitive logs compensation trigger when forward fails."""
     workflow = SagaPrimitive(
         forward=FailingPrimitive(),
@@ -96,7 +96,7 @@ async def test_saga_logs_compensation_trigger():
 
 
 @pytest.mark.asyncio
-async def test_saga_records_execution_checkpoints():
+async def test_saga_records_execution_checkpoints() -> None:
     """Verify that SagaPrimitive records checkpoints for executions."""
     workflow = SagaPrimitive(
         forward=FailingPrimitive(),
@@ -118,7 +118,7 @@ async def test_saga_records_execution_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_saga_records_execution_metrics():
+async def test_saga_records_execution_metrics() -> None:
     """Verify that SagaPrimitive records execution metrics."""
     from tta_dev_primitives.observability.enhanced_collector import (
         get_enhanced_metrics_collector,
@@ -149,7 +149,7 @@ async def test_saga_records_execution_metrics():
 
 
 @pytest.mark.asyncio
-async def test_saga_creates_execution_spans():
+async def test_saga_creates_execution_spans() -> None:
     """Verify that SagaPrimitive attempts to create spans when tracing available."""
     workflow = SagaPrimitive(
         forward=ForwardPrimitive(),
@@ -168,7 +168,7 @@ async def test_saga_creates_execution_spans():
 
 
 @pytest.mark.asyncio
-async def test_saga_span_attributes():
+async def test_saga_span_attributes() -> None:
     """Verify that saga execution includes proper attribute tracking."""
     workflow = SagaPrimitive(
         forward=ForwardPrimitive(),
@@ -193,7 +193,7 @@ async def test_saga_span_attributes():
 
 
 @pytest.mark.asyncio
-async def test_saga_error_handling_in_forward_and_compensation():
+async def test_saga_error_handling_in_forward_and_compensation() -> None:
     """Verify that errors in both forward and compensation are properly tracked."""
     workflow = SagaPrimitive(
         forward=FailingPrimitive(),
@@ -214,7 +214,7 @@ async def test_saga_error_handling_in_forward_and_compensation():
 
 
 @pytest.mark.asyncio
-async def test_saga_success_on_forward():
+async def test_saga_success_on_forward() -> None:
     """Verify that SagaPrimitive handles success on forward (no compensation needed)."""
     workflow = SagaPrimitive(
         forward=ForwardPrimitive(),
@@ -237,7 +237,7 @@ async def test_saga_success_on_forward():
 
 
 @pytest.mark.asyncio
-async def test_saga_compensation_triggered():
+async def test_saga_compensation_triggered() -> None:
     """Verify that SagaPrimitive triggers compensation after forward fails."""
     workflow = SagaPrimitive(
         forward=FailingPrimitive(),
@@ -256,7 +256,7 @@ async def test_saga_compensation_triggered():
 
 
 @pytest.mark.asyncio
-async def test_saga_compensation_failure_handling():
+async def test_saga_compensation_failure_handling() -> None:
     """Verify that SagaPrimitive handles compensation failure."""
     workflow = SagaPrimitive(
         forward=FailingPrimitive(),
@@ -277,7 +277,7 @@ async def test_saga_compensation_failure_handling():
 
 
 @pytest.mark.asyncio
-async def test_saga_preserves_existing_functionality():
+async def test_saga_preserves_existing_functionality() -> None:
     """Verify that Phase 2 changes don't break existing functionality."""
     # Test success on forward
     workflow1 = SagaPrimitive(

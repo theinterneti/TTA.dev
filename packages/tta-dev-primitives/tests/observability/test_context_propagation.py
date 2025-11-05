@@ -10,7 +10,7 @@ from tta_dev_primitives.observability.context_propagation import (
 
 
 @pytest.mark.asyncio
-async def test_inject_trace_context_without_otel():
+async def test_inject_trace_context_without_otel() -> None:
     """Test trace context injection without OpenTelemetry."""
     context = WorkflowContext(workflow_id="test")
 
@@ -23,7 +23,7 @@ async def test_inject_trace_context_without_otel():
 
 
 @pytest.mark.asyncio
-async def test_extract_trace_context_with_valid_ids():
+async def test_extract_trace_context_with_valid_ids() -> None:
     """Test trace context extraction with valid trace IDs."""
     context = WorkflowContext(
         workflow_id="test",
@@ -39,7 +39,7 @@ async def test_extract_trace_context_with_valid_ids():
 
 
 @pytest.mark.asyncio
-async def test_workflow_context_new_fields():
+async def test_workflow_context_new_fields() -> None:
     """Test that WorkflowContext has all new observability fields."""
     context = WorkflowContext(workflow_id="test")
 
@@ -74,7 +74,7 @@ async def test_workflow_context_new_fields():
 
 
 @pytest.mark.asyncio
-async def test_workflow_context_checkpoint():
+async def test_workflow_context_checkpoint() -> None:
     """Test checkpoint recording."""
     context = WorkflowContext(workflow_id="test")
 
@@ -95,7 +95,7 @@ async def test_workflow_context_checkpoint():
 
 
 @pytest.mark.asyncio
-async def test_workflow_context_elapsed_ms():
+async def test_workflow_context_elapsed_ms() -> None:
     """Test elapsed time calculation."""
     import asyncio
 
@@ -111,7 +111,7 @@ async def test_workflow_context_elapsed_ms():
 
 
 @pytest.mark.asyncio
-async def test_workflow_context_create_child():
+async def test_workflow_context_create_child() -> None:
     """Test child context creation."""
     parent = WorkflowContext(
         workflow_id="parent",
@@ -151,7 +151,7 @@ async def test_workflow_context_create_child():
 
 
 @pytest.mark.asyncio
-async def test_workflow_context_to_otel_context():
+async def test_workflow_context_to_otel_context() -> None:
     """Test conversion to OpenTelemetry context attributes."""
     context = WorkflowContext(
         workflow_id="wf123",
@@ -173,7 +173,7 @@ async def test_workflow_context_to_otel_context():
 
 
 @pytest.mark.asyncio
-async def test_workflow_context_defaults():
+async def test_workflow_context_defaults() -> None:
     """Test that WorkflowContext can be created with minimal args."""
     context = WorkflowContext()
 
@@ -191,7 +191,7 @@ async def test_workflow_context_defaults():
 
 
 @pytest.mark.asyncio
-async def test_workflow_context_correlation_id_unique():
+async def test_workflow_context_correlation_id_unique() -> None:
     """Test that each context gets a unique correlation_id."""
     context1 = WorkflowContext()
     context2 = WorkflowContext()
@@ -201,7 +201,7 @@ async def test_workflow_context_correlation_id_unique():
 
 
 @pytest.mark.asyncio
-async def test_workflow_context_baggage_and_tags():
+async def test_workflow_context_baggage_and_tags() -> None:
     """Test baggage and tags functionality."""
     context = WorkflowContext(
         baggage={"user_id": "123", "tenant": "acme"},

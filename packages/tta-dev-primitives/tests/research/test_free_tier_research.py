@@ -14,7 +14,7 @@ from tta_dev_primitives.research import (
 class TestFreeTierResearchPrimitive:
     """Test suite for FreeTierResearchPrimitive."""
 
-    async def test_research_all_providers(self):
+    async def test_research_all_providers(self) -> None:
         """Test researching all default providers."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-research")
@@ -31,13 +31,13 @@ class TestFreeTierResearchPrimitive:
         assert "ollama" in response.providers
 
         # Verify provider info structure
-        for provider_name, info in response.providers.items():
+        for _provider_name, info in response.providers.items():
             assert isinstance(info, ProviderInfo)
             assert info.name is not None
             assert isinstance(info.has_free_tier, bool)
             assert info.last_verified is not None
 
-    async def test_research_specific_providers(self):
+    async def test_research_specific_providers(self) -> None:
         """Test researching specific providers only."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-specific")
@@ -54,7 +54,7 @@ class TestFreeTierResearchPrimitive:
         assert "ollama" in response.providers
         assert "anthropic" not in response.providers
 
-    async def test_openai_provider_info(self):
+    async def test_openai_provider_info(self) -> None:
         """Test OpenAI provider information accuracy."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-openai")
@@ -70,7 +70,7 @@ class TestFreeTierResearchPrimitive:
         assert openai_info.setup_url is not None
         assert "ChatGPT" in openai_info.notes  # Web UI vs API confusion
 
-    async def test_anthropic_provider_info(self):
+    async def test_anthropic_provider_info(self) -> None:
         """Test Anthropic provider information accuracy."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-anthropic")
@@ -84,7 +84,7 @@ class TestFreeTierResearchPrimitive:
         assert anthropic_info.credit_card_required is True
         assert "claude.ai" in anthropic_info.notes  # Web UI is free
 
-    async def test_google_gemini_provider_info(self):
+    async def test_google_gemini_provider_info(self) -> None:
         """Test Google Gemini provider information accuracy."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-gemini")
@@ -100,7 +100,7 @@ class TestFreeTierResearchPrimitive:
         assert gemini_info.expires == "Never"
         assert "AI Studio" in gemini_info.notes  # AI Studio vs Vertex AI
 
-    async def test_openrouter_provider_info(self):
+    async def test_openrouter_provider_info(self) -> None:
         """Test OpenRouter provider information accuracy."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-openrouter")
@@ -115,7 +115,7 @@ class TestFreeTierResearchPrimitive:
         assert openrouter_info.credit_card_required is False
         assert "BYOK" in openrouter_info.notes  # BYOK explanation
 
-    async def test_ollama_provider_info(self):
+    async def test_ollama_provider_info(self) -> None:
         """Test Ollama provider information accuracy."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-ollama")
@@ -131,7 +131,7 @@ class TestFreeTierResearchPrimitive:
         assert ollama_info.expires == "Never"
         assert ollama_info.cost_after_free == "$0 (uses your hardware)"
 
-    async def test_unknown_provider(self):
+    async def test_unknown_provider(self) -> None:
         """Test handling of unknown provider."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-unknown")
@@ -145,7 +145,7 @@ class TestFreeTierResearchPrimitive:
         assert unknown_info.has_free_tier is False
         assert "not found" in unknown_info.notes
 
-    async def test_changelog_generation(self):
+    async def test_changelog_generation(self) -> None:
         """Test changelog generation."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-changelog")
@@ -162,7 +162,7 @@ class TestFreeTierResearchPrimitive:
         assert len(response.changelog) > 0
         assert isinstance(response.changelog[0], str)
 
-    async def test_guide_generation(self):
+    async def test_guide_generation(self) -> None:
         """Test markdown guide generation."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-guide")
@@ -180,7 +180,7 @@ class TestFreeTierResearchPrimitive:
         assert "Ollama" in response.updated_guide
         assert "| Provider |" in response.updated_guide  # Table header
 
-    async def test_no_changelog_when_disabled(self):
+    async def test_no_changelog_when_disabled(self) -> None:
         """Test that changelog is not generated when disabled."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-no-changelog")
@@ -194,7 +194,7 @@ class TestFreeTierResearchPrimitive:
         # Verify no changelog
         assert response.changelog is None
 
-    async def test_no_guide_when_no_output_path(self):
+    async def test_no_guide_when_no_output_path(self) -> None:
         """Test that guide is not generated when no output path."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-no-guide")
@@ -208,7 +208,7 @@ class TestFreeTierResearchPrimitive:
         # Verify no guide
         assert response.updated_guide is None
 
-    async def test_research_date_included(self):
+    async def test_research_date_included(self) -> None:
         """Test that research date is included in response."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-date")
@@ -221,7 +221,7 @@ class TestFreeTierResearchPrimitive:
         assert len(response.research_date) == 10  # YYYY-MM-DD format
         assert "-" in response.research_date
 
-    async def test_quality_metrics_included(self):
+    async def test_quality_metrics_included(self) -> None:
         """Test that quality metrics are included for providers."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-quality")
@@ -245,7 +245,7 @@ class TestFreeTierResearchPrimitive:
         assert "llama" in llama_model.model_name.lower()
         assert llama_model.overall_score > 0
 
-    async def test_best_free_models_ranking(self):
+    async def test_best_free_models_ranking(self) -> None:
         """Test best free models ranking generation."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-ranking")
@@ -269,7 +269,7 @@ class TestFreeTierResearchPrimitive:
             next_rank, next_model, next_provider = ranked_models[i + 1]
             assert current_rank < next_rank  # Ranks increase
 
-    async def test_fallback_strategy_generation_code_generation(self):
+    async def test_fallback_strategy_generation_code_generation(self) -> None:
         """Test fallback strategy generation for code generation use case."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-fallback-code")
@@ -288,7 +288,7 @@ class TestFreeTierResearchPrimitive:
         assert "code generation" in strategy_code.lower()
         assert "gpt-4o-mini" in strategy_code  # Best for code generation
 
-    async def test_fallback_strategy_generation_creative_writing(self):
+    async def test_fallback_strategy_generation_creative_writing(self) -> None:
         """Test fallback strategy generation for creative writing use case."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-fallback-creative")
@@ -303,7 +303,7 @@ class TestFreeTierResearchPrimitive:
         assert "creative writing" in strategy_code.lower()
         assert "claude" in strategy_code.lower()  # Anthropic is best for creative writing
 
-    async def test_fallback_strategy_generation_reasoning(self):
+    async def test_fallback_strategy_generation_reasoning(self) -> None:
         """Test fallback strategy generation for reasoning use case."""
         primitive = FreeTierResearchPrimitive()
         context = WorkflowContext(workflow_id="test-fallback-reasoning")

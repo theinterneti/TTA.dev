@@ -50,7 +50,7 @@ class FailingPrimitive(InstrumentedPrimitive[dict, dict]):
 
 
 @pytest.mark.asyncio
-async def test_sequential_logs_workflow_start_and_completion(caplog):
+async def test_sequential_logs_workflow_start_and_completion(caplog) -> None:
     """Verify that SequentialPrimitive logs workflow start and completion."""
     import logging
 
@@ -69,7 +69,7 @@ async def test_sequential_logs_workflow_start_and_completion(caplog):
 
 
 @pytest.mark.asyncio
-async def test_sequential_logs_step_execution():
+async def test_sequential_logs_step_execution() -> None:
     """Verify that SequentialPrimitive logs each step (verified via checkpoints)."""
     workflow = SequentialPrimitive([SimplePrimitive(), CounterPrimitive(), SimplePrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
@@ -89,7 +89,7 @@ async def test_sequential_logs_step_execution():
 
 
 @pytest.mark.asyncio
-async def test_sequential_records_step_checkpoints():
+async def test_sequential_records_step_checkpoints() -> None:
     """Verify that SequentialPrimitive records checkpoints for each step."""
     workflow = SequentialPrimitive([SimplePrimitive(), SimplePrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
@@ -111,7 +111,7 @@ async def test_sequential_records_step_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_sequential_records_step_metrics():
+async def test_sequential_records_step_metrics() -> None:
     """Verify that SequentialPrimitive records per-step metrics."""
     from tta_dev_primitives.observability.enhanced_collector import (
         get_enhanced_metrics_collector,
@@ -139,7 +139,7 @@ async def test_sequential_records_step_metrics():
 
 
 @pytest.mark.asyncio
-async def test_sequential_creates_step_spans():
+async def test_sequential_creates_step_spans() -> None:
     """Verify that SequentialPrimitive attempts to create spans when tracing available."""
     # Test that the code path for span creation is exercised
     # We verify this indirectly through successful execution
@@ -158,7 +158,7 @@ async def test_sequential_creates_step_spans():
 
 
 @pytest.mark.asyncio
-async def test_sequential_span_attributes():
+async def test_sequential_span_attributes() -> None:
     """Verify that step execution includes proper attribute tracking."""
     # Test that execution completes with proper tracking
     workflow = SequentialPrimitive([SimplePrimitive(), CounterPrimitive()])
@@ -183,7 +183,7 @@ async def test_sequential_span_attributes():
 
 
 @pytest.mark.asyncio
-async def test_sequential_error_handling_with_spans():
+async def test_sequential_error_handling_with_spans() -> None:
     """Verify that errors in steps are properly propagated."""
     workflow = SequentialPrimitive([SimplePrimitive(), FailingPrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
@@ -199,7 +199,7 @@ async def test_sequential_error_handling_with_spans():
 
 
 @pytest.mark.asyncio
-async def test_sequential_graceful_degradation_without_tracing():
+async def test_sequential_graceful_degradation_without_tracing() -> None:
     """Verify that SequentialPrimitive works without OpenTelemetry."""
     with patch("tta_dev_primitives.core.sequential.TRACING_AVAILABLE", False):
         workflow = SequentialPrimitive([SimplePrimitive(), SimplePrimitive()])
@@ -217,7 +217,7 @@ async def test_sequential_graceful_degradation_without_tracing():
 
 
 @pytest.mark.asyncio
-async def test_sequential_preserves_existing_functionality():
+async def test_sequential_preserves_existing_functionality() -> None:
     """Verify that Phase 2 changes don't break existing functionality."""
     # Test basic execution
     counter1 = CounterPrimitive()

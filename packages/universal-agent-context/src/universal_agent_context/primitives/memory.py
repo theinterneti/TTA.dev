@@ -226,7 +226,7 @@ class AgentMemoryPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
 
         # Filter by query criteria
         results = []
-        for key, entry in memories.items():
+        for _key, entry in memories.items():
             # Filter by agent if specified
             if query_agent and entry.get("agent") != query_agent:
                 continue

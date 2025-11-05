@@ -105,7 +105,7 @@ async def test_agent_handoff_tracks_history():
     # First handoff
     result1 = await handoff1.execute(input_data, context)
     # Second handoff
-    result2 = await handoff2.execute(result1, context)
+    await handoff2.execute(result1, context)
 
     agent_history = context.metadata["agent_history"]
     assert len(agent_history) == 2
