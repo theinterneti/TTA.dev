@@ -131,7 +131,9 @@ async def test_agent_handoff_invalid_strategy():
 @pytest.mark.asyncio
 async def test_agent_memory_store():
     """Test storing a memory entry."""
-    memory = AgentMemoryPrimitive(operation="store", memory_key="test_key", memory_scope="workflow")
+    memory = AgentMemoryPrimitive(
+        operation="store", memory_key="test_key", memory_scope="workflow"
+    )
     context = WorkflowContext(workflow_id="test")
     context.metadata["current_agent"] = "agent1"
 
@@ -195,7 +197,9 @@ async def test_agent_memory_query():
 
     # Query by tags
     query = AgentMemoryPrimitive(operation="query")
-    result = await query.execute({"query_tags": {"type": "test", "priority": "high"}}, context)
+    result = await query.execute(
+        {"query_tags": {"type": "test", "priority": "high"}}, context
+    )
 
     assert result["result_count"] == 1
     assert result["query_results"][0]["value"] == "data1"
@@ -245,7 +249,8 @@ async def test_agent_coordination_aggregate():
     }
 
     coordinator = AgentCoordinationPrimitive(
-        agent_primitives=agents, coordination_strategy="aggregate"
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
+        coordination_strategy="aggregate",
     )
     context = WorkflowContext(workflow_id="test")
 
@@ -267,7 +272,10 @@ async def test_agent_coordination_first():
         "agent2": NamedPrimitive("agent2"),
     }
 
-    coordinator = AgentCoordinationPrimitive(agent_primitives=agents, coordination_strategy="first")
+    coordinator = AgentCoordinationPrimitive(
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
+        coordination_strategy="first",
+    )
     context = WorkflowContext(workflow_id="test")
 
     input_data = {"task": "analyze"}
@@ -335,7 +343,7 @@ async def test_agent_coordination_timeout():
     }
 
     coordinator = AgentCoordinationPrimitive(
-        agent_primitives=agents,
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
         coordination_strategy="aggregate",
         timeout_seconds=0.1,
         require_all_success=False,
@@ -354,7 +362,8 @@ async def test_agent_coordination_invalid_strategy():
     agents = {"agent1": NamedPrimitive("agent1")}
 
     coordinator = AgentCoordinationPrimitive(
-        agent_primitives=agents, coordination_strategy="invalid"
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
+        coordination_strategy="invalid",
     )
     context = WorkflowContext(workflow_id="test")
 
@@ -373,7 +382,9 @@ async def test_agent_handoff_with_memory():
 
     # Agent 1 stores decision
     store = AgentMemoryPrimitive(operation="store", memory_key="decision")
-    await store.execute({"memory_value": {"choice": "option_a"}, "task": "analyze"}, context)
+    await store.execute(
+        {"memory_value": {"choice": "option_a"}, "task": "analyze"}, context
+    )
 
     # Handoff to agent 2
     handoff = AgentHandoffPrimitive(target_agent="agent2")
@@ -398,7 +409,9 @@ async def test_multi_agent_workflow():
 
     # Coordinator stores plan
     store_plan = AgentMemoryPrimitive(operation="store", memory_key="plan")
-    await store_plan.execute({"memory_value": {"tasks": ["analyze", "implement", "test"]}}, context)
+    await store_plan.execute(
+        {"memory_value": {"tasks": ["analyze", "implement", "test"]}}, context
+    )
 
     # Coordinate parallel agents
     agents = {
@@ -408,7 +421,8 @@ async def test_multi_agent_workflow():
     }
 
     coordinator = AgentCoordinationPrimitive(
-        agent_primitives=agents, coordination_strategy="aggregate"
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
+        coordination_strategy="aggregate",
     )
     coord_result = await coordinator.execute({"task": "build_feature"}, context)
 
