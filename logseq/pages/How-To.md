@@ -31,7 +31,7 @@ This namespace contains step-by-step guides for common TTA.dev tasks and workflo
 ## Related Pages
 
 - [[TTA.dev/Guides]] - Complete guide listing
-- [[GETTING_STARTED]] - Main getting started guide
+- [[GETTING STARTED]] - Main getting started guide
 - [[TTA.dev (Meta-Project)]] - Project overview
 
 ## Documentation

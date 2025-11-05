@@ -229,7 +229,7 @@ rag_workflow = (
 
 - [[TTA Primitives]]
 - [[TTA.dev/Architecture]]
-- [[PRIMITIVES_CATALOG]]
+- [[PRIMITIVES CATALOG]]
 - [[Whiteboard - TTA.dev Architecture Overview]]
 
 ---

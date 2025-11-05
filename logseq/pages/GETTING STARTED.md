@@ -1,4 +1,4 @@
-# GETTING_STARTED
+# GETTING STARTED
 
 **Quick start guide for new TTA.dev users.**
 
@@ -73,7 +73,7 @@ result = await workflow.execute({"input": "Hello"}, context)
 
 ## Reference
 
-- [[PRIMITIVES_CATALOG]] - Complete primitive reference
+- [[PRIMITIVES CATALOG]] - Complete primitive reference
 - [[TTA.dev/Primitives]] - Primitives namespace
 - [[TTA.dev/Examples]] - Working code examples
 - [[TTA.dev (Meta-Project)]] - Project overview

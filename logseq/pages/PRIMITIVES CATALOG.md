@@ -1,4 +1,4 @@
-# PRIMITIVES_CATALOG
+# PRIMITIVES CATALOG
 
 **Complete reference catalog for all TTA.dev workflow primitives.**
 
@@ -65,7 +65,7 @@ cached_llm = CachePrimitive(
 - [[TTA.dev/Primitives]] - Primitives overview
 - [[Core Primitives]] - Core patterns
 - [[Recovery Patterns]] - Recovery strategies
-- [[GETTING_STARTED]] - Getting started guide
+- [[GETTING STARTED]] - Getting started guide
 
 ## External References
 

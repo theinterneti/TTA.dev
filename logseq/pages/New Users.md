@@ -13,7 +13,7 @@ New Users are:
 ## Getting Started
 
 ### Essential Resources
-- [[GETTING_STARTED]] - Installation and setup
+- [[GETTING STARTED]] - Installation and setup
 - [[TTA.dev/Quick Start]] - Your first workflow in 5 minutes
 - [[TTA.dev/Examples/Basic Workflow]] - Simple examples
 

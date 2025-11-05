@@ -32,8 +32,8 @@ This page is a disambiguation page for "Example" references. If you're looking f
 
 ## Related Pages
 
-- [[GETTING_STARTED]] - First example walkthrough
-- [[PRIMITIVES_CATALOG]] - Reference with examples
+- [[GETTING STARTED]] - First example walkthrough
+- [[PRIMITIVES CATALOG]] - Reference with examples
 - [[How-To]] - Step-by-step guides
 
 ## Tags

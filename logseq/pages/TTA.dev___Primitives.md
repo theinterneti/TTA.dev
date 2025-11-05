@@ -39,7 +39,7 @@ This namespace contains documentation for all TTA.dev workflow primitives - the 
 
 ## Reference Documentation
 
-- [[PRIMITIVES_CATALOG]] - Complete catalog with examples
+- [[PRIMITIVES CATALOG]] - Complete catalog with examples
 - [[Core Primitives]] - Core workflow patterns
 - [[Recovery Patterns]] - Error handling strategies
 - [[Performance Optimization]] - Performance patterns
@@ -51,7 +51,7 @@ This namespace contains documentation for all TTA.dev workflow primitives - the 
 ## Related Pages
 
 - [[TTA.dev/Packages/tta-dev-primitives]] - Package documentation
-- [[GETTING_STARTED]] - Getting started guide
+- [[GETTING STARTED]] - Getting started guide
 - [[TTA.dev/Examples]] - Working examples
 
 ## Tags

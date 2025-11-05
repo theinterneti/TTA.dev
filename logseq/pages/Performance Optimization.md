@@ -87,7 +87,7 @@ workflow = (
 
 ## Documentation
 
-- [[PRIMITIVES_CATALOG]] - Performance section
+- [[PRIMITIVES CATALOG]] - Performance section
 - `packages/tta-dev-primitives/examples/` - Code examples
 
 ## Tags
