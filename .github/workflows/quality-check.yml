@@ -48,7 +48,7 @@ jobs:
         run: uv pip install pyright
 
       - name: Run Pyright
-        run: uv run pyright packages/ --ignore='**/examples/**'
+        run: uv run pyright packages/
 
       - name: Run tests with coverage
         run: uv run pytest -m "not integration and not slow and not external" --cov=packages --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing
