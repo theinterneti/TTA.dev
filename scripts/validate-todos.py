@@ -63,10 +63,11 @@ class ValidationResult:
 class TODOValidator:
     """Validates Logseq TODOs against compliance rules."""
 
-    def __init__(self, logseq_root: Path):
+    def __init__(self, logseq_root: Path, quiet: bool = False):
         self.logseq_root = logseq_root
         self.journals_dir = logseq_root / "journals"
         self.pages_dir = logseq_root / "pages"
+        self.quiet = quiet
 
         # Regex patterns
         self.todo_pattern = re.compile(
@@ -81,11 +82,16 @@ class TODOValidator:
         result = ValidationResult()
 
         if not self.journals_dir.exists():
-            print(f"⚠️  Journals directory not found: {self.journals_dir}")
+            if not self.quiet:
+                print(
+                    f"⚠️  Journals directory not found: {self.journals_dir}",
+                    file=sys.stderr,
+                )
             return result
 
         journal_files = sorted(self.journals_dir.glob("*.md"))
-        print(f"📋 Scanning {len(journal_files)} journal files...")
+        if not self.quiet:
+            print(f"📋 Scanning {len(journal_files)} journal files...")
 
         for journal_file in journal_files:
             self._validate_file(journal_file, result)
@@ -271,10 +277,15 @@ class TODOValidator:
         for page_name in matches:
             # Convert page name to file name (Logseq uses ___ for /)
             # Try both formats: "Page/Name" -> "Page___Name.md" and "Page/Name.md"
-            page_file_with_underscores = self.pages_dir / f"{page_name.replace('/', '___')}.md"
+            page_file_with_underscores = (
+                self.pages_dir / f"{page_name.replace('/', '___')}.md"
+            )
             page_file_with_slash = self.pages_dir / f"{page_name}.md"
 
-            if not page_file_with_underscores.exists() and not page_file_with_slash.exists():
+            if (
+                not page_file_with_underscores.exists()
+                and not page_file_with_slash.exists()
+            ):
                 result.missing_kb_pages.add(page_name)
 
 
@@ -330,15 +341,20 @@ def main() -> int:
         help="Path to Logseq root directory",
     )
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
-    parser.add_argument("--fix", action="store_true", help="Auto-fix issues (not implemented yet)")
+    parser.add_argument(
+        "--fix", action="store_true", help="Auto-fix issues (not implemented yet)"
+    )
 
     args = parser.parse_args()
 
     if not args.logseq_root.exists():
-        print(f"❌ Logseq root not found: {args.logseq_root}")
+        if args.json:
+            print(json.dumps({"error": "Logseq root not found"}), file=sys.stderr)
+        else:
+            print(f"❌ Logseq root not found: {args.logseq_root}")
         return 2
 
-    validator = TODOValidator(args.logseq_root)
+    validator = TODOValidator(args.logseq_root, quiet=args.json)
     result = validator.validate_journals()
 
     if args.json:
