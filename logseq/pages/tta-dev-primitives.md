@@ -230,7 +230,7 @@ import pytest
 async def test_workflow():
     mock_llm = MockPrimitive(return_value={"output": "test"})
     workflow = step1 >> mock_llm >> step3
-    
+
     result = await workflow.execute(input_data, context)
     assert mock_llm.call_count == 1
 ```

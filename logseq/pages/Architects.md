@@ -307,7 +307,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     openai_api_key: str
-    
+
     class Config:
         env_file = ".env"
 
@@ -366,7 +366,7 @@ class WorkflowManager:
         self.cache = Cache()
         self.router = Router()
         self.retry = Retry()
-    
+
     def execute_everything(self, data):
         # 500 lines of code
 ```

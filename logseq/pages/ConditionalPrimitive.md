@@ -33,11 +33,11 @@ result = await workflow.execute(request_data, context)
 def check_complexity(data: dict, context: WorkflowContext) -> bool:
     """Route based on input complexity."""
     text = data.get("text", "")
-    
+
     # Complex if long or contains code
     is_long = len(text) > 1000
     has_code = "```" in text or "def " in text
-    
+
     return is_long or has_code
 
 workflow = ConditionalPrimitive(
@@ -155,10 +155,10 @@ def within_rate_limit(data: dict, context: WorkflowContext) -> bool:
     """Check if user is within rate limit."""
     user_id = data["user_id"]
     last_request = context.metadata.get(f"last_request_{user_id}")
-    
+
     if not last_request:
         return True
-    
+
     elapsed = datetime.now() - last_request
     return elapsed > timedelta(seconds=1)
 

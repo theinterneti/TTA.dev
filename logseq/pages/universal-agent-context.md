@@ -258,14 +258,14 @@ async def cached_web_search(query: str):
         tool_name="web_search",
         args={"query": query}
     )
-    
+
     if cached:
         print("Cache hit!")
         return cached
-    
+
     # Call expensive API
     result = await expensive_web_search_api(query)
-    
+
     # Cache for 5 minutes
     context.cache_tool_result(
         tool_name="web_search",
@@ -273,7 +273,7 @@ async def cached_web_search(query: str):
         result=result,
         ttl=300
     )
-    
+
     return result
 
 # First call - cache miss
@@ -495,16 +495,16 @@ config = ContextConfig(
     # Session settings
     session_ttl_seconds=1800,        # 30 minutes
     max_session_cost_dollars=10.0,
-    
+
     # Cache settings
     tool_cache_ttl_seconds=300,      # 5 minutes
     tool_cache_max_size=1000,
-    
+
     # Observability
     enable_tracing=True,
     enable_metrics=True,
     log_level="INFO",
-    
+
     # Multi-agent
     agent_selection_strategy="best_quality",
     max_parallel_agents=5
@@ -570,7 +570,7 @@ from universal_agent_context import UniversalAgentContext
 def route_based_on_context(data, ctx):
     # Access user preferences from context
     prefs = ctx.get_state("user_preferences", {})
-    
+
     if prefs.get("speed") == "fast":
         return "gpt-4-mini"
     elif prefs.get("quality") == "high":
@@ -604,22 +604,22 @@ from universal_agent_context import UniversalAgentContext
 @pytest.mark.asyncio
 async def test_context_state():
     context = UniversalAgentContext(workflow_id="test")
-    
+
     # Test state management
     context.set_state("key", "value")
     assert context.get_state("key") == "value"
-    
+
     # Test state isolation
     child = context.create_child(workflow_id="child")
     child.set_state("child_key", "child_value")
-    
+
     assert child.get_state("key") == "value"  # Inherits parent
     assert context.get_state("child_key") is None  # Parent doesn't see child
 
 @pytest.mark.asyncio
 async def test_tool_caching():
     context = UniversalAgentContext(workflow_id="test")
-    
+
     # Cache result
     context.cache_tool_result(
         tool_name="test_tool",
@@ -627,13 +627,13 @@ async def test_tool_caching():
         result={"data": "cached"},
         ttl=60
     )
-    
+
     # Retrieve cached result
     cached = context.get_cached_tool_result(
         tool_name="test_tool",
         args={"param": "value"}
     )
-    
+
     assert cached["data"] == "cached"
 ```
 

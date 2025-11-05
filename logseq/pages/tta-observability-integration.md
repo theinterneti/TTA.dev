@@ -198,13 +198,13 @@ services:
     ports:
       - "8000:8000"
       - "9464:9464"  # Prometheus metrics
-  
+
   jaeger:
     image: jaegertracing/all-in-one:latest
     ports:
       - "16686:16686"  # Jaeger UI
       - "4317:4317"    # OTLP receiver
-  
+
   prometheus:
     image: prom/prometheus:latest
     volumes:
