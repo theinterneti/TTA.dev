@@ -152,6 +152,16 @@ artifacts/
 uv-x86_64-unknown-linux-gnu/
 
 # === Logseq Knowledge Base ===
-# Private project notes and knowledge management
-# This folder should be synced via a separate private repo (e.g., TTA-notes)
-logseq/
+# Logseq internal files are handled by logseq/.gitignore
+# We track: pages/, journals/, and documentation .md files
+# We ignore: .logseq/, .recycle/, bak/ (via logseq/.gitignore)
+
+# SpecKit example outputs (generated during development)
+examples/features/
+examples/plan_output/
+examples/tasks_output/
+
+# Logseq personal content
+logseq/journals/
+logseq/logseq/
+logseq/pages/AI\ Research.md
