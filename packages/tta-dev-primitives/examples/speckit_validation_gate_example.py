@@ -260,9 +260,7 @@ async def example3_complete_workflow() -> None:
         feedback="Comprehensive specification. Ready for implementation planning.",
     )
 
-    status = await validation_gate.check_approval_status(
-        Path(validation_result["approval_path"])
-    )
+    status = await validation_gate.check_approval_status(Path(validation_result["approval_path"]))
     print(f"  ✓ Approved: {status['approved']}")
     print(f"  Feedback: {status['feedback']}")
 
@@ -437,13 +435,9 @@ async def main() -> None:
         print("=" * 80 + "\n")
 
         print("Key Takeaways:")
-        print(
-            "1. ValidationGatePrimitive creates pending approvals in .approvals/ directory"
-        )
+        print("1. ValidationGatePrimitive creates pending approvals in .approvals/ directory")
         print("2. Phase 1 returns 'pending' status with instructions (no blocking)")
-        print(
-            "3. Approvals can be manual (edit JSON) or programmatic (utility methods)"
-        )
+        print("3. Approvals can be manual (edit JSON) or programmatic (utility methods)")
         print("4. Existing approval decisions are automatically reused")
         print("5. Multiple artifacts can be validated together")
         print("6. Full audit trail with timestamps and reviewer info")

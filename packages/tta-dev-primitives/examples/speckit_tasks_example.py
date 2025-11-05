@@ -115,9 +115,7 @@ async def example_3_formats():
     # Generate in multiple formats
     for fmt in ["markdown", "json", "jira", "linear", "github"]:
         primitive = TasksPrimitive(output_dir=str(output_dir), output_format=fmt)
-        result = await primitive.execute(
-            {"plan_path": str(plan_path)}, WorkflowContext()
-        )
+        result = await primitive.execute({"plan_path": str(plan_path)}, WorkflowContext())
         print(f"✅ {fmt:10s}: {result['tasks_path']}")
 
 
@@ -145,15 +143,11 @@ async def example_4_workflow():
 
     # Generate plan
     plan_primitive = PlanPrimitive(output_dir=str(output_dir))
-    plan_result = await plan_primitive.execute(
-        {"spec_path": str(spec_path)}, WorkflowContext()
-    )
+    plan_result = await plan_primitive.execute({"spec_path": str(spec_path)}, WorkflowContext())
     print(f"2️⃣ Generated plan: {plan_result['plan_path']}")
 
     # Generate tasks
-    tasks_primitive = TasksPrimitive(
-        output_dir=str(output_dir), identify_critical_path=True
-    )
+    tasks_primitive = TasksPrimitive(output_dir=str(output_dir), identify_critical_path=True)
     tasks_result = await tasks_primitive.execute(
         {"plan_path": plan_result["plan_path"]}, WorkflowContext()
     )

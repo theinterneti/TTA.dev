@@ -197,9 +197,7 @@ class SessionContextBuilder:
 
         return context_parts
 
-    async def _find_relevant_kb_pages(
-        self, topic: str, context: WorkflowContext
-    ) -> list[dict]:
+    async def _find_relevant_kb_pages(self, topic: str, context: WorkflowContext) -> list[dict]:
         """Find KB pages relevant to topic."""
         # Parse all KB pages
         parser = ParseLogseqPages(kb_path=self.kb_path)
@@ -226,9 +224,7 @@ class SessionContextBuilder:
 
         return formatted
 
-    async def _find_relevant_code_files(
-        self, topic: str, context: WorkflowContext
-    ) -> list[dict]:
+    async def _find_relevant_code_files(self, topic: str, context: WorkflowContext) -> list[dict]:
         """Find code files relevant to topic."""
         # Scan codebase
         # ScanCodebase expects its inputs via the execute() payload (root_path),
@@ -286,9 +282,7 @@ class SessionContextBuilder:
 
         return formatted
 
-    async def _find_relevant_todos(
-        self, topic: str, context: WorkflowContext
-    ) -> list[dict]:
+    async def _find_relevant_todos(self, topic: str, context: WorkflowContext) -> list[dict]:
         """Find TODOs relevant to topic."""
         # Scan for TODOs in code
         scanner = ScanCodebase()
@@ -303,9 +297,7 @@ class SessionContextBuilder:
         # Extract TODOs from each file
         for file_path in files:
             try:
-                result = await extractor.execute(
-                    {"file_path": Path(file_path)}, context
-                )
+                result = await extractor.execute({"file_path": Path(file_path)}, context)
                 for todo in result["todos"]:
                     # Add relevance check
                     if topic.lower() in todo["text"].lower():
@@ -319,9 +311,7 @@ class SessionContextBuilder:
 
         return all_todos[: self.max_todos]
 
-    async def _find_relevant_tests(
-        self, topic: str, context: WorkflowContext
-    ) -> list[dict]:
+    async def _find_relevant_tests(self, topic: str, context: WorkflowContext) -> list[dict]:
         """Find test files relevant to topic."""
         # Scan for test files
         scanner = ScanCodebase()
@@ -346,9 +336,7 @@ class SessionContextBuilder:
             analysis = await analyzer.execute({"files": [str(test_path)]}, context)
 
             test_functions = [
-                name
-                for name in analysis.get("functions", [])
-                if name.startswith("test_")
+                name for name in analysis.get("functions", []) if name.startswith("test_")
             ]
 
             formatted.append(

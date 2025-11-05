@@ -54,9 +54,7 @@ class MarkdownChecker:
                 link_text, link_target = match.groups()
 
                 # Skip external links, anchors, and special protocols
-                if link_target.startswith(
-                    ("http://", "https://", "#", "mailto:", "tel:")
-                ):
+                if link_target.startswith(("http://", "https://", "#", "mailto:", "tel:")):
                     continue
 
                 # Remove anchor from target
@@ -69,9 +67,7 @@ class MarkdownChecker:
 
                 if not target_path.exists():
                     rel_file = md_file.relative_to(self.root_dir)
-                    self.errors.append(
-                        f"{rel_file}: Broken link [{link_text}]({link_target})"
-                    )
+                    self.errors.append(f"{rel_file}: Broken link [{link_text}]({link_target})")
 
     def check_code_blocks(self, md_files: list[Path]) -> None:
         """Check that code blocks have language specifiers."""
@@ -90,9 +86,7 @@ class MarkdownChecker:
                             f"{rel_file}:{line_num}: Code block missing language identifier"
                         )
 
-    def extract_runnable_code_blocks(
-        self, md_files: list[Path]
-    ) -> list[tuple[Path, int, str]]:
+    def extract_runnable_code_blocks(self, md_files: list[Path]) -> list[tuple[Path, int, str]]:
         """Extract Python code blocks marked as runnable."""
         print("🐍 Extracting runnable code blocks...")
 
@@ -114,18 +108,12 @@ class MarkdownChecker:
                     block_start_line = line_num
                     current_block_lines = []
                     # Check if marked as runnable
-                    is_runnable = (
-                        "# runnable" in stripped.lower()
-                        or "runnable" in stripped.lower()
-                    )
+                    is_runnable = "# runnable" in stripped.lower() or "runnable" in stripped.lower()
 
                 elif stripped == "```" and in_python_block:
                     in_python_block = False
                     # Check first line of block for runnable marker
-                    if (
-                        current_block_lines
-                        and "# runnable" in current_block_lines[0].lower()
-                    ):
+                    if current_block_lines and "# runnable" in current_block_lines[0].lower():
                         is_runnable = True
 
                     if is_runnable and current_block_lines:
@@ -180,9 +168,7 @@ class MarkdownChecker:
             print("\n✅ All checks passed!")
             return 0
         elif self.errors:
-            print(
-                f"\n❌ Found {len(self.errors)} error(s) and {len(self.warnings)} warning(s)"
-            )
+            print(f"\n❌ Found {len(self.errors)} error(s) and {len(self.warnings)} warning(s)")
             return 1
         else:
             print(f"\n⚠️  Found {len(self.warnings)} warning(s)")
@@ -201,18 +187,14 @@ def find_markdown_files(root_dir: Path, exclude_dirs: set[str]) -> list[Path]:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Check markdown documentation for TTA.dev"
-    )
+    parser = argparse.ArgumentParser(description="Check markdown documentation for TTA.dev")
     parser.add_argument("--links", action="store_true", help="Check internal links")
     parser.add_argument(
         "--code-blocks",
         action="store_true",
         help="Check code blocks have language identifiers",
     )
-    parser.add_argument(
-        "--frontmatter", action="store_true", help="Check frontmatter validity"
-    )
+    parser.add_argument("--frontmatter", action="store_true", help="Check frontmatter validity")
     parser.add_argument("--all", action="store_true", help="Run all static checks")
     parser.add_argument(
         "--extract-runnable",

@@ -87,13 +87,7 @@ async def complex_specification_example():
 
     print("\nSection Status:")
     for section, status_val in list(status.items())[:8]:
-        emoji = (
-            "✅"
-            if status_val == "complete"
-            else "⚠️"
-            if status_val == "incomplete"
-            else "❌"
-        )
+        emoji = "✅" if status_val == "complete" else "⚠️" if status_val == "incomplete" else "❌"
         print(f"  {emoji} {section}: {status_val}")
 
 

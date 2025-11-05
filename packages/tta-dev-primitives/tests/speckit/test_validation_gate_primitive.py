@@ -109,9 +109,7 @@ class TestValidationGateExecution:
         assert approval_data["reviewer"] == "test@example.com"
 
     @pytest.mark.asyncio
-    async def test_missing_artifacts_raises_error(
-        self, validation_gate, workflow_context
-    ):
+    async def test_missing_artifacts_raises_error(self, validation_gate, workflow_context):
         """Test that missing artifacts raises ValueError."""
         with pytest.raises(ValueError, match="At least one artifact required"):
             await validation_gate.execute(
@@ -120,9 +118,7 @@ class TestValidationGateExecution:
             )
 
     @pytest.mark.asyncio
-    async def test_nonexistent_artifact_raises_error(
-        self, validation_gate, workflow_context
-    ):
+    async def test_nonexistent_artifact_raises_error(self, validation_gate, workflow_context):
         """Test that nonexistent artifact raises FileNotFoundError."""
         with pytest.raises(FileNotFoundError, match="Artifact not found"):
             await validation_gate.execute(
@@ -213,9 +209,7 @@ class TestValidationCriteria:
         assert "required_sections_check" in validation_results
 
     @pytest.mark.asyncio
-    async def test_artifacts_exist_check(
-        self, validation_gate, sample_spec_file, workflow_context
-    ):
+    async def test_artifacts_exist_check(self, validation_gate, sample_spec_file, workflow_context):
         """Test that artifacts existence is checked."""
         result = await validation_gate.execute(
             {
@@ -335,9 +329,7 @@ class TestApprovalStatus:
     """Test approval status checking."""
 
     @pytest.mark.asyncio
-    async def test_check_pending_status(
-        self, validation_gate, sample_spec_file, workflow_context
-    ):
+    async def test_check_pending_status(self, validation_gate, sample_spec_file, workflow_context):
         """Test checking pending approval status."""
         # Create pending approval
         result = await validation_gate.execute(
@@ -356,9 +348,7 @@ class TestApprovalStatus:
         assert status["approved"] is False
 
     @pytest.mark.asyncio
-    async def test_check_approved_status(
-        self, validation_gate, sample_spec_file, workflow_context
-    ):
+    async def test_check_approved_status(self, validation_gate, sample_spec_file, workflow_context):
         """Test checking approved status."""
         # Create and approve
         result = await validation_gate.execute(
@@ -378,9 +368,7 @@ class TestApprovalStatus:
         assert status["approved"] is True
 
     @pytest.mark.asyncio
-    async def test_check_rejected_status(
-        self, validation_gate, sample_spec_file, workflow_context
-    ):
+    async def test_check_rejected_status(self, validation_gate, sample_spec_file, workflow_context):
         """Test checking rejected status."""
         # Create and reject
         result = await validation_gate.execute(
@@ -406,9 +394,7 @@ class TestApprovalStatus:
     @pytest.mark.asyncio
     async def test_check_nonexistent_approval(self, validation_gate):
         """Test checking status of nonexistent approval."""
-        status = await validation_gate.check_approval_status(
-            "/nonexistent/approval.json"
-        )
+        status = await validation_gate.check_approval_status("/nonexistent/approval.json")
         assert status["status"] == "not_found"
         assert status["approved"] is False
 
@@ -439,9 +425,7 @@ class TestMultipleArtifacts:
         )
 
         assert result["status"] == "pending"
-        assert (
-            len(json.loads(Path(result["approval_path"]).read_text())["artifacts"]) == 3
-        )
+        assert len(json.loads(Path(result["approval_path"]).read_text())["artifacts"]) == 3
 
     @pytest.mark.asyncio
     async def test_approval_filename_with_multiple_artifacts(

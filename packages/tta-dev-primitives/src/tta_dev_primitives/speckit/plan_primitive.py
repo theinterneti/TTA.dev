@@ -168,17 +168,13 @@ class PlanPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         # 8. Generate data-model.md (if data models exist)
         data_model_path: Path | None = None
         if data_models:
-            data_model_path = await self._generate_data_model_md(
-                output_dir, data_models
-            )
+            data_model_path = await self._generate_data_model_md(output_dir, data_models)
 
         return {
             "plan_path": str(plan_path),
             "data_model_path": str(data_model_path) if data_model_path else None,
             "phases": [self._phase_to_dict(p) for p in phases],
-            "architecture_decisions": [
-                self._decision_to_dict(d) for d in arch_decisions
-            ],
+            "architecture_decisions": [self._decision_to_dict(d) for d in arch_decisions],
             "effort_estimate": effort,
             "dependencies": dependencies,
         }
@@ -273,8 +269,7 @@ class PlanPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             r
             for r in all_requirements
             if any(
-                keyword in r.lower()
-                for keyword in ["api", "endpoint", "route", "interface", "ui"]
+                keyword in r.lower() for keyword in ["api", "endpoint", "route", "interface", "ui"]
             )
         ]
 
@@ -293,9 +288,7 @@ class PlanPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         ]
 
         # Remaining are business logic
-        categorized = set(
-            data_requirements + api_requirements + integration_requirements
-        )
+        categorized = set(data_requirements + api_requirements + integration_requirements)
         logic_requirements = [r for r in all_requirements if r not in categorized]
 
         phases: list[Phase] = []
@@ -368,9 +361,7 @@ class PlanPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         # Limit to max_phases
         return phases[: self.max_phases]
 
-    async def _extract_data_models(
-        self, spec_content: dict[str, Any]
-    ) -> list[DataModel]:
+    async def _extract_data_models(self, spec_content: dict[str, Any]) -> list[DataModel]:
         """Extract data models from spec requirements.
 
         Args:
@@ -585,9 +576,7 @@ class PlanPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             [
                 "## Overview",
                 "",
-                spec_content.get("sections", {}).get(
-                    "Overview", "No overview provided"
-                ),
+                spec_content.get("sections", {}).get("Overview", "No overview provided"),
                 "",
             ]
         )
@@ -668,9 +657,7 @@ class PlanPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 
         return plan_path
 
-    async def _generate_data_model_md(
-        self, output_dir: Path, data_models: list[DataModel]
-    ) -> Path:
+    async def _generate_data_model_md(self, output_dir: Path, data_models: list[DataModel]) -> Path:
         """Generate data-model.md file.
 
         Args:

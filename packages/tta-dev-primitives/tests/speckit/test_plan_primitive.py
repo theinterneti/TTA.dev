@@ -339,13 +339,9 @@ class TestArchitectureDecisions:
             "existing_patterns": ["REST API", "Redis Cache"],
         }
 
-        arch_decisions = await plan._generate_architecture_decisions(
-            spec_content, arch_context
-        )
+        arch_decisions = await plan._generate_architecture_decisions(spec_content, arch_context)
 
-        assert (
-            len(arch_decisions) >= 0
-        )  # May or may not generate decisions based on context
+        assert len(arch_decisions) >= 0  # May or may not generate decisions based on context
 
     @pytest.mark.asyncio
     async def test_generate_architecture_decisions_disabled(self, sample_spec_file):
@@ -487,9 +483,7 @@ class TestPlanGeneration:
     """Test plan.md file generation."""
 
     @pytest.mark.asyncio
-    async def test_generate_plan_md_creates_file(
-        self, sample_spec_file, temp_output_dir
-    ):
+    async def test_generate_plan_md_creates_file(self, sample_spec_file, temp_output_dir):
         """Test that plan.md file is created."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -504,9 +498,7 @@ class TestPlanGeneration:
         assert plan_path.read_text(encoding="utf-8")
 
     @pytest.mark.asyncio
-    async def test_generate_plan_md_content_structure(
-        self, sample_spec_file, temp_output_dir
-    ):
+    async def test_generate_plan_md_content_structure(self, sample_spec_file, temp_output_dir):
         """Test that plan.md has correct structure."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -541,9 +533,7 @@ class TestPlanGeneration:
             assert "## Data Models" in content
 
     @pytest.mark.asyncio
-    async def test_generate_plan_md_includes_effort(
-        self, sample_spec_file, temp_output_dir
-    ):
+    async def test_generate_plan_md_includes_effort(self, sample_spec_file, temp_output_dir):
         """Test that plan.md includes effort estimation."""
         plan = PlanPrimitive()
         spec_content = await plan._parse_spec(sample_spec_file)
@@ -581,9 +571,7 @@ class TestDataModelGeneration:
             )
         ]
 
-        data_model_path = await plan._generate_data_model_md(
-            temp_output_dir, data_models
-        )
+        data_model_path = await plan._generate_data_model_md(temp_output_dir, data_models)
 
         assert data_model_path.exists()
         assert data_model_path.name == "data-model.md"
@@ -609,9 +597,7 @@ class TestDataModelGeneration:
             ),
         ]
 
-        data_model_path = await plan._generate_data_model_md(
-            temp_output_dir, data_models
-        )
+        data_model_path = await plan._generate_data_model_md(temp_output_dir, data_models)
 
         content = data_model_path.read_text(encoding="utf-8")
 
@@ -641,15 +627,11 @@ class TestFullExecution:
     """Test full execution of PlanPrimitive."""
 
     @pytest.mark.asyncio
-    async def test_execute_basic(
-        self, sample_spec_file, temp_output_dir, workflow_context
-    ):
+    async def test_execute_basic(self, sample_spec_file, temp_output_dir, workflow_context):
         """Test basic execution."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
-        result = await plan.execute(
-            {"spec_path": str(sample_spec_file)}, workflow_context
-        )
+        result = await plan.execute({"spec_path": str(sample_spec_file)}, workflow_context)
 
         assert "plan_path" in result
         assert "data_model_path" in result
@@ -683,9 +665,7 @@ class TestFullExecution:
             estimate_effort=False,
         )
 
-        result = await plan.execute(
-            {"spec_path": str(sample_spec_file)}, workflow_context
-        )
+        result = await plan.execute({"spec_path": str(sample_spec_file)}, workflow_context)
 
         assert result["data_model_path"] is None
         assert len(result["architecture_decisions"]) == 0
@@ -738,29 +718,21 @@ class TestObservability:
     """Test observability integration."""
 
     @pytest.mark.asyncio
-    async def test_execute_creates_span(
-        self, sample_spec_file, temp_output_dir, workflow_context
-    ):
+    async def test_execute_creates_span(self, sample_spec_file, temp_output_dir, workflow_context):
         """Test that execution creates observability span."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
         # InstrumentedPrimitive should create spans automatically
-        result = await plan.execute(
-            {"spec_path": str(sample_spec_file)}, workflow_context
-        )
+        result = await plan.execute({"spec_path": str(sample_spec_file)}, workflow_context)
 
         assert result is not None  # Execution completed successfully
 
     @pytest.mark.asyncio
-    async def test_workflow_context_propagation(
-        self, sample_spec_file, temp_output_dir
-    ):
+    async def test_workflow_context_propagation(self, sample_spec_file, temp_output_dir):
         """Test that workflow context is propagated."""
         plan = PlanPrimitive(output_dir=str(temp_output_dir))
 
-        context = WorkflowContext(
-            workflow_id="test-workflow", correlation_id="test-correlation"
-        )
+        context = WorkflowContext(workflow_id="test-workflow", correlation_id="test-correlation")
 
         result = await plan.execute({"spec_path": str(sample_spec_file)}, context)
 

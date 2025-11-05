@@ -149,10 +149,7 @@ class TestLinkValidatorWithRealKB:
 
         assert report, "Report should not be empty"
         # Check for KB Link Validation Report (actual title) or Link Validation Report
-        assert (
-            "# KB Link Validation Report" in report
-            or "# Link Validation Report" in report
-        )
+        assert "# KB Link Validation Report" in report or "# Link Validation Report" in report
         assert "## Summary" in report
 
     async def test_link_validator_handles_special_characters(self, skip_if_no_kb):
@@ -276,9 +273,7 @@ class TestCrossReferenceBuilderWithRealData:
         assert len(result["report"]) > 100, "Report should have content"
 
     @pytest.mark.integration
-    async def test_cross_reference_builder_finds_bidirectional_refs(
-        self, skip_if_no_kb
-    ):
+    async def test_cross_reference_builder_finds_bidirectional_refs(self, skip_if_no_kb):
         """Test that CrossReferenceBuilder finds both KB→Code and Code→KB refs."""
         from tta_kb_automation.tools.cross_reference_builder import (
             CrossReferenceBuilder,
@@ -412,9 +407,7 @@ class TestEndToEndWorkflows:
 
         # Calculate health score (0-100)
         total_links = metrics["valid_links"] + metrics["broken_links"]
-        link_health = (
-            (metrics["valid_links"] / total_links * 100) if total_links > 0 else 100
-        )
+        link_health = (metrics["valid_links"] / total_links * 100) if total_links > 0 else 100
 
         orphan_penalty = min(metrics["orphaned_pages"] * 5, 30)
         health_score = max(0, link_health - orphan_penalty)
@@ -559,9 +552,7 @@ def test_integration_tests_are_documented():
     readme_path = Path(__file__).parent.parent.parent / "README.md"
     if readme_path.exists():
         content = readme_path.read_text()
-        assert "integration" in content.lower(), (
-            "README should document integration tests"
-        )
+        assert "integration" in content.lower(), "README should document integration tests"
 
 
 if __name__ == "__main__":

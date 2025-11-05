@@ -37,9 +37,7 @@ class AggregateParallelResults(InstrumentedPrimitive[list[dict], dict]):
     def __init__(self) -> None:
         super().__init__(name="aggregate_parallel_results")
 
-    async def _execute_impl(
-        self, input_data: list[dict], context: WorkflowContext
-    ) -> dict:
+    async def _execute_impl(self, input_data: list[dict], context: WorkflowContext) -> dict:
         """Merge parallel validation results."""
         if not input_data or len(input_data) < 2:
             # Fallback for unexpected input
@@ -219,9 +217,7 @@ class LinkValidator:
         # Orphaned pages section
         orphaned = result.get("orphaned_pages", [])
         if orphaned:
-            lines.extend(
-                ["## 🔍 Orphaned Pages", "", "Pages with no incoming links:", ""]
-            )
+            lines.extend(["## 🔍 Orphaned Pages", "", "Pages with no incoming links:", ""])
             for page in orphaned[:30]:  # Limit to 30
                 title = page.get("title", "?")
                 tags = page.get("tags", [])
