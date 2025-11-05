@@ -5,11 +5,14 @@ to extract TODOs, docstrings, and structural information for KB integration.
 """
 
 import ast
+import logging
 import re
 from pathlib import Path
 
 from tta_dev_primitives import WorkflowContext
 from tta_dev_primitives.observability import InstrumentedPrimitive
+
+logger = logging.getLogger(__name__)
 
 
 class ScanCodebase(InstrumentedPrimitive[dict, dict]):
@@ -177,7 +180,7 @@ class ExtractTODOs(InstrumentedPrimitive[dict, dict]):
 
             except Exception as e:
                 # Log error but continue processing other files
-                context.logger.warning(f"Error processing {file_path}: {e}")
+                logger.warning(f"Error analyzing {file_path}: {e}")
                 continue
 
         return {
