@@ -135,7 +135,9 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
 
             try:
                 if tracer and TRACING_AVAILABLE:
-                    with tracer.start_as_current_span(f"retry.attempt_{attempt}") as span:
+                    with tracer.start_as_current_span(
+                        f"retry.attempt_{attempt}"
+                    ) as span:
                         span.set_attribute("retry.attempt", attempt + 1)
                         span.set_attribute("retry.max_attempts", total_attempts)
                         span.set_attribute(
@@ -145,7 +147,9 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
                         try:
                             result = await self.primitive.execute(input_data, context)
                             span.set_attribute("retry.status", "success")
-                            span.set_attribute("retry.succeeded_on_attempt", attempt + 1)
+                            span.set_attribute(
+                                "retry.succeeded_on_attempt", attempt + 1
+                            )
                         except Exception as e:
                             span.set_attribute("retry.status", "error")
                             span.set_attribute("retry.error", str(e))
@@ -280,4 +284,6 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
                         success=False,
                     )
 
-        raise last_error
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("Retry failed without capturing an error")
