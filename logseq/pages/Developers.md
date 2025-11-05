@@ -18,7 +18,7 @@ Developers using TTA.dev are:
 - [[TTA.dev/Primitives/ConditionalPrimitive]] - Branching logic
 
 ### Getting Started
-- [[GETTING_STARTED]] - Installation and first workflow
+- [[GETTING STARTED]] - Installation and first workflow
 - [[TTA.dev/Examples]] - Working code examples
 - [[TTA.dev/Guides/Workflow Composition]] - Composition patterns
 

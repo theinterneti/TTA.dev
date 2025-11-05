@@ -58,7 +58,7 @@ workflow = FallbackPrimitive(
 
 - [[TTA.dev/Guides/Error Handling]] - Error handling guide
 - [[TTA.dev/Examples/Error Handling Patterns]] - Code examples
-- [[PRIMITIVES_CATALOG]] - Recovery section
+- [[PRIMITIVES CATALOG]] - Recovery section
 
 ## Tags
 

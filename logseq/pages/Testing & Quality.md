@@ -60,7 +60,7 @@ TTA.dev maintains high quality standards with comprehensive testing and automate
 - Clear variable names
 
 ### Documentation Quality
-- All primitives documented in [[PRIMITIVES_CATALOG]]
+- All primitives documented in [[PRIMITIVES CATALOG]]
 - Examples for all public APIs
 - Architecture decisions recorded in `docs/architecture/`
 

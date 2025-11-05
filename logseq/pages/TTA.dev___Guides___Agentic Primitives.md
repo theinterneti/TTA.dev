@@ -523,7 +523,7 @@ workflow = (
 - **Handle errors:** [[TTA.dev/Guides/Error Handling Patterns]]
 - **Add observability:** [[TTA.dev/Guides/Observability]]
 - **Optimize costs:** [[TTA.dev/Guides/Cost Optimization]]
-- **Browse catalog:** [[PRIMITIVES_CATALOG]]
+- **Browse catalog:** [[PRIMITIVES CATALOG]]
 
 ---
 

@@ -404,7 +404,7 @@ async def test_compensation_rolls_back_on_failure():
 
 - [[TTA Primitives]]
 - [[TTA.dev/Architecture]]
-- [[PRIMITIVES_CATALOG]]
+- [[PRIMITIVES CATALOG]]
 - [[Whiteboard - TTA.dev Architecture Overview]]
 - [[How to Add Observability to Workflows]]
 

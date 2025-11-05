@@ -25,8 +25,8 @@ This page is a disambiguation page for "Core" references. See specific topics be
 
 ## Related Pages
 
-- [[PRIMITIVES_CATALOG]] - Complete primitive reference
-- [[GETTING_STARTED]] - Introduction to core concepts
+- [[PRIMITIVES CATALOG]] - Complete primitive reference
+- [[GETTING STARTED]] - Introduction to core concepts
 - [[Developers]] - Using core components
 
 ## Tags
