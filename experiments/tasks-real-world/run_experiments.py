@@ -64,9 +64,7 @@ to visualize system health, track performance trends, and identify bottlenecks.
 
     # Generate plan
     plan_primitive = PlanPrimitive(output_dir=str(output_dir))
-    plan_result = await plan_primitive.execute(
-        {"spec_path": str(spec_path)}, WorkflowContext()
-    )
+    plan_result = await plan_primitive.execute({"spec_path": str(spec_path)}, WorkflowContext())
     print(f"✅ Generated plan: {plan_result['plan_path']}")
 
     # Generate tasks with all features enabled
@@ -96,9 +94,7 @@ to visualize system health, track performance trends, and identify bottlenecks.
         print(f"   Parallel streams: {len(tasks_result['parallel_streams'])} groups")
 
     # Export to GitHub format for actual use
-    github_primitive = TasksPrimitive(
-        output_dir=str(output_dir), output_format="github"
-    )
+    github_primitive = TasksPrimitive(output_dir=str(output_dir), output_format="github")
     github_result = await github_primitive.execute(
         {"plan_path": plan_result["plan_path"]}, WorkflowContext()
     )
@@ -214,9 +210,7 @@ Add a new family of primitives for data transformation and processing workflows.
 
     # Full workflow: Spec → Plan → Tasks
     spec_primitive = SpecifyPrimitive(output_dir=str(output_dir))
-    spec_result = await spec_primitive.execute(
-        {"requirement": spec_content}, WorkflowContext()
-    )
+    spec_result = await spec_primitive.execute({"requirement": spec_content}, WorkflowContext())
 
     plan_primitive = PlanPrimitive(output_dir=str(output_dir))
     plan_result = await plan_primitive.execute(spec_result, WorkflowContext())

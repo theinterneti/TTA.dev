@@ -182,9 +182,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         # Extract input parameters
         plan_path = Path(input_data["plan_path"])
         data_model_path = (
-            Path(input_data["data_model_path"])
-            if "data_model_path" in input_data
-            else None
+            Path(input_data["data_model_path"]) if "data_model_path" in input_data else None
         )
         output_format = input_data.get("output_format", self.output_format)
 
@@ -192,9 +190,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         plan_data = self._parse_plan_file(plan_path)
 
         # Parse data model if provided
-        data_model_data = (
-            self._parse_data_model(data_model_path) if data_model_path else None
-        )
+        data_model_data = self._parse_data_model(data_model_path) if data_model_path else None
 
         # Generate tasks from plan
         tasks = self._generate_tasks(plan_data, data_model_data)
@@ -204,9 +200,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 
         # Identify critical path
         critical_path = (
-            self._identify_critical_path(ordered_tasks)
-            if self.identify_critical_path_flag
-            else []
+            self._identify_critical_path(ordered_tasks) if self.identify_critical_path_flag else []
         )
 
         # Mark critical path tasks
@@ -216,9 +210,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 
         # Identify parallel work streams
         parallel_streams = (
-            self._identify_parallel_streams(ordered_tasks)
-            if self.group_parallel_work_flag
-            else {}
+            self._identify_parallel_streams(ordered_tasks) if self.group_parallel_work_flag else {}
         )
 
         # Assign parallel groups to tasks
@@ -229,9 +221,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
                     task.parallel_group = group_id
 
         # Calculate total effort
-        total_story_points = sum(
-            t.story_points for t in ordered_tasks if t.story_points
-        )
+        total_story_points = sum(t.story_points for t in ordered_tasks if t.story_points)
         total_hours = sum(t.hours for t in ordered_tasks if t.hours)
 
         # Generate output based on format
@@ -314,9 +304,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
                         effort_str = line.replace("**Effort:**", "").strip()
                         if "hours" in effort_str:
                             try:
-                                hours = float(
-                                    effort_str.split("hours")[0].strip().split()[-1]
-                                )
+                                hours = float(effort_str.split("hours")[0].strip().split()[-1])
                                 current_phase["hours"] = hours
                             except (ValueError, IndexError):
                                 pass
@@ -325,9 +313,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
                         requirement = line[1:].strip()
                         if requirement and not requirement.startswith("**"):
                             current_phase["requirements"].append(requirement)
-                    elif line.startswith("## ") and not line.startswith(
-                        "## Implementation"
-                    ):
+                    elif line.startswith("## ") and not line.startswith("## Implementation"):
                         # End of phases section
                         break
                     i += 1
@@ -410,9 +396,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
                     entities.append(entity_name)
 
             # Parse relationships
-            if line.startswith("**Relationships:**") or (
-                "→" in line and current_entity
-            ):
+            if line.startswith("**Relationships:**") or ("→" in line and current_entity):
                 relationships.append(line)
 
         return {"entities": entities, "relationships": relationships}
@@ -483,9 +467,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 
                 task = Task(
                     id=task_id,
-                    title=requirement[:60] + "..."
-                    if len(requirement) > 60
-                    else requirement,
+                    title=requirement[:60] + "..." if len(requirement) > 60 else requirement,
                     description=f"Implement: {requirement}\n\nPhase: {phase_name}",
                     phase=phase_name,
                     dependencies=[],
@@ -635,9 +617,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         for task in tasks:
             # ES = max(EF of all dependencies)
             if task.dependencies:
-                es_times[task.id] = max(
-                    ef_times.get(dep_id, 0.0) for dep_id in task.dependencies
-                )
+                es_times[task.id] = max(ef_times.get(dep_id, 0.0) for dep_id in task.dependencies)
             else:
                 es_times[task.id] = 0.0
 
@@ -706,9 +686,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             for task in phase_tasks:
                 # Check if task depends on other tasks in same phase
                 phase_task_ids = {t.id for t in phase_tasks}
-                has_phase_dependency = any(
-                    dep_id in phase_task_ids for dep_id in task.dependencies
-                )
+                has_phase_dependency = any(dep_id in phase_task_ids for dep_id in task.dependencies)
 
                 if not has_phase_dependency and len(phase_tasks) > 1:
                     independent_tasks.append(task)
@@ -744,9 +722,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         # Calculate totals
         total_story_points = sum(t.story_points for t in tasks if t.story_points)
         total_hours = sum(t.hours for t in tasks if t.hours)
-        critical_hours = sum(
-            t.hours for t in tasks if t.id in critical_path and t.hours
-        )
+        critical_hours = sum(t.hours for t in tasks if t.id in critical_path and t.hours)
 
         # Build markdown content
         lines = [
@@ -756,9 +732,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         ]
 
         if self.include_effort:
-            lines.append(
-                f"**Total Effort:** {total_story_points} SP ({total_hours:.1f} hours)\n"
-            )
+            lines.append(f"**Total Effort:** {total_story_points} SP ({total_hours:.1f} hours)\n")
 
         lines.append("\n## Summary\n")
         lines.append(f"- **Total Tasks:** {len(tasks)}\n")
@@ -769,9 +743,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             )
 
         if parallel_streams:
-            lines.append(
-                f"- **Parallel Work Streams:** {len(parallel_streams)} groups\n"
-            )
+            lines.append(f"- **Parallel Work Streams:** {len(parallel_streams)} groups\n")
 
         dependency_count = sum(len(t.dependencies) for t in tasks)
         lines.append(f"- **Total Dependencies:** {dependency_count}\n")
@@ -992,9 +964,7 @@ class TasksPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         output_path.write_text(output.getvalue(), encoding="utf-8")
         return output_path
 
-    def _generate_github_issues(
-        self, tasks: list[Task], plan_data: dict[str, Any]
-    ) -> Path:
+    def _generate_github_issues(self, tasks: list[Task], plan_data: dict[str, Any]) -> Path:
         """Generate GitHub Issues JSON file.
 
         Args:

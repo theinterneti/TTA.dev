@@ -41,9 +41,7 @@ async def example_1_basic_clarify_workflow() -> None:
 
     # Create primitives
     specify = SpecifyPrimitive()
-    clarify = ClarifyPrimitive(
-        max_iterations=3, target_coverage=0.9, questions_per_gap=2
-    )
+    clarify = ClarifyPrimitive(max_iterations=3, target_coverage=0.9, questions_per_gap=2)
 
     # Create temporary directory for specs
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -118,9 +116,7 @@ async def example_1_basic_clarify_workflow() -> None:
             print(f"    Iteration {entry['iteration']}:")
             print(f"      Questions asked: {len(entry['questions'])}")
             print(f"      Gaps addressed: {entry['gaps_addressed']}")
-            print(
-                f"      Coverage: {entry['coverage_before']:.2f} → {entry['coverage_after']:.2f}"
-            )
+            print(f"      Coverage: {entry['coverage_before']:.2f} → {entry['coverage_after']:.2f}")
 
 
 async def example_2_iterative_refinement() -> None:
@@ -220,8 +216,7 @@ async def example_2_iterative_refinement() -> None:
 
         print("✓ Round 2 complete")
         print(
-            f"  Coverage: {result2['final_coverage']:.2f} "
-            f"(+{result2['coverage_improvement']:.2f})"
+            f"  Coverage: {result2['final_coverage']:.2f} (+{result2['coverage_improvement']:.2f})"
         )
         print(f"  Remaining gaps: {len(result2['remaining_gaps'])}")
 
@@ -285,9 +280,7 @@ async def example_3_integration_with_specify() -> None:
         spec_result = await specify.execute(
             {
                 "requirement": "Add real-time notifications for order status updates",
-                "context": {
-                    "current_system": "E-commerce platform with order tracking"
-                },
+                "context": {"current_system": "E-commerce platform with order tracking"},
             },
             context,
         )

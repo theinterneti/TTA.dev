@@ -135,9 +135,7 @@ class TestClarifyPrimitiveInitialization:
 
     def test_init_with_custom_parameters(self):
         """Test initialization with custom parameters."""
-        primitive = ClarifyPrimitive(
-            max_iterations=5, target_coverage=0.95, questions_per_gap=3
-        )
+        primitive = ClarifyPrimitive(max_iterations=5, target_coverage=0.95, questions_per_gap=3)
         assert primitive.max_iterations == 5
         assert primitive.target_coverage == 0.95
         assert primitive.questions_per_gap == 3
@@ -230,9 +228,7 @@ class TestClarifyPrimitiveExecution:
         assert result["coverage_improvement"] == 0.0
 
     @pytest.mark.asyncio
-    async def test_execute_reaches_target_coverage(
-        self, sample_spec_file, workflow_context
-    ):
+    async def test_execute_reaches_target_coverage(self, sample_spec_file, workflow_context):
         """Test execution stops when target coverage is reached."""
         primitive = ClarifyPrimitive(max_iterations=5, target_coverage=0.3)
 
@@ -555,15 +551,11 @@ class TestErrorHandling:
     """Test error handling in ClarifyPrimitive."""
 
     @pytest.mark.asyncio
-    async def test_handles_malformed_spec(
-        self, clarify_primitive, tmp_specs_dir, workflow_context
-    ):
+    async def test_handles_malformed_spec(self, clarify_primitive, tmp_specs_dir, workflow_context):
         """Test handling of malformed specification files."""
         # Create malformed spec (missing sections)
         malformed_spec = tmp_specs_dir / "malformed.spec.md"
-        malformed_spec.write_text(
-            "# Malformed Spec\n\nNo proper structure", encoding="utf-8"
-        )
+        malformed_spec.write_text("# Malformed Spec\n\nNo proper structure", encoding="utf-8")
 
         result = await clarify_primitive.execute(
             {

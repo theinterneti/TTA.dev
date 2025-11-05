@@ -37,9 +37,7 @@ class ExtractCodeReferences(InstrumentedPrimitive[dict, dict]):
         self.file_patterns = [
             re.compile(r"`([a-zA-Z0-9_/\-]+\.py)`"),  # `path/to/file.py`
             re.compile(r"\[([^\]]+)\]\(([^)]+\.py)\)"),  # [text](path/to/file.py)
-            re.compile(
-                r"packages/([a-zA-Z0-9_\-]+/[^\s]+\.py)"
-            ),  # packages/pkg/file.py
+            re.compile(r"packages/([a-zA-Z0-9_\-]+/[^\s]+\.py)"),  # packages/pkg/file.py
         ]
 
     async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
@@ -155,9 +153,7 @@ class AnalyzeCrossReferences(InstrumentedPrimitive[dict, dict]):
         kb_pages = {page["title"] for page in input_data.get("pages", [])}
 
         for kb_ref in all_code_kb_refs:
-            if kb_ref not in kb_pages and not any(
-                kb_ref in title for title in kb_pages
-            ):
+            if kb_ref not in kb_pages and not any(kb_ref in title for title in kb_pages):
                 missing.append(
                     {
                         "type": "kb_missing",

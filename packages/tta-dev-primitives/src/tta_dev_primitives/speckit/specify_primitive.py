@@ -101,9 +101,7 @@ class SpecifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             raise ValueError("requirement must be provided and non-empty")
 
         project_context = input_data.get("context", {})
-        feature_name = input_data.get(
-            "feature_name", self._generate_feature_name(requirement)
-        )
+        feature_name = input_data.get("feature_name", self._generate_feature_name(requirement))
 
         # Generate specification
         spec_content = self._generate_spec(requirement, project_context)
@@ -153,9 +151,7 @@ class SpecifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         # Fill in what we can from the requirement
         sections["overview"]["problem"] = self._extract_problem(requirement)
         sections["overview"]["solution"] = self._extract_solution(requirement)
-        sections["requirements"]["functional"] = self._extract_functional_requirements(
-            requirement
-        )
+        sections["requirements"]["functional"] = self._extract_functional_requirements(requirement)
 
         # Add project context
         if project_context:
@@ -230,8 +226,7 @@ class SpecifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
         # If requirement describes a solution (starts with action verbs), use it
         lower = requirement.lower()
         if any(
-            lower.startswith(verb)
-            for verb in ["add", "implement", "create", "build", "integrate"]
+            lower.startswith(verb) for verb in ["add", "implement", "create", "build", "integrate"]
         ):
             return requirement
         return "[CLARIFY]"
@@ -256,9 +251,7 @@ class SpecifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             parts = new_parts
 
         # Clean and return
-        requirements = [
-            part.strip() for part in parts if part.strip() and len(part) > 10
-        ]
+        requirements = [part.strip() for part in parts if part.strip() and len(part) > 10]
         return requirements if requirements else ["[CLARIFY]"]
 
     def _render_spec_markdown(self, sections: dict[str, Any], requirement: str) -> str:
@@ -403,9 +396,7 @@ class SpecifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 
         return datetime.now().strftime("%Y-%m-%d")
 
-    def _analyze_coverage(
-        self, spec_content: str
-    ) -> tuple[float, list[str], dict[str, str]]:
+    def _analyze_coverage(self, spec_content: str) -> tuple[float, list[str], dict[str, str]]:
         """Analyze specification coverage.
 
         Args:

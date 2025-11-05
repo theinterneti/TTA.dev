@@ -143,9 +143,7 @@ class ClarifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             answers = self._get_answers(questions, pre_answers, iteration)
 
             # Update specification with answers
-            spec_content = self._update_specification(
-                spec_content, questions, answers, iteration
-            )
+            spec_content = self._update_specification(spec_content, questions, answers, iteration)
 
             # Recalculate coverage and remaining gaps
             new_coverage, new_gaps = self._analyze_updated_spec(spec_content)
@@ -183,9 +181,7 @@ class ClarifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             "target_reached": current_coverage >= self.target_coverage,
         }
 
-    def _generate_questions(
-        self, gaps: list[str], spec_content: str
-    ) -> list[dict[str, Any]]:
+    def _generate_questions(self, gaps: list[str], spec_content: str) -> list[dict[str, Any]]:
         """Generate structured questions for each gap.
 
         Args:
@@ -204,9 +200,7 @@ class ClarifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 
         return questions
 
-    def _get_questions_for_section(
-        self, section: str, spec_content: str
-    ) -> list[dict[str, Any]]:
+    def _get_questions_for_section(self, section: str, spec_content: str) -> list[dict[str, Any]]:
         """Get targeted questions for specific section.
 
         Args:
@@ -456,9 +450,7 @@ class ClarifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
 **Answers Provided:**
 {self._format_answers(answers)}
 """
-                    updated_content = (
-                        updated_content[:idx] + history_entry + updated_content[idx:]
-                    )
+                    updated_content = updated_content[:idx] + history_entry + updated_content[idx:]
 
         return updated_content
 

@@ -116,9 +116,7 @@ class ValidationGatePrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, An
         approval_dir.mkdir(exist_ok=True)
 
         # Generate approval file name based on artifacts
-        artifact_names = "_".join(
-            Path(a).stem for a in artifacts[:3]
-        )  # Use first 3 for filename
+        artifact_names = "_".join(Path(a).stem for a in artifacts[:3])  # Use first 3 for filename
         if len(artifacts) > 3:
             artifact_names += f"_and_{len(artifacts) - 3}_more"
 
@@ -134,17 +132,13 @@ class ValidationGatePrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, An
                     "feedback": existing_approval.get("feedback", ""),
                     "timestamp": existing_approval.get("timestamp", ""),
                     "reviewer": existing_approval.get("reviewer", reviewer),
-                    "validation_results": existing_approval.get(
-                        "validation_results", {}
-                    ),
+                    "validation_results": existing_approval.get("validation_results", {}),
                     "approval_path": str(approval_path),
                     "reused_approval": True,
                 }
 
         # Run validation criteria checks
-        validation_results = self._check_validation_criteria(
-            artifacts, validation_criteria
-        )
+        validation_results = self._check_validation_criteria(artifacts, validation_criteria)
 
         # Create pending approval record
         approval_record = {

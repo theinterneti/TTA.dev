@@ -245,9 +245,7 @@ class TestDataModelParsing:
 
         assert result is None
 
-    def test_data_model_entities_extracted_correctly(
-        self, sample_data_model_file
-    ) -> None:
+    def test_data_model_entities_extracted_correctly(self, sample_data_model_file) -> None:
         """Test that entity names are extracted correctly."""
         primitive = TasksPrimitive()
         data_model = primitive._parse_data_model(sample_data_model_file)
@@ -323,9 +321,7 @@ class TestTaskGeneration:
             assert task.phase
             assert isinstance(task.dependencies, list)
 
-    def test_tasks_include_database_tasks(
-        self, sample_plan_data, sample_data_model
-    ) -> None:
+    def test_tasks_include_database_tasks(self, sample_plan_data, sample_data_model) -> None:
         """Test that data model entities generate database tasks."""
         primitive = TasksPrimitive()
         tasks = primitive._generate_tasks(sample_plan_data, sample_data_model)
@@ -504,9 +500,7 @@ class TestCriticalPathIdentification:
 
         # Create linear dependency chain
         tasks = [
-            Task(
-                id="T-001", title="Task 1", description="First", phase="P1", hours=10.0
-            ),
+            Task(id="T-001", title="Task 1", description="First", phase="P1", hours=10.0),
             Task(
                 id="T-002",
                 title="Task 2",
@@ -580,9 +574,7 @@ class TestCriticalPathIdentification:
         primitive = TasksPrimitive(identify_critical_path=False)
 
         [
-            Task(
-                id="T-001", title="Task 1", description="First", phase="P1", hours=10.0
-            ),
+            Task(id="T-001", title="Task 1", description="First", phase="P1", hours=10.0),
         ]
 
         # Should return empty list when disabled
@@ -641,9 +633,7 @@ class TestParallelStreamIdentification:
         if parallel_streams:
             # Verify all task IDs in streams are from same phase
             for _group_id, task_ids in parallel_streams.items():
-                phases = {
-                    next(t.phase for t in tasks if t.id == tid) for tid in task_ids
-                }
+                phases = {next(t.phase for t in tasks if t.id == tid) for tid in task_ids}
                 # All tasks in a parallel group should be from same phase
                 assert len(phases) == 1
 
@@ -704,18 +694,14 @@ class TestOutputFormatting:
             "total_effort": {"story_points": 3, "hours": 15.0},
         }
 
-    def test_generate_markdown_format(
-        self, tmp_path, sample_tasks, sample_plan_data
-    ) -> None:
+    def test_generate_markdown_format(self, tmp_path, sample_tasks, sample_plan_data) -> None:
         """Test markdown tasks.md generation."""
         primitive = TasksPrimitive(output_dir=str(tmp_path))
 
         # Mark T-001 as critical path
         sample_tasks[0].is_critical_path = True
 
-        output_path = primitive._generate_tasks_md(
-            sample_tasks, sample_plan_data, ["T-001"], {}
-        )
+        output_path = primitive._generate_tasks_md(sample_tasks, sample_plan_data, ["T-001"], {})
 
         assert output_path.exists()
         content = output_path.read_text(encoding="utf-8")
@@ -728,9 +714,7 @@ class TestOutputFormatting:
         assert "#### T-001:" in content
         assert "[CRITICAL PATH]" in content
 
-    def test_generate_json_format(
-        self, tmp_path, sample_tasks, sample_plan_data
-    ) -> None:
+    def test_generate_json_format(self, tmp_path, sample_tasks, sample_plan_data) -> None:
         """Test JSON export."""
         primitive = TasksPrimitive(output_dir=str(tmp_path))
 
@@ -823,9 +807,7 @@ class TestOutputFormatting:
         plan_path = tmp_path / "plan.md"
         plan_path.write_text("# Plan\n## Phase 1\n- [ ] Task 1", encoding="utf-8")
 
-        primitive = TasksPrimitive(
-            output_dir=str(tmp_path), output_format="invalid_format"
-        )
+        primitive = TasksPrimitive(output_dir=str(tmp_path), output_format="invalid_format")
         context = WorkflowContext()
 
         with pytest.raises(ValueError, match="Unknown output format"):
@@ -889,9 +871,7 @@ Total hours: 40
         primitive = TasksPrimitive(output_dir=str(setup_files["output_dir"]))
 
         context = WorkflowContext(correlation_id="test-123")
-        result = await primitive.execute(
-            {"plan_path": str(setup_files["plan_path"])}, context
-        )
+        result = await primitive.execute({"plan_path": str(setup_files["plan_path"])}, context)
 
         # Check result structure
         assert "tasks_path" in result
@@ -985,9 +965,7 @@ Total hours: 10
         primitive = TasksPrimitive(output_dir=str(setup_basic_plan["output_dir"]))
 
         context = WorkflowContext(correlation_id="span-test")
-        result = await primitive.execute(
-            {"plan_path": str(setup_basic_plan["plan_path"])}, context
-        )
+        result = await primitive.execute({"plan_path": str(setup_basic_plan["plan_path"])}, context)
 
         # Execution should complete successfully
         assert result is not None
@@ -1000,9 +978,7 @@ Total hours: 10
         correlation_id = "context-test-123"
         context = WorkflowContext(correlation_id=correlation_id)
 
-        result = await primitive.execute(
-            {"plan_path": str(setup_basic_plan["plan_path"])}, context
-        )
+        result = await primitive.execute({"plan_path": str(setup_basic_plan["plan_path"])}, context)
 
         # Context should be used (we can't directly verify, but execution succeeds)
         assert result is not None
