@@ -69,6 +69,18 @@ jobs:
               }, context)
 
               broken = result['broken_links']
+              valid_count = result.get('valid_links', 0)
+
+              # Generate report file for PR comments
+              with open('kb-validation-report.md', 'w') as f:
+                  f.write('# KB Link Validation Report\n\n')
+                  f.write(f'**Valid Links:** {valid_count}\n')
+                  f.write(f'**Broken Links:** {len(broken)}\n\n')
+                  if broken:
+                      f.write('## Broken Links\n\n')
+                      for link in broken:
+                          f.write(f'- {link[\"source\"]} -> {link[\"target\"]} (missing)\n')
+
               if broken:
                   print(f'❌ Found {len(broken)} broken links:')
                   for link in broken[:10]:
@@ -77,7 +89,7 @@ jobs:
                       print(f'  ... and {len(broken) - 10} more')
                   exit(1)
               else:
-                  print('✅ All links valid')
+                  print(f'✅ All {valid_count} links valid')
 
           asyncio.run(main())
           "
