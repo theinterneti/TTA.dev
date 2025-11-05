@@ -1,0 +1,15 @@
+{
+  "include": ["packages/*/src", "packages/*/tests"],
+  "exclude": [
+    "packages/*/examples",
+    "**/__pycache__",
+    "**/*.pyc",
+    "**/node_modules",
+    "**/.venv",
+    "**/venv"
+  ],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic"
+}
