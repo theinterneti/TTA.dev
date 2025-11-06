@@ -6,7 +6,6 @@ on:
     paths:
       - 'packages/**'
       - 'tests/**'
-      - '*.py'
       - 'pyproject.toml'
       - 'uv.lock'
   push:
@@ -14,7 +13,6 @@ on:
     paths:
       - 'packages/**'
       - 'tests/**'
-      - '*.py'
       - 'pyproject.toml'
       - 'uv.lock'
 
@@ -46,8 +44,11 @@ jobs:
       - name: Run Ruff (lint)
         run: uv run ruff check .
 
+      - name: Install Pyright
+        run: uv pip install pyright
+
       - name: Run Pyright
-        run: uvx pyright packages/
+        run: uv run pyright packages/
 
       - name: Run tests with coverage
         run: uv run pytest -m "not integration and not slow and not external" --cov=packages --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing

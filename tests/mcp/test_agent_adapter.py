@@ -77,7 +77,7 @@ def test_register_agent_methods(mock_fastmcp_class, mock_agent):
     mock_fastmcp_instance = MagicMock()
     mock_fastmcp_class.return_value = mock_fastmcp_instance
 
-    adapter = AgentMCPAdapter(mock_agent)
+    AgentMCPAdapter(mock_agent)
 
     # Check that the tool decorator was called for each method
     assert mock_fastmcp_instance.tool.call_count >= 2
@@ -95,7 +95,7 @@ def test_register_agent_resources(mock_fastmcp_class, mock_agent):
     mock_fastmcp_instance = MagicMock()
     mock_fastmcp_class.return_value = mock_fastmcp_instance
 
-    adapter = AgentMCPAdapter(mock_agent)
+    AgentMCPAdapter(mock_agent)
 
     # Check that the resource decorator was called
     assert mock_fastmcp_instance.resource.call_count >= 1
@@ -110,7 +110,7 @@ def test_register_agent_prompts(mock_fastmcp_class, mock_agent):
     mock_fastmcp_instance = MagicMock()
     mock_fastmcp_class.return_value = mock_fastmcp_instance
 
-    adapter = AgentMCPAdapter(mock_agent)
+    AgentMCPAdapter(mock_agent)
 
     # Check that the prompt decorator was called
     assert mock_fastmcp_instance.prompt.call_count >= 1

@@ -7,7 +7,7 @@ Provides ultra-fast inference with free tier access.
 from typing import Any
 
 try:
-    from groq import AsyncGroq
+    from groq import AsyncGroq  # type: ignore[import-not-found]  # Optional dependency
 
     GROQ_AVAILABLE = True
 except ImportError:

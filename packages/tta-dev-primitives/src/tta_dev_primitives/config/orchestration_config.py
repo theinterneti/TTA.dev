@@ -7,7 +7,6 @@ customization of model selection, fallback strategies, and cost tracking.
 import logging
 import os
 from pathlib import Path
-from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field, field_validator
@@ -123,7 +122,7 @@ class OrchestrationConfig(BaseModel):
         if not yaml_path.exists():
             raise FileNotFoundError(f"Configuration file not found: {yaml_path}")
 
-        with open(yaml_path, "r") as f:
+        with open(yaml_path) as f:
             data = yaml.safe_load(f)
 
         if not data or "orchestration" not in data:

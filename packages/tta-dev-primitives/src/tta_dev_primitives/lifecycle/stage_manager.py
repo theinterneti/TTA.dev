@@ -186,7 +186,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
                     max_results=3,
                     include_content=False,
                 )
-                best_practices_result = await kb.execute(context, best_practices_query)
+                best_practices_result = await kb.execute(best_practices_query, context)
 
                 # Query for common mistakes in current stage
                 mistakes_query = KBQuery(
@@ -196,7 +196,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
                     max_results=3,
                     include_content=False,
                 )
-                mistakes_result = await kb.execute(context, mistakes_query)
+                mistakes_result = await kb.execute(mistakes_query, context)
 
                 # Add best practices pages to recommendations
                 kb_recommendations.extend(best_practices_result.pages)

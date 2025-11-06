@@ -42,7 +42,7 @@ class FailingPrimitive(InstrumentedPrimitive[dict, dict]):
 
 
 @pytest.mark.asyncio
-async def test_fallback_logs_workflow_start_and_completion():
+async def test_fallback_logs_workflow_start_and_completion() -> None:
     """Verify that FallbackPrimitive logs workflow start and completion."""
     workflow = FallbackPrimitive(
         primary=PrimaryPrimitive(),
@@ -59,7 +59,7 @@ async def test_fallback_logs_workflow_start_and_completion():
 
 
 @pytest.mark.asyncio
-async def test_fallback_logs_primary_execution():
+async def test_fallback_logs_primary_execution() -> None:
     """Verify that FallbackPrimitive logs primary execution."""
     workflow = FallbackPrimitive(
         primary=PrimaryPrimitive(),
@@ -76,7 +76,7 @@ async def test_fallback_logs_primary_execution():
 
 
 @pytest.mark.asyncio
-async def test_fallback_logs_fallback_trigger():
+async def test_fallback_logs_fallback_trigger() -> None:
     """Verify that FallbackPrimitive logs fallback trigger when primary fails."""
     workflow = FallbackPrimitive(
         primary=FailingPrimitive(),
@@ -98,7 +98,7 @@ async def test_fallback_logs_fallback_trigger():
 
 
 @pytest.mark.asyncio
-async def test_fallback_records_execution_checkpoints():
+async def test_fallback_records_execution_checkpoints() -> None:
     """Verify that FallbackPrimitive records checkpoints for executions."""
     workflow = FallbackPrimitive(
         primary=FailingPrimitive(),
@@ -119,7 +119,7 @@ async def test_fallback_records_execution_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_fallback_records_execution_metrics():
+async def test_fallback_records_execution_metrics() -> None:
     """Verify that FallbackPrimitive records execution metrics."""
     from tta_dev_primitives.observability.enhanced_collector import (
         get_enhanced_metrics_collector,
@@ -150,7 +150,7 @@ async def test_fallback_records_execution_metrics():
 
 
 @pytest.mark.asyncio
-async def test_fallback_creates_execution_spans():
+async def test_fallback_creates_execution_spans() -> None:
     """Verify that FallbackPrimitive attempts to create spans when tracing available."""
     workflow = FallbackPrimitive(
         primary=PrimaryPrimitive(),
@@ -169,7 +169,7 @@ async def test_fallback_creates_execution_spans():
 
 
 @pytest.mark.asyncio
-async def test_fallback_span_attributes():
+async def test_fallback_span_attributes() -> None:
     """Verify that fallback execution includes proper attribute tracking."""
     workflow = FallbackPrimitive(
         primary=PrimaryPrimitive(),
@@ -194,7 +194,7 @@ async def test_fallback_span_attributes():
 
 
 @pytest.mark.asyncio
-async def test_fallback_error_handling_in_primary_and_fallback():
+async def test_fallback_error_handling_in_primary_and_fallback() -> None:
     """Verify that errors in both primary and fallback are properly tracked."""
     workflow = FallbackPrimitive(
         primary=FailingPrimitive(),
@@ -215,7 +215,7 @@ async def test_fallback_error_handling_in_primary_and_fallback():
 
 
 @pytest.mark.asyncio
-async def test_fallback_success_on_primary():
+async def test_fallback_success_on_primary() -> None:
     """Verify that FallbackPrimitive handles success on primary (no fallback needed)."""
     workflow = FallbackPrimitive(
         primary=PrimaryPrimitive(),
@@ -238,7 +238,7 @@ async def test_fallback_success_on_primary():
 
 
 @pytest.mark.asyncio
-async def test_fallback_success_on_fallback():
+async def test_fallback_success_on_fallback() -> None:
     """Verify that FallbackPrimitive tracks success on fallback after primary fails."""
     workflow = FallbackPrimitive(
         primary=FailingPrimitive(),
@@ -259,7 +259,7 @@ async def test_fallback_success_on_fallback():
 
 
 @pytest.mark.asyncio
-async def test_fallback_exhausted_scenario():
+async def test_fallback_exhausted_scenario() -> None:
     """Verify that FallbackPrimitive handles exhaustion when both fail."""
     workflow = FallbackPrimitive(
         primary=FailingPrimitive(),
@@ -280,7 +280,7 @@ async def test_fallback_exhausted_scenario():
 
 
 @pytest.mark.asyncio
-async def test_fallback_preserves_existing_functionality():
+async def test_fallback_preserves_existing_functionality() -> None:
     """Verify that Phase 2 changes don't break existing functionality."""
     # Test success on primary
     workflow1 = FallbackPrimitive(

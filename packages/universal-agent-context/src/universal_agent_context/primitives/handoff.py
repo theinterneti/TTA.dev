@@ -147,6 +147,6 @@ class AgentHandoffPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
             )
 
         # Log handoff
-        context.tags[f"handoff_{self.target_agent}"] = True
+        context.tags[f"handoff_{self.target_agent}"] = "true"
 
         return handoff_data

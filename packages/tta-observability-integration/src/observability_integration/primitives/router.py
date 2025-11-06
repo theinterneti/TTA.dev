@@ -12,25 +12,10 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-try:
-    from tta_dev_primitives.core.base import (
-        WorkflowContext,
-        WorkflowPrimitive,
-    )
-except ImportError:
-    # Fallback for development/testing
-    from typing import Protocol
-
-    class WorkflowContext:  # type: ignore
-        """Mock WorkflowContext for testing."""
-
-        pass
-
-    class WorkflowPrimitive(Protocol):  # type: ignore
-        """Minimal WorkflowPrimitive protocol for testing."""
-
-        pass
-
+from tta_dev_primitives.core.base import (
+    WorkflowContext,
+    WorkflowPrimitive,
+)
 
 from ..apm_setup import get_meter
 

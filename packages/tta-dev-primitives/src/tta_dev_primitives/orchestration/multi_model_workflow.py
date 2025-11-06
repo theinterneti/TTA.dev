@@ -155,7 +155,7 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
         # Load configuration if available
         self.config = None
-        if CONFIG_AVAILABLE and config_path:
+        if CONFIG_AVAILABLE and config_path and load_orchestration_config is not None:
             try:
                 self.config = load_orchestration_config(config_path)
                 prefer_free = self.config.prefer_free_models
@@ -169,7 +169,7 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
     def _init_metrics(self) -> None:
         """Initialize Prometheus metrics for orchestration."""
-        if not METRICS_AVAILABLE:
+        if not METRICS_AVAILABLE or metrics is None:
             return
 
         try:
@@ -344,9 +344,9 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
         # Record metrics from context
         if METRICS_AVAILABLE and hasattr(self, "_orchestrator_tokens_counter"):
-            orchestrator_tokens = context.data.get("orchestrator_tokens", 0)
-            executor_tokens = context.data.get("executor_tokens", 0)
-            orchestrator_cost = context.data.get("orchestrator_cost", 0.0)
+            orchestrator_tokens = context.metadata.get("orchestrator_tokens", 0)
+            executor_tokens = context.metadata.get("executor_tokens", 0)
+            orchestrator_cost = context.metadata.get("orchestrator_cost", 0.0)
             executor_cost = delegation_response.cost
             total_cost = orchestrator_cost + executor_cost
 

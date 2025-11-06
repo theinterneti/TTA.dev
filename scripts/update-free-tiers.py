@@ -103,7 +103,7 @@ async def main():
     # Display provider summary
     if not args.quiet:
         print("📊 Provider Summary:")
-        for provider_name, info in response.providers.items():
+        for _provider_name, info in response.providers.items():
             free_status = "✅ Free" if info.has_free_tier else "❌ Paid"
             print(f"   {info.name}: {free_status}")
             if info.free_tier_details:

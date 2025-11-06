@@ -1,5 +1,7 @@
 """Tests for ConditionalPrimitive Phase 2 instrumentation."""
 
+from typing import Never
+
 import pytest
 
 from tta_dev_primitives.core.base import WorkflowContext
@@ -42,7 +44,7 @@ class FailingPrimitive(InstrumentedPrimitive[dict, dict]):
 
 
 @pytest.mark.asyncio
-async def test_conditional_logs_workflow_start_and_completion():
+async def test_conditional_logs_workflow_start_and_completion() -> None:
     """Verify that ConditionalPrimitive logs workflow start and completion."""
     workflow = ConditionalPrimitive(
         condition=lambda data, ctx: data.get("value", 0) > 5,
@@ -60,7 +62,7 @@ async def test_conditional_logs_workflow_start_and_completion():
 
 
 @pytest.mark.asyncio
-async def test_conditional_logs_condition_evaluation():
+async def test_conditional_logs_condition_evaluation() -> None:
     """Verify that ConditionalPrimitive logs condition evaluation."""
     workflow = ConditionalPrimitive(
         condition=lambda data, ctx: data.get("value", 0) > 5,
@@ -78,7 +80,7 @@ async def test_conditional_logs_condition_evaluation():
 
 
 @pytest.mark.asyncio
-async def test_conditional_records_branch_checkpoints():
+async def test_conditional_records_branch_checkpoints() -> None:
     """Verify that ConditionalPrimitive records checkpoints for branches."""
     workflow = ConditionalPrimitive(
         condition=lambda data, ctx: data.get("value", 0) > 5,
@@ -102,7 +104,7 @@ async def test_conditional_records_branch_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_conditional_records_branch_metrics():
+async def test_conditional_records_branch_metrics() -> None:
     """Verify that ConditionalPrimitive records per-branch metrics."""
     from tta_dev_primitives.observability.enhanced_collector import (
         get_enhanced_metrics_collector,
@@ -135,7 +137,7 @@ async def test_conditional_records_branch_metrics():
 
 
 @pytest.mark.asyncio
-async def test_conditional_creates_branch_spans():
+async def test_conditional_creates_branch_spans() -> None:
     """Verify that ConditionalPrimitive attempts to create spans when tracing available."""
     workflow = ConditionalPrimitive(
         condition=lambda data, ctx: data.get("value", 0) > 5,
@@ -155,7 +157,7 @@ async def test_conditional_creates_branch_spans():
 
 
 @pytest.mark.asyncio
-async def test_conditional_span_attributes():
+async def test_conditional_span_attributes() -> None:
     """Verify that branch execution includes proper attribute tracking."""
     workflow = ConditionalPrimitive(
         condition=lambda data, ctx: data.get("value", 0) > 5,
@@ -181,7 +183,7 @@ async def test_conditional_span_attributes():
 
 
 @pytest.mark.asyncio
-async def test_conditional_error_handling_with_spans():
+async def test_conditional_error_handling_with_spans() -> None:
     """Verify that errors in branches are properly propagated."""
     workflow = ConditionalPrimitive(
         condition=lambda data, ctx: data.get("value", 0) > 5,
@@ -200,7 +202,7 @@ async def test_conditional_error_handling_with_spans():
 
 
 @pytest.mark.asyncio
-async def test_conditional_preserves_existing_functionality():
+async def test_conditional_preserves_existing_functionality() -> None:
     """Verify that Phase 2 changes don't break existing functionality."""
     # Test 'then' branch
     workflow = ConditionalPrimitive(
@@ -229,7 +231,7 @@ async def test_conditional_preserves_existing_functionality():
 
 
 @pytest.mark.asyncio
-async def test_conditional_passthrough_logging():
+async def test_conditional_passthrough_logging() -> None:
     """Verify that ConditionalPrimitive logs passthrough when no else branch."""
     workflow = ConditionalPrimitive(
         condition=lambda data, ctx: data.get("value", 0) > 5,
@@ -254,10 +256,10 @@ async def test_conditional_passthrough_logging():
 
 
 @pytest.mark.asyncio
-async def test_conditional_condition_error_handling():
+async def test_conditional_condition_error_handling() -> None:
     """Verify that errors in condition evaluation are properly handled."""
 
-    def failing_condition(data, ctx):
+    def failing_condition(data, ctx) -> Never:
         raise RuntimeError("Condition evaluation failed")
 
     workflow = ConditionalPrimitive(

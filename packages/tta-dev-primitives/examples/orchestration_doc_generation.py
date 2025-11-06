@@ -398,7 +398,7 @@ Generate complete, production-ready documentation following this structure.
             return {"success": False, "error": str(e)}
 
 
-async def main():
+async def main() -> None:
     """Main entry point for CLI usage."""
     parser = argparse.ArgumentParser(
         description="Generate documentation using multi-model orchestration"

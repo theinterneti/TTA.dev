@@ -1,5 +1,7 @@
 """Tests for SwitchPrimitive Phase 2 instrumentation."""
 
+from typing import Never
+
 import pytest
 
 from tta_dev_primitives.core.base import WorkflowContext
@@ -58,7 +60,7 @@ class FailingPrimitive(InstrumentedPrimitive[dict, dict]):
 
 
 @pytest.mark.asyncio
-async def test_switch_logs_workflow_start_and_completion():
+async def test_switch_logs_workflow_start_and_completion() -> None:
     """Verify that SwitchPrimitive logs workflow start and completion."""
     workflow = SwitchPrimitive(
         selector=lambda data, ctx: data.get("case", "a"),
@@ -80,7 +82,7 @@ async def test_switch_logs_workflow_start_and_completion():
 
 
 @pytest.mark.asyncio
-async def test_switch_logs_selector_evaluation():
+async def test_switch_logs_selector_evaluation() -> None:
     """Verify that SwitchPrimitive logs selector evaluation."""
     workflow = SwitchPrimitive(
         selector=lambda data, ctx: data.get("case", "a"),
@@ -100,7 +102,7 @@ async def test_switch_logs_selector_evaluation():
 
 
 @pytest.mark.asyncio
-async def test_switch_records_case_checkpoints():
+async def test_switch_records_case_checkpoints() -> None:
     """Verify that SwitchPrimitive records checkpoints for cases."""
     workflow = SwitchPrimitive(
         selector=lambda data, ctx: data.get("case", "a"),
@@ -135,7 +137,7 @@ async def test_switch_records_case_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_switch_records_case_metrics():
+async def test_switch_records_case_metrics() -> None:
     """Verify that SwitchPrimitive records per-case metrics."""
     from tta_dev_primitives.observability.enhanced_collector import (
         get_enhanced_metrics_collector,
@@ -170,7 +172,7 @@ async def test_switch_records_case_metrics():
 
 
 @pytest.mark.asyncio
-async def test_switch_creates_case_spans():
+async def test_switch_creates_case_spans() -> None:
     """Verify that SwitchPrimitive attempts to create spans when tracing available."""
     workflow = SwitchPrimitive(
         selector=lambda data, ctx: data.get("case", "a"),
@@ -192,7 +194,7 @@ async def test_switch_creates_case_spans():
 
 
 @pytest.mark.asyncio
-async def test_switch_span_attributes():
+async def test_switch_span_attributes() -> None:
     """Verify that case execution includes proper attribute tracking."""
     workflow = SwitchPrimitive(
         selector=lambda data, ctx: data.get("case", "a"),
@@ -220,7 +222,7 @@ async def test_switch_span_attributes():
 
 
 @pytest.mark.asyncio
-async def test_switch_error_handling_in_case():
+async def test_switch_error_handling_in_case() -> None:
     """Verify that errors in cases are properly propagated."""
     workflow = SwitchPrimitive(
         selector=lambda data, ctx: data.get("case", "a"),
@@ -241,7 +243,7 @@ async def test_switch_error_handling_in_case():
 
 
 @pytest.mark.asyncio
-async def test_switch_default_case_handling():
+async def test_switch_default_case_handling() -> None:
     """Verify that SwitchPrimitive handles default case correctly."""
     workflow = SwitchPrimitive(
         selector=lambda data, ctx: data.get("case", "a"),
@@ -265,7 +267,7 @@ async def test_switch_default_case_handling():
 
 
 @pytest.mark.asyncio
-async def test_switch_passthrough_logging():
+async def test_switch_passthrough_logging() -> None:
     """Verify that SwitchPrimitive logs passthrough when no matching case or default."""
     workflow = SwitchPrimitive(
         selector=lambda data, ctx: data.get("case", "a"),
@@ -293,10 +295,10 @@ async def test_switch_passthrough_logging():
 
 
 @pytest.mark.asyncio
-async def test_switch_selector_error_handling():
+async def test_switch_selector_error_handling() -> None:
     """Verify that errors in selector evaluation are properly handled."""
 
-    def failing_selector(data, ctx):
+    def failing_selector(data, ctx) -> Never:
         raise RuntimeError("Selector evaluation failed")
 
     workflow = SwitchPrimitive(
@@ -317,7 +319,7 @@ async def test_switch_selector_error_handling():
 
 
 @pytest.mark.asyncio
-async def test_switch_preserves_existing_functionality():
+async def test_switch_preserves_existing_functionality() -> None:
     """Verify that Phase 2 changes don't break existing functionality."""
     # Test case 'a'
     workflow = SwitchPrimitive(

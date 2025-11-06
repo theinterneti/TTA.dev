@@ -58,22 +58,22 @@ from .workflows import (
 __version__ = "0.1.0"
 
 __all__ = [
-    # Version
-    "__version__",
-    # Configuration
-    "TTADocsConfig",
-    "load_config",
-    # Data models
-    "LogseqPage",
-    "MarkdownDocument",
     # Primitives
     "AIMetadataExtractorPrimitive",
     "FileWatcherPrimitive",
+    # Data models
+    "LogseqPage",
     "LogseqSyncPrimitive",
     "MarkdownConverterPrimitive",
+    "MarkdownDocument",
+    # Configuration
+    "TTADocsConfig",
+    # Version
+    "__version__",
     # Workflow factories
     "create_ai_enhanced_sync_workflow",
     "create_basic_sync_workflow",
     "create_batch_sync_workflow",
     "create_production_sync_workflow",
+    "load_config",
 ]

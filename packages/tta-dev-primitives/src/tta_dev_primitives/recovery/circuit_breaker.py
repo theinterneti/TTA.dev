@@ -229,7 +229,9 @@ def with_retry(
                 return fallback(*args, **kwargs)
 
             # Re-raise the last error
-            raise last_error
+            if last_error is not None:
+                raise last_error
+            raise RuntimeError(f"{func.__name__} failed without capturing an error")
 
         return wrapper
 
@@ -265,7 +267,7 @@ def with_retry_async(
 
             for attempt in range(config.max_retries + 1):
                 try:
-                    return await func(*args, **kwargs)
+                    return await func(*args, **kwargs)  # type: ignore[misc]
                 except Exception as e:
                     last_error = e
                     category, severity = classify_error(e)
@@ -289,12 +291,14 @@ def with_retry_async(
             # All retries exhausted
             if fallback:
                 logger.info(f"{func.__name__} using fallback after {config.max_retries} retries")
-                return await fallback(*args, **kwargs)
+                return await fallback(*args, **kwargs)  # type: ignore[misc]
 
             # Re-raise the last error
-            raise last_error
+            if last_error is not None:
+                raise last_error
+            raise RuntimeError(f"{func.__name__} failed without capturing an error")
 
-        return wrapper
+        return wrapper  # type: ignore[return-value]
 
     return decorator
 
@@ -314,7 +318,7 @@ class CircuitBreaker:
         failure_threshold: int = 5,
         recovery_timeout: float = 60.0,
         expected_exception: type[Exception] = Exception,
-    ):
+    ) -> None:
         """
         Initialize circuit breaker.
 

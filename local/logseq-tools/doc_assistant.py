@@ -191,7 +191,6 @@ class LogseqDocumentAnalyzer:
     def _check_task_syntax(self, lines: list[str]) -> list[LogseqDocIssue]:
         """Check for Logseq task syntax issues."""
         issues = []
-        valid_statuses = {"TODO", "DOING", "DONE", "LATER", "NOW", "WAITING"}
 
         for i, line in enumerate(lines, 1):
             # Check for task markers (only in list items, not bold text)

@@ -123,7 +123,7 @@ async def example_chat_mode():
 
     logseq_root = Path("logseq")
     analyzer = LogseqDocumentAnalyzer(logseq_root)
-    fixer = LogseqDocumentFixer(analyzer)
+    LogseqDocumentFixer(analyzer)
 
     print("\n🤖 Logseq Documentation Assistant")
     print("   I can help you improve your Logseq documentation!")

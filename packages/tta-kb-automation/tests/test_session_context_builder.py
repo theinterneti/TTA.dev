@@ -143,18 +143,10 @@ class TestSessionContextBuilder:
 
         # Mock all the internal methods
         with (
-            patch.object(
-                builder, "_find_relevant_kb_pages", new_callable=AsyncMock
-            ) as mock_kb,
-            patch.object(
-                builder, "_find_relevant_code_files", new_callable=AsyncMock
-            ) as mock_code,
-            patch.object(
-                builder, "_find_relevant_todos", new_callable=AsyncMock
-            ) as mock_todos,
-            patch.object(
-                builder, "_find_relevant_tests", new_callable=AsyncMock
-            ) as mock_tests,
+            patch.object(builder, "_find_relevant_kb_pages", new_callable=AsyncMock) as mock_kb,
+            patch.object(builder, "_find_relevant_code_files", new_callable=AsyncMock) as mock_code,
+            patch.object(builder, "_find_relevant_todos", new_callable=AsyncMock) as mock_todos,
+            patch.object(builder, "_find_relevant_tests", new_callable=AsyncMock) as mock_tests,
         ):
             mock_kb.return_value = [
                 {
@@ -164,13 +156,9 @@ class TestSessionContextBuilder:
                     "tags": ["testing"],
                 }
             ]
-            mock_code.return_value = [
-                {"path": "packages/test.py", "summary": "test module"}
-            ]
+            mock_code.return_value = [{"path": "packages/test.py", "summary": "test module"}]
             mock_todos.return_value = [{"text": "TODO: test this", "file": "test.py"}]
-            mock_tests.return_value = [
-                {"path": "tests/test_feature.py", "test_count": 5}
-            ]
+            mock_tests.return_value = [{"path": "tests/test_feature.py", "test_count": 5}]
 
             result = await builder.build_context(topic="test feature")
 
@@ -187,18 +175,10 @@ class TestSessionContextBuilder:
         builder = SessionContextBuilder()
 
         with (
-            patch.object(
-                builder, "_find_relevant_kb_pages", new_callable=AsyncMock
-            ) as mock_kb,
-            patch.object(
-                builder, "_find_relevant_code_files", new_callable=AsyncMock
-            ) as mock_code,
-            patch.object(
-                builder, "_find_relevant_todos", new_callable=AsyncMock
-            ) as mock_todos,
-            patch.object(
-                builder, "_find_relevant_tests", new_callable=AsyncMock
-            ) as mock_tests,
+            patch.object(builder, "_find_relevant_kb_pages", new_callable=AsyncMock) as mock_kb,
+            patch.object(builder, "_find_relevant_code_files", new_callable=AsyncMock) as mock_code,
+            patch.object(builder, "_find_relevant_todos", new_callable=AsyncMock) as mock_todos,
+            patch.object(builder, "_find_relevant_tests", new_callable=AsyncMock) as mock_tests,
         ):
             mock_kb.return_value = []
             mock_code.return_value = []
@@ -273,12 +253,8 @@ class TestSessionContextBuilder:
         ]
 
         with (
-            patch(
-                "tta_kb_automation.tools.session_context_builder.ScanCodebase"
-            ) as MockScanner,
-            patch(
-                "tta_kb_automation.tools.session_context_builder.ParseDocstrings"
-            ) as MockParser,
+            patch("tta_kb_automation.tools.session_context_builder.ScanCodebase") as MockScanner,
+            patch("tta_kb_automation.tools.session_context_builder.ParseDocstrings") as MockParser,
         ):
             mock_scanner = AsyncMock()
             mock_scanner.execute = AsyncMock(return_value={"files": mock_files})
@@ -308,12 +284,8 @@ class TestSessionContextBuilder:
         mock_files = [Path("packages/test.py")]
 
         with (
-            patch(
-                "tta_kb_automation.tools.session_context_builder.ScanCodebase"
-            ) as MockScanner,
-            patch(
-                "tta_kb_automation.tools.session_context_builder.ExtractTODOs"
-            ) as MockExtractor,
+            patch("tta_kb_automation.tools.session_context_builder.ScanCodebase") as MockScanner,
+            patch("tta_kb_automation.tools.session_context_builder.ExtractTODOs") as MockExtractor,
         ):
             mock_scanner = AsyncMock()
             mock_scanner.execute = AsyncMock(return_value={"files": mock_files})
@@ -356,9 +328,7 @@ class TestSessionContextBuilder:
         ]
 
         with (
-            patch(
-                "tta_kb_automation.tools.session_context_builder.ScanCodebase"
-            ) as MockScanner,
+            patch("tta_kb_automation.tools.session_context_builder.ScanCodebase") as MockScanner,
             patch(
                 "tta_kb_automation.tools.session_context_builder.AnalyzeCodeStructure"
             ) as MockAnalyzer,
@@ -369,9 +339,7 @@ class TestSessionContextBuilder:
 
             mock_analyzer = AsyncMock()
             mock_analyzer.execute = AsyncMock(
-                return_value={
-                    "functions": ["test_cache_hit", "test_cache_miss", "test_ttl"]
-                }
+                return_value={"functions": ["test_cache_hit", "test_cache_miss", "test_ttl"]}
             )
             MockAnalyzer.return_value = mock_analyzer
 

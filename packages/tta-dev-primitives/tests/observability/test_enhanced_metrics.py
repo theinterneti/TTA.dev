@@ -16,7 +16,7 @@ from tta_dev_primitives.observability.enhanced_metrics import (
 class TestPercentileMetrics:
     """Test percentile metrics calculation."""
 
-    def test_percentile_calculation(self):
+    def test_percentile_calculation(self) -> None:
         """Test percentile calculation with sample data."""
         metrics = PercentileMetrics(name="test")
 
@@ -38,7 +38,7 @@ class TestPercentileMetrics:
         # P90 should be around 90
         assert 80 <= percentiles["p90"] <= 100
 
-    def test_empty_percentiles(self):
+    def test_empty_percentiles(self) -> None:
         """Test percentiles with no data."""
         metrics = PercentileMetrics(name="test")
         percentiles = metrics.get_percentiles()
@@ -48,7 +48,7 @@ class TestPercentileMetrics:
         assert percentiles["p95"] == 0.0
         assert percentiles["p99"] == 0.0
 
-    def test_max_samples_limit(self):
+    def test_max_samples_limit(self) -> None:
         """Test that max_samples limit is enforced."""
         metrics = PercentileMetrics(name="test", max_samples=100)
 
@@ -60,7 +60,7 @@ class TestPercentileMetrics:
         assert len(metrics.durations) == 100
         assert metrics.durations[0] == 100.0  # First kept sample
 
-    def test_reset(self):
+    def test_reset(self) -> None:
         """Test reset clears all durations."""
         metrics = PercentileMetrics(name="test")
         metrics.record(10.0)
@@ -76,7 +76,7 @@ class TestPercentileMetrics:
 class TestSLOMetrics:
     """Test SLO tracking and error budget calculation."""
 
-    def test_availability_slo(self):
+    def test_availability_slo(self) -> None:
         """Test availability-based SLO tracking."""
         config = SLOConfig(
             name="test_slo",
@@ -94,7 +94,7 @@ class TestSLOMetrics:
         assert slo.availability == 0.99
         assert slo.is_compliant
 
-    def test_latency_slo(self):
+    def test_latency_slo(self) -> None:
         """Test latency-based SLO tracking."""
         config = SLOConfig(
             name="test_slo",
@@ -113,7 +113,7 @@ class TestSLOMetrics:
         assert slo.latency_compliance == 0.95
         assert slo.is_compliant
 
-    def test_error_budget_remaining(self):
+    def test_error_budget_remaining(self) -> None:
         """Test error budget calculation."""
         config = SLOConfig(
             name="test_slo",
@@ -135,7 +135,7 @@ class TestSLOMetrics:
         # Error budget should be reduced
         assert slo.error_budget_remaining < 1.0
 
-    def test_slo_violation(self):
+    def test_slo_violation(self) -> None:
         """Test SLO violation detection."""
         config = SLOConfig(
             name="test_slo",
@@ -154,7 +154,7 @@ class TestSLOMetrics:
         assert not slo.is_compliant
         assert slo.availability == 0.95
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test conversion to dictionary."""
         config = SLOConfig(name="test_slo", target=0.99, threshold_ms=1000.0)
         slo = SLOMetrics(config=config)
@@ -174,7 +174,7 @@ class TestSLOMetrics:
 class TestThroughputMetrics:
     """Test throughput and concurrency tracking."""
 
-    def test_active_requests(self):
+    def test_active_requests(self) -> None:
         """Test active request tracking."""
         metrics = ThroughputMetrics(name="test")
 
@@ -192,7 +192,7 @@ class TestThroughputMetrics:
         metrics.end_request()
         assert metrics.active_requests == 0
 
-    def test_total_requests(self):
+    def test_total_requests(self) -> None:
         """Test total request counting."""
         metrics = ThroughputMetrics(name="test")
 
@@ -202,7 +202,7 @@ class TestThroughputMetrics:
 
         assert metrics.total_requests == 10
 
-    def test_requests_per_second(self):
+    def test_requests_per_second(self) -> None:
         """Test RPS calculation."""
         metrics = ThroughputMetrics(name="test")
 
@@ -214,7 +214,7 @@ class TestThroughputMetrics:
         rps = metrics.requests_per_second
         assert rps > 0
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test conversion to dictionary."""
         metrics = ThroughputMetrics(name="test")
         metrics.start_request()
@@ -230,7 +230,7 @@ class TestThroughputMetrics:
 class TestCostMetrics:
     """Test cost tracking."""
 
-    def test_cost_recording(self):
+    def test_cost_recording(self) -> None:
         """Test cost recording."""
         metrics = CostMetrics(name="test")
 
@@ -241,7 +241,7 @@ class TestCostMetrics:
         assert metrics.cost_by_operation["gpt-4"] == 0.05
         assert metrics.cost_by_operation["gpt-3.5"] == 0.02
 
-    def test_savings_recording(self):
+    def test_savings_recording(self) -> None:
         """Test savings recording."""
         metrics = CostMetrics(name="test")
 
@@ -252,7 +252,7 @@ class TestCostMetrics:
         assert metrics.total_savings == 0.03
         assert metrics.net_cost == 0.07
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test conversion to dictionary."""
         metrics = CostMetrics(name="test")
         metrics.record_cost(0.05, operation="llm")
@@ -270,7 +270,7 @@ class TestCostMetrics:
 class TestEnhancedMetricsCollector:
     """Test enhanced metrics collector."""
 
-    def test_configure_slo(self):
+    def test_configure_slo(self) -> None:
         """Test SLO configuration."""
         collector = EnhancedMetricsCollector()
 
@@ -280,7 +280,7 @@ class TestEnhancedMetricsCollector:
         assert slo_status["name"] == "test_primitive"
         assert slo_status["target"] == 0.99
 
-    def test_record_execution(self):
+    def test_record_execution(self) -> None:
         """Test recording execution with all metrics."""
         collector = EnhancedMetricsCollector()
         collector.configure_slo("test_primitive", target=0.99, threshold_ms=1000.0)
@@ -313,7 +313,7 @@ class TestEnhancedMetricsCollector:
         assert metrics["cost"]["total_cost"] == 0.05
         assert metrics["cost"]["total_savings"] == 0.01
 
-    def test_get_all_primitives_metrics(self):
+    def test_get_all_primitives_metrics(self) -> None:
         """Test getting metrics for all primitives."""
         collector = EnhancedMetricsCollector()
 
@@ -325,7 +325,7 @@ class TestEnhancedMetricsCollector:
         assert "primitive1" in all_metrics
         assert "primitive2" in all_metrics
 
-    def test_reset(self):
+    def test_reset(self) -> None:
         """Test resetting metrics."""
         collector = EnhancedMetricsCollector()
 
@@ -336,7 +336,7 @@ class TestEnhancedMetricsCollector:
         metrics = collector.get_all_metrics("test_primitive")
         assert metrics["percentiles"]["p50"] == 0.0
 
-    def test_global_collector(self):
+    def test_global_collector(self) -> None:
         """Test global collector singleton."""
         collector1 = get_enhanced_metrics_collector()
         collector2 = get_enhanced_metrics_collector()

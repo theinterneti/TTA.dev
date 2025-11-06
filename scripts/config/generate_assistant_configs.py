@@ -148,7 +148,7 @@ class CombineCorePrimitive(WorkflowPrimitive[list[str], str]):
         sections = []
         titles = ["Project Overview", "Architecture", "Development Workflow", "Quality Standards"]
 
-        for title, content in zip(titles, input_data):
+        for title, content in zip(titles, input_data, strict=False):
             sections.append(f"# {title}\n\n{content}")
 
         return "\n\n".join(sections)
@@ -171,7 +171,7 @@ class CombineAgentBehaviorPrimitive(WorkflowPrimitive[list[str], str]):
         sections = []
         titles = ["Communication Style", "Priority Order", "Anti-Patterns to Avoid"]
 
-        for title, content in zip(titles, input_data):
+        for title, content in zip(titles, input_data, strict=False):
             sections.append(f"# {title}\n\n{content}")
 
         return "\n\n".join(sections)

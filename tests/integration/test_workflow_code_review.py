@@ -16,7 +16,6 @@ from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
 from tta_dev_primitives.core.parallel import ParallelPrimitive
 from tta_dev_primitives.observability.tracing import ObservablePrimitive
 
-
 # ============================================================================
 # Code Analysis Primitives
 # ============================================================================

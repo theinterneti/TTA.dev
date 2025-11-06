@@ -116,7 +116,7 @@ def download_model(model_name, quantization="4bit", force_download=False):
     try:
         # Download tokenizer
         logger.info(f"Downloading tokenizer for {model_name}...")
-        tokenizer = AutoTokenizer.from_pretrained(
+        AutoTokenizer.from_pretrained(
             model_name,
             cache_dir=MODEL_CACHE_DIR,
             token=HF_TOKEN,
@@ -125,7 +125,7 @@ def download_model(model_name, quantization="4bit", force_download=False):
 
         # Download model
         logger.info(f"Downloading model {model_name}...")
-        model = AutoModelForCausalLM.from_pretrained(
+        AutoModelForCausalLM.from_pretrained(
             model_name,
             cache_dir=MODEL_CACHE_DIR,
             token=HF_TOKEN,

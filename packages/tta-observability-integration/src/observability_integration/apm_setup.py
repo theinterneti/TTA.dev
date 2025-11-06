@@ -47,7 +47,7 @@ def initialize_observability(
     service_name: str = "tta",
     service_version: str = "0.1.0",
     enable_prometheus: bool = True,
-    enable_console_traces: bool = None,
+    enable_console_traces: bool | None = None,
     prometheus_port: int = 9464,
 ) -> bool:
     """

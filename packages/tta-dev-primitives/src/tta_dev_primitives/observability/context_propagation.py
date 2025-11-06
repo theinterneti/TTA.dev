@@ -163,7 +163,9 @@ def extract_baggage(context: WorkflowContext) -> None:
         return
 
     try:
-        from opentelemetry.baggage import get_all_baggage
+        from opentelemetry.baggage import (
+            get_all_baggage,  # type: ignore[attr-defined]  # May not be in all OTel versions
+        )
 
         baggage = get_all_baggage()
         if baggage:

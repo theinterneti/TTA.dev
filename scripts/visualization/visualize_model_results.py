@@ -108,7 +108,7 @@ def plot_speed_comparison(df: pd.DataFrame, output_dir: str):
     speed_data = df.groupby(["model", "quantization"])["tokens_per_second"].mean().reset_index()
 
     # Create the plot
-    ax = sns.barplot(x="model", y="tokens_per_second", hue="quantization", data=speed_data)
+    sns.barplot(x="model", y="tokens_per_second", hue="quantization", data=speed_data)
 
     # Customize the plot
     plt.title("Model Speed Comparison by Quantization", fontsize=16)
@@ -130,7 +130,7 @@ def plot_memory_usage(df: pd.DataFrame, output_dir: str):
     memory_data = df.groupby(["model", "quantization"])["memory_usage_mb"].mean().reset_index()
 
     # Create the plot
-    ax = sns.barplot(x="model", y="memory_usage_mb", hue="quantization", data=memory_data)
+    sns.barplot(x="model", y="memory_usage_mb", hue="quantization", data=memory_data)
 
     # Customize the plot
     plt.title("Model Memory Usage by Quantization", fontsize=16)
@@ -161,7 +161,7 @@ def plot_temperature_effect(df: pd.DataFrame, output_dir: str):
         temp_data = metric_df.groupby(["model", "temperature"])[metric].mean().reset_index()
 
         # Create the plot
-        ax = sns.lineplot(x="temperature", y=metric, hue="model", marker="o", data=temp_data)
+        sns.lineplot(x="temperature", y=metric, hue="model", marker="o", data=temp_data)
 
         # Customize the plot
         plt.title(f"Effect of Temperature on {metric_name}", fontsize=16)
@@ -196,7 +196,7 @@ def plot_task_performance(df: pd.DataFrame, output_dir: str):
         task_data = task_df.groupby(["model"])[metric].mean().reset_index()
 
         # Create the plot
-        ax = sns.barplot(x="model", y=metric, data=task_data)
+        sns.barplot(x="model", y=metric, data=task_data)
 
         # Customize the plot
         plt.title(f"Model Performance on {task.replace('_', ' ').title()}", fontsize=16)
@@ -218,7 +218,7 @@ def plot_flash_attention_comparison(df: pd.DataFrame, output_dir: str):
     flash_data = df.groupby(["model", "flash_attention"])["tokens_per_second"].mean().reset_index()
 
     # Create the plot
-    ax = sns.barplot(x="model", y="tokens_per_second", hue="flash_attention", data=flash_data)
+    sns.barplot(x="model", y="tokens_per_second", hue="flash_attention", data=flash_data)
 
     # Customize the plot
     plt.title("Effect of Flash Attention on Generation Speed", fontsize=16)
@@ -275,7 +275,7 @@ def create_radar_chart(analysis: dict[str, Any], output_dir: str):
     angles = np.linspace(0, 2 * np.pi, len(capabilities), endpoint=False).tolist()
     angles += angles[:1]  # Close the loop
 
-    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"polar": True})
 
     for i, model in enumerate(models):
         values = data_array[i].tolist()
@@ -301,7 +301,7 @@ def create_radar_chart(analysis: dict[str, Any], output_dir: str):
 def create_html_report(results_file: str, analysis_file: str, charts_dir: str):
     """Create an HTML report with all the visualizations and analysis."""
     # Load results and analysis
-    results = load_results(results_file)
+    load_results(results_file)
     analysis = load_results(analysis_file)
 
     # Create timestamp
@@ -329,7 +329,7 @@ def create_html_report(results_file: str, analysis_file: str, charts_dir: str):
         <div class="container">
             <h1>Model Testing Results</h1>
             <p>Generated on: {timestamp}</p>
-            
+
             <h2>Models Evaluated</h2>
             <ul>
     """
@@ -340,7 +340,7 @@ def create_html_report(results_file: str, analysis_file: str, charts_dir: str):
 
     html_content += """
             </ul>
-            
+
             <h2>Performance Visualizations</h2>
     """
 
@@ -399,7 +399,7 @@ def create_html_report(results_file: str, analysis_file: str, charts_dir: str):
 
     html_content += """
             </table>
-            
+
             <h2>Best Configurations</h2>
     """
 

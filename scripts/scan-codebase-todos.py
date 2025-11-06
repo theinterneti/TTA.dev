@@ -22,7 +22,6 @@ import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 
 @dataclass
@@ -207,25 +206,25 @@ def print_results(result: ScanResult) -> None:
     print("📊 CODEBASE TODO SCAN RESULTS")
     print("=" * 80)
 
-    print(f"\n📈 Summary:")
+    print("\n📈 Summary:")
     print(f"  Total TODOs: {len(result.todos)}")
     print(f"  Files scanned: {result.files_scanned}")
     print(f"  Files with TODOs: {result.files_with_todos}")
 
     # By category
-    print(f"\n📂 By Category:")
+    print("\n📂 By Category:")
     by_category = result.by_category()
     for category, todos in sorted(by_category.items(), key=lambda x: -len(x[1])):
         print(f"  {category}: {len(todos)}")
 
     # By file type
-    print(f"\n📄 By File Type:")
+    print("\n📄 By File Type:")
     by_type = result.by_file_type()
     for file_type, todos in sorted(by_type.items(), key=lambda x: -len(x[1])):
         print(f"  .{file_type}: {len(todos)}")
 
     # Sample TODOs
-    print(f"\n📋 Sample TODOs (first 10):")
+    print("\n📋 Sample TODOs (first 10):")
     for todo in result.todos[:10]:
         print(f"\n  {todo.file_path}:{todo.line_number}")
         print(f"  {todo.todo_text}")

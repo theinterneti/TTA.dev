@@ -6,7 +6,10 @@ operators to create production-ready documentation pipelines.
 
 from pathlib import Path
 
-from tta_dev_primitives import ParallelPrimitive, SequentialPrimitive
+from tta_dev_primitives import (
+    ParallelPrimitive,
+    WorkflowPrimitive,
+)
 from tta_dev_primitives.performance import CachePrimitive
 from tta_dev_primitives.recovery import (
     FallbackPrimitive,
@@ -25,7 +28,7 @@ from .primitives import (
 
 def create_basic_sync_workflow(
     config: TTADocsConfig | None = None,
-) -> SequentialPrimitive:
+) -> WorkflowPrimitive[Path, Path]:
     """Create basic documentation sync workflow.
 
     Workflow: Markdown → Logseq Conversion → Sync to Disk
@@ -54,14 +57,12 @@ def create_basic_sync_workflow(
     syncer = LogseqSyncPrimitive(create_directories=True)
 
     # Compose with >> operator (sequential)
-    workflow = converter >> syncer
-
-    return workflow
+    return converter >> syncer
 
 
 def create_ai_enhanced_sync_workflow(
     config: TTADocsConfig | None = None,
-) -> SequentialPrimitive:
+) -> WorkflowPrimitive[Path, Path]:
     """Create AI-enhanced documentation sync workflow with fallback.
 
     Workflow:
@@ -118,14 +119,12 @@ def create_ai_enhanced_sync_workflow(
     syncer = LogseqSyncPrimitive(create_directories=True)
 
     # Compose workflow: Convert >> AI Enhance >> Sync
-    workflow = converter >> metadata_extractor >> syncer
-
-    return workflow
+    return converter >> metadata_extractor >> syncer
 
 
 def create_production_sync_workflow(
     config: TTADocsConfig | None = None,
-) -> SequentialPrimitive:
+) -> WorkflowPrimitive[Path, Path]:
     """Create production-ready sync workflow with all safeguards.
 
     Workflow:
@@ -201,9 +200,7 @@ def create_production_sync_workflow(
     )
 
     # Compose complete workflow
-    workflow = converter >> metadata_extractor >> syncer
-
-    return workflow
+    return converter >> metadata_extractor >> syncer
 
 
 def create_batch_sync_workflow(
@@ -234,9 +231,7 @@ def create_batch_sync_workflow(
     sync_workflows = [create_production_sync_workflow(config) for _ in range(max_parallel)]
 
     # Compose with | operator (parallel)
-    workflow = ParallelPrimitive(primitives=sync_workflows)
-
-    return workflow
+    return ParallelPrimitive(primitives=sync_workflows)
 
 
 # Workflow examples demonstrating TTA.dev patterns
