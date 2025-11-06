@@ -87,7 +87,10 @@ def trace_workflow(span_name: str | None = None, attributes: dict[str, Any] | No
 
 
 def track_metric(
-    metric_name: str, metric_type: str = "counter", description: str = "", unit: str = "1"
+    metric_name: str,
+    metric_type: str = "counter",
+    description: str = "",
+    unit: str = "1",
 ):
     """Decorator to track metrics for function execution.
 
@@ -129,20 +132,24 @@ def track_metric(
 
                 # Record metric
                 if metric_type == "counter":
-                    instrument.add(1, {"status": "success"})
+                    instrument.add(1, {"status": "success"})  # type: ignore[attr-defined]
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(duration, {"status": "success"})
+                    instrument.record(duration, {"status": "success"})  # type: ignore[attr-defined]
 
                 return result
 
             except Exception as e:
                 # Record error metric
                 if metric_type == "counter":
-                    instrument.add(1, {"status": "error", "error_type": type(e).__name__})
+                    instrument.add(  # type: ignore[attr-defined]  # OpenTelemetry stub incomplete
+                        1, {"status": "error", "error_type": type(e).__name__}
+                    )
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(duration, {"status": "error", "error_type": type(e).__name__})
+                    instrument.record(  # type: ignore[attr-defined]  # OpenTelemetry stub incomplete
+                        duration, {"status": "error", "error_type": type(e).__name__}
+                    )
                 raise
 
         @wraps(func)
@@ -170,20 +177,24 @@ def track_metric(
 
                 # Record metric
                 if metric_type == "counter":
-                    instrument.add(1, {"status": "success"})
+                    instrument.add(1, {"status": "success"})  # type: ignore[attr-defined]
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(duration, {"status": "success"})
+                    instrument.record(duration, {"status": "success"})  # type: ignore[attr-defined]
 
                 return result
 
             except Exception as e:
                 # Record error metric
                 if metric_type == "counter":
-                    instrument.add(1, {"status": "error", "error_type": type(e).__name__})
+                    instrument.add(  # type: ignore[attr-defined]  # OpenTelemetry stub incomplete
+                        1, {"status": "error", "error_type": type(e).__name__}
+                    )
                 elif metric_type == "histogram":
                     duration = time.time() - start_time
-                    instrument.record(duration, {"status": "error", "error_type": type(e).__name__})
+                    instrument.record(  # type: ignore[attr-defined]  # OpenTelemetry stub incomplete
+                        duration, {"status": "error", "error_type": type(e).__name__}
+                    )
                 raise
 
         # Return appropriate wrapper based on function type

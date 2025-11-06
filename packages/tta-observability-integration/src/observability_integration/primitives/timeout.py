@@ -8,31 +8,15 @@ Tracks timeout rates and execution times for reliability monitoring.
 from __future__ import annotations
 
 import asyncio
+import builtins
 import logging
 import time
 from typing import Any
 
-try:
-    from tta_dev_primitives.core.base import (
-        WorkflowContext,
-        WorkflowPrimitive,
-    )
-except ImportError:
-    # Fallback for development/testing
-    from typing import Protocol
-
-    class WorkflowContext:  # type: ignore
-        """Mock WorkflowContext for testing."""
-
-        pass
-
-    class WorkflowPrimitive(Protocol):  # type: ignore
-        """Minimal WorkflowPrimitive protocol for testing."""
-
-        pass
-
-
-import builtins
+from tta_dev_primitives.core.base import (
+    WorkflowContext,
+    WorkflowPrimitive,
+)
 
 from ..apm_setup import get_meter
 
@@ -134,7 +118,9 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
             self._timeout_rate_gauge = meter.create_observable_gauge(
                 name="timeout_rate",
                 description="Timeout failure rate (0.0-1.0)",
-                callbacks=[lambda _: [(get_timeout_rate(), {"operation": self.operation_name})]],
+                callbacks=[  # type: ignore  # OpenTelemetry CallbackT variance
+                    lambda _: [(get_timeout_rate(), {"operation": self.operation_name})]
+                ],
             )
         else:
             self._successes_counter = None

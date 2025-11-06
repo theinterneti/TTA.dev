@@ -39,7 +39,7 @@ from tta_dev_primitives.orchestration.task_classifier_primitive import (
 # ============================================================================
 
 
-async def example_task_classification():
+async def example_task_classification() -> None:
     """Demonstrate intelligent task classification for model selection.
 
     **Pattern:** Analyze task → Recommend best model
@@ -80,7 +80,7 @@ async def example_task_classification():
 # ============================================================================
 
 
-async def example_claude_to_gemini():
+async def example_claude_to_gemini() -> None:
     """Demonstrate Claude analyzing requirements → Gemini Pro executing.
 
     **Pattern:** Orchestrator analyzes → Executor executes
@@ -135,7 +135,7 @@ async def example_claude_to_gemini():
 # ============================================================================
 
 
-async def example_multi_model_workflow():
+async def example_multi_model_workflow() -> None:
     """Demonstrate automatic task routing across multiple models.
 
     **Pattern:** Classify → Route → Execute → Validate
@@ -219,7 +219,7 @@ async def example_multi_model_workflow():
 # ============================================================================
 
 
-async def example_parallel_execution():
+async def example_parallel_execution() -> None:
     """Demonstrate Claude planning → parallel execution across free models.
 
     **Pattern:** Orchestrator plans → Parallel execution → Aggregation
@@ -313,7 +313,7 @@ async def example_parallel_execution():
 # ============================================================================
 
 
-async def main():
+async def main() -> None:
     """Run all multi-model orchestration examples."""
     print("\n" + "=" * 80)
     print("MULTI-MODEL ORCHESTRATION EXAMPLES")

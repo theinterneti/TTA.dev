@@ -290,7 +290,7 @@ async def llm_chain_workflow():
     return result
 
 
-async def main():
+async def main() -> None:
     """Run all examples."""
     print("=" * 60)
     print("TTA-Dev-Primitives: Real-World Workflow Examples")

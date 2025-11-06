@@ -9,6 +9,9 @@ This package provides primitives and tools for:
 All automation uses TTA.dev primitives for composability and observability.
 """
 
+# Re-export WorkflowContext from tta-dev-primitives for convenience
+from tta_dev_primitives import WorkflowContext
+
 from tta_kb_automation.core import (
     AnalyzeCodeStructure,
     # Intelligence
@@ -49,6 +52,8 @@ from tta_kb_automation.workflows import (
 __version__ = "0.1.0"
 
 __all__ = [
+    # Re-exported from tta-dev-primitives
+    "WorkflowContext",
     # Core primitives
     "ParseLogseqPages",
     "ExtractLinks",

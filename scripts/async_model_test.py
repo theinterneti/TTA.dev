@@ -283,9 +283,9 @@ class AsyncModelTester:
     async def run_tests_async(
         self,
         models: list[str],
-        quantizations: list[str] = ["4bit"],
-        flash_attention_settings: list[bool] = [True],
-        temperatures: list[float] = [0.7],
+        quantizations: list[str] = None,
+        flash_attention_settings: list[bool] = None,
+        temperatures: list[float] = None,
         max_concurrent: int = 1,
         output_file: str | None = None,
     ) -> dict[str, Any]:
@@ -304,6 +304,12 @@ class AsyncModelTester:
             results: Test results
         """
         # Create results dictionary
+        if temperatures is None:
+            temperatures = [0.7]
+        if flash_attention_settings is None:
+            flash_attention_settings = [True]
+        if quantizations is None:
+            quantizations = ["4bit"]
         results = {
             "models": models,
             "quantizations": quantizations,

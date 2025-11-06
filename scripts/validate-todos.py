@@ -63,10 +63,11 @@ class ValidationResult:
 class TODOValidator:
     """Validates Logseq TODOs against compliance rules."""
 
-    def __init__(self, logseq_root: Path):
+    def __init__(self, logseq_root: Path, quiet: bool = False):
         self.logseq_root = logseq_root
         self.journals_dir = logseq_root / "journals"
         self.pages_dir = logseq_root / "pages"
+        self.quiet = quiet
 
         # Regex patterns
         self.todo_pattern = re.compile(
@@ -81,11 +82,16 @@ class TODOValidator:
         result = ValidationResult()
 
         if not self.journals_dir.exists():
-            print(f"⚠️  Journals directory not found: {self.journals_dir}")
+            if not self.quiet:
+                print(
+                    f"⚠️  Journals directory not found: {self.journals_dir}",
+                    file=sys.stderr,
+                )
             return result
 
         journal_files = sorted(self.journals_dir.glob("*.md"))
-        print(f"📋 Scanning {len(journal_files)} journal files...")
+        if not self.quiet:
+            print(f"📋 Scanning {len(journal_files)} journal files...")
 
         for journal_file in journal_files:
             self._validate_file(journal_file, result)
@@ -335,10 +341,13 @@ def main() -> int:
     args = parser.parse_args()
 
     if not args.logseq_root.exists():
-        print(f"❌ Logseq root not found: {args.logseq_root}")
+        if args.json:
+            print(json.dumps({"error": "Logseq root not found"}), file=sys.stderr)
+        else:
+            print(f"❌ Logseq root not found: {args.logseq_root}")
         return 2
 
-    validator = TODOValidator(args.logseq_root)
+    validator = TODOValidator(args.logseq_root, quiet=args.json)
     result = validator.validate_journals()
 
     if args.json:

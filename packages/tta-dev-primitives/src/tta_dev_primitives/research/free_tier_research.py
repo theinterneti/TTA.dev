@@ -456,7 +456,7 @@ class FreeTierResearchPrimitive(
         """
         # Generate comparison table
         table_rows = []
-        for provider_name, info in providers.items():
+        for _provider_name, info in providers.items():
             table_rows.append(
                 f"| **{info.name}** | "
                 f"{'✅ Yes' if info.has_free_tier else '❌ No'} | "

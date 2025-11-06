@@ -335,7 +335,7 @@ Generate complete, runnable test code with proper imports and fixtures.
             return {"success": False, "error": str(e)}
 
 
-async def main():
+async def main() -> None:
     """Main entry point for CLI usage."""
     parser = argparse.ArgumentParser(description="Generate tests using multi-model orchestration")
     parser.add_argument("--file", required=True, help="Path to Python file to generate tests for")

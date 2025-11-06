@@ -105,7 +105,7 @@ async def test_agent_handoff_tracks_history():
     # First handoff
     result1 = await handoff1.execute(input_data, context)
     # Second handoff
-    result2 = await handoff2.execute(result1, context)
+    await handoff2.execute(result1, context)
 
     agent_history = context.metadata["agent_history"]
     assert len(agent_history) == 2
@@ -245,7 +245,8 @@ async def test_agent_coordination_aggregate():
     }
 
     coordinator = AgentCoordinationPrimitive(
-        agent_primitives=agents, coordination_strategy="aggregate"
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
+        coordination_strategy="aggregate",
     )
     context = WorkflowContext(workflow_id="test")
 
@@ -267,7 +268,10 @@ async def test_agent_coordination_first():
         "agent2": NamedPrimitive("agent2"),
     }
 
-    coordinator = AgentCoordinationPrimitive(agent_primitives=agents, coordination_strategy="first")
+    coordinator = AgentCoordinationPrimitive(
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
+        coordination_strategy="first",
+    )
     context = WorkflowContext(workflow_id="test")
 
     input_data = {"task": "analyze"}
@@ -335,7 +339,7 @@ async def test_agent_coordination_timeout():
     }
 
     coordinator = AgentCoordinationPrimitive(
-        agent_primitives=agents,
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
         coordination_strategy="aggregate",
         timeout_seconds=0.1,
         require_all_success=False,
@@ -354,7 +358,8 @@ async def test_agent_coordination_invalid_strategy():
     agents = {"agent1": NamedPrimitive("agent1")}
 
     coordinator = AgentCoordinationPrimitive(
-        agent_primitives=agents, coordination_strategy="invalid"
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
+        coordination_strategy="invalid",
     )
     context = WorkflowContext(workflow_id="test")
 
@@ -408,7 +413,8 @@ async def test_multi_agent_workflow():
     }
 
     coordinator = AgentCoordinationPrimitive(
-        agent_primitives=agents, coordination_strategy="aggregate"
+        agent_primitives=agents,  # type: ignore[arg-type]  # Test primitive variance
+        coordination_strategy="aggregate",
     )
     coord_result = await coordinator.execute({"task": "build_feature"}, context)
 

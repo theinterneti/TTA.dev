@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 try:
-    import numpy as np
+    import numpy as np  # type: ignore[import-not-found]  # Optional dependency
 
     NUMPY_AVAILABLE = True
 except ImportError:

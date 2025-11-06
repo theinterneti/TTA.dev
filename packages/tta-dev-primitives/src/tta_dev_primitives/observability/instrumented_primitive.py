@@ -65,7 +65,9 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
                   Used in span names as "primitive.{name}"
         """
         self.name = name or self.__class__.__name__
-        self._tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
+        self._tracer = (
+            trace.get_tracer(__name__) if TRACING_AVAILABLE and trace is not None else None
+        )
 
     async def execute(self, input_data: T, context: WorkflowContext) -> U:
         """

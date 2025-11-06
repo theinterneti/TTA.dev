@@ -118,7 +118,7 @@ class TestOpenAIPrimitive:
             messages=[{"role": "user", "content": "Test"}],
             model="gpt-4",  # Override default
         )
-        response = await primitive.execute(request, context)
+        await primitive.execute(request, context)
 
         # Verify correct model was used
         call_args = primitive.client.chat.completions.create.call_args
@@ -215,7 +215,7 @@ class TestAnthropicPrimitive:
             max_tokens=1024,
             model="claude-3-opus-20240229",  # Override default
         )
-        response = await primitive.execute(request, context)
+        await primitive.execute(request, context)
 
         # Verify correct model was used
         call_args = primitive.client.messages.create.call_args

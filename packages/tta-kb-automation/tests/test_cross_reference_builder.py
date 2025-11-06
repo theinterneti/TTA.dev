@@ -58,9 +58,7 @@ def mock_cross_ref_structure(tmp_path: Path) -> tuple[Path, Path]:
     )
 
     # Code file with no KB references
-    (pkg_dir / "utils.py").write_text(
-        '"""Utility functions."""\n\ndef helper():\n    pass\n'
-    )
+    (pkg_dir / "utils.py").write_text('"""Utility functions."""\n\ndef helper():\n    pass\n')
 
     return kb_path, code_path
 

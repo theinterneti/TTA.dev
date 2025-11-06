@@ -14,6 +14,8 @@ from tta_dev_primitives import WorkflowContext
 
 # Mark ALL tests in this module as integration since they execute stage validations that spawn subprocesses
 pytestmark = pytest.mark.integration
+from typing import Never
+
 from tta_dev_primitives.knowledge import (
     KBPage,
     KBQuery,
@@ -31,7 +33,7 @@ from tta_dev_primitives.lifecycle import (
 class MockKBPrimitive(KnowledgeBasePrimitive):
     """Mock KB primitive that returns predefined results."""
 
-    def __init__(self, mock_pages: list[KBPage] | None = None):
+    def __init__(self, mock_pages: list[KBPage] | None = None) -> None:
         """Initialize mock KB with predefined pages."""
         super().__init__(logseq_available=False)
         self.mock_pages = mock_pages or []
@@ -58,7 +60,7 @@ class MockKBPrimitive(KnowledgeBasePrimitive):
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_without_kb():
+async def test_stage_manager_without_kb() -> None:
     """Test StageManager works without KB (backward compatibility)."""
     manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
     context = WorkflowContext(correlation_id="test-001")
@@ -78,7 +80,7 @@ async def test_stage_manager_without_kb():
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_no_results():
+async def test_stage_manager_with_kb_no_results() -> None:
     """Test StageManager with KB that returns no results."""
     mock_kb = MockKBPrimitive(mock_pages=[])
     manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
@@ -98,7 +100,7 @@ async def test_stage_manager_with_kb_no_results():
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_best_practices():
+async def test_stage_manager_with_kb_best_practices() -> None:
     """Test StageManager with KB returning best practices."""
     mock_pages = [
         KBPage(
@@ -141,7 +143,7 @@ async def test_stage_manager_with_kb_best_practices():
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_common_mistakes():
+async def test_stage_manager_with_kb_common_mistakes() -> None:
     """Test StageManager with KB returning common mistakes."""
     mock_pages = [
         KBPage(
@@ -178,7 +180,7 @@ async def test_stage_manager_with_kb_common_mistakes():
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_mixed_recommendations():
+async def test_stage_manager_with_kb_mixed_recommendations() -> None:
     """Test StageManager with KB returning both best practices and mistakes."""
     mock_pages = [
         KBPage(
@@ -217,13 +219,13 @@ async def test_stage_manager_with_kb_mixed_recommendations():
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_kb_error_handling():
+async def test_stage_manager_kb_error_handling() -> None:
     """Test StageManager handles KB errors gracefully."""
 
     class ErrorKB(KnowledgeBasePrimitive):
         """KB that raises errors."""
 
-        async def _execute_impl(self, context, input_data):
+        async def _execute_impl(self, context, input_data) -> Never:
             raise RuntimeError("KB query failed")
 
     error_kb = ErrorKB(logseq_available=False)
@@ -246,7 +248,7 @@ async def test_stage_manager_kb_error_handling():
 
 
 @pytest.mark.asyncio
-async def test_stage_readiness_summary_with_kb():
+async def test_stage_readiness_summary_with_kb() -> None:
     """Test StageReadiness.get_summary() includes KB recommendations."""
     mock_pages = [
         KBPage(
@@ -280,7 +282,7 @@ async def test_stage_readiness_summary_with_kb():
 
 @pytest.mark.integration  # Spawns subprocess to run pytest
 @pytest.mark.asyncio
-async def test_stage_manager_execute_without_kb():
+async def test_stage_manager_execute_without_kb() -> None:
     """Test StageManager.execute() still works (backward compatibility)."""
     manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
     context = WorkflowContext(correlation_id="test-008")

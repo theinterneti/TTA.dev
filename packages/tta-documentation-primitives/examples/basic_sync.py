@@ -21,9 +21,7 @@ async def main() -> None:
 
     # Process a file
     file_path = Path("docs/guides/example.md")
-    result = await workflow.execute(file_path, context)
-
-    return result
+    return await workflow.execute(file_path, context)
 
 
 if __name__ == "__main__":

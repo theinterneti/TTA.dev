@@ -103,21 +103,21 @@ def get_prometheus_config(timeout: int = 10) -> dict[str, Any]:
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_prometheus_health():
+def test_prometheus_health() -> None:
     """Test that Prometheus is healthy and responding."""
     response = requests.get(f"{PROMETHEUS_URL}/-/healthy", timeout=5)
     assert response.status_code == 200, "Prometheus health check failed"
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_prometheus_ready():
+def test_prometheus_ready() -> None:
     """Test that Prometheus is ready to serve queries."""
     response = requests.get(f"{PROMETHEUS_URL}/-/ready", timeout=5)
     assert response.status_code == 200, "Prometheus readiness check failed"
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_prometheus_api_accessible():
+def test_prometheus_api_accessible() -> None:
     """Test that Prometheus API is accessible."""
     response = requests.get(PROMETHEUS_CONFIG_API, timeout=5)
     assert response.status_code == 200, "Prometheus API not accessible"
@@ -127,7 +127,7 @@ def test_prometheus_api_accessible():
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_prometheus_configuration():
+def test_prometheus_configuration() -> None:
     """Test that Prometheus is configured with expected scrape jobs."""
     config = get_prometheus_config()
 
@@ -144,7 +144,7 @@ def test_prometheus_configuration():
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_prometheus_scrape_targets():
+def test_prometheus_scrape_targets() -> None:
     """Test that Prometheus has configured scrape targets."""
     targets = get_prometheus_targets()
 
@@ -165,7 +165,7 @@ def test_prometheus_scrape_targets():
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_otel_collector_up():
+def test_otel_collector_up() -> None:
     """Test that OpenTelemetry Collector is being scraped by Prometheus."""
     # Wait a bit for initial scrape
     time.sleep(5)
@@ -186,7 +186,7 @@ def test_otel_collector_up():
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_otel_collector_metrics_exported():
+def test_otel_collector_metrics_exported() -> None:
     """Test that OpenTelemetry Collector exports its own metrics."""
     # Wait for metrics to be scraped
     time.sleep(5)
@@ -208,7 +208,7 @@ def test_otel_collector_metrics_exported():
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_otel_collector_span_export_metrics():
+def test_otel_collector_span_export_metrics() -> None:
     """Test that OpenTelemetry Collector exports span processing metrics."""
     # Wait for metrics to be scraped
     time.sleep(5)
@@ -229,7 +229,7 @@ def test_otel_collector_span_export_metrics():
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_otel_collector_metric_export_metrics():
+def test_otel_collector_metric_export_metrics() -> None:
     """Test that OpenTelemetry Collector exports metric processing metrics."""
     # Wait for metrics to be scraped
     time.sleep(5)
@@ -255,7 +255,7 @@ def test_otel_collector_metric_export_metrics():
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
-def test_prometheus_self_monitoring():
+def test_prometheus_self_monitoring() -> None:
     """Test that Prometheus monitors itself."""
     query = 'up{job="prometheus"}'
     result = query_prometheus(query)

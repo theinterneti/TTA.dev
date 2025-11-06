@@ -11,10 +11,10 @@ import time
 import pytest
 from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
 from tta_dev_primitives.observability import InstrumentedPrimitive
-from tta_dev_primitives.observability.tracing import ObservablePrimitive
 from tta_dev_primitives.observability.enhanced_collector import (
     get_enhanced_metrics_collector,
 )
+from tta_dev_primitives.observability.tracing import ObservablePrimitive
 
 # Try to import observability_integration (optional)
 try:

@@ -152,7 +152,7 @@ def plot_speed_comparison(df: pd.DataFrame, output_dir: str):
     )
 
     # Plot
-    ax = pivot_df.plot(kind="bar", figsize=(14, 8))
+    pivot_df.plot(kind="bar", figsize=(14, 8))
     plt.title("Average Generation Speed by Model and Configuration")
     plt.ylabel("Tokens per Second")
     plt.xlabel("Model")
@@ -184,7 +184,7 @@ def plot_memory_usage(df: pd.DataFrame, output_dir: str):
     )
 
     # Plot
-    ax = pivot_df.plot(kind="bar", figsize=(14, 8))
+    pivot_df.plot(kind="bar", figsize=(14, 8))
     plt.title("Average Memory Usage by Model and Quantization")
     plt.ylabel("Memory Usage (MB)")
     plt.xlabel("Model")
@@ -340,7 +340,7 @@ def plot_radar_chart(analysis: dict[str, Any], output_dir: str):
     angles += angles[:1]  # Close the loop
 
     # Create figure
-    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw={"polar": True})
 
     # Add category labels
     plt.xticks(angles[:-1], categories, size=12)
@@ -351,7 +351,7 @@ def plot_radar_chart(analysis: dict[str, Any], output_dir: str):
     plt.ylim(0, 1)
 
     # Plot each model
-    for i, model in enumerate(models):
+    for _i, model in enumerate(models):
         # Get model performance
         perf = analysis["model_performance"][model]
 
@@ -454,12 +454,12 @@ def create_html_report(results_file: str, analysis_file: str, output_dir: str):
     <body>
         <div class="container">
             <h1>Model Evaluation Report</h1>
-            
+
             <div class="section">
                 <h2>Overview</h2>
                 <p>This report summarizes the performance of various language models across different configurations and tasks.</p>
             </div>
-            
+
             <div class="section">
                 <h2>Model Performance Summary</h2>
                 <table>
@@ -491,7 +491,7 @@ def create_html_report(results_file: str, analysis_file: str, output_dir: str):
     html += """
                 </table>
             </div>
-            
+
             <div class="section">
                 <h2>Best Configurations</h2>
                 <table>
@@ -530,7 +530,7 @@ def create_html_report(results_file: str, analysis_file: str, output_dir: str):
     html += """
                 </table>
             </div>
-            
+
             <div class="section">
                 <h2>Task Recommendations</h2>
     """
@@ -542,7 +542,7 @@ def create_html_report(results_file: str, analysis_file: str, output_dir: str):
                 <ol>
         """
 
-        for i, rec in enumerate(recommendations[:3], 1):
+        for _i, rec in enumerate(recommendations[:3], 1):
             config = rec["recommended_config"]
             config_str = (
                 f" (quantization={config['quantization']}, temperature={config['temperature']})"
@@ -559,45 +559,45 @@ def create_html_report(results_file: str, analysis_file: str, output_dir: str):
 
     html += """
             </div>
-            
+
             <div class="section">
                 <h2>Visualizations</h2>
-                
+
                 <div class="visualization">
                     <h3>Model Capabilities Comparison</h3>
                     <img src="model_capabilities_radar.png" alt="Model Capabilities Radar Chart">
                 </div>
-                
+
                 <div class="visualization">
                     <h3>Speed Comparison</h3>
                     <img src="speed_comparison.png" alt="Speed Comparison">
                 </div>
-                
+
                 <div class="visualization">
                     <h3>Memory Usage</h3>
                     <img src="memory_usage.png" alt="Memory Usage">
                 </div>
-                
+
                 <div class="visualization">
                     <h3>Temperature Effect on Speed</h3>
                     <img src="temperature_effect_speed.png" alt="Temperature Effect on Speed">
                 </div>
-                
+
                 <div class="visualization">
                     <h3>Temperature Effect on Creativity</h3>
                     <img src="temperature_effect_creativity.png" alt="Temperature Effect on Creativity">
                 </div>
-                
+
                 <div class="visualization">
                     <h3>Structured Output Success Rate</h3>
                     <img src="structured_output_success.png" alt="Structured Output Success Rate">
                 </div>
-                
+
                 <div class="visualization">
                     <h3>Tool Mentions</h3>
                     <img src="tool_mentions.png" alt="Tool Mentions">
                 </div>
-                
+
                 <div class="visualization">
                     <h3>Reasoning Score</h3>
                     <img src="reasoning_score.png" alt="Reasoning Score">

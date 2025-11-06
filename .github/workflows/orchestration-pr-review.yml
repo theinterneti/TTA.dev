@@ -20,28 +20,28 @@ jobs:
   orchestrated-review:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Fetch full history for better diff analysis
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-      
+
       - name: Install dependencies
         run: |
           cd packages/tta-dev-primitives
           uv sync --extra integrations
-      
+
       - name: Run orchestrated PR review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,17 +54,11 @@ jobs:
           uv run python examples/orchestration_pr_review.py \
             --repo ${{ github.repository }} \
             --pr ${{ github.event.pull_request.number }}
-      
-      - name: Upload review metrics
+
+            - name: Upload PR review
         if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: pr-review-metrics
-          path: |
-            *.log
-            metrics.json
-          retention-days: 7
-      
+        uses: actions/upload-artifact@v4
+
       - name: Comment on PR (if review generated)
         if: success()
         uses: actions/github-script@v7
@@ -74,25 +68,24 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            
+
             // In production, this would read the review content from the workflow output
             // For now, we post a summary comment
             const comment = `## 🤖 Orchestrated PR Review
-            
+
             This PR has been automatically reviewed using multi-model orchestration:
             - **Orchestrator:** Claude Sonnet 4.5 (analysis + validation)
             - **Executor:** Gemini Pro (detailed review)
             - **Cost Savings:** ~85% vs. all-Claude approach
-            
+
             ✅ Review completed successfully.
-            
+
             _Powered by [TTA.dev Multi-Model Orchestration](https://github.com/theinterneti/TTA.dev)_
             `;
-            
+
             await github.rest.issues.createComment({
               owner,
               repo,
               issue_number: prNumber,
               body: comment,
             });
-

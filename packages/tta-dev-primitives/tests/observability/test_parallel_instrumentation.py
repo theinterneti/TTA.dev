@@ -39,7 +39,7 @@ class FailingPrimitive(InstrumentedPrimitive[dict, dict]):
 
 
 @pytest.mark.asyncio
-async def test_parallel_logs_workflow_start_and_completion():
+async def test_parallel_logs_workflow_start_and_completion() -> None:
     """Verify that ParallelPrimitive logs workflow start and completion."""
     workflow = ParallelPrimitive([SimplePrimitive(), SimplePrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
@@ -53,7 +53,7 @@ async def test_parallel_logs_workflow_start_and_completion():
 
 
 @pytest.mark.asyncio
-async def test_parallel_logs_branch_execution():
+async def test_parallel_logs_branch_execution() -> None:
     """Verify that ParallelPrimitive logs each branch (verified via checkpoints)."""
     workflow = ParallelPrimitive([SimplePrimitive(), CounterPrimitive(), SimplePrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
@@ -71,7 +71,7 @@ async def test_parallel_logs_branch_execution():
 
 
 @pytest.mark.asyncio
-async def test_parallel_records_branch_checkpoints():
+async def test_parallel_records_branch_checkpoints() -> None:
     """Verify that ParallelPrimitive records checkpoints for each branch."""
     workflow = ParallelPrimitive([SimplePrimitive(), SimplePrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
@@ -91,7 +91,7 @@ async def test_parallel_records_branch_checkpoints():
 
 
 @pytest.mark.asyncio
-async def test_parallel_records_branch_metrics():
+async def test_parallel_records_branch_metrics() -> None:
     """Verify that ParallelPrimitive records per-branch metrics."""
     from tta_dev_primitives.observability.enhanced_collector import (
         get_enhanced_metrics_collector,
@@ -119,7 +119,7 @@ async def test_parallel_records_branch_metrics():
 
 
 @pytest.mark.asyncio
-async def test_parallel_creates_branch_spans():
+async def test_parallel_creates_branch_spans() -> None:
     """Verify that ParallelPrimitive attempts to create spans when tracing available."""
     # Test that the code path for span creation is exercised
     # We verify this indirectly through successful execution
@@ -139,7 +139,7 @@ async def test_parallel_creates_branch_spans():
 
 
 @pytest.mark.asyncio
-async def test_parallel_span_attributes():
+async def test_parallel_span_attributes() -> None:
     """Verify that branch execution includes proper attribute tracking."""
     # Test that execution completes with proper tracking
     workflow = ParallelPrimitive([SimplePrimitive(), CounterPrimitive()])
@@ -166,7 +166,7 @@ async def test_parallel_span_attributes():
 
 
 @pytest.mark.asyncio
-async def test_parallel_error_handling_with_spans():
+async def test_parallel_error_handling_with_spans() -> None:
     """Verify that errors in branches are properly propagated."""
     workflow = ParallelPrimitive([SimplePrimitive(), FailingPrimitive()])
     context = WorkflowContext(workflow_id="test-workflow")
@@ -182,7 +182,7 @@ async def test_parallel_error_handling_with_spans():
 
 
 @pytest.mark.asyncio
-async def test_parallel_preserves_existing_functionality():
+async def test_parallel_preserves_existing_functionality() -> None:
     """Verify that Phase 2 changes don't break existing functionality."""
     # Test basic execution
     counter1 = CounterPrimitive()
@@ -211,7 +211,7 @@ async def test_parallel_preserves_existing_functionality():
 
 
 @pytest.mark.asyncio
-async def test_parallel_concurrency_tracking():
+async def test_parallel_concurrency_tracking() -> None:
     """Verify that ParallelPrimitive tracks concurrent execution."""
     import asyncio
 

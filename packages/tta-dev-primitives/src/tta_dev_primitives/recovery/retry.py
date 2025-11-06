@@ -280,4 +280,6 @@ class RetryPrimitive(WorkflowPrimitive[Any, Any]):
                         success=False,
                     )
 
-        raise last_error
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("Retry failed without capturing an error")
