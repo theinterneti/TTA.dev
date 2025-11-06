@@ -134,8 +134,10 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
 
         response = query.execute()
         return SupabaseResponse(
-            data=response.data, count=len(response.data), status="success"
-        )  # type: ignore[arg-type]  # Supabase JSON type variance
+            data=response.data,  # type: ignore[arg-type]  # Supabase JSON type variance
+            count=len(response.data),
+            status="success",
+        )
 
     async def _execute_insert(self, input_data: SupabaseRequest) -> SupabaseResponse:
         """Execute INSERT operation."""
@@ -144,8 +146,10 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
 
         response = self.client.table(input_data.table).insert(input_data.data).execute()
         return SupabaseResponse(
-            data=response.data, count=len(response.data), status="success"
-        )  # type: ignore[arg-type]  # Supabase JSON type variance
+            data=response.data,  # type: ignore[arg-type]  # Supabase JSON type variance
+            count=len(response.data),
+            status="success",
+        )
 
     async def _execute_update(self, input_data: SupabaseRequest) -> SupabaseResponse:
         """Execute UPDATE operation."""
@@ -165,8 +169,10 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
 
         response = query.execute()
         return SupabaseResponse(
-            data=response.data, count=len(response.data), status="success"
-        )  # type: ignore[arg-type]  # Supabase JSON type variance
+            data=response.data,  # type: ignore[arg-type]  # Supabase JSON type variance
+            count=len(response.data),
+            status="success",
+        )
 
     async def _execute_delete(self, input_data: SupabaseRequest) -> SupabaseResponse:
         """Execute DELETE operation."""
@@ -183,5 +189,7 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
 
         response = query.execute()
         return SupabaseResponse(
-            data=response.data, count=len(response.data), status="success"
-        )  # type: ignore[arg-type]  # Supabase JSON type variance
+            data=response.data,  # type: ignore[arg-type]  # Supabase JSON type variance
+            count=len(response.data),
+            status="success",
+        )
