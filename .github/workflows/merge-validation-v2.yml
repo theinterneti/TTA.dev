@@ -12,7 +12,7 @@ on:
 jobs:
   quality-checks:
     name: Quality Checks
-    uses: ./.github/workflows/reusable/quality-checks.yml
+    uses: ./.github/workflows/reusable-quality-checks.yml
     with:
       python-version: '3.11'
       check-format: true
@@ -22,7 +22,7 @@ jobs:
 
   comprehensive-tests:
     name: Comprehensive Tests
-    uses: ./.github/workflows/reusable/run-tests.yml
+    uses: ./.github/workflows/reusable-run-tests.yml
     with:
       test-type: 'unit'
       python-versions: '["3.11", "3.12"]'
@@ -34,7 +34,7 @@ jobs:
   integration-tests:
     name: Integration Tests
     needs: comprehensive-tests
-    uses: ./.github/workflows/reusable/run-tests.yml
+    uses: ./.github/workflows/reusable-run-tests.yml
     with:
       test-type: 'integration'
       python-versions: '["3.11"]'
@@ -45,7 +45,7 @@ jobs:
   build-primitives:
     name: Build tta-dev-primitives
     needs: [quality-checks, comprehensive-tests]
-    uses: ./.github/workflows/reusable/build-package.yml
+    uses: ./.github/workflows/reusable-build-package.yml
     with:
       package-path: 'packages/tta-dev-primitives'
       python-version: '3.11'
@@ -69,7 +69,7 @@ jobs:
           echo "| Integration Tests | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Package | ${{ needs.build-primitives.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check if all required jobs passed
           if [ "${{ needs.quality-checks.result }}" == "success" ] && \
              [ "${{ needs.comprehensive-tests.result }}" == "success" ] && \
