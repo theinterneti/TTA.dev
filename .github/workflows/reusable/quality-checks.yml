@@ -1,0 +1,124 @@
+name: Quality Checks
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: 'Python version to use'
+        required: false
+        default: '3.11'
+        type: string
+      check-format:
+        description: 'Run ruff format check'
+        required: false
+        default: true
+        type: boolean
+      check-lint:
+        description: 'Run ruff lint check'
+        required: false
+        default: true
+        type: boolean
+      check-types:
+        description: 'Run pyright type check'
+        required: false
+        default: true
+        type: boolean
+      fail-on-type-errors:
+        description: 'Fail workflow if type errors found'
+        required: false
+        default: false
+        type: boolean
+    outputs:
+      format-result:
+        description: 'Format check result (pass/fail)'
+        value: ${{ jobs.quality.outputs.format-result }}
+      lint-result:
+        description: 'Lint check result (pass/fail)'
+        value: ${{ jobs.quality.outputs.lint-result }}
+      type-result:
+        description: 'Type check result (pass/fail)'
+        value: ${{ jobs.quality.outputs.type-result }}
+      type-error-count:
+        description: 'Number of type errors found'
+        value: ${{ jobs.quality.outputs.type-errors }}
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    outputs:
+      format-result: ${{ steps.format.outcome }}
+      lint-result: ${{ steps.lint.outcome }}
+      type-result: ${{ steps.typecheck.outcome }}
+      type-errors: ${{ steps.typecheck-count.outputs.count }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup TTA environment
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Format check
+        id: format
+        if: inputs.check-format
+        run: |
+          echo "Running ruff format check..."
+          uv run ruff format --check .
+          echo "result=pass" >> $GITHUB_OUTPUT
+
+      - name: Lint check
+        id: lint
+        if: inputs.check-lint
+        run: |
+          echo "Running ruff lint check..."
+          uv run ruff check .
+          echo "result=pass" >> $GITHUB_OUTPUT
+
+      - name: Type check
+        id: typecheck
+        if: inputs.check-types
+        continue-on-error: ${{ !inputs.fail-on-type-errors }}
+        run: |
+          echo "Running pyright type check..."
+          uv run pyright packages/ 2>&1 | tee typecheck-output.txt
+          echo "result=pass" >> $GITHUB_OUTPUT
+
+      - name: Count type errors
+        id: typecheck-count
+        if: inputs.check-types
+        run: |
+          # Extract error count from pyright output
+          if [ -f typecheck-output.txt ]; then
+            ERROR_COUNT=$(grep -oP '\d+(?= errors?)' typecheck-output.txt | tail -1 || echo "0")
+            echo "count=$ERROR_COUNT" >> $GITHUB_OUTPUT
+            echo "Found $ERROR_COUNT type errors"
+          else
+            echo "count=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload type check results
+        if: inputs.check-types && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-results-${{ inputs.python-version }}
+          path: typecheck-output.txt
+          retention-days: 7
+
+      - name: Quality checks summary
+        if: always()
+        run: |
+          echo "## Quality Checks Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Format | ${{ steps.format.outcome || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ steps.lint.outcome || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Type Check | ${{ steps.typecheck.outcome || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ steps.typecheck-count.outputs.count }}" ]; then
+            echo "| Type Errors | ${{ steps.typecheck-count.outputs.count }} |" >> $GITHUB_STEP_SUMMARY
+          fi
