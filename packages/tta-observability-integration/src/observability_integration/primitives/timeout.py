@@ -118,7 +118,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
             self._timeout_rate_gauge = meter.create_observable_gauge(
                 name="timeout_rate",
                 description="Timeout failure rate (0.0-1.0)",
-                callbacks=[
+                callbacks=[  # type: ignore[arg-type]  # OpenTelemetry CallbackT variance
                     lambda _: [(get_timeout_rate(), {"operation": self.operation_name})]
                 ],
             )
