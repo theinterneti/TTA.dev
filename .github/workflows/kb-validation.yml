@@ -5,12 +5,18 @@ permissions:
 
 on:
   pull_request:
+    branches:
+      - main
+      - 'kb/**'
     paths:
       - 'logseq/**'
       - 'packages/tta-kb-automation/**'
       - 'scripts/kb-*.sh'
+      - '.github/workflows/kb-validation.yml'
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - 'kb/**'
     paths:
       - 'logseq/**'
       - 'packages/tta-kb-automation/**'
