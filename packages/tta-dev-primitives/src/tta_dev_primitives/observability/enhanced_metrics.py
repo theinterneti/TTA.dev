@@ -80,9 +80,7 @@ class SLOConfig:
     name: str
     target: float  # Target compliance (e.g., 0.99 for 99%)
     threshold_ms: float | None = None  # Latency threshold in ms
-    error_rate_threshold: float | None = (
-        None  # Error rate threshold (e.g., 0.01 for 1%)
-    )
+    error_rate_threshold: float | None = None  # Error rate threshold (e.g., 0.01 for 1%)
     window_seconds: int = DEFAULT_SLO_WINDOW_SECONDS
 
 
@@ -252,9 +250,7 @@ class CostMetrics:
     def record_cost(self, cost: float, operation: str = "default") -> None:
         """Record a cost."""
         self.total_cost += cost
-        self.cost_by_operation[operation] = (
-            self.cost_by_operation.get(operation, 0.0) + cost
-        )
+        self.cost_by_operation[operation] = self.cost_by_operation.get(operation, 0.0) + cost
 
     def record_savings(self, savings: float) -> None:
         """Record cost savings (e.g., from cache hits)."""

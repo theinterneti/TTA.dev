@@ -166,9 +166,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
                 self._successes_counter.add(1, {"operation": self.operation_name})
 
             if self._execution_histogram:
-                self._execution_histogram.record(
-                    duration, {"operation": self.operation_name}
-                )
+                self._execution_histogram.record(duration, {"operation": self.operation_name})
 
             # Warn if operation completed but was slow (within grace period)
             if duration > self.timeout_seconds:
@@ -195,9 +193,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
                 self._failures_counter.add(1, {"operation": self.operation_name})
 
             if self._execution_histogram:
-                self._execution_histogram.record(
-                    duration, {"operation": self.operation_name}
-                )
+                self._execution_histogram.record(duration, {"operation": self.operation_name})
 
             logger.error(
                 f"'{self.operation_name}' TIMEOUT after {duration:.2f}s "
@@ -221,9 +217,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
                 self._successes_counter.add(1, {"operation": self.operation_name})
 
             if self._execution_histogram:
-                self._execution_histogram.record(
-                    duration, {"operation": self.operation_name}
-                )
+                self._execution_histogram.record(duration, {"operation": self.operation_name})
 
             # Re-raise the original exception
             raise

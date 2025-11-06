@@ -127,9 +127,7 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
                 name="cache_hit_rate",
                 description="Cache hit rate (0.0-1.0)",
                 callbacks=[  # type: ignore  # OpenTelemetry CallbackT variance
-                    lambda options: [
-                        (get_hit_rate(), {"operation": self.operation_name})
-                    ]
+                    lambda options: [(get_hit_rate(), {"operation": self.operation_name})]
                 ],
             )
         else:
@@ -255,9 +253,7 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
             if self._misses_counter:
                 self._misses_counter.add(1, {"operation": self.operation_name})
 
-            logger.debug(
-                f"Cache MISS for '{self.operation_name}' (key: {cache_key[:50]}...)"
-            )
+            logger.debug(f"Cache MISS for '{self.operation_name}' (key: {cache_key[:50]}...)")
 
         # Execute wrapped primitive
         result = await self.primitive.execute(input_data, context)

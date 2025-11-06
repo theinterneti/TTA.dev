@@ -159,9 +159,7 @@ def calculate_delay(attempt: int, config: RetryConfig) -> float:
     import random
 
     # Exponential backoff
-    delay = min(
-        config.base_delay * (config.exponential_base**attempt), config.max_delay
-    )
+    delay = min(config.base_delay * (config.exponential_base**attempt), config.max_delay)
 
     # Add jitter to prevent thundering herd
     if config.jitter:
@@ -227,9 +225,7 @@ def with_retry(
 
             # All retries exhausted
             if fallback:
-                logger.info(
-                    f"{func.__name__} using fallback after {config.max_retries} retries"
-                )
+                logger.info(f"{func.__name__} using fallback after {config.max_retries} retries")
                 return fallback(*args, **kwargs)
 
             # Re-raise the last error
@@ -294,9 +290,7 @@ def with_retry_async(
 
             # All retries exhausted
             if fallback:
-                logger.info(
-                    f"{func.__name__} using fallback after {config.max_retries} retries"
-                )
+                logger.info(f"{func.__name__} using fallback after {config.max_retries} retries")
                 return await fallback(*args, **kwargs)  # type: ignore[misc]
 
             # Re-raise the last error
@@ -360,9 +354,7 @@ class CircuitBreaker:
             if self._should_attempt_reset():
                 self.state = "HALF_OPEN"
             else:
-                raise Exception(
-                    f"Circuit breaker is OPEN (failures: {self.failure_count})"
-                )
+                raise Exception(f"Circuit breaker is OPEN (failures: {self.failure_count})")
 
         try:
             result = func(*args, **kwargs)
@@ -390,6 +382,4 @@ class CircuitBreaker:
 
         if self.failure_count >= self.failure_threshold:
             self.state = "OPEN"
-            logger.warning(
-                f"Circuit breaker opened after {self.failure_count} failures"
-            )
+            logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
