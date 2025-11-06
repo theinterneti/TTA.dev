@@ -39,7 +39,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       artifact: ${{ steps.artifact.outputs.name }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
             echo "❌ pyproject.toml not found!"
             exit 1
           fi
-          
+
           # Check required fields
           for field in "name" "version" "description"; do
             if ! grep -q "^$field = " pyproject.toml; then
@@ -75,7 +75,7 @@ jobs:
               exit 1
             fi
           done
-          
+
           echo "✅ pyproject.toml validation passed"
 
       - name: Build package

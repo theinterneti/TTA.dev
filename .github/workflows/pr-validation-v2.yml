@@ -16,7 +16,7 @@ concurrency:
 jobs:
   quality-checks:
     name: Quality Checks
-    uses: ./.github/workflows/reusable/quality-checks.yml
+    uses: ./.github/workflows/reusable-quality-checks.yml
     with:
       python-version: '3.11'
       check-format: true
@@ -26,7 +26,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    uses: ./.github/workflows/reusable/run-tests.yml
+    uses: ./.github/workflows/reusable-run-tests.yml
     with:
       test-type: 'unit'
       python-versions: '["3.11"]'
@@ -53,7 +53,7 @@ jobs:
           echo "### Unit Tests" >> $GITHUB_STEP_SUMMARY
           echo "- **Result:** ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Overall status
           if [ "${{ needs.quality-checks.result }}" == "success" ] && [ "${{ needs.unit-tests.result }}" == "success" ]; then
             echo "### ✅ All Checks Passed!" >> $GITHUB_STEP_SUMMARY
