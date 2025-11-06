@@ -1,0 +1,125 @@
+name: Build Package
+
+on:
+  workflow_call:
+    inputs:
+      package-path:
+        description: 'Path to package (e.g., packages/tta-dev-primitives)'
+        required: true
+        type: string
+      python-version:
+        description: 'Python version to use'
+        required: false
+        default: '3.11'
+        type: string
+      upload-artifact:
+        description: 'Upload built package as artifact'
+        required: false
+        default: true
+        type: boolean
+      validate-manifest:
+        description: 'Validate package manifest'
+        required: false
+        default: true
+        type: boolean
+    outputs:
+      build-result:
+        description: 'Build result (success/failure)'
+        value: ${{ jobs.build.result }}
+      package-version:
+        description: 'Package version built'
+        value: ${{ jobs.build.outputs.version }}
+      artifact-name:
+        description: 'Name of uploaded artifact'
+        value: ${{ jobs.build.outputs.artifact }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      artifact: ${{ steps.artifact.outputs.name }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup TTA environment
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Extract package version
+        id: version
+        working-directory: ${{ inputs.package-path }}
+        run: |
+          # Extract version from pyproject.toml
+          VERSION=$(grep -oP '(?<=^version = ")[^"]+' pyproject.toml || echo "0.0.0")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Package version: $VERSION"
+
+      - name: Validate pyproject.toml
+        if: inputs.validate-manifest
+        working-directory: ${{ inputs.package-path }}
+        run: |
+          echo "Validating pyproject.toml..."
+          if [ ! -f "pyproject.toml" ]; then
+            echo "❌ pyproject.toml not found!"
+            exit 1
+          fi
+          
+          # Check required fields
+          for field in "name" "version" "description"; do
+            if ! grep -q "^$field = " pyproject.toml; then
+              echo "❌ Missing required field: $field"
+              exit 1
+            fi
+          done
+          
+          echo "✅ pyproject.toml validation passed"
+
+      - name: Build package
+        working-directory: ${{ inputs.package-path }}
+        run: |
+          echo "Building package..."
+          uv build
+          echo "✅ Package built successfully"
+
+      - name: List build artifacts
+        working-directory: ${{ inputs.package-path }}
+        run: |
+          echo "Build artifacts:"
+          ls -lh dist/
+
+      - name: Set artifact name
+        id: artifact
+        run: |
+          PACKAGE_NAME=$(basename ${{ inputs.package-path }})
+          ARTIFACT_NAME="${PACKAGE_NAME}-${{ steps.version.outputs.version }}"
+          echo "name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+          echo "📦 Artifact name: $ARTIFACT_NAME"
+
+      - name: Upload build artifacts
+        if: inputs.upload-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: ${{ inputs.package-path }}/dist/
+          retention-days: 30
+
+      - name: Build summary
+        if: always()
+        run: |
+          echo "## Package Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package Path:** \`${{ inputs.package-path }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Package Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Python Version:** ${{ inputs.python-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Artifact Name:** ${{ steps.artifact.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -d "${{ inputs.package-path }}/dist" ]; then
+            echo "### Build Artifacts:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            ls -lh ${{ inputs.package-path }}/dist/ >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
