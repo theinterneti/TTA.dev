@@ -154,17 +154,11 @@ class ExtractTODOs(InstrumentedPrimitive[dict, dict]):
                         if include_context:
                             start_idx = max(0, i - 1 - context_lines)
                             end_idx = min(len(lines), i + context_lines)
-                            context_before = [
-                                lines[j].rstrip() for j in range(start_idx, i - 1)
-                            ]
-                            context_after = [
-                                lines[j].rstrip() for j in range(i, end_idx)
-                            ]
+                            context_before = [lines[j].rstrip() for j in range(start_idx, i - 1)]
+                            context_after = [lines[j].rstrip() for j in range(i, end_idx)]
 
                         # Infer category from file path and context
-                        category = self._infer_category(
-                            file_path, todo_text, context_before
-                        )
+                        category = self._infer_category(file_path, todo_text, context_before)
 
                         todos.append(
                             {
@@ -189,9 +183,7 @@ class ExtractTODOs(InstrumentedPrimitive[dict, dict]):
             "files_with_todos": len(files_with_todos),
         }
 
-    def _infer_category(
-        self, file_path: str, todo_text: str, context: list[str]
-    ) -> str:
+    def _infer_category(self, file_path: str, todo_text: str, context: list[str]) -> str:
         """Infer TODO category from file path and content."""
         file_lower = file_path.lower()
         todo_lower = todo_text.lower()
@@ -300,13 +292,9 @@ class ParseDocstrings(InstrumentedPrimitive[dict, dict]):
 
                 # Walk AST for classes and functions
                 for node in ast.walk(tree):
-                    if isinstance(
-                        node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
-                    ):
+                    if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
                         doc = ast.get_docstring(node)
-                        node_type = (
-                            "class" if isinstance(node, ast.ClassDef) else "function"
-                        )
+                        node_type = "class" if isinstance(node, ast.ClassDef) else "function"
 
                         if doc:
                             doc_entry = self._process_docstring(
@@ -401,8 +389,7 @@ class ParseDocstrings(InstrumentedPrimitive[dict, dict]):
                     elif not stripped and current_example:
                         # Empty line ends >>> style example
                         if any(
-                            code_line.strip().startswith(">>>")
-                            for code_line in current_example
+                            code_line.strip().startswith(">>>") for code_line in current_example
                         ):
                             examples.append("\n".join(current_example))
                             current_example = []
@@ -499,11 +486,7 @@ class AnalyzeCodeStructure(InstrumentedPrimitive[dict, dict]):
                 tree = ast.parse(source, filename=file_path)
 
                 # Extract classes
-                classes = [
-                    node.name
-                    for node in ast.walk(tree)
-                    if isinstance(node, ast.ClassDef)
-                ]
+                classes = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
 
                 # Extract functions
                 functions = [
@@ -541,9 +524,7 @@ class AnalyzeCodeStructure(InstrumentedPrimitive[dict, dict]):
                     "classes": classes,
                     "functions": functions,
                     "imports": imports if include_imports else [],
-                    "dependencies": list(set(dependencies))
-                    if include_dependencies
-                    else [],
+                    "dependencies": list(set(dependencies)) if include_dependencies else [],
                     "loc": loc,
                 }
 

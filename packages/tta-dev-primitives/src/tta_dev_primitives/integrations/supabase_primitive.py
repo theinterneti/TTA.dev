@@ -14,9 +14,7 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class SupabaseRequest(BaseModel):
     """Request model for Supabase primitive."""
 
-    operation: str = Field(
-        description="Database operation: 'select', 'insert', 'update', 'delete'"
-    )
+    operation: str = Field(description="Database operation: 'select', 'insert', 'update', 'delete'")
     table: str = Field(description="Table name to operate on")
     data: dict[str, Any] | list[dict[str, Any]] | None = Field(
         default=None, description="Data for insert/update operations"
@@ -24,17 +22,13 @@ class SupabaseRequest(BaseModel):
     filters: dict[str, Any] | None = Field(
         default=None, description="Filter conditions for select/update/delete"
     )
-    columns: str | None = Field(
-        default=None, description="Columns to select (default: '*')"
-    )
+    columns: str | None = Field(default=None, description="Columns to select (default: '*')")
 
 
 class SupabaseResponse(BaseModel):
     """Response model for Supabase primitive."""
 
-    data: list[dict[str, Any]] | dict[str, Any] | None = Field(
-        description="Query result data"
-    )
+    data: list[dict[str, Any]] | dict[str, Any] | None = Field(description="Query result data")
     count: int | None = Field(default=None, description="Number of rows affected")
     status: str = Field(description="Operation status")
 

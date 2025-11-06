@@ -11,9 +11,7 @@ from .setup import get_meter, get_tracer, is_apm_enabled
 logger = logging.getLogger(__name__)
 
 
-def trace_workflow(
-    span_name: str | None = None, attributes: dict[str, Any] | None = None
-):
+def trace_workflow(span_name: str | None = None, attributes: dict[str, Any] | None = None):
     """Decorator to trace workflow function execution.
 
     Args:
@@ -120,13 +118,9 @@ def track_metric(
 
             # Create appropriate metric instrument
             if metric_type == "counter":
-                instrument = meter.create_counter(
-                    metric_name, description=description, unit=unit
-                )
+                instrument = meter.create_counter(metric_name, description=description, unit=unit)
             elif metric_type == "histogram":
-                instrument = meter.create_histogram(
-                    metric_name, description=description, unit=unit
-                )
+                instrument = meter.create_histogram(metric_name, description=description, unit=unit)
             else:
                 logger.warning(f"Unknown metric type: {metric_type}")
                 return await func(*args, **kwargs)
@@ -169,13 +163,9 @@ def track_metric(
 
             # Create appropriate metric instrument
             if metric_type == "counter":
-                instrument = meter.create_counter(
-                    metric_name, description=description, unit=unit
-                )
+                instrument = meter.create_counter(metric_name, description=description, unit=unit)
             elif metric_type == "histogram":
-                instrument = meter.create_histogram(
-                    metric_name, description=description, unit=unit
-                )
+                instrument = meter.create_histogram(metric_name, description=description, unit=unit)
             else:
                 logger.warning(f"Unknown metric type: {metric_type}")
                 return func(*args, **kwargs)

@@ -123,9 +123,7 @@ def initialize_observability(
         if enable_prometheus:
             # Prometheus metrics reader
             prometheus_reader = PrometheusMetricReader()
-            _meter_provider = MeterProvider(
-                resource=resource, metric_readers=[prometheus_reader]
-            )
+            _meter_provider = MeterProvider(resource=resource, metric_readers=[prometheus_reader])
             metrics.set_meter_provider(_meter_provider)
             logger.info(
                 f"Prometheus metrics enabled on port {prometheus_port}. "

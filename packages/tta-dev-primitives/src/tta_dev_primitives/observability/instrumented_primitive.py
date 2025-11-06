@@ -66,9 +66,7 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
         """
         self.name = name or self.__class__.__name__
         self._tracer = (
-            trace.get_tracer(__name__)
-            if TRACING_AVAILABLE and trace is not None
-            else None
+            trace.get_tracer(__name__) if TRACING_AVAILABLE and trace is not None else None
         )
 
     async def execute(self, input_data: T, context: WorkflowContext) -> U:
@@ -109,9 +107,7 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
         try:
             if self._tracer and TRACING_AVAILABLE:
                 # Create span linked to context
-                with create_linked_span(
-                    self._tracer, f"primitive.{self.name}", context
-                ) as span:
+                with create_linked_span(self._tracer, f"primitive.{self.name}", context) as span:
                     # Add context attributes to span
                     for key, value in context.to_otel_context().items():
                         span.set_attribute(key, value)
@@ -145,9 +141,7 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
 
             # Calculate duration and record metrics
             duration_ms = (time.time() - start_time) * 1000
-            metrics_collector.record_execution(
-                self.name, duration_ms=duration_ms, success=success
-            )
+            metrics_collector.record_execution(self.name, duration_ms=duration_ms, success=success)
             metrics_collector.end_request(self.name)
 
     @abstractmethod

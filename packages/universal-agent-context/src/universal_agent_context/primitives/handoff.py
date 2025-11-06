@@ -71,9 +71,7 @@ class AgentHandoffPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
         self.preserve_context = preserve_context
         self.handoff_callback = handoff_callback
 
-    async def execute(
-        self, input_data: dict[str, Any], context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
         """Execute agent handoff.
 
         Args:
