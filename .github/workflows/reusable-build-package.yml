@@ -79,10 +79,10 @@ jobs:
           echo "✅ pyproject.toml validation passed"
 
       - name: Build package
-        working-directory: ${{ inputs.package-path }}
         run: |
           echo "Building package..."
-          uv build
+          cd ${{ inputs.package-path }}
+          uv build --out-dir dist
           echo "✅ Package built successfully"
 
       - name: List build artifacts
