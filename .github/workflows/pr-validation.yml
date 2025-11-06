@@ -38,7 +38,7 @@ jobs:
         run: uv run ruff check .
 
       - name: Type check
-        run: uvx pyright packages/
+        run: uv run pyright packages/
 
       - name: Run unit tests
         run: uv run pytest -v -m "not integration and not slow" --maxfail=5
