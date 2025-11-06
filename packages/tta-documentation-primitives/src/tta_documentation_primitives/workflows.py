@@ -6,7 +6,10 @@ operators to create production-ready documentation pipelines.
 
 from pathlib import Path
 
-from tta_dev_primitives import ParallelPrimitive, SequentialPrimitive
+from tta_dev_primitives import (
+    ParallelPrimitive,
+    WorkflowPrimitive,
+)
 from tta_dev_primitives.performance import CachePrimitive
 from tta_dev_primitives.recovery import (
     FallbackPrimitive,
@@ -25,7 +28,7 @@ from .primitives import (
 
 def create_basic_sync_workflow(
     config: TTADocsConfig | None = None,
-) -> SequentialPrimitive:
+) -> WorkflowPrimitive[Path, Path]:
     """Create basic documentation sync workflow.
 
     Workflow: Markdown → Logseq Conversion → Sync to Disk
@@ -59,7 +62,7 @@ def create_basic_sync_workflow(
 
 def create_ai_enhanced_sync_workflow(
     config: TTADocsConfig | None = None,
-) -> SequentialPrimitive:
+) -> WorkflowPrimitive[Path, Path]:
     """Create AI-enhanced documentation sync workflow with fallback.
 
     Workflow:
@@ -102,7 +105,9 @@ def create_ai_enhanced_sync_workflow(
     if config.ai.fallback:
         fallback_extractor = AIMetadataExtractorPrimitive(
             provider="ollama",
-            model=config.ai.fallback.split(":")[-1],  # Extract model from "ollama:model"
+            model=config.ai.fallback.split(":")[
+                -1
+            ],  # Extract model from "ollama:model"
         )
 
         # Use fallback pattern
@@ -121,7 +126,7 @@ def create_ai_enhanced_sync_workflow(
 
 def create_production_sync_workflow(
     config: TTADocsConfig | None = None,
-) -> SequentialPrimitive:
+) -> WorkflowPrimitive[Path, Path]:
     """Create production-ready sync workflow with all safeguards.
 
     Workflow:
@@ -225,7 +230,9 @@ def create_batch_sync_workflow(
         config = load_config()
 
     # Create individual sync workflows
-    sync_workflows = [create_production_sync_workflow(config) for _ in range(max_parallel)]
+    sync_workflows = [
+        create_production_sync_workflow(config) for _ in range(max_parallel)
+    ]
 
     # Compose with | operator (parallel)
     return ParallelPrimitive(primitives=sync_workflows)
