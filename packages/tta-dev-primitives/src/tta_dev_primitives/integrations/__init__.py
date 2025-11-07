@@ -3,12 +3,17 @@
 This module provides TTA.dev primitives that wrap popular external services:
 - LLM providers (OpenAI, Anthropic, Ollama, Google AI Studio, Groq, OpenRouter, Hugging Face, Together.ai)
 - Databases (Supabase, SQLite)
+- Code Execution (E2B Sandboxes)
 
 All integration primitives follow the WorkflowPrimitive interface for consistent
 composition and observability.
 """
 
 from tta_dev_primitives.integrations.anthropic_primitive import AnthropicPrimitive
+from tta_dev_primitives.integrations.e2b_primitive import (
+    CodeExecutionPrimitive,
+    E2BPrimitive,
+)
 from tta_dev_primitives.integrations.google_ai_studio_primitive import (
     GoogleAIStudioPrimitive,
 )
@@ -37,4 +42,6 @@ __all__ = [
     "TogetherAIPrimitive",
     "SupabasePrimitive",
     "SQLitePrimitive",
+    "CodeExecutionPrimitive",
+    "E2BPrimitive",
 ]

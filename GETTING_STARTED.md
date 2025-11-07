@@ -287,6 +287,20 @@ async def test_my_workflow():
 
 ## Next Steps
 
+### 🎓 Structured Learning
+
+**Learning Paths:** [`TTA.dev Learning Paths`](logseq/pages/TTA.dev___Learning%20Paths.md) - Follow structured sequences from beginner to expert
+
+**Interactive Learning:** [`Learning TTA Primitives`](logseq/pages/Learning%20TTA%20Primitives.md) - Flashcards and exercises for mastering concepts
+
+**Knowledge Base:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - Navigate between documentation and knowledge systems
+
+### 📋 Task Management
+
+**TODO System:** [`TODO Management System`](logseq/pages/TODO%20Management%20System.md) - Central dashboard for all project tasks
+
+Add tasks to today's journal: `logseq/journals/YYYY_MM_DD.md`
+
 ### Learn More
 
 - 📚 [Architecture Overview](docs/architecture/Overview.md) - Understand the design

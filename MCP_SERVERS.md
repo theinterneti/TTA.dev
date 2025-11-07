@@ -24,16 +24,16 @@
 
 ### Context-Specific Availability
 
-| MCP Feature | VS Code Extension (LOCAL) | Coding Agent (CLOUD) | GitHub CLI |
-|-------------|---------------------------|----------------------|------------|
-| Context7 | ✅ Yes | ❌ No | ❌ No |
-| AI Toolkit | ✅ Yes | ❌ No | ❌ No |
-| Grafana | ✅ Yes | ❌ No | ❌ No |
-| Pylance | ✅ Yes | ❌ No | ❌ No |
-| Database Client | ✅ Yes | ❌ No | ❌ No |
-| GitHub PR Tools | ✅ Yes | ⚠️ Different | ❌ No |
-| Sift (Docker) | ✅ Yes | ❌ No | ❌ No |
-| LogSeq | ✅ Yes | ❌ No | ❌ No |
+| MCP Feature | VS Code Extension (LOCAL) | Cline (LOCAL) | Coding Agent (CLOUD) | GitHub CLI |
+|-------------|---------------------------|---------------|----------------------|------------|
+| Context7 | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| AI Toolkit | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| Grafana | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| Pylance | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| Database Client | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| GitHub PR Tools | ✅ Yes | ✅ Yes | ⚠️ Different | ❌ No |
+| Sift (Docker) | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| LogSeq | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
 
 **Why MCP isn't available in GitHub Actions:**
 
@@ -41,6 +41,13 @@
 - GitHub Actions runs in ephemeral cloud containers
 - No VS Code extension system in GitHub Actions
 - Coding Agent uses installed tools (uv, pytest, ruff) instead
+
+**Cline Integration:**
+
+- Cline is a VS Code extension that natively supports MCP
+- All TTA.dev MCP servers work seamlessly with Cline
+- Cline can collaborate with Copilot using shared MCP infrastructure
+- See [CLINE_INTEGRATION_GUIDE.md](docs/integrations/CLINE_INTEGRATION_GUIDE.md) for details
 
 ---
 
