@@ -1,0 +1,16 @@
+[
+  {
+    "key": "generate pytest tests for cacheprimitive cache hit/miss behavior:current approach is performant",
+    "strategy": "current approach is performant",
+    "context": "generate pytest tests for cacheprimitive cache hit/miss behavior",
+    "successes": 0,
+    "failures": 0
+  },
+  {
+    "key": "generate pytest tests for cacheprimitive ttl expiration:current approach is performant",
+    "strategy": "current approach is performant",
+    "context": "generate pytest tests for cacheprimitive ttl expiration",
+    "successes": 0,
+    "failures": 0
+  }
+]

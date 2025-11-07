@@ -2140,6 +2140,7 @@ version = "0.1.0"
 source = { editable = "packages/tta-dev-primitives" }
 dependencies = [
     { name = "e2b-code-interpreter" },
+    { name = "google-generativeai" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-sdk" },
     { name = "pydantic" },
@@ -2179,6 +2180,7 @@ requires-dist = [
     { name = "aiosqlite", marker = "extra == 'integrations'", specifier = ">=0.19.0" },
     { name = "anthropic", marker = "extra == 'integrations'", specifier = ">=0.18.0" },
     { name = "e2b-code-interpreter", specifier = ">=2.3.0" },
+    { name = "google-generativeai", specifier = ">=0.8.5" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
     { name = "ollama", marker = "extra == 'integrations'", specifier = ">=0.1.0" },
     { name = "openai", marker = "extra == 'integrations'", specifier = ">=1.0.0" },

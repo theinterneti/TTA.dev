@@ -49,6 +49,15 @@ from tta_dev_primitives.observability import InstrumentedPrimitive
 
 logger = logging.getLogger(__name__)
 
+# Import LLM integration for Phase 2
+try:
+    from .llm_integration import LLMCodeGenerator
+
+    LLM_AVAILABLE = True
+except ImportError:
+    LLM_AVAILABLE = False
+    logger.warning("LLM integration not available - using mock implementation")
+
 
 class ACEInput(TypedDict, total=False):
     """Input for ACE-enabled primitives."""
@@ -174,6 +183,14 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
         self.playbook = MockACEPlaybook()
         self.e2b_executor = CodeExecutionPrimitive()
 
+        # Initialize LLM code generator (Phase 2)
+        if LLM_AVAILABLE:
+            self.llm_generator = LLMCodeGenerator()
+            logger.info("LLM code generator initialized (Phase 2 active)")
+        else:
+            self.llm_generator = None
+            logger.info("Using mock code generation (Phase 1 mode)")
+
         # Learning metrics
         self.total_executions = 0
         self.successful_executions = 0
@@ -183,7 +200,9 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
         self.playbook_file = playbook_file or Path("ace_playbook.json")
         if self.playbook_file.exists():
             self.playbook.load_from_file(self.playbook_file)
-            logger.info(f"Loaded {self.playbook.size()} strategies from {self.playbook_file}")
+            logger.info(
+                f"Loaded {self.playbook.size()} strategies from {self.playbook_file}"
+            )
 
     @property
     def success_rate(self) -> float:
@@ -207,10 +226,13 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
             return 0.0
         return min(
             1.0,
-            (current_rate - self.baseline_success_rate) / (1.0 - self.baseline_success_rate),
+            (current_rate - self.baseline_success_rate)
+            / (1.0 - self.baseline_success_rate),
         )
 
-    async def _execute_impl(self, input_data: ACEInput, context: WorkflowContext) -> ACEOutput:
+    async def _execute_impl(
+        self, input_data: ACEInput, context: WorkflowContext
+    ) -> ACEOutput:
         """Execute with learning."""
 
         task = input_data["task"]
@@ -222,7 +244,9 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
         self.total_executions += 1
 
         # Get relevant strategies from playbook
-        relevant_strategies = self.playbook.get_relevant_strategies(f"{task} {task_context}")
+        relevant_strategies = self.playbook.get_relevant_strategies(
+            f"{task} {task_context}"
+        )
 
         # Generate code using learned strategies
         code = await self._generate_code_with_strategies(
@@ -282,12 +306,16 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
             self.playbook.save_to_file(self.playbook_file)
 
         # Generate learning summary
-        learning_summary = self._generate_learning_summary(strategies_learned, execution_result)
+        learning_summary = self._generate_learning_summary(
+            strategies_learned, execution_result
+        )
 
         return ACEOutput(
             result=execution_result.get("output", "") if execution_result else "",
             code_generated=code,
-            execution_success=execution_result.get("success", False) if execution_result else False,
+            execution_success=execution_result.get("success", False)
+            if execution_result
+            else False,
             strategies_learned=strategies_learned,
             playbook_size=self.playbook_size,
             improvement_score=self.improvement_score,
@@ -299,13 +327,32 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
     ) -> str:
         """Generate code using learned strategies.
 
-        In a full ACE integration, this would use the ACE Generator.
-        For now, we use a simple template-based approach.
+        Phase 2: Uses real LLM (Gemini 2.5 Pro) if available.
+        Phase 1: Falls back to mock implementation.
         """
 
-        # Build prompt with learned strategies (used implicitly in generation logic below)
+        # Use LLM generator if available (Phase 2)
+        if self.llm_generator is not None:
+            logger.info(
+                f"Generating code with LLM (Phase 2) - {len(strategies)} strategies"
+            )
+            return await self.llm_generator.generate_code(
+                task, context, language, strategies
+            )
 
-        # Simple code generation (would be replaced with LLM call)
+        # Fallback to mock implementation (Phase 1)
+        logger.info("Generating code with mock implementation (Phase 1)")
+        return await self._mock_generate_code(task, context, language, strategies)
+
+    async def _mock_generate_code(
+        self, task: str, context: str, language: str, strategies: list[str]
+    ) -> str:
+        """Mock code generation (Phase 1 fallback).
+
+        This is the original template-based implementation.
+        """
+
+        # Simple code generation (template-based)
         if "fibonacci" in task.lower():
             if "use memoization for better performance" in strategies:
                 return '''def fibonacci(n, memo={}):
@@ -379,7 +426,9 @@ print("Language: {language}")"""
             strategies_learned += 1
 
         if "prime" in task.lower() and "int(n**0.5)" in code:
-            self.playbook.add_strategy("optimize prime checking with sqrt limit", "number_theory")
+            self.playbook.add_strategy(
+                "optimize prime checking with sqrt limit", "number_theory"
+            )
             strategies_learned += 1
 
         # Learn from execution performance
@@ -420,7 +469,9 @@ print("Language: {language}")"""
             strategies_learned += 1
 
         if "SyntaxError" in error:
-            self.playbook.add_strategy("validate syntax before execution", "syntax_error_handling")
+            self.playbook.add_strategy(
+                "validate syntax before execution", "syntax_error_handling"
+            )
             strategies_learned += 1
 
         return strategies_learned
@@ -428,9 +479,62 @@ print("Language: {language}")"""
     async def _improve_code(
         self, original_code: str, error: str, task: str, strategies: list[str]
     ) -> str:
-        """Improve code based on error and strategies."""
+        """Improve code based on error and strategies.
 
-        # Simple improvement logic (would use LLM in full implementation)
+        Phase 3: Uses LLM to fix errors based on execution feedback.
+        """
+
+        # Use LLM generator if available (Phase 3)
+        if self.llm_generator is not None:
+            logger.info(f"Improving code with LLM (Phase 3) - Error: {error[:100]}...")
+
+            # Build error-aware prompt
+            improvement_prompt = f"""The following code failed with an error. Fix the code to resolve the error.
+
+**Original Task:** {task}
+
+**Original Code:**
+```python
+{original_code}
+```
+
+**Error:**
+```
+{error}
+```
+
+**Instructions:**
+1. Analyze the error message carefully
+2. Identify the root cause (API mismatch, syntax error, logic error, etc.)
+3. Fix the code to resolve the error
+4. Ensure the fixed code still accomplishes the original task
+5. Return ONLY the fixed code, no explanations
+
+"""
+            if strategies:
+                improvement_prompt += "**Apply these learned strategies:**\n"
+                for i, strategy in enumerate(strategies, 1):
+                    improvement_prompt += f"{i}. {strategy}\n"
+                improvement_prompt += "\n"
+
+            improvement_prompt += "Generate the fixed code now:"
+
+            try:
+                # Use LLM to generate improved code
+                improved_code = await self.llm_generator.generate_code(
+                    task=f"Fix error in: {task}",
+                    context=improvement_prompt,
+                    language="python",
+                    strategies=strategies,
+                )
+                return improved_code
+            except Exception as e:
+                logger.error(f"LLM code improvement failed: {e}")
+                # Fall through to mock implementation
+
+        # Fallback to mock implementation (Phase 1/2)
+        logger.info("Improving code with mock implementation")
+
         if "RecursionError" in error and "fibonacci" in task.lower():
             # Add memoization to prevent deep recursion
             return '''def fibonacci(n, memo={}):
