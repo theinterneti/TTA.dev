@@ -21,6 +21,8 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 
 **IMPORTANT:** All agents must use the Logseq TODO management system:
 
+**🧭 Knowledge Base Hub:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - **START HERE** for intelligent navigation between documentation and knowledge base systems.
+
 - **📐 TODO Architecture:** [`logseq/pages/TTA.dev/TODO Architecture.md`](logseq/pages/TTA.dev___TODO Architecture.md) - Complete system design
 - **📊 Main Dashboard:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO Management System.md) - Active queries
 - **📋 Templates:** [`logseq/pages/TODO Templates.md`](logseq/pages/TODO Templates.md) - Copy-paste patterns
@@ -271,6 +273,56 @@ workflow = ParallelPrimitive(
     primitives=[cached_processor] * 10  # 10 parallel workers
 )
 ```
+
+### 4. Iterative Code Refinement with E2B ⭐ NEW!
+
+**CRITICAL PATTERN:** When generating code with AI, always validate it works before using!
+
+```python
+from tta_dev_primitives.integrations import CodeExecutionPrimitive
+
+# Pattern: Generate → Execute → Fix → Repeat until working
+class IterativeCodeGenerator:
+    def __init__(self):
+        self.code_executor = CodeExecutionPrimitive()
+        self.max_attempts = 3
+
+    async def generate_working_code(self, requirement: str, context):
+        """Keep generating until code executes successfully."""
+        for attempt in range(1, self.max_attempts + 1):
+            # Step 1: Generate code (LLM)
+            code = await llm_generate_code(requirement, previous_errors)
+
+            # Step 2: Execute in E2B sandbox
+            result = await self.code_executor.execute(
+                {"code": code, "timeout": 30},
+                context
+            )
+
+            # Step 3: Check if it works
+            if result["success"]:
+                return {"code": code, "output": result["logs"]}
+
+            # Step 4: Feed error back to LLM for next iteration
+            previous_errors = result["error"]
+
+        raise Exception("Failed to generate working code")
+```
+
+**When to use this pattern:**
+- ✅ Test generation workflows (generate → execute → validate)
+- ✅ Documentation code snippets (ensure examples work)
+- ✅ PR code validation (run tests before merge)
+- ✅ AI coding assistants (validate before suggesting)
+- ✅ Data processing scripts (catch errors early)
+
+**Benefits:**
+- Real validation (not just LLM opinion that "code looks good")
+- Catch syntax errors, import errors, logic bugs
+- $0 cost (E2B FREE tier) + ~$0.01/iteration (LLM)
+- Typically 1-3 iterations = working code
+
+**Full example:** [`examples/e2b_iterative_code_refinement.py`](packages/tta-dev-primitives/examples/e2b_iterative_code_refinement.py)
 
 **More examples:** [`packages/tta-dev-primitives/examples/`](packages/tta-dev-primitives/examples/)
 

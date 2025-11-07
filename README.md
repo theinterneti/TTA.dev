@@ -85,6 +85,16 @@ pip install dev-primitives
 
 ---
 
+## 🧭 Knowledge Base & Learning
+
+**Structured Learning:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - Intelligent navigation between documentation and knowledge base
+
+**Learning Paths:** [`TTA.dev Learning Paths`](logseq/pages/TTA.dev___Learning%20Paths.md) - Step-by-step progression from beginner to expert
+
+**Interactive Learning:** [`Learning TTA Primitives`](logseq/pages/Learning%20TTA%20Primitives.md) - Flashcards and exercises for mastering concepts
+
+---
+
 ## 🚀 Quick Start
 
 ### Installation

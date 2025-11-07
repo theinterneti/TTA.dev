@@ -20,7 +20,6 @@ from tta_dev_primitives.knowledge import (
     KnowledgeBasePrimitive,
 )
 from tta_dev_primitives.lifecycle import (
-    STAGE_CRITERIA_MAP,
     Stage,
     StageManager,
 )
@@ -31,8 +30,16 @@ class TestStageManagerKBIntegration:
 
     @pytest.mark.asyncio
     async def test_check_readiness_without_kb(self) -> None:
-        """Test check_readiness works without KB parameter."""
-        manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
+        """Test check_readiness works without KB parameter.
+
+        Note: Uses empty stage_criteria_map to avoid running expensive
+        validation checks (like pytest) that would cause test timeouts.
+        This test focuses on KB integration, not validation logic.
+        """
+        # Use empty criteria map to avoid subprocess timeouts
+        # Previously used STAGE_CRITERIA_MAP which includes TESTS_PASS check
+        # that runs pytest recursively, causing 180+ second timeouts
+        manager = StageManager(stage_criteria_map={})
         context = WorkflowContext(correlation_id="test-001")
 
         readiness = await manager.check_readiness(
@@ -49,7 +56,8 @@ class TestStageManagerKBIntegration:
         """Test check_readiness with KB that returns no results."""
         # Create KB that returns empty results
         kb = KnowledgeBasePrimitive(logseq_available=False)
-        manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
+        # Use empty criteria map to avoid pytest recursion timeouts
+        manager = StageManager(stage_criteria_map={})
         context = WorkflowContext(correlation_id="test-002")
 
         readiness = await manager.check_readiness(
@@ -105,7 +113,8 @@ class TestStageManagerKBIntegration:
 
         kb.execute = mock_execute
 
-        manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
+        # Use empty criteria map to avoid pytest recursion timeouts
+        manager = StageManager(stage_criteria_map={})
         context = WorkflowContext(correlation_id="test-003")
 
         readiness = await manager.check_readiness(
@@ -135,7 +144,8 @@ class TestStageManagerKBIntegration:
 
         kb.execute = mock_execute
 
-        manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
+        # Use empty criteria map to avoid pytest recursion timeouts
+        manager = StageManager(stage_criteria_map={})
         context = WorkflowContext(correlation_id="test-004")
 
         await manager.check_readiness(
@@ -181,7 +191,8 @@ class TestStageManagerKBIntegration:
 
         kb.execute = mock_execute
 
-        manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
+        # Use empty criteria map to avoid pytest recursion timeouts
+        manager = StageManager(stage_criteria_map={})
         context = WorkflowContext(correlation_id="test-005")
 
         readiness = await manager.check_readiness(
