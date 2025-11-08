@@ -99,10 +99,9 @@ async def test_success_on_first_attempt():
 
 async def test_success_after_one_retry():
     """Test that RetryPrimitive succeeds after one retry if the underlying primitive fails once then succeeds."""
-    mock = MockPrimitive("test", side_effect=[
-        Exception("First attempt fails"),
-        {"result": "success"}
-    ])
+    mock = MockPrimitive(
+        "test", side_effect=[Exception("First attempt fails"), {"result": "success"}]
+    )
     retry = RetryPrimitive(primitive=mock)
     context = WorkflowContext()
     result = await retry.execute("input_data", context)
@@ -112,11 +111,14 @@ async def test_success_after_one_retry():
 
 async def test_success_after_two_retries():
     """Test that RetryPrimitive succeeds after two retries if the underlying primitive fails twice then succeeds."""
-    mock = MockPrimitive("test", side_effect=[
-        Exception("First attempt fails"),
-        Exception("Second attempt fails"),
-        {"result": "success"}
-    ])
+    mock = MockPrimitive(
+        "test",
+        side_effect=[
+            Exception("First attempt fails"),
+            Exception("Second attempt fails"),
+            {"result": "success"},
+        ],
+    )
     retry = RetryPrimitive(primitive=mock)
     context = WorkflowContext()
     result = await retry.execute("input_data", context)
@@ -311,7 +313,9 @@ async def test_jitter_enabled(workflow_context):
     expected_delay_no_jitter = 2.0 + 4.0  # 2.0^1 + 2.0^2 = 6.0
     min_expected_delay = expected_delay_no_jitter * 0.5
     max_expected_delay = expected_delay_no_jitter * 1.5
-    assert min_expected_delay < elapsed < max_expected_delay, f"elapsed={elapsed}, min={min_expected_delay}, max={max_expected_delay}"
+    assert min_expected_delay < elapsed < max_expected_delay, (
+        f"elapsed={elapsed}, min={min_expected_delay}, max={max_expected_delay}"
+    )
     assert mock_primitive.call_count == 3
 
 
@@ -337,7 +341,9 @@ async def test_jitter_disabled(workflow_context):
 async def test_max_backoff_limit(workflow_context):
     """Test that the max_backoff limit is enforced."""
     strategy = RetryStrategy(max_retries=3, backoff_base=10.0, max_backoff=20.0, jitter=False)
-    mock_primitive = MockPrimitive(results=[1], exceptions=[MockException(), MockException(), MockException()])
+    mock_primitive = MockPrimitive(
+        results=[1], exceptions=[MockException(), MockException(), MockException()]
+    )
     retry = RetryPrimitive(mock_primitive, strategy)
     input_data = "test_input"
 
@@ -356,7 +362,9 @@ async def test_max_backoff_limit(workflow_context):
 async def test_retry_exhaustion(workflow_context):
     """Test that the RetryPrimitive raises the last exception when retries are exhausted."""
     strategy = RetryStrategy(max_retries=2, backoff_base=2.0, jitter=False)
-    mock_primitive = MockPrimitive(results=[], exceptions=[MockException("err1"), MockException("err2"), MockException("err3")])
+    mock_primitive = MockPrimitive(
+        results=[], exceptions=[MockException("err1"), MockException("err2"), MockException("err3")]
+    )
     retry = RetryPrimitive(mock_primitive, strategy)
     input_data = "test_input"
 
@@ -365,4 +373,3 @@ async def test_retry_exhaustion(workflow_context):
 
     assert str(exc_info.value) == "err3"
     assert mock_primitive.call_count == 3
-

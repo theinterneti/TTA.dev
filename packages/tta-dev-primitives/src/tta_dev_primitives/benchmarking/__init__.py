@@ -122,7 +122,7 @@ class BenchmarkFramework(Protocol):
 class Benchmark(ABC):
     """Abstract base class for individual benchmarks."""
 
-    def __init__(self, name: str, description: str, category: BenchmarkCategory):
+    def __init__(self, name: str, description: str, category: BenchmarkCategory) -> None:
         self.name = name
         self.description = description
         self.category = category
@@ -179,7 +179,7 @@ class Benchmark(ABC):
                         "significant": p_value < 0.05,
                         "effect_size": float(cohens_d),
                         "effect_size_interpretation": self._interpret_effect_size(cohens_d),
-                        "frameworks": dict(zip(framework_names, framework_values)),
+                        "frameworks": dict(zip(framework_names, framework_values, strict=False)),
                     }
 
                 # ANOVA for multiple samples
@@ -191,7 +191,7 @@ class Benchmark(ABC):
                         "f_statistic": float(f_stat),
                         "p_value": float(p_value),
                         "significant": p_value < 0.05,
-                        "frameworks": dict(zip(framework_names, framework_values)),
+                        "frameworks": dict(zip(framework_names, framework_values, strict=False)),
                     }
 
         return analysis
@@ -212,7 +212,7 @@ class Benchmark(ABC):
 class RAGWorkflowBenchmark(Benchmark):
     """Benchmark RAG (Retrieval-Augmented Generation) workflow implementations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="rag_workflow",
             description="Compare RAG implementation approaches across frameworks",
@@ -606,7 +606,7 @@ print(f"Response: {result.get('response', 'No response')}")
 class TTAPrimitivesFramework:
     """TTA.dev primitives framework implementation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = "tta_primitives"
         self.version = "1.0.0"
 
@@ -626,7 +626,7 @@ class TTAPrimitivesFramework:
 class VanillaPythonFramework:
     """Vanilla Python framework implementation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = "vanilla_python"
         self.version = "3.12"
 
@@ -646,7 +646,7 @@ class VanillaPythonFramework:
 class LangChainFramework:
     """LangChain framework implementation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = "langchain"
         self.version = "0.1.0"
 
@@ -666,7 +666,7 @@ class LangChainFramework:
 class BenchmarkSuite:
     """Collection of benchmarks to run."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.benchmarks: dict[str, Benchmark] = {}
 
     def add_benchmark(self, name: str, benchmark: Benchmark) -> None:
@@ -686,7 +686,7 @@ class BenchmarkSuite:
 class BenchmarkRunner:
     """Executes benchmark suites."""
 
-    def __init__(self, e2b_api_key: str):
+    def __init__(self, e2b_api_key: str) -> None:
         self.executor = CodeExecutionPrimitive(api_key=e2b_api_key)
 
     async def run_suite(
@@ -730,7 +730,7 @@ class BenchmarkRunner:
 class BenchmarkReport:
     """Generate reports from benchmark results."""
 
-    def __init__(self, results: list[BenchmarkResult]):
+    def __init__(self, results: list[BenchmarkResult]) -> None:
         self.results = results
 
     def generate_summary(self) -> dict[str, Any]:
@@ -928,7 +928,7 @@ class BenchmarkReport:
 
 
 # Example usage
-async def main():
+async def main() -> None:
     """Example benchmarking usage."""
     # Create benchmark suite
     suite = BenchmarkSuite()

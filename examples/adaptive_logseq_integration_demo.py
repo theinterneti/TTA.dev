@@ -16,12 +16,12 @@ import json
 import logging
 from pathlib import Path
 
-from tta_dev_primitives.adaptive.base import LearningMode
-from tta_dev_primitives.adaptive.logseq_integration import (
+from tta_dev_primitives.adaptive import (
     STRATEGY_DASHBOARD_TEMPLATE,
+    AdaptiveRetryPrimitive,
+    LearningMode,
     LogseqStrategyIntegration,
 )
-from tta_dev_primitives.adaptive.retry import AdaptiveRetryPrimitive
 from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 # Configure logging
@@ -113,9 +113,7 @@ async def demonstrate_logseq_strategy_learning():
             )
 
             try:
-                result = await adaptive_retry.execute(
-                    {"request_id": f"req_{attempt}"}, context
-                )
+                await adaptive_retry.execute({"request_id": f"req_{attempt}"}, context)
                 print(f"   ✅ Attempt {attempt + 1}: Success")
             except Exception as e:
                 print(f"   ❌ Attempt {attempt + 1}: Failed - {e}")
@@ -126,9 +124,7 @@ async def demonstrate_logseq_strategy_learning():
         # Show learned strategies for this scenario
         learned_strategies = adaptive_retry._learning_strategies
         scenario_strategies = [
-            s
-            for s in learned_strategies
-            if scenario["name"].lower().replace(" ", "_") in s.name
+            s for s in learned_strategies if scenario["name"].lower().replace(" ", "_") in s.name
         ]
 
         if scenario_strategies:
@@ -153,9 +149,7 @@ async def demonstrate_logseq_strategy_learning():
     print(f"Validated strategies: {sum(1 for s in all_strategies if s.is_validated)}")
 
     if all_strategies:
-        avg_success_rate = sum(s.metrics.success_rate for s in all_strategies) / len(
-            all_strategies
-        )
+        avg_success_rate = sum(s.metrics.success_rate for s in all_strategies) / len(all_strategies)
         print(f"Average success rate: {avg_success_rate:.1%}")
 
         total_executions = sum(s.metrics.total_executions for s in all_strategies)
@@ -230,12 +224,8 @@ async def demonstrate_strategy_sharing():
     api1 = UnreliableAPI()
     api2 = UnreliableAPI()
 
-    retry1 = AdaptiveRetryPrimitive(
-        primitive=api1, logseq_integration=logseq_integration
-    )
-    retry2 = AdaptiveRetryPrimitive(
-        primitive=api2, logseq_integration=logseq_integration
-    )
+    retry1 = AdaptiveRetryPrimitive(primitive=api1, logseq_integration=logseq_integration)
+    AdaptiveRetryPrimitive(primitive=api2, logseq_integration=logseq_integration)
 
     # First primitive learns a strategy
     print("  🎯 Primitive 1 learning...")

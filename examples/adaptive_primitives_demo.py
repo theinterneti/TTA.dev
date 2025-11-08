@@ -85,9 +85,7 @@ async def demonstrate_adaptive_learning():
 
     print("🧠 Adaptive Retry Primitive Learning Demo")
     print("=" * 60)
-    print(
-        "This shows how primitives learn from observability data to improve over time.\n"
-    )
+    print("This shows how primitives learn from observability data to improve over time.\n")
 
     # Create unreliable API to test against
     unreliable_api = UnreliableAPI(failure_rate=0.5)
@@ -191,17 +189,13 @@ async def demonstrate_adaptive_learning():
                 )
 
             except Exception as e:
-                print(
-                    f"   ❌ Iteration {iteration + 1:2d}: Failed with {type(e).__name__}"
-                )
+                print(f"   ❌ Iteration {iteration + 1:2d}: Failed with {type(e).__name__}")
                 total_executions += 1
 
         # Show scenario summary
         success_rate = scenario_successes / scenario["iterations"]
         avg_attempts = (
-            scenario_attempts / scenario["iterations"]
-            if scenario["iterations"] > 0
-            else 0
+            scenario_attempts / scenario["iterations"] if scenario["iterations"] > 0 else 0
         )
 
         print("\n📊 Scenario Summary:")
@@ -221,9 +215,7 @@ async def demonstrate_adaptive_learning():
     print("🎯 Final Learning Summary")
     print(f"{'=' * 60}")
 
-    overall_success_rate = (
-        total_successes / total_executions if total_executions > 0 else 0
-    )
+    overall_success_rate = total_successes / total_executions if total_executions > 0 else 0
     learning_summary = adaptive_retry.get_learning_summary()
 
     print(f"Overall Success Rate: {overall_success_rate:.1%}")
@@ -307,9 +299,7 @@ async def main():
     """Run the complete adaptive primitives demonstration."""
 
     print("🚀 Welcome to the Adaptive/Self-Improving Primitives Demo!")
-    print(
-        "This demonstrates primitives that learn from observability data to improve over time."
-    )
+    print("This demonstrates primitives that learn from observability data to improve over time.")
     print()
 
     try:
@@ -331,9 +321,7 @@ async def main():
         print("• Circuit breakers provide graceful degradation")
         print("• Meta-observability makes learning process transparent")
         print()
-        print(
-            "This represents a new paradigm: Infrastructure that gets smarter with use! 🧠"
-        )
+        print("This represents a new paradigm: Infrastructure that gets smarter with use! 🧠")
 
     except Exception as e:
         logger.error(f"Demo failed: {e}")

@@ -1,6 +1,6 @@
 [project]
 name = "tta-kb-automation"
-version = "0.1.0"
+version = "1.0.0"
 description = "Automated knowledge base maintenance and documentation generation for TTA.dev"
 readme = "README.md"
 requires-python = ">=3.11"

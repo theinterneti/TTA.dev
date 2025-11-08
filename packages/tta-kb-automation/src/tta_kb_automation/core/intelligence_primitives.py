@@ -34,9 +34,45 @@ class ClassifyTODO(InstrumentedPrimitive[dict, dict]):
         input_data: dict,
         context: WorkflowContext,
     ) -> dict:
-        """Classify TODO (stub implementation)."""
-        # TODO: Implement TODO classification
-        raise NotImplementedError("ClassifyTODO not yet implemented")
+        """Classify TODO (rule-based implementation)."""
+        todo_text = input_data.get("todo_text", "").lower()
+        # context = input_data.get("context", []) # Not used in rule-based for now
+
+        category = "implementation"
+        priority = "medium"
+        confidence = 0.8  # Default confidence for rule-based classification
+
+        # Rule-based classification for category
+        if any(kw in todo_text for kw in ["test", "testing", "coverage", "pytest"]):
+            category = "testing"
+        elif any(kw in todo_text for kw in ["doc", "docs", "documentation", "readme"]):
+            category = "documentation"
+        elif any(kw in todo_text for kw in ["fix", "bug", "issue", "error", "debug"]):
+            category = "bugfix"
+        elif any(kw in todo_text for kw in ["refactor", "cleanup", "optimize", "restructure"]):
+            category = "refactoring"
+        elif any(kw in todo_text for kw in ["infra", "infrastructure", "deploy", "ci/cd"]):
+            category = "infrastructure"
+        elif any(kw in todo_text for kw in ["learn", "tutorial", "example", "onboard"]):
+            category = "learning"  # Moved this higher
+        elif any(kw in todo_text for kw in ["feature", "implement", "add", "create", "build"]):
+            category = "implementation"
+        elif any(kw in todo_text for kw in ["template", "pattern"]):
+            category = "template"
+        elif any(kw in todo_text for kw in ["ops", "operation", "monitor", "alert"]):
+            category = "operations"
+
+        # Rule-based classification for priority
+        if any(kw in todo_text for kw in ["urgent", "critical", "asap", "blocker"]):
+            priority = "high"
+        elif any(kw in todo_text for kw in ["later", "someday", "low priority", "nice to have"]):
+            priority = "low"
+
+        return {
+            "category": category,
+            "priority": priority,
+            "confidence": confidence,
+        }
 
 
 class SuggestKBLinks(InstrumentedPrimitive[dict, dict]):

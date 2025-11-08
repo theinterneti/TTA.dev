@@ -203,6 +203,49 @@ memory_persistent = MemoryPrimitive(
 - Agent memory and recall
 - Personalization based on history
 
+### Pattern 5: Self-Improving Workflows
+
+```python
+from tta_dev_primitives.adaptive import (
+    AdaptiveRetryPrimitive,
+    LogseqStrategyIntegration,
+    LearningMode
+)
+
+# Zero-setup self-improving retry (no manual tuning required)
+logseq = LogseqStrategyIntegration("my_app")
+adaptive_retry = AdaptiveRetryPrimitive(
+    target_primitive=unreliable_api,
+    logseq_integration=logseq,
+    enable_auto_persistence=True,
+    learning_mode=LearningMode.ACTIVE
+)
+
+# Learning happens automatically from execution patterns
+result = await adaptive_retry.execute(data, context)
+
+# Check what was learned
+for name, strategy in adaptive_retry.strategies.items():
+    print(f"{name}: {strategy.metrics.success_rate:.1%} success")
+
+# Strategies automatically saved to logseq/pages/Strategies/
+```
+
+**Benefits:**
+
+- ✅ **Automatic Learning**: Learns optimal retry parameters without manual tuning
+- ✅ **Context-Aware**: Different strategies for production/staging/dev
+- ✅ **Production-Safe**: Circuit breakers and validation prevent bad strategies
+- ✅ **Knowledge Base**: Strategies persist to Logseq for sharing
+- ✅ **Observable**: Full OpenTelemetry integration
+
+**Use Cases:**
+
+- Unreliable external APIs needing adaptive retry strategies
+- Services with varying load patterns across contexts
+- Teams wanting to share learned strategies via knowledge base
+- Production systems requiring automatic optimization
+
 ## Cost Optimization
 
 ### Smart Caching

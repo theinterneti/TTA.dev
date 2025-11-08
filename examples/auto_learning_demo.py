@@ -83,13 +83,9 @@ async def main():
         try:
             result = await adaptive_retry.execute({"request_id": i}, context)
             if result.get("success"):
-                print(
-                    f"  ✅ Request {i}: Success (attempts: {result.get('attempts', 1)})"
-                )
+                print(f"  ✅ Request {i}: Success (attempts: {result.get('attempts', 1)})")
             else:
-                print(
-                    f"  ❌ Request {i}: Failed after {result.get('attempts', 0)} attempts"
-                )
+                print(f"  ❌ Request {i}: Failed after {result.get('attempts', 0)} attempts")
         except Exception as e:
             print(f"  ❌ Request {i}: Exception - {e}")
 
@@ -110,13 +106,9 @@ async def main():
         try:
             result = await adaptive_retry.execute({"request_id": i}, context)
             if result.get("success"):
-                print(
-                    f"  ✅ Request {i}: Success (attempts: {result.get('attempts', 1)})"
-                )
+                print(f"  ✅ Request {i}: Success (attempts: {result.get('attempts', 1)})")
             else:
-                print(
-                    f"  ❌ Request {i}: Failed after {result.get('attempts', 0)} attempts"
-                )
+                print(f"  ❌ Request {i}: Failed after {result.get('attempts', 0)} attempts")
         except Exception as e:
             print(f"  ❌ Request {i}: Exception - {e}")
 
@@ -154,9 +146,7 @@ async def main():
         # Show journal entries
         journal_entries = list(logseq_base.glob("journals/*.md"))
         if journal_entries:
-            print(
-                f"\n  📅 {len(journal_entries)} journal entries with learning events:"
-            )
+            print(f"\n  📅 {len(journal_entries)} journal entries with learning events:")
             for entry in journal_entries:
                 print(f"     • {entry.name}")
 

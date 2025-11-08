@@ -156,12 +156,8 @@ async def main():
         print("\n" + "=" * 80)
         print("📊 TEST SUMMARY")
         print("=" * 80)
-        print(
-            f"Test 1 (Fibonacci): {'✅ PASS' if result1.get('execution_success') else '❌ FAIL'}"
-        )
-        print(
-            f"Test 2 (Pytest): {'✅ PASS' if result2.get('execution_success') else '❌ FAIL'}"
-        )
+        print(f"Test 1 (Fibonacci): {'✅ PASS' if result1.get('execution_success') else '❌ FAIL'}")
+        print(f"Test 2 (Pytest): {'✅ PASS' if result2.get('execution_success') else '❌ FAIL'}")
         print(
             f"\nTotal Strategies Learned: {result1.get('strategies_learned', 0) + result2.get('strategies_learned', 0)}"
         )

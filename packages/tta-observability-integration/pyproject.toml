@@ -7,7 +7,7 @@ packages = ["src/observability_integration"]
 
 [project]
 name = "tta-observability-integration"
-version = "0.1.0"
+version = "1.0.0"
 description = "Comprehensive observability and monitoring integration for TTA platform"
 readme = "README.md"
 requires-python = ">=3.11"

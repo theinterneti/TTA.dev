@@ -25,7 +25,7 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
         ttl_seconds: float = 3600.0,
     ) -> None:
         '''Initialize cache primitive.
-        
+
         Args:
             primitive: Primitive to cache
             cache_key_fn: Function to generate cache key from input/context
@@ -41,7 +41,7 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
         '''Execute with caching.'''
         cache_key = self.cache_key_fn(input_data, context)
         # ... caching logic ...
-        
+
     def get_stats(self) -> dict[str, int]:
         '''Get cache statistics.'''
         return self._stats.copy()
@@ -166,4 +166,3 @@ Use exact API: CachePrimitive(primitive=..., cache_key_fn=..., ttl_seconds=...)
 
 if __name__ == "__main__":
     asyncio.run(main())
-

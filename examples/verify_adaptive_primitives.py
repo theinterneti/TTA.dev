@@ -185,9 +185,7 @@ async def verify_context_awareness():
 
         success = 0
         for i in range(5):
-            context = WorkflowContext(
-                correlation_id=f"ctx_{env}_{i}", metadata=ctx_meta
-            )
+            context = WorkflowContext(correlation_id=f"ctx_{env}_{i}", metadata=ctx_meta)
 
             try:
                 result = await adaptive_retry.execute({"attempt": i}, context)
@@ -366,9 +364,7 @@ async def verify_logseq_integration():
     print(f"   Journals directory exists: {journals_dir.exists()}")
 
     # Check strategy pages
-    strategy_files = (
-        list(strategies_dir.glob("*.md")) if strategies_dir.exists() else []
-    )
+    strategy_files = list(strategies_dir.glob("*.md")) if strategies_dir.exists() else []
     print(f"   Strategy pages created: {len(strategy_files)}")
 
     if strategy_files:
@@ -461,13 +457,11 @@ async def verify_observability_integration():
 
         try:
             result = await adaptive_retry.execute({"iteration": i}, context)
-            execution_time = result.get("execution_time", 0)
+            result.get("execution_time", 0)
             attempts = result.get("attempts", 1)
 
             if i % 5 == 0:  # Log sample
-                print(
-                    f"   Iteration {i}: {attempts} attempts, success={result.get('success')}"
-                )
+                print(f"   Iteration {i}: {attempts} attempts, success={result.get('success')}")
 
         except Exception:
             pass
@@ -488,9 +482,7 @@ async def verify_observability_integration():
         print(f"      Success rate: {strategy.metrics.success_rate:.1%}")
         print(f"      Contexts seen: {len(strategy.metrics.contexts_seen)}")
 
-    assert final_strategies > initial_strategies, (
-        "Should learn new strategies from observability"
-    )
+    assert final_strategies > initial_strategies, "Should learn new strategies from observability"
 
     print("\n✅ TEST 5 PASSED: Observability drives learning!")
 

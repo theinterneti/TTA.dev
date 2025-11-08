@@ -81,15 +81,49 @@ Example - Custom Adaptive Primitive:
 """
 
 from .base import AdaptivePrimitive, LearningMode, LearningStrategy, StrategyMetrics
+from .cache import AdaptiveCachePrimitive
+from .exceptions import (
+    AdaptiveError,
+    CircuitBreakerError,
+    ContextExtractionError,
+    LearningError,
+    PerformanceRegressionError,
+    StrategyAdaptationError,
+    StrategyNotFoundError,
+    StrategyValidationError,
+    ValidationWindowError,
+)
+from .fallback import AdaptiveFallbackPrimitive
 from .logseq_integration import LogseqStrategyIntegration
+from .metrics import AdaptiveMetrics, get_adaptive_metrics, reset_adaptive_metrics
 from .retry import AdaptiveRetryPrimitive
+from .timeout import AdaptiveTimeoutPrimitive
 
 __all__ = [
+    # Core classes
     "AdaptivePrimitive",
     "AdaptiveRetryPrimitive",
+    "AdaptiveCachePrimitive",
+    "AdaptiveFallbackPrimitive",
+    "AdaptiveTimeoutPrimitive",
     "LearningStrategy",
     "StrategyMetrics",
     "LearningMode",
+    # Custom exceptions
+    "AdaptiveError",
+    "LearningError",
+    "StrategyValidationError",
+    "StrategyAdaptationError",
+    "CircuitBreakerError",
+    "ContextExtractionError",
+    "StrategyNotFoundError",
+    "ValidationWindowError",
+    "PerformanceRegressionError",
+    # Metrics
+    "AdaptiveMetrics",
+    "get_adaptive_metrics",
+    "reset_adaptive_metrics",
+    # Logseq integration
     "LogseqStrategyIntegration",
 ]
 

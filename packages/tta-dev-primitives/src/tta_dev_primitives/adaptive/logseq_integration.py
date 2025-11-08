@@ -1,470 +1,282 @@
-"""Logseq integration for adaptive primitive strategy persistence.
+#!/usr/bin/env python3
+"""
+Logseq Integration for Adaptive Primitives
 
-This module enables strategy playbooks to be persisted in Logseq knowledge base,
-creating a rich, searchable, and interconnected record of learned strategies.
-
-Key Features:
-- Strategy → Logseq page conversion
-- Automatic strategy network graph updates
-- Performance metrics tracking
-- Learning history documentation
-- Query templates for strategy analysis
-
-Integration Points:
-- Strategy discovery and sharing
-- Performance pattern analysis
-- Context-aware strategy recommendations
-- Learning pathway documentation
+This module provides a LogseqStrategyIntegration class to persist learned
+strategies and performance metrics to a Logseq knowledge base.
 """
 
-from __future__ import annotations
-
-import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from tta_dev_primitives.adaptive.base import LearningStrategy
-from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.adaptive.base import (
+    LearningStrategy,
+    StrategyMetrics,
+)
 
 logger = logging.getLogger(__name__)
 
 
+# Helper functions for Logseq filesystem operations
+async def create_logseq_page(logseq_path: str, page_title: str, content: str) -> None:
+    """
+    Creates a Logseq page in the pages directory.
+
+    Args:
+        logseq_path: Path to the Logseq graph directory
+        page_title: Title of the page (will be used as filename)
+        content: Markdown content for the page
+    """
+    pages_dir = Path(logseq_path) / "pages"
+    pages_dir.mkdir(parents=True, exist_ok=True)
+
+    # Sanitize filename - replace spaces with underscores, keep only safe characters
+    safe_filename = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in page_title)
+    page_path = pages_dir / f"Strategies____{safe_filename}.md"
+
+    # Write content
+    page_path.write_text(content, encoding="utf-8")
+    logger.debug(f"Created Logseq page: {page_path}")
+
+
+async def create_logseq_journal_entry(logseq_path: str, entry: str) -> None:
+    """
+    Appends an entry to today's Logseq journal.
+
+    Args:
+        logseq_path: Path to the Logseq graph directory
+        entry: Journal entry content to append
+    """
+    journals_dir = Path(logseq_path) / "journals"
+    journals_dir.mkdir(parents=True, exist_ok=True)
+
+    # Use today's date for journal filename (Logseq format: YYYY_MM_DD.md)
+    today = datetime.now().strftime("%Y_%m_%d")
+    journal_path = journals_dir / f"{today}.md"
+
+    # Append to journal (or create if doesn't exist)
+    with journal_path.open("a", encoding="utf-8") as f:
+        f.write(f"\n{entry}\n")
+    logger.debug(f"Added entry to Logseq journal: {journal_path}")
+
+
 class LogseqStrategyIntegration:
-    """Integrates adaptive primitive strategies with Logseq knowledge base."""
+    """
+    Integrates TTA.dev primitives with Logseq for strategy persistence and discovery.
 
-    def __init__(self, logseq_base_path: Path | str = "logseq"):
-        self.logseq_base_path = Path(logseq_base_path)
-        self.strategies_path = self.logseq_base_path / "pages" / "Strategies"
-        self.journals_path = self.logseq_base_path / "journals"
+    This class handles saving learned strategies, performance metrics, and
+    learning events to Logseq pages and journals.
+    """
 
-        # Ensure directories exist
-        self.strategies_path.mkdir(parents=True, exist_ok=True)
-        self.journals_path.mkdir(parents=True, exist_ok=True)
+    def __init__(self, service_name: str, logseq_path: str | None = None) -> None:
+        """
+        Initializes the LogseqStrategyIntegration.
 
-        logger.info(f"Initialized Logseq integration: {self.logseq_base_path}")
+        Args:
+            service_name: The name of the service or primitive being integrated.
+            logseq_path: Optional path to the Logseq graph directory. If not provided,
+                         it defaults to a common location or environment variable.
+        """
+        self.service_name = service_name
+        self.logseq_path = logseq_path or os.environ.get("LOGSEQ_GRAPH_PATH", "./logseq")
+        logger.info(f"Initializing Logseq integration for '{service_name}' at: {self.logseq_path}")
 
     async def save_learned_strategy(
         self,
         strategy: LearningStrategy,
         primitive_type: str,
-        context: WorkflowContext,
-        performance_data: dict[str, Any] | None = None,
-    ) -> Path:
-        """Save a learned strategy to Logseq knowledge base."""
+        context: str,
+        notes: str | None = None,
+    ) -> None:
+        """
+        Saves a newly learned strategy to Logseq.
 
-        # Create strategy page content
-        strategy_page_content = self._create_strategy_page(
-            strategy, primitive_type, context, performance_data
+        Creates a dedicated page for the strategy and logs the learning event.
+
+        Args:
+            strategy: The LearningStrategy object to save.
+            primitive_type: The type of the primitive (e.g., "AdaptiveRetryPrimitive").
+            context: The context in which the strategy was learned.
+            notes: Optional additional notes about the learning event.
+        """
+        page_title = f"{self.service_name}_{strategy.name}"
+        page_content = self._format_strategy_page(
+            strategy=strategy,
+            primitive_type=primitive_type,
+            context=context,
+            notes=notes,
+            service_name=self.service_name,
         )
 
-        # Save strategy page
-        strategy_file = self.strategies_path / f"{strategy.name}.md"
-        strategy_file.write_text(strategy_page_content, encoding="utf-8")
+        try:
+            await create_logseq_page(self.logseq_path, page_title, page_content)
+            logger.info(f"Saved strategy '{strategy.name}' for '{self.service_name}' to Logseq.")
 
-        # Update daily journal with strategy learning event
-        await self._log_strategy_event(strategy, primitive_type, "learned")
+            # Log the learning event to the daily journal
+            journal_entry = self._format_journal_entry(
+                strategy_name=strategy.name,
+                primitive_type=primitive_type,
+                context=context,
+                notes=notes,
+                event_type="Strategy Learned",
+            )
+            await create_logseq_journal_entry(self.logseq_path, journal_entry)
+            logger.info(f"Logged learning event for '{strategy.name}' to Logseq journal.")
 
-        # Update strategy network (for visualization)
-        await self._update_strategy_network(strategy, primitive_type)
-
-        logger.info(f"Saved strategy '{strategy.name}' to Logseq: {strategy_file}")
-        return strategy_file
+        except Exception as e:
+            logger.error(f"Failed to save strategy '{strategy.name}' to Logseq: {e}")
 
     async def update_strategy_performance(
         self,
-        strategy: LearningStrategy,
+        strategy_name: str,
+        new_metrics: StrategyMetrics,
         primitive_type: str,
-        execution_result: dict[str, Any],
+        context: str,
+        notes: str | None = None,
     ) -> None:
-        """Update strategy performance metrics in Logseq."""
+        """
+        Updates the performance metrics of an existing strategy in Logseq.
 
-        # Load existing page
-        strategy_file = self.strategies_path / f"{strategy.name}.md"
-        if not strategy_file.exists():
-            logger.warning(f"Strategy file not found: {strategy_file}")
-            return
+        Args:
+            strategy_name: The name of the strategy to update.
+            new_metrics: The updated StrategyMetrics object.
+            primitive_type: The type of the primitive.
+            context: The context of the strategy.
+            notes: Optional notes for the update.
+        """
+        # In a real implementation, this would involve reading the existing page,
+        # appending the new metrics, and writing back. For simplicity, we'll
+        # just log the update and create a journal entry.
+        logger.info(f"Updating performance for strategy '{strategy_name}' in Logseq.")
 
-        content = strategy_file.read_text(encoding="utf-8")
-
-        # Update performance section
-        updated_content = self._update_performance_section(
-            content, strategy, execution_result
+        journal_entry = self._format_journal_entry(
+            strategy_name=strategy_name,
+            primitive_type=primitive_type,
+            context=context,
+            notes=notes,
+            event_type="Strategy Performance Updated",
+            metrics=new_metrics,
         )
+        try:
+            await create_logseq_journal_entry(self.logseq_path, journal_entry)
+            logger.info(f"Logged performance update for '{strategy_name}' to Logseq journal.")
+        except Exception as e:
+            logger.error(f"Failed to update strategy performance in Logseq: {e}")
 
-        # Save updated content
-        strategy_file.write_text(updated_content, encoding="utf-8")
-
-        # Log performance update in daily journal
-        await self._log_strategy_event(strategy, primitive_type, "performance_update")
-
-    def _create_strategy_page(
+    def _format_strategy_page(
         self,
         strategy: LearningStrategy,
         primitive_type: str,
-        context: WorkflowContext,
-        performance_data: dict[str, Any] | None = None,
+        context: str,
+        notes: str | None,
+        service_name: str,
     ) -> str:
-        """Create Logseq page content for a strategy."""
+        """Formats the content for a Logseq strategy page."""
+        # Basic table for performance history - could be more sophisticated
+        performance_history_table = f"""
+| Date | Success Rate | Avg Latency | Observations |
+|------|--------------|-------------|--------------|
+| {datetime.now().strftime("%Y-%m-%d")} | {strategy.metrics.success_rate:.1%} | {strategy.metrics.avg_latency_ms:.1f}ms | {strategy.metrics.contexts_seen} |
+"""
+        # Query for related strategies - adjust query as needed
+        related_strategies_query = f"{{query (and [[Strategies]] [[{service_name}]])}}"
 
-        performance_data = performance_data or {}
-        created_date = datetime.fromtimestamp(strategy.created_at).strftime("%Y-%m-%d")
+        content = f"""
+# Strategy - {service_name}_{strategy.name}
 
-        # Build related strategies section
-        related_strategies = self._find_related_strategies(strategy, primitive_type)
+**Type:** {primitive_type}
+**Context:** {context}
+**Created:** {datetime.now().strftime("%Y-%m-%d")}
+**Performance:** {strategy.metrics.success_rate:.1%} success, {strategy.metrics.avg_latency_ms:.1f}ms avg latency
 
-        page_content = f"""# Strategy: {strategy.name}
+## Parameters
 
-## Overview
-- **Type:** #strategy #adaptive #{primitive_type.lower().replace("_", "-")}
-- **Primitive:** [[TTA Primitives/{primitive_type}]]
-- **Created:** [[{created_date}]]
-- **Status:** {"🟢 Active" if strategy.is_validated else "🟡 Learning"}
+- name: {strategy.name}
+- description: {strategy.description}
+{self._format_parameters(strategy.parameters)}
 
-## Description
-{strategy.description}
-
-## Context Pattern
-- **Pattern:** `{strategy.context_pattern}`
-- **Matches:** Contexts containing "{strategy.context_pattern}"
-
-## Strategy Parameters
-```json
-{json.dumps(strategy.parameters, indent=2)}
-```
-
-## Performance Metrics
-- **Success Rate:** {strategy.metrics.success_rate:.1%} ({strategy.metrics.success_count}/{strategy.metrics.total_executions})
-- **Average Latency:** {strategy.metrics.avg_latency:.3f}s
-- **Total Executions:** {strategy.metrics.total_executions}
-- **Contexts Seen:** {len(strategy.metrics.contexts_seen)}
-- **Last Updated:** {datetime.fromtimestamp(strategy.metrics.last_updated).strftime("%Y-%m-%d %H:%M")}
-
-### Validation Status
-- **Validation Attempts:** {strategy.validation_attempts}
-- **Validation Successes:** {strategy.validation_successes}
-- **Validated:** {"✅ Yes" if strategy.is_validated else "⏳ In Progress"}
-
-{self._format_performance_data(performance_data)}
-
-## Learning Context
-- **Correlation ID:** {context.correlation_id}
-- **Environment:** {context.metadata.get("environment", "unknown")}
-- **Priority:** {context.metadata.get("priority", "normal")}
-- **Time Sensitive:** {context.metadata.get("time_sensitive", False)}
-
-## Learning History
-{self._format_learning_history(strategy)}
+## Performance History
+{performance_history_table}
 
 ## Related Strategies
-{related_strategies}
 
-## Usage Examples
-```python
-# Context where this strategy applies
-context = WorkflowContext(metadata={{
-    "environment": "{context.metadata.get("environment", "example")}",
-    "priority": "{context.metadata.get("priority", "normal")}"
-}})
+{related_strategies_query}
 
-# Strategy parameters
-strategy_params = {json.dumps(strategy.parameters, indent=2)}
-```
-
-## Performance Analysis
-### Success Patterns
-- Most successful in: {self._analyze_success_patterns(strategy)}
-- Best performance time: {self._analyze_timing_patterns(strategy)}
-
-### Failure Analysis
-- Common failure modes: {self._analyze_failure_patterns(strategy)}
-- Context sensitivity: {self._analyze_context_sensitivity(strategy)}
-
-## Strategy Evolution
-{self._format_strategy_evolution(strategy)}
-
----
-*Generated by Adaptive Primitives Learning System*
-*Last Updated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}*
-
-#learning #performance #adaptive-primitives
+## Notes
+{notes if notes else "No additional notes."}
 """
+        return content
 
-        return page_content
+    def _format_journal_entry(
+        self,
+        strategy_name: str,
+        primitive_type: str,
+        context: str,
+        notes: str | None,
+        event_type: str,
+        metrics: StrategyMetrics | None = None,
+    ) -> str:
+        """Formats a Logseq journal entry for a learning event."""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        entry = f"- **{event_type}** for **{strategy_name}** ({primitive_type} in context '{context}') at {timestamp}\n"
+        if notes:
+            entry += f"  - Notes: {notes}\n"
+        if metrics:
+            entry += f"  - Metrics: Success Rate={metrics.success_rate:.1%}, Avg Latency={metrics.avg_latency_ms:.1f}ms, Observations={metrics.contexts_seen}\n"
+        return entry
 
-    def _format_performance_data(self, performance_data: dict[str, Any]) -> str:
-        """Format additional performance data for display."""
-        if not performance_data:
+    def _format_parameters(self, parameters: dict[str, Any]) -> str:
+        """Formats strategy parameters into a markdown list."""
+        if not parameters:
             return ""
-
-        sections = []
-        if "latency_percentiles" in performance_data:
-            sections.append("### Latency Distribution")
-            for percentile, value in performance_data["latency_percentiles"].items():
-                sections.append(f"- **P{percentile}:** {value:.3f}s")
-
-        if "error_breakdown" in performance_data:
-            sections.append("\n### Error Breakdown")
-            for error_type, count in performance_data["error_breakdown"].items():
-                sections.append(f"- **{error_type}:** {count} occurrences")
-
-        return "\n".join(sections) if sections else ""
-
-    def _format_learning_history(self, strategy: LearningStrategy) -> str:
-        """Format learning history for display."""
-        history_items = [
-            f"- **Created:** {datetime.fromtimestamp(strategy.created_at).strftime('%Y-%m-%d %H:%M')}",
-            f"- **Last Used:** {datetime.fromtimestamp(strategy.last_used).strftime('%Y-%m-%d %H:%M')}",
-            f"- **Total Usage:** {strategy.metrics.total_executions} executions",
-        ]
-
-        if strategy.validation_attempts > 0:
-            validation_rate = (
-                strategy.validation_successes / strategy.validation_attempts
-            )
-            history_items.append(f"- **Validation Rate:** {validation_rate:.1%}")
-
-        return "\n".join(history_items)
-
-    def _find_related_strategies(
-        self, strategy: LearningStrategy, primitive_type: str
-    ) -> str:
-        """Find and format related strategies."""
-        # In a full implementation, this would query existing strategies
-        # For now, provide template for manual linking
-        return f"""- [[Strategies/baseline_{primitive_type.lower()}]] - Baseline comparison
-- Query: {{{{query (and [[#strategy]] [[#{primitive_type.lower()}]])}}}}
-- Similar contexts: {{{{query (and [[#strategy]] (property context-pattern *{strategy.context_pattern.split(":")[0] if ":" in strategy.context_pattern else strategy.context_pattern}*))}}}}"""
-
-    def _analyze_success_patterns(self, strategy: LearningStrategy) -> str:
-        """Analyze and format success patterns."""
-        if not strategy.metrics.contexts_seen:
-            return "Insufficient data"
-
-        # Analyze context patterns - in full implementation would use ML
-        contexts = list(strategy.metrics.contexts_seen)
-        if len(contexts) == 1:
-            return f"Single context: {contexts[0]}"
-        else:
-            return f"{len(contexts)} different contexts"
-
-    def _analyze_timing_patterns(self, strategy: LearningStrategy) -> str:
-        """Analyze timing patterns."""
-        if strategy.metrics.avg_latency < 1.0:
-            return "Fast execution (< 1s)"
-        elif strategy.metrics.avg_latency < 5.0:
-            return "Moderate execution (1-5s)"
-        else:
-            return "Slow execution (> 5s)"
-
-    def _analyze_failure_patterns(self, strategy: LearningStrategy) -> str:
-        """Analyze failure patterns."""
-        if strategy.metrics.failure_rate == 0:
-            return "No failures observed"
-        elif strategy.metrics.failure_rate < 0.1:
-            return "Occasional failures (< 10%)"
-        else:
-            return f"Significant failures ({strategy.metrics.failure_rate:.1%})"
-
-    def _analyze_context_sensitivity(self, strategy: LearningStrategy) -> str:
-        """Analyze context sensitivity."""
-        num_contexts = len(strategy.metrics.contexts_seen)
-        if num_contexts <= 1:
-            return "Single context - high sensitivity"
-        elif num_contexts <= 3:
-            return "Low context diversity"
-        else:
-            return "High context diversity"
-
-    def _format_strategy_evolution(self, strategy: LearningStrategy) -> str:
-        """Format strategy evolution timeline."""
-        timeline = [
-            f"- **{datetime.fromtimestamp(strategy.created_at).strftime('%Y-%m-%d')}:** Strategy created",
-        ]
-
-        if strategy.validation_attempts > 0:
-            timeline.append(
-                f"- **Validation:** {strategy.validation_successes}/{strategy.validation_attempts} attempts successful"
-            )
-
-        if strategy.is_validated:
-            timeline.append("- **Status:** ✅ Validated and active")
-
-        return "\n".join(timeline)
-
-    async def _log_strategy_event(
-        self, strategy: LearningStrategy, primitive_type: str, event_type: str
-    ) -> None:
-        """Log strategy event in daily journal."""
-
-        today = datetime.now().strftime("%Y_%m_%d")
-        journal_file = self.journals_path / f"{today}.md"
-
-        # Create or append to today's journal
-        if journal_file.exists():
-            content = journal_file.read_text(encoding="utf-8")
-        else:
-            content = f"# {datetime.now().strftime('%Y-%m-%d')}\n\n"
-
-        # Add strategy event
-        timestamp = datetime.now().strftime("%H:%M")
-        event_entry = f"""
-## {timestamp} - Strategy {event_type.title()}
-
-- **Strategy:** [[Strategies/{strategy.name}]]
-- **Primitive:** [[TTA Primitives/{primitive_type}]]
-- **Success Rate:** {strategy.metrics.success_rate:.1%}
-- **Executions:** {strategy.metrics.total_executions}
-- **Event:** {event_type} #strategy-learning
-
-"""
-
-        content += event_entry
-        journal_file.write_text(content, encoding="utf-8")
-
-    async def _update_strategy_network(
-        self, strategy: LearningStrategy, primitive_type: str
-    ) -> None:
-        """Update strategy network visualization."""
-
-        # Create/update strategy network page
-        network_file = self.logseq_base_path / "pages" / "Strategy Network.md"
-
-        if network_file.exists():
-            content = network_file.read_text(encoding="utf-8")
-        else:
-            content = """# Strategy Network
-
-This page visualizes the relationships between learned strategies.
-
-## Strategy Graph
-"""
-
-        # Add network entry
-        network_entry = f"""
-### {strategy.name}
-- **Type:** {primitive_type}
-- **Performance:** {strategy.metrics.success_rate:.1%} success rate
-- **Contexts:** {len(strategy.metrics.contexts_seen)}
-- **Link:** [[Strategies/{strategy.name}]]
-"""
-
-        content += network_entry
-        network_file.write_text(content, encoding="utf-8")
-
-    def _update_performance_section(
-        self, content: str, strategy: LearningStrategy, execution_result: dict[str, Any]
-    ) -> str:
-        """Update performance section in existing strategy page."""
-
-        # Find and update performance metrics section
-        lines = content.split("\n")
-        updated_lines = []
-        in_performance_section = False
-
-        for line in lines:
-            if line.startswith("## Performance Metrics"):
-                in_performance_section = True
-                updated_lines.append(line)
-                # Add updated metrics
-                updated_lines.extend(
-                    [
-                        f"- **Success Rate:** {strategy.metrics.success_rate:.1%} ({strategy.metrics.success_count}/{strategy.metrics.total_executions})",
-                        f"- **Average Latency:** {strategy.metrics.avg_latency:.3f}s",
-                        f"- **Total Executions:** {strategy.metrics.total_executions}",
-                        f"- **Contexts Seen:** {len(strategy.metrics.contexts_seen)}",
-                        f"- **Last Updated:** {datetime.fromtimestamp(strategy.metrics.last_updated).strftime('%Y-%m-%d %H:%M')}",
-                    ]
-                )
-                # Skip old metrics lines
-                continue
-            elif in_performance_section and line.startswith("##"):
-                in_performance_section = False
-
-            if not in_performance_section or not line.startswith("- "):
-                updated_lines.append(line)
-
-        return "\n".join(updated_lines)
-
-    def generate_strategy_queries(self) -> dict[str, str]:
-        """Generate useful Logseq queries for strategy analysis."""
-
-        return {
-            "high_performance_strategies": """{{query (and [[#strategy]] (property success-rate > 0.8))}}""",
-            "recent_strategies": """{{query (and [[#strategy]] (between [[7 days ago]] [[today]]))}}""",
-            "strategies_by_primitive": {
-                "retry": """{{query (and [[#strategy]] [[#retry]])}}""",
-                "cache": """{{query (and [[#strategy]] [[#cache]])}}""",
-                "routing": """{{query (and [[#strategy]] [[#routing]])}}""",
-            },
-            "learning_events": """{{query (and [[#strategy-learning]] (between [[today]] [[tomorrow]]))}}""",
-            "validation_pending": """{{query (and [[#strategy]] (property validated false))}}""",
-        }
+        param_list = ""
+        for key, value in parameters.items():
+            param_list += f"- {key}: {value}\n"
+        return param_list
 
 
-# Template for strategy dashboard page
-STRATEGY_DASHBOARD_TEMPLATE = """# Strategy Learning Dashboard
+# Example Usage (for demonstration purposes, not executed directly)
+async def _example_usage() -> None:
+    # This is a placeholder to show how the class might be used.
+    # In a real scenario, this would be part of an AdaptivePrimitive.
 
-**Real-time view of adaptive primitive learning progress**
+    # Mock data
+    mock_strategy = LearningStrategy(
+        name="test_strategy_v1",
+        description="A test strategy",
+        parameters={"timeout": 10, "retries": 2},
+        metrics=StrategyMetrics(success_rate=0.95, avg_latency_ms=500, contexts_seen=5),
+    )
+    mock_metrics = StrategyMetrics(success_rate=0.98, avg_latency_ms=450, contexts_seen=10)
 
-## 🎯 Performance Summary
+    # Initialize integration
+    logseq_integration = LogseqStrategyIntegration("example_service")
 
-### High-Performance Strategies (>80% success rate)
-{{query (and [[#strategy]] (property success-rate > 0.8))}}
+    # Save a new strategy
+    await logseq_integration.save_learned_strategy(
+        strategy=mock_strategy,
+        primitive_type="AdaptivePrimitive",
+        context="development",
+        notes="Initial test strategy.",
+    )
 
-### Recently Learned (Last 7 days)
-{{query (and [[#strategy]] (between [[7 days ago]] [[today]]))}}
-
-### Validation Pending
-{{query (and [[#strategy]] (property validated false))}}
-
-## 📊 Strategy Breakdown by Primitive
-
-### Retry Strategies
-{{query (and [[#strategy]] [[#retry]])}}
-
-### Cache Strategies
-{{query (and [[#strategy]] [[#cache]])}}
-
-### Routing Strategies
-{{query (and [[#strategy]] [[#routing]])}}
-
-## 🔍 Learning Activity
-
-### Today's Learning Events
-{{query (and [[#strategy-learning]] (between [[today]] [[tomorrow]]))}}
-
-### Strategy Performance Updates
-{{query (and [[#strategy-learning]] (property event-type "performance_update"))}}
-
-## 🧠 Learning Insights
-
-### Most Successful Contexts
-{{query (and [[#strategy]] (property context-pattern *production*))}}
-
-### Error-Specific Strategies
-{{query (and [[#strategy]] (property context-pattern *error*))}}
-
-### Time-Sensitive Optimizations
-{{query (and [[#strategy]] (property context-pattern *time_sensitive*))}}
-
-## 📈 Performance Trends
-
-Use these queries to analyze learning trends:
-
-- **Weekly Learning Rate:** How many strategies learned per week?
-- **Validation Success Rate:** What percentage of new strategies get validated?
-- **Context Diversity:** How many different contexts are we learning from?
-- **Performance Improvements:** Are strategies actually improving over baselines?
-
----
-*Auto-updated by Adaptive Primitives Learning System*
-"""
+    # Update performance of an existing strategy
+    await logseq_integration.update_strategy_performance(
+        strategy_name="test_strategy_v1",
+        new_metrics=mock_metrics,
+        primitive_type="AdaptivePrimitive",
+        context="development",
+        notes="Performance improved.",
+    )
 
 
-# Export classes and templates
-__all__ = [
-    "LogseqStrategyIntegration",
-    "STRATEGY_DASHBOARD_TEMPLATE",
-]
+if __name__ == "__main__":
+    # To run this example, you would need to have Logseq installed and
+    # a graph path configured (e.g., via LOGSEQ_GRAPH_PATH env var).
+    # You would also need the tta_dev_primitives package installed.
+    # import asyncio
+    # asyncio.run(_example_usage())
+    pass

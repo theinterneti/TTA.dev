@@ -31,11 +31,13 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 - **⚡ Quick Reference:** [`logseq/pages/TODO Architecture Quick Reference.md`](logseq/pages/TODO Architecture Quick Reference.md) - Fast lookup
 
 **Package Dashboards:**
+
 - [`TTA.dev/Packages/tta-dev-primitives/TODOs`](logseq/pages/TTA.dev___Packages___tta-dev-primitives___TODOs.md) - Core primitives ✅
 - [`TTA.dev/Packages/tta-observability-integration/TODOs`](logseq/pages/TTA.dev___Packages___tta-observability-integration___TODOs.md) - Observability ✅
 - [`TTA.dev/Packages/universal-agent-context/TODOs`](logseq/pages/TTA.dev___Packages___universal-agent-context___TODOs.md) - Agent context ✅
 
 **Migration Documentation:**
+
 - [`docs/TODO_ARCHITECTURE_APPLICATION_COMPLETE.md`](docs/TODO_ARCHITECTURE_APPLICATION_COMPLETE.md) - **28 active TODOs** migrated/created
 - [`docs/TODO_LIFECYCLE_GUIDE.md`](docs/TODO_LIFECYCLE_GUIDE.md) - Completion, archival, and embedded TODO workflows ✅
 - [`docs/TODO_LIFECYCLE_IMPLEMENTATION_SUMMARY.md`](docs/TODO_LIFECYCLE_IMPLEMENTATION_SUMMARY.md) - Implementation summary
@@ -43,10 +45,11 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 **Daily Journal:** Add TODOs to `logseq/journals/YYYY_MM_DD.md`
 
 **Tag Convention:**
-  - `#dev-todo` - Development work (building TTA.dev itself)
-  - `#learning-todo` - User education (tutorials, flashcards, exercises)
-  - `#template-todo` - Reusable patterns (for agents/users)
-  - `#ops-todo` - Infrastructure (deployment, monitoring)
+
+- `#dev-todo` - Development work (building TTA.dev itself)
+- `#learning-todo` - User education (tutorials, flashcards, exercises)
+- `#template-todo` - Reusable patterns (for agents/users)
+- `#ops-todo` - Infrastructure (deployment, monitoring)
 
 **When to Update:**
 
@@ -168,6 +171,63 @@ TTA.dev's core value is **composable workflow primitives**. Here are the key pri
 |-----------|---------|-------------|---------|
 | `MockPrimitive` | Testing and mocking | `from tta_dev_primitives.testing import MockPrimitive` | [mock_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/testing/mock_primitive.py) |
 
+### Adaptive/Self-Improving Primitives ⭐ NEW
+
+**Primitives that learn from observability data and automatically improve their behavior.**
+
+| Primitive | Purpose | Import Path | Example |
+|-----------|---------|-------------|---------|
+| `AdaptivePrimitive[T,U]` | Base class for self-improving primitives | `from tta_dev_primitives.adaptive import AdaptivePrimitive` | [base.py](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py) |
+| `AdaptiveRetryPrimitive` | Retry that learns optimal strategies | `from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive` | [retry.py](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py) |
+| `LogseqStrategyIntegration` | Persist learned strategies to KB | `from tta_dev_primitives.adaptive import LogseqStrategyIntegration` | [logseq_integration.py](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py) |
+
+**Quick Start:**
+
+```python
+from tta_dev_primitives.adaptive import (
+    AdaptiveRetryPrimitive,
+    LogseqStrategyIntegration,
+    LearningMode
+)
+
+# Setup Logseq integration for automatic persistence
+logseq = LogseqStrategyIntegration("my_service")
+
+# Create adaptive retry - learns optimal retry strategies!
+adaptive_retry = AdaptiveRetryPrimitive(
+    target_primitive=unreliable_api,
+    logseq_integration=logseq,
+    enable_auto_persistence=True
+)
+
+# Use it - learning happens automatically!
+result = await adaptive_retry.execute(data, context)
+
+# Strategies automatically saved to logseq/pages/Strategies/
+# Check learned strategies: logseq/pages/Strategies/my_service_*.md
+```
+
+**Key Features:**
+
+- ✅ **Automatic Learning** - Learns from execution patterns without manual tuning
+- ✅ **Context-Aware** - Different strategies for different contexts (production/staging/dev)
+- ✅ **Production-Safe** - Circuit breakers and validation windows prevent bad strategies
+- ✅ **Knowledge Base** - Automatically persists strategies to Logseq for discovery and sharing
+- ✅ **Observable** - Full OpenTelemetry integration shows learning process
+- ✅ **Composable** - Works with all other TTA.dev primitives
+
+**Examples:**
+
+- [auto_learning_demo.py](examples/auto_learning_demo.py) - Automatic learning and persistence ✅
+- [verify_adaptive_primitives.py](examples/verify_adaptive_primitives.py) - Comprehensive verification suite ✅
+- [production_adaptive_demo.py](examples/production_adaptive_demo.py) - Production multi-region simulation ✅
+
+**Documentation:**
+
+- [ADAPTIVE_PRIMITIVES_VERIFICATION_COMPLETE.md](ADAPTIVE_PRIMITIVES_VERIFICATION_COMPLETE.md) - Comprehensive verification report
+- [ADAPTIVE_PRIMITIVES_AUDIT.md](ADAPTIVE_PRIMITIVES_AUDIT.md) - System audit and quality review
+- [ADAPTIVE_PRIMITIVES_IMPROVEMENTS.md](ADAPTIVE_PRIMITIVES_IMPROVEMENTS.md) - Latest improvements summary
+
 **Full catalog with detailed examples:** [`PRIMITIVES_CATALOG.md`](PRIMITIVES_CATALOG.md)
 
 ---
@@ -274,7 +334,7 @@ workflow = ParallelPrimitive(
 )
 ```
 
-### 4. Iterative Code Refinement with E2B ⭐ NEW!
+### 4. Iterative Code Refinement with E2B ⭐ NEW
 
 **CRITICAL PATTERN:** When generating code with AI, always validate it works before using!
 
@@ -310,6 +370,7 @@ class IterativeCodeGenerator:
 ```
 
 **When to use this pattern:**
+
 - ✅ Test generation workflows (generate → execute → validate)
 - ✅ Documentation code snippets (ensure examples work)
 - ✅ PR code validation (run tests before merge)
@@ -317,6 +378,7 @@ class IterativeCodeGenerator:
 - ✅ Data processing scripts (catch errors early)
 
 **Benefits:**
+
 - Real validation (not just LLM opinion that "code looks good")
 - Catch syntax errors, import errors, logic bugs
 - $0 cost (E2B FREE tier) + ~$0.01/iteration (LLM)
@@ -583,6 +645,15 @@ Each package has:
 4. **Add observability:** Use `WorkflowContext` for all workflows
 5. **Test with mocks:** Use `MockPrimitive` for unit tests
 6. **Check toolsets:** Use `#tta-agent-dev` in Copilot for agent-specific tools
+7. **Try adaptive primitives:** Use `AdaptiveRetryPrimitive` for self-improving workflows
+
+### For Self-Improving Workflows
+
+1. **Start simple:** Use `AdaptiveRetryPrimitive` with existing unreliable operations
+2. **Enable auto-persistence:** Add `LogseqStrategyIntegration` for automatic KB updates
+3. **Review learned strategies:** Check `logseq/pages/Strategies/` for insights
+4. **Use learning modes:** Start with `OBSERVE`, move to `VALIDATE`, then `ACTIVE`
+5. **Monitor learning:** Check OpenTelemetry traces for learning events
 
 ### For Observability Work
 

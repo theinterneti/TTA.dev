@@ -2,7 +2,7 @@
 
 **Complete Reference for All Workflow Primitives**
 
-**Last Updated:** October 30, 2025
+**Last Updated:** November 7, 2025
 
 ---
 
@@ -18,6 +18,7 @@ This catalog provides a complete reference for all TTA.dev workflow primitives, 
 4. [Orchestration Primitives](#orchestration-primitives) - Multi-agent coordination
 5. [Testing Primitives](#testing-primitives) - Testing utilities
 6. [Observability Primitives](#observability-primitives) - Tracing and metrics
+7. [ACE Framework Agents](#ace-framework-agents) - LLM-powered code generation and learning
 
 ---
 
@@ -515,6 +516,274 @@ from tta_dev_primitives.observability import InstrumentedPrimitive
 
 ---
 
+## Adaptive/Self-Improving Primitives
+
+### AdaptivePrimitive[TInput, TOutput]
+
+**Base class for self-improving primitives that learn from execution patterns.**
+
+**Import:**
+\`\`\`python
+from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode
+\`\`\`
+
+**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py)
+
+**Key Concepts:**
+
+- **LearningStrategy**: Named configuration with performance metrics
+- **StrategyMetrics**: Success rate, latency, contexts seen
+- **LearningMode**: DISABLED, OBSERVE, VALIDATE, ACTIVE
+- **Circuit Breaker**: Automatic fallback on high failure rates
+- **Context-Aware**: Different strategies for different contexts
+
+**Type Parameters:**
+
+- \`TInput\` - Input data type
+- \`TOutput\` - Output data type
+
+**Usage:**
+\`\`\`python
+from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode, LearningStrategy
+
+class MyAdaptivePrimitive(AdaptivePrimitive[str, dict]):
+    async def _execute_with_strategy(
+        self,
+        strategy: LearningStrategy,
+        input_data: str,
+        context: WorkflowContext
+    ) -> dict:
+        """Execute using the selected strategy."""
+        # Your implementation using strategy.parameters
+        return {"result": input_data, "strategy": strategy.name}
+
+    async def _consider_new_strategy(
+        self,
+        input_data: str,
+        context: WorkflowContext,
+        current_performance: StrategyMetrics
+    ) -> LearningStrategy | None:
+        """Consider creating a new strategy based on patterns."""
+        # Your learning logic
+        if current_performance.success_rate < 0.8:
+            return LearningStrategy(
+                name="optimized_v2",
+                description="Improved based on failures",
+                parameters={"timeout": 60}
+            )
+        return None
+
+# Use it
+
+adaptive = MyAdaptivePrimitive(
+    baseline_strategy=LearningStrategy(name="default", parameters={"timeout": 30}),
+    learning_mode=LearningMode.ACTIVE,
+    enable_circuit_breaker=True
+)
+
+result = await adaptive.execute(data, context)
+\`\`\`
+
+**Safety Features:**
+
+- ✅ Baseline fallback strategy always available
+- ✅ Circuit breaker on high failure rates (>50%)
+- ✅ Validation window before strategy adoption
+- ✅ Minimum observations required for learning
+- ✅ Context isolation prevents interference
+
+---
+
+### AdaptiveRetryPrimitive
+
+**Retry primitive that learns optimal retry parameters from execution patterns.**
+
+**Import:**
+\`\`\`python
+from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive
+\`\`\`
+
+**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py)
+
+**What It Learns:**
+
+- Optimal number of retries (max_retries)
+- Best backoff factor (backoff_factor)
+- Ideal initial delay (initial_delay)
+- Context-specific strategies (production vs staging)
+
+**Usage:**
+\`\`\`python
+from tta_dev_primitives.adaptive import (
+    AdaptiveRetryPrimitive,
+    LogseqStrategyIntegration,
+    LearningMode
+)
+
+# Setup Logseq integration (optional but recommended)
+
+logseq = LogseqStrategyIntegration("my_api_service")
+
+# Create adaptive retry
+
+adaptive_retry = AdaptiveRetryPrimitive(
+    target_primitive=unreliable_api,
+    logseq_integration=logseq,
+    enable_auto_persistence=True,
+    learning_mode=LearningMode.ACTIVE,
+    min_observations_before_learning=10
+)
+
+# Use it - learning happens automatically
+
+result = await adaptive_retry.execute(api_request, context)
+
+# Check learned strategies
+
+strategies = adaptive_retry.strategies
+for name, strategy in strategies.items():
+    print(f"{name}: {strategy.metrics.success_rate:.1%} success")
+\`\`\`
+
+**Automatic Behaviors:**
+
+- ✅ Learns from failures and successes
+- ✅ Creates context-specific strategies
+- ✅ Validates strategies before adoption
+- ✅ Persists to Logseq automatically
+- ✅ Falls back to baseline on issues
+
+**Example Learned Strategy:**
+\`\`\`python
+LearningStrategy(
+    name="production_high_load_v2",
+    description="Learned from 50 executions in production context",
+    parameters={
+        "max_retries": 5,        # Learned: more retries needed
+        "backoff_factor": 2.5,   # Learned: longer waits help
+        "initial_delay": 2.0     # Learned: start with longer delay
+    },
+    metrics=StrategyMetrics(
+        success_rate=0.94,       # 94% success rate
+        avg_latency_ms=1250.5,   # Average latency
+        contexts_seen=1          # Specific to this context
+    )
+)
+\`\`\`
+
+---
+
+### LogseqStrategyIntegration
+
+**Persist learned strategies to Logseq knowledge base.**
+
+**Import:**
+\`\`\`python
+from tta_dev_primitives.adaptive import LogseqStrategyIntegration
+\`\`\`
+
+**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py)
+
+**Features:**
+
+- **Strategy Pages**: Creates `logseq/pages/Strategies/{service_name}_{strategy_name}.md`
+- **Journal Entries**: Logs learning events to daily journals
+- **Query Support**: Pre-configured queries to discover related strategies
+- **Performance Tracking**: Updates metrics over time
+- **Cross-Service Sharing**: Strategies discoverable across services
+
+**Usage:**
+\`\`\`python
+
+# Create integration
+
+logseq = LogseqStrategyIntegration("recommendation_engine")
+
+# Save learned strategy
+
+await logseq.save_learned_strategy(
+    strategy=learned_strategy,
+    primitive_type="AdaptiveRetryPrimitive",
+    context="production_high_load",
+    notes="Learned during Black Friday traffic spike"
+)
+
+# Update performance
+
+await logseq.update_strategy_performance(
+    strategy_name="production_high_load_v2",
+    new_metrics=updated_metrics
+)
+\`\`\`
+
+**Generated Strategy Page Example:**
+\`\`\`markdown
+
+# Strategy - recommendation_engine_production_v2
+
+**Type:** AdaptiveRetryPrimitive
+**Context:** production_high_load
+**Created:** 2025-11-07
+**Performance:** 94.0% success rate, 1250.5ms avg latency
+
+## Parameters
+
+- max_retries: 5
+- backoff_factor: 2.5
+- initial_delay: 2.0
+
+## Performance History
+
+| Date | Success Rate | Avg Latency | Observations |
+|------|--------------|-------------|--------------|
+| 2025-11-07 | 94.0% | 1250.5ms | 50 |
+
+## Related Strategies
+
+{{query (and [[Strategies]] [[recommendation_engine]])}}
+
+## Notes
+
+Learned during Black Friday traffic spike. Higher retry count needed.
+\`\`\`
+
+**Benefits:**
+
+- ✅ **Knowledge Preservation**: Strategies persist across restarts
+- ✅ **Discovery**: Find similar strategies via Logseq queries
+- ✅ **Transparency**: Full visibility into what was learned
+- ✅ **Sharing**: Export strategies for other services
+- ✅ **Auditing**: Complete learning history in journals
+
+---
+
+## ACE Framework Agents
+
+**The ACE (Autonomous Cognitive Engine) framework provides advanced LLM-powered agents for code generation, analysis, and knowledge management.**
+
+### GeneratorAgent
+
+**Purpose**: Generates code using LLM and learned strategies.
+**Import**: `from tta_dev_primitives.ace.agents.generator import GeneratorAgent`
+**Source**: [\`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/generator.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/generator.py)
+**Description**: Replaces template-based code generation with sophisticated LLM capabilities, incorporating learned strategies for improved output quality and relevance.
+
+### ReflectorAgent
+
+**Purpose**: Analyzes execution results and extracts insights.
+**Import**: `from tta_dev_primitives.ace.agents.reflector import ReflectorAgent`
+**Source**: [\`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/reflector.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/reflector.py)
+**Description**: Performs deep analysis of execution outcomes, identifying root causes of failures, performance bottlenecks, and extracting actionable strategies for learning.
+
+### CuratorAgent
+
+**Purpose**: Manages the knowledge base and strategy selection.
+**Import**: `from tta_dev_primitives.ace.agents.curator import CuratorAgent`
+**Source**: [\`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py)
+**Description**: Intelligently manages learned strategies, including deduplication, relevance scoring, and selection for future tasks, ensuring the playbook remains efficient and effective.
+
+---
+
 ## Complete Production Example
 
 **Goal:** Build a production-ready LLM service with all safeguards.
@@ -611,6 +880,14 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 |-----------|-------------|---------|
 | CachePrimitive | \`tta_dev_primitives.performance\` | LRU cache with TTL |
 
+### Adaptive/Learning
+
+| Primitive | Import Path | Purpose |
+|-----------|-------------|---------|
+| AdaptivePrimitive | \`tta_dev_primitives.adaptive\` | Base class for self-improving primitives |
+| AdaptiveRetryPrimitive | \`tta_dev_primitives.adaptive\` | Retry that learns optimal strategies |
+| LogseqStrategyIntegration | \`tta_dev_primitives.adaptive\` | Persist strategies to knowledge base |
+
 ### Orchestration
 
 | Primitive | Import Path | Purpose |
@@ -633,6 +910,6 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 
 ---
 
-**Last Updated:** October 30, 2025
+**Last Updated:** November 7, 2025
 **Maintained by:** TTA.dev Team
 **License:** See package licenses
