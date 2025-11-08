@@ -264,9 +264,7 @@ async def main():
         print(f"   Total Requests: {result['total_requests']}")
         print(f"   Strategies Learned: {result['strategies_learned']}")
         print(f"   Logseq Pages Created: {result['logseq_pages']}")
-        print(
-            f"   Production Ready: {'✅ Yes' if result['production_ready'] else '❌ No'}"
-        )
+        print(f"   Production Ready: {'✅ Yes' if result['production_ready'] else '❌ No'}")
 
         return result
 

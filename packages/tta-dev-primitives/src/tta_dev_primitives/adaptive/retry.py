@@ -77,11 +77,9 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
         max_strategies: int = 8,
         logseq_integration: Any | None = None,
         enable_auto_persistence: bool = True,
-        **kwargs,
-    ):
-        super().__init__(
-            learning_mode=learning_mode, max_strategies=max_strategies, **kwargs
-        )
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(learning_mode=learning_mode, max_strategies=max_strategies, **kwargs)
 
         self.target_primitive = target_primitive
         self.logseq_integration = logseq_integration
@@ -174,17 +172,11 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
                 # Don't sleep after the last attempt
                 if attempt < retry_params.max_retries:
                     # Calculate delay with backoff and optional jitter
-                    delay = retry_params.initial_delay * (
-                        retry_params.backoff_factor**attempt
-                    )
+                    delay = retry_params.initial_delay * (retry_params.backoff_factor**attempt)
                     delay = min(delay, retry_params.max_delay)
 
                     if retry_params.jitter:
-                        jitter = (
-                            delay
-                            * retry_params.jitter_factor
-                            * (2 * random.random() - 1)
-                        )
+                        jitter = delay * retry_params.jitter_factor * (2 * random.random() - 1)
                         delay = max(0, delay + jitter)
 
                     if span:
@@ -226,9 +218,7 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
             context_pattern="",  # Matches all contexts
         )
 
-    def _context_extractor(
-        self, input_data: dict[str, Any], context: WorkflowContext
-    ) -> str:
+    def _context_extractor(self, input_data: dict[str, Any], context: WorkflowContext) -> str:
         """Extract context key for retry strategy selection."""
         # Build context key from:
         # - Environment (prod vs dev vs test)
@@ -291,9 +281,7 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
 
             # 2. If we're consistently failing after max retries, maybe increase them
             elif not success and strategy.metrics.failure_rate > 0.3:
-                await self._consider_increasing_retries(
-                    context_key, strategy, error_type, context
-                )
+                await self._consider_increasing_retries(context_key, strategy, error_type, context)
 
             # 3. If we see specific error patterns, create specialized strategies
             if error_type in ["TimeoutError", "ConnectionError", "HTTPException"]:
@@ -314,24 +302,17 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
 
         strategy_name = f"low_retry_{hash(context_key) % 1000}"
 
-        if (
-            strategy_name not in self.strategies
-            and len(self.strategies) < self.max_strategies
-        ):
+        if strategy_name not in self.strategies and len(self.strategies) < self.max_strategies:
             # Create strategy with reduced retries for fast-succeeding contexts
             new_params = RetryStrategyParams.from_dict(strategy.parameters.copy())
             new_params.max_retries = max(1, new_params.max_retries - 1)
-            new_params.initial_delay = min(
-                0.5, new_params.initial_delay
-            )  # Faster initial delay
+            new_params.initial_delay = min(0.5, new_params.initial_delay)  # Faster initial delay
 
             new_strategy = LearningStrategy(
                 name=strategy_name,
                 description=f"Reduced retries for reliable context: {context_key[:50]}",
                 parameters=new_params.to_dict(),
-                context_pattern=context_key.split("|")[
-                    0
-                ],  # Match on environment pattern
+                context_pattern=context_key.split("|")[0],  # Match on environment pattern
             )
 
             self.strategies[strategy_name] = new_strategy
@@ -354,21 +335,12 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
 
         strategy_name = f"high_retry_{error_type.lower()}_{hash(context_key) % 1000}"
 
-        if (
-            strategy_name not in self.strategies
-            and len(self.strategies) < self.max_strategies
-        ):
+        if strategy_name not in self.strategies and len(self.strategies) < self.max_strategies:
             # Create strategy with more retries and longer delays for problematic contexts
             new_params = RetryStrategyParams.from_dict(strategy.parameters.copy())
-            new_params.max_retries = min(
-                8, new_params.max_retries + 2
-            )  # Add more retries
-            new_params.backoff_factor = max(
-                1.5, new_params.backoff_factor * 0.8
-            )  # Gentler backoff
-            new_params.max_delay = min(
-                120.0, new_params.max_delay * 1.5
-            )  # Allow longer delays
+            new_params.max_retries = min(8, new_params.max_retries + 2)  # Add more retries
+            new_params.backoff_factor = max(1.5, new_params.backoff_factor * 0.8)  # Gentler backoff
+            new_params.max_delay = min(120.0, new_params.max_delay * 1.5)  # Allow longer delays
 
             new_strategy = LearningStrategy(
                 name=strategy_name,
@@ -396,14 +368,9 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
     ) -> None:
         """Consider creating error-type-specific strategies."""
 
-        strategy_name = (
-            f"error_specific_{error_type.lower()}_{hash(context_key) % 1000}"
-        )
+        strategy_name = f"error_specific_{error_type.lower()}_{hash(context_key) % 1000}"
 
-        if (
-            strategy_name not in self.strategies
-            and len(self.strategies) < self.max_strategies
-        ):
+        if strategy_name not in self.strategies and len(self.strategies) < self.max_strategies:
             # Create error-specific strategy based on known patterns
             params = RetryStrategyParams()
 
@@ -451,10 +418,7 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
 
         strategy_name = f"fast_backoff_{hash(context_key) % 1000}"
 
-        if (
-            strategy_name not in self.strategies
-            and len(self.strategies) < self.max_strategies
-        ):
+        if strategy_name not in self.strategies and len(self.strategies) < self.max_strategies:
             # Create strategy with faster backoff for time-sensitive scenarios
             new_params = RetryStrategyParams.from_dict(strategy.parameters.copy())
             new_params.initial_delay = max(0.1, new_params.initial_delay * 0.5)

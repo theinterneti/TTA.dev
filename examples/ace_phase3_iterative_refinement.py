@@ -25,9 +25,7 @@ async def demo_iterative_refinement():
     print()
 
     # Initialize learner with playbook
-    learner = SelfLearningCodePrimitive(
-        playbook_file=Path("phase3_refinement_playbook.json")
-    )
+    learner = SelfLearningCodePrimitive(playbook_file=Path("phase3_refinement_playbook.json"))
 
     # Create context
     context = WorkflowContext(correlation_id="phase3-demo")
@@ -117,4 +115,3 @@ async def demo_iterative_refinement():
 
 if __name__ == "__main__":
     asyncio.run(demo_iterative_refinement())
-

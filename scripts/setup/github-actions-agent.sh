@@ -61,7 +61,7 @@ packages=(
 )
 
 for pkg in "${packages[@]}"; do
-    if uv run python -c "import $pkg; print(f'✅ {pkg} imported')" 2>/dev/null; then
+    if uv run python -c "import $pkg as pkg_module; print('✅ ' + pkg_module.__name__ + ' imported')" 2>/dev/null; then
         log_success "$pkg package available"
     else
         log_warning "$pkg package not importable"

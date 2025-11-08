@@ -242,9 +242,7 @@ CRITICAL: Use side_effect as a Callable function, NOT a list!
     combined_tests = "\n\n".join(all_tests)
 
     # Write to test file
-    test_file_path = (
-        "packages/tta-dev-primitives/tests/performance/test_retry_primitive_phase4.py"
-    )
+    test_file_path = "packages/tta-dev-primitives/tests/performance/test_retry_primitive_phase4.py"
     with open(test_file_path, "w") as f:
         f.write(
             f'''"""Comprehensive tests for RetryPrimitive (Phase 4 - Complete Context).

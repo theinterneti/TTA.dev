@@ -25,15 +25,25 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, TypeVar
+from typing import Any, Protocol, TypeVar
 
 from tta_dev_primitives.core.base import WorkflowContext
 from tta_dev_primitives.observability import InstrumentedPrimitive
 
 logger = logging.getLogger(__name__)
 
+# Type variables with constraints for better type safety
 TInput = TypeVar("TInput")
 TOutput = TypeVar("TOutput")
+TInput_contra = TypeVar("TInput_contra", contravariant=True)
+TOutput_co = TypeVar("TOutput_co", covariant=True)
+
+
+# Protocol for context extraction functions
+class ContextExtractor(Protocol[TInput_contra]):
+    """Protocol for context extraction callable."""
+
+    def __call__(self, input_data: TInput_contra, context: WorkflowContext) -> str: ...
 
 
 class LearningMode(Enum):
@@ -89,9 +99,7 @@ class StrategyMetrics:
         self.contexts_seen.add(context_key)
         self.last_updated = time.time()
 
-    def is_better_than(
-        self, other: StrategyMetrics, significance_threshold: float = 0.05
-    ) -> bool:
+    def is_better_than(self, other: StrategyMetrics, significance_threshold: float = 0.05) -> bool:
         """Check if this strategy is significantly better than another."""
         # Require minimum sample size for comparison
         if self.total_executions < 10 or other.total_executions < 10:
@@ -167,8 +175,8 @@ class AdaptivePrimitive(InstrumentedPrimitive[TInput, TOutput], ABC):
         max_strategies: int = 10,
         validation_window: int = 50,
         circuit_breaker_threshold: float = 0.5,
-        context_extractor: callable | None = None,
-    ):
+        context_extractor: ContextExtractor[TInput] | None = None,
+    ) -> None:
         super().__init__()
 
         self.learning_mode = learning_mode
@@ -194,9 +202,7 @@ class AdaptivePrimitive(InstrumentedPrimitive[TInput, TOutput], ABC):
             f"Initialized {self.__class__.__name__} with learning_mode={learning_mode.value}"
         )
 
-    async def _execute_impl(
-        self, input_data: TInput, context: WorkflowContext
-    ) -> TOutput:
+    async def _execute_impl(self, input_data: TInput, context: WorkflowContext) -> TOutput:
         """Execute with adaptive strategy selection and learning."""
 
         # Extract context for strategy selection
@@ -214,17 +220,13 @@ class AdaptivePrimitive(InstrumentedPrimitive[TInput, TOutput], ABC):
                 with self._tracer.start_as_current_span("adaptive_execution") as span:
                     span.set_attribute("adaptive.strategy_name", strategy.name)
                     span.set_attribute("adaptive.context_key", context_key)
-                    span.set_attribute(
-                        "adaptive.learning_mode", self.learning_mode.value
-                    )
+                    span.set_attribute("adaptive.learning_mode", self.learning_mode.value)
                     span.set_attribute(
                         "adaptive.circuit_breaker_active", self.circuit_breaker_active
                     )
 
                     # Execute the actual primitive logic with selected strategy
-                    result = await self._execute_with_strategy(
-                        input_data, context, strategy
-                    )
+                    result = await self._execute_with_strategy(input_data, context, strategy)
 
                     execution_time = time.time() - start_time
 
@@ -246,16 +248,12 @@ class AdaptivePrimitive(InstrumentedPrimitive[TInput, TOutput], ABC):
                     span.set_attribute(
                         "adaptive.strategy_success_rate", strategy.metrics.success_rate
                     )
-                    span.set_attribute(
-                        "adaptive.total_strategies", len(self.strategies)
-                    )
+                    span.set_attribute("adaptive.total_strategies", len(self.strategies))
 
                     return result
             else:
                 # No tracing available - execute without spans
-                result = await self._execute_with_strategy(
-                    input_data, context, strategy
-                )
+                result = await self._execute_with_strategy(input_data, context, strategy)
 
                 execution_time = time.time() - start_time
                 strategy.record_usage(True, execution_time, context_key)
@@ -337,9 +335,7 @@ class AdaptivePrimitive(InstrumentedPrimitive[TInput, TOutput], ABC):
         self.circuit_breaker_until = time.time() + duration_seconds
         logger.warning(f"Circuit breaker activated for {duration_seconds} seconds")
 
-    def _default_context_extractor(
-        self, input_data: TInput, context: WorkflowContext
-    ) -> str:
+    def _default_context_extractor(self, input_data: TInput, context: WorkflowContext) -> str:
         """Default context extraction - can be overridden by subclasses."""
         # Simple context based on input type and metadata
         input_type = type(input_data).__name__
@@ -386,9 +382,7 @@ class AdaptivePrimitive(InstrumentedPrimitive[TInput, TOutput], ABC):
 
         # Check if we should create a new strategy based on performance
         if strategy.metrics.total_executions > 20:  # Minimum sample size
-            await self._consider_strategy_adaptation(
-                input_data, context, strategy, execution_time
-            )
+            await self._consider_strategy_adaptation(input_data, context, strategy, execution_time)
 
     async def _consider_strategy_adaptation(
         self,

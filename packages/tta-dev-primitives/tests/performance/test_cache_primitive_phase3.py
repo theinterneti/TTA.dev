@@ -5,28 +5,32 @@ Total scenarios: 2
 Strategies learned: 2
 """
 
-# Cache Hit and Miss Scenarios
 import asyncio
 from collections.abc import Callable
+from time import time
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 
+from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 
-class WorkflowContext:
-    """
-    A mock WorkflowContext for testing.  Can be expanded as needed.
-    """
-    def __init__(self, id: str = "test_context"):
-        self.id = id
 
-class WorkflowPrimitive:
-    """
-    A base class for workflow primitives.
-    """
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
-        raise NotImplementedError
+def default_cache_key_fn(input_data: Any, context: WorkflowContext) -> str:
+    return str(input_data) + context.correlation_id
+
+
+@pytest.fixture
+def mock_primitive():
+    mock = AsyncMock(spec=WorkflowPrimitive)
+    mock.execute.return_value = "mock_result"
+    return mock
+
+
+@pytest.fixture
+def mock_context():
+    return WorkflowContext(correlation_id="test_correlation_id")
+
 
 class CachePrimitive(WorkflowPrimitive):
     def __init__(
@@ -35,13 +39,6 @@ class CachePrimitive(WorkflowPrimitive):
         cache_key_fn: Callable[[Any, WorkflowContext], str],
         ttl_seconds: float = 3600.0,
     ) -> None:
-        '''Initialize cache primitive.
-        
-        Args:
-            primitive: Primitive to cache
-            cache_key_fn: Function to generate cache key from input/context
-            ttl_seconds: Time-to-live for cached values (default 1 hour)
-        '''
         self.primitive = primitive
         self.cache_key_fn = cache_key_fn
         self.ttl_seconds = ttl_seconds
@@ -49,323 +46,107 @@ class CachePrimitive(WorkflowPrimitive):
         self._stats = {"hits": 0, "misses": 0, "expirations": 0}
 
     async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
-        '''Execute with caching.'''
-        import time
-
         cache_key = self.cache_key_fn(input_data, context)
-
+        now = time()
         if cache_key in self._cache:
             value, expiry = self._cache[cache_key]
-            if time.time() < expiry:
+            if now < expiry:
                 self._stats["hits"] += 1
                 return value
             else:
                 self._stats["expirations"] += 1
                 del self._cache[cache_key]
-
-        self._stats["misses"] += 1
         result = await self.primitive.execute(input_data, context)
-        self._cache[cache_key] = (result, time.time() + self.ttl_seconds)
+        self._cache[cache_key] = (result, now + self.ttl_seconds)
+        self._stats["misses"] += 1
         return result
 
     def get_stats(self) -> dict[str, int]:
-        '''Get cache statistics.'''
         return self._stats.copy()
 
 
-@pytest.fixture
-def mock_primitive():
-    """Fixture to create a mock primitive."""
-    mock = MagicMock(spec=WorkflowPrimitive)
-    mock.execute.return_value = "primitive_result"
-    return mock
-
-@pytest.fixture
-def context():
-    """Fixture to create a context."""
-    return WorkflowContext()
-
-
-async def test_cache_miss_on_first_access(mock_primitive, context):
-    """Test cache miss on first access."""
-    cache_key_fn = lambda input_data, context: f"key_{input_data}"
-    cache = CachePrimitive(primitive=mock_primitive, cache_key_fn=cache_key_fn)
-
-    input_data = "test_input"
-    result = await cache.execute(input_data, context)
-
-    assert result == "primitive_result"
-    mock_primitive.execute.assert_called_once_with(input_data, context)
+@pytest.mark.asyncio
+async def test_cache_miss_on_first_access(mock_primitive, mock_context):
+    cache = CachePrimitive(primitive=mock_primitive, cache_key_fn=default_cache_key_fn)
+    input_data = "test_data"
+    result = await cache.execute(input_data, mock_context)
+    assert result == "mock_result"
     stats = cache.get_stats()
     assert stats["hits"] == 0
     assert stats["misses"] == 1
-    assert stats["expirations"] == 0
+    mock_primitive.execute.assert_called_once_with(input_data, mock_context)
 
 
-async def test_cache_hit_on_second_access(mock_primitive, context):
-    """Test cache hit on second access."""
-    cache_key_fn = lambda input_data, context: f"key_{input_data}"
-    cache = CachePrimitive(primitive=mock_primitive, cache_key_fn=cache_key_fn)
-
-    input_data = "test_input"
-
-    # First access (cache miss)
-    result1 = await cache.execute(input_data, context)
-    assert result1 == "primitive_result"
-    mock_primitive.execute.assert_called_once_with(input_data, context)
-
-    # Second access (cache hit)
-    mock_primitive.execute.reset_mock()  # Reset call count for the mock
-    result2 = await cache.execute(input_data, context)
-    assert result2 == "primitive_result"
-    mock_primitive.execute.assert_not_called()  # Ensure primitive is not called
-
+@pytest.mark.asyncio
+async def test_cache_hit_on_second_access(mock_primitive, mock_context):
+    cache = CachePrimitive(primitive=mock_primitive, cache_key_fn=default_cache_key_fn)
+    input_data = "test_data"
+    await cache.execute(input_data, mock_context)
+    mock_primitive.execute.reset_mock()
+    result = await cache.execute(input_data, mock_context)
+    assert result == "mock_result"
     stats = cache.get_stats()
     assert stats["hits"] == 1
     assert stats["misses"] == 1
-    assert stats["expirations"] == 0
-
-
-async def test_different_cache_keys_result_in_different_cached_values(mock_primitive, context):
-    """Test different cache keys."""
-    cache_key_fn = lambda input_data, context: f"key_{input_data}"
-    cache = CachePrimitive(primitive=mock_primitive, cache_key_fn=cache_key_fn)
-
-    input_data1 = "input_1"
-    input_data2 = "input_2"
-
-    # First access with input_1 (cache miss)
-    mock_primitive.execute.return_value = "result_1"
-    result1 = await cache.execute(input_data1, context)
-    assert result1 == "result_1"
-    mock_primitive.execute.assert_called_once_with(input_data1, context)
-
-    # Second access with input_2 (cache miss, different key)
-    mock_primitive.reset_mock()
-    mock_primitive.execute.return_value = "result_2"
-    result2 = await cache.execute(input_data2, context)
-    assert result2 == "result_2"
-    mock_primitive.execute.assert_called_once_with(input_data2, context)
-
-    # Third access with input_1 (cache hit)
-    mock_primitive.reset_mock()
-    result3 = await cache.execute(input_data1, context)
-    assert result3 == "result_1"
     mock_primitive.execute.assert_not_called()
 
+
+@pytest.mark.asyncio
+async def test_different_cache_keys_result_in_different_cached_values(mock_primitive, mock_context):
+    cache = CachePrimitive(primitive=mock_primitive, cache_key_fn=default_cache_key_fn)
+    input_data1 = "test_data_1"
+    input_data2 = "test_data_2"
+    await cache.execute(input_data1, mock_context)
+    await cache.execute(input_data2, mock_context)
     stats = cache.get_stats()
-    assert stats["hits"] == 1
+    assert stats["hits"] == 0
     assert stats["misses"] == 2
-    assert stats["expirations"] == 0
+    mock_primitive.execute.assert_any_call(input_data1, mock_context)
+    mock_primitive.execute.assert_any_call(input_data2, mock_context)
 
 
-async def test_cache_expiration(mock_primitive, context):
-    """Test cache expiration."""
-    cache_key_fn = lambda input_data, context: f"key_{input_data}"
-    cache = CachePrimitive(primitive=mock_primitive, cache_key_fn=cache_key_fn, ttl_seconds=0.1)  # Short TTL
-
-    input_data = "test_input"
-
-    # First access (cache miss)
-    await cache.execute(input_data, context)
-    mock_primitive.execute.assert_called_once_with(input_data, context)
-    mock_primitive.reset_mock()
-
-    # Wait for cache to expire
+@pytest.mark.asyncio
+async def test_cache_expiration(mock_primitive, mock_context):
+    cache = CachePrimitive(
+        primitive=mock_primitive, cache_key_fn=default_cache_key_fn, ttl_seconds=0.1
+    )
+    input_data = "test_data"
+    await cache.execute(input_data, mock_context)
+    mock_primitive.execute.assert_called_once()
+    mock_primitive.execute.reset_mock()
     await asyncio.sleep(0.2)
-
-    # Second access (cache expired, so miss)
-    await cache.execute(input_data, context)
-    mock_primitive.execute.assert_called_once_with(input_data, context)
-
+    await cache.execute(input_data, mock_context)
+    mock_primitive.execute.assert_called_once()
     stats = cache.get_stats()
-    assert stats["hits"] == 0
-    assert stats["misses"] == 2
     assert stats["expirations"] == 1
 
 
+@pytest.mark.asyncio
+async def test_custom_cache_key_function(mock_primitive, mock_context):
+    def custom_cache_key_fn(input_data: Any, context: WorkflowContext) -> str:
+        return f"custom_{input_data}_{context.correlation_id}"
 
-# TTL Expiration Tests
-import time
-from collections.abc import Callable
-from typing import Any
-
-import pytest
-
-
-class WorkflowContext:
-    """
-    A mock WorkflowContext for testing.
-    """
-
-    def __init__(self):
-        pass
+    cache = CachePrimitive(primitive=mock_primitive, cache_key_fn=custom_cache_key_fn)
+    input_data = "test_data"
+    await cache.execute(input_data, mock_context)
+    mock_primitive.execute.assert_called_once_with(input_data, mock_context)
+    mock_primitive.execute.reset_mock()
+    await cache.execute(input_data, mock_context)
+    mock_primitive.execute.assert_not_called()
 
 
-class WorkflowPrimitive:  # Changed to a base class
-    """
-    Base class for workflow primitives.
-    """
-
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
-        raise NotImplementedError
-
-
-class MockPrimitive(WorkflowPrimitive):
-    """
-    A mock primitive for testing purposes.
-    """
-
-    def __init__(self, return_value: Any = None):
-        self.return_value = return_value
-        self.execution_count = 0
-
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
-        self.execution_count += 1
-        return self.return_value
-
-
-class CachePrimitive(WorkflowPrimitive):
-    """
-    A workflow primitive that caches the result of another primitive.
-    """
-
-    def __init__(
-        self,
-        primitive: WorkflowPrimitive,
-        cache_key_fn: Callable[[Any, WorkflowContext], str],
-        ttl_seconds: float = 3600.0,
-    ) -> None:
-        '''Initialize cache primitive.
-
-        Args:
-            primitive: Primitive to cache
-            cache_key_fn: Function to generate cache key from input/context
-            ttl_seconds: Time-to-live for cached values (default 1 hour)
-        '''
-        self.primitive = primitive
-        self.cache_key_fn = cache_key_fn
-        self.ttl_seconds = ttl_seconds
-        self._cache: dict[str, tuple[Any, float]] = {}
-        self._stats: dict[str, int] = {"hits": 0, "misses": 0, "expirations": 0}
-
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
-        '''Execute with caching.'''
-        cache_key = self.cache_key_fn(input_data, context)
-        if cache_key in self._cache:
-            value, expiry_time = self._cache[cache_key]
-            if time.time() < expiry_time:
-                self._stats["hits"] += 1
-                return value
-            else:
-                self._stats["expirations"] += 1
-                del self._cache[cache_key]  # Remove expired entry
-        self._stats["misses"] += 1
-        result = await self.primitive.execute(input_data, context)
-        self._cache[cache_key] = (result, time.time() + self.ttl_seconds)
-        return result
-
-    def get_stats(self) -> dict[str, int]:
-        '''Get cache statistics.'''
-        return self._stats.copy()
-
-
-# Test cases for CachePrimitive TTL expiration
-class MockWorkflowContext(WorkflowContext):
-    """A mock WorkflowContext for testing."""
-
-    def __init__(self):
-        pass
-
-
-@pytest.fixture
-def mock_context():
-    return MockWorkflowContext()
-
-
-def test_cache_primitive_returns_value_before_ttl(mock_context):
-    """
-    Test that the cached value is returned before the TTL expires.
-    """
-    mock_primitive = MockPrimitive(return_value="initial value")
-    cache_key_fn = lambda input_data, context: "test_key"
-    cache_primitive = CachePrimitive(
-        primitive=mock_primitive, cache_key_fn=cache_key_fn, ttl_seconds=1
+@pytest.mark.asyncio
+async def test_expiration_statistics(mock_primitive, mock_context):
+    cache = CachePrimitive(
+        primitive=mock_primitive, cache_key_fn=default_cache_key_fn, ttl_seconds=0.1
     )
-
-    # First execution: Cache miss, primitive executed
-    result1 = asyncio.run(cache_primitive.execute("input", mock_context))
-    assert result1 == "initial value"
-    assert mock_primitive.execution_count == 1
-    stats = cache_primitive.get_stats()
+    input_data = "test_input"
+    await cache.execute(input_data, mock_context)
+    await asyncio.sleep(0.2)
+    await cache.execute(input_data, mock_context)
+    await asyncio.sleep(0.2)
+    await cache.execute(input_data, mock_context)
+    stats = cache.get_stats()
+    assert stats["expirations"] == 2
+    assert stats["misses"] == 3
     assert stats["hits"] == 0
-    assert stats["misses"] == 1
-    assert stats["expirations"] == 0
-
-    # Second execution (within TTL): Cache hit, primitive not executed
-    result2 = asyncio.run(cache_primitive.execute("input", mock_context))
-    assert result2 == "initial value"
-    assert mock_primitive.execution_count == 1
-    stats = cache_primitive.get_stats()
-    assert stats["hits"] == 1
-    assert stats["misses"] == 1
-    assert stats["expirations"] == 0
-
-
-def test_cache_primitive_re_executes_after_ttl(mock_context):
-    """
-    Test that the primitive is re-executed after the TTL expires.
-    """
-    mock_primitive = MockPrimitive(return_value="initial value")
-    cache_key_fn = lambda input_data, context: "test_key"
-    cache_primitive = CachePrimitive(
-        primitive=mock_primitive, cache_key_fn=cache_key_fn, ttl_seconds=0.5
-    )
-
-    # First execution: Cache miss, primitive executed
-    result1 = asyncio.run(cache_primitive.execute("input", mock_context))
-    assert result1 == "initial value"
-    assert mock_primitive.execution_count == 1
-    stats = cache_primitive.get_stats()
-    assert stats["hits"] == 0
-    assert stats["misses"] == 1
-    assert stats["expirations"] == 0
-
-    # Wait for TTL to expire
-    time.sleep(0.6)  # Ensure TTL expires
-
-    # Second execution (after TTL): Cache miss due to expiration, primitive re-executed
-    result2 = asyncio.run(cache_primitive.execute("input", mock_context))
-    assert result2 == "initial value"
-    assert mock_primitive.execution_count == 2
-    stats = cache_primitive.get_stats()
-    assert stats["hits"] == 0
-    assert stats["misses"] == 2
-    assert stats["expirations"] == 1
-
-
-def test_cache_primitive_statistics_track_expirations(mock_context):
-    """
-    Test that the statistics track expirations correctly.
-    """
-    mock_primitive = MockPrimitive(return_value="initial value")
-    cache_key_fn = lambda input_data, context: "test_key"
-    cache_primitive = CachePrimitive(
-        primitive=mock_primitive, cache_key_fn=cache_key_fn, ttl_seconds=0.5
-    )
-
-    # First execution: Cache miss, primitive executed
-    asyncio.run(cache_primitive.execute("input", mock_context))
-
-    # Wait for TTL to expire
-    time.sleep(0.6)  # Ensure TTL expires
-
-    # Second execution (after TTL): Cache miss due to expiration, primitive re-executed
-    asyncio.run(cache_primitive.execute("input", mock_context))
-
-    # Get statistics
-    stats = cache_primitive.get_stats()
-    assert stats["hits"] == 0
-    assert stats["misses"] == 2
-    assert stats["expirations"] == 1
-

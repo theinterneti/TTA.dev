@@ -41,13 +41,18 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any, TypedDict, cast
 
 from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.integrations.e2b_primitive import CodeExecutionPrimitive
+from tta_dev_primitives.integrations.e2b_primitive import (
+    CodeExecutionPrimitive,
+    CodeOutput,
+)
 from tta_dev_primitives.observability import InstrumentedPrimitive
 
 logger = logging.getLogger(__name__)
+
+from .code_processing import process_generated_code
 
 # Import LLM integration for Phase 2
 try:
@@ -59,11 +64,16 @@ except ImportError:
     logger.warning("LLM integration not available - using mock implementation")
 
 
-class ACEInput(TypedDict, total=False):
+class ACEInput(TypedDict):
     """Input for ACE-enabled primitives."""
 
-    task: str  # Required: Task description
-    context: str  # Optional: Additional context
+    task: str
+
+
+class ACEInputOptional(TypedDict, total=False):
+    """Optional input for ACE-enabled primitives."""
+
+    context: str
     language: str  # Optional: Programming language (default: python)
     expected_output: str  # Optional: Expected result for learning
     max_iterations: int  # Optional: Max refinement iterations (default: 3)
@@ -200,9 +210,7 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
         self.playbook_file = playbook_file or Path("ace_playbook.json")
         if self.playbook_file.exists():
             self.playbook.load_from_file(self.playbook_file)
-            logger.info(
-                f"Loaded {self.playbook.size()} strategies from {self.playbook_file}"
-            )
+            logger.info(f"Loaded {self.playbook.size()} strategies from {self.playbook_file}")
 
     @property
     def success_rate(self) -> float:
@@ -226,13 +234,10 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
             return 0.0
         return min(
             1.0,
-            (current_rate - self.baseline_success_rate)
-            / (1.0 - self.baseline_success_rate),
+            (current_rate - self.baseline_success_rate) / (1.0 - self.baseline_success_rate),
         )
 
-    async def _execute_impl(
-        self, input_data: ACEInput, context: WorkflowContext
-    ) -> ACEOutput:
+    async def _execute_impl(self, input_data: ACEInput, context: WorkflowContext) -> ACEOutput:
         """Execute with learning."""
 
         task = input_data["task"]
@@ -244,9 +249,7 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
         self.total_executions += 1
 
         # Get relevant strategies from playbook
-        relevant_strategies = self.playbook.get_relevant_strategies(
-            f"{task} {task_context}"
-        )
+        relevant_strategies = self.playbook.get_relevant_strategies(f"{task} {task_context}")
 
         # Generate code using learned strategies
         code = await self._generate_code_with_strategies(
@@ -257,7 +260,7 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
         )
 
         # Execute code and learn from results
-        execution_result = None
+        execution_result: CodeOutput | None = None
         strategies_learned = 0
 
         for iteration in range(max_iterations):
@@ -282,40 +285,41 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
 
                     # Generate improved code for next iteration
                     if iteration < max_iterations - 1:
-                        code = await self._improve_code(
-                            original_code=code,
-                            error=execution_result.get("error", ""),
-                            task=task,
-                            strategies=self.playbook.get_relevant_strategies(
-                                f"error_handling {task}"
-                            ),
-                        )
+                        error_message = execution_result.get("error")
+                        if error_message:
+                            code = await self._improve_code(
+                                original_code=code,
+                                error=error_message,
+                                task=task,
+                                strategies=self.playbook.get_relevant_strategies(
+                                    f"error_handling {task}"
+                                ),
+                            )
 
             except Exception as e:
                 logger.error(f"Execution error: {e}")
-                execution_result = {
-                    "success": False,
-                    "error": str(e),
-                    "output": "",
-                    "execution_time": 0.0,
-                    "logs": [],
-                }
+                execution_result = cast(
+                    CodeOutput,
+                    {
+                        "success": False,
+                        "error": str(e),
+                        "output": "",
+                        "execution_time": 0.0,
+                        "logs": [],
+                    },
+                )
 
         # Save learned strategies
         if strategies_learned > 0:
             self.playbook.save_to_file(self.playbook_file)
 
         # Generate learning summary
-        learning_summary = self._generate_learning_summary(
-            strategies_learned, execution_result
-        )
+        learning_summary = self._generate_learning_summary(strategies_learned, execution_result)
 
         return ACEOutput(
             result=execution_result.get("output", "") if execution_result else "",
             code_generated=code,
-            execution_success=execution_result.get("success", False)
-            if execution_result
-            else False,
+            execution_success=execution_result.get("success", False) if execution_result else False,
             strategies_learned=strategies_learned,
             playbook_size=self.playbook_size,
             improvement_score=self.improvement_score,
@@ -333,12 +337,11 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
 
         # Use LLM generator if available (Phase 2)
         if self.llm_generator is not None:
-            logger.info(
-                f"Generating code with LLM (Phase 2) - {len(strategies)} strategies"
-            )
-            return await self.llm_generator.generate_code(
+            logger.info(f"Generating code with LLM (Phase 2) - {len(strategies)} strategies")
+            generated_code = await self.llm_generator.generate_code(
                 task, context, language, strategies
             )
+            return process_generated_code(generated_code)
 
         # Fallback to mock implementation (Phase 1)
         logger.info("Generating code with mock implementation (Phase 1)")
@@ -401,14 +404,14 @@ primes = generate_primes(50)
 print(f"Primes up to 50: {primes}")'''
 
         # Default: simple task-based code generation
-        return f"""# Generated code for: {task}
+        return f'''# Generated code for: {task}
 print("Hello from generated code!")
 print("Task: {task}")
-print("Context: {context}")
-print("Language: {language}")"""
+print("Context: """{context}""")
+print("Language: {language}")'''
 
     async def _learn_from_success(
-        self, task: str, code: str, result: dict, strategies_used: list[str]
+        self, task: str, code: str, result: CodeOutput, strategies_used: list[str]
     ) -> int:
         """Learn strategies from successful execution."""
 
@@ -426,9 +429,7 @@ print("Language: {language}")"""
             strategies_learned += 1
 
         if "prime" in task.lower() and "int(n**0.5)" in code:
-            self.playbook.add_strategy(
-                "optimize prime checking with sqrt limit", "number_theory"
-            )
+            self.playbook.add_strategy("optimize prime checking with sqrt limit", "number_theory")
             strategies_learned += 1
 
         # Learn from execution performance
@@ -439,19 +440,19 @@ print("Language: {language}")"""
         return strategies_learned
 
     async def _learn_from_failure(
-        self, task: str, code: str, result: dict, strategies_used: list[str]
+        self, task: str, code: str, result: CodeOutput, strategies_used: list[str]
     ) -> int:
         """Learn strategies from failed execution."""
 
         strategies_learned = 0
-        error = result.get("error", "")
+        error = result.get("error")
 
         # Record failure for used strategies
         for strategy in strategies_used:
             self.playbook.record_failure(strategy)
 
         # Learn error handling strategies
-        if "RecursionError" in error:
+        if error and "RecursionError" in error:
             self.playbook.add_strategy(
                 "add base case for recursion to prevent stack overflow",
                 "recursion_error_handling",
@@ -462,16 +463,14 @@ print("Language: {language}")"""
             )
             strategies_learned += 2
 
-        if "NameError" in error:
+        if error and "NameError" in error:
             self.playbook.add_strategy(
                 "ensure all variables are defined before use", "variable_error_handling"
             )
             strategies_learned += 1
 
-        if "SyntaxError" in error:
-            self.playbook.add_strategy(
-                "validate syntax before execution", "syntax_error_handling"
-            )
+        if error and "SyntaxError" in error:
+            self.playbook.add_strategy("validate syntax before execution", "syntax_error_handling")
             strategies_learned += 1
 
         return strategies_learned
@@ -527,7 +526,7 @@ print("Language: {language}")"""
                     language="python",
                     strategies=strategies,
                 )
-                return improved_code
+                return process_generated_code(improved_code)
             except Exception as e:
                 logger.error(f"LLM code improvement failed: {e}")
                 # Fall through to mock implementation
@@ -558,7 +557,7 @@ except Exception as e:
     print("Implementing error handling based on learned strategies")"""
 
     def _generate_learning_summary(
-        self, strategies_learned: int, execution_result: dict | None
+        self, strategies_learned: int, execution_result: CodeOutput | None
     ) -> str:
         """Generate human-readable learning summary."""
 

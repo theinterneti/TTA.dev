@@ -58,6 +58,7 @@ This document outlines the complete integration plan for replacing the current m
 ### Three-Agent System
 
 #### 1. Generator Agent
+
 - **Purpose**: Generate code using LLM + learned strategies
 - **Input**: Task description, context, relevant strategies
 - **Output**: Executable code
@@ -65,6 +66,7 @@ This document outlines the complete integration plan for replacing the current m
 - **Prompt Engineering**: Incorporates playbook strategies
 
 #### 2. Reflector Agent
+
 - **Purpose**: Analyze execution results and extract insights
 - **Input**: Generated code, execution result, error messages
 - **Output**: Analysis of what worked/failed, why
@@ -75,6 +77,7 @@ This document outlines the complete integration plan for replacing the current m
   - Code quality assessment
 
 #### 3. Curator Agent
+
 - **Purpose**: Manage knowledge base and strategy selection
 - **Input**: Reflector insights, execution history
 - **Output**: Updated playbook, relevant strategies for tasks
@@ -95,15 +98,18 @@ This document outlines the complete integration plan for replacing the current m
 #### Tasks
 
 1. **Review Existing ACE Work**
+
    ```bash
    git checkout experiment/ace-integration
    cd experiments/ace/
    ```
+
    - Examine `kayba_ace_test.py`
    - Review ACE agent implementations
    - Identify reusable components
 
 2. **Create ACE Integration Package**
+
    ```
    packages/tta-dev-primitives/src/tta_dev_primitives/ace/
    ├── agents/
@@ -122,6 +128,7 @@ This document outlines the complete integration plan for replacing the current m
    - Add LiteLLM for multi-provider support
    - Configure API keys (OpenAI, Anthropic, Google)
    - Implement cost tracking per agent
+   - **Updated .env with CACHE_METRICS_ENABLED and CACHE_METRICS_PORT**
 
 4. **Testing Infrastructure**
    - Unit tests for each agent
@@ -129,12 +136,14 @@ This document outlines the complete integration plan for replacing the current m
    - Mock LLM responses for CI/CD
 
 **Deliverables**:
+
 - ACE agent implementations
 - LLM integration layer
 - Test suite
 - Configuration system
 
 **Success Criteria**:
+
 - All agents can be instantiated
 - LLM calls work with multiple providers
 - Tests pass in CI/CD
@@ -148,6 +157,7 @@ This document outlines the complete integration plan for replacing the current m
 #### Implementation
 
 1. **Generator Agent Class**
+
    ```python
    class GeneratorAgent:
        """LLM-powered code generation with strategy incorporation."""
@@ -181,12 +191,14 @@ This document outlines the complete integration plan for replacing the current m
    - Handle multiple code blocks
 
 **Deliverables**:
+
 - Working Generator agent
 - Prompt templates
 - Code extraction logic
 - Integration tests
 
 **Success Criteria**:
+
 - Generates syntactically valid code
 - Incorporates strategies from playbook
 - Works with multiple LLM providers
@@ -200,6 +212,7 @@ This document outlines the complete integration plan for replacing the current m
 #### Implementation
 
 1. **Reflector Agent Class**
+
    ```python
    class ReflectorAgent:
        """Analyze execution results and extract insights."""
@@ -229,11 +242,13 @@ This document outlines the complete integration plan for replacing the current m
    - Suggested fixes
 
 **Deliverables**:
+
 - Reflector agent implementation
 - Analysis prompt templates
 - Strategy extraction logic
 
 **Success Criteria**:
+
 - Accurately identifies failure causes
 - Extracts actionable strategies
 - Provides useful insights
@@ -247,6 +262,7 @@ This document outlines the complete integration plan for replacing the current m
 #### Implementation
 
 1. **Curator Agent Class**
+
    ```python
    class CuratorAgent:
        """Manage playbook and strategy selection."""
@@ -276,11 +292,13 @@ This document outlines the complete integration plan for replacing the current m
    - Strategy ranking
 
 **Deliverables**:
+
 - Curator agent implementation
 - Strategy management system
 - Retrieval mechanisms
 
 **Success Criteria**:
+
 - Prevents duplicate strategies
 - Retrieves relevant strategies
 - Maintains playbook quality
@@ -309,6 +327,7 @@ This document outlines the complete integration plan for replacing the current m
    - Usage examples
    - Migration guide from mock
    - Best practices
+   - **Update PRIMITIVES_CATALOG.md with ACE details**
 
 4. **Cost Optimization**
    - LLM call caching
@@ -317,12 +336,14 @@ This document outlines the complete integration plan for replacing the current m
    - Rate limiting
 
 **Deliverables**:
+
 - Fully integrated system
 - Complete test suite
 - Documentation
 - Cost analysis
 
 **Success Criteria**:
+
 - All tests pass
 - Demonstrates learning improvement
 - Cost per iteration < $0.10
@@ -405,6 +426,7 @@ agents:
    - Use as fallback
 
 2. **Feature Flags**
+
    ```python
    USE_REAL_ACE = os.getenv("USE_REAL_ACE", "false").lower() == "true"
 

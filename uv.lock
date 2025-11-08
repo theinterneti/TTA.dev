@@ -2102,7 +2102,7 @@ wheels = [
 
 [[package]]
 name = "tta-agent-coordination"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/tta-agent-coordination" }
 dependencies = [
     { name = "docker" },
@@ -2136,7 +2136,7 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "tta-dev-primitives"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/tta-dev-primitives" }
 dependencies = [
     { name = "e2b-code-interpreter" },
@@ -2206,7 +2206,7 @@ provides-extras = ["dev", "tracing", "apm", "integrations"]
 
 [[package]]
 name = "tta-documentation-primitives"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/tta-documentation-primitives" }
 dependencies = [
     { name = "click" },
@@ -2258,7 +2258,7 @@ provides-extras = ["dev", "ollama"]
 
 [[package]]
 name = "tta-kb-automation"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/tta-kb-automation" }
 dependencies = [
     { name = "tta-dev-primitives" },
@@ -2290,7 +2290,7 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "tta-observability-integration"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/tta-observability-integration" }
 dependencies = [
     { name = "opentelemetry-api" },

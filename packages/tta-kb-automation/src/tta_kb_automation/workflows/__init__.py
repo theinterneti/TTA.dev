@@ -3,6 +3,14 @@
 These workflows provide complete automation pipelines for common tasks.
 """
 
+from tta_kb_automation.core.code_primitives import (
+    AnalyzeCodeStructure,
+    ExtractTODOs,
+    ScanCodebase,
+)
+from tta_kb_automation.core.intelligence_primitives import SuggestKBLinks
+from tta_kb_automation.tools.todo_sync import TODOSync
+
 
 async def validate_kb_links(kb_path: str) -> dict:
     """Validate all links in KB.
@@ -27,8 +35,11 @@ async def sync_code_todos(kb_path: str, code_path: str) -> dict:
     Returns:
         Sync results with counts of created/updated entries
     """
-    # TODO: Implement workflow
-    raise NotImplementedError("sync_code_todos workflow not yet implemented")
+    sync = TODOSync()
+    result = await sync.scan_and_create(
+        paths=[code_path],
+    )
+    return result
 
 
 async def build_cross_references(kb_path: str, code_path: str) -> dict:
@@ -41,8 +52,22 @@ async def build_cross_references(kb_path: str, code_path: str) -> dict:
     Returns:
         Cross-reference mappings and suggestions
     """
-    # TODO: Implement workflow
-    raise NotImplementedError("build_cross_references workflow not yet implemented")
+    scanner = ScanCodebase()
+    code_data = await scanner.execute({"root_path": code_path})
+
+    analyzer = AnalyzeCodeStructure()
+    await analyzer.execute(
+        {"files": code_data["files"], "include_dependencies": True}
+    )
+
+    # TODO: Integrate SuggestKBLinks to find relevant KB pages
+    # TODO: Process extracted TODOs from ExtractTODOs primitive
+    # TODO: Generate cross-references based on extracted data and KB links
+
+    return {
+        "cross_references": [],  # Placeholder for actual cross-references
+        "suggestions": [],  # Placeholder for KB link suggestions
+    }
 
 
 async def build_session_context(

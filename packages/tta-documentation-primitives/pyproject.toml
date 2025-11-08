@@ -1,6 +1,6 @@
 [project]
 name = "tta-documentation-primitives"
-version = "0.1.0"
+version = "1.0.0"
 description = "Automated documentation-to-Logseq integration with AI-powered metadata generation for TTA.dev"
 authors = [{ name = "TTA Development Team" }]
 readme = "README.md"

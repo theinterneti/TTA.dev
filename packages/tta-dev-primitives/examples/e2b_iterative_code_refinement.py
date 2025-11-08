@@ -65,7 +65,7 @@ class CodeGeneratorPrimitive(InstrumentedPrimitive[dict, dict]):
         self.attempt += 1
         requirement = input_data.get("requirement", "Calculate fibonacci")
         previous_error = input_data.get("previous_error")
-        previous_code = input_data.get("previous_code")
+        input_data.get("previous_code")
 
         logger.info(f"\n{'=' * 80}")
         logger.info(f"🤖 CODE GENERATOR - Attempt {self.attempt}")

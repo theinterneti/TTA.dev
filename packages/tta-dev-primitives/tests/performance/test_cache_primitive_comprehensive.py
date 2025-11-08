@@ -139,7 +139,7 @@ class CachePrimitive:
         """
         self.cache = Cache(maxsize=maxsize)
         self.ttl = ttl
-        self.stats = {'hits': 0, 'misses': 0, 'expirations': 0}
+        self.stats = {"hits": 0, "misses": 0, "expirations": 0}
         self.lock = asyncio.Lock()  # Use asyncio.Lock for async operations
 
     async def get(self, key: Any, func: Callable[[], Any]) -> Any:
@@ -162,15 +162,15 @@ class CachePrimitive:
             if cached_value is not None:
                 value, expiry_time = cached_value
                 if expiry_time > now:
-                    self.stats['hits'] += 1
+                    self.stats["hits"] += 1
                     return value
                 else:
                     # Entry has expired
                     del self.cache[key]  # Remove expired entry
-                    self.stats['expirations'] += 1
+                    self.stats["expirations"] += 1
 
             # Value not in cache or expired
-            self.stats['misses'] += 1
+            self.stats["misses"] += 1
             value = await func()  # Await the async function
             self.cache[key] = (value, now + self.ttl)
             return value
@@ -287,12 +287,12 @@ class TestCacheTTLExpiration:
 
         key = "test_key"
         await cache.get(key, expensive_function)
-        assert cache.stats['expirations'] == 0
+        assert cache.stats["expirations"] == 0
 
         await asyncio.sleep(ttl * 2)  # Wait for TTL to expire
 
         await cache.get(key, expensive_function)
-        assert cache.stats['expirations'] == 1
+        assert cache.stats["expirations"] == 1
 
     @pytest.mark.parametrize("ttl_value", [1, 5])
     async def test_longer_ttl_values(self, ttl_value):
@@ -433,7 +433,6 @@ class CachePrimitive:
         self.cache = {}
 
 
-
 class TestCacheStatistics:
     """
     Tests for CachePrimitive statistics.
@@ -468,7 +467,7 @@ class TestCacheStatistics:
             cache["a"]
             cache["a"]
         except KeyError:
-            pass # Should not happen, key is in the cache
+            pass  # Should not happen, key is in the cache
         stats = cache.get_stats()
         assert stats["hits"] == 3
 
@@ -552,6 +551,7 @@ from typing import Any
 import pytest
 
 logging.basicConfig(level=logging.INFO)
+
 
 class CacheStats:
     """
@@ -664,7 +664,7 @@ class CachePrimitive:
         Manually removes expired entries from the cache.
         """
         keys_to_delete = []
-        for key, (value, expiry) in self.cache.items():
+        for key, (_value, expiry) in self.cache.items():
             if expiry <= time.time():
                 keys_to_delete.append(key)
 
@@ -672,8 +672,8 @@ class CachePrimitive:
             del self.cache[key]
         self.stats.size = len(self.cache)
 
-class TestCacheEdgeCases:
 
+class TestCacheEdgeCases:
     @pytest.fixture
     def empty_cache(self):
         return CachePrimitive()
@@ -718,7 +718,6 @@ class TestCacheEdgeCases:
         await cache.set(long_key, "long_value")
 
         assert await cache.get(long_key) == "long_value"
-
 
     @pytest.mark.asyncio
     async def test_concurrent_access(self):

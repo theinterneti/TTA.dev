@@ -29,6 +29,7 @@ class RetryStrategy:
             delay *= 0.5 + random.random()
         return delay
 
+
 class WorkflowPrimitive:  # Define WorkflowPrimitive base class
     async def execute(self, input_data: Any, context: "WorkflowContext") -> Any:
         raise NotImplementedError
@@ -48,12 +49,10 @@ class RetryPrimitive(WorkflowPrimitive):
 
         Returns result on success, raises last error on exhaustion.
         """
-        last_error = None
         for attempt in range(self.strategy.max_retries + 1):
             try:
                 return await self.primitive.execute(input_data, context)
-            except Exception as e:
-                last_error = e
+            except Exception:
                 if attempt == self.strategy.max_retries:
                     raise
                 delay = self.strategy.calculate_delay(attempt + 1)
@@ -234,6 +233,7 @@ class RetryStrategy:
             delay *= 0.5 + random.random()
         return delay
 
+
 class WorkflowContext:
     def __init__(
         self,
@@ -346,7 +346,7 @@ async def test_linear_backoff():
     end_time = time.time()
 
     elapsed_time = end_time - start_time
-    expected_min_time = 1.0**0 + 1.0**1 # 1 + 1 = 2
+    expected_min_time = 1.0**0 + 1.0**1  # 1 + 1 = 2
     assert elapsed_time >= expected_min_time
 
 
@@ -362,7 +362,7 @@ async def test_constant_backoff():
     end_time = time.time()
 
     elapsed_time = end_time - start_time
-    expected_min_time = 1.0 + 1.0 # max_backoff is 1.0, so expect this each time
+    expected_min_time = 1.0 + 1.0  # max_backoff is 1.0, so expect this each time
     assert elapsed_time >= expected_min_time
 
 
@@ -426,7 +426,9 @@ async def test_retry_success_after_failure():
         return {"result": "success"}
 
     mock = MockPrimitive("test", side_effect=side_effect_fn)
-    retry = RetryPrimitive(primitive=mock, strategy=RetryStrategy(max_retries=3, jitter=False, backoff_base=1.0))
+    retry = RetryPrimitive(
+        primitive=mock, strategy=RetryStrategy(max_retries=3, jitter=False, backoff_base=1.0)
+    )
     result = await retry.execute({"input": "data"}, WorkflowContext())
     assert result == {"result": "success"}
     assert mock.call_count == 2
@@ -444,14 +446,16 @@ async def test_no_retry_on_success():
 async def test_retry_exhaustion():
     """Test that the last exception is raised after retries are exhausted."""
     mock = MockPrimitive("test", raise_error=Exception("Always fails"))
-    retry = RetryPrimitive(primitive=mock, strategy=RetryStrategy(max_retries=2, jitter=False, backoff_base=1.0))
+    retry = RetryPrimitive(
+        primitive=mock, strategy=RetryStrategy(max_retries=2, jitter=False, backoff_base=1.0)
+    )
 
     start_time = time.time()
     with pytest.raises(Exception, match="Always fails"):
         await retry.execute({"input": "data"}, WorkflowContext())
     end_time = time.time()
     elapsed_time = end_time - start_time
-    assert mock.call_count == 3 # 1 initial attempt + 2 retries
+    assert mock.call_count == 3  # 1 initial attempt + 2 retries
 
     expected_min_time = 1.0**0 + 1.0**1
     assert elapsed_time >= expected_min_time
@@ -475,4 +479,3 @@ async def test_retry_with_context_and_input():
     assert mock.call_count == 2
     assert mock.calls[0] == (input_data, context)
     assert mock.calls[1] == (input_data, context)
-
