@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTA Observability UI</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <h1>🔍 TTA Observability UI</h1>
+                <div class="header-subtitle">Lightweight observability for TTA.dev workflows</div>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" id="connectionStatus"></div>
+                <span id="connectionText">Connected</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="overview">Overview</button>
+        <button class="nav-tab" data-tab="traces">Traces</button>
+        <button class="nav-tab" data-tab="metrics">Metrics</button>
+        <button class="nav-tab" data-tab="primitives">Primitives</button>
+    </nav>
+
+    <div class="container">
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value text-info" id="totalTraces">0</div>
+                    <div class="metric-label">Total Traces</div>
+                    <div class="metric-change positive" id="tracesChange">+0 today</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value text-success" id="successRate">0%</div>
+                    <div class="metric-label">Success Rate</div>
+                    <div class="metric-change" id="successChange">Last 100 traces</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value text-warning" id="avgDuration">0ms</div>
+                    <div class="metric-label">Avg Duration</div>
+                    <div class="metric-change" id="durationChange">Across all traces</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value text-error" id="errorRate">0%</div>
+                    <div class="metric-label">Error Rate</div>
+                    <div class="metric-change" id="errorChange">Last 24 hours</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Traces</h2>
+                    <div class="card-actions">
+                        <button class="btn btn-icon" onclick="refreshTraces()" title="Refresh">
+                            🔄
+                        </button>
+                    </div>
+                </div>
+                <ul class="trace-list" id="recentTraces">
+                    <!-- Traces will be loaded here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Traces Tab -->
+        <div id="traces" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Traces</h2>
+                    <div class="card-actions">
+                        <select class="btn btn-secondary" id="statusFilter" onchange="filterTraces()">
+                            <option value="">All Status</option>
+                            <option value="success">Success</option>
+                            <option value="error">Error</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="refreshTraces()">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+                <ul class="trace-list" id="allTraces">
+                    <!-- Traces will be loaded here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Metrics Tab -->
+        <div id="metrics" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Metrics Summary</h2>
+                    <button class="btn btn-icon" onclick="refreshMetrics()" title="Refresh">
+                        🔄
+                    </button>
+                </div>
+                <div id="metricsContent">
+                    <!-- Metrics will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Primitives Tab -->
+        <div id="primitives" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Primitive Usage Statistics</h2>
+                    <button class="btn btn-icon" onclick="refreshPrimitiveStats()" title="Refresh">
+                        🔄
+                    </button>
+                </div>
+                <div id="primitiveStats">
+                    <!-- Primitive stats will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trace Detail Modal -->
+    <div id="traceModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; overflow-y: auto;">
+        <div style="max-width: 1000px; margin: 40px auto; background: var(--bg-secondary); border-radius: 8px; padding: 30px;">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="card-title">Trace Details</h2>
+                <button class="btn btn-secondary" onclick="closeTraceModal()">Close</button>
+            </div>
+            <div id="traceDetails">
+                <!-- Trace details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

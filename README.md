@@ -24,157 +24,100 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 
 ---
 
-## 📦 Packages
+## 📦 Production Packages
 
-### tta-workflow-primitives
+TTA.dev is a Python monorepo with 3 production packages:
 
-Production-ready composable workflow primitives for building reliable, observable agent workflows.
+### 1. `tta-dev-primitives`
+
+Core workflow primitives for building reliable, observable agent workflows.
 
 **Features:**
-- 🔀 Router, Cache, Timeout, Retry primitives
+- 🔀 Router, Cache, Timeout, Retry, Memory primitives
 - 🔗 Composition operators (`>>`, `|`)
 - ⚡ Parallel and conditional execution
 - 📊 OpenTelemetry integration
 - 💪 Comprehensive error handling
-- 📉 30-40% cost reduction via intelligent caching
+- 📉 Cost reduction via intelligent caching and routing
 
 **Installation:**
 ```bash
-pip install tta-workflow-primitives
+uv add tta-dev-primitives
 ```
 
 **Quick Start:**
+See [`GETTING_STARTED.md`](GETTING_STARTED.md) for a quick start guide.
 
-```python
-from tta_workflow_primitives import RouterPrimitive, CachePrimitive
-
-# Compose workflow with operators
-workflow = (
-    validate_input >>
-    CachePrimitive(ttl=3600) >>
-    process_data >>
-    generate_response
-)
-
-# Execute
-result = await workflow.execute(data, context)
-```
-
-[📚 Full Documentation](packages/tta-workflow-primitives/README.md)
+[📚 Full Documentation](packages/tta-dev-primitives/README.md)
 
 ---
 
-### dev-primitives
+### 2. `tta-observability-integration`
 
-Development utilities and meta-level primitives for building robust development processes.
+OpenTelemetry integration for tracing, metrics, and logging across TTA.dev primitives.
 
 **Features:**
-
-- 🛠️ Development and debugging tools
-- 📝 Structured logging utilities
-- ♻️ Retry mechanisms
-- 🧪 Testing helpers
+- 📊 Automatic OpenTelemetry tracing and metrics
+- 📝 Structured logging
+- 📈 Prometheus-compatible metrics export
+- 🛡️ Graceful degradation when observability backend is unavailable
 
 **Installation:**
-
 ```bash
-pip install dev-primitives
+uv add tta-observability-integration
 ```
 
-[📚 Full Documentation](packages/dev-primitives/README.md)
+[📚 Full Documentation](packages/tta-observability-integration/README.md)
 
 ---
 
-## 🧭 Knowledge Base & Learning
+### 3. `universal-agent-context`
 
-**Structured Learning:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - Intelligent navigation between documentation and knowledge base
+Agent context management and orchestration for multi-agent workflows.
 
-**Learning Paths:** [`TTA.dev Learning Paths`](logseq/pages/TTA.dev___Learning%20Paths.md) - Step-by-step progression from beginner to expert
+**Features:**
+- 🧠 Centralized context management for agents
+- 🔄 Context propagation across primitives
+- 🔑 Secure handling of agent-specific data
+- 🤝 Facilitates multi-agent coordination
 
-**Interactive Learning:** [`Learning TTA Primitives`](logseq/pages/Learning%20TTA%20Primitives.md) - Flashcards and exercises for mastering concepts
+**Installation:**
+```bash
+uv add universal-agent-context
+```
+
+[📚 Full Documentation](packages/universal-agent-context/README.md)
+
+---
+
+## ⚠️ Packages Under Review
+
+- **`keploy-framework`**: Minimal implementation, no `pyproject.toml`, no tests. Decision needed.
+- **`python-pathway`**: No clear use case documented. Decision needed.
+- **`js-dev-primitives`**: Placeholder, not implemented. Decision needed.
 
 ---
 
 ## 🚀 Quick Start
 
-### Installation
-
-```bash
-# Install with pip
-pip install tta-workflow-primitives dev-primitives
-
-# Or with uv (recommended)
-uv pip install tta-workflow-primitives dev-primitives
-```
-
-### Basic Workflow Example
-
-```python
-from tta_workflow_primitives import WorkflowContext
-from tta_workflow_primitives.core.base import LambdaPrimitive
-
-# Define primitives
-validate = LambdaPrimitive(lambda x, ctx: {"validated": True, **x})
-process = LambdaPrimitive(lambda x, ctx: {"processed": True, **x})
-generate = LambdaPrimitive(lambda x, ctx: {"result": "success"})
-
-# Compose with >> operator
-workflow = validate >> process >> generate
-
-# Execute
-context = WorkflowContext(workflow_id="demo", session_id="123")
-result = await workflow.execute({"input": "data"}, context)
-
-print(result)  # {"validated": True, "processed": True, "result": "success"}
-```
-
----
-
-## 🏗️ Architecture
-
-TTA.dev follows a **composable, modular architecture**:
-
-```
-┌─────────────────────────────────────────────────────┐
-│                  Your Application                   │
-└─────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│           tta-workflow-primitives                   │
-│  ┌────────────┬──────────────┬─────────────────┐   │
-│  │   Router   │    Cache     │    Timeout      │   │
-│  ├────────────┼──────────────┼─────────────────┤   │
-│  │  Parallel  │ Conditional  │     Retry       │   │
-│  └────────────┴──────────────┴─────────────────┘   │
-└─────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│              dev-primitives                         │
-│  ┌────────────┬──────────────┬─────────────────┐   │
-│  │  Logging   │   Retries    │   Test Utils    │   │
-│  └────────────┴──────────────┴─────────────────┘   │
-└─────────────────────────────────────────────────────┘
-```
+For a comprehensive quick start guide, including installation and your first workflow, please refer to [`GETTING_STARTED.md`](GETTING_STARTED.md).
 
 ---
 
 ## 📚 Documentation
 
 - **[Getting Started Guide](GETTING_STARTED.md)** - 5-minute quickstart
+- **[Primitives Catalog](PRIMITIVES_CATALOG.md)** - Complete reference for all primitives
+- **[Agent Instructions](AGENTS.md)** - Guidance for AI agents working on TTA.dev
 - **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
 - **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
-- **[MCP Integration](docs/mcp/README.md)** - Model Context Protocol guides
-- **[Package Documentation](packages/tta-dev-primitives/README.md)** - Detailed API reference
-
-### Cost Optimization
-
-- **[LLM Cost Guide](docs/guides/llm-cost-guide.md)** - Free vs paid model comparison, pricing analysis
-- **[Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md)** - Production patterns for 50-70% cost reduction
+- **[MCP Integration](MCP_SERVERS.md)** - Model Context Protocol guides
+- **[Cline Integration](CLINE_INTEGRATION_GUIDE.md)** - Enhanced Cline development experience
 
 ### Additional Resources
 
+- [LLM Cost Guide](docs/guides/llm-cost-guide.md) - Free vs paid model comparison, pricing analysis
+- [Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md) - Production patterns for 50-70% cost reduction
 - [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
 - [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
 - [LLM Selection Guide](docs/guides/llm-selection-guide.md)
@@ -194,7 +137,7 @@ uv run pytest -v
 uv run pytest --cov=packages --cov-report=html
 
 # Run specific package tests
-uv run pytest packages/tta-workflow-primitives/tests/ -v
+uv run pytest packages/tta-dev-primitives/tests/ -v
 ```
 
 ---
@@ -204,8 +147,8 @@ uv run pytest packages/tta-workflow-primitives/tests/ -v
 ### Prerequisites
 
 - Python 3.11+
-- [uv](https://github.com/astral-sh/uv) (recommended) or pip
-- VS Code with Copilot (recommended)
+- [uv](https://github.com/astral-sh/uv) (recommended)
+- VS Code with recommended extensions (see `.vscode/extensions.json`)
 
 ### Setup
 
@@ -252,7 +195,7 @@ We welcome contributions! However, **only battle-tested, proven code is accepted
 Before submitting a PR, ensure:
 
 - ✅ All tests passing (100%)
-- ✅ Test coverage >80%
+- ✅ Test coverage >100% (for new code)
 - ✅ Documentation complete
 - ✅ Ruff + Pyright checks pass
 - ✅ **TODO compliance (100%)** - All Logseq TODOs properly formatted
@@ -305,7 +248,7 @@ The CI will automatically validate TODO compliance on all PRs. Non-compliant TOD
 
 5. **Squash merge after approval**
 
-[See full contribution guide](CONTRIBUTING.md) (Coming soon)
+[See full contribution guide](CONTRIBUTING.md)
 
 ---
 
@@ -329,7 +272,7 @@ The CI will automatically validate TODO compliance on all PRs. Non-compliant TOD
 ### Testing
 
 - **pytest** with AAA pattern
-- >80% coverage required
+- 100% coverage required
 - All tests must pass
 
 ### Documentation
@@ -337,7 +280,7 @@ The CI will automatically validate TODO compliance on all PRs. Non-compliant TOD
 - Google-style docstrings
 - README for each package
 - Examples for all features
-- **Phase 3 Examples:** See [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
+- **Phase 3 Examples:** See [`packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
 
 ---
 
@@ -363,8 +306,9 @@ All PRs automatically run:
 
 | Package | Version | Tests | Coverage | Status |
 |---------|---------|-------|----------|--------|
-| tta-workflow-primitives | 0.1.0 | 12/12 ✅ | 100% | 🟢 Stable |
-| dev-primitives | 0.1.0 | TBD | TBD | 🟢 Stable |
+| tta-dev-primitives | 0.1.0 | 12/12 ✅ | 100% | 🟢 Stable |
+| tta-observability-integration | 0.1.0 | TBD | TBD | 🟢 Stable |
+| universal-agent-context | 0.1.0 | TBD | TBD | 🟢 Stable |
 
 ### Roadmap
 
@@ -415,5 +359,4 @@ If you find TTA.dev useful, please consider giving it a star! ⭐
 
 ---
 
-**Last Updated:** 2025-10-27
-**Status:** 🚀 Ready for migration
+**Last Updated:** 2025-11-10

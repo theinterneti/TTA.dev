@@ -1,15 +1,5 @@
 # MCP Server Integration Registry
 
-## 🖥️ LOCAL ONLY: GitHub Copilot VS Code Extension
-
-**⚠️ IMPORTANT CONTEXT:**
-
-- **VS Code Extension?** ✅ This documentation is FOR YOU
-- **Coding Agent (GitHub Actions)?** ❌ You do NOT have access to MCP servers
-- **GitHub CLI?** ❌ MCP servers not available in terminal
-
----
-
 ## What is MCP?
 
 **Model Context Protocol (MCP)** is an open standard for connecting AI applications to external data sources and tools. MCP servers expose capabilities that AI agents can use to:
@@ -22,32 +12,9 @@
 
 **Official Documentation:** <https://modelcontextprotocol.io>
 
-### Context-Specific Availability
+**IMPORTANT:** MCP servers are only available in a local development environment (e.g., VS Code with Cline or GitHub Copilot extensions). They are not accessible in cloud-based environments like GitHub Actions.
 
-| MCP Feature | VS Code Extension (LOCAL) | Cline (LOCAL) | Coding Agent (CLOUD) | GitHub CLI |
-|-------------|---------------------------|---------------|----------------------|------------|
-| Context7 | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
-| AI Toolkit | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
-| Grafana | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
-| Pylance | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
-| Database Client | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
-| GitHub PR Tools | ✅ Yes | ✅ Yes | ⚠️ Different | ❌ No |
-| Sift (Docker) | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
-| LogSeq | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
-
-**Why MCP isn't available in GitHub Actions:**
-
-- MCP servers run on your local machine with VS Code
-- GitHub Actions runs in ephemeral cloud containers
-- No VS Code extension system in GitHub Actions
-- Coding Agent uses installed tools (uv, pytest, ruff) instead
-
-**Cline Integration:**
-
-- Cline is a VS Code extension that natively supports MCP
-- All TTA.dev MCP servers work seamlessly with Cline
-- Cline can collaborate with Copilot using shared MCP infrastructure
-- See [CLINE_INTEGRATION_GUIDE.md](docs/integrations/CLINE_INTEGRATION_GUIDE.md) for details
+For more details on agent context and tooling, refer to [`AGENTS.md`](AGENTS.md).
 
 ---
 
@@ -726,7 +693,7 @@ Run query: [SQL query]
 
 ---
 
-**Last Updated:** October 29, 2025
+**Last Updated:** 2025-11-10
 **Maintained by:** TTA.dev Team
 **MCP Version:** 1.0
 **VS Code Integration:** Stable

@@ -2,7 +2,7 @@
 
 **Complete Reference for All Workflow Primitives**
 
-**Last Updated:** November 7, 2025
+**Last Updated:** 2025-11-10
 
 ---
 
@@ -320,6 +320,22 @@ from tta_dev_primitives.recovery import CircuitBreakerPrimitive
 \`\`\`
 
 **Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/circuit_breaker.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/circuit_breaker.py)
+
+**Usage:**
+\`\`\`python
+from tta_dev_primitives.recovery import CircuitBreakerPrimitive
+
+# Protect an unreliable service
+protected_service = CircuitBreakerPrimitive(
+    primitive=unreliable_service_call,
+    failure_threshold=5,      # 5 failures to open circuit
+    recovery_timeout=60,      # 60 seconds to half-open
+    expected_successes=2      # 2 successes to close
+)
+
+# Use it
+result = await protected_service.execute(data, context)
+\`\`\`
 
 ---
 
@@ -879,6 +895,7 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
 | CachePrimitive | \`tta_dev_primitives.performance\` | LRU cache with TTL |
+| MemoryPrimitive | \`tta_dev_primitives.performance\` | Conversational memory |
 
 ### Adaptive/Learning
 
@@ -896,6 +913,14 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 | MultiModelWorkflow | \`tta_dev_primitives.orchestration\` | Multi-model coordination |
 | TaskClassifierPrimitive | \`tta_dev_primitives.orchestration\` | Task classification |
 
+### ACE Framework
+
+| Primitive | Import Path | Purpose |
+|-----------|-------------|---------|
+| GeneratorAgent | \`tta_dev_primitives.ace.agents\` | Generates code using LLM |
+| ReflectorAgent | \`tta_dev_primitives.ace.agents\` | Analyzes execution results |
+| CuratorAgent | \`tta_dev_primitives.ace.agents\` | Manages knowledge base |
+
 ---
 
 ## Related Documentation
@@ -910,6 +935,6 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 
 ---
 
-**Last Updated:** November 7, 2025
+**Last Updated:** 2025-11-10
 **Maintained by:** TTA.dev Team
 **License:** See package licenses

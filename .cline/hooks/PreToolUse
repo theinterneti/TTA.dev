@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+input=$(cat)
+tool_name=$(echo "$input" | jq -r '.preToolUse.toolName')
+command_str=$(echo "$input" | jq -r '.preToolUse.parameters.command')
+
+if [[ "$tool_name" == "execute_command" ]]; then
+  if [[ "$command_str" == *"pip install"* || "$command_str" == *"poetry add"* ]]; then
+    echo '{"cancel": true, "errorMessage": "🚫 Please use `uv add` instead of `pip install` or `poetry add` for dependency management in TTA.dev."}'
+    exit 0
+  fi
+fi
+
+echo '{"cancel": false}'

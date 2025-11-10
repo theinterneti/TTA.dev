@@ -6,7 +6,7 @@
 	],
 	"settings": {
 		// TTA.dev Core Configuration
-		"python.defaultInterpreterPath": "./.venv/bin/python",
+		"python.defaultInterpreterPath": "/home/thein/repos/TTA.dev/.venv/bin/python",
 		"python.analysis.extraPaths": [
 			"./packages/tta-dev-primitives/src",
 			"./packages/tta-observability-integration/src",
@@ -242,7 +242,15 @@
 				"problemMatcher": [
 					{
 						"owner": "pyright",
-						"fileLocation": "absolute"
+						"fileLocation": "absolute",
+						"pattern": {
+							"regexp": "^\\s*(.*):(\\d+):(\\d+)\\s+-\\s+(error|warning|information):\\s+(.*)$",
+							"file": 1,
+							"line": 2,
+							"column": 3,
+							"severity": 4,
+							"message": 5
+						}
 					}
 				]
 			},
