@@ -19,7 +19,7 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 
 ### 📋 TODO Management & Knowledge Base
 
-**IMPORTANT:** All agents must use the Logseq TODO management system:
+**IMPORTANT:** All agents must use the Logseq TODO management system. Refer to the `.clinerules` for detailed tag conventions and properties.
 
 **🧭 Knowledge Base Hub:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - **START HERE** for intelligent navigation between documentation and knowledge base systems.
 
@@ -78,61 +78,13 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 
 **See:** [`logseq/ADVANCED_FEATURES.md`](logseq/ADVANCED_FEATURES.md) for complete Logseq guide.
 
-### 🎯 Know Your Copilot Context
+### 🎯 Agent Context & Tooling
 
-**CRITICAL:** If you're GitHub Copilot, understand which context you're in:
-
-- **🖥️ VS Code Extension (LOCAL):** You have MCP servers, toolsets, local filesystem
-- **☁️ Coding Agent (CLOUD):** You run in GitHub Actions, NO MCP/toolsets
-- **💻 GitHub CLI (TERMINAL):** You run in terminal via `gh copilot`
-
-**Full details:** See `.github/copilot-instructions.md` section "📍 CRITICAL: Know Your Context"
-
-**Why this matters:** Configuration, tools, and capabilities differ by context. Don't assume LOCAL features are available in CLOUD environment or vice versa.
+For GitHub Copilot users, specific instructions and toolset configurations are available in [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
 
 ### ⚡ Before You Code: Primitive Usage Rules
 
-**CRITICAL:** When working on TTA.dev, **ALWAYS use primitives** for these patterns:
-
-| Pattern | ❌ Don't Use | ✅ Use Instead |
-|---------|-------------|----------------|
-| Sequential workflows | Manual async chains | `SequentialPrimitive` or `>>` operator |
-| Parallel execution | `asyncio.gather()` | `ParallelPrimitive` or `\|` operator |
-| Error handling | Try/except loops | `RetryPrimitive`, `FallbackPrimitive` |
-| Timeouts | `asyncio.wait_for()` | `TimeoutPrimitive` |
-| Caching | Manual dicts | `CachePrimitive` |
-| Routing | If/else chains | `RouterPrimitive` |
-
-**Standard Import Pattern:**
-
-```python
-from tta_dev_primitives import (
-    WorkflowPrimitive,
-    SequentialPrimitive,
-    ParallelPrimitive,
-    WorkflowContext
-)
-from tta_dev_primitives.recovery import (
-    RetryPrimitive,
-    FallbackPrimitive,
-    TimeoutPrimitive
-)
-from tta_dev_primitives.performance import CachePrimitive
-```
-
-**Before Committing:**
-
-```bash
-# Validate your code uses primitives correctly
-./scripts/validate-primitive-usage.sh
-
-# Or run full quality check
-uv run ruff check . --fix && uvx pyright packages/
-```
-
-**Validation Checklist:** See [`.github/AGENT_CHECKLIST.md`](.github/AGENT_CHECKLIST.md) for complete pre-commit verification steps.
-
-**Prompt Templates:** See [`.vscode/tta-prompts.md`](.vscode/tta-prompts.md) for copy-paste code patterns.
+**CRITICAL:** When working on TTA.dev, **ALWAYS use primitives** for workflow patterns. Refer to the `.clinerules` file for detailed guidance on primitive usage, anti-patterns, and code quality standards.
 
 ### Repository Structure
 
@@ -442,6 +394,7 @@ All primitives have **built-in observability**:
 - **Distributed Tracing**: OpenTelemetry spans for each operation
 - **Metrics**: Prometheus-compatible metrics (execution time, success rate, etc.)
 - **Context Propagation**: `WorkflowContext` carries state and correlation IDs
+- **🆕 TTA UI**: LangSmith-inspired dashboard for local development
 
 ### WorkflowContext
 
@@ -479,6 +432,13 @@ result = await workflow.execute(context, input_data)
    - Prometheus metrics export on port 9464
    - Graceful degradation when OpenTelemetry unavailable
 
+3. **🆕 TTA Observability UI** (`tta-observability-ui/`)
+   - **LangSmith-inspired** lightweight dashboard
+   - **Zero-config** SQLite storage
+   - **VS Code integration** (coming in Phase 3)
+   - **Real-time updates** via WebSocket
+   - **Primitive-aware** visualization
+
 **Quick Setup:**
 
 ```python
@@ -488,7 +448,9 @@ from observability_integration.primitives import RouterPrimitive, CachePrimitive
 # Initialize observability
 success = initialize_observability(
     service_name="my-app",
-    enable_prometheus=True
+    enable_prometheus=True,
+    enable_tta_ui=True,  # ← NEW! Enable TTA UI
+    tta_ui_endpoint="http://localhost:8765"
 )
 
 # Use enhanced primitives
@@ -500,14 +462,31 @@ workflow = (
 )
 ```
 
+**Start TTA UI:**
+
+```bash
+# Terminal 1: Start observability service
+tta-observability-ui start
+
+# Terminal 2: Run your application
+python my_app.py
+
+# Browser: View traces
+open http://localhost:8765
+```
+
 **Benefits:**
 
 - 30-40% cost reduction (via Cache + Router)
 - Real-time metrics in Prometheus/Grafana
 - Distributed tracing across workflows
 - Automatic span creation and context propagation
+- 🆕 **Simple local UI** (no Docker/Jaeger needed for dev!)
 
-**See:** [`docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md`](docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md#1-tta-observability-integration) for detailed integration guide.
+**See:** 
+- Integration: [`docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md`](docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md#1-tta-observability-integration)
+- TTA UI: [`packages/tta-observability-ui/QUICKSTART.md`](packages/tta-observability-ui/QUICKSTART.md)
+- Design: [`docs/architecture/OBSERVABILITY_UI_DESIGN.md`](docs/architecture/OBSERVABILITY_UI_DESIGN.md)
 
 ---
 
@@ -752,6 +731,15 @@ When making decisions, prioritize:
 
 ---
 
+## 🤝 Cline Integration (Super-Cline)
+
+TTA.dev is integrated with Cline to provide an enhanced development experience. This "Super-Cline" setup includes:
+-   **Cline Hooks**: Automated checks and environment setup (e.g., `uv` enforcement, `uv sync` on task start).
+-   **VS Code Workspace Configuration**: Recommended extensions, settings, and tasks for TTA.dev development.
+-   **TTA.dev Primitives as MCP Tools**: Direct access to TTA.dev's agentic primitives as callable Cline tools.
+
+For a detailed guide, see [`CLINE_INTEGRATION_GUIDE.md`](CLINE_INTEGRATION_GUIDE.md).
+
 ## 📞 Getting Help
 
 1. **Check package AGENTS.md** - Most specific guidance
@@ -762,6 +750,6 @@ When making decisions, prioritize:
 
 ---
 
-**Last Updated:** October 29, 2025
+**Last Updated:** 2025-11-10
 **Maintained by:** TTA.dev Team
 **License:** See individual package licenses

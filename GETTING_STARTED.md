@@ -2,24 +2,15 @@
 
 **Build reliable AI applications with production-ready primitives and patterns.**
 
-## What is TTA.dev?
-
-TTA.dev is a collection of battle-tested components for building AI-native applications. Every component has:
-- ✅ 100% test coverage
-- ✅ Production usage validation
-- ✅ Comprehensive documentation
-- ✅ Observable and debuggable
-
 ## Quick Start (5 minutes)
+
+This guide provides a rapid introduction to TTA.dev. For a detailed overview, refer to the [README.md](README.md).
 
 ### 1. Installation
 
 ```bash
-# Install with pip
-pip install tta-dev-primitives
-
-# Or with uv (recommended)
-uv pip install tta-dev-primitives
+# Install with uv (recommended)
+uv add tta-dev-primitives
 ```
 
 ### 2. Your First Workflow
@@ -348,7 +339,7 @@ Add tasks to today's journal: `logseq/journals/YYYY_MM_DD.md`
 
 - 📚 [Architecture Overview](docs/architecture/Overview.md) - Understand the design
 - 🎯 [Coding Standards](docs/development/CodingStandards.md) - Best practices
-- 🔧 [MCP Integration](docs/mcp/README.md) - Model Context Protocol
+- 🔧 [MCP Integration](MCP_SERVERS.md) - Model Context Protocol
 - 📦 [Package README](packages/tta-dev-primitives/README.md) - Detailed docs
 
 ### Production Examples
@@ -374,7 +365,7 @@ uv run python packages/tta-dev-primitives/examples/rag_workflow.py
 ls packages/tta-dev-primitives/examples/
 ```
 
-**Implementation Guide:** [PHASE3_EXAMPLES_COMPLETE.md](PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
+**Implementation Guide:** [`packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
 - Complete implementation details for all examples
 - InstrumentedPrimitive pattern guide
 - Test results and validation
@@ -394,6 +385,10 @@ More patterns in the examples directory:
 - 💻 Examples: See `packages/tta-dev-primitives/examples/`
 - 🐛 Issues: Open an issue on GitHub
 - 💬 Discussions: GitHub Discussions
+
+## Cline Integration
+
+TTA.dev provides a powerful Cline integration to streamline development and enforce best practices. For detailed information on Cline hooks, VS Code configuration, and TTA.dev primitives exposed as MCP tools, refer to [`CLINE_INTEGRATION_GUIDE.md`](CLINE_INTEGRATION_GUIDE.md).
 
 ## Advanced Topics
 
@@ -474,3 +469,7 @@ Interested in contributing? Check out:
 ---
 
 **Ready to build?** Start with the [quick start](#quick-start-5-minutes) above or explore the [examples](packages/tta-dev-primitives/examples/).
+
+---
+
+**Last Updated:** 2025-11-10

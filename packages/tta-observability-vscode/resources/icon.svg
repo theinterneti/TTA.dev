@@ -1,0 +1,18 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#4ec9b0" opacity="0.2"/>
+  
+  <!-- Pulse icon -->
+  <path d="M 8 32 L 18 32 L 22 20 L 28 44 L 34 24 L 40 36 L 44 32 L 56 32" 
+        stroke="#4ec9b0" 
+        stroke-width="3" 
+        fill="none" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+  
+  <!-- Center dot (pulse) -->
+  <circle cx="32" cy="32" r="3" fill="#4ec9b0">
+    <animate attributeName="r" values="3;5;3" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>

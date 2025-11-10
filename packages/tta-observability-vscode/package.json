@@ -1,0 +1,135 @@
+{
+  "name": "tta-observability-vscode",
+  "displayName": "TTA Observability",
+  "description": "Real-time observability dashboard for TTA.dev workflows",
+  "version": "0.1.0",
+  "publisher": "tta-dev",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "Debuggers",
+    "Visualization"
+  ],
+  "keywords": [
+    "tta",
+    "observability",
+    "tracing",
+    "monitoring",
+    "workflow"
+  ],
+  "activationEvents": [
+    "onCommand:tta.openDashboard",
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "tta.openDashboard",
+        "title": "TTA: Open Observability Dashboard",
+        "category": "TTA",
+        "icon": "$(pulse)"
+      },
+      {
+        "command": "tta.refreshDashboard",
+        "title": "TTA: Refresh Dashboard",
+        "category": "TTA",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "tta.clearTraces",
+        "title": "TTA: Clear All Traces",
+        "category": "TTA",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "tta.startService",
+        "title": "TTA: Start Observability Service",
+        "category": "TTA",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "tta.stopService",
+        "title": "TTA: Stop Observability Service",
+        "category": "TTA",
+        "icon": "$(debug-stop)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "tta-observability",
+          "title": "TTA Observability",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "tta-observability": [
+        {
+          "id": "tta.tracesView",
+          "name": "Recent Traces",
+          "when": "tta.serviceRunning"
+        },
+        {
+          "id": "tta.metricsView",
+          "name": "Metrics Summary",
+          "when": "tta.serviceRunning"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "TTA Observability",
+      "properties": {
+        "tta.serviceUrl": {
+          "type": "string",
+          "default": "http://localhost:8765",
+          "description": "URL of the TTA Observability service"
+        },
+        "tta.autoStartService": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start the observability service when VS Code opens"
+        },
+        "tta.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show trace count in status bar"
+        },
+        "tta.refreshInterval": {
+          "type": "number",
+          "default": 5000,
+          "description": "Refresh interval in milliseconds (0 to disable polling, relies on WebSocket)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.40.0",
+    "typescript": "^5.0.0",
+    "@vscode/vsce": "^2.19.0"
+  },
+  "dependencies": {
+    "ws": "^8.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theinterneti/TTA.dev.git",
+    "directory": "packages/tta-observability-vscode"
+  },
+  "license": "MIT"
+}
