@@ -1,0 +1,62 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- /home/thein/repos/TTA.dev/.venv/bin/python3
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.3', 'Platform': 'Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39', 'Packages': {'pytest': '8.4.2', 'pluggy': '1.6.0'}, 'Plugins': {'asyncio': '1.2.0', 'json-report': '1.5.0', 'anyio': '4.11.0', 'mock': '3.15.1', 'timeout': '2.4.0', 'langsmith': '0.4.41', 'metadata': '3.1.1', 'cov': '7.0.0'}}
+rootdir: /home/thein/repos/TTA.dev/packages/tta-rebuild
+configfile: pyproject.toml
+plugins: asyncio-1.2.0, json-report-1.5.0, anyio-4.11.0, mock-3.15.1, timeout-2.4.0, langsmith-0.4.41, metadata-3.1.1, cov-7.0.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+packages/tta-rebuild/tests/simulations/quick_proof.py::test_simulation Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/src/tta_rebuild/integrations/gemini_provider.py", line 103, in generate
+    response = await asyncio.to_thread(
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/generativeai/generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/ai/generativelanguage_v1beta/services/generative_service/client.py", line 835, in generate_content
+    response = rpc(
+               ^^^^
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/api_core/gapic_v1/method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/api_core/retry/retry_unary.py", line 294, in retry_wrapped_func
+    return retry_target(
+           ^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/api_core/retry/retry_unary.py", line 156, in retry_target
+    next_sleep = _retry_error_helper(
+                 ^^^^^^^^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/api_core/retry/retry_base.py", line 214, in _retry_error_helper
+    raise final_exc from source_exc
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/api_core/retry/retry_unary.py", line 147, in retry_target
+    result = target()
+             ^^^^^^^^
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/api_core/timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/google/api_core/grpc_helpers.py", line 77, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.NotFound: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 147, in run_simulation
+    story = await generator.execute(input_data, context)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/src/tta_rebuild/narrative/story_generator.py", line 96, in execute
+    story_data = await self.llm_provider.generate_json(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/src/tta_rebuild/integrations/gemini_provider.py", line 197, in generate_json
+    response = await self.generate(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/src/tta_rebuild/integrations/gemini_provider.py", line 132, in generate
+    raise Exception(
+Exception: Gemini API failed after 3 attempts: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.

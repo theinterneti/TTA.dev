@@ -90,9 +90,53 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 
 **Why this matters:** Configuration, tools, and capabilities differ by context. Don't assume LOCAL features are available in CLOUD environment or vice versa.
 
+### ⚡ Before You Code: Primitive Usage Rules
+
+**CRITICAL:** When working on TTA.dev, **ALWAYS use primitives** for these patterns:
+
+| Pattern | ❌ Don't Use | ✅ Use Instead |
+|---------|-------------|----------------|
+| Sequential workflows | Manual async chains | `SequentialPrimitive` or `>>` operator |
+| Parallel execution | `asyncio.gather()` | `ParallelPrimitive` or `\|` operator |
+| Error handling | Try/except loops | `RetryPrimitive`, `FallbackPrimitive` |
+| Timeouts | `asyncio.wait_for()` | `TimeoutPrimitive` |
+| Caching | Manual dicts | `CachePrimitive` |
+| Routing | If/else chains | `RouterPrimitive` |
+
+**Standard Import Pattern:**
+
+```python
+from tta_dev_primitives import (
+    WorkflowPrimitive,
+    SequentialPrimitive,
+    ParallelPrimitive,
+    WorkflowContext
+)
+from tta_dev_primitives.recovery import (
+    RetryPrimitive,
+    FallbackPrimitive,
+    TimeoutPrimitive
+)
+from tta_dev_primitives.performance import CachePrimitive
+```
+
+**Before Committing:**
+
+```bash
+# Validate your code uses primitives correctly
+./scripts/validate-primitive-usage.sh
+
+# Or run full quality check
+uv run ruff check . --fix && uvx pyright packages/
+```
+
+**Validation Checklist:** See [`.github/AGENT_CHECKLIST.md`](.github/AGENT_CHECKLIST.md) for complete pre-commit verification steps.
+
+**Prompt Templates:** See [`.vscode/tta-prompts.md`](.vscode/tta-prompts.md) for copy-paste code patterns.
+
 ### Repository Structure
 
-```
+```text
 TTA.dev/
 ├── packages/
 │   ├── tta-dev-primitives/          # ✅ Core workflow primitives

@@ -18,7 +18,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 try:
-    from secrets import validate_secrets, get_config, get_secrets_manager
+    from tta_secrets import validate_secrets, get_config, get_secrets_manager
     import logging
 
     # Set up logging

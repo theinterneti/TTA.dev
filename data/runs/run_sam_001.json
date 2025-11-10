@@ -1,0 +1,39 @@
+{
+  "run_id": "run_sam_001",
+  "character_id": "char_sam_001",
+  "character_name": "Sam",
+  "universe_id": "enchanted_realm_001",
+  "state": "completed",
+  "timeline_position": 310,
+  "turn_count": 120,
+  "session_count": 2,
+  "created_at": "2025-11-09T16:23:45.937454+00:00",
+  "last_played": "2025-11-09T16:23:50.400241+00:00",
+  "completed_at": "2025-11-09T16:23:50.465838+00:00",
+  "completion_reason": "Character completed journey",
+  "current_scene": "",
+  "recent_events": [
+    "Turn 111: Action at turn 111",
+    "Turn 112: Action at turn 112",
+    "Turn 113: Action at turn 113",
+    "Turn 114: Action at turn 114",
+    "Turn 115: Action at turn 115",
+    "Turn 116: Action at turn 116",
+    "Turn 117: Action at turn 117",
+    "Turn 118: Action at turn 118",
+    "Turn 119: Action at turn 119",
+    "Turn 120: Action at turn 120"
+  ],
+  "active_storylines": [],
+  "therapeutic_focus": "relationship_healing",
+  "metaconcepts_integrated": [
+    "Metaconcept_1",
+    "Metaconcept_2",
+    "Metaconcept_3",
+    "Metaconcept_4",
+    "Metaconcept_5",
+    "Metaconcept_6"
+  ],
+  "insights_discovered": [],
+  "therapeutic_milestones": 6
+}
