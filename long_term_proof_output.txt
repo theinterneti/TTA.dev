@@ -1,0 +1,584 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- /home/thein/repos/TTA.dev/.venv/bin/python3
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.3', 'Platform': 'Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39', 'Packages': {'pytest': '8.4.2', 'pluggy': '1.6.0'}, 'Plugins': {'asyncio': '1.2.0', 'json-report': '1.5.0', 'anyio': '4.11.0', 'mock': '3.15.1', 'timeout': '2.4.0', 'langsmith': '0.4.41', 'metadata': '3.1.1', 'cov': '7.0.0'}}
+rootdir: /home/thein/repos/TTA.dev/packages/tta-rebuild
+configfile: pyproject.toml
+plugins: asyncio-1.2.0, json-report-1.5.0, anyio-4.11.0, mock-3.15.1, timeout-2.4.0, langsmith-0.4.41, metadata-3.1.1, cov-7.0.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+packages/tta-rebuild/tests/simulations/long_term_run_proof.py::test_long_term_proof 
+================================================================================
+🎮 LONG-TERM RUN & SHARED WORLD PROOF OF CONCEPT
+================================================================================
+
+
+================================================================================
+PROOF 1: LONG-TERM CHARACTER RUN
+Goal: Demonstrate 150-turn run across 5 sessions
+================================================================================
+
+============================================================
+🎮 SESSION 1: Alex
+   Turns: 1-30
+   Notes: Initial exploration
+============================================================
+
+🌍 Saved universe: enchanted_realm_001 (Timeline: 1)
+   Turn 1: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 2)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 3)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 4)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 5)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 6)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 7)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 8)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 9)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 10)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 11)
+   Turn 11: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 12)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 13)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 14)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 15)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 16)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 17)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 18)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 19)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 20)
+   🎯 Therapeutic Milestone #1
+🌍 Saved universe: enchanted_realm_001 (Timeline: 21)
+   Turn 21: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 22)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 23)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 24)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 25)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 26)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 27)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 28)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 29)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 30)
+💾 Saved run: run_alex_001 (Turn 30)
+
+💾 Session saved! Total turns: 30
+
+============================================================
+🎮 SESSION 2: Alex
+   Turns: 31-60
+   Notes: Building confidence
+============================================================
+
+🌍 Saved universe: enchanted_realm_001 (Timeline: 31)
+   Turn 31: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 32)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 33)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 34)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 35)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 36)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 37)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 38)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 39)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 40)
+   🎯 Therapeutic Milestone #2
+🌍 Saved universe: enchanted_realm_001 (Timeline: 41)
+   Turn 41: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 42)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 43)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 44)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 45)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 46)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 47)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 48)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 49)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 50)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 51)
+   Turn 51: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 52)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 53)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 54)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 55)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 56)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 57)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 58)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 59)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 60)
+   🎯 Therapeutic Milestone #3
+💾 Saved run: run_alex_001 (Turn 60)
+
+💾 Session saved! Total turns: 60
+
+============================================================
+🎮 SESSION 3: Alex
+   Turns: 61-100
+   Notes: Major challenges
+============================================================
+
+🌍 Saved universe: enchanted_realm_001 (Timeline: 61)
+   Turn 61: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 62)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 63)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 64)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 65)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 66)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 67)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 68)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 69)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 70)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 71)
+   Turn 71: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 72)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 73)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 74)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 75)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 76)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 77)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 78)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 79)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 80)
+   🎯 Therapeutic Milestone #4
+🌍 Saved universe: enchanted_realm_001 (Timeline: 81)
+   Turn 81: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 82)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 83)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 84)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 85)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 86)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 87)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 88)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 89)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 90)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 91)
+   Turn 91: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 92)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 93)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 94)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 95)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 96)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 97)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 98)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 99)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 100)
+   🎯 Therapeutic Milestone #5
+💾 Saved run: run_alex_001 (Turn 100)
+
+💾 Session saved! Total turns: 100
+
+============================================================
+🎮 SESSION 4: Alex
+   Turns: 101-125
+   Notes: Approaching resolution
+============================================================
+
+🌍 Saved universe: enchanted_realm_001 (Timeline: 101)
+   Turn 101: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 102)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 103)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 104)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 105)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 106)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 107)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 108)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 109)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 110)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 111)
+   Turn 111: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 112)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 113)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 114)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 115)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 116)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 117)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 118)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 119)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 120)
+   🎯 Therapeutic Milestone #6
+🌍 Saved universe: enchanted_realm_001 (Timeline: 121)
+   Turn 121: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 122)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 123)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 124)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 125)
+💾 Saved run: run_alex_001 (Turn 125)
+
+💾 Session saved! Total turns: 125
+
+============================================================
+🎮 SESSION 5: Alex
+   Turns: 126-150
+   Notes: Final arc
+============================================================
+
+🌍 Saved universe: enchanted_realm_001 (Timeline: 126)
+   Turn 126: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 127)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 128)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 129)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 130)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 131)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 132)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 133)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 134)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 135)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 136)
+   Turn 136: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 137)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 138)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 139)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 140)
+   🎯 Therapeutic Milestone #7
+🌍 Saved universe: enchanted_realm_001 (Timeline: 141)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 142)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 143)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 144)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 145)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 146)
+   Turn 146: Alex progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 147)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 148)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 149)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 150)
+💾 Saved run: run_alex_001 (Turn 150)
+
+💾 Session saved! Total turns: 150
+
+✅ PROOF 1 COMPLETE:
+   Total Turns: 150
+   Total Sessions: 5
+   Timeline Position: 150
+   Therapeutic Milestones: 7
+
+================================================================================
+PROOF 2: MULTI-CHARACTER SHARED WORLD
+Goal: Demonstrate 3 characters in same universe
+================================================================================
+
+============================================================
+🎮 SESSION 1: Jordan
+   Turns: 1-40
+   Notes: Jordan's journey begins
+============================================================
+
+🌍 Saved universe: enchanted_realm_001 (Timeline: 151)
+   Turn 1: Jordan progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 152)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 153)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 154)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 155)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 156)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 157)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 158)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 159)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 160)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 161)
+   Turn 11: Jordan progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 162)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 163)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 164)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 165)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 166)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 167)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 168)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 169)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 170)
+   🎯 Therapeutic Milestone #1
+🌍 Saved universe: enchanted_realm_001 (Timeline: 171)
+   Turn 21: Jordan progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 172)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 173)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 174)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 175)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 176)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 177)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 178)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 179)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 180)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 181)
+   Turn 31: Jordan progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 182)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 183)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 184)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 185)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 186)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 187)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 188)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 189)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 190)
+   🎯 Therapeutic Milestone #2
+💾 Saved run: run_jordan_001 (Turn 40)
+
+💾 Session saved! Total turns: 40
+
+============================================================
+🎮 SESSION 1: Sam
+   Turns: 1-50
+   Notes: Sam explores
+============================================================
+
+🌍 Saved universe: enchanted_realm_001 (Timeline: 191)
+   Turn 1: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 192)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 193)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 194)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 195)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 196)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 197)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 198)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 199)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 200)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 201)
+   Turn 11: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 202)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 203)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 204)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 205)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 206)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 207)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 208)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 209)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 210)
+   🎯 Therapeutic Milestone #1
+🌍 Saved universe: enchanted_realm_001 (Timeline: 211)
+   Turn 21: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 212)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 213)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 214)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 215)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 216)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 217)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 218)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 219)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 220)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 221)
+   Turn 31: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 222)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 223)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 224)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 225)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 226)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 227)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 228)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 229)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 230)
+   🎯 Therapeutic Milestone #2
+🌍 Saved universe: enchanted_realm_001 (Timeline: 231)
+   Turn 41: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 232)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 233)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 234)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 235)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 236)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 237)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 238)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 239)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 240)
+💾 Saved run: run_sam_001 (Turn 50)
+
+💾 Session saved! Total turns: 50
+
+🌍 SHARED UNIVERSE STATE:
+   Universe: enchanted_realm_001
+   Timeline Position: 240
+   Total Events: 240
+   Active Characters: 0
+   Major Events: 7
+
+✅ PROOF 2 COMPLETE:
+   Alex: 150 turns
+   Jordan: 40 turns
+   Sam: 50 turns
+   Shared timeline events: 240
+
+================================================================================
+PROOF 3: META-PROGRESSION SYSTEM
+Goal: Show completed runs grant progression, abandoned do not
+================================================================================
+
+============================================================
+🏁 COMPLETING RUN: Alex
+   Reason: Character retired peacefully
+   Total Turns: 150
+   Sessions: 5
+============================================================
+
+💾 Saved run: run_alex_001 (Turn 150)
+⭐ Saved progression: player_001
+✨ Meta-progression awarded! Total completed runs: 1
+
+📊 PROGRESSION AFTER ALEX (COMPLETED):
+   Total Completed Runs: 1
+   Total Turns: 150
+   Advanced Narratives Unlocked: False
+
+============================================================
+⏸️  ABANDONING RUN: Jordan
+   Turns Completed: 40
+   Can Resume: Yes
+============================================================
+
+💾 Saved run: run_jordan_001 (Turn 40)
+⚠️  No meta-progression awarded (run not completed)
+
+📊 PROGRESSION AFTER JORDAN (ABANDONED):
+   Total Completed Runs: 1 (unchanged)
+   Total Turns: 150 (unchanged)
+
+============================================================
+🎮 SESSION 2: Sam
+   Turns: 51-120
+   Notes: Sam's epic finale
+============================================================
+
+🌍 Saved universe: enchanted_realm_001 (Timeline: 241)
+   Turn 51: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 242)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 243)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 244)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 245)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 246)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 247)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 248)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 249)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 250)
+   🎯 Therapeutic Milestone #3
+🌍 Saved universe: enchanted_realm_001 (Timeline: 251)
+   Turn 61: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 252)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 253)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 254)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 255)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 256)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 257)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 258)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 259)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 260)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 261)
+   Turn 71: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 262)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 263)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 264)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 265)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 266)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 267)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 268)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 269)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 270)
+   🎯 Therapeutic Milestone #4
+🌍 Saved universe: enchanted_realm_001 (Timeline: 271)
+   Turn 81: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 272)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 273)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 274)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 275)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 276)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 277)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 278)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 279)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 280)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 281)
+   Turn 91: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 282)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 283)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 284)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 285)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 286)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 287)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 288)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 289)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 290)
+   🎯 Therapeutic Milestone #5
+🌍 Saved universe: enchanted_realm_001 (Timeline: 291)
+   Turn 101: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 292)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 293)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 294)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 295)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 296)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 297)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 298)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 299)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 300)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 301)
+   Turn 111: Sam progresses...
+🌍 Saved universe: enchanted_realm_001 (Timeline: 302)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 303)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 304)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 305)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 306)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 307)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 308)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 309)
+🌍 Saved universe: enchanted_realm_001 (Timeline: 310)
+   🎯 Therapeutic Milestone #6
+💾 Saved run: run_sam_001 (Turn 120)
+
+💾 Session saved! Total turns: 120
+
+============================================================
+🏁 COMPLETING RUN: Sam
+   Reason: Character completed journey
+   Total Turns: 120
+   Sessions: 2
+============================================================
+
+💾 Saved run: run_sam_001 (Turn 120)
+⭐ Saved progression: player_001
+✨ Meta-progression awarded! Total completed runs: 2
+
+📊 FINAL PROGRESSION AFTER SAM (COMPLETED):
+   Total Completed Runs: 2
+   Total Turns: 270
+   Advanced Narratives Unlocked: True
+   Complex Characters Unlocked: False
+   Multi-Path Stories Unlocked: False
+
+✅ PROOF 3 COMPLETE:
+   Completed Runs: 2
+   Abandoned Runs: 1 (Jordan)
+   Meta-Progression Awarded: 2 runs
+
+================================================================================
+🎉 ALL PROOFS COMPLETE!
+================================================================================
+
+✅ PROOF 1: Long-Term Run
+   - Alex: 150 turns across 5 sessions
+   - State persisted and resumed successfully
+   - Narrative continuity maintained
+
+✅ PROOF 2: Shared Universe
+   - 3 characters in same universe
+   - 240 shared timeline events
+   - Character actions affected shared world
+
+✅ PROOF 3: Meta-Progression
+   - Completed runs: 2
+   - Abandoned runs: 1 (no progression)
+   - Unlocks working correctly
+
+📊 TOTAL STATISTICS:
+   Total Turns Simulated: 310
+   Total Sessions: 8
+   Universe Timeline Position: 240
+   Player Progression Level: 2 completed runs
+
+================================================================================
+SUCCESS: All architectural requirements proven!
+================================================================================
+
+PASSED/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/coverage/inorout.py:521: CoverageWarning: Module src/tta_rebuild was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.11.0/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/coverage/control.py:946: CoverageWarning: No data was collected. (no-data-collected); see https://coverage.readthedocs.io/en/7.11.0/messages.html#warning-no-data-collected
+  self._warn("No data was collected.", slug="no-data-collected")
+/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/pytest_cov/plugin.py:363: CovReportWarning: Failed to generate report: No data to report.
+
+  warnings.warn(CovReportWarning(message), stacklevel=1)
+
+WARNING: Failed to generate report: No data to report.
+
+
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+============================== 1 passed in 7.36s ===============================

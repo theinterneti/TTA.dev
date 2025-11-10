@@ -19,6 +19,15 @@
     "--tb=short"
   ],
 
+  // ===== TTA.dev Snippets & IntelliSense =====
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.snippetSuggestions": "top",
+
   // ===== Ruff Settings =====
   "ruff.enable": true,
   "ruff.lint.run": "onSave",

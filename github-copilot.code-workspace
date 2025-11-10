@@ -1,0 +1,326 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		// TTA.dev Core Configuration
+		"python.defaultInterpreterPath": "./.venv/bin/python",
+		"python.analysis.extraPaths": [
+			"./packages/tta-dev-primitives/src",
+			"./packages/tta-observability-integration/src",
+			"./packages/universal-agent-context/src",
+			"./packages/tta-kb-automation/src"
+		],
+		"python.analysis.autoImportCompletions": true,
+		"python.analysis.autoSearchPaths": true,
+		"python.analysis.typeCheckingMode": "strict",
+		"python.analysis.useLibraryCodeForTypes": true,
+
+		// TTA.dev Package Manager (uv)
+		"python.terminal.activateEnvironment": true,
+		"python.terminal.activateEnvInCurrentTerminal": true,
+
+		// GitHub Copilot Configuration - Enhanced
+		"github.copilot.enable": true,
+		"github.copilot.chat.enable": true,
+		"github.copilot.chat.codeLens": true,
+		"github.copilot.codeGeneration": true,
+		"github.copilot.codeGeneration.commentStyle": "use-line-comments",
+		"github.copilot.codeGeneration.languageStyle": "natural",
+		"github.copilot.ui.badge": "on",
+		"github.copilot.telemetryEvents": true,
+
+		// Copilot Chat Configuration
+		"github.copilot.chat.panel.defaultMode": "ask",
+		"github.copilot.chat.panel.bubblePosition": "left",
+		"github.copilot.chat.panel.revealFollowFocus": false,
+		"github.copilot.chat.panel.showClearMessageButton": true,
+		"github.copilot.chat.panel.copyAction": "on-insert",
+
+		// TTA.dev Specific Copilot Settings
+		"github.copilot.codeGeneration.inline": true,
+		"github.copilot.codeGeneration.inline.shortcut": "accept",
+		"github.copilot.codeGeneration.inline.suggestOnType": true,
+		"github.copilot.codeGeneration.inline.suggestInFunctions": true,
+		"github.copilot.codeGeneration.acceptedOrRejectedReferencesCount": 0,
+		"github.copilot.codeGeneration.generateTests": true,
+		"github.copilot.codeGeneration.generateDocstring": true,
+		"github.copilot.codeGeneration.documentationTypes": ["google", "numpy", "sphinx"],
+
+		// TTA.dev Specific Settings
+		"files.associations": {
+			"*.py": "python",
+			"*.md": "markdown",
+			"*.yml": "yaml",
+			"*.yaml": "yaml"
+		},
+		"files.exclude": {
+			"**/__pycache__": true,
+			"**/*.pyc": true,
+			"**/node_modules": true,
+			"**/.git": false,
+			"**/.DS_Store": true,
+			"**/*.egg-info": true,
+			"**/uv.lock": true,
+			"**/htmlcov": true,
+			"**/.pytest_cache": true
+		},
+
+		// Python Development
+		"python.formatting.provider": "none",
+		"python.linting.enabled": true,
+		"python.linting.pylintEnabled": true,
+		"python.linting.flake8Enabled": true,
+		"python.linting.mypyEnabled": true,
+		"python.linting.ruffEnabled": true,
+		"python.sortImports.args": ["--profile", "black"],
+
+		// Testing Configuration
+		"python.testing.pytestEnabled": true,
+		"python.testing.pytestArgs": [
+			"-v",
+			"--tb=short",
+			"--strict-markers"
+		],
+		"python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+		// GitHub Integration Settings
+		"github.copilot.workflows.badgeDisplay": true,
+		"github.copilot.workflows.statusUpdates": true,
+		"github.copilot.workflows.testGeneration": true,
+		"github.copilot.workflows.lintingFeedback": true,
+
+		// Editor Settings
+		"editor.formatOnSave": true,
+		"editor.formatOnPaste": true,
+		"editor.rulers": [88, 120],
+		"editor.tabSize": 4,
+		"editor.insertSpaces": true,
+		"editor.detectIndentation": false,
+		"editor.wordWrap": "bounded",
+		"editor.wordWrapColumn": 120,
+		"editor.minimap.enabled": true,
+		"editor.bracketPairColorization.enabled": true,
+		"editor.guides.bracketPairs": true,
+
+		// Git Integration
+		"git.enableSmartCommit": true,
+		"git.autofetch": true,
+		"git.autostash": true,
+		"git.confirmSync": false,
+		"git.branchValidationRegex": "^(main|master|develop|feature\\/.+|hotfix\\/.+|release\\/.+)$",
+
+		// Terminal Configuration
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"terminal.integrated.env.linux": {
+			"UV_PYTHON": "./.venv/bin/python",
+			"PATH": "./.venv/bin:$PATH"
+		},
+		"terminal.integrated.defaultProfile.linux": "bash"
+	},
+	"extensions": {
+		"recommendations": [
+			// GitHub Copilot Extensions - November 2025
+			"github.copilot",
+			"github.copilot-chat",
+			"github.vscode-pull-request-github",
+			"github.copilot-labs",
+			"github.vscode-github-actions",
+			"github.copilot-docs",
+
+			// Current Python Development (November 2025)
+			"ms-python.python",
+			"ms-python.debugpy",
+			"charliermarsh.ruff",
+			"ms-python.pylint",
+			"ms-python.mypy-type-checker",
+			"ms-python.pytest",
+
+			// Modern GitHub Workflow (November 2025)
+			"ms-vscode.vscode-git-base",
+			"eamodio.gitlens",
+			"mhutchie.git-graph",
+			"donjayamanne.githistory",
+			"github-actions.github-actions",
+			"github.copilot-vscode",
+
+			// Current Code Quality (November 2025)
+			"ms-vscode.vscode-json",
+			"redhat.vscode-yaml",
+			"yzhang.markdown-all-in-one",
+			"njpwerner.autodocstring",
+			"ms-vscode.vscode-markdown",
+			"davidanson.vscode-markdownlint",
+
+			// Modern Development Tools (November 2025)
+			"ms-vscode-remote.remote-containers",
+			"ms-vscode-remote.remote-ssh",
+			"ms-vscode-remote.remote-wsl",
+			"ms-azuretools.vscode-docker",
+			"ms-vscode.vscode-todo-highlight",
+			"gruntfuggly.todo-tree",
+
+			// Documentation (November 2025)
+			"yzhang.markdown-all-in-one",
+			"ms-vscode.vscode-markdown",
+			"davidanson.vscode-markdownlint",
+
+			// Testing (November 2025)
+			"ms-python.pytest",
+			"littlefoxteam.vscode-python-test-adapter",
+			"ms-python.pylint",
+
+			// Modern CI/CD Tools (November 2025)
+			"github-actions.github-actions",
+			"mike-co.actions-panel",
+			"ms-vscode-remote.remote-containers",
+			"cschleiden.vscode-github-actions"
+		],
+		"unwantedRecommendations": [
+			"ms-python.black-formatter",
+			"ms-python.isort",
+			"saoudrizwan.claude-dev"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Copilot: Run with Quality Checks",
+				"type": "shell",
+				"command": "uv",
+				"args": ["run", "ruff", "format", ".", "&&", "uv", "run", "ruff", "check", ".", "--fix"],
+				"group": "build",
+				"presentation": {
+					"echo": true,
+					"reveal": "always",
+					"focus": false,
+					"panel": "shared"
+				}
+			},
+			{
+				"label": "Copilot: Test & Validate",
+				"type": "shell",
+				"command": "uv",
+				"args": ["run", "pytest", "-v", "--cov=packages/", "--cov-report=html"],
+				"group": "test",
+				"presentation": {
+					"echo": true,
+					"reveal": "always",
+					"focus": "focus",
+					"panel": "shared"
+				},
+				"problemMatcher": [
+					{
+						"owner": "python",
+						"fileLocation": "absolute",
+						"pattern": {
+							"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error|info):\\s+(.*)$",
+							"file": 1,
+							"line": 2,
+							"column": 3,
+							"severity": 4,
+							"message": 5
+						}
+					}
+				]
+			},
+			{
+				"label": "Copilot: Type Check",
+				"type": "shell",
+				"command": "uvx",
+				"args": ["pyright", "packages/"],
+				"group": "build",
+				"presentation": {
+					"echo": true,
+					"reveal": "always",
+					"focus": false,
+					"panel": "shared"
+				},
+				"problemMatcher": [
+					{
+						"owner": "pyright",
+						"fileLocation": "absolute"
+					}
+				]
+			},
+			{
+				"label": "Copilot: GitHub Actions Check",
+				"type": "shell",
+				"command": "echo",
+				"args": ["Checking GitHub Actions workflow validation"],
+				"group": "build",
+				"presentation": {
+					"echo": true,
+					"reveal": "always",
+					"focus": false,
+					"panel": "shared"
+				},
+				"problemMatcher": []
+			},
+			{
+				"label": "Copilot: Full Quality Pipeline",
+				"dependsOrder": "sequence",
+				"dependsOn": [
+					"Copilot: Run with Quality Checks",
+					"Copilot: Type Check",
+					"Copilot: Test & Validate",
+					"Copilot: GitHub Actions Check"
+				],
+				"group": "build"
+			}
+		]
+	},
+	"debug": {
+		"version": "0.1.0",
+		"configurations": [
+			{
+				"name": "Copilot: Python Current File",
+				"type": "python",
+				"request": "launch",
+				"program": "${file}",
+				"console": "integratedTerminal",
+				"env": {
+					"PYTHONPATH": "${workspaceFolder}/packages/tta-dev-primitives/src:${workspaceFolder}/packages/tta-observability-integration/src:${workspaceFolder}/packages/universal-agent-context/src:${workspaceFolder}/packages/tta-kb-automation/src"
+				}
+			},
+			{
+				"name": "Copilot: Python Tests with Coverage",
+				"type": "python",
+				"request": "launch",
+				"module": "pytest",
+				"args": ["--cov=packages/", "--cov-report=html", "${workspaceFolder}/tests/"],
+				"console": "integratedTerminal",
+				"cwd": "${workspaceFolder}",
+				"env": {
+					"PYTHONPATH": "${workspaceFolder}/packages/tta-dev-primitives/src:${workspaceFolder}/packages/tta-observability-integration/src:${workspaceFolder}/packages/universal-agent-context/src:${workspaceFolder}/packages/tta-kb-automation/src"
+				}
+			},
+			{
+				"name": "Copilot: Workflow Validation",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder}/examples/${input:workflowExample}",
+				"console": "integratedTerminal",
+				"env": {
+					"PYTHONPATH": "${workspaceFolder}/packages/tta-dev-primitives/src:${workspaceFolder}/packages/tta-observability-integration/src:${workspaceFolder}/packages/universal-agent-context/src:${workspaceFolder}/packages/tta-kb-automation/src"
+				}
+			}
+		],
+		"inputs": [
+			{
+				"id": "workflowExample",
+				"description": "Select a workflow example to validate",
+				"type": "pickString",
+				"options": [
+					"production_adaptive_demo.py",
+					"verify_adaptive_primitives.py",
+					"auto_learning_demo.py",
+					"examples/adaptive_primitives_demo.py"
+				]
+			}
+		]
+	}
+}

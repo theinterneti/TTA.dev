@@ -125,7 +125,7 @@ gh secret set N8N_API_KEY
 
 ```python
 # Import the new secrets module
-from secrets import get_gemini_api_key, get_github_token, get_config
+from tta_secrets import get_gemini_api_key, get_github_token, get_config
 
 # Get specific API keys
 gemini_key = get_gemini_api_key()
@@ -138,7 +138,7 @@ config = get_config()
 ### For AI Agents
 
 ```python
-from secrets import get_secrets_manager
+from tta_secrets import get_secrets_manager
 
 # Secure secrets handling
 secrets = get_secrets_manager()

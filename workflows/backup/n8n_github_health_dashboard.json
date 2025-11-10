@@ -1,0 +1,433 @@
+{
+  "name": "GitHub Health Dashboard with Gemini AI",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "value": 6
+            }
+          ]
+        }
+      },
+      "id": "1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "resourcePath": "/repos/{{$node[\"Configure Repository\"].json[\"owner\"]}}/{{$node[\"Configure Repository\"].json[\"repo\"]}}"
+      },
+      "id": "2",
+      "name": "Get Repository Info",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "1",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "resourcePath": "/repos/{{$node[\"Configure Repository\"].json[\"owner\"]}}/{{$node[\"Configure Repository\"].json[\"repo\"]}}/issues",
+        "options": {
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "state",
+                "value": "open"
+              },
+              {
+                "name": "per_page",
+                "value": "100"
+              }
+            ]
+          }
+        }
+      },
+      "id": "3",
+      "name": "Get Issues",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        680,
+        200
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "1",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "resourcePath": "/repos/{{$node[\"Configure Repository\"].json[\"owner\"]}}/{{$node[\"Configure Repository\"].json[\"repo\"]}}/pulls",
+        "options": {
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "state",
+                "value": "open"
+              },
+              {
+                "name": "per_page",
+                "value": "100"
+              }
+            ]
+          }
+        }
+      },
+      "id": "4",
+      "name": "Get Pull Requests",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        680,
+        400
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "1",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "resourcePath": "/repos/{{$node[\"Configure Repository\"].json[\"owner\"]}}/{{$node[\"Configure Repository\"].json[\"repo\"]}}/contributors",
+        "options": {
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "per_page",
+                "value": "100"
+              }
+            ]
+          }
+        }
+      },
+      "id": "5",
+      "name": "Get Contributors",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        680,
+        600
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "1",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "resourcePath": "/repos/{{$node[\"Configure Repository\"].json[\"owner\"]}}/{{$node[\"Configure Repository\"].json[\"repo\"]}}/stats/commit_activity"
+      },
+      "id": "6",
+      "name": "Get Commit Activity",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        680,
+        800
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "1",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all GitHub data and calculate health metrics\nconst repoInfo = $input.first().json;\nconst issues = $node[\"Get Issues\"].json;\nconst pullRequests = $node[\"Get Pull Requests\"].json;\nconst contributors = $node[\"Get Contributors\"].json;\nconst commitActivity = $node[\"Get Commit Activity\"].json;\n\n// Calculate basic metrics\nconst metrics = {\n  repository: {\n    name: repoInfo.name,\n    full_name: repoInfo.full_name,\n    description: repoInfo.description,\n    stars: repoInfo.stargazers_count,\n    forks: repoInfo.forks_count,\n    open_issues: repoInfo.open_issues_count,\n    language: repoInfo.language,\n    created_at: repoInfo.created_at,\n    updated_at: repoInfo.updated_at,\n    size: repoInfo.size,\n    default_branch: repoInfo.default_branch\n  },\n  issues: {\n    total_open: issues.length,\n    by_label: issues.reduce((acc, issue) => {\n      issue.labels.forEach(label => {\n        acc[label.name] = (acc[label.name] || 0) + 1;\n      });\n      return acc;\n    }, {}),\n    avg_time_to_close: issues\n      .filter(issue => issue.closed_at)\n      .reduce((acc, issue, _, arr) => {\n        const openTime = new Date(issue.created_at).getTime();\n        const closeTime = new Date(issue.closed_at).getTime();\n        return acc + (closeTime - openTime) / arr.length;\n      }, 0)\n  },\n  pull_requests: {\n    total_open: pullRequests.length,\n    by_state: pullRequests.reduce((acc, pr) => {\n      acc[pr.state] = (acc[pr.state] || 0) + 1;\n      return acc;\n    }, {}),\n    avg_time_to_merge: pullRequests\n      .filter(pr => pr.merged_at)\n      .reduce((acc, pr, _, arr) => {\n        const openTime = new Date(pr.created_at).getTime();\n        const mergeTime = new Date(pr.merged_at).getTime();\n        return acc + (mergeTime - openTime) / arr.length;\n      }, 0)\n  },\n  contributors: {\n    total: contributors.length,\n    top_contributors: contributors.slice(0, 10).map(c => ({\n      login: c.login,\n      contributions: c.contributions\n    }))\n  },\n  commit_activity: {\n    weekly_data: commitActivity,\n    recent_activity: commitActivity.slice(-4).reduce((sum, week) => sum + week.total, 0) / 4\n  }\n};\n\n// Calculate health score components\nconst healthFactors = {\n  activity_score: Math.min(100, (metrics.commit_activity.recent_activity / 10) * 100),\n  community_engagement: Math.min(100, (metrics.contributors.total / 50) * 100),\n  issue_management: Math.min(100, (1 - Math.min(metrics.issues.total_open / 100, 1)) * 100),\n  pr_flow: Math.min(100, (metrics.pull_requests.by_state.open || 0) > 50 ? 50 : 100 - metrics.pull_requests.by_state.open)\n};\n\noverall_health_score = Object.values(healthFactors).reduce((a, b) => a + b, 0) / Object.keys(healthFactors).length;\n\nreturn {\n  timestamp: new Date().toISOString(),\n  repository: metrics.repository,\n  metrics: metrics,\n  health_factors: healthFactors,\n  overall_health_score: Math.round(overall_health_score),\n  raw_data: {\n    issues_sample: issues.slice(0, 5),\n    prs_sample: pullRequests.slice(0, 5)\n  }\n};"
+      },
+      "id": "7",
+      "name": "Process & Calculate Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare data for Gemini AI analysis\nconst data = $input.first().json;\n\nconst prompt = `Analyze this GitHub repository health data and provide insights:\n\nRepository: ${data.repository.full_name}\nHealth Score: ${data.overall_health_score}/100\n\nKey Metrics:\n- Stars: ${data.repository.stars}\n- Open Issues: ${data.issues.total_open}\n- Open PRs: ${data.pull_requests.total_open}\n- Contributors: ${data.contributors.total}\n- Recent Weekly Commits: ${Math.round(data.commit_activity.recent_activity)}\n\nHealth Factors:\n- Activity: ${data.health_factors.activity_score}/100\n- Community: ${data.health_factors.community_engagement}/100\n- Issue Management: ${data.health_factors.issue_management}/100\n- PR Flow: ${data.health_factors.pr_flow}/100\n\nProvide:\n1. Overall health assessment (1-2 sentences)\n2. Top 3 strengths\n3. Top 3 areas for improvement\n4. Specific actionable recommendations\n5. Risk level (Low/Medium/High)\n\nRespond in JSON format with keys: assessment, strengths, improvements, recommendations, risk_level`;\n\nreturn {\n  prompt: prompt,\n  repository_data: data\n};"
+      },
+      "id": "8",
+      "name": "Prepare AI Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+        "options": {
+          "queryParametersUi": {
+            "parameter": [
+              {
+                "name": "key",
+                "value": "={{$env.GEMINI_API_KEY}}"
+              }
+            ]
+          }
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"{{$node['Prepare AI Analysis'].json.prompt}}\"\n    }]\n  }]\n}"
+      },
+      "id": "9",
+      "name": "Gemini AI Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        1340,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Gemini response and create final dashboard\nconst data = $node[\"Process & Calculate Metrics\"].json;\nconst aiResponse = $input.first().json;\n\nlet aiInsights = {};\ntry {\n  const text = aiResponse.candidates[0].content.parts[0].text;\n  // Extract JSON from the response\n  const jsonMatch = text.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    aiInsights = JSON.parse(jsonMatch[0]);\n  }\n} catch (e) {\n  aiInsights = {\n    assessment: \"AI analysis unavailable\",\n    strengths: [],\n    improvements: [],\n    recommendations: [],\n    risk_level: \"Unknown\"\n  };\n}\n\nconst dashboard = {\n  generated_at: new Date().toISOString(),\n  repository: {\n    name: data.repository.full_name,\n    description: data.repository.description,\n    url: `https://github.com/${data.repository.full_name}`,\n    language: data.repository.language,\n    age_days: Math.floor((new Date() - new Date(data.repository.created_at)) / (1000 * 60 * 60 * 24))\n  },\n  health_score: {\n    overall: data.overall_health_score,\n    grade: data.overall_health_score >= 80 ? 'A' : \n           data.overall_health_score >= 70 ? 'B' :\n           data.overall_health_score >= 60 ? 'C' :\n           data.overall_health_score >= 50 ? 'D' : 'F',\n    factors: data.health_factors\n  },\n  metrics: {\n    stars: data.repository.stars,\n    forks: data.repository.forks,\n    open_issues: data.issues.total_open,\n    open_prs: data.pull_requests.total_open,\n    contributors: data.contributors.total,\n    weekly_commits: Math.round(data.commit_activity.recent_activity)\n  },\n  trends: {\n    issue_resolution_time_hours: Math.round(data.issues.avg_time_to_close / (1000 * 60 * 60)),\n    pr_merge_time_hours: Math.round(data.pull_requests.avg_time_to_merge / (1000 * 60 * 60)),\n    commit_velocity: data.commit_activity.recent_activity > 10 ? 'High' :\n                   data.commit_activity.recent_activity > 5 ? 'Medium' : 'Low'\n  },\n  ai_insights: aiInsights,\n  alerts: [\n    ...(data.issues.total_open > 50 ? ['High number of open issues'] : []),\n    ...(data.pull_requests.total_open > 30 ? ['Many open pull requests'] : []),\n    ...(data.contributors.total < 3 ? ['Low contributor diversity'] : []),\n    ...(data.commit_activity.recent_activity < 2 ? ['Low recent activity'] : [])\n  ],\n  recommendations: [\n    ...(aiInsights.recommendations || []),\n    ...(data.issues.total_open > 100 ? ['Consider issue cleanup or closing stale issues'] : []),\n    ...(data.pull_requests.total_open > 20 ? ['Review and merge pending pull requests'] : [])\n  ]\n};\n\nreturn dashboard;"
+      },
+      "id": "10",
+      "name": "Generate Final Dashboard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "owner",
+              "value": "theinterneti"
+            },
+            {
+              "name": "repo",
+              "value": "TTA.dev"
+            }
+          ]
+        }
+      },
+      "id": "11",
+      "name": "Configure Repository",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        60,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "options": {},
+        "jsCode": "// Log dashboard to console and prepare for output\nconst dashboard = $input.first().json;\n\nconsole.log('=== GitHub Health Dashboard ===');\nconsole.log(`Repository: ${dashboard.repository.name}`);\nconsole.log(`Health Score: ${dashboard.health_score.overall}/100 (${dashboard.health_score.grade})`);\nconsole.log(`Generated: ${dashboard.generated_at}`);\nconsole.log('Alerts:', dashboard.alerts);\nconsole.log('===============================');\n\nreturn dashboard;"
+      },
+      "id": "12",
+      "name": "Output Dashboard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1780,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Configure Repository",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure Repository": {
+      "main": [
+        [
+          {
+            "node": "Get Repository Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Repository Info": {
+      "main": [
+        [
+          {
+            "node": "Get Issues",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Pull Requests",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contributors",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Commit Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Issues": {
+      "main": [
+        [
+          {
+            "node": "Process & Calculate Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pull Requests": {
+      "main": [
+        [
+          {
+            "node": "Process & Calculate Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contributors": {
+      "main": [
+        [
+          {
+            "node": "Process & Calculate Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Commit Activity": {
+      "main": [
+        [
+          {
+            "node": "Process & Calculate Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process & Calculate Metrics": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Analysis": {
+      "main": [
+        [
+          {
+            "node": "Gemini AI Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini AI Analysis": {
+      "main": [
+        [
+          {
+            "node": "Generate Final Dashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Final Dashboard": {
+      "main": [
+        [
+          {
+            "node": "Output Dashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {},
+  "tags": [
+    {
+      "createdAt": "2025-11-08T23:13:44.000Z",
+      "updatedAt": "2025-11-08T23:13:44.000Z",
+      "id": "1",
+      "name": "github"
+    },
+    {
+      "createdAt": "2025-11-08T23:13:44.000Z",
+      "updatedAt": "2025-11-08T23:13:44.000Z",
+      "id": "2",
+      "name": "health-dashboard"
+    },
+    {
+      "createdAt": "2025-11-08T23:13:44.000Z",
+      "updatedAt": "2025-11-08T23:13:44.000Z",
+      "id": "3",
+      "name": "ai-analysis"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-08T23:13:44.000Z",
+  "versionId": "1",
+  "active": false
+}
