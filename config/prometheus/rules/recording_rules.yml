@@ -1,0 +1,147 @@
+# TTA.dev Recording Rules
+# Pre-computed metrics for dashboard performance and complex calculations
+
+groups:
+  - name: tta_dev_performance
+    interval: 30s
+    rules:
+      # Request rate calculations
+      - record: tta:request_rate_5m
+        expr: rate(tta_requests_total[5m])
+
+      - record: tta:request_rate_1h
+        expr: rate(tta_requests_total[1h])
+
+      # Success rate calculations
+      - record: tta:success_rate_5m
+        expr: |
+          rate(tta_requests_total{status="success"}[5m]) /
+          rate(tta_requests_total[5m]) * 100
+
+      - record: tta:error_rate_5m
+        expr: |
+          rate(tta_requests_total{status!="success"}[5m]) /
+          rate(tta_requests_total[5m]) * 100
+
+      # Latency percentiles (expensive queries pre-computed)
+      - record: tta:latency_p50_5m
+        expr: histogram_quantile(0.50, rate(tta_execution_duration_seconds_bucket[5m]))
+
+      - record: tta:latency_p95_5m
+        expr: histogram_quantile(0.95, rate(tta_execution_duration_seconds_bucket[5m]))
+
+      - record: tta:latency_p99_5m
+        expr: histogram_quantile(0.99, rate(tta_execution_duration_seconds_bucket[5m]))
+
+      # Average latency
+      - record: tta:latency_avg_5m
+        expr: |
+          rate(tta_execution_duration_seconds_sum[5m]) /
+          rate(tta_execution_duration_seconds_count[5m])
+
+  - name: tta_dev_cache
+    interval: 30s
+    rules:
+      # Cache performance metrics
+      - record: tta:cache_hit_rate_5m
+        expr: |
+          rate(tta_cache_hits_total[5m]) /
+          (rate(tta_cache_hits_total[5m]) + rate(tta_cache_misses_total[5m])) * 100
+
+      - record: tta:cache_operations_rate_5m
+        expr: rate(tta_cache_hits_total[5m]) + rate(tta_cache_misses_total[5m])
+
+      # Cache efficiency over time
+      - record: tta:cache_efficiency_1h
+        expr: |
+          increase(tta_cache_hits_total[1h]) /
+          (increase(tta_cache_hits_total[1h]) + increase(tta_cache_misses_total[1h])) * 100
+
+  - name: tta_dev_workflows
+    interval: 60s
+    rules:
+      # Workflow-level metrics
+      - record: tta:workflow_rate_5m
+        expr: rate(tta_workflow_executions_total[5m])
+
+      - record: tta:workflow_duration_p95_5m
+        expr: histogram_quantile(0.95, rate(tta_workflow_duration_seconds_bucket[5m]))
+
+      - record: tta:workflow_success_rate_5m
+        expr: |
+          rate(tta_workflow_executions_total{status="success"}[5m]) /
+          rate(tta_workflow_executions_total[5m]) * 100
+
+  - name: tta_dev_business_metrics
+    interval: 300s  # 5 minutes
+    rules:
+      # Business/User-facing metrics
+      - record: tta:total_executions_24h
+        expr: increase(tta_workflow_executions_total[24h])
+
+      - record: tta:avg_cache_savings_24h
+        expr: |
+          (increase(tta_cache_hits_total[24h]) /
+           (increase(tta_cache_hits_total[24h]) + increase(tta_cache_misses_total[24h]))) * 100
+
+      # Cost estimation metrics (assuming cache hits save money)
+      - record: tta:estimated_cost_savings_24h
+        expr: |
+          increase(tta_cache_hits_total[24h]) * 0.001  # Assuming $0.001 per cache hit saved
+
+  - name: tta_dev_sli  # Service Level Indicators
+    interval: 60s
+    rules:
+      # Availability SLI (error rate < 1%)
+      - record: tta:sli_availability_5m
+        expr: |
+          (
+            rate(tta_requests_total{status="success"}[5m]) /
+            rate(tta_requests_total[5m])
+          ) >= 0.99
+
+      # Latency SLI (95% of requests < 100ms)
+      - record: tta:sli_latency_5m
+        expr: histogram_quantile(0.95, rate(tta_execution_duration_seconds_bucket[5m])) < 0.1
+
+      # Cache Performance SLI (hit rate > 90%)
+      - record: tta:sli_cache_performance_5m
+        expr: |
+          (
+            rate(tta_cache_hits_total[5m]) /
+            (rate(tta_cache_hits_total[5m]) + rate(tta_cache_misses_total[5m]))
+          ) >= 0.9
+
+  - name: tta_dev_capacity
+    interval: 300s  # 5 minutes
+    rules:
+      # Resource utilization trends
+      - record: tta:cpu_utilization_avg_1h
+        expr: avg(rate(process_cpu_seconds_total[1h])) * 100
+
+      - record: tta:memory_utilization_mb
+        expr: process_resident_memory_bytes / 1024 / 1024
+
+      # Growth rate calculations
+      - record: tta:request_growth_rate_24h
+        expr: |
+          (
+            rate(tta_requests_total[1h]) -
+            rate(tta_requests_total[1h] offset 24h)
+          ) / rate(tta_requests_total[1h] offset 24h) * 100
+
+  - name: tta_dev_alerts_helper
+    interval: 30s
+    rules:
+      # Helper metrics for alerting (reduce alert query complexity)
+      - record: tta:high_error_rate
+        expr: tta:error_rate_5m > 5
+
+      - record: tta:high_latency
+        expr: tta:latency_p95_5m > 0.5
+
+      - record: tta:low_cache_hit_rate
+        expr: tta:cache_hit_rate_5m < 80
+
+      - record: tta:service_down
+        expr: up{job=~"tta-.*"} == 0

@@ -22,11 +22,47 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 
 **Philosophy:** Only proven code enters this repository.
 
+## 🔍 Built-in Observability
+
+TTA.dev comes with **production-grade observability** out of the box:
+
+- **📊 Metrics**: Prometheus metrics with percentile latencies, throughput, error rates
+- **🔍 Tracing**: OpenTelemetry distributed tracing with Jaeger integration
+- **📈 Dashboards**: Pre-configured Grafana dashboards for all primitives
+- **🚨 Alerting**: SLO monitoring with automatic error budget tracking
+- **⚡ Real-time**: Live metrics during development and production
+
+**Quick Start**: `docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d`
+
+Access your observability stack:
+- 📊 **Prometheus**: http://localhost:9090
+- 🔍 **Jaeger**: http://localhost:16686
+- 📈 **Grafana**: http://localhost:3000 (admin/admin)
+
 ---
 
-## 📦 Packages
+## 🏗️ Architecture
 
-### tta-workflow-primitives
+### Platform Packages (Production-Ready)
+
+| Package | Purpose | Status | Version |
+|---------|---------|--------|---------|
+| **tta-dev-primitives** | Core workflow primitives (Router, Cache, Retry, etc.) | ✅ Stable | 1.0.0 |
+| **tta-observability-integration** | OpenTelemetry integration and monitoring | ✅ Stable | 1.0.0 |
+| **universal-agent-context** | Agent context management and coordination | ✅ Stable | 1.0.0 |
+| **tta-documentation-primitives** | Documentation generation and management | ✅ Stable | 1.0.0 |
+| **tta-kb-automation** | Knowledge base automation tools | ✅ Stable | 1.0.0 |
+| **tta-agent-coordination** | Multi-agent coordination patterns | ✅ Stable | 1.0.0 |
+
+### Reference Implementation
+
+| Package | Purpose | Status | Version |
+|---------|---------|--------|---------|
+| **tta-rebuild** | **Rebuild of theinterneti/TTA using TTA.dev primitives** | 🔧 Development | 0.1.0 |
+
+**Meta-Development Strategy:** We use TTA.dev to rebuild our predecessor (TTA), creating a natural feedback loop that drives platform improvement and validates real-world usage patterns.
+
+## 📦 Core Package: tta-dev-primitives
 
 Production-ready composable workflow primitives for building reliable, observable agent workflows.
 
@@ -40,13 +76,13 @@ Production-ready composable workflow primitives for building reliable, observabl
 
 **Installation:**
 ```bash
-pip install tta-workflow-primitives
+pip install tta-dev-primitives
 ```
 
 **Quick Start:**
 
 ```python
-from tta_workflow_primitives import RouterPrimitive, CachePrimitive
+from tta_dev_primitives import RouterPrimitive, CachePrimitive
 
 # Compose workflow with operators
 workflow = (
@@ -127,6 +163,28 @@ result = await workflow.execute({"input": "data"}, context)
 
 print(result)  # {"validated": True, "processed": True, "result": "success"}
 ```
+
+### Enable Observability (Optional but Recommended)
+
+```bash
+# Start observability stack (Prometheus, Jaeger, Grafana)
+cd TTA.dev
+docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d
+
+# Run the observability demo
+uv run python packages/tta-dev-primitives/examples/observability_demo.py
+```
+
+**View Results**:
+- 📊 **Metrics**: http://localhost:9090 (Prometheus)
+- 🔍 **Traces**: http://localhost:16686 (Jaeger)
+- 📈 **Dashboards**: http://localhost:3000 (Grafana - admin/admin)
+
+Your workflow will automatically emit:
+- ✅ **Latency percentiles** (p50, p90, p95, p99)
+- ✅ **Throughput metrics** (requests/second)
+- ✅ **Error rates and SLO compliance**
+- ✅ **Distributed traces** with correlation IDs
 
 ---
 

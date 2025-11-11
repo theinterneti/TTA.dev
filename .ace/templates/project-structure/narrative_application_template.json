@@ -1,0 +1,36 @@
+{
+  "name": "narrative_application",
+  "description": "Project template based on TTA development patterns",
+  "based_on_patterns": [
+    "inheritance_patterns",
+    "async_workflows",
+    "primitive_composition"
+  ],
+  "directory_structure": {
+    "src/": "Source code",
+    "tests/": "Test suite",
+    "docs/": "Documentation",
+    "examples/": "Usage examples",
+    "scripts/": "Development scripts"
+  },
+  "required_files": [
+    "pyproject.toml",
+    "README.md",
+    "CHANGELOG.md",
+    ".gitignore",
+    "pytest.ini"
+  ],
+  "recommended_tools": [
+    "uv (package management)",
+    "ruff (linting/formatting)",
+    "pytest (testing)",
+    "pyright (type checking)"
+  ],
+  "quality_gates": [
+    "100% test coverage",
+    "Type checking passes",
+    "Linting passes",
+    "Documentation complete"
+  ],
+  "created_date": "2025-11-10"
+}

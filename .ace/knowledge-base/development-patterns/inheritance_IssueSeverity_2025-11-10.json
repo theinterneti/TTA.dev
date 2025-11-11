@@ -1,0 +1,16 @@
+{
+  "name": "inheritance_IssueSeverity",
+  "description": "Class IssueSeverity inherits from Enum",
+  "context": "File: packages/tta-rebuild/src/tta_rebuild/narrative/branch_validator.py",
+  "code_example": "class IssueSeverity(Enum):\n    \"\"\"Severity level of validation issues.\"\"\"\n\n    INFO = \"info\"\n    WARNING = \"warning\"\n    ERROR = \"error\"\n\n",
+  "success_metrics": {
+    "complexity": "manageable",
+    "reusability": "high"
+  },
+  "reusability_score": 0.8,
+  "tags": [
+    "inheritance",
+    "class-design"
+  ],
+  "captured_date": "2025-11-10"
+}

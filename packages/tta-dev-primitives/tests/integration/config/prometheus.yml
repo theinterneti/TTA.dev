@@ -23,7 +23,7 @@ scrape_configs:
   # This will scrape metrics from the test application running on host
   - job_name: 'tta-primitives'
     static_configs:
-      - targets: ['host.docker.internal:9464']
+      - targets: ['172.17.0.1:9464']
     scrape_interval: 2s
     scrape_timeout: 1s
     metrics_path: '/metrics'

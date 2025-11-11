@@ -1,0 +1,16 @@
+{
+  "name": "inheritance_BranchValidatorPrimitive",
+  "description": "Class BranchValidatorPrimitive inherits from Unknown",
+  "context": "File: packages/tta-rebuild/src/tta_rebuild/narrative/branch_validator.py",
+  "code_example": "class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):\n    \"\"\"Validate branching narrative choices.\n\n    This primitive:\n    1. Checks consistency with established timeline\n    2. Assesses meaningfulness of choices\n    3. Validates character alignment\n    4. Enforces universe rules\n    5. Detects potential dead ends\n",
+  "success_metrics": {
+    "complexity": "manageable",
+    "reusability": "high"
+  },
+  "reusability_score": 0.8,
+  "tags": [
+    "inheritance",
+    "class-design"
+  ],
+  "captured_date": "2025-11-10"
+}

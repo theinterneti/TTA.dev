@@ -45,6 +45,18 @@ try:
 except ImportError:
     PROMETHEUS_AVAILABLE = False
 
+# Try to import OpenTelemetry for tracing to Jaeger
+try:
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+    from opentelemetry.sdk.resources import Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+    TRACING_AVAILABLE = True
+except ImportError:
+    TRACING_AVAILABLE = False
+
 
 # ============================================================================
 # Demo Primitives - Simulating Real AI Workflow Components
@@ -241,6 +253,94 @@ def print_metrics_summary(primitive_name: str, metrics: dict[str, Any]) -> None:
 # ============================================================================
 
 
+def setup_tracing() -> bool:
+    """
+    Initialize OpenTelemetry tracing to export to Jaeger via OTLP.
+
+    Returns:
+        True if tracing was successfully initialized, False otherwise
+    """
+    if not TRACING_AVAILABLE:
+        print("⚠️  OpenTelemetry not available - traces will not be sent to Jaeger")
+        print(
+            "   Install with: uv pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc"
+        )
+        return False
+
+    try:
+        # Create resource with service information
+        resource = Resource.create(
+            {
+                "service.name": "observability-demo",
+                "service.version": "1.0.0",
+                "deployment.environment": "demo",
+            }
+        )
+
+        # Create OTLP exporter pointing to our OTLP collector
+        # The collector is configured to forward traces to Jaeger
+        otlp_exporter = OTLPSpanExporter(
+            endpoint="http://localhost:4317",  # OTLP gRPC endpoint
+            insecure=True,  # No TLS for local development
+        )
+
+        # Create tracer provider with OTLP exporter
+        tracer_provider = TracerProvider(resource=resource)
+        tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+
+        # Set as global tracer provider
+        trace.set_tracer_provider(tracer_provider)
+
+        print("✅ OpenTelemetry tracing initialized")
+        print("   Sending traces to: http://localhost:4317 (OTLP → Jaeger)")
+        print("   View traces at: http://localhost:16686 (Jaeger UI)")
+        return True
+
+    except Exception as e:
+        print(f"⚠️  Failed to initialize tracing: {e}")
+        print("   Traces will not be exported to Jaeger")
+        return False
+
+
+def setup_metrics() -> bool:
+    """
+    Initialize OpenTelemetry metrics export to Prometheus.
+
+    Returns:
+        True if metrics were successfully initialized, False otherwise
+    """
+    try:
+        from tta_dev_primitives.apm.setup import setup_apm
+
+        # Setup APM with Prometheus metrics export
+        tracer_provider, meter_provider = setup_apm(
+            service_name="observability-demo",
+            service_version="1.0.0",
+            enable_prometheus=True,
+            prometheus_port=9464,
+        )
+
+        if meter_provider:
+            print("✅ OpenTelemetry metrics initialized")
+            print("   Exporting metrics on: http://localhost:9464/metrics")
+            print("   Prometheus scraping: http://localhost:9090")
+            return True
+        else:
+            print("⚠️  Metrics provider not initialized")
+            return False
+
+    except ImportError:
+        print("⚠️  OpenTelemetry SDK not available - metrics will not be exported")
+        print(
+            "   Install with: uv pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-prometheus"
+        )
+        return False
+    except Exception as e:
+        print(f"⚠️  Failed to initialize metrics: {e}")
+        print("   Metrics will not be exported to Prometheus")
+        return False
+
+
 async def run_demo() -> None:
     """
     Run the comprehensive observability demo.
@@ -251,6 +351,14 @@ async def run_demo() -> None:
     3. Varying load patterns (demonstrates percentile tracking)
     """
     print_section_header("TTA.dev Observability Platform Demo")
+
+    # Initialize tracing to Jaeger
+    tracing_enabled = setup_tracing()
+    print()
+
+    # Initialize metrics export to Prometheus
+    metrics_enabled = setup_metrics()
+    print()
 
     # Get the global metrics collector
     collector = get_enhanced_metrics_collector()
@@ -285,6 +393,10 @@ async def run_demo() -> None:
     num_initial_runs = 20
     print(f"Running workflow {num_initial_runs} times...")
 
+    # Get tracer for creating root spans
+    if TRACING_AVAILABLE:
+        tracer = trace.get_tracer(__name__)
+    
     for i in range(num_initial_runs):
         context = WorkflowContext(
             workflow_id=f"demo-workflow-{i}",
@@ -293,9 +405,24 @@ async def run_demo() -> None:
         )
 
         try:
-            await workflow.execute(
-                {"query": f"What is the meaning of life? (run {i + 1})"}, context
-            )
+            # CRITICAL: Wrap execution in root span for proper trace hierarchy
+            if TRACING_AVAILABLE:
+                with tracer.start_as_current_span(
+                    "demo.workflow_execution",
+                    attributes={
+                        "workflow.id": context.workflow_id or "unknown",
+                        "run.number": i + 1,
+                        "run.phase": "initial"
+                    }
+                ) as root_span:
+                    await workflow.execute(
+                        {"query": f"What is the meaning of life? (run {i + 1})"}, context
+                    )
+                    root_span.set_attribute("execution.status", "success")
+            else:
+                await workflow.execute(
+                    {"query": f"What is the meaning of life? (run {i + 1})"}, context
+                )
             print(f"  ✓ Run {i + 1} completed")
         except Exception as e:
             print(f"  ✗ Run {i + 1} failed: {e}")
@@ -325,10 +452,26 @@ async def run_demo() -> None:
         )
 
         try:
-            await workflow.execute(
-                {"query": "What is the meaning of life? (run 1)"},  # Same query
-                context,
-            )
+            # CRITICAL: Wrap execution in root span for proper trace hierarchy
+            if TRACING_AVAILABLE:
+                with tracer.start_as_current_span(
+                    "demo.workflow_execution",
+                    attributes={
+                        "workflow.id": context.workflow_id or "unknown",
+                        "run.number": num_initial_runs + i + 1,
+                        "run.phase": "cached"
+                    }
+                ) as root_span:
+                    await workflow.execute(
+                        {"query": "What is the meaning of life? (run 1)"},  # Same query
+                        context,
+                    )
+                    root_span.set_attribute("execution.status", "success")
+            else:
+                await workflow.execute(
+                    {"query": "What is the meaning of life? (run 1)"},  # Same query
+                    context,
+                )
             print(f"  ✓ Cached run {i + 1} completed")
         except Exception as e:
             print(f"  ✗ Cached run {i + 1} failed: {e}")
@@ -347,10 +490,15 @@ async def run_demo() -> None:
     if PROMETHEUS_AVAILABLE:
         print_section_header("Prometheus Metrics Export")
         try:
-            get_prometheus_exporter()
-            print("✅ Prometheus exporter initialized")
-            print("\n📊 Sample Prometheus metrics would be available at:")
-            print("   http://localhost:8000/metrics")
+            exporter = get_prometheus_exporter()
+            if exporter.start():
+                print("✅ Prometheus metrics server started")
+                print("\n📊 Live Prometheus metrics available at:")
+                print("   http://localhost:9464/metrics")
+            else:
+                print("⚠️  Could not start Prometheus metrics server")
+                print("\n📊 Metrics would be available at:")
+                print("   http://localhost:9464/metrics")
             print("\nMetric types exported:")
             print("  - tta_workflow_primitive_duration_seconds (Histogram)")
             print("  - tta_workflow_slo_compliance_ratio (Gauge)")

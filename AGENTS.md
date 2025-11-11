@@ -168,6 +168,12 @@ Each package has detailed agent instructions. **Always read the package-specific
 | **tta-observability-integration** | ✅ Active | [`packages/tta-observability-integration/README.md`](packages/tta-observability-integration/README.md) | OpenTelemetry tracing, metrics, logging |
 | **universal-agent-context** | ✅ Active | [`packages/universal-agent-context/AGENTS.md`](packages/universal-agent-context/AGENTS.md) | Agent context management and orchestration |
 
+### 🎯 Reference Implementation
+
+| Package | Status | Documentation | Purpose |
+|---------|--------|---------------|---------|
+| **tta-rebuild** | 🔧 Active Development | [`TTA_REBUILD_STATUS.md`](TTA_REBUILD_STATUS.md) | **Reference implementation** - Rebuild of `theinterneti/TTA` using TTA.dev primitives. Demonstrates platform capabilities and drives requirements discovery through meta-development feedback loop. |
+
 ### ⚠️ Packages Under Review
 
 | Package | Status | Documentation | Issue |
@@ -176,7 +182,7 @@ Each package has detailed agent instructions. **Always read the package-specific
 | **python-pathway** | ⚠️ Under Review | Minimal | No clear use case documented, not in workspace. **Decision needed by Nov 7, 2025** |
 | **js-dev-primitives** | 🚧 Placeholder | None | Directory structure only, no implementation. **Decision needed by Nov 14, 2025** |
 
-**Note:** Only the 3 production packages above are included in the uv workspace and fully supported. Packages under review require architectural decisions before use.
+**Note:** The 6 production packages are included in the uv workspace and fully supported. `tta-rebuild` serves as a reference implementation using the platform. Packages under review require architectural decisions before use.
 
 ---
 

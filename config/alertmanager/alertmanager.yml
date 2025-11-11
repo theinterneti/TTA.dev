@@ -1,0 +1,229 @@
+# TTA.dev AlertManager Configuration
+# Professional alert routing, grouping, and notification handling
+
+global:
+  # SMTP configuration for email notifications
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@tta.dev'
+  smtp_auth_username: 'alerts@tta.dev'
+  smtp_auth_password: 'your-smtp-password'
+
+# Template files for custom notification formats
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route tree for organizing alerts
+route:
+  # Default configuration
+  group_by: ['alertname', 'severity', 'service']
+  group_wait: 10s        # Wait for additional alerts before sending
+  group_interval: 5m     # Wait before sending additional alerts for same group
+  repeat_interval: 1h    # Wait before repeating alert notification
+  receiver: 'default-receiver'
+
+  # Routing rules
+  routes:
+    # Critical alerts - immediate notification
+    - matchers:
+        - severity="critical"
+      group_wait: 5s
+      group_interval: 2m
+      repeat_interval: 30m
+      receiver: 'critical-alerts'
+
+    # Platform team alerts
+    - matchers:
+        - team="platform"
+      receiver: 'platform-team'
+
+    # SLO breach alerts
+    - matchers:
+        - slo=~".+"
+      receiver: 'slo-alerts'
+      group_by: ['slo', 'service']
+
+    # Infrastructure monitoring alerts
+    - matchers:
+        - service="monitoring"
+      receiver: 'infrastructure-alerts'
+
+    # Business metrics alerts (lower priority)
+    - matchers:
+        - severity="info"
+      group_interval: 1h
+      repeat_interval: 24h
+      receiver: 'business-metrics'
+
+    # Capacity planning alerts
+    - matchers:
+        - alertname=~".*Growth.*|.*Capacity.*"
+      group_interval: 1h
+      repeat_interval: 12h
+      receiver: 'capacity-planning'
+
+# Inhibition rules - suppress certain alerts when others are firing
+inhibit_rules:
+  # Suppress workflow-level alerts when service is down
+  - source_matchers:
+      - alertname="TTAServiceDown"
+    target_matchers:
+      - service="tta-dev"
+    equal: ['service']
+
+  # Suppress cache alerts when high error rate is occurring
+  - source_matchers:
+      - alertname="TTAHighErrorRate"
+    target_matchers:
+      - alertname=~".*Cache.*"
+    equal: ['service']
+
+  # Suppress individual SLO breaches when availability SLO is breached
+  - source_matchers:
+      - alertname="TTAAvailabilitySLOBreach"
+    target_matchers:
+      - slo=~"latency|cache_performance"
+    equal: ['service']
+
+# Notification receivers
+receivers:
+  # Default receiver for unmatched alerts
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'alerts@tta.dev'
+        subject: '[TTA.dev] Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Service: {{ .Labels.service }}
+          {{ end }}
+
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'critical-alerts@tta.dev'
+        subject: '🚨 [CRITICAL] TTA.dev Alert: {{ .GroupLabels.alertname }}'
+        html: |
+          <h2 style="color: red;">🚨 Critical Alert</h2>
+          {{ range .Alerts }}
+          <div style="border: 1px solid red; padding: 10px; margin: 5px;">
+            <h3>{{ .Annotations.summary }}</h3>
+            <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+            <p><strong>Impact:</strong> {{ .Annotations.impact }}</p>
+            <p><strong>Service:</strong> {{ .Labels.service }}</p>
+            <p><strong>Severity:</strong> {{ .Labels.severity }}</p>
+            {{ if .Annotations.runbook_url }}
+            <p><a href="{{ .Annotations.runbook_url }}">📖 Runbook</a></p>
+            {{ end }}
+            {{ if .Annotations.dashboard_url }}
+            <p><a href="{{ .Annotations.dashboard_url }}">📊 Dashboard</a></p>
+            {{ end }}
+            <p><small>Started: {{ .StartsAt }}</small></p>
+          </div>
+          {{ end }}
+    # Slack webhook for critical alerts (configure with your Slack webhook URL)
+    webhook_configs:
+      - url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        title: '🚨 Critical TTA.dev Alert'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+          {{ end }}
+
+  # Platform team alerts
+  - name: 'platform-team'
+    email_configs:
+      - to: 'platform-team@tta.dev'
+        subject: '[Platform] TTA.dev Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          Platform Team Alert
+
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Severity: {{ .Labels.severity }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ if .Annotations.action }}
+          Recommended Action: {{ .Annotations.action }}
+          {{ end }}
+          {{ end }}
+
+  # SLO breach alerts - special handling
+  - name: 'slo-alerts'
+    email_configs:
+      - to: 'sre-team@tta.dev'
+        subject: '📊 SLO Breach: {{ .GroupLabels.slo }} for {{ .GroupLabels.service }}'
+        body: |
+          Service Level Objective Breach Detected
+
+          {{ range .Alerts }}
+          SLO: {{ .Labels.slo }}
+          Service: {{ .Labels.service }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Error Budget Burn Rate: {{ .Annotations.error_budget_burn }}
+          Impact: {{ .Annotations.impact }}
+          {{ end }}
+
+          This requires immediate attention to maintain service quality commitments.
+
+  # Infrastructure monitoring alerts
+  - name: 'infrastructure-alerts'
+    email_configs:
+      - to: 'infrastructure@tta.dev'
+        subject: '[Infrastructure] Monitoring Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          Infrastructure Monitoring Alert
+
+          {{ range .Alerts }}
+          Component: {{ .Labels.job }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Impact: {{ .Annotations.impact }}
+          {{ end }}
+
+          Please check monitoring infrastructure health.
+
+  # Business metrics alerts - low priority
+  - name: 'business-metrics'
+    email_configs:
+      - to: 'product-team@tta.dev'
+        subject: '[Business Metrics] TTA.dev Insight: {{ .GroupLabels.alertname }}'
+        body: |
+          Business Metrics Update
+
+          {{ range .Alerts }}
+          Metric: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.action }}
+          Suggested Action: {{ .Annotations.action }}
+          {{ end }}
+          {{ end }}
+
+          This is informational and may warrant analysis during regular business hours.
+
+  # Capacity planning alerts
+  - name: 'capacity-planning'
+    email_configs:
+      - to: 'capacity-planning@tta.dev'
+        subject: '[Capacity] TTA.dev Growth Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          Capacity Planning Alert
+
+          {{ range .Alerts }}
+          Growth Metric: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Recommended Action: {{ .Annotations.action }}
+          {{ end }}
+
+          Please review capacity planning and scaling strategies.
+
+# Notification templates directory
+templates_dir: '/etc/alertmanager/templates'

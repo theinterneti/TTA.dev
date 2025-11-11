@@ -1,0 +1,262 @@
+# TTA.dev Alerting Rules
+# Professional alerting for production observability
+
+groups:
+  - name: tta_dev_critical
+    rules:
+      - alert: TTAHighErrorRate
+        expr: tta:error_rate_5m > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev error rate is critically high"
+          description: "Error rate is {{ $value }}% for the last 5 minutes, which is above the 5% threshold"
+          runbook_url: "https://runbooks.tta.dev/high-error-rate"
+          dashboard_url: "http://localhost:3000/d/tta-platform-health"
+
+      - alert: TTAServiceDown
+        expr: tta:service_down
+        for: 1m
+        labels:
+          severity: critical
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev service is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute"
+          runbook_url: "https://runbooks.tta.dev/service-down"
+
+      - alert: TTAHighLatency
+        expr: tta:latency_p95_5m > 1.0
+        for: 5m
+        labels:
+          severity: critical
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev latency is critically high"
+          description: "95th percentile latency is {{ $value }}s, which is above 1.0s threshold"
+          runbook_url: "https://runbooks.tta.dev/high-latency"
+
+  - name: tta_dev_warnings
+    rules:
+      - alert: TTAModerateLowCacheHitRate
+        expr: tta:cache_hit_rate_5m < 80
+        for: 10m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev cache hit rate is low"
+          description: "Cache hit rate is {{ $value }}% for the last 5 minutes, below 80% threshold"
+          impact: "Increased costs and latency"
+          runbook_url: "https://runbooks.tta.dev/low-cache-hit-rate"
+
+      - alert: TTALowCacheHitRate
+        expr: tta:cache_hit_rate_5m < 60
+        for: 5m
+        labels:
+          severity: critical
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev cache hit rate is critically low"
+          description: "Cache hit rate is {{ $value }}% for the last 5 minutes, below 60% threshold"
+          impact: "Significant cost increase and performance degradation"
+          runbook_url: "https://runbooks.tta.dev/low-cache-hit-rate"
+
+      - alert: TTAHighRequestRate
+        expr: tta:request_rate_5m > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev request rate is unusually high"
+          description: "Request rate is {{ $value }} req/s, above normal threshold of 1000 req/s"
+          impact: "Potential capacity issues"
+          runbook_url: "https://runbooks.tta.dev/high-request-rate"
+
+      - alert: TTAHighMemoryUsage
+        expr: tta:memory_utilization_mb > 1000
+        for: 15m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev memory usage is high"
+          description: "Memory usage is {{ $value }}MB, above 1GB threshold"
+          impact: "Potential performance degradation"
+
+  - name: tta_dev_business_slos
+    rules:
+      - alert: TTAAvailabilitySLOBreach
+        expr: tta:sli_availability_5m == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: tta-dev
+          team: platform
+          slo: availability
+        annotations:
+          summary: "TTA.dev availability SLO breached"
+          description: "Service availability is below 99% SLO for 5 minutes"
+          impact: "SLO breach - customer impact"
+          error_budget_burn: "high"
+
+      - alert: TTALatencySLOBreach
+        expr: tta:sli_latency_5m == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+          slo: latency
+        annotations:
+          summary: "TTA.dev latency SLO breached"
+          description: "95% of requests are not completing within 100ms SLO"
+          impact: "User experience degradation"
+          error_budget_burn: "medium"
+
+      - alert: TTACachePerformanceSLOBreach
+        expr: tta:sli_cache_performance_5m == 0
+        for: 15m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+          slo: cache_performance
+        annotations:
+          summary: "TTA.dev cache performance SLO breached"
+          description: "Cache hit rate is below 90% SLO"
+          impact: "Increased costs and latency"
+          error_budget_burn: "low"
+
+  - name: tta_dev_capacity_planning
+    rules:
+      - alert: TTAHighGrowthRate
+        expr: tta:request_growth_rate_24h > 50
+        for: 1h
+        labels:
+          severity: info
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev experiencing high growth"
+          description: "Request volume has grown {{ $value }}% in the last 24 hours"
+          impact: "May need capacity planning review"
+          action: "Review capacity and scaling strategy"
+
+      - alert: TTANegativeGrowthRate
+        expr: tta:request_growth_rate_24h < -20
+        for: 2h
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev traffic decline detected"
+          description: "Request volume has decreased {{ $value }}% in the last 24 hours"
+          impact: "Potential service issue or user behavior change"
+          action: "Investigate cause of traffic decline"
+
+  - name: tta_dev_infrastructure
+    rules:
+      - alert: TTAPrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: monitoring
+          team: platform
+        annotations:
+          summary: "Prometheus monitoring is down"
+          description: "Prometheus server is not responding"
+          impact: "Loss of monitoring visibility"
+
+      - alert: TTAGrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring
+          team: platform
+        annotations:
+          summary: "Grafana dashboard service is down"
+          description: "Grafana server is not responding"
+          impact: "Loss of dashboard access"
+
+      - alert: TTAJaegerDown
+        expr: up{job="jaeger"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: monitoring
+          team: platform
+        annotations:
+          summary: "Jaeger tracing service is down"
+          description: "Jaeger server is not responding"
+          impact: "Loss of distributed tracing"
+
+  - name: tta_dev_data_quality
+    rules:
+      - alert: TTAMissingMetrics
+        expr: absent(tta_requests_total)
+        for: 5m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev metrics are missing"
+          description: "Core metrics like tta_requests_total are not being scraped"
+          impact: "Loss of observability data"
+          action: "Check application metrics endpoints"
+
+      - alert: TTAStaleMetrics
+        expr: time() - tta_requests_total > 300
+        for: 5m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev metrics are stale"
+          description: "Metrics haven't been updated in over 5 minutes"
+          impact: "Observability data may be outdated"
+
+  - name: tta_dev_workflow_specific
+    rules:
+      - alert: TTAWorkflowFailureSpike
+        expr: |
+          (
+            rate(tta_workflow_executions_total{status!="success"}[5m]) /
+            rate(tta_workflow_executions_total[5m])
+          ) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev workflow failure rate spike"
+          description: "Workflow failure rate is {{ $value | humanizePercentage }} over last 5 minutes"
+          impact: "User workflow disruption"
+
+      - alert: TTAWorkflowLatencySpike
+        expr: tta:workflow_duration_p95_5m > 10.0
+        for: 5m
+        labels:
+          severity: warning
+          service: tta-dev
+          team: platform
+        annotations:
+          summary: "TTA.dev workflow latency spike"
+          description: "95th percentile workflow duration is {{ $value }}s"
+          impact: "User experience degradation"

@@ -22,15 +22,12 @@ processors:
     timeout: 1s
     send_batch_size: 1024
 
-  # Add resource attributes
+  # Add resource attributes (insert if not present, don't overwrite)
   resource:
     attributes:
-      - key: service.name
-        value: tta-dev-primitives
-        action: upsert
       - key: environment
         value: integration-test
-        action: upsert
+        action: insert
 
   # Memory limiter to prevent OOM
   memory_limiter:
@@ -72,4 +69,3 @@ service:
       level: info
     metrics:
       address: 0.0.0.0:8888
-

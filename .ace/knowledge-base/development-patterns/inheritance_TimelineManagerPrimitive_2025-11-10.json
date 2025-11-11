@@ -1,0 +1,16 @@
+{
+  "name": "inheritance_TimelineManagerPrimitive",
+  "description": "Class TimelineManagerPrimitive inherits from Unknown",
+  "context": "File: packages/tta-rebuild/src/tta_rebuild/narrative/timeline_manager.py",
+  "code_example": "class TimelineManagerPrimitive(TTAPrimitive[TimelineUpdate, TimelineState]):\n    \"\"\"Manage story timelines with consistency validation.\n\n    This primitive:\n    1. Tracks story events across timeline\n    2. Validates causal relationships\n    3. Identifies branch points for player choices\n    4. Detects and reports timeline inconsistencies\n    5. Suggests fixes for detected issues\n",
+  "success_metrics": {
+    "complexity": "manageable",
+    "reusability": "high"
+  },
+  "reusability_score": 0.8,
+  "tags": [
+    "inheritance",
+    "class-design"
+  ],
+  "captured_date": "2025-11-10"
+}

@@ -154,9 +154,9 @@
       "problemMatcher": []
     },
     {
-      "label": "🔭 Verify Observability Setup",
+      "label": "🔭 Setup Observability Stack",
       "type": "shell",
-      "command": "./scripts/verify-and-setup-persistence.sh",
+      "command": "./scripts/setup-observability.sh",
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -167,6 +167,31 @@
       "runOptions": {
         "runOn": "folderOpen"
       }
+    },
+    {
+      "label": "📊 Run Observability Demo",
+      "type": "shell",
+      "command": "uv run python packages/tta-dev-primitives/examples/observability_demo.py",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": [],
+      "dependsOn": "🔭 Setup Observability Stack"
+    },
+    {
+      "label": "🏥 Development Environment Check",
+      "type": "shell",
+      "command": "./scripts/dev-env-check.sh",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [

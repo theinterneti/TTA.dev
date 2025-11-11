@@ -1,0 +1,356 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TTA.dev Executive Dashboard",
+    "tags": ["tta-dev", "executive", "business"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "5m",
+    "schemaVersion": 30,
+    "version": 1,
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "timerange",
+          "type": "interval",
+          "query": "1h,6h,12h,24h,7d,30d",
+          "current": {
+            "text": "24h",
+            "value": "24h"
+          }
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "prometheus",
+          "enable": true,
+          "expr": "increase(tta_deployments_total[1m])",
+          "iconColor": "green",
+          "titleFormat": "Deployment"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Health Overview",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        },
+        "targets": [
+          {
+            "expr": "tta:success_rate_5m",
+            "legendFormat": "Success Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "tta:cache_hit_rate_5m",
+            "legendFormat": "Cache Hit Rate",
+            "refId": "B"
+          },
+          {
+            "expr": "avg(up{job=~\"tta-.*\"}) * 100",
+            "legendFormat": "Service Availability",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Business Metrics Summary",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 4},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short",
+            "decimals": 0
+          }
+        },
+        "options": {
+          "orientation": "vertical",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "value_and_name"
+        },
+        "targets": [
+          {
+            "expr": "tta:total_executions_24h",
+            "legendFormat": "Workflow Executions (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(tta_requests_total[5m])) * 60",
+            "legendFormat": "Requests per Minute",
+            "refId": "B"
+          },
+          {
+            "expr": "count(up{job=~\"tta-.*\"} == 1)",
+            "legendFormat": "Active Services",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Cost Efficiency Metrics",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 4},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "green", "value": 90}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "options": {
+          "orientation": "vertical",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        },
+        "targets": [
+          {
+            "expr": "tta:avg_cache_savings_24h",
+            "legendFormat": "Cache Efficiency (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "tta:estimated_cost_savings_24h",
+            "legendFormat": "Estimated Savings ($)",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Service Level Objectives Status",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 10},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 0.95},
+                {"color": "green", "value": 0.99}
+              ]
+            },
+            "unit": "percentunit",
+            "min": 0,
+            "max": 1
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "displayMode": "gradient"
+        },
+        "targets": [
+          {
+            "expr": "tta:sli_availability_5m",
+            "legendFormat": "Availability SLO (99%)",
+            "refId": "A"
+          },
+          {
+            "expr": "tta:sli_latency_5m",
+            "legendFormat": "Latency SLO (100ms)",
+            "refId": "B"
+          },
+          {
+            "expr": "tta:sli_cache_performance_5m",
+            "legendFormat": "Cache Performance SLO (90%)",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Request Volume Trend",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "pointSize": 5,
+              "fillOpacity": 20
+            },
+            "unit": "reqps"
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi"},
+          "legend": {"displayMode": "table", "placement": "bottom"}
+        },
+        "targets": [
+          {
+            "expr": "tta:request_rate_5m",
+            "legendFormat": "Requests/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "tta:workflow_rate_5m",
+            "legendFormat": "Workflows/sec",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Performance Indicators",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "pointSize": 5
+            },
+            "unit": "s"
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "multi"},
+          "legend": {"displayMode": "table", "placement": "bottom"}
+        },
+        "targets": [
+          {
+            "expr": "tta:latency_p50_5m",
+            "legendFormat": "P50 Latency",
+            "refId": "A"
+          },
+          {
+            "expr": "tta:latency_p95_5m",
+            "legendFormat": "P95 Latency",
+            "refId": "B"
+          },
+          {
+            "expr": "tta:latency_p99_5m",
+            "legendFormat": "P99 Latency",
+            "refId": "C"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Growth Metrics",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 26},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "blue", "value": -50},
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 20},
+                {"color": "red", "value": 50}
+              ]
+            },
+            "unit": "percent"
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
+          "textMode": "value_and_name",
+          "colorMode": "background"
+        },
+        "targets": [
+          {
+            "expr": "tta:request_growth_rate_24h",
+            "legendFormat": "Request Growth (24h)",
+            "refId": "A"
+          },
+          {
+            "expr": "(tta:total_executions_24h - tta:total_executions_24h offset 24h) / tta:total_executions_24h offset 24h * 100",
+            "legendFormat": "Workflow Growth (24h)",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "System Health Heatmap",
+        "type": "heatmap",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
+        "options": {
+          "calculate": true,
+          "yAxis": {
+            "unit": "s",
+            "min": "0",
+            "max": "2"
+          }
+        },
+        "targets": [
+          {
+            "expr": "rate(tta_execution_duration_seconds_bucket[5m])",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ]
+      }
+    ]
+  }
+}

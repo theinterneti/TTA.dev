@@ -1,0 +1,93 @@
+{
+  "name": "TTA.dev Product Building Environment",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "enableNonRootDocker": "true"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylance",
+        "charliermarsh.ruff",
+        "ms-python.debugpy",
+        "ms-toolsai.jupyter",
+        "github.copilot",
+        "github.copilot-chat",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.test-adapter-converter",
+        "ms-python.pytest"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "python.linting.enabled": true,
+        "python.linting.ruffEnabled": true,
+        "python.formatting.provider": "black",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": [
+          "packages/",
+          "tests/"
+        ],
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/.pytest_cache": true,
+          "**/.ruff_cache": true,
+          "**/.mypy_cache": true
+        },
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        }
+      }
+    }
+  },
+  "postCreateCommand": ".devcontainer/setup.sh",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "forwardPorts": [
+    8000,
+    9090,
+    3000,
+    8080,
+    6379,
+    5432
+  ],
+  "portsAttributes": {
+    "8000": {
+      "label": "TTA Application",
+      "onAutoForward": "notify"
+    },
+    "9090": {
+      "label": "Prometheus",
+      "onAutoForward": "ignore"
+    },
+    "3000": {
+      "label": "Grafana",
+      "onAutoForward": "ignore"
+    },
+    "8080": {
+      "label": "Development Server",
+      "onAutoForward": "notify"
+    }
+  },
+  "remoteUser": "vscode",
+  "workspaceFolder": "/workspace",
+  "remoteEnv": {
+    "PYTHONPATH": "/workspace/packages",
+    "TTA_DEV_MODE": "true",
+    "ACE_ENABLED": "true"
+  }
+}

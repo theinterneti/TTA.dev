@@ -1,0 +1,74 @@
+apiVersion: 1
+
+datasources:
+  # Prometheus - Primary metrics source
+  - name: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    basicAuth: false
+    jsonData:
+      httpMethod: POST
+      prometheusType: Prometheus
+      prometheusVersion: 2.48.1
+      cacheLevel: 'High'
+      incrementalQuerying: true
+      incrementalQueryOverlapWindow: 10m
+      queryTimeout: 60s
+      timeInterval: 15s
+      customQueryParameters: ''
+    secureJsonData: {}
+
+  # Jaeger - Distributed tracing
+  - name: jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    editable: false
+    basicAuth: false
+    jsonData:
+      tracesToLogs:
+        datasourceUid: 'loki'
+        tags: ['job', 'instance', 'pod', 'namespace']
+        mappedTags: [
+          { key: 'service.name', value: 'service' }
+        ]
+        mapTagNamesEnabled: false
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: false
+        filterBySpanID: false
+      spanBar:
+        type: 'Tag'
+        tag: 'http.path'
+      nodeGraph:
+        enabled: true
+    secureJsonData: {}
+
+  # Loki - Log aggregation (future enhancement)
+  # - name: loki
+  #   type: loki
+  #   access: proxy
+  #   url: http://loki:3100
+  #   editable: false
+  #   basicAuth: false
+  #   jsonData:
+  #     derivedFields:
+  #       - datasourceUid: 'jaeger'
+  #         matcherRegex: '"trace_id":"(\w+)"'
+  #         name: 'trace_id'
+  #         url: '$${__value.raw}'
+  #   secureJsonData: {}
+
+  # AlertManager - Alert status and management
+  - name: alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager:9093
+    editable: false
+    basicAuth: false
+    jsonData:
+      implementation: prometheus
+    secureJsonData: {}

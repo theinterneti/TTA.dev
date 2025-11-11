@@ -58,6 +58,18 @@ Your workflow now has:
 - ✅ Retry logic for transient failures
 - ✅ Full observability with traces
 
+### 4. Enable Observability (Optional)
+
+```bash
+# Start observability stack
+./scripts/setup-observability.sh
+
+# Run your workflow and view metrics at:
+# 📊 http://localhost:9090 (Prometheus)
+# 🔍 http://localhost:16686 (Jaeger)
+# 📈 http://localhost:3000 (Grafana)
+```
+
 ## Core Concepts
 
 ### Primitives
@@ -272,6 +284,35 @@ router = RouterPrimitive(
 
 ## Observability
 
+TTA.dev includes **production-grade observability** built-in. Every primitive automatically emits metrics, traces, and logs.
+
+### Quick Setup (5 minutes)
+
+```bash
+# Start observability stack (one-time setup)
+./scripts/setup-observability.sh
+
+# Run the demo to see it in action
+uv run python packages/tta-dev-primitives/examples/observability_demo.py
+```
+
+**Access Your Data**:
+- 📊 **Metrics**: http://localhost:9090 (Prometheus)
+- 🔍 **Traces**: http://localhost:16686 (Jaeger)
+- 📈 **Dashboards**: http://localhost:3000 (Grafana - admin/admin)
+
+### What You Get Automatically
+
+Every workflow execution provides:
+
+- ✅ **Latency percentiles** (p50, p90, p95, p99)
+- ✅ **Throughput metrics** (requests/second, active requests)
+- ✅ **Error rates and success rates**
+- ✅ **SLO compliance monitoring** with error budgets
+- ✅ **Distributed traces** with correlation IDs
+- ✅ **Cache hit rates** and performance impact
+- ✅ **Cost tracking** (API calls, cache savings)
+
 ### OpenTelemetry Integration
 
 ```python
@@ -305,6 +346,16 @@ logger.info(
     }
 )
 ```
+
+### Production Monitoring
+
+For production deployments, TTA.dev integrates with:
+
+- **Prometheus** - Metrics collection and alerting
+- **Jaeger** - Distributed tracing
+- **Grafana** - Dashboards and visualization
+- **OpenTelemetry** - Standards-compliant telemetry
+- **Any OTLP-compatible system** (Datadog, New Relic, etc.)
 
 ## Testing
 
