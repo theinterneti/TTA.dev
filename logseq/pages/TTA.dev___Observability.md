@@ -29,3 +29,5 @@ See the main observability documentation in:
 ## Tags
 
 #observability #tracing #metrics #logging #opentelemetry
+
+- [[Project Hub]]

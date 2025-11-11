@@ -126,7 +126,7 @@
 #### Cross-Reference System
 **Pattern Established:**
 ```text
-Documentation → Knowledge Base: "💡 See Also: [Deep Dive](logseq/pages/...) for patterns"
+Documentation → Knowledge Base: "💡 See Also: [Deep Dive] for patterns"
 Knowledge Base → Documentation: "📚 API Reference: See PRIMITIVES_CATALOG.md"
 ```
 

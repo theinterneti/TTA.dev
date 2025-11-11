@@ -22,6 +22,8 @@ class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
 
     Each primitive's output becomes the next primitive's input.
 
+    See: [[SequentialPrimitive]] for more details.
+
     Example:
         ```python
         workflow = SequentialPrimitive([
@@ -100,7 +102,9 @@ class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
                 with self._tracer.start_as_current_span(f"sequential.step_{i}") as span:
                     span.set_attribute("step.index", i)
                     span.set_attribute("step.name", step_name)
-                    span.set_attribute("step.primitive_type", primitive.__class__.__name__)
+                    span.set_attribute(
+                        "step.primitive_type", primitive.__class__.__name__
+                    )
                     span.set_attribute("step.total_steps", len(self.primitives))
 
                     try:

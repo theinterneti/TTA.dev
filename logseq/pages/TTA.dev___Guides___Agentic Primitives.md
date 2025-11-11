@@ -556,3 +556,5 @@ workflow = (
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 25 minutes
 **Difficulty:** [[Beginner]]
+
+- [[Project Hub]]

@@ -505,3 +505,5 @@ See [[Contributing Guide]] for details.
 **Category:** Templates / Development Resources
 **Complexity:** Beginner to Advanced
 **Status:** Active - continuously updated
+
+- [[Project Hub]]

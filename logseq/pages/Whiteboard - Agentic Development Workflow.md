@@ -635,3 +635,5 @@ Learning materials
 **Last Updated:** November 3, 2025
 **Status:** Active - Meta-Pattern
 **Purpose:** Guide AI agents in building TTA.dev using TTA.dev patterns
+
+- [[Project Hub]]

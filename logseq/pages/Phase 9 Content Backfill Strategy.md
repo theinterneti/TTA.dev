@@ -437,3 +437,5 @@ Each page should include:
 **Created:** [[2025-11-05]]
 **Status:** 🚀 Active - Stage 1 in progress
 **Next Review:** [[2025-11-08]]
+
+- [[Project Hub]]

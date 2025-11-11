@@ -108,3 +108,5 @@ Interested in implementing OpenAIPrimitive? See:
 primitive:: llm
 status:: planned
 provider:: openai
+
+- [[Project Hub]]

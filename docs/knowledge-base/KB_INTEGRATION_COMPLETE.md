@@ -36,7 +36,7 @@
 **Established Pattern:**
 ```
 Documentation → Knowledge Base (for rich context)
-"See Also: [Deep Dive: CachePrimitive](logseq/pages/...) for patterns and examples"
+"See Also: [Deep Dive: CachePrimitive] for patterns and examples"
 
 Knowledge Base → Documentation (for authoritative info)
 "API Reference: See PRIMITIVES_CATALOG.md for complete API documentation"
@@ -212,7 +212,7 @@ docs/knowledge-base/README.md → Standards + Templates + Cross-refs
 ### Cross-Reference Pattern ✅
 
 ```text
-Documentation: "💡 See Also: [Deep Dive](logseq/pages/...) for implementation patterns"
+Documentation: "💡 See Also: [Deep Dive] for implementation patterns"
 Knowledge Base: "📚 API Reference: See PRIMITIVES_CATALOG.md for complete API docs"
 ```
 

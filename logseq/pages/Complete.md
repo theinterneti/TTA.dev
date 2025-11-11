@@ -352,3 +352,5 @@ async def test_workflow_completion_callback():
 
 **Status:** Production pattern
 **Category:** Workflow patterns
+
+- [[Project Hub]]

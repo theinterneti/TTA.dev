@@ -616,3 +616,5 @@ id:: integration-plan-longterm
 - [[TTA.dev/Integration/AI Libraries Comparison]] - Library selection guide
 - [[TTA.dev/Integration/GitHub Agent HQ]] - Multi-agent orchestration
 - [[TTA.dev/Guides/Agentic Primitives]] - TTA.dev workflow composition
+
+- [[Project Hub]]

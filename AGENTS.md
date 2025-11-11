@@ -23,24 +23,18 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 
 **🧭 Knowledge Base Hub:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - **START HERE** for intelligent navigation between documentation and knowledge base systems.
 
-- **📐 TODO Architecture:** [`logseq/pages/TTA.dev/TODO Architecture.md`](logseq/pages/TTA.dev___TODO Architecture.md) - Complete system design
-- **📊 Main Dashboard:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO Management System.md) - Active queries
-- **📋 Templates:** [`logseq/pages/TODO Templates.md`](logseq/pages/TODO Templates.md) - Copy-paste patterns
-- **🎓 Learning Paths:** [`logseq/pages/TTA.dev/Learning Paths.md`](logseq/pages/TTA.dev___Learning Paths.md) - Structured sequences
-- **📈 Metrics:** [`logseq/pages/TTA.dev/TODO Metrics Dashboard.md`](logseq/pages/TTA.dev___TODO Metrics Dashboard.md) - Analytics
-- **⚡ Quick Reference:** [`logseq/pages/TODO Architecture Quick Reference.md`](logseq/pages/TODO Architecture Quick Reference.md) - Fast lookup
+- **📐 TODO Architecture:** [`logseq/pages/TTA.dev/TODO Architecture.md`](logseq/pages/TTA.dev___TODO%20Architecture.md) - Complete system design
+- **📊 Main Dashboard:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO%20Management%20System.md) - Active queries
+- **📋 Templates:** [`logseq/pages/TODO Templates.md`](logseq/pages/TODO%20Templates.md) - Copy-paste patterns
+- **🎓 Learning Paths:** [`logseq/pages/TTA.dev___Learning Paths.md`](logseq/pages/TTA.dev___Learning%20Paths.md) - Structured sequences
+- **📈 Metrics:** [`logseq/pages/TTA.dev/TODO Metrics Dashboard.md`](logseq/pages/TTA.dev___TODO%20Metrics%20Dashboard.md) - Analytics
+- **⚡ Quick Reference:** [`logseq/pages/TODO Architecture Quick Reference.md`](logseq/pages/TODO%20Architecture%20Quick%20Reference.md) - Fast lookup
 
 **Package Dashboards:**
 
 - [`TTA.dev/Packages/tta-dev-primitives/TODOs`](logseq/pages/TTA.dev___Packages___tta-dev-primitives___TODOs.md) - Core primitives ✅
 - [`TTA.dev/Packages/tta-observability-integration/TODOs`](logseq/pages/TTA.dev___Packages___tta-observability-integration___TODOs.md) - Observability ✅
 - [`TTA.dev/Packages/universal-agent-context/TODOs`](logseq/pages/TTA.dev___Packages___universal-agent-context___TODOs.md) - Agent context ✅
-
-**Migration Documentation:**
-
-- [`docs/TODO_ARCHITECTURE_APPLICATION_COMPLETE.md`](docs/TODO_ARCHITECTURE_APPLICATION_COMPLETE.md) - **28 active TODOs** migrated/created
-- [`docs/TODO_LIFECYCLE_GUIDE.md`](docs/TODO_LIFECYCLE_GUIDE.md) - Completion, archival, and embedded TODO workflows ✅
-- [`docs/TODO_LIFECYCLE_IMPLEMENTATION_SUMMARY.md`](docs/TODO_LIFECYCLE_IMPLEMENTATION_SUMMARY.md) - Implementation summary
 
 **Daily Journal:** Add TODOs to `logseq/journals/YYYY_MM_DD.md`
 
@@ -76,7 +70,7 @@ TTA.dev is a production-ready **AI development toolkit** providing:
   time-estimate:: 20 minutes
 ```
 
-**See:** [`logseq/ADVANCED_FEATURES.md`](logseq/ADVANCED_FEATURES.md) for complete Logseq guide.
+**See:** [`logseq/pages/TTA.dev___Logseq Advanced Features.md`](logseq/pages/TTA.dev___Logseq%20Advanced%20Features.md) for complete Logseq guide.
 
 ### 🎯 Know Your Copilot Context
 
@@ -132,7 +126,14 @@ uv run ruff check . --fix && uvx pyright packages/
 
 **Validation Checklist:** See [`.github/AGENT_CHECKLIST.md`](.github/AGENT_CHECKLIST.md) for complete pre-commit verification steps.
 
-**Prompt Templates:** See [`.vscode/tta-prompts.md`](.vscode/tta-prompts.md) for copy-paste code patterns.
+**KB Health Check:**
+```bash
+uv run python scripts/validate_kb_links.py
+```
+*   Run this script to ensure all links between documentation, code, and the knowledge base are healthy.
+*   Fix any broken links or orphans before committing.
+
+**Prompt Templates:** See `packages/tta-dev-primitives/examples/` for copy-paste code patterns.
 
 ### Repository Structure
 
@@ -189,10 +190,10 @@ TTA.dev's core value is **composable workflow primitives**. Here are the key pri
 | Primitive | Purpose | Import Path | Example |
 |-----------|---------|-------------|---------|
 | `WorkflowPrimitive[T,U]` | Base class for all primitives | `from tta_dev_primitives import WorkflowPrimitive` | [base.py](packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py) |
-| `SequentialPrimitive` | Execute steps in sequence | `from tta_dev_primitives import SequentialPrimitive` | [examples/basic_sequential.py](packages/tta-dev-primitives/examples/basic_sequential.py) |
-| `ParallelPrimitive` | Execute steps in parallel | `from tta_dev_primitives import ParallelPrimitive` | [examples/parallel_execution.py](packages/tta-dev-primitives/examples/parallel_execution.py) |
+| `SequentialPrimitive` | Execute steps in sequence | `from tta_dev_primitives import SequentialPrimitive` | [examples/basic_sequential.py](packages/tta-dev-primitives/examples/basic_workflow.py) |
+| `ParallelPrimitive` | Execute steps in parallel | `from tta_dev_primitives import ParallelPrimitive` | [examples/parallel_execution.py](packages/tta-dev-primitives/examples/composition.py) |
 | `ConditionalPrimitive` | Conditional branching | `from tta_dev_primitives import ConditionalPrimitive` | [conditional.py](packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py) |
-| `RouterPrimitive` | Dynamic routing (LLM selection, etc.) | `from tta_dev_primitives import RouterPrimitive` | [examples/router_llm_selection.py](packages/tta-dev-primitives/examples/router_llm_selection.py) |
+| `RouterPrimitive` | Dynamic routing (LLM selection, etc.) | `from tta_dev_primitives import RouterPrimitive` | [examples/router_llm_selection.py](packages/tta-dev-primitives/examples/error_handling.py) |
 
 ### Recovery Primitives
 
@@ -268,9 +269,9 @@ result = await adaptive_retry.execute(data, context)
 
 **Documentation:**
 
-- [ADAPTIVE_PRIMITIVES_VERIFICATION_COMPLETE.md](ADAPTIVE_PRIMITIVES_VERIFICATION_COMPLETE.md) - Comprehensive verification report
-- [ADAPTIVE_PRIMITIVES_AUDIT.md](ADAPTIVE_PRIMITIVES_AUDIT.md) - System audit and quality review
-- [ADAPTIVE_PRIMITIVES_IMPROVEMENTS.md](ADAPTIVE_PRIMITIVES_IMPROVEMENTS.md) - Latest improvements summary
+- [`docs/ADAPTIVE_PRIMITIVES_PHASES_1_3_COMPLETE.md`](docs/ADAPTIVE_PRIMITIVES_PHASES_1_3_COMPLETE.md) - Comprehensive verification report
+- [`archive/reports_and_logs/ADAPTIVE_PRIMITIVES_AUDIT.md`](archive/reports_and_logs/ADAPTIVE_PRIMITIVES_AUDIT.md) - System audit and quality review
+- [`archive/reports_and_logs/ADAPTIVE_PRIMITIVES_IMPROVEMENTS.md`](archive/reports_and_logs/ADAPTIVE_PRIMITIVES_IMPROVEMENTS.md) - Latest improvements summary
 
 **Full catalog with detailed examples:** [`PRIMITIVES_CATALOG.md`](PRIMITIVES_CATALOG.md)
 
@@ -572,7 +573,7 @@ uv run pytest -v
 - Ruff (linting/formatting)
 - GitLens (Git integration)
 
-**Copilot Toolsets:** See [`.vscode/copilot-toolsets.jsonc`](.vscode/copilot-toolsets.jsonc)
+**Copilot Toolsets:** See `docs/guides/Copilot_Toolsets_Guide.md`
 
 - Use `#tta-package-dev` for primitive development
 - Use `#tta-testing` for test development
@@ -664,7 +665,7 @@ Tradeoff: Slightly more memory, but better reliability
 | [`README.md`](README.md) | Project overview and quick start |
 | [`GETTING_STARTED.md`](GETTING_STARTED.md) | Detailed setup guide |
 | [`PRIMITIVES_CATALOG.md`](PRIMITIVES_CATALOG.md) | Complete primitive reference |
-| [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) | Phase 3 examples implementation guide |
+| [`docs/guides/PHASE3_EXAMPLES_COMPLETE.md`](docs/guides/PHASE3_EXAMPLES_COMPLETE.md) | Phase 3 examples implementation guide |
 | [`MCP_SERVERS.md`](MCP_SERVERS.md) | MCP server integrations |
 | [`docs/architecture/`](docs/architecture/) | Architecture decisions and patterns |
 | [`docs/guides/`](docs/guides/) | Usage guides and tutorials |
@@ -684,7 +685,7 @@ Each package has:
 ### For Agent Development
 
 1. **Start with examples:** [`packages/tta-dev-primitives/examples/`](packages/tta-dev-primitives/examples/)
-2. **Review Phase 3 patterns:** See [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) for production patterns
+2. **Review Phase 3 patterns:** See [`docs/guides/PHASE3_EXAMPLES_COMPLETE.md`](docs/guides/PHASE3_EXAMPLES_COMPLETE.md) for production patterns
 3. **Use composition:** Chain primitives with `>>` and `|`
 4. **Add observability:** Use `WorkflowContext` for all workflows
 5. **Test with mocks:** Use `MockPrimitive` for unit tests

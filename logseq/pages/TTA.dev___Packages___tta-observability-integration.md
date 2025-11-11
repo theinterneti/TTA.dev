@@ -37,3 +37,5 @@ Observability primitives and integrations (OpenTelemetry, Prometheus exporters, 
 ## Owner Notes
 - Ensure safe failure when OTLP is unavailable
 - Export Prometheus metrics under `/metrics` endpoint
+
+- [[Project Hub]]

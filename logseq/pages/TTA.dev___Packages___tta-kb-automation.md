@@ -533,3 +533,5 @@ uv run python -m tta_kb_automation pre-commit-check
 **Last Updated:** November 3, 2025
 **Next Review:** November 10, 2025
 **Status:** 🚧 Phase 1 Complete, Phase 2 In Progress
+
+- [[Project Hub]]

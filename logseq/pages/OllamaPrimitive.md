@@ -172,3 +172,5 @@ primitive:: llm
 status:: planned
 provider:: ollama
 deployment:: local
+
+- [[Project Hub]]

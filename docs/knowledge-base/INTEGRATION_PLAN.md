@@ -161,7 +161,7 @@ Cross-reference pattern:
 ## CachePrimitive
 <!-- Authoritative API documentation here -->
 
-**💡 See Also:** [Deep Dive: CachePrimitive](logseq/pages/TTA Primitives/CachePrimitive.md) for implementation patterns, real-world examples, and troubleshooting.
+**💡 See Also:** [Deep Dive: CachePrimitive](logseq/pages/TTA%20Primitives___CachePrimitive.md) for implementation patterns, real-world examples, and troubleshooting.
 ```
 
 ---

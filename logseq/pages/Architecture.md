@@ -41,3 +41,5 @@ This page is a disambiguation page for "Architecture" references. For specific a
 
 disambiguation:: architecture
 type:: navigation
+
+- [[Project Hub]]

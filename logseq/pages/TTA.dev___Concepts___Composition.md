@@ -571,3 +571,5 @@ async def good_primitive(data: dict, context: WorkflowContext) -> dict:
 **Category:** Core Concept
 **Complexity:** Medium
 **Status:** Production-ready
+
+- [[Project Hub]]

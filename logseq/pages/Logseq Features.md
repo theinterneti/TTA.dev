@@ -82,3 +82,5 @@ TTA.dev leverages advanced Logseq features for powerful knowledge management inc
 
 features:: logseq
 type:: documentation
+
+- [[Project Hub]]

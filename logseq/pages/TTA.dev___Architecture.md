@@ -140,3 +140,5 @@ workflow = (
 **Last Updated:** [[2025-10-31]]
 **Status:** In Progress
 **Next:** Create whiteboards and migrate ADRs
+
+- [[Project Hub]]

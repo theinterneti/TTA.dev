@@ -72,3 +72,5 @@ workflow = (
 
 category:: orchestration
 type:: multi-agent
+
+- [[Project Hub]]

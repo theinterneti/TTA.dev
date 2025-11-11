@@ -86,3 +86,5 @@ done
 namespace:: examples
 type:: code-examples
 audience:: all-users
+
+- [[Project Hub]]
