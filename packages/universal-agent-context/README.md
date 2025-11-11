@@ -23,13 +23,7 @@ Both structures are **actively maintained** and demonstrate different strategies
 
 ### Installation
 
-```bash
-# Clone or copy the package to your project
-cp -r packages/universal-agent-context/ /path/to/your/project/
-
-# Or install as a git submodule
-git submodule add https://github.com/theinterneti/TTA.dev packages/universal-agent-context
-```
+This package is part of the TTA.dev monorepo and is included when you run `uv sync --all-extras` from the root directory. No separate installation is required.
 
 ### Choose Your Approach
 
@@ -249,7 +243,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-Developed as part of the [TTA (Therapeutic Text Adventure)](https://github.com/theinterneti/TTA) project, demonstrating production-ready AI-native development practices.
+Developed as part of the TTA.dev toolkit, demonstrating production-ready AI-native development practices.
 
 **Key Contributors**:
 - Augment CLI team for the sophisticated Augster identity system
@@ -258,7 +252,6 @@ Developed as part of the [TTA (Therapeutic Text Adventure)](https://github.com/t
 
 ---
 
-**Version**: 1.0.0  
-**Status**: Production  
+**Version**: 1.0.0
+**Status**: Production
 **Last Updated**: 2025-10-28
-

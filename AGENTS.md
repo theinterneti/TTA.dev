@@ -764,4 +764,4 @@ When making decisions, prioritize:
 
 **Last Updated:** October 29, 2025
 **Maintained by:** TTA.dev Team
-**License:** See individual package licenses
+**License:** MIT License - see [LICENSE](LICENSE) for details

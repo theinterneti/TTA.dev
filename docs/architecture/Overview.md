@@ -1,119 +1,76 @@
-# TTA Architecture Overview
+# TTA.dev Architecture Overview
 
-This document provides an overview of the Therapeutic Text Adventure (TTA) architecture.
+This document provides a high-level overview of the TTA.dev toolkit's architecture, which is designed to be modular, composable, and observable.
+
+## Guiding Principles
+
+The architecture is built on the following principles:
+
+1.  **Composability**: Complex AI workflows are built by combining small, single-purpose components (Primitives).
+2.  **Modularity**: Each package has a distinct responsibility, allowing for independent development, testing, and deployment.
+3.  **Observability**: The system is designed from the ground up to be transparent, with built-in support for tracing, metrics, and structured logging.
+4.  **Developer Experience**: A strong emphasis is placed on creating an intuitive and efficient development process, with features like operator overloading for composition and a consistent API.
 
 ## System Architecture
 
-The TTA project is built with a modular architecture that separates concerns and allows for easy extension. The main components are:
+TTA.dev follows a layered, composable architecture. Your application consumes primitives from the `tta-dev-primitives` package, which in turn leverage the observability and context management packages.
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                           TTA System                            │
-└─────────────────────────────────────────────────────────────────┘
-                                  │
-                                  ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                           Game Engine                           │
-├─────────────┬─────────────┬─────────────┬─────────────┬─────────┤
-│  Game Loop  │  Game State │  Commands   │    Input    │ Output  │
-└─────────────┴─────────────┴─────────────┴─────────────┴─────────┘
-                                  │
-                 ┌────────────────┼────────────────┐
-                 │                │                │
-                 ▼                ▼                ▼
-┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐
-│   Agent System    │  │    Tool System    │  │  Knowledge Graph  │
-├───────────────────┤  ├───────────────────┤  ├───────────────────┤
-│  Input Processor  │  │    Look Tool      │  │     Locations     │
-│ Narrative Generator│  │    Move Tool     │  │       Items       │
-└───────────────────┘  │   Examine Tool    │  │     Characters    │
-          │            │    Talk Tool      │  └───────────────────┘
-          │            │  Inventory Tool   │            │
-          │            └───────────────────┘            │
-          │                      │                      │
-          └──────────┬───────────┘                      │
-                     │                                   │
-                     ▼                                   ▼
-┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐
-│    Model System   │  │    MCP System    │  │      Neo4j        │
-├───────────────────┤  ├───────────────────┤  ├───────────────────┤
-│   Model Manager   │  │  Server Manager  │  │  Graph Database   │
-│ Transformers API  │  │  Agent Adapters  │  │                   │
-└───────────────────┘  └───────────────────┘  └───────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                  Your Application                   │
+└─────────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────┐
+│                 tta-dev-primitives                  │
+│  ┌────────────┬──────────────┬─────────────────┐   │
+│  │   Router   │    Cache     │    Timeout      │   │
+│  ├────────────┼──────────────┼─────────────────┤   │
+│  │  Parallel  │ Conditional  │     Retry       │   │
+│  └────────────┴──────────────┴─────────────────┘   │
+└─────────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────┐
+│        tta-observability-integration              │
+│  ┌────────────┬──────────────┬─────────────────┐   │
+│  │ APM Setup  │   Metrics    │     Tracing     │   │
+│  └────────────┴──────────────┴─────────────────┘   │
+└─────────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────┐
+│           universal-agent-context                 │
+│  ┌────────────┬──────────────┬─────────────────┐   │
+│  │ Coordination│   Handoff    │     Memory      │   │
+│  └────────────┴──────────────┴─────────────────┘   │
+└─────────────────────────────────────────────────────┘
 ```
 
 ## Component Descriptions
 
-### Core Components
+### `tta-dev-primitives`
 
-- **Core**: Provides fundamental functionality used throughout the application, including configuration management, logging, and exception handling.
+This is the core package of the toolkit, providing a rich set of composable workflow primitives for building reliable, observable agent workflows. It includes components for:
+-   **Control Flow**: `SequentialPrimitive`, `ParallelPrimitive`, `ConditionalPrimitive`, `RouterPrimitive`
+-   **Resilience**: `RetryPrimitive`, `FallbackPrimitive`, `TimeoutPrimitive`, `CircuitBreakerPrimitive`
+-   **Performance**: `CachePrimitive`, `MemoryPrimitive`
 
-### Game Engine
+### `tta-observability-integration`
 
-- **Game Loop**: The main loop that drives the game, handling user input and generating responses.
-- **Game State**: Manages the current state of the game, including player location, inventory, and game world.
-- **Commands**: Processes user commands and translates them into game actions.
+This package provides seamless integration with OpenTelemetry, enabling distributed tracing, metrics, and structured logging across all primitives. It is designed to be plug-and-play, offering immediate insights into workflow performance and behavior.
 
-### Agent System
+### `universal-agent-context`
 
-- **Input Processor**: Analyzes user input to determine intent and extract entities.
-- **Narrative Generator**: Creates engaging, descriptive narrative responses based on the game state.
-
-### Tool System
-
-- **Tool Registry**: Manages the available tools and their execution.
-- **Standard Tools**: Implements common game actions like looking, moving, examining items, etc.
-
-### Knowledge Graph
-
-- **Neo4j Manager**: Provides an interface to the Neo4j database.
-- **Schema**: Defines the structure of the knowledge graph.
-- **Initializer**: Populates the graph with initial data.
-
-### Model System
-
-- **Model Manager**: Handles loading and using transformer models.
-- **Transformers API**: Provides functions for generating text and chat responses.
-
-### MCP System
-
-- **Server Manager**: Manages starting, stopping, and monitoring MCP servers.
-- **Agent Adapters**: Converts TTA agents into MCP servers that can be used by AI assistants.
+This package provides a standardized framework for managing state and context across complex, multi-agent workflows. It handles context propagation, ensuring that all components have access to relevant information like correlation IDs, user data, and session state.
 
 ## Data Flow
 
-### Standard Game Flow
+A typical data flow through the TTA.dev architecture is as follows:
 
-1. User enters a command in the game loop
-2. Input processor analyzes the command to determine intent
-3. Command processor executes the appropriate tool based on the intent
-4. Tools interact with the knowledge graph to retrieve or update data
-5. Narrative generator creates a response based on the tool result
-6. Game loop displays the response to the user
+1.  **Application Layer**: The user's application initiates a workflow by calling `execute()` on a composed set of primitives, passing in the initial data and a `WorkflowContext`.
+2.  **Primitives Layer**: The data flows through the chain of primitives, with each primitive performing its specific function. The `WorkflowContext` is passed along, collecting traces and metrics at each step.
+3.  **Observability Layer**: As primitives execute, the `tta-observability-integration` package captures telemetry data and exports it to a configured backend (e.g., Prometheus, Jaeger).
+4.  **Context Management**: The `universal-agent-context` package ensures that the `WorkflowContext` is consistently propagated, even across distributed or multi-agent systems.
 
-### MCP Integration Flow
-
-1. AI assistant connects to MCP servers
-2. AI assistant calls MCP tools or accesses MCP resources
-3. MCP server routes requests to the appropriate agent or component
-4. Agent or component processes the request and returns a response
-5. MCP server returns the response to the AI assistant
-6. AI assistant uses the response to generate text for the user
-
-## Design Principles
-
-The TTA architecture follows these key design principles:
-
-1. **Separation of Concerns**: Each component has a specific responsibility.
-2. **Modularity**: Components can be developed and tested independently.
-3. **Extensibility**: New agents, tools, and models can be added without changing existing code.
-4. **Testability**: Components are designed to be easily testable.
-5. **Configurability**: System behavior can be configured through environment variables.
-
-## Technology Stack
-
-- **Python**: Primary programming language
-- **Neo4j**: Graph database for storing game state
-- **Transformers**: Library for working with language models
-- **Pydantic**: Data validation and settings management
-- **Docker**: Containerization for development and deployment
+This layered approach ensures a clean separation of concerns while providing powerful, cross-cutting features like observability and context management.

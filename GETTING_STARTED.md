@@ -15,11 +15,8 @@ TTA.dev is a collection of battle-tested components for building AI-native appli
 ### 1. Installation
 
 ```bash
-# Install with pip
-pip install tta-dev-primitives
-
-# Or with uv (recommended)
-uv pip install tta-dev-primitives
+# Install with uv
+uv add tta-dev-primitives
 ```
 
 ### 2. Your First Workflow

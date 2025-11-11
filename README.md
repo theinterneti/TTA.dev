@@ -26,7 +26,7 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 
 ## 📦 Packages
 
-### tta-workflow-primitives
+### tta-dev-primitives
 
 Production-ready composable workflow primitives for building reliable, observable agent workflows.
 
@@ -40,13 +40,13 @@ Production-ready composable workflow primitives for building reliable, observabl
 
 **Installation:**
 ```bash
-pip install tta-workflow-primitives
+uv add tta-dev-primitives
 ```
 
 **Quick Start:**
 
 ```python
-from tta_workflow_primitives import RouterPrimitive, CachePrimitive
+from tta_dev_primitives import RouterPrimitive, CachePrimitive
 
 # Compose workflow with operators
 workflow = (
@@ -60,28 +60,7 @@ workflow = (
 result = await workflow.execute(data, context)
 ```
 
-[📚 Full Documentation](packages/tta-workflow-primitives/README.md)
-
----
-
-### dev-primitives
-
-Development utilities and meta-level primitives for building robust development processes.
-
-**Features:**
-
-- 🛠️ Development and debugging tools
-- 📝 Structured logging utilities
-- ♻️ Retry mechanisms
-- 🧪 Testing helpers
-
-**Installation:**
-
-```bash
-pip install dev-primitives
-```
-
-[📚 Full Documentation](packages/dev-primitives/README.md)
+[📚 Full Documentation](packages/tta-dev-primitives/README.md)
 
 ---
 
@@ -100,18 +79,15 @@ pip install dev-primitives
 ### Installation
 
 ```bash
-# Install with pip
-pip install tta-workflow-primitives dev-primitives
-
-# Or with uv (recommended)
-uv pip install tta-workflow-primitives dev-primitives
+# Install dependencies from pyproject.toml
+uv sync --all-extras
 ```
 
 ### Basic Workflow Example
 
 ```python
-from tta_workflow_primitives import WorkflowContext
-from tta_workflow_primitives.core.base import LambdaPrimitive
+from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives.core.base import LambdaPrimitive
 
 # Define primitives
 validate = LambdaPrimitive(lambda x, ctx: {"validated": True, **x})
@@ -141,7 +117,7 @@ TTA.dev follows a **composable, modular architecture**:
                         │
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│           tta-workflow-primitives                   │
+│                 tta-dev-primitives                  │
 │  ┌────────────┬──────────────┬─────────────────┐   │
 │  │   Router   │    Cache     │    Timeout      │   │
 │  ├────────────┼──────────────┼─────────────────┤   │
@@ -151,9 +127,17 @@ TTA.dev follows a **composable, modular architecture**:
                         │
                         ▼
 ┌─────────────────────────────────────────────────────┐
-│              dev-primitives                         │
+│        tta-observability-integration              │
 │  ┌────────────┬──────────────┬─────────────────┐   │
-│  │  Logging   │   Retries    │   Test Utils    │   │
+│  │ APM Setup  │   Metrics    │     Tracing     │   │
+│  └────────────┴──────────────┴─────────────────┘   │
+└─────────────────────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────┐
+│           universal-agent-context                 │
+│  ┌────────────┬──────────────┬─────────────────┐   │
+│  │ Coordination│   Handoff    │     Memory      │   │
 │  └────────────┴──────────────┴─────────────────┘   │
 └─────────────────────────────────────────────────────┘
 ```
@@ -194,7 +178,7 @@ uv run pytest -v
 uv run pytest --cov=packages --cov-report=html
 
 # Run specific package tests
-uv run pytest packages/tta-workflow-primitives/tests/ -v
+uv run pytest packages/tta-dev-primitives/tests/ -v
 ```
 
 ---
@@ -204,7 +188,7 @@ uv run pytest packages/tta-workflow-primitives/tests/ -v
 ### Prerequisites
 
 - Python 3.11+
-- [uv](https://github.com/astral-sh/uv) (recommended) or pip
+- [uv](https://github.com/astral-sh/uv)
 - VS Code with Copilot (recommended)
 
 ### Setup
@@ -252,7 +236,7 @@ We welcome contributions! However, **only battle-tested, proven code is accepted
 Before submitting a PR, ensure:
 
 - ✅ All tests passing (100%)
-- ✅ Test coverage >80%
+- ✅ Test coverage 100%
 - ✅ Documentation complete
 - ✅ Ruff + Pyright checks pass
 - ✅ **TODO compliance (100%)** - All Logseq TODOs properly formatted
@@ -305,7 +289,7 @@ The CI will automatically validate TODO compliance on all PRs. Non-compliant TOD
 
 5. **Squash merge after approval**
 
-[See full contribution guide](CONTRIBUTING.md) (Coming soon)
+[See full contribution guide](CONTRIBUTING.md)
 
 ---
 
@@ -337,7 +321,7 @@ The CI will automatically validate TODO compliance on all PRs. Non-compliant TOD
 - Google-style docstrings
 - README for each package
 - Examples for all features
-- **Phase 3 Examples:** See [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
+- **Examples:** See the `examples/` directory in each package for usage patterns.
 
 ---
 
@@ -361,10 +345,11 @@ All PRs automatically run:
 
 ### Current Release: v0.1.0 (Initial)
 
-| Package | Version | Tests | Coverage | Status |
-|---------|---------|-------|----------|--------|
-| tta-workflow-primitives | 0.1.0 | 12/12 ✅ | 100% | 🟢 Stable |
-| dev-primitives | 0.1.0 | TBD | TBD | 🟢 Stable |
+| Package | Version | Status |
+|---------|---------|--------|
+| tta-dev-primitives | 0.1.0 | 🟢 Stable |
+| tta-observability-integration | 0.1.0 | 🟢 Stable |
+| universal-agent-context | 0.1.0 | 🟢 Stable |
 
 ### Roadmap
 
