@@ -394,3 +394,5 @@ Legend: Each █ = 2 TODOs
 **Last Updated:** November 2, 2025
 **Maintained by:** TTA.dev Team
 **Whiteboard Type:** Architecture + Dependencies + Learning Paths
+
+- [[Project Hub]]

@@ -16,3 +16,5 @@ This is a redirect page for the variant spelling. See [[PRIMITIVES CATALOG]] for
 
 type:: redirect
 target:: [[PRIMITIVES CATALOG]]
+
+- [[Project Hub]]

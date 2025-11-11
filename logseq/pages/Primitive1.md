@@ -386,3 +386,5 @@ class MetricsPrimitive(WorkflowPrimitive[dict, dict]):
 
 **Category:** Reference / Disambiguation
 **Status:** Generic placeholder
+
+- [[Project Hub]]

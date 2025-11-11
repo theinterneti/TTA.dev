@@ -55,3 +55,5 @@ workflow = input >> (fast | slow | cached) >> aggregator
 
 category:: core
 type:: primitives
+
+- [[Project Hub]]

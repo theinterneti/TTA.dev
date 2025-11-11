@@ -123,3 +123,5 @@ Interested in implementing AnthropicPrimitive? See:
 primitive:: llm
 status:: planned
 provider:: anthropic
+
+- [[Project Hub]]

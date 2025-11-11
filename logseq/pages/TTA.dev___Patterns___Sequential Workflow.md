@@ -554,3 +554,5 @@ workflow = (
 **Category:** Workflow Pattern
 **Complexity:** Beginner to Intermediate
 **Status:** Production-ready
+
+- [[Project Hub]]

@@ -680,9 +680,9 @@ server.start();
 
 ## Related Documentation
 
-- **Copilot Toolsets:** [`.vscode/copilot-toolsets.jsonc`](.vscode/copilot-toolsets.jsonc)
+- **Copilot Toolsets:** [`docs/guides/Copilot_Toolsets_Guide.md`](docs/guides/Copilot_Toolsets_Guide.md)
 - **Toolset Guide:** [`docs/guides/copilot-toolsets-guide.md`](docs/guides/copilot-toolsets-guide.md)
-- **Integration README:** [`.vscode/README.md`](.vscode/README.md)
+- **Integration README:** [`docs/guides/VSCODE_INTEGRATION.md`](docs/guides/VSCODE_INTEGRATION.md)
 - **MCP Documentation:** [`docs/mcp/`](docs/mcp/)
 
 ---

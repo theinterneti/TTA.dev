@@ -371,7 +371,7 @@ uv run python packages/tta-dev-primitives/examples/rag_workflow.py
 ls packages/tta-dev-primitives/examples/
 ```
 
-**Implementation Guide:** [PHASE3_EXAMPLES_COMPLETE.md](PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
+**Implementation Guide:** [docs/guides/PHASE3_EXAMPLES_COMPLETE.md](docs/guides/PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
 - Complete implementation details for all examples
 - InstrumentedPrimitive pattern guide
 - Test results and validation

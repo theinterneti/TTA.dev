@@ -51,7 +51,7 @@ TTA.dev uses **two complementary information systems**:
 
 ✅ **TODO Management** → [`TODO Management System`](../../logseq/pages/TODO%20Management%20System.md)
 ✅ **Learning Paths** → [`Learning Paths`](../../logseq/pages/TTA.dev___Learning%20Paths.md)
-✅ **Concept Relationships** → [`TTA Primitives/`](../../logseq/pages/)
+✅ **Concept Relationships** → [`Project Hub`](../../logseq/pages/Project%20Hub.md)
 ✅ **Personal Notes** → Daily journals
 ✅ **Dynamic Queries** → Live TODO dashboards
 
@@ -83,6 +83,32 @@ When KB needs to reference authoritative information:
 **💡 API Reference:** See [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md#cacheprimitives) for complete API documentation.
 
 This page explores advanced patterns, real-world examples, and troubleshooting.
+```
+
+### From Code → Knowledge Base
+
+When code needs to reference conceptual information:
+
+```python
+class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
+    """
+    Execute primitives in sequence.
+
+    Each primitive's output becomes the next primitive's input.
+
+    See: [[SequentialPrimitive]] for more details.
+
+    Example:
+        ```python
+        workflow = SequentialPrimitive([
+            input_processing,
+            world_building,
+            narrative_generation
+        ])
+        # Or use >> operator:
+        workflow = input_processing >> world_building >> narrative_generation
+        ```
+    """
 ```
 
 ---
@@ -131,8 +157,8 @@ The Knowledge Base contains structured learning sequences that complement docume
 
 ### For Developers
 1. **Architecture:** [`docs/architecture/`](../architecture/) → Design decisions
-2. **Patterns:** [`logseq/pages/TTA.dev/Patterns/`](../../logseq/pages/) → Advanced concepts
-3. **Examples:** [`PHASE3_EXAMPLES_COMPLETE.md`](../../PHASE3_EXAMPLES_COMPLETE.md) → Production patterns
+2. **Patterns:** [`Project Hub`](../../logseq/pages/Project%20Hub.md) → Advanced concepts
+3. **Examples:** [`archive/phase3-status/PHASE3_EXAMPLES_COMPLETE.md`](../../archive/phase3-status/PHASE3_EXAMPLES_COMPLETE.md) → Production patterns
 4. **Contributing:** [`CONTRIBUTING.md`](../../CONTRIBUTING.md) → Development workflow
 
 ---
@@ -204,19 +230,14 @@ Provides **live knowledge base access** in VS Code:
 - 📚 **Documentation Hierarchy** - Organized docs/ structure
 - 🧠 **Knowledge Base** - 207 structured Logseq pages
 - 🔗 **MCP Integration** - LogSeq server available in VS Code
-
-### 🔄 In Progress
-
 - 🎯 **Cross-Reference System** - Smart bidirectional linking
 - 📋 **TODO Integration** - Documentation → KB TODO system
 - 🎓 **Learning Path Links** - Documentation → Structured learning
 
 ### 📋 Next Steps
 
-1. **Update Core Files** - Add KB references to AGENTS.md, README.md
-2. **Cross-Reference Implementation** - Bidirectional smart linking
-3. **MCP Optimization** - Enhanced VS Code integration
-4. **Usage Examples** - Document successful integration patterns
+1. **Final Validation** - Run the validation script to certify 100% health.
+2. **Documentation Handoff** - Update `AGENTS.md` with the new validation procedures.
 
 ---
 
@@ -231,6 +252,7 @@ Provides **live knowledge base access** in VS Code:
 2. **Create Cross-References:**
    - Markdown → Link to rich KB content for deep dives
    - Logseq → Link to authoritative docs for API details
+   - Code → Link to conceptual KB pages from docstrings
 
 3. **Follow Standards:**
    - Use templates from [`TODO Templates`](../../logseq/pages/TODO%20Templates.md)
@@ -245,6 +267,32 @@ Provides **live knowledge base access** in VS Code:
 
 ---
 
+## 🛠️ Validation Tooling
+
+To ensure the health of our three-way knowledge graph, we use a custom validation script.
+
+### `validate_kb_links.py`
+
+**Purpose:**
+This script performs a comprehensive audit of the repository, checking for:
+- Broken links between Markdown, Logseq, and Python docstrings.
+- Orphaned documentation files and Logseq pages.
+
+**How to Run:**
+```bash
+uv run python scripts/validate_kb_links.py
+```
+
+**Interpreting the Output:**
+- **Broken Links:** The script will list any links that point to non-existent files. These must be fixed.
+- **Orphaned Pages:** The script will list any Logseq pages that are not linked to from anywhere and do not link out to any documentation or code. These should be linked to the `[[Project Hub]]` or another relevant page.
+
+**Maintenance:**
+- Run this script before committing changes to documentation or code.
+- Address any reported issues to maintain the integrity of the knowledge graph.
+
+---
+
 ## 🔗 Quick Links
 
 ### Essential Documentation
@@ -255,7 +303,7 @@ Provides **live knowledge base access** in VS Code:
 ### Key Knowledge Base Pages
 - [`TODO Management System`](../../logseq/pages/TODO%20Management%20System.md) - Central task dashboard
 - [`TTA.dev Learning Paths`](../../logseq/pages/TTA.dev___Learning%20Paths.md) - Structured onboarding
-- [`TTA Primitives`](../../logseq/pages/TTA%20Primitives.md) - Concept relationships
+- [`Project Hub`](../../logseq/pages/Project%20Hub.md) - Central hub for all KB topics
 
 ### Integration Resources
 - [`MCP_SERVERS.md`](../../MCP_SERVERS.md) - Model Context Protocol setup
@@ -264,6 +312,6 @@ Provides **live knowledge base access** in VS Code:
 
 ---
 
-**Last Updated:** November 7, 2025
+**Last Updated:** November 11, 2025
 **Next Review:** Weekly (every Monday)
 **Maintained by:** TTA.dev Team

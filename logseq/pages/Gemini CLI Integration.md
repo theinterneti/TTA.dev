@@ -60,3 +60,5 @@ This page tracks the integration and usage of Google's Gemini CLI tool for devel
 tool:: gemini-cli
 status:: evaluation
 type:: ai-assistance
+
+- [[Project Hub]]

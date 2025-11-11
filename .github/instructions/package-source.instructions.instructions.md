@@ -69,7 +69,7 @@ workflow = (
 result = await workflow.execute(data, context)
 ```
 
-[📚 Full Documentation](packages/tta-dev-primitives/README.md)
+[📚 Full Documentation](../../packages/tta-dev-primitives/README.md)
 
 ---
 
@@ -142,17 +142,17 @@ TTA.dev follows a **composable, modular architecture**:
 
 ## 📚 Documentation
 
-- **[Getting Started Guide](GETTING_STARTED.md)** - 5-minute quickstart
-- **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
-- **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
-- **[MCP Integration](docs/mcp/README.md)** - Model Context Protocol guides
-- **[Package Documentation](packages/tta-dev-primitives/README.md)** - Detailed API reference
+- **[Getting Started Guide](../../GETTING_STARTED.md)** - 5-minute quickstart
+- **[Architecture Overview](../../docs/architecture/Overview.md)** - System design and principles
+- **[Coding Standards](../../docs/development/CodingStandards.md)** - Development best practices
+- **[MCP Integration](../../docs/mcp/README.md)** - Model Context Protocol guides
+- **[Package Documentation](../../packages/tta-dev-primitives/README.md)** - Detailed API reference
 
 ### Additional Resources
 
-- [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
-- [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
-- [Examples](packages/tta-dev-primitives/examples/)
+- [AI Libraries Comparison](../../docs/integration/AI_Libraries_Comparison.md)
+- [Model Selection Guide](../../docs/models/Model_Selection_Strategy.md)
+- [Examples](../../packages/tta-dev-primitives/examples/)
 
 ---
 
@@ -213,7 +213,7 @@ We provide VS Code tasks for common operations:
    - 🔍 Lint Code
    - ✨ Format Code
 
-[See full task list](.vscode/tasks.json)
+[See full task list](../../.vscode/tasks.json)
 
 ---
 
@@ -260,7 +260,7 @@ gh pr create --title "feat: Add awesome feature"
 
 5. **Squash merge after approval**
 
-[See full contribution guide](CONTRIBUTING.md) (Coming soon)
+[See full contribution guide](../../CONTRIBUTING.md) (Coming soon)
 
 ---
 
@@ -337,7 +337,7 @@ All PRs automatically run:
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details
+MIT License - see [LICENSE](../../LICENSE) for details
 
 ---
 
@@ -385,14 +385,14 @@ async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
 async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
     """
     Process input with validation.
-    
+
     Args:
         input_data: Data to process
         context: Workflow context
-        
+
     Returns:
         Processed result
-        
+
     Example:
 ```python
         result = await processor.execute({"key": "value"}, context)
@@ -873,11 +873,11 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 ## Anti-Patterns to Avoid
 
-❌ Using `pip` instead of `uv`  
-❌ Creating primitives without type hints  
-❌ Skipping tests ("will add later")  
-❌ Global state instead of `WorkflowContext`  
-❌ Modifying code without running quality checks  
+❌ Using `pip` instead of `uv`
+❌ Creating primitives without type hints
+❌ Skipping tests ("will add later")
+❌ Global state instead of `WorkflowContext`
+❌ Modifying code without running quality checks
 ❌ Using `Optional[T]` instead of `T | None`
 # Package Source Code Guidelines
 
@@ -917,14 +917,14 @@ class MyWorkflow(WorkflowPrimitive[InputType, OutputType]):
     async def execute(self, input_data: InputType, context: WorkflowContext) -> OutputType:
         """
         Brief description.
-        
+
         Args:
             input_data: Description
             context: Workflow context for tracing
-            
+
         Returns:
             Description
-            
+
         Example:
 ```python
             workflow = MyWorkflow()
@@ -1009,21 +1009,21 @@ Every public class and method needs Google-style docstrings:
 async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
     """
     Process input data with validation and transformation.
-    
+
     This method validates the input structure, applies transformations,
     and returns the processed result.
-    
+
     Args:
         input_data: Raw input containing 'query' and optional 'params'
         context: Workflow context with session tracking info
-        
+
     Returns:
         Processed data with 'result' and 'metadata' keys
-        
+
     Raises:
         ValidationError: If required fields are missing
         TimeoutError: If processing exceeds configured timeout
-        
+
     Example:
 ```python
         processor = DataProcessor(timeout=5.0)
@@ -1061,7 +1061,7 @@ from pydantic import BaseModel, Field
 
 class InputData(BaseModel):
     """Input structure for processing."""
-    
+
     query: str = Field(..., description="Search query")
     max_results: int = Field(10, ge=1, le=100, description="Maximum results")
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -1082,21 +1082,21 @@ Before committing, ensure:
 ntext) -> dict:
     """
     Process input data with validation and transformation.
-    
+
     This method validates the input structure, applies transformations,
     and returns the processed result.
-    
+
     Args:
         input_data: Raw input containing 'query' and optional 'params'
         context: Workflow context with session tracking info
-        
+
     Returns:
         Processed data with 'result' and 'metadata' keys
-        
+
     Raises:
         ValidationError: If required fields are missing
         TimeoutError: If processing exceeds configured timeout
-        
+
     Example:
         ```python
         processor = DataProcessor(timeout=5.0)
@@ -1134,7 +1134,7 @@ from pydantic import BaseModel, Field
 
 class InputData(BaseModel):
     """Input structure for processing."""
-    
+
     query: str = Field(..., description="Search query")
     max_results: int = Field(10, ge=1, le=100, description="Maximum results")
     metadata: dict[str, Any] = Field(default_factory=dict)

@@ -31,3 +31,5 @@
 - Use MCP code execution for safe skill practice
 - Maintain cross-session persistence via Logseq
 
+
+- [[Project Hub]]

@@ -29,19 +29,19 @@ This catalog provides a complete reference for all TTA.dev workflow primitives, 
 **Base class for all workflow primitives.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py`](packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py)
 
 **Type Parameters:**
 
-- \`TInput\` - Input data type
-- \`TOutput\` - Output data type
+- `TInput` - Input data type
+- `TOutput` - Output data type
 
 **Key Methods:**
-\`\`\`python
+```python
 async def execute(self, input_data: TInput, context: WorkflowContext) -> TOutput:
     """Execute primitive with input data and context."""
     pass
@@ -53,10 +53,10 @@ def **rshift**(self, other) -> SequentialPrimitive:
 def **or**(self, other) -> ParallelPrimitive:
     """Parallel execution: self | other"""
     pass
-\`\`\`
+```
 
 **Usage:**
-\`\`\`python
+```python
 from abc import abstractmethod
 
 class MyPrimitive(WorkflowPrimitive[str, dict]):
@@ -72,13 +72,13 @@ result = await primitive.execute("hello", context)
 
 # {"result": "HELLO"}
 
-\`\`\`
+```
 
 **Properties:**
 
 - ✅ Type-safe composition
 - ✅ Automatic observability
-- ✅ Operator overloading (\`>>\`, \`|\`)
+- ✅ Operator overloading (`>>`, `|`)
 
 ---
 
@@ -87,14 +87,14 @@ result = await primitive.execute("hello", context)
 **Execute primitives in sequence, passing output to input.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives import SequentialPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py`](packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py)
 
 **Usage:**
-\`\`\`python
+```python
 
 # Explicit construction
 
@@ -108,12 +108,12 @@ workflow = step1 >> step2 >> step3
 
 context = WorkflowContext(workflow_id="demo")
 result = await workflow.execute(input_data, context)
-\`\`\`
+```
 
 **Execution Flow:**
-\`\`\`text
+```text
 input → step1 → result1 → step2 → result2 → step3 → output
-\`\`\`
+```
 
 **Properties:**
 
@@ -123,10 +123,10 @@ input → step1 → result1 → step2 → result2 → step3 → output
 - ✅ Step-level metrics
 
 **Metrics:**
-\`\`\`promql
+```promql
 sequential_step_duration_seconds{step="step1"}
 sequential_total_duration_seconds
-\`\`\`
+```
 
 ---
 
@@ -135,14 +135,14 @@ sequential_total_duration_seconds
 **Execute primitives concurrently, collecting results.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives import ParallelPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py`](packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py)
 
 **Usage:**
-\`\`\`python
+```python
 
 # Explicit construction
 
@@ -158,7 +158,7 @@ results = await workflow.execute(input_data, context)
 
 # Returns: [result1, result2, result3]
 
-\`\`\`
+```
 
 **Properties:**
 
@@ -174,20 +174,20 @@ results = await workflow.execute(input_data, context)
 **Branch execution based on runtime conditions.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives import ConditionalPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py`](packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py)
 
 **Usage:**
-\`\`\`python
+```python
 workflow = ConditionalPrimitive(
     condition=lambda data, ctx: len(data.get("text", "")) < 1000,
     then_primitive=fast_processor,
     else_primitive=slow_processor
 )
-\`\`\`
+```
 
 ---
 
@@ -196,14 +196,14 @@ workflow = ConditionalPrimitive(
 **Dynamic routing to multiple destinations based on logic.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.core import RouterPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py`](packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py)
 
 **Usage:**
-\`\`\`python
+```python
 router = RouterPrimitive(
     routes={
         "fast": gpt4_mini,
@@ -213,7 +213,7 @@ router = RouterPrimitive(
     router_fn=select_route,
     default="fast"
 )
-\`\`\`
+```
 
 ---
 
@@ -224,14 +224,14 @@ router = RouterPrimitive(
 **Automatic retry with exponential backoff.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.recovery import RetryPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py)
 
 **Usage:**
-\`\`\`python
+```python
 reliable_llm = RetryPrimitive(
     primitive=llm_call,
     max_retries=3,
@@ -239,7 +239,7 @@ reliable_llm = RetryPrimitive(
     initial_delay=1.0,
     jitter=True
 )
-\`\`\`
+```
 
 ---
 
@@ -248,19 +248,19 @@ reliable_llm = RetryPrimitive(
 **Graceful degradation with fallback cascade.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.recovery import FallbackPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py)
 
 **Usage:**
-\`\`\`python
+```python
 workflow = FallbackPrimitive(
     primary=openai_gpt4,
     fallbacks=[anthropic_claude, google_gemini, local_llama]
 )
-\`\`\`
+```
 
 ---
 
@@ -269,20 +269,20 @@ workflow = FallbackPrimitive(
 **Circuit breaker pattern with timeout.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.recovery import TimeoutPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py)
 
 **Usage:**
-\`\`\`python
+```python
 protected_api = TimeoutPrimitive(
     primitive=external_api_call,
     timeout_seconds=30.0,
     raise_on_timeout=True
 )
-\`\`\`
+```
 
 ---
 
@@ -291,14 +291,14 @@ protected_api = TimeoutPrimitive(
 **Saga pattern for distributed transactions with rollback.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.recovery import CompensationPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py)
 
 **Usage:**
-\`\`\`python
+```python
 workflow = CompensationPrimitive(
     primitives=[
         (create_user_step, rollback_user_creation),
@@ -306,7 +306,7 @@ workflow = CompensationPrimitive(
         (activate_account_step, None),
     ]
 )
-\`\`\`
+```
 
 ---
 
@@ -315,11 +315,11 @@ workflow = CompensationPrimitive(
 **Circuit breaker pattern to prevent cascade failures.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.recovery import CircuitBreakerPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/circuit_breaker.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/circuit_breaker.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/circuit_breaker.py`](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/circuit_breaker.py)
 
 ---
 
@@ -330,21 +330,21 @@ from tta_dev_primitives.recovery import CircuitBreakerPrimitive
 **LRU cache with TTL for expensive operations.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.performance import CachePrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py`](packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py)
 
 **Usage:**
-\`\`\`python
+```python
 cached_llm = CachePrimitive(
     primitive=expensive_llm_call,
     ttl_seconds=3600,  # 1 hour
     max_size=1000,     # Max 1000 entries
     key_fn=lambda data, ctx: data["prompt"]
 )
-\`\`\`
+```
 
 **Benefits:**
 
@@ -420,19 +420,19 @@ This primitive demonstrates the **"Fallback first, enhancement optional"** patte
 **Orchestrator → Executor pattern for multi-agent workflows.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.orchestration import DelegationPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/delegation_primitive.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/delegation_primitive.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/delegation_primitive.py`](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/delegation_primitive.py)
 
 **Usage:**
-\`\`\`python
+```python
 workflow = DelegationPrimitive(
     orchestrator=claude_sonnet,  # Analyze and plan
     executor=gemini_flash,       # Execute plan
 )
-\`\`\`
+```
 
 ---
 
@@ -441,11 +441,11 @@ workflow = DelegationPrimitive(
 **Intelligent multi-model coordination.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.orchestration import MultiModelWorkflow
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py`](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py)
 
 ---
 
@@ -454,11 +454,11 @@ from tta_dev_primitives.orchestration import MultiModelWorkflow
 **Classify tasks and route to appropriate handler.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.orchestration import TaskClassifierPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/task_classifier_primitive.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/task_classifier_primitive.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/task_classifier_primitive.py`](packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/task_classifier_primitive.py)
 
 ---
 
@@ -469,14 +469,14 @@ from tta_dev_primitives.orchestration import TaskClassifierPrimitive
 **Mock primitive for testing workflows.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.testing import MockPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/testing/mock_primitive.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/testing/mock_primitive.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/testing/mock_primitive.py`](packages/tta-dev-primitives/src/tta_dev_primitives/testing/mock_primitive.py)
 
 **Usage:**
-\`\`\`python
+```python
 
 # Mock LLM response
 
@@ -490,7 +490,7 @@ workflow = input_step >> mock_llm >> output_step
 
 result = await workflow.execute(input_data, context)
 assert mock_llm.call_count == 1
-\`\`\`
+```
 
 ---
 
@@ -501,11 +501,11 @@ assert mock_llm.call_count == 1
 **Base class with automatic observability.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.observability import InstrumentedPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/observability/instrumented_primitive.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/observability/instrumented_primitive.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/observability/instrumented_primitive.py`](packages/tta-dev-primitives/src/tta_dev_primitives/observability/instrumented_primitive.py)
 
 **Automatic Features:**
 
@@ -523,11 +523,11 @@ from tta_dev_primitives.observability import InstrumentedPrimitive
 **Base class for self-improving primitives that learn from execution patterns.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py)
 
 **Key Concepts:**
 
@@ -539,11 +539,11 @@ from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode
 
 **Type Parameters:**
 
-- \`TInput\` - Input data type
-- \`TOutput\` - Output data type
+- `TInput` - Input data type
+- `TOutput` - Output data type
 
 **Usage:**
-\`\`\`python
+```python
 from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode, LearningStrategy
 
 class MyAdaptivePrimitive(AdaptivePrimitive[str, dict]):
@@ -582,7 +582,7 @@ adaptive = MyAdaptivePrimitive(
 )
 
 result = await adaptive.execute(data, context)
-\`\`\`
+```
 
 **Safety Features:**
 
@@ -599,11 +599,11 @@ result = await adaptive.execute(data, context)
 **Retry primitive that learns optimal retry parameters from execution patterns.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py)
 
 **What It Learns:**
 
@@ -613,7 +613,7 @@ from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive
 - Context-specific strategies (production vs staging)
 
 **Usage:**
-\`\`\`python
+```python
 from tta_dev_primitives.adaptive import (
     AdaptiveRetryPrimitive,
     LogseqStrategyIntegration,
@@ -643,7 +643,7 @@ result = await adaptive_retry.execute(api_request, context)
 strategies = adaptive_retry.strategies
 for name, strategy in strategies.items():
     print(f"{name}: {strategy.metrics.success_rate:.1%} success")
-\`\`\`
+```
 
 **Automatic Behaviors:**
 
@@ -654,7 +654,7 @@ for name, strategy in strategies.items():
 - ✅ Falls back to baseline on issues
 
 **Example Learned Strategy:**
-\`\`\`python
+```python
 LearningStrategy(
     name="production_high_load_v2",
     description="Learned from 50 executions in production context",
@@ -669,7 +669,7 @@ LearningStrategy(
         contexts_seen=1          # Specific to this context
     )
 )
-\`\`\`
+```
 
 ---
 
@@ -678,11 +678,11 @@ LearningStrategy(
 **Persist learned strategies to Logseq knowledge base.**
 
 **Import:**
-\`\`\`python
+```python
 from tta_dev_primitives.adaptive import LogseqStrategyIntegration
-\`\`\`
+```
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py)
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py`](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py)
 
 **Features:**
 
@@ -693,7 +693,7 @@ from tta_dev_primitives.adaptive import LogseqStrategyIntegration
 - **Cross-Service Sharing**: Strategies discoverable across services
 
 **Usage:**
-\`\`\`python
+```python
 
 # Create integration
 
@@ -714,10 +714,10 @@ await logseq.update_strategy_performance(
     strategy_name="production_high_load_v2",
     new_metrics=updated_metrics
 )
-\`\`\`
+```
 
 **Generated Strategy Page Example:**
-\`\`\`markdown
+```markdown
 
 # Strategy - recommendation_engine_production_v2
 
@@ -745,7 +745,7 @@ await logseq.update_strategy_performance(
 ## Notes
 
 Learned during Black Friday traffic spike. Higher retry count needed.
-\`\`\`
+```
 
 **Benefits:**
 
@@ -765,21 +765,21 @@ Learned during Black Friday traffic spike. Higher retry count needed.
 
 **Purpose**: Generates code using LLM and learned strategies.
 **Import**: `from tta_dev_primitives.ace.agents.generator import GeneratorAgent`
-**Source**: [\`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/generator.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/generator.py)
+**Source**: [`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/generator.py`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/generator.py)
 **Description**: Replaces template-based code generation with sophisticated LLM capabilities, incorporating learned strategies for improved output quality and relevance.
 
 ### ReflectorAgent
 
 **Purpose**: Analyzes execution results and extracts insights.
 **Import**: `from tta_dev_primitives.ace.agents.reflector import ReflectorAgent`
-**Source**: [\`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/reflector.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/reflector.py)
+**Source**: [`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/reflector.py`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/reflector.py)
 **Description**: Performs deep analysis of execution outcomes, identifying root causes of failures, performance bottlenecks, and extracting actionable strategies for learning.
 
 ### CuratorAgent
 
 **Purpose**: Manages the knowledge base and strategy selection.
 **Import**: `from tta_dev_primitives.ace.agents.curator import CuratorAgent`
-**Source**: [\`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py)
+**Source**: [`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py)
 **Description**: Intelligently manages learned strategies, including deduplication, relevance scoring, and selection for future tasks, ensuring the playbook remains efficient and effective.
 
 ---
@@ -788,7 +788,7 @@ Learned during Black Friday traffic spike. Higher retry count needed.
 
 **Goal:** Build a production-ready LLM service with all safeguards.
 
-\`\`\`python
+```python
 from tta_dev_primitives import WorkflowContext
 from tta_dev_primitives.recovery import (
     RetryPrimitive,
@@ -840,7 +840,7 @@ production_llm = RouterPrimitive(
 
 context = WorkflowContext(workflow_id="prod-service")
 result = await production_llm.execute({"prompt": "Hello"}, context)
-\`\`\`
+```
 
 **Benefits:**
 
@@ -858,55 +858,55 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 
 | Primitive | Operator | Import Path | Purpose |
 |-----------|----------|-------------|---------|
-| WorkflowPrimitive | - | \`tta_dev_primitives\` | Base class |
-| SequentialPrimitive | \`>>\` | \`tta_dev_primitives\` | Execute in sequence |
-| ParallelPrimitive | \`\|\` | \`tta_dev_primitives\` | Execute concurrently |
-| ConditionalPrimitive | - | \`tta_dev_primitives\` | Branch on condition |
-| RouterPrimitive | - | \`tta_dev_primitives.core\` | Dynamic routing |
+| WorkflowPrimitive | - | `tta_dev_primitives` | Base class |
+| SequentialPrimitive | `>>` | `tta_dev_primitives` | Execute in sequence |
+| ParallelPrimitive | `|` | `tta_dev_primitives` | Execute concurrently |
+| ConditionalPrimitive | - | `tta_dev_primitives` | Branch on condition |
+| RouterPrimitive | - | `tta_dev_primitives.core` | Dynamic routing |
 
 ### Recovery
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| RetryPrimitive | \`tta_dev_primitives.recovery\` | Retry with backoff |
-| FallbackPrimitive | \`tta_dev_primitives.recovery\` | Graceful degradation |
-| TimeoutPrimitive | \`tta_dev_primitives.recovery\` | Circuit breaker |
-| CompensationPrimitive | \`tta_dev_primitives.recovery\` | Saga pattern |
-| CircuitBreakerPrimitive | \`tta_dev_primitives.recovery\` | Circuit breaker |
+| RetryPrimitive | `tta_dev_primitives.recovery` | Retry with backoff |
+| FallbackPrimitive | `tta_dev_primitives.recovery` | Graceful degradation |
+| TimeoutPrimitive | `tta_dev_primitives.recovery` | Circuit breaker |
+| CompensationPrimitive | `tta_dev_primitives.recovery` | Saga pattern |
+| CircuitBreakerPrimitive | `tta_dev_primitives.recovery` | Circuit breaker |
 
 ### Performance
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| CachePrimitive | \`tta_dev_primitives.performance\` | LRU cache with TTL |
+| CachePrimitive | `tta_dev_primitives.performance` | LRU cache with TTL |
 
 ### Adaptive/Learning
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| AdaptivePrimitive | \`tta_dev_primitives.adaptive\` | Base class for self-improving primitives |
-| AdaptiveRetryPrimitive | \`tta_dev_primitives.adaptive\` | Retry that learns optimal strategies |
-| LogseqStrategyIntegration | \`tta_dev_primitives.adaptive\` | Persist strategies to knowledge base |
+| AdaptivePrimitive | `tta_dev_primitives.adaptive` | Base class for self-improving primitives |
+| AdaptiveRetryPrimitive | `tta_dev_primitives.adaptive` | Retry that learns optimal strategies |
+| LogseqStrategyIntegration | `tta_dev_primitives.adaptive` | Persist strategies to knowledge base |
 
 ### Orchestration
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| DelegationPrimitive | \`tta_dev_primitives.orchestration\` | Orchestrator→Executor |
-| MultiModelWorkflow | \`tta_dev_primitives.orchestration\` | Multi-model coordination |
-| TaskClassifierPrimitive | \`tta_dev_primitives.orchestration\` | Task classification |
+| DelegationPrimitive | `tta_dev_primitives.orchestration` | Orchestrator→Executor |
+| MultiModelWorkflow | `tta_dev_primitives.orchestration` | Multi-model coordination |
+| TaskClassifierPrimitive | `tta_dev_primitives.orchestration` | Task classification |
 
 ---
 
 ## Related Documentation
 
-- **Production Integrations:** [\`docs/guides/PRODUCTION_INTEGRATIONS_QUICKREF.md\`](docs/guides/PRODUCTION_INTEGRATIONS_QUICKREF.md)
-- **GitHub Blog Implementation:** [\`docs/guides/GITHUB_BLOG_IMPLEMENTATION.md\`](docs/guides/GITHUB_BLOG_IMPLEMENTATION.md)
-- **VS Code Integration:** [\`docs/guides/VSCODE_INTEGRATION.md\`](docs/guides/VSCODE_INTEGRATION.md)
-- **AI Patterns:** [\`docs/knowledge/AI_PATTERNS.md\`](docs/knowledge/AI_PATTERNS.md)
-- **Primitive Patterns:** [\`docs/architecture/PRIMITIVE_PATTERNS.md\`](docs/architecture/PRIMITIVE_PATTERNS.md)
-- **Package README:** [\`packages/tta-dev-primitives/README.md\`](packages/tta-dev-primitives/README.md)
-- **Agent Instructions:** [\`packages/tta-dev-primitives/AGENTS.md\`](packages/tta-dev-primitives/AGENTS.md)
+- **Production Integrations:** [`docs/guides/Production_Integrations_QuickRef.md`](docs/guides/Production_Integrations_QuickRef.md)
+- **GitHub Blog Implementation:** [`docs/guides/GITHUB_BLOG_IMPLEMENTATION.md`](docs/guides/GITHUB_BLOG_IMPLEMENTATION.md)
+- **VS Code Integration:** [`docs/guides/VSCODE_INTEGRATION.md`](docs/guides/VSCODE_INTEGRATION.md)
+- **AI Patterns:** [`docs/knowledge/AI_PATTERNS.md`](docs/knowledge/AI_PATTERNS.md)
+- **Primitive Patterns:** [`docs/architecture/PRIMITIVE_PATTERNS.md`](docs/architecture/PRIMITIVE_PATTERNS.md)
+- **Package README:** [`packages/tta-dev-primitives/README.md`](packages/tta-dev-primitives/README.md)
+- **Agent Instructions:** [`packages/tta-dev-primitives/AGENTS.md`](packages/tta-dev-primitives/AGENTS.md)
 
 ---
 

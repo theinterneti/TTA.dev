@@ -400,3 +400,5 @@ example:: cost-tracking
 type:: production
 feature:: cost-optimization
 primitives:: cache, router, budget-enforcement
+
+- [[Project Hub]]

@@ -1001,3 +1001,5 @@ id:: observability-implementation-success-p1
 - [[TTA.dev/Architecture/Observability Assessment]] - Detailed technical review
 - [[TTA.dev/Guides/Observability]] - User guide for observability features
 - [[TTA.dev/Primitives/WorkflowPrimitive]] - Base primitive documentation
+
+- [[Project Hub]]

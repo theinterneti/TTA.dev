@@ -843,3 +843,5 @@ for stat in top_stats[:10]:
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 45 minutes
 **Difficulty:** [[Intermediate]]
+
+- [[Project Hub]]

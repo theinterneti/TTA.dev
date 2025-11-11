@@ -499,3 +499,5 @@ workflow = FallbackPrimitive(
 **Category:** Error Handling Pattern
 **Complexity:** Medium to High
 **Status:** Production-ready
+
+- [[Project Hub]]

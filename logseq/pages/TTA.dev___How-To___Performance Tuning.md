@@ -824,3 +824,5 @@ cached_llm = CachePrimitive(gpt4_call)  # Takes 2000ms
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 45 minutes
 **Difficulty:** [[Advanced]]
+
+- [[Project Hub]]

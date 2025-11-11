@@ -676,3 +676,5 @@ id:: integration-transformers-resources
 - [[TTA.dev/Integration/AI Libraries Comparison]] - Library comparison
 - [[TTA.dev/Integration/GitHub Agent HQ]] - Multi-agent orchestration
 - [[TTA.dev/Guides/Performance Tuning]] - Optimization techniques
+
+- [[Project Hub]]

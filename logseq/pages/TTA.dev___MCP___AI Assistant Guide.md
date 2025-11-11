@@ -502,3 +502,5 @@ id:: mcp-ai-assistant-summary
 **Status:** Production Ready
 **Maintained by:** TTA.dev Team
 **Target:** AI Assistants (Claude, GPT-4, etc.)
+
+- [[Project Hub]]

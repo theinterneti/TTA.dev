@@ -56,3 +56,5 @@ TTA.dev uses GitHub Actions for automated CI/CD with comprehensive validation an
 
 infrastructure:: ci-cd
 automation:: true
+
+- [[Project Hub]]

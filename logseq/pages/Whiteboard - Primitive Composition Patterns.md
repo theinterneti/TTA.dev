@@ -228,3 +228,5 @@ workflow = (
 **Last Updated:** [[2025-10-31]]
 **Status:** Template Ready
 **Next:** Create interactive whiteboard in Logseq UI
+
+- [[Project Hub]]

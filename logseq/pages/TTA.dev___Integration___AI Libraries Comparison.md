@@ -489,3 +489,5 @@ id:: integration-libraries-resources
 - [[TTA.dev/Integration/Transformers]] - Transformers deep dive
 - [[TTA.dev/Guides/Agentic Primitives]] - TTA.dev workflow composition
 - [[TTA.dev/Architecture/Component Integration]] - Architecture patterns
+
+- [[Project Hub]]

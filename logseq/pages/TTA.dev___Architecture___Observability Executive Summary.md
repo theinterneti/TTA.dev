@@ -377,3 +377,5 @@ id:: observability-summary-takeaways
 **Status:** Assessment Complete
 **Next Review:** After Phase 1 completion
 **Maintained by:** TTA.dev Team
+
+- [[Project Hub]]

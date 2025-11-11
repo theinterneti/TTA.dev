@@ -33,3 +33,5 @@ This page is a disambiguation page for "Core" references. See specific topics be
 
 disambiguation:: core
 type:: navigation
+
+- [[Project Hub]]

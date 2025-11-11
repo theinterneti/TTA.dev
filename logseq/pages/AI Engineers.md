@@ -41,3 +41,5 @@ AI Engineers are technical professionals who:
 
 audience:: ai-engineers
 level:: intermediate-to-advanced
+
+- [[Project Hub]]

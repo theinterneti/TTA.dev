@@ -21,6 +21,8 @@ class WorkflowContext(BaseModel):
 
     Provides distributed tracing, correlation tracking, and observability metadata
     following W3C Trace Context and Baggage specifications.
+
+    See: [[WorkflowContext]] for more details.
     """
 
     # Core workflow identifiers
@@ -31,7 +33,9 @@ class WorkflowContext(BaseModel):
     state: dict[str, Any] = Field(default_factory=dict)
 
     # Distributed tracing (W3C Trace Context)
-    trace_id: str | None = Field(default=None, description="OpenTelemetry trace ID (hex)")
+    trace_id: str | None = Field(
+        default=None, description="OpenTelemetry trace ID (hex)"
+    )
     span_id: str | None = Field(default=None, description="Current span ID (hex)")
     parent_span_id: str | None = Field(default=None, description="Parent span ID (hex)")
     trace_flags: int = Field(default=1, description="W3C trace flags (sampled=1)")
@@ -138,6 +142,8 @@ class WorkflowPrimitive(Generic[T, U], ABC):
     using operators:
     - `>>` for sequential execution (self then other)
     - `|` for parallel execution (self and other concurrently)
+
+    See: [[TTA.dev___Concepts___Composition]] for more details.
 
     Example:
         ```python

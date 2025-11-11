@@ -468,3 +468,5 @@ TTA.dev's AI agent discoverability has been elevated from **8/10 to 10/10** thro
 **Branch:** feature/observability-phase-1-trace-context
 **Status:** ✅ Complete - Production Ready
 **Prepared by:** GitHub Copilot
+
+- [[Project Hub]]
