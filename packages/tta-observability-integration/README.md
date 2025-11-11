@@ -1,6 +1,6 @@
-# TTA Observability Integration
+# TTA.dev Observability Integration
 
-Comprehensive observability and monitoring integration for the TTA (Therapeutic Text Adventure) platform.
+Comprehensive observability and monitoring integration for the TTA.dev toolkit.
 
 ## Features
 
@@ -80,4 +80,4 @@ uv run pytest tests/ --cov=src --cov-report=html
 
 ## License
 
-MIT (or as per TTA.dev repository)
+MIT License - see [LICENSE](../../LICENSE) for details

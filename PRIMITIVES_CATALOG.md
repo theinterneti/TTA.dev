@@ -912,4 +912,4 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 
 **Last Updated:** November 7, 2025
 **Maintained by:** TTA.dev Team
-**License:** See package licenses
+**License:** MIT License - see [LICENSE](LICENSE) for details

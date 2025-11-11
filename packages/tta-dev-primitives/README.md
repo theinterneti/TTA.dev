@@ -38,11 +38,8 @@ Production-ready development primitives for building TTA agents and workflows. T
 ## Installation
 
 ```bash
-# Install from local package
-uv pip install -e packages/tta-dev-primitives
-
-# Install with all extras
-uv pip install -e "packages/tta-dev-primitives[dev,tracing,apm]"
+# Install with uv
+uv add tta-dev-primitives
 ```
 
 ## Quick Start
@@ -50,10 +47,10 @@ uv pip install -e "packages/tta-dev-primitives[dev,tracing,apm]"
 ### Workflow Composition
 
 ```python
-from tta_dev_primitives import Sequential, Parallel, Router, WorkflowPrimitive
+from tta_dev_primitives import SequentialPrimitive, ParallelPrimitive, RouterPrimitive, WorkflowPrimitive
 
 # Sequential workflow
-workflow = Sequential([
+workflow = SequentialPrimitive([
     load_data,
     process_data,
     save_results
@@ -61,7 +58,7 @@ workflow = Sequential([
 result = await workflow.execute({"input": "data"})
 
 # Parallel execution
-parallel = Parallel([
+parallel = ParallelPrimitive([
     fetch_user_data,
     fetch_analytics,
     fetch_recommendations
@@ -69,7 +66,7 @@ parallel = Parallel([
 results = await parallel.execute({"user_id": 123})
 
 # Dynamic routing with cost optimization
-router = Router({
+router = RouterPrimitive({
     "fast": gpt4_mini,
     "balanced": gpt4,
     "quality": gpt4_turbo
@@ -80,26 +77,26 @@ response = await router.execute({"tier": "balanced", "prompt": "..."})
 ### Recovery Patterns
 
 ```python
-from tta_dev_primitives import Retry, Fallback, Timeout, Saga
+from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive, TimeoutPrimitive, CompensationPrimitive
 
 # Retry with exponential backoff
-@Retry(max_attempts=3, backoff_factor=2.0)
+@RetryPrimitive(max_attempts=3, backoff_factor=2.0)
 async def flaky_api_call():
     return await external_api.fetch()
 
 # Fallback strategy
-workflow = Fallback(
+workflow = FallbackPrimitive(
     primary=expensive_model,
     fallback=cheap_model
 )
 
 # Timeout enforcement
-@Timeout(seconds=5.0)
+@TimeoutPrimitive(seconds=5.0)
 async def long_running_task():
     return await process_data()
 
 # Saga compensation pattern
-saga = Saga()
+saga = CompensationPrimitive()
 saga.add_step(create_user, rollback=delete_user)
 saga.add_step(send_email, rollback=send_cancellation)
 await saga.execute({"user_data": {...}})
@@ -522,7 +519,7 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # Type check
-uv run mypy src/
+uvx pyright packages/
 ```
 
 ## APM Integration
@@ -539,7 +536,7 @@ category: development-tools
 
 ## License
 
-Proprietary - TTA Storytelling Platform
+MIT License - see [LICENSE](../../LICENSE) for details
 
 ## Related Packages
 
