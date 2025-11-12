@@ -26,7 +26,7 @@ target-audience:: [[Developers]], [[QA Engineers]], [[AI Engineers]]
 **Should understand:**
 - pytest basics
 - async/await in Python
-- WorkflowContext usage
+- [[TTA.dev/Data/WorkflowContext]] usage
 
 ---
 
@@ -82,7 +82,7 @@ target-audience:: [[Developers]], [[QA Engineers]], [[AI Engineers]]
 
 ```python
 from tta_dev_primitives.testing import MockPrimitive
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 import pytest
 
 @pytest.mark.asyncio
@@ -93,7 +93,7 @@ async def test_simple_mock():
     mock = MockPrimitive(return_value={"result": "mocked"})
 
     # Execute
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result = await mock.execute({"input": "test"}, context)
 
     # Verify
@@ -141,7 +141,7 @@ async def test_sequential_workflow():
     workflow = step_a >> step_b >> step_c
 
     # Execute
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result = await workflow.execute({"input": "test"}, context)
 
     # Verify final result
@@ -164,7 +164,7 @@ from tta_dev_primitives import WorkflowPrimitive
 
 class InputProcessor(WorkflowPrimitive[dict, dict]):
     """Real primitive that processes input."""
-    async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
+    async def execute(self, input_data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         return {"processed": input_data["raw"].upper()}
 
 @pytest.mark.asyncio
@@ -184,7 +184,7 @@ async def test_mixed_real_and_mock():
     workflow = processor >> mock_llm >> mock_formatter
 
     # Execute
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result = await workflow.execute({"raw": "hello"}, context)
 
     # Verify
@@ -216,7 +216,7 @@ async def test_parallel_workflow():
     workflow = branch_a | branch_b | branch_c
 
     # Execute
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     results = await workflow.execute({"input": "test"}, context)
 
     # Verify all branches executed
@@ -243,7 +243,7 @@ from tta_dev_primitives import ParallelPrimitive, SequentialPrimitive
 
 class AggregatorPrimitive(WorkflowPrimitive[list, dict]):
     """Aggregate parallel results."""
-    async def execute(self, input_data: list, context: WorkflowContext) -> dict:
+    async def execute(self, input_data: list, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         return {
             "count": len(input_data),
             "results": input_data
@@ -267,7 +267,7 @@ async def test_parallel_aggregation():
     workflow = parallel >> aggregator
 
     # Execute
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result = await workflow.execute({"input": "test"}, context)
 
     # Verify aggregation
@@ -297,7 +297,7 @@ async def test_exception_handling():
     )
 
     # Verify exception raised
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     with pytest.raises(ValueError, match="Something went wrong"):
         await failing_primitive.execute({"input": "test"}, context)
 
@@ -336,7 +336,7 @@ async def test_retry_success_on_second_attempt():
     )
 
     # Execute
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result = await retry_workflow.execute({"input": "test"}, context)
 
     # Verify succeeded on second attempt
@@ -359,7 +359,7 @@ async def test_retry_exhausted():
     )
 
     # Verify raises after 3 attempts
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     with pytest.raises(ValueError, match="Always fails"):
         await retry_workflow.execute({"input": "test"}, context)
 
@@ -388,7 +388,7 @@ async def test_fallback_on_primary_failure():
     workflow = FallbackPrimitive(primary=primary, fallbacks=[fallback])
 
     # Execute
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result = await workflow.execute({"input": "test"}, context)
 
     # Verify fallback used
@@ -410,7 +410,7 @@ async def test_fallback_primary_success():
     workflow = FallbackPrimitive(primary=primary, fallbacks=[fallback])
 
     # Execute
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result = await workflow.execute({"input": "test"}, context)
 
     # Verify primary used
@@ -444,7 +444,7 @@ async def test_timeout_exceeded():
     )
 
     # Verify raises TimeoutError
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     with pytest.raises(asyncio.TimeoutError):
         await timeout_workflow.execute({"input": "test"}, context)
 
@@ -487,12 +487,12 @@ async def test_timeout_with_fallback():
 ### Verify Context Flow
 
 ```python
-from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
+from tta_dev_primitives import WorkflowPrimitive, WorkflowContext # Keep import for now, will address later if needed
 import pytest
 
 class ContextInspector(WorkflowPrimitive[dict, dict]):
     """Primitive that inspects context."""
-    async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
+    async def execute(self, input_data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         return {
             "workflow_id": context.workflow_id,
             "correlation_id": context.correlation_id,
@@ -504,7 +504,7 @@ async def test_context_propagation():
     """Test context flows through workflow."""
 
     # Create context with metadata
-    context = WorkflowContext(
+    context = WorkflowContext( # This is a code example, will address later if needed
         workflow_id="test-workflow",
         correlation_id="test-123",
         metadata={"user_id": "user-789"}
@@ -527,7 +527,7 @@ async def test_child_context():
     """Test child context inherits from parent."""
 
     # Parent context
-    parent_context = WorkflowContext(
+    parent_context = WorkflowContext( # This is a code example, will address later if needed
         workflow_id="parent",
         correlation_id="parent-123"
     )
@@ -563,7 +563,7 @@ async def test_cache_hit():
     cached_op = CachePrimitive(primitive=expensive_op, ttl_seconds=60)
 
     # First call - cache miss
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result1 = await cached_op.execute({"input": "test"}, context)
     assert result1 == {"computed": True}
     assert expensive_op.call_count == 1
@@ -584,7 +584,7 @@ async def test_cache_miss_different_input():
     cached_op = CachePrimitive(primitive=expensive_op, ttl_seconds=60)
 
     # First call
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result1 = await cached_op.execute({"input": "test1"}, context)
     assert expensive_op.call_count == 1
 
@@ -603,7 +603,7 @@ async def test_cache_ttl_expiration():
     cached_op = CachePrimitive(primitive=expensive_op, ttl_seconds=0.1)
 
     # First call
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     result1 = await cached_op.execute({"input": "test"}, context)
     assert expensive_op.call_count == 1
 
@@ -657,7 +657,7 @@ async def test_complete_workflow_integration():
     )
 
     # Execute with production-like context
-    context = WorkflowContext(
+    context = WorkflowContext( # This is a code example, will address later if needed
         workflow_id="integration-test",
         correlation_id="test-456",
         metadata={"test": True}
@@ -690,7 +690,7 @@ async def test_workflow_performance():
     workflow = fast_op
 
     # Measure execution time
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
     start = time.time()
     result = await workflow.execute({"input": "test"}, context)
     duration = time.time() - start
@@ -716,7 +716,7 @@ async def test_parallel_performance_gain():
     # Parallel: A | B | C
     parallel = slow_op_a | slow_op_b | slow_op_c
 
-    context = WorkflowContext()
+    context = WorkflowContext() # This is a code example, will address later if needed
 
     # Measure sequential
     start = time.time()
@@ -894,7 +894,7 @@ async def test_second(mock):
 
 1. **MockPrimitive** - Your primary testing tool for workflows
 2. **Test behaviors** - Not internal implementation details
-3. **Context required** - Always use WorkflowContext in tests
+3. **Context required** - Always use [[TTA.dev/Data/WorkflowContext]] in tests
 4. **90% unit tests** - Fast, isolated tests for individual primitives
 5. **10% integration** - Slower tests for complete workflows
 6. **Reset mocks** - Clean state between tests for reliability

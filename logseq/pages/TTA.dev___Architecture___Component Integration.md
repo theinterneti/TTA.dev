@@ -56,7 +56,7 @@ updated:: [[2025-10-30]]
      - [[InstrumentedPrimitive]] - Auto-instrumented with tracing
      - [[ObservablePrimitive]] - Wrapper adding observability to any primitive
      - Automatic span creation and metrics collection
-     - Trace context propagation via [[WorkflowContext]]
+     - Trace context propagation via [[TTA.dev/Data/WorkflowContext]]
 
   4. **APM Setup Pattern**
      ```python

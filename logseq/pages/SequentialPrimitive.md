@@ -58,7 +58,7 @@ final_output
 
 ### Automatic Context Propagation
 
-- [[WorkflowContext]] passed through all steps
+- [[TTA.dev/Data/WorkflowContext]] passed through all steps
 - Correlation IDs maintained
 - Trace spans created for each step
 

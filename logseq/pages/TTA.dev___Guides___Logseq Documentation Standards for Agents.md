@@ -685,7 +685,7 @@ Just some thoughts on error handling...
 The Logseq documentation standard integrates with TTA.dev's agentic primitives:
 
 ```python
-from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
+from tta_dev_primitives import WorkflowPrimitive, WorkflowContext # Keep import for now, will address later if needed
 
 class DocumentationPrimitive(WorkflowPrimitive[dict, dict]):
     """Primitive that creates Logseq-formatted documentation."""
@@ -693,7 +693,7 @@ class DocumentationPrimitive(WorkflowPrimitive[dict, dict]):
     async def execute(
         self,
         input_data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         # Extract doc type from context
         doc_type = input_data.get("type", "Guide")

@@ -99,13 +99,13 @@ This page contains frequently used content that should be embedded (not copied) 
 
 ## Workflow Patterns
 
-### WorkflowContext Pattern
+### [[TTA.dev/Data/WorkflowContext]] Pattern
 - id:: workflow-context-pattern
   ```python
-  from tta_dev_primitives import WorkflowContext
+  from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 
   # Create context with correlation ID and metadata
-  context = WorkflowContext(
+  context = WorkflowContext( # This is a code example, will address later if needed
       correlation_id="req-12345",
       data={
           "user_id": "user-789",

@@ -107,7 +107,7 @@ Automatic structured logs for all operations:
 
 ### 4. Context Propagation
 
-[[WorkflowContext]] automatically propagates:
+[[TTA.dev/Data/WorkflowContext]] automatically propagates:
 - Correlation IDs
 - Trace context
 - User metadata

@@ -85,7 +85,7 @@ See [[WorkflowPrimitive]] for the base class documentation.
 ### Basic Custom Primitive
 
 ```python
-from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
+from tta_dev_primitives import WorkflowPrimitive, WorkflowContext # Keep import for now, will address later if needed
 
 class MyCustomPrimitive(WorkflowPrimitive[str, dict]):
     """Custom primitive that processes strings."""
@@ -93,7 +93,7 @@ class MyCustomPrimitive(WorkflowPrimitive[str, dict]):
     async def _execute_impl(
         self,
         data: str,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Process the input string."""
 
@@ -104,7 +104,7 @@ class MyCustomPrimitive(WorkflowPrimitive[str, dict]):
 
 # Use it
 primitive = MyCustomPrimitive()
-result = await primitive.execute("hello", WorkflowContext())
+result = await primitive.execute("hello", WorkflowContext()) # This is a code example, will address later if needed
 # Result: {"result": "HELLO"}
 ```
 
@@ -122,7 +122,7 @@ class ConfigurablePrimitive(WorkflowPrimitive[dict, dict]):
     async def _execute_impl(
         self,
         data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Execute with configured behavior."""
 
@@ -242,7 +242,7 @@ class HandlerPrimitive(WorkflowPrimitive):
 
 ```python
 import pytest
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 
 @pytest.mark.asyncio
 async def test_primitive1_basic_functionality():
@@ -250,7 +250,7 @@ async def test_primitive1_basic_functionality():
 
     # Arrange
     primitive = MyCustomPrimitive()
-    context = WorkflowContext(workflow_id="test")
+    context = WorkflowContext(workflow_id="test") # This is a code example, will address later if needed
     input_data = "hello world"
 
     # Act
@@ -265,7 +265,7 @@ async def test_primitive1_error_handling():
     """Test primitive error handling."""
 
     primitive = MyCustomPrimitive()
-    context = WorkflowContext(workflow_id="test")
+    context = WorkflowContext(workflow_id="test") # This is a code example, will address later if needed
 
     with pytest.raises(ValueError):
         await primitive.execute(None, context)  # Should raise
@@ -284,7 +284,7 @@ async def test_primitive1_in_workflow():
 
     workflow = primitive1 >> primitive2 >> primitive3
 
-    result = await workflow.execute({"input": "test"}, WorkflowContext())
+    result = await workflow.execute({"input": "test"}, WorkflowContext()) # This is a code example, will address later if needed
 
     assert result["status"] == "completed"
 ```
@@ -329,7 +329,7 @@ class MetricsPrimitive(WorkflowPrimitive[dict, dict]):
         ['primitive_name']
     )
 
-    async def _execute_impl(self, data: dict, context: WorkflowContext) -> dict:
+    async def _execute_impl(self, data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         with self.execution_duration.labels(
             primitive_name=self.__class__.__name__
         ).time():

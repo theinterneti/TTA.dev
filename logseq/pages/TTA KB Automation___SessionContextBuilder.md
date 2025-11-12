@@ -31,7 +31,7 @@ from tta_kb_automation.tools import SessionContextBuilder
 
 **Dependencies:**
 - \`tta_kb_automation.core\` - All KB and code scanning primitives
-- \`tta_dev_primitives\` - WorkflowContext for execution context
+- \`tta_dev_primitives\` - [[TTA.dev/Data/WorkflowContext]] for execution context
 
 ---
 
@@ -40,14 +40,14 @@ from tta_kb_automation.tools import SessionContextBuilder
 ### Basic Usage
 
 \`\`\`python
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 from tta_kb_automation.tools import SessionContextBuilder
-from tta_dev_primitives import WorkflowContext
 
 # Create builder with default paths
 builder = SessionContextBuilder()
 
 # Build context for a topic
-context = WorkflowContext()
+context = WorkflowContext() # This is a code example, will address later if needed
 result = await builder.build_context(
     topic="CachePrimitive",
     context=context
@@ -204,7 +204,7 @@ Generate rich context before agent starts working:
 # Agent needs to work on CachePrimitive
 context_data = await builder.build_context(
     topic="CachePrimitive",
-    context=WorkflowContext()
+    context=WorkflowContext() # This is a code example, will address later if needed
 )
 
 # Agent now has:
@@ -240,7 +240,7 @@ Find all resources for learning a topic:
 # Student wants to learn about retry patterns
 learning_materials = await builder.build_context(
     topic="RetryPrimitive",
-    context=WorkflowContext()
+    context=WorkflowContext() # This is a code example, will address later if needed
 )
 
 # Student gets:
@@ -331,7 +331,7 @@ items = [
     {"title": "LRU Implementation", "content": "..."}
 ]
 
-context = WorkflowContext()
+context = WorkflowContext() # This is a code example, will address later if needed
 ranked = await ranker.execute(
     {"topic": "cache", "items": items},
     context
@@ -366,7 +366,7 @@ Measured on TTA.dev codebase (99 KB pages, ~50 Python files):
 
 ---
 
-## �� Testing
+##  Testing
 
 SessionContextBuilder has comprehensive test coverage (17 tests, 100%):
 
@@ -434,7 +434,7 @@ Extracts ~50 chars before topic mention, includes the topic, and extends to max_
 \`\`\`python
 result = await builder.build_context(
     topic="CachePrimitive",
-    context=WorkflowContext()
+    context=WorkflowContext() # This is a code example, will address later if needed
 )
 \`\`\`
 
@@ -457,7 +457,7 @@ Returns dict with:
 - [[TTA KB Automation/ParseLogseqPages]] - KB parsing primitive
 - [[TTA KB Automation/ScanCodebase]] - Code scanning primitive
 - [[TTA KB Automation/ExtractTODOs]] - TODO extraction primitive
-- [[TTA Primitives/WorkflowContext]] - Execution context
+- [[TTA.dev/Data/WorkflowContext]] - Execution context
 
 ---
 
@@ -496,11 +496,11 @@ Returns dict with:
 
 ---
 
-**Last Updated:** November 3, 2025  
-**Status:** ✅ Production Ready  
-**Version:** 1.0.0  
-**Test Coverage:** 100%  
-**Implemented By:** GitHub Copilot Agent  
+**Last Updated:** November 3, 2025
+**Status:** ✅ Production Ready
+**Version:** 1.0.0
+**Test Coverage:** 100%
+**Implemented By:** GitHub Copilot Agent
 **Session:** KB Automation Phase 3 Implementation
 
 - [[Project Hub]]

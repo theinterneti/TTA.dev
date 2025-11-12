@@ -34,7 +34,7 @@ This guide covers deploying TTA.dev workflows to production environments with pr
 - [ ] OpenTelemetry tracing enabled
 - [ ] Prometheus metrics exposed
 - [ ] Structured logging (JSON format)
-- [ ] Correlation IDs in all [[WorkflowContext]]
+- [ ] Correlation IDs in all [[TTA.dev/Data/WorkflowContext]]
 
 ### 4. Performance ✅
 
@@ -75,7 +75,7 @@ app/
 
 ```python
 from fastapi import FastAPI, BackgroundTasks
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 from tta_observability_integration import initialize_observability
 from workflows.rag_workflow import rag_workflow
 import structlog
@@ -98,7 +98,7 @@ async def query_endpoint(
     """Execute RAG workflow with production safeguards."""
 
     # Create context with correlation ID
-    context = WorkflowContext(
+    context = WorkflowContext( # This is a code example, will address later if needed
         workflow_id=f"query-{uuid.uuid4()}",
         correlation_id=request.correlation_id or f"req-{uuid.uuid4()}",
         user_id=request.user_id
@@ -241,7 +241,7 @@ services:
 ```python
 # lambda_handler.py
 import json
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 from workflows.rag_workflow import rag_workflow
 
 def lambda_handler(event, context):
@@ -251,7 +251,7 @@ def lambda_handler(event, context):
     body = json.loads(event.get("body", "{}"))
 
     # Create workflow context
-    workflow_context = WorkflowContext(
+    workflow_context = WorkflowContext( # This is a code example, will address later if needed
         workflow_id=context.request_id,
         correlation_id=event["headers"].get("X-Correlation-ID"),
         user_id=body.get("user_id")

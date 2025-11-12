@@ -16,7 +16,7 @@ from tta_dev_primitives import ConditionalPrimitive
 ### Basic Conditional
 
 ```python
-from tta_dev_primitives import ConditionalPrimitive, WorkflowContext
+from tta_dev_primitives import ConditionalPrimitive, WorkflowContext # Keep import for now, will address later if needed
 
 workflow = ConditionalPrimitive(
     condition=lambda data, ctx: data["priority"] == "high",
@@ -30,7 +30,7 @@ result = await workflow.execute(request_data, context)
 ### Complex Conditions
 
 ```python
-def check_complexity(data: dict, context: WorkflowContext) -> bool:
+def check_complexity(data: dict, context: WorkflowContext) -> bool: # This is a code example, will address later if needed
     """Route based on input complexity."""
     text = data.get("text", "")
 
@@ -50,7 +50,7 @@ workflow = ConditionalPrimitive(
 ### With Context
 
 ```python
-def user_has_premium(data: dict, context: WorkflowContext) -> bool:
+def user_has_premium(data: dict, context: WorkflowContext) -> bool: # This is a code example, will address later if needed
     """Check user tier from context."""
     return context.metadata.get("user_tier") == "premium"
 
@@ -85,7 +85,7 @@ workflow = ConditionalPrimitive(
 ```python
 from pydantic import BaseModel, ValidationError
 
-def is_valid(data: dict, context: WorkflowContext) -> bool:
+def is_valid(data: dict, context: WorkflowContext) -> bool: # This is a code example, will address later if needed
     try:
         InputModel(**data)
         return True
@@ -102,7 +102,7 @@ workflow = ConditionalPrimitive(
 ### Feature Flags
 
 ```python
-def feature_enabled(data: dict, context: WorkflowContext) -> bool:
+def feature_enabled(data: dict, context: WorkflowContext) -> bool: # This is a code example, will address later if needed
     """Check if feature flag is enabled."""
     feature_flags = context.metadata.get("feature_flags", {})
     return feature_flags.get("new_algorithm", False)
@@ -134,7 +134,7 @@ workflow = cache >> size_router >> format_output
 ```python
 import random
 
-def in_test_group(data: dict, context: WorkflowContext) -> bool:
+def in_test_group(data: dict, context: WorkflowContext) -> bool: # This is a code example, will address later if needed
     """50/50 A/B split based on user_id."""
     user_id = data.get("user_id", "")
     return hash(user_id) % 2 == 0
@@ -151,7 +151,7 @@ ab_test = ConditionalPrimitive(
 ```python
 from datetime import datetime, timedelta
 
-def within_rate_limit(data: dict, context: WorkflowContext) -> bool:
+def within_rate_limit(data: dict, context: WorkflowContext) -> bool: # This is a code example, will address later if needed
     """Check if user is within rate limit."""
     user_id = data["user_id"]
     last_request = context.metadata.get(f"last_request_{user_id}")

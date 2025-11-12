@@ -63,9 +63,9 @@ Caching is a critical pattern for reducing costs and improving performance in TT
 
 ```python
 from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 
-async def expensive_llm_call(data: dict, context: WorkflowContext) -> dict:
+async def expensive_llm_call(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Expensive operation that benefits from caching."""
     # Simulate expensive LLM call
     response = await openai.chat.completions.create(
@@ -88,7 +88,7 @@ cached_llm = CachePrimitive(
 )
 
 # Use in workflow
-context = WorkflowContext(workflow_id="cached-workflow")
+context = WorkflowContext(workflow_id="cached-workflow") # This is a code example, will address later if needed
 
 # First call: cache miss (executes LLM call)
 result1 = await cached_llm.execute(
@@ -118,7 +118,7 @@ result3 = await cached_llm.execute(
 ```python
 from tta_dev_primitives.performance import CachePrimitive
 
-async def data_retrieval(data: dict, context: WorkflowContext) -> dict:
+async def data_retrieval(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Expensive data retrieval operation."""
     # Simulate expensive database or API call
     return await fetch_from_database(data["query"])
@@ -157,7 +157,7 @@ result = await l2_cache.execute({"query": "user-123"}, context)
 ```python
 from tta_dev_primitives.performance import CachePrimitive
 
-def context_aware_key(data: dict, context: WorkflowContext) -> str:
+def context_aware_key(data: dict, context: WorkflowContext) -> str: # This is a code example, will address later if needed
     """Generate cache key including context."""
     return f"{data['prompt']}:{context.user_id}:{context.get('tier', 'default')}"
 
@@ -169,8 +169,8 @@ cached_personalized_llm = CachePrimitive(
 )
 
 # Different users get different cached results
-context_user1 = WorkflowContext(user_id="user-1")
-context_user2 = WorkflowContext(user_id="user-2")
+context_user1 = WorkflowContext(user_id="user-1") # This is a code example, will address later if needed
+context_user2 = WorkflowContext(user_id="user-2") # This is a code example, will address later if needed
 
 # These create separate cache entries
 result1 = await cached_personalized_llm.execute(
@@ -193,7 +193,7 @@ result2 = await cached_personalized_llm.execute(
 ```python
 async def warm_cache(common_queries: list[str], cache: CachePrimitive):
     """Pre-populate cache with common queries."""
-    context = WorkflowContext(workflow_id="cache-warming")
+    context = WorkflowContext(workflow_id="cache-warming") # This is a code example, will address later if needed
 
     for query in common_queries:
         await cache.execute({"prompt": query}, context)
@@ -248,7 +248,7 @@ async def invalidate_user_cache(user_id: str):
 ### Strategy 3: Conditional Invalidation
 
 ```python
-async def cached_with_validation(data: dict, context: WorkflowContext) -> dict:
+async def cached_with_validation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Cache with validation on retrieval."""
 
     # Check if cached result is still valid
@@ -281,7 +281,7 @@ cache_latency = Histogram('cache_latency_seconds', 'Cache operation latency')
 
 # Enhanced cache with metrics
 class MetricsCachePrimitive(CachePrimitive):
-    async def execute(self, data: dict, context: WorkflowContext) -> dict:
+    async def execute(self, data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         start_time = time.time()
 
         # Check cache
@@ -337,20 +337,20 @@ cache_large = CachePrimitive(max_size=10000)
 
 ```python
 # ✅ Good: Semantic content-based key
-def semantic_key(data: dict, context: WorkflowContext) -> str:
+def semantic_key(data: dict, context: WorkflowContext) -> str: # This is a code example, will address later if needed
     prompt = data["prompt"]
     # Hash or embed prompt for similarity matching
     return f"semantic:{hash_prompt(prompt)}"
 
 # ❌ Bad: Random or opaque keys
-def bad_key(data: dict, context: WorkflowContext) -> str:
+def bad_key(data: dict, context: WorkflowContext) -> str: # This is a code example, will address later if needed
     return str(uuid.uuid4())  # Every call generates new key
 ```
 
 ### 4. Handle Cache Failures Gracefully
 
 ```python
-async def fault_tolerant_cache(data: dict, context: WorkflowContext) -> dict:
+async def fault_tolerant_cache(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Cache that falls back on failure."""
     try:
         return await cached_operation.execute(data, context)

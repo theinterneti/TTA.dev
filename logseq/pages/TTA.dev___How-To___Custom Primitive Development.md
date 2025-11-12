@@ -37,7 +37,7 @@ primitives-used:: [[WorkflowPrimitive]]
 ### Core Components
 
 ```python
-from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
+from tta_dev_primitives import WorkflowPrimitive, WorkflowContext # Keep import for now, will address later if needed
 from typing import Generic, TypeVar
 
 # Define input/output types
@@ -66,7 +66,7 @@ class MyCustomPrimitive(WorkflowPrimitive[InputType, OutputType]):
     async def execute(
         self,
         input_data: InputType,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> OutputType:
         """
         Execute the primitive logic.
@@ -104,7 +104,7 @@ class MyCustomPrimitive(WorkflowPrimitive[InputType, OutputType]):
     async def _do_work(
         self,
         input_data: InputType,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> OutputType:
         """Core primitive logic."""
         raise NotImplementedError("Subclasses must implement _do_work")
@@ -120,7 +120,7 @@ class MyCustomPrimitive(WorkflowPrimitive[InputType, OutputType]):
 ```python
 class EmailValidator(WorkflowPrimitive[str, dict]):
     """Validates email address format and checks if domain exists."""
-    async def execute(self, input_data: str, context: WorkflowContext) -> dict:
+    async def execute(self, input_data: str, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         return {
             "email": input_data,
             "is_valid": self._check_format(input_data),
@@ -224,7 +224,7 @@ class SentimentAnalyzer(WorkflowPrimitive[str, SentimentResult]):
     async def execute(
         self,
         input_data: str,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> SentimentResult:
         """Analyze sentiment."""
         context.checkpoint("sentiment.analysis.start")
@@ -294,7 +294,9 @@ class SentimentAnalyzer(WorkflowPrimitive[str, SentimentResult]):
     async def _ml_based_analysis(
         self,
         text: str,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
+    ) -> dict:
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """ML-based sentiment analysis."""
         context.checkpoint("sentiment.ml.start")
@@ -366,7 +368,7 @@ class ConfigurablePrimitive(WorkflowPrimitive[dict, dict]):
     async def execute(
         self,
         input_data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         # Use configuration
         max_retries = self.retry_config.max_retries
@@ -427,7 +429,7 @@ class RobustPrimitive(WorkflowPrimitive[dict, dict]):
     async def execute(
         self,
         input_data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Execute with error handling."""
         context.checkpoint("robust.start")
@@ -479,7 +481,7 @@ class RobustPrimitive(WorkflowPrimitive[dict, dict]):
     async def _execute_impl(
         self,
         input_data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Core execution logic."""
         # ... implementation ...
@@ -512,7 +514,7 @@ class ObservablePrimitive(WorkflowPrimitive[dict, dict]):
     async def execute(
         self,
         input_data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Execute with full observability."""
         # Start timing
@@ -552,7 +554,7 @@ class ObservablePrimitive(WorkflowPrimitive[dict, dict]):
     async def _execute_with_tracing(
         self,
         input_data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Execute with detailed tracing."""
         # Add spans for sub-operations
@@ -567,7 +569,7 @@ class ObservablePrimitive(WorkflowPrimitive[dict, dict]):
 
         return formatted
 
-    def _record_success(self, latency_ms: float, context: WorkflowContext):
+    def _record_success(self, latency_ms: float, context: WorkflowContext): # This is a code example, will address later if needed
         """Record successful execution."""
         self.metrics["total_calls"] += 1
         self.metrics["successful_calls"] += 1
@@ -579,7 +581,7 @@ class ObservablePrimitive(WorkflowPrimitive[dict, dict]):
     def _record_failure(
         self,
         latency_ms: float,
-        context: WorkflowContext,
+        context: WorkflowContext, # This is a code example, will address later if needed
         error: Exception
     ):
         """Record failed execution."""
@@ -595,7 +597,7 @@ class ObservablePrimitive(WorkflowPrimitive[dict, dict]):
             error_type=type(error).__name__
         )
 
-    def _export_metrics(self, context: WorkflowContext, **kwargs):
+    def _export_metrics(self, context: WorkflowContext, **kwargs): # This is a code example, will address later if needed
         """Export metrics to monitoring system."""
         # Prometheus, Datadog, etc.
         pass
@@ -687,7 +689,7 @@ class TestSentimentAnalyzer:
     async def test_positive_sentiment(self):
         """Test positive sentiment detection."""
         analyzer = SentimentAnalyzer()
-        context = WorkflowContext()
+        context = WorkflowContext() # This is a code example, will address later if needed
 
         result = await analyzer.execute(
             "This is a great and amazing product!",
@@ -702,7 +704,7 @@ class TestSentimentAnalyzer:
     async def test_negative_sentiment(self):
         """Test negative sentiment detection."""
         analyzer = SentimentAnalyzer()
-        context = WorkflowContext()
+        context = WorkflowContext() # This is a code example, will address later if needed
 
         result = await analyzer.execute(
             "This is terrible and awful!",
@@ -716,7 +718,7 @@ class TestSentimentAnalyzer:
     async def test_neutral_sentiment(self):
         """Test neutral sentiment detection."""
         analyzer = SentimentAnalyzer()
-        context = WorkflowContext()
+        context = WorkflowContext() # This is a code example, will address later if needed
 
         result = await analyzer.execute(
             "The product exists and has features.",
@@ -729,7 +731,7 @@ class TestSentimentAnalyzer:
     async def test_empty_input_raises_error(self):
         """Test empty input raises ValueError."""
         analyzer = SentimentAnalyzer()
-        context = WorkflowContext()
+        context = WorkflowContext() # This is a code example, will address later if needed
 
         with pytest.raises(ValueError, match="cannot be empty"):
             await analyzer.execute("", context)
@@ -738,7 +740,7 @@ class TestSentimentAnalyzer:
     async def test_with_ml_model(self):
         """Test with ML model enabled."""
         analyzer = SentimentAnalyzer(ml_model_path="/path/to/model")
-        context = WorkflowContext()
+        context = WorkflowContext() # This is a code example, will address later if needed
 
         result = await analyzer.execute(
             "Long text for ML analysis that has more than five words",
@@ -755,7 +757,7 @@ class TestSentimentAnalyzer:
 
         workflow = analyzer >> formatter
 
-        context = WorkflowContext()
+        context = WorkflowContext() # This is a code example, will address later if needed
         result = await workflow.execute("Great product!", context)
 
         assert result["formatted"] is True
@@ -768,7 +770,7 @@ class TestSentimentAnalyzer:
         observable = ObservablePrimitive("sentiment")
 
         # Execute multiple times
-        context = WorkflowContext()
+        context = WorkflowContext() # This is a code example, will address later if needed
         # ... run executions ...
 
         metrics = observable.get_metrics()
@@ -788,7 +790,7 @@ class TestSentimentAnalyzer:
        async def execute(
            self,
            input_data: InputType,
-           context: WorkflowContext
+           context: WorkflowContext # This is a code example, will address later if needed
        ) -> OutputType:
            ...
    ```

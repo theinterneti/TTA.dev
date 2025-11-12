@@ -10,7 +10,7 @@ last-updated:: [[2025-10-31]]
 
 ## Purpose
 
-Agent context management and orchestration utilities. Provides WorkflowContext patterns and helpers used by agents.
+Agent context management and orchestration utilities. Provides [[TTA.dev/Data/WorkflowContext]] patterns and helpers used by agents.
 
 ## Current Status
 

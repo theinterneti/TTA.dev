@@ -136,13 +136,13 @@ id:: sqlite-example
 """Local task manager using SQLitePrimitive"""
 
 from tta_dev_primitives.integrations import SQLitePrimitive, SQLiteRequest
-from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.core.base import WorkflowContext # Keep import for now, will address later if needed
 import asyncio
 
 async def main():
     # Create primitive (uses local file)
     db = SQLitePrimitive(database="tasks.db")
-    context = WorkflowContext(workflow_id="task-manager")
+    context = WorkflowContext(workflow_id="task-manager") # This is a code example, will address later if needed
 
     # Create table
     create_table = SQLiteRequest(
@@ -190,7 +190,7 @@ id:: supabase-example
 """Team task manager using SupabasePrimitive"""
 
 from tta_dev_primitives.integrations import SupabasePrimitive, SupabaseRequest
-from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.core.base import WorkflowContext # Keep import for now, will address later if needed
 import asyncio
 import os
 
@@ -200,7 +200,7 @@ async def main():
         url=os.getenv("SUPABASE_URL"),
         key=os.getenv("SUPABASE_KEY")
     )
-    context = WorkflowContext(workflow_id="team-tasks")
+    context = WorkflowContext(workflow_id="team-tasks") # This is a code example, will address later if needed
 
     # Add task (table already exists in Supabase)
     add_task = SupabaseRequest(

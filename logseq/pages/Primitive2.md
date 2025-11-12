@@ -72,15 +72,15 @@ conditional = ConditionalPrimitive(
 ### Example: Processing Chain
 
 ```python
-async def primitive1_extract(data: dict, context: WorkflowContext) -> dict:
+async def primitive1_extract(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Extract raw data (Primitive1)."""
     return {"extracted": data["source"].extract()}
 
-async def primitive2_transform(data: dict, context: WorkflowContext) -> dict:
+async def primitive2_transform(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Transform extracted data (Primitive2)."""
     return {"transformed": transform(data["extracted"])}
 
-async def primitive3_load(data: dict, context: WorkflowContext) -> dict:
+async def primitive3_load(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Load transformed data (Primitive3)."""
     await storage.save(data["transformed"])
     return {"status": "saved"}
@@ -168,7 +168,7 @@ async def test_workflow_with_mocked_primitive2():
     workflow = primitive1 >> primitive2 >> primitive3
 
     # Execute
-    result = await workflow.execute({"input": "test"}, WorkflowContext())
+    result = await workflow.execute({"input": "test"}, WorkflowContext()) # This is a code example, will address later if needed
 
     # Verify mock was called
     assert primitive2.call_count == 1
@@ -220,7 +220,7 @@ class TransformationPrimitive(WorkflowPrimitive[dict, dict]):
     async def _execute_impl(
         self,
         data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Apply transformations."""
 
@@ -258,7 +258,7 @@ class EnrichmentPrimitive(WorkflowPrimitive[dict, dict]):
     async def _execute_impl(
         self,
         data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Enrich data from Primitive1."""
 
@@ -285,7 +285,7 @@ class ValidationPrimitive(WorkflowPrimitive[dict, dict]):
     async def _execute_impl(
         self,
         data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         """Validate data from Primitive1."""
 

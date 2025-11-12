@@ -47,7 +47,7 @@ logger.info(
 
 ### 4. Context Propagation
 
-- [[WorkflowContext]] automatically propagated
+- [[TTA.dev/Data/WorkflowContext]] automatically propagated
 - Correlation IDs maintained
 - Parent span context preserved
 
@@ -57,7 +57,7 @@ logger.info(
 
 ```python
 from tta_dev_primitives.observability import InstrumentedPrimitive
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 
 class CustomPrimitive(InstrumentedPrimitive[dict, dict]):
     """My custom primitive with automatic observability."""
@@ -65,7 +65,7 @@ class CustomPrimitive(InstrumentedPrimitive[dict, dict]):
     async def _execute_impl(
         self,
         input_data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> dict:
         # Your logic here
         # Tracing, metrics, logging all automatic
@@ -79,7 +79,7 @@ class CustomPrimitive(InstrumentedPrimitive[dict, dict]):
 from opentelemetry import trace
 
 class AdvancedPrimitive(InstrumentedPrimitive[dict, dict]):
-    async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
+    async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         # Automatic parent span already created
 
         tracer = trace.get_tracer(__name__)
@@ -102,7 +102,7 @@ cache_hits = Counter("cache_hits_total", "Total cache hits")
 query_duration = Histogram("query_duration_seconds", "Query duration")
 
 class CachedPrimitive(InstrumentedPrimitive[dict, dict]):
-    async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
+    async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         if result := self.cache.get(input_data):
             cache_hits.inc()  # Custom metric
             return result
@@ -129,7 +129,7 @@ SequentialPrimitive, ParallelPrimitive, etc.
 
 ```python
 class InstrumentedPrimitive:
-    async def execute(self, input_data: TInput, context: WorkflowContext) -> TOutput:
+    async def execute(self, input_data: TInput, context: WorkflowContext) -> TOutput: # This is a code example, will address later if needed
         """Public execute method with automatic instrumentation."""
         # 1. Start span
         # 2. Start metrics timer
@@ -140,7 +140,7 @@ class InstrumentedPrimitive:
         # 7. End span
         # 8. Return result
 
-    async def _execute_impl(self, input_data: TInput, context: WorkflowContext) -> TOutput:
+    async def _execute_impl(self, input_data: TInput, context: WorkflowContext) -> TOutput: # This is a code example, will address later if needed
         """Subclasses implement this - observability automatic."""
         raise NotImplementedError
 ```
@@ -154,8 +154,8 @@ Automatically added to every span:
 - `primitive.name` - Primitive class name
 - `primitive.input_type` - Input data type
 - `primitive.output_type` - Output data type
-- `correlation_id` - From WorkflowContext
-- `workflow_id` - From WorkflowContext
+- `correlation_id` - From [[TTA.dev/Data/WorkflowContext]]
+- `workflow_id` - From [[TTA.dev/Data/WorkflowContext]]
 
 ### Metrics Labels
 

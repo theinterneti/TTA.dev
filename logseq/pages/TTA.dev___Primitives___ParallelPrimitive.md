@@ -38,7 +38,7 @@ related-primitives:: [[TTA.dev/Primitives/SequentialPrimitive]], [[TTA.dev/Primi
 - id:: parallel-primitive-benefits
   - ✅ **Concurrent execution** - All branches run in parallel using asyncio.gather
   - ✅ **Type-safe composition** with `|` operator (natural and intuitive)
-  - ✅ **Automatic context propagation** - Same [[WorkflowContext]] passed to all branches
+  - ✅ **Automatic context propagation** - Same [[TTA.dev/Data/WorkflowContext]] passed to all branches
   - ✅ **Built-in observability** - Parallel spans show concurrent execution
   - ✅ **Error handling** - Choose fail-fast or collect-all-results mode
   - ✅ **Performance boost** - Latency = max(branch_latencies), not sum
@@ -99,7 +99,7 @@ llama_query = LambdaPrimitive(lambda data, ctx: call_llama(data))
 
 workflow = gpt4_query | claude_query | llama_query
 
-context = WorkflowContext(correlation_id="llm-compare-001")
+context = WorkflowContext(correlation_id="llm-compare-001") # This is a code example, will address later if needed
 results = await workflow.execute(
     input_data={"prompt": "Explain quantum computing"},
     context=context
@@ -121,7 +121,7 @@ fetch_preferences = LambdaPrimitive(lambda data, ctx: fetch_prefs_api(data["user
 
 workflow = fetch_user | fetch_orders | fetch_preferences
 
-context = WorkflowContext(correlation_id="data-fetch-001")
+context = WorkflowContext(correlation_id="data-fetch-001") # This is a code example, will address later if needed
 results = await workflow.execute(
     input_data={"user_id": "user-123"},
     context=context
@@ -278,7 +278,7 @@ for i, result in enumerate(results):
 
 ```python
 import pytest
-from tta_dev_primitives import ParallelPrimitive, WorkflowContext
+from tta_dev_primitives import ParallelPrimitive, WorkflowContext # Keep import for now, will address later if needed
 from tta_dev_primitives.testing import MockPrimitive
 
 @pytest.mark.asyncio
@@ -292,7 +292,7 @@ async def test_parallel_execution():
     workflow = mock1 | mock2 | mock3
 
     # Execute
-    context = WorkflowContext(correlation_id="test-001")
+    context = WorkflowContext(correlation_id="test-001") # This is a code example, will address later if needed
     start = time.time()
     results = await workflow.execute(input_data="test", context=context)
     duration = time.time() - start

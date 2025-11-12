@@ -20,7 +20,7 @@ Phase 2 integration tests validate interactions between TTA.dev components in re
 
 1. **Inter-Primitive Communication**
    - Data flow between [[WorkflowPrimitive]] instances
-   - [[WorkflowContext]] propagation
+   - [[TTA.dev/Data/WorkflowContext]] propagation
    - Error handling across primitive boundaries
 
 2. **Package Integration**
@@ -84,7 +84,7 @@ async def test_mock_external_apis():
 
 ```python
 import pytest
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 from tta_dev_primitives.performance import CachePrimitive
 from tta_dev_primitives.recovery import RetryPrimitive
 
@@ -95,7 +95,7 @@ async def test_cache_retry_integration():
 
     call_count = 0
 
-    async def flaky_operation(data: dict, context: WorkflowContext) -> dict:
+    async def flaky_operation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         nonlocal call_count
         call_count += 1
 
@@ -115,7 +115,7 @@ async def test_cache_retry_integration():
         ttl_seconds=60
     )
 
-    context = WorkflowContext(workflow_id="test-cache-retry")
+    context = WorkflowContext(workflow_id="test-cache-retry") # This is a code example, will address later if needed
 
     # First execution: retries until success
     result1 = await workflow.execute({"input": "test"}, context)
@@ -137,7 +137,7 @@ async def test_cache_retry_integration():
 
 ```python
 import pytest
-from tta_dev_primitives import WorkflowContext, SequentialPrimitive
+from tta_dev_primitives import WorkflowContext, SequentialPrimitive # Keep import for now, will address later if needed
 
 @pytest.mark.integration
 @pytest.mark.asyncio
@@ -146,15 +146,15 @@ async def test_context_propagation():
 
     captured_contexts = []
 
-    async def capture_context_1(data: dict, context: WorkflowContext) -> dict:
+    async def capture_context_1(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         captured_contexts.append(("step1", context.correlation_id, context.workflow_id))
         return data
 
-    async def capture_context_2(data: dict, context: WorkflowContext) -> dict:
+    async def capture_context_2(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         captured_contexts.append(("step2", context.correlation_id, context.workflow_id))
         return data
 
-    async def capture_context_3(data: dict, context: WorkflowContext) -> dict:
+    async def capture_context_3(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         captured_contexts.append(("step3", context.correlation_id, context.workflow_id))
         return data
 
@@ -166,7 +166,7 @@ async def test_context_propagation():
     ])
 
     # Execute with specific context
-    context = WorkflowContext(
+    context = WorkflowContext( # This is a code example, will address later if needed
         workflow_id="test-workflow",
         correlation_id="test-correlation-123"
     )
@@ -185,7 +185,7 @@ async def test_context_propagation():
 
 ```python
 import pytest
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 from tta_observability_integration import initialize_observability
 from tta_observability_integration.primitives import RouterPrimitive
 
@@ -201,10 +201,10 @@ async def test_observability_metrics():
         enable_tracing=False  # Disable for test speed
     )
 
-    async def fast_operation(data: dict, context: WorkflowContext) -> dict:
+    async def fast_operation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         return {"result": "fast", "cost": 0.001}
 
-    async def quality_operation(data: dict, context: WorkflowContext) -> dict:
+    async def quality_operation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         return {"result": "quality", "cost": 0.01}
 
     # Create router with observability
@@ -216,7 +216,7 @@ async def test_observability_metrics():
         router_fn=lambda d, c: d.get("tier", "fast")
     )
 
-    context = WorkflowContext(workflow_id="test-observability")
+    context = WorkflowContext(workflow_id="test-observability") # This is a code example, will address later if needed
 
     # Execute with different tiers
     result_fast = await router.execute({"tier": "fast"}, context)
@@ -278,12 +278,12 @@ uv run pytest tests/integration/ -v
 ```python
 # tests/integration/conftest.py
 import pytest
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 
 @pytest.fixture
 def test_context():
     """Provide test context for integration tests."""
-    return WorkflowContext(
+    return WorkflowContext( # This is a code example, will address later if needed
         workflow_id="test-integration",
         correlation_id="test-correlation"
     )
@@ -405,7 +405,7 @@ jobs:
 
 - [[TTA.dev/Testing Strategy]] - Overall testing approach
 - [[MockPrimitive]] - Mocking framework
-- [[WorkflowContext]] - Context propagation
+- [[TTA.dev/Data/WorkflowContext]] - Context propagation
 - [[GitHub Actions]] - CI/CD setup
 
 ---

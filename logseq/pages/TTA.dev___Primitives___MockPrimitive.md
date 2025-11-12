@@ -79,7 +79,7 @@ MockPrimitive(
 
 ```python
 import pytest
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 from tta_dev_primitives.testing import MockPrimitive
 
 @pytest.mark.asyncio
@@ -92,7 +92,7 @@ async def test_workflow():
     # Use in workflow
     workflow = step1 >> mock_llm >> step3
 
-    context = WorkflowContext(correlation_id="test-001")
+    context = WorkflowContext(correlation_id="test-001") # This is a code example, will address later if needed
     result = await workflow.execute(input_data="test", context=context)
 
     # Verify

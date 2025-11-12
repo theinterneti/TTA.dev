@@ -11,20 +11,20 @@ Basic workflow examples show fundamental patterns for composing primitives into 
 ## Example 1: Simple Sequential Workflow
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+from tta_dev_primitives import SequentialPrimitive, WorkflowContext # Keep import for now, will address later if needed
 
-async def validate_input(data: dict, context: WorkflowContext) -> dict:
+async def validate_input(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Validate input data."""
     if not data.get("text"):
         raise ValueError("Missing 'text' field")
     return data
 
-async def process_text(data: dict, context: WorkflowContext) -> dict:
+async def process_text(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Process text with LLM."""
     # Your LLM call here
     return {"result": data["text"].upper()}
 
-async def format_output(data: dict, context: WorkflowContext) -> dict:
+async def format_output(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Format final output."""
     return {"formatted": f"Result: {data['result']}"}
 
@@ -32,14 +32,14 @@ async def format_output(data: dict, context: WorkflowContext) -> dict:
 workflow = validate_input >> process_text >> format_output
 
 # Execute
-context = WorkflowContext(correlation_id="example-1")
+context = WorkflowContext(correlation_id="example-1") # This is a code example, will address later if needed
 result = await workflow.execute({"text": "hello"}, context)
 # {"formatted": "Result: HELLO"}
 ```
 
 **Key concepts:**
 - [[SequentialPrimitive]] with `>>` operator
-- [[WorkflowContext]] for tracing
+- [[TTA.dev/Data/WorkflowContext]] for tracing
 - Simple function-based primitives
 
 ## Example 2: Parallel Data Fetching
@@ -47,15 +47,15 @@ result = await workflow.execute({"text": "hello"}, context)
 ```python
 from tta_dev_primitives import ParallelPrimitive
 
-async def fetch_user_profile(data: dict, context: WorkflowContext) -> dict:
+async def fetch_user_profile(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Fetch user profile from API."""
     return {"profile": {"name": "User", "age": 30}}
 
-async def fetch_recommendations(data: dict, context: WorkflowContext) -> dict:
+async def fetch_recommendations(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Fetch recommendations from service."""
     return {"recommendations": ["Item 1", "Item 2"]}
 
-async def fetch_analytics(data: dict, context: WorkflowContext) -> dict:
+async def fetch_analytics(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Fetch analytics data."""
     return {"analytics": {"visits": 42, "clicks": 15}}
 
@@ -84,11 +84,11 @@ result = await workflow.execute({"user_id": 123}, context)
 ```python
 from tta_dev_primitives import ConditionalPrimitive
 
-async def fast_processor(data: dict, context: WorkflowContext) -> dict:
+async def fast_processor(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Fast processing for simple inputs."""
     return {"result": f"Fast: {data['text']}"}
 
-async def slow_processor(data: dict, context: WorkflowContext) -> dict:
+async def slow_processor(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Thorough processing for complex inputs."""
     return {"result": f"Slow: {data['text']}"}
 
@@ -118,7 +118,7 @@ result = await workflow.execute({"text": "a" * 200}, context)
 ```python
 from tta_dev_primitives.performance import CachePrimitive
 
-async def expensive_llm_call(data: dict, context: WorkflowContext) -> dict:
+async def expensive_llm_call(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Expensive LLM operation."""
     # Simulate expensive call
     await asyncio.sleep(2)
@@ -148,7 +148,7 @@ result = await workflow.execute({"prompt": "hello"}, context)
 ```python
 from tta_dev_primitives.recovery import RetryPrimitive
 
-async def flaky_api_call(data: dict, context: WorkflowContext) -> dict:
+async def flaky_api_call(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """API that sometimes fails."""
     # Simulate 50% failure rate
     if random.random() < 0.5:
@@ -177,15 +177,15 @@ result = await workflow.execute({}, context)
 ```python
 from tta_dev_primitives.recovery import FallbackPrimitive
 
-async def primary_api(data: dict, context: WorkflowContext) -> dict:
+async def primary_api(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Primary API (might fail)."""
     raise Exception("Primary unavailable")
 
-async def backup_api(data: dict, context: WorkflowContext) -> dict:
+async def backup_api(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Backup API."""
     return {"result": "backup", "source": "backup"}
 
-async def cache_response(data: dict, context: WorkflowContext) -> dict:
+async def cache_response(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Cached response as last resort."""
     return {"result": "cached", "source": "cache"}
 
@@ -210,7 +210,7 @@ result = await workflow.execute({}, context)
 ```python
 from tta_dev_primitives.recovery import TimeoutPrimitive
 
-async def slow_operation(data: dict, context: WorkflowContext) -> dict:
+async def slow_operation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Operation that might hang."""
     await asyncio.sleep(60)  # Very slow
     return {"result": "done"}

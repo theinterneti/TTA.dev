@@ -909,7 +909,7 @@ async def handle_user_session(user_id: str, session_data: dict):
 **Automatic Trace Propagation:**
 
 ```python
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 from observability_integration.tracing import get_tracer
 
 tracer = get_tracer("tta-main-workflow")
@@ -920,7 +920,7 @@ async def process_user_request(request_data: dict):
         span.set_attribute("request_type", request_data["type"])
 
         # Create context with trace information
-        context = WorkflowContext(
+        context = WorkflowContext( # This is a code example, will address later if needed
             correlation_id=f"req-{uuid.uuid4()}",
             user_id=request_data["user_id"],
             trace_id=span.get_span_context().trace_id

@@ -208,13 +208,13 @@ class [PrimitiveName](InstrumentedPrimitive[TInput, TOutput]):
 ### Basic Usage
 
 \`\`\`python
-from tta_dev_primitives import [PrimitiveName], WorkflowContext
+from tta_dev_primitives import [PrimitiveName], WorkflowContext # Keep import for now, will address later if needed
 
 # Create primitive
 primitive = [PrimitiveName](param1=value1)
 
 # Execute
-context = WorkflowContext()
+context = WorkflowContext() # This is a code example, will address later if needed
 result = await primitive.execute(input_data, context)
 \`\`\`
 

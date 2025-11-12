@@ -30,7 +30,7 @@ from tta_dev_primitives import (
     CachePrimitive,
     RouterPrimitive,
     RetryPrimitive,
-    WorkflowContext
+    [[TTA.dev/Data/WorkflowContext]]
 )
 
 # Compose workflow

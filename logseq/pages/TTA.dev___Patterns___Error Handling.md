@@ -24,9 +24,9 @@ Error handling is critical for production AI workflows. TTA.dev provides composa
 
 ```python
 from tta_dev_primitives.recovery import RetryPrimitive
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 
-async def unstable_api(data: dict, context: WorkflowContext) -> dict:
+async def unstable_api(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """API that sometimes fails transiently."""
     response = await external_api.call(data)
     return response
@@ -77,19 +77,19 @@ RetryPrimitive(backoff_strategy="exponential", initial_delay=1.0, jitter=True)
 from tta_dev_primitives.recovery import FallbackPrimitive
 
 # Define primary and fallback operations
-async def primary_llm(data: dict, context: WorkflowContext) -> dict:
+async def primary_llm(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Primary LLM (OpenAI GPT-4)."""
     return await openai.generate(data["prompt"], model="gpt-4")
 
-async def fallback_llm_1(data: dict, context: WorkflowContext) -> dict:
+async def fallback_llm_1(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """First fallback (Anthropic Claude)."""
     return await anthropic.generate(data["prompt"], model="claude-3")
 
-async def fallback_llm_2(data: dict, context: WorkflowContext) -> dict:
+async def fallback_llm_2(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Second fallback (Google Gemini)."""
     return await google.generate(data["prompt"], model="gemini-pro")
 
-async def cached_response(data: dict, context: WorkflowContext) -> dict:
+async def cached_response(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Final fallback (cached responses)."""
     return {"response": "Service temporarily unavailable. Using cached response."}
 
@@ -126,7 +126,7 @@ result = await resilient_llm.execute({"prompt": "Hello"}, context)
 ```python
 from tta_dev_primitives.recovery import TimeoutPrimitive
 
-async def slow_operation(data: dict, context: WorkflowContext) -> dict:
+async def slow_operation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Operation that might take too long."""
     result = await potentially_slow_api(data)
     return result
@@ -159,24 +159,24 @@ except TimeoutError:
 from tta_dev_primitives.recovery import CompensationPrimitive
 
 # Define operations and compensations
-async def create_user(data: dict, context: WorkflowContext) -> dict:
+async def create_user(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     user = await db.create_user(data["user_info"])
     return {"user_id": user.id}
 
-async def rollback_user(data: dict, context: WorkflowContext) -> dict:
+async def rollback_user(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     await db.delete_user(data["user_id"])
     return {"rolled_back": "user"}
 
-async def send_welcome_email(data: dict, context: WorkflowContext) -> dict:
+async def send_welcome_email(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     await email.send(data["user_id"], "Welcome!")
     return {"email_sent": True}
 
-async def rollback_email(data: dict, context: WorkflowContext) -> dict:
+async def rollback_email(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     # Can't unsend email, but log it
     await log.info(f"Email was sent to {data['user_id']}")
     return {"noted": "email_sent"}
 
-async def activate_account(data: dict, context: WorkflowContext) -> dict:
+async def activate_account(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     await db.activate_user(data["user_id"])
     return {"activated": True}
 
@@ -254,12 +254,12 @@ Request → Timeout(10s) → Retry(3x) → Fallback(2 options) → Response
 ### Tracking Errors Through Workflow
 
 ```python
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 import structlog
 
 logger = structlog.get_logger(__name__)
 
-async def error_aware_operation(data: dict, context: WorkflowContext) -> dict:
+async def error_aware_operation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will will address later if needed
     """Operation that tracks errors in context."""
 
     try:
@@ -306,7 +306,7 @@ operation_duration = Histogram(
     ['operation', 'status']
 )
 
-async def monitored_operation(data: dict, context: WorkflowContext) -> dict:
+async def monitored_operation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Operation with error metrics."""
 
     start_time = time.time()
@@ -415,7 +415,7 @@ async def test_retry_on_transient_failure():
 
     retry_op = RetryPrimitive(flaky_operation, max_retries=5)
 
-    result = await retry_op.execute({}, WorkflowContext())
+    result = await retry_op.execute({}, WorkflowContext()) # This is a code example, will address later if needed
 
     assert result["success"]
     assert call_count == 3  # Failed twice, succeeded third time
@@ -429,7 +429,7 @@ async def test_retry_on_transient_failure():
 
 ```python
 # Bad: Swallows errors
-async def bad_operation(data: dict, context: WorkflowContext) -> dict:
+async def bad_operation(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     try:
         return await risky_operation(data)
     except Exception:

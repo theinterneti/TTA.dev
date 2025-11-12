@@ -555,7 +555,7 @@ id:: integration-transformers-tta
 id:: integration-transformers-tta-wrap
 
 ```python
-from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
+from tta_dev_primitives import WorkflowPrimitive, WorkflowContext # Keep import for now, will address later if needed
 from tta_dev_primitives.recovery import RetryPrimitive
 from tta_dev_primitives.performance import CachePrimitive
 
@@ -569,7 +569,7 @@ class TransformersPrimitive(WorkflowPrimitive[dict, str]):
     async def execute(
         self,
         input_data: dict,
-        context: WorkflowContext
+        context: WorkflowContext # This is a code example, will address later if needed
     ) -> str:
         """Execute Transformers generation."""
         return await self.model_manager.generate(

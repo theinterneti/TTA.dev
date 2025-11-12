@@ -48,7 +48,7 @@ from tta_dev_primitives.integrations import (
     SupabasePrimitive,
     SQLitePrimitive,
 )
-from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.core.base import WorkflowContext # Keep import for now, will address later if needed
 ```
 
 ---
@@ -78,7 +78,7 @@ from tta_dev_primitives.core.base import WorkflowContext
       max_tokens=1000
   )
 
-  context = WorkflowContext(workflow_id="chat")
+  context = WorkflowContext(workflow_id="chat") # This is a code example, will address later if needed
   response = await llm.execute(request, context)
   print(response.content)  # "Hello! How can I help you?"
   ```
@@ -109,7 +109,7 @@ from tta_dev_primitives.core.base import WorkflowContext
       max_tokens=1000
   )
 
-  context = WorkflowContext(workflow_id="explain")
+  context = WorkflowContext(workflow_id="explain") # This is a code example, will address later if needed
   response = await llm.execute(request, context)
   print(response.content)
   ```
@@ -139,7 +139,7 @@ from tta_dev_primitives.core.base import WorkflowContext
       temperature=0.8
   )
 
-  context = WorkflowContext(workflow_id="poetry")
+  context = WorkflowContext(workflow_id="poetry") # This is a code example, will address later if needed
   response = await llm.execute(request, context)
   print(response.content)
   ```
@@ -173,7 +173,7 @@ from tta_dev_primitives.core.base import WorkflowContext
       columns="id,name,email"
   )
 
-  context = WorkflowContext(workflow_id="query")
+  context = WorkflowContext(workflow_id="query") # This is a code example, will address later if needed
   response = await db.execute(request, context)
   print(response.data)  # [{"id": 1, "name": "Alice", ...}]
 
@@ -229,7 +229,7 @@ from tta_dev_primitives.core.base import WorkflowContext
       fetch="none"
   )
 
-  context = WorkflowContext(workflow_id="setup")
+  context = WorkflowContext(workflow_id="setup") # This is a code example, will address later if needed
   await db.execute(create_request, context)
 
   # INSERT

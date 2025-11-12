@@ -24,7 +24,7 @@ target-audience:: [[Developers]], [[DevOps]], [[AI Engineers]]
 - [[TTA.dev/Guides/Getting Started]] - Basic workflows
 
 **Should understand:**
-- WorkflowContext basics
+- [[TTA.dev/Data/WorkflowContext]] basics
 - Async execution
 - Why monitoring matters
 
@@ -100,15 +100,15 @@ with tracer.start_as_current_span("llm_call") as span:
 
 ---
 
-## WorkflowContext: The Observability Carrier
+## [[TTA.dev/Data/WorkflowContext]]: The Observability Carrier
 
 ### Creating Context
 
 ```python
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives import WorkflowContext # Keep import for now, will address later if needed
 import uuid
 
-context = WorkflowContext(
+context = WorkflowContext( # This is a code example, will address later if needed
     workflow_id="user-signup-flow",
     session_id="session-abc123",
     correlation_id=str(uuid.uuid4()),
@@ -155,10 +155,10 @@ result = await workflow.execute(input_data, context)
 ### Recording Checkpoints
 
 ```python
-from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
+from tta_dev_primitives import WorkflowPrimitive, WorkflowContext # Keep import for now, will address later if needed
 
 class DataProcessor(WorkflowPrimitive[dict, dict]):
-    async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
+    async def execute(self, input_data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         context.checkpoint("processing.start")
 
         # Step 1: Validate
@@ -233,7 +233,7 @@ else:
 from opentelemetry import trace
 
 class TracedPrimitive(WorkflowPrimitive[str, str]):
-    async def execute(self, input_data: str, context: WorkflowContext) -> str:
+    async def execute(self, input_data: str, context: WorkflowContext) -> str: # This is a code example, will address later if needed
         tracer = trace.get_tracer(__name__)
 
         with tracer.start_as_current_span("custom_operation") as span:
@@ -260,7 +260,7 @@ class TracedPrimitive(WorkflowPrimitive[str, str]):
 
 ```python
 # Parent workflow
-parent_context = WorkflowContext(
+parent_context = WorkflowContext( # This is a code example, will address later if needed
     workflow_id="main-workflow",
     correlation_id="req-12345"
 )
@@ -354,7 +354,7 @@ initialize_observability(
 
 # Build workflow with observability
 class ContentGenerator(WorkflowPrimitive[dict, dict]):
-    async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
+    async def execute(self, input_data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         # Checkpoint: Start
         context.checkpoint("content_generation.start")
 
@@ -419,7 +419,7 @@ resilient_generator = FallbackPrimitive(
 # Execute with full observability
 async def handle_request(user_input: dict) -> dict:
     # Create context with rich metadata
-    context = WorkflowContext(
+    context = WorkflowContext( # This is a code example, will address later if needed
         workflow_id="content-generation",
         session_id=user_input.get("session_id"),
         correlation_id=str(uuid.uuid4()),
@@ -609,7 +609,7 @@ sum(rate(cache_hits_total[5m])) /
 ## Key Takeaways
 
 1. **Three pillars:** Logs (what), Traces (how), Metrics (how many/fast)
-2. **WorkflowContext:** Carrier for observability data
+2. **[[TTA.dev/Data/WorkflowContext]]:** Carrier for observability data
 3. **Checkpoints:** Fine-grained timing analysis
 4. **OpenTelemetry:** Industry-standard distributed tracing
 5. **Prometheus:** Metrics for monitoring and alerting

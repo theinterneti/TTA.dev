@@ -20,7 +20,7 @@ New Users are:
 ### Core Concepts
 - [[TTA.dev/Concepts/Primitives]] - What are primitives?
 - [[TTA.dev/Concepts/Composition]] - How to chain primitives
-- [[TTA.dev/Concepts/WorkflowContext]] - Managing workflow state
+- [[TTA.dev/Data/WorkflowContext]] - Managing workflow state
 
 ### First Patterns
 - [[TTA.dev/Patterns/Sequential Workflow]] - Step-by-step execution

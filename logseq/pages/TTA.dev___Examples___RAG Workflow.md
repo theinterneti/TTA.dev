@@ -11,7 +11,7 @@ RAG workflow demonstrates building a reliable document retrieval and generation 
 ## Complete Example
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+from tta_dev_primitives import SequentialPrimitive, WorkflowContext # Keep import for now, will address later if needed
 from tta_dev_primitives.performance import CachePrimitive
 from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive
 import structlog
@@ -19,7 +19,7 @@ import structlog
 logger = structlog.get_logger()
 
 # Step 1: Document Retrieval
-async def retrieve_documents(data: dict, context: WorkflowContext) -> dict:
+async def retrieve_documents(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Retrieve relevant documents from vector store."""
     query = data.get("query", "")
 
@@ -39,7 +39,7 @@ async def retrieve_documents(data: dict, context: WorkflowContext) -> dict:
     }
 
 # Step 2: Document Reranking
-async def rerank_documents(data: dict, context: WorkflowContext) -> dict:
+async def rerank_documents(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Rerank documents using cross-encoder."""
     documents = data.get("documents", [])
 
@@ -55,7 +55,7 @@ async def rerank_documents(data: dict, context: WorkflowContext) -> dict:
     }
 
 # Step 3: Context Assembly
-async def assemble_context(data: dict, context: WorkflowContext) -> dict:
+async def assemble_context(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Assemble context from top documents."""
     documents = data.get("documents", [])
 
@@ -72,7 +72,7 @@ async def assemble_context(data: dict, context: WorkflowContext) -> dict:
     }
 
 # Step 4: LLM Generation
-async def generate_response(data: dict, context: WorkflowContext) -> dict:
+async def generate_response(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Generate response using LLM with retrieved context."""
     query = data.get("query", "")
     context_text = data.get("context", "")
@@ -100,7 +100,7 @@ Answer:"""
     }
 
 # Step 5: Response Validation
-async def validate_response(data: dict, context: WorkflowContext) -> dict:
+async def validate_response(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     """Validate response quality."""
     answer = data.get("answer", "")
 
@@ -144,7 +144,7 @@ def build_rag_workflow():
     )
 
     # Fallback to simpler generation
-    async def simple_generation(data: dict, ctx: WorkflowContext) -> dict:
+    async def simple_generation(data: dict, ctx: WorkflowContext) -> dict: # This is a code example, will address later if needed
         return {
             "query": data["query"],
             "answer": "I apologize, but I'm having trouble generating a response. Please try again.",
@@ -174,7 +174,7 @@ async def main():
     rag = build_rag_workflow()
 
     # Create context
-    context = WorkflowContext(
+    context = WorkflowContext( # This is a code example, will address later if needed
         correlation_id="rag-example-1",
         data={"user_id": "user123"}
     )
@@ -334,7 +334,7 @@ context = truncate_to_tokens(assembled_context, max_tokens=2000)
 ```python
 from pinecone import Pinecone
 
-async def retrieve_documents(data: dict, context: WorkflowContext) -> dict:
+async def retrieve_documents(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
     index = pc.Index("documents")
 
@@ -358,7 +358,7 @@ from openai import AsyncOpenAI
 
 client = AsyncOpenAI()
 
-async def generate_response(data: dict, context: WorkflowContext) -> dict:
+async def generate_response(data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
     response = await client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -381,7 +381,7 @@ rag_workflow = build_rag_workflow()
 @app.post("/api/query")
 async def query_endpoint(query: str):
     try:
-        context = WorkflowContext(correlation_id=generate_id())
+        context = WorkflowContext(correlation_id=generate_id()) # This is a code example, will address later if needed
         result = await rag_workflow.execute({"query": query}, context)
         return result
     except Exception as e:

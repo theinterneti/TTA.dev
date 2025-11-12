@@ -219,7 +219,7 @@ router = RouterPrimitive(
 ```python
 def select_route(
     {{cloze input_data}}: dict,
-    {{cloze context}}: WorkflowContext
+    {{cloze context}}: [[TTA.dev/Data/WorkflowContext]]
 ) -> {{cloze str}}:
     # Return route key
     return "fast" if simple else "quality"
@@ -249,9 +249,9 @@ def select_route(
 
 ## 📊 Observability
 
-### WorkflowContext Purpose #card
+### [[TTA.dev/Data/WorkflowContext]] Purpose #card
 
-**WorkflowContext** carries {{cloze state and metadata}} through the workflow.
+**[[TTA.dev/Data/WorkflowContext]]** carries {{cloze state and metadata}} through the workflow.
 
 Key attributes:
 - `{{cloze correlation_id}}` - Unique request identifier
@@ -261,7 +261,7 @@ Key attributes:
 
 **Creation:**
 ```python
-context = WorkflowContext(
+context = WorkflowContext( # This is a code example, will address later if needed
     correlation_id={{cloze "req-123"}},
     metadata={{cloze {"user_id": "user-789"}}}
 )

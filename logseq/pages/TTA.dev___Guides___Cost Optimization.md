@@ -96,7 +96,7 @@ result2 = await cached_llm.execute("What is Python?", context)  # $0 (cache hit!
 ```python
 from tta_dev_primitives import RouterPrimitive
 
-def select_model(input_data: dict, context: WorkflowContext) -> str:
+def select_model(input_data: dict, context: WorkflowContext) -> str: # This is a code example, will address later if needed
     """Route based on complexity."""
     complexity = estimate_complexity(input_data["prompt"])
 
@@ -218,7 +218,7 @@ faq_cache = CachePrimitive(
 )
 
 # Complexity-based routing
-def select_support_model(input_data: dict, context: WorkflowContext) -> str:
+def select_support_model(input_data: dict, context: WorkflowContext) -> str: # This is a code example, will address later if needed
     """Route based on query complexity."""
     query = input_data["query"]
 
@@ -352,7 +352,7 @@ class CostTrackingPrimitive(WorkflowPrimitive[dict, dict]):
         self.llm = llm_primitive
         self.cost_per_1k = cost_per_1k_tokens
 
-    async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
+    async def execute(self, input_data: dict, context: WorkflowContext) -> dict: # This is a code example, will address later if needed
         # Execute LLM
         result = await self.llm.execute(input_data, context)
 
@@ -502,7 +502,7 @@ router = RouterPrimitive(
 
 ```python
 # ✅ GOOD - Route by complexity
-def intelligent_routing(input_data: dict, context: WorkflowContext) -> str:
+def intelligent_routing(input_data: dict, context: WorkflowContext) -> str: # This is a code example, will address later if needed
     complexity = analyze_complexity(input_data)
     return "cheap" if complexity < 0.3 else "expensive"
 
