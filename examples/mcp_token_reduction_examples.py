@@ -71,9 +71,7 @@ filtered_result
             context = WorkflowContext(trace_id="dataset-filter-example")
             result = await self.mcp_primitive.execute({"code": code}, context)
 
-            print(
-                "✅ Traditional MCP: ~50,000 tokens (full dataset + tool definitions)"
-            )
+            print("✅ Traditional MCP: ~50,000 tokens (full dataset + tool definitions)")
             print("✅ Code Execution: ~500 tokens (filter code + results)")
             print("🎯 Token Reduction: 99%")
 
@@ -296,12 +294,8 @@ print(f"Skills development insights: {insights}")
             context = WorkflowContext(trace_id="skills-development-example")
             result = await self.mcp_primitive.execute({"code": code}, context)
 
-            print(
-                "✅ Traditional MCP: Skills tracking across multiple conversations = Complex"
-            )
-            print(
-                "✅ Code Execution: Self-contained skills development = Simple + Persistent"
-            )
+            print("✅ Traditional MCP: Skills tracking across multiple conversations = Complex")
+            print("✅ Code Execution: Self-contained skills development = Simple + Persistent")
             print("🎯 Token Reduction: 90% + Persistent Learning")
 
             return result

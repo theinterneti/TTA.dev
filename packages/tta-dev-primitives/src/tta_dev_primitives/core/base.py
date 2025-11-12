@@ -30,8 +30,31 @@ class WorkflowContext(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
     state: dict[str, Any] = Field(default_factory=dict)
 
+    # Agent identifiers (Phase 1: Semantic Tracing)
+    agent_id: str | None = Field(default=None, description="Unique agent instance ID")
+    agent_type: str | None = Field(
+        default=None,
+        description="Agent type (e.g., 'coordinator', 'executor', 'validator')",
+    )
+    workflow_name: str | None = Field(
+        default=None, description="Human-readable workflow name"
+    )
+
+    # LLM tracking (Phase 1: Semantic Tracing)
+    llm_provider: str | None = Field(
+        default=None, description="LLM provider (e.g., 'openai', 'anthropic')"
+    )
+    llm_model_name: str | None = Field(
+        default=None, description="LLM model name (e.g., 'gpt-4', 'claude-3-sonnet')"
+    )
+    llm_model_tier: str | None = Field(
+        default=None, description="LLM tier (e.g., 'fast', 'balanced', 'quality')"
+    )
+
     # Distributed tracing (W3C Trace Context)
-    trace_id: str | None = Field(default=None, description="OpenTelemetry trace ID (hex)")
+    trace_id: str | None = Field(
+        default=None, description="OpenTelemetry trace ID (hex)"
+    )
     span_id: str | None = Field(default=None, description="Current span ID (hex)")
     parent_span_id: str | None = Field(default=None, description="Parent span ID (hex)")
     trace_flags: int = Field(default=1, description="W3C trace flags (sampled=1)")
@@ -94,6 +117,15 @@ class WorkflowContext(BaseModel):
             player_id=self.player_id,
             metadata=copy.deepcopy(self.metadata),
             state=copy.deepcopy(self.state),
+            # Inherit agent identifiers
+            agent_id=self.agent_id,
+            agent_type=self.agent_type,
+            workflow_name=self.workflow_name,
+            # Inherit LLM tracking
+            llm_provider=self.llm_provider,
+            llm_model_name=self.llm_model_name,
+            llm_model_tier=self.llm_model_tier,
+            # Trace context
             trace_id=self.trace_id,
             parent_span_id=self.span_id,  # Current span becomes parent
             correlation_id=self.correlation_id,  # Inherit correlation
@@ -121,13 +153,31 @@ class WorkflowContext(BaseModel):
                 span.set_attribute(key, value)
             ```
         """
-        return {
+        attrs = {
             "workflow.id": self.workflow_id or "unknown",
             "workflow.session_id": self.session_id or "unknown",
             "workflow.player_id": self.player_id or "unknown",
             "workflow.correlation_id": self.correlation_id,
             "workflow.elapsed_ms": self.elapsed_ms(),
         }
+
+        # Add agent identifiers (Phase 1: Semantic Tracing)
+        if self.agent_id:
+            attrs["agent.id"] = self.agent_id
+        if self.agent_type:
+            attrs["agent.type"] = self.agent_type
+        if self.workflow_name:
+            attrs["workflow.name"] = self.workflow_name
+
+        # Add LLM tracking (Phase 1: Semantic Tracing)
+        if self.llm_provider:
+            attrs["llm.provider"] = self.llm_provider
+        if self.llm_model_name:
+            attrs["llm.model_name"] = self.llm_model_name
+        if self.llm_model_tier:
+            attrs["llm.model_tier"] = self.llm_model_tier
+
+        return attrs
 
 
 class WorkflowPrimitive(Generic[T, U], ABC):

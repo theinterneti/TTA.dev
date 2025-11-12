@@ -38,8 +38,8 @@ services:
       - "9090:9090"
     volumes:
       # Professional configuration files
-      - ../../config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ../../config/prometheus/rules:/etc/prometheus/rules:ro
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/prometheus/rules:/etc/prometheus/rules:ro
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -69,7 +69,7 @@ services:
     ports:
       - "9093:9093"
     volumes:
-      - ../../config/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./config/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
       - alertmanager-data:/alertmanager
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'
@@ -100,9 +100,9 @@ services:
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-clock-panel
     volumes:
       - grafana-data:/var/lib/grafana
-      - ../../config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
-      - ../../config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ../../config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
       interval: 30s
@@ -126,7 +126,7 @@ services:
       - "8889:8889" # Prometheus exporter metrics
       - "13133:13133" # Health check
     volumes:
-      - ../../config/otel-collector/otel-collector-config.yml:/etc/otel-collector-config.yml:ro
+      - ./config/otel-collector/otel-collector-config.yml:/etc/otel-collector-config.yml:ro
     command: [ "--config=/etc/otel-collector-config.yml" ]
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:13133/"]

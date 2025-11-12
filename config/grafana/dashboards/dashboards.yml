@@ -1,10 +1,21 @@
 apiVersion: 1
 
 providers:
-  # TTA.dev Professional Dashboards
+  # TTA.dev Production Dashboards (New Consolidated Location)
+  - name: 'TTA.dev Production'
+    orgId: 1
+    folder: 'TTA.dev Production'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/production
+
+  # TTA.dev Professional Dashboards (Legacy - being migrated)
   - name: 'TTA.dev Dashboards'
     orgId: 1
-    folder: 'TTA.dev'
+    folder: 'TTA.dev Legacy'
     type: file
     disableDeletion: false
     updateIntervalSeconds: 30

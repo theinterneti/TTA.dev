@@ -83,9 +83,7 @@ class SelfAssessmentWorkflow:
                     ]
                 )
 
-                results = await parallel_assessments.execute(
-                    {"type": "comprehensive"}, context
-                )
+                results = await parallel_assessments.execute({"type": "comprehensive"}, context)
 
                 # Aggregate results
                 return {
@@ -125,9 +123,7 @@ class SelfAssessmentWorkflow:
 class TestRunnerPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
     """Primitive for running tests and collecting results."""
 
-    async def execute(
-        self, data: dict[str, Any], context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def execute(self, data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
         """Execute test suite and return results."""
         context.checkpoint("tests.start")
 
@@ -170,9 +166,7 @@ class TestRunnerPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
 class CodeAnalysisPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
     """Primitive for analyzing code quality and structure."""
 
-    async def execute(
-        self, data: dict[str, Any], context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def execute(self, data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
         """Analyze code quality and structure."""
         context.checkpoint("code_analysis.start")
 
@@ -189,9 +183,7 @@ class CodeAnalysisPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
 
             return {
                 "code_quality": 95.0,  # Simulated high score
-                "linting_issues": len(result.stdout.split("\n"))
-                if result.stdout
-                else 0,
+                "linting_issues": len(result.stdout.split("\n")) if result.stdout else 0,
                 "structure_score": 90.0,
                 "type_safety_score": 95.0,
                 "primitive_patterns": True,
@@ -208,9 +200,7 @@ class CodeAnalysisPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
 class DocumentationCheckerPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
     """Primitive for checking documentation quality."""
 
-    async def execute(
-        self, data: dict[str, Any], context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def execute(self, data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
         """Check documentation quality and completeness."""
         context.checkpoint("docs.start")
 
@@ -233,9 +223,7 @@ class DocumentationCheckerPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, 
 class PerformanceMonitorPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
     """Primitive for monitoring performance metrics."""
 
-    async def execute(
-        self, data: dict[str, Any], context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def execute(self, data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
         """Monitor and collect performance metrics."""
         context.checkpoint("performance.start")
 
@@ -259,9 +247,7 @@ class PerformanceMonitorPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, An
 class IntegrationTestPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
     """Primitive for testing integrations and MCP servers."""
 
-    async def execute(
-        self, data: dict[str, Any], context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def execute(self, data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
         """Test integrations and return results."""
         context.checkpoint("integration.start")
 
@@ -319,18 +305,14 @@ async def main():
         print(f"Code Quality Score: {summary.get('code_quality_score', 0):.1f}/100")
         print(f"Documentation Score: {summary.get('documentation_score', 0):.1f}/100")
         print(f"MCP Servers Available: {summary.get('mcp_servers', 0)}")
-        print(
-            f"Cline Integration: {'✅' if summary.get('cline_integration') else '❌'}"
-        )
+        print(f"Cline Integration: {'✅' if summary.get('cline_integration') else '❌'}")
         print(f"UV Compliance: {'✅' if summary.get('uv_compliance') else '❌'}")
 
     if "assessments" in result:
         print("\nDetailed Results:")
         for i, assessment_result in enumerate(result["assessments"]):
             if isinstance(assessment_result, dict):
-                print(
-                    f"  Assessment {i + 1}: {assessment_result.get('status', 'unknown')}"
-                )
+                print(f"  Assessment {i + 1}: {assessment_result.get('status', 'unknown')}")
 
     # Test primitive composition
     print("\n🔧 Testing Primitive Composition...")

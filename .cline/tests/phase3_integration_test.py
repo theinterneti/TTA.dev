@@ -150,9 +150,7 @@ export default Header;
         await optimizer.stop_system()
 
     @pytest.mark.asyncio
-    async def test_dynamic_context_loading_integration(
-        self, temp_project, advanced_systems
-    ):
+    async def test_dynamic_context_loading_integration(self, temp_project, advanced_systems):
         """Test dynamic context loading integration."""
         # Create context loader
         loader = DynamicContextLoader(
@@ -194,9 +192,7 @@ export default Header;
         assert context.user_preferences is not None
 
     @pytest.mark.asyncio
-    async def test_tool_aware_suggestion_integration(
-        self, temp_project, advanced_systems
-    ):
+    async def test_tool_aware_suggestion_integration(self, temp_project, advanced_systems):
         """Test tool-aware suggestion engine integration."""
         # Create tool-aware engine
         engine = create_tool_aware_engine()
@@ -235,10 +231,7 @@ function Counter() {
         )
 
         assert len(suggestions) > 0
-        assert any(
-            "cache" in str(s).lower() or "primitive" in str(s).lower()
-            for s in suggestions
-        )
+        assert any("cache" in str(s).lower() or "primitive" in str(s).lower() for s in suggestions)
 
         # Test suggestion ranking and confidence
         ranked_suggestions = engine.rank_suggestions(suggestions, context)
@@ -247,9 +240,7 @@ function Counter() {
 
         # Test explanation generation
         if ranked_suggestions:
-            explanation = await engine.generate_explanation(
-                ranked_suggestions[0], context
-            )
+            explanation = await engine.generate_explanation(ranked_suggestions[0], context)
             assert explanation is not None
             assert len(explanation) > 0
 
@@ -719,9 +710,7 @@ class TestPhase3QualityValidation:
                 )
 
             # Calculate accuracy
-            accuracy = (
-                relevant_suggestions / len(test_scenarios) if test_scenarios else 0
-            )
+            accuracy = relevant_suggestions / len(test_scenarios) if test_scenarios else 0
             assert accuracy >= 0.9, f"Accuracy {accuracy:.2%} below 90% target"
 
         finally:
@@ -737,9 +726,7 @@ class TestPhase3QualityValidation:
 
         # Should detect React framework
         assert len(context.frameworks) > 0
-        react_detected = any(
-            f.framework == FrameworkType.REACT for f in context.frameworks
-        )
+        react_detected = any(f.framework == FrameworkType.REACT for f in context.frameworks)
         assert react_detected, "React framework not detected"
 
         # Should detect TypeScript
@@ -763,9 +750,7 @@ class TestPhase3QualityValidation:
         context = await loader.load_project_context(str(temp_project))
         context_load_time = time.time() - start_time
 
-        assert context_load_time < 2.0, (
-            f"Context loading too slow: {context_load_time:.2f}s"
-        )
+        assert context_load_time < 2.0, f"Context loading too slow: {context_load_time:.2f}s"
 
         # Suggestion generation performance
         start_time = time.time()
@@ -775,9 +760,7 @@ class TestPhase3QualityValidation:
         )
         suggestion_time = time.time() - start_time
 
-        assert suggestion_time < 1.0, (
-            f"Suggestion generation too slow: {suggestion_time:.2f}s"
-        )
+        assert suggestion_time < 1.0, f"Suggestion generation too slow: {suggestion_time:.2f}s"
 
         # Workflow execution performance
         from ..advanced.multi_agent_optimizer import Task
@@ -793,9 +776,7 @@ class TestPhase3QualityValidation:
             input_data="test",
         )
 
-        workflow = optimizer.workflow_engine.create_workflow(
-            WorkflowType.SEQUENTIAL, [task]
-        )
+        workflow = optimizer.workflow_engine.create_workflow(WorkflowType.SEQUENTIAL, [task])
 
         start_time = time.time()
         result = await optimizer.workflow_engine.execute_workflow(workflow)
@@ -809,9 +790,7 @@ class TestPhase3QualityValidation:
         report = await analytics.get_comprehensive_report()
         analytics_time = time.time() - start_time
 
-        assert analytics_time < 2.0, (
-            f"Analytics reporting too slow: {analytics_time:.2f}s"
-        )
+        assert analytics_time < 2.0, f"Analytics reporting too slow: {analytics_time:.2f}s"
         assert report is not None
 
 

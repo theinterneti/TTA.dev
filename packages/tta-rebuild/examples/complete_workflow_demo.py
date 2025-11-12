@@ -202,9 +202,7 @@ async def main():
 
     print(f"\n📅 Timeline: {len(timeline.get_timeline('mystery_case'))} events")
     print(f"👤 Characters: {len(characters.get_all_characters())}")
-    print(
-        f"🌿 Validated Branches: {len(validator.get_validated_branches('mystery_case'))}"
-    )
+    print(f"🌿 Validated Branches: {len(validator.get_validated_branches('mystery_case'))}")
 
     print_section("Demo Complete!")
     print("\nAll primitives demonstrated:")

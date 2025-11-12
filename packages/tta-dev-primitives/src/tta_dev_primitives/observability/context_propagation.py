@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from ..core.base import WorkflowContext
 
 try:
@@ -96,41 +99,46 @@ def extract_trace_context(context: WorkflowContext) -> SpanContext | None:
         return None
 
 
+@contextmanager
 def create_linked_span(
     tracer: trace.Tracer, name: str, context: WorkflowContext, **kwargs
-) -> trace.Span:
+) -> Generator[trace.Span, None, None]:
     """
-    Create a span linked to the trace context in WorkflowContext.
+    Create a span linked to the ACTIVE OpenTelemetry context.
+
+    This function uses start_as_current_span() to automatically link to the
+    active context, ensuring proper parent-child relationships in distributed
+    traces. The previous implementation using NonRecordingSpan caused broken
+    span linking.
 
     Args:
         tracer: OpenTelemetry tracer
         name: Span name
-        context: WorkflowContext with trace information
-        **kwargs: Additional span creation arguments
+        context: WorkflowContext to update with span information
+        **kwargs: Additional span creation arguments (attributes, links, etc.)
 
-    Returns:
-        New span linked to parent context
+    Yields:
+        Active span with proper parent linkage
+
+    Example:
+        ```python
+        with create_linked_span(tracer, "my_operation", context) as span:
+            span.set_attribute("operation.type", "processing")
+            result = await do_work()
+            span.set_attribute("result.size", len(result))
+        # Span automatically closes with proper parent-child relationship
+        ```
     """
-    parent_context = extract_trace_context(context)
+    # Use start_as_current_span to automatically link to active context
+    # This ensures proper parent-child relationships in the trace tree
+    with tracer.start_as_current_span(name, **kwargs) as span:
+        # Update WorkflowContext with span info for logging/debugging
+        span_ctx = span.get_span_context()
+        context.span_id = format(span_ctx.span_id, "016x")
+        context.trace_id = format(span_ctx.trace_id, "032x")
+        context.trace_flags = span_ctx.trace_flags.sampled
 
-    if parent_context:
-        # Create span with explicit parent
-        span = tracer.start_span(
-            name,
-            context=trace.set_span_in_context(trace.NonRecordingSpan(parent_context)),
-            **kwargs,
-        )
-    else:
-        # Create new root span
-        span = tracer.start_span(name, **kwargs)
-
-    # Update WorkflowContext with new span info
-    span_context = span.get_span_context()
-    context.span_id = format(span_context.span_id, "016x")
-    if not context.trace_id:
-        context.trace_id = format(span_context.trace_id, "032x")
-
-    return span
+        yield span
 
 
 def propagate_baggage(context: WorkflowContext) -> None:

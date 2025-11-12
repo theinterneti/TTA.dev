@@ -89,6 +89,19 @@ groups:
         expr: |
           increase(tta_cache_hits_total[24h]) * 0.001  # Assuming $0.001 per cache hit saved
 
+      # Cost per hour (dashboard-friendly metric)
+      - record: tta:cost_per_hour_dollars
+        expr: |
+          sum by (job) (
+            rate(tta_llm_cost_total[1h]) * 3600
+          )
+          or
+          vector(0)  # Default to 0 if metric doesn't exist yet
+
+      # Alternative: p95_latency_seconds (alias for dashboard compatibility)
+      - record: tta:p95_latency_seconds
+        expr: histogram_quantile(0.95, rate(tta_execution_duration_seconds_bucket[5m]))
+
   - name: tta_dev_sli  # Service Level Indicators
     interval: 60s
     rules:

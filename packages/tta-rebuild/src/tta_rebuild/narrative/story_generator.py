@@ -272,9 +272,7 @@ Generate the story scene now:"""
                 dialogue=[],
                 setting_description="Setting details not parsed",
                 emotional_tone="neutral",
-                story_branches=[
-                    {"choice": "Continue", "consequence": "The story continues"}
-                ],
+                story_branches=[{"choice": "Continue", "consequence": "The story continues"}],
                 quality_score=0.0,
             )
 

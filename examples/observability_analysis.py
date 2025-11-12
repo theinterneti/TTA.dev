@@ -454,9 +454,7 @@ class ObservabilityAnalyzer:
         for item in coverage["well_covered"]:
             print(f"   • {item['integration']}: {item['score']:.1%} coverage")
 
-        print(
-            f"⚠️  Partially Covered: {len(coverage['partially_covered'])} integrations"
-        )
+        print(f"⚠️  Partially Covered: {len(coverage['partially_covered'])} integrations")
         for item in coverage["partially_covered"]:
             print(f"   • {item['integration']}: {item['score']:.1%} coverage")
 

@@ -225,7 +225,9 @@ def print_metrics_summary(primitive_name: str, metrics: dict[str, Any]) -> None:
         print(f"    Target: {slo.get('target', 0) * 100:.1f}%")
         print(f"    Availability: {slo.get('availability', 0) * 100:.2f}%")
         print(f"    Latency Compliance: {slo.get('latency_compliance', 0) * 100:.2f}%")
-        print(f"    Error Budget Remaining: {slo.get('error_budget_remaining', 0) * 100:.1f}%")
+        print(
+            f"    Error Budget Remaining: {slo.get('error_budget_remaining', 0) * 100:.1f}%"
+        )
 
     # Throughput
     if "throughput" in metrics and metrics["throughput"]:
@@ -396,7 +398,7 @@ async def run_demo() -> None:
     # Get tracer for creating root spans
     if TRACING_AVAILABLE:
         tracer = trace.get_tracer(__name__)
-    
+
     for i in range(num_initial_runs):
         context = WorkflowContext(
             workflow_id=f"demo-workflow-{i}",
@@ -412,11 +414,12 @@ async def run_demo() -> None:
                     attributes={
                         "workflow.id": context.workflow_id or "unknown",
                         "run.number": i + 1,
-                        "run.phase": "initial"
-                    }
+                        "run.phase": "initial",
+                    },
                 ) as root_span:
                     await workflow.execute(
-                        {"query": f"What is the meaning of life? (run {i + 1})"}, context
+                        {"query": f"What is the meaning of life? (run {i + 1})"},
+                        context,
                     )
                     root_span.set_attribute("execution.status", "success")
             else:
@@ -459,8 +462,8 @@ async def run_demo() -> None:
                     attributes={
                         "workflow.id": context.workflow_id or "unknown",
                         "run.number": num_initial_runs + i + 1,
-                        "run.phase": "cached"
-                    }
+                        "run.phase": "cached",
+                    },
                 ) as root_span:
                     await workflow.execute(
                         {"query": "What is the meaning of life? (run 1)"},  # Same query
