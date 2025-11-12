@@ -21,7 +21,7 @@ echo ""
 # Step 1: Check if centralized .env exists
 if [ ! -f "$HOME/.env.tta-dev" ]; then
     echo -e "${YELLOW}⚠️  Centralized .env not found at ~/.env.tta-dev${NC}"
-    
+
     if [ -f "/home/thein/recovered-tta-storytelling/.env" ]; then
         echo "Found .env at /home/thein/recovered-tta-storytelling/.env"
         read -p "Copy to ~/.env.tta-dev? (y/n) " -n 1 -r
@@ -55,7 +55,7 @@ echo ""
 for workspace in "${WORKSPACES[@]}"; do
     if [ -d "$workspace" ]; then
         env_link="$workspace/.env"
-        
+
         # Check if .env already exists
         if [ -L "$env_link" ]; then
             # It's a symlink
@@ -127,12 +127,12 @@ GITIGNORE_ENTRIES=(
 for workspace in "${WORKSPACES[@]}"; do
     if [ -d "$workspace" ]; then
         gitignore="$workspace/.gitignore"
-        
+
         # Create .gitignore if it doesn't exist
         if [ ! -f "$gitignore" ]; then
             touch "$gitignore"
         fi
-        
+
         # Add entries if missing
         for entry in "${GITIGNORE_ENTRIES[@]}"; do
             if ! grep -qxF "$entry" "$gitignore" 2>/dev/null; then

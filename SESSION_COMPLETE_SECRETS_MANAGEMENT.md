@@ -1,6 +1,6 @@
 # Session Complete: Secrets Management + Git Push ✅
 
-**Date:** November 12, 2025  
+**Date:** November 12, 2025
 **Session:** Logseq Knowledge Graph + Secrets Management Setup
 
 ---
@@ -305,6 +305,6 @@ Checking available secrets:
 
 ---
 
-**Session Status:** ✅ **COMPLETE**  
-**Ready for:** Production use + Cline migration  
+**Session Status:** ✅ **COMPLETE**
+**Ready for:** Production use + Cline migration
 **Last Updated:** November 12, 2025 10:45 AM
