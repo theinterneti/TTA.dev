@@ -165,3 +165,4 @@ examples/tasks_output/
 logseq/journals/
 logseq/logseq/
 logseq/pages/AI\ Research.md
+.env.backup

@@ -2,10 +2,13 @@
 """Simple test to verify Prometheus metrics are exported correctly."""
 
 import asyncio
+
 from tta_dev_primitives import WorkflowContext
 from tta_dev_primitives.core import SequentialPrimitive
+from tta_dev_primitives.observability.prometheus_exporter import (
+    start_prometheus_exporter,
+)
 from tta_dev_primitives.testing import MockPrimitive
-from tta_dev_primitives.observability.prometheus_exporter import start_prometheus_exporter
 
 
 async def main():

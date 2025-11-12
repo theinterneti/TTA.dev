@@ -1,4 +1,5 @@
 """Parallel workflow primitive composition."""
+# pragma: allow-asyncio
 
 from __future__ import annotations
 
@@ -57,7 +58,9 @@ class ParallelPrimitive(InstrumentedPrimitive[Any, list[Any]]):
         # Initialize InstrumentedPrimitive with name
         super().__init__(name="ParallelPrimitive")
 
-    async def _execute_impl(self, input_data: Any, context: WorkflowContext) -> list[Any]:
+    async def _execute_impl(
+        self, input_data: Any, context: WorkflowContext
+    ) -> list[Any]:
         """
         Execute primitives in parallel with branch-level instrumentation.
 
@@ -112,7 +115,9 @@ class ParallelPrimitive(InstrumentedPrimitive[Any, list[Any]]):
 
             # Create tasks with branch-level instrumentation
             async def execute_branch(
-                branch_idx: int, primitive: WorkflowPrimitive, child_ctx: WorkflowContext
+                branch_idx: int,
+                primitive: WorkflowPrimitive,
+                child_ctx: WorkflowContext,
             ) -> Any:
                 """Execute a single branch with instrumentation and context propagation."""
                 # Attach parent OpenTelemetry context to this async task
@@ -148,7 +153,9 @@ class ParallelPrimitive(InstrumentedPrimitive[Any, list[Any]]):
                             span.set_attribute(
                                 "branch.primitive_type", primitive.__class__.__name__
                             )
-                            span.set_attribute("branch.total_branches", len(self.primitives))
+                            span.set_attribute(
+                                "branch.total_branches", len(self.primitives)
+                            )
 
                             try:
                                 result = await primitive.execute(input_data, child_ctx)

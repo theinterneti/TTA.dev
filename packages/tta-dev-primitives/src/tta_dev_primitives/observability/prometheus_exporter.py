@@ -8,8 +8,17 @@ Exports all collected metrics from the enhanced metrics collector.
 import threading
 
 try:
-    from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, generate_latest, start_http_server
-    from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, HistogramMetricFamily
+    from prometheus_client import (
+        CONTENT_TYPE_LATEST,
+        REGISTRY,
+        generate_latest,
+        start_http_server,
+    )
+    from prometheus_client.core import (
+        CounterMetricFamily,
+        GaugeMetricFamily,
+        HistogramMetricFamily,
+    )
 
     PROMETHEUS_CLIENT_AVAILABLE = True
 except ImportError:
@@ -40,7 +49,9 @@ def start_prometheus_exporter(port: int = 9464, host: str = "0.0.0.0") -> bool:
     global _exporter_running, _exporter_port
 
     if not PROMETHEUS_CLIENT_AVAILABLE:
-        print("⚠️  prometheus-client not available. Install with: uv pip install prometheus-client")
+        print(
+            "⚠️  prometheus-client not available. Install with: uv pip install prometheus-client"
+        )
         return False
 
     if _exporter_running:
@@ -93,7 +104,9 @@ class TTAPrometheusExporter:
             start_http_server(self.port, addr=self.host)
             self.running = True
 
-            print(f"✅ Prometheus metrics server started on http://{self.host}:{self.port}/metrics")
+            print(
+                f"✅ Prometheus metrics server started on http://{self.host}:{self.port}/metrics"
+            )
             return True
 
         except Exception as e:
@@ -167,7 +180,9 @@ class TTAPrometheusExporter:
                         )
 
                 except Exception as metric_error:
-                    print(f"⚠️  Error collecting metrics for {primitive_name}: {metric_error}")
+                    print(
+                        f"⚠️  Error collecting metrics for {primitive_name}: {metric_error}"
+                    )
                     continue
 
         except Exception as e:
@@ -196,7 +211,9 @@ class TTAPrometheusExporter:
 _exporter: TTAPrometheusExporter | None = None
 
 
-def get_prometheus_exporter(port: int = 9464, host: str = "0.0.0.0") -> TTAPrometheusExporter:
+def get_prometheus_exporter(
+    port: int = 9464, host: str = "0.0.0.0"
+) -> TTAPrometheusExporter:
     """Get or create the global Prometheus exporter instance."""
     global _exporter
 

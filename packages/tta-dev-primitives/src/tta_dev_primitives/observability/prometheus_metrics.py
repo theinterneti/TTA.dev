@@ -62,7 +62,9 @@ class PrometheusMetrics:
 
             # LLM cost counter (in USD)
             self._llm_cost = Counter(
-                "tta_llm_cost_total", "Total LLM API costs in USD", ["model", "provider", "job"]
+                "tta_llm_cost_total",
+                "Total LLM API costs in USD",
+                ["model", "provider", "job"],
             )
 
             # Execution duration histogram
@@ -76,7 +78,9 @@ class PrometheusMetrics:
 
             # Cache hit counter
             self._cache_hits = Counter(
-                "tta_cache_hits_total", "Total cache hits", ["primitive_name", "cache_type", "job"]
+                "tta_cache_hits_total",
+                "Total cache hits",
+                ["primitive_name", "cache_type", "job"],
             )
 
             # Cache miss counter
@@ -89,7 +93,8 @@ class PrometheusMetrics:
             logger.info("prometheus_metrics_initialized", extra={"status": "enabled"})
         else:
             logger.warning(
-                "prometheus_metrics_disabled", extra={"reason": "prometheus_client not available"}
+                "prometheus_metrics_disabled",
+                extra={"reason": "prometheus_client not available"},
             )
 
     def record_workflow_execution(
@@ -106,10 +111,16 @@ class PrometheusMetrics:
         if not self._enabled:
             return
 
-        self._workflow_executions.labels(workflow_name=workflow_name, status=status, job=job).inc()
+        self._workflow_executions.labels(
+            workflow_name=workflow_name, status=status, job=job
+        ).inc()
 
     def record_primitive_execution(
-        self, primitive_type: str, primitive_name: str, status: str, job: str = "tta-primitives"
+        self,
+        primitive_type: str,
+        primitive_name: str,
+        status: str,
+        job: str = "tta-primitives",
     ) -> None:
         """
         Record a primitive execution.
@@ -124,7 +135,10 @@ class PrometheusMetrics:
             return
 
         self._primitive_executions.labels(
-            primitive_type=primitive_type, primitive_name=primitive_name, status=status, job=job
+            primitive_type=primitive_type,
+            primitive_name=primitive_name,
+            status=status,
+            job=job,
         ).inc()
 
     def record_llm_cost(
@@ -176,7 +190,9 @@ class PrometheusMetrics:
         if not self._enabled:
             return
 
-        self._cache_hits.labels(primitive_name=primitive_name, cache_type=cache_type, job=job).inc()
+        self._cache_hits.labels(
+            primitive_name=primitive_name, cache_type=cache_type, job=job
+        ).inc()
 
     def record_cache_miss(
         self, primitive_name: str, cache_type: str = "lru", job: str = "tta-primitives"

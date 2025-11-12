@@ -3,8 +3,16 @@ TTA.dev Secrets Management Package
 
 This package provides secure secrets management for TTA.dev applications.
 It implements current security best practices for 2024-2025.
+
+Features:
+- Centralized .env loading from ~/.env.tta-dev
+- Per-workspace .env override support
+- Automatic loading on import
+- Secure secrets validation and caching
 """
 
+# Auto-load environment variables first
+from .loader import EnvLoader, get_env, require_env
 from .manager import (
     SecretsManager,
     get_config,
@@ -17,6 +25,11 @@ from .manager import (
 )
 
 __all__ = [
+    # Environment loading
+    "EnvLoader",
+    "get_env",
+    "require_env",
+    # Secrets management
     "SecretsManager",
     "get_secrets_manager",
     "get_gemini_api_key",
@@ -28,4 +41,4 @@ __all__ = [
 ]
 
 # Version info
-__version__ = "1.0.0"
+__version__ = "1.1.0"

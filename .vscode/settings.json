@@ -98,6 +98,14 @@
   "git.confirmSync": false,
 
   // ===== Terminal =====
+  "terminal.integrated.env.linux": {
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8"
+  },
+  "terminal.integrated.env.osx": {
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8"
+  },
   "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.defaultProfile.windows": "PowerShell",

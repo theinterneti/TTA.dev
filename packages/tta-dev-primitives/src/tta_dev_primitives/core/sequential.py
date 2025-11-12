@@ -47,7 +47,9 @@ class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
             raise ValueError("SequentialPrimitive requires at least one primitive")
         self.primitives = primitives
         # Initialize InstrumentedPrimitive with semantic naming
-        super().__init__(name="SequentialPrimitive", primitive_type="sequential", action="execute")
+        super().__init__(
+            name="SequentialPrimitive", primitive_type="sequential", action="execute"
+        )
 
     async def _execute_impl(self, input_data: Any, context: WorkflowContext) -> Any:
         """
@@ -120,7 +122,9 @@ class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
                         # Standard step attributes
                         span.set_attribute("step.index", i)
                         span.set_attribute("step.name", step_name)
-                        span.set_attribute("step.primitive_type", primitive.__class__.__name__)
+                        span.set_attribute(
+                            "step.primitive_type", primitive.__class__.__name__
+                        )
                         span.set_attribute("step.total_steps", len(self.primitives))
                         span.set_attribute("primitive.type", "sequential")
                         span.set_attribute("primitive.action", f"step_{i}")
