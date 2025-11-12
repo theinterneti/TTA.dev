@@ -1,0 +1,17 @@
+- ---
+- type:: [[G]] GraphComponent
+- status:: stable
+- tags:: #recovery, #resilience, #error-handling, #backoff
+- context-level:: 2-Operational
+- component-type:: node
+- in-graph:: [[TTA.dev/Concepts/WorkflowPrimitive]]
+- modifies-state::
+- calls-tools::
+- source-file:: `packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py`
+- ---
+- ### Summary
+  - `RetryPrimitive` wraps another `[[TTA.dev/Concepts/WorkflowPrimitive]]` and automatically retries its execution if it fails, following a configurable `[[TTA.dev/Data/RetryStrategy]]`.
+- ### Logic
+  - It takes a target primitive and an optional `[[TTA.dev/Data/RetryStrategy]]` during initialization.
+  - The `execute` method attempts to run the target primitive. If an exception occurs, it calculates a backoff delay (potentially with jitter) and retries up to `max_retries`.
+  - Includes comprehensive logging, metrics, and tracing for each attempt and backoff period, leveraging `[[TTA.dev/Data/WorkflowContext]]`.

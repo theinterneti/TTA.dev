@@ -1,404 +1,91 @@
-# TTA.dev - AI Development Toolkit
+# TTA.dev Knowledge Graph Schema Documentation
 
-**Production-ready agentic primitives and workflow patterns for building reliable AI applications.**
+This document outlines the schema and conventions for organizing the TTA.dev framework's knowledge within Logseq. The goal is to create a living "developer's manual" that maps the framework's architecture, making it easier to understand, navigate, and contribute to.
 
-[![CI](https://github.com/theinterneti/TTA.dev/workflows/CI/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
-[![Quality](https://github.com/theinterneti/TTA.dev/workflows/Quality%20Checks/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
-[![TODO Compliance](https://github.com/theinterneti/TTA.dev/workflows/TODO%20Compliance%20Validation/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Type checked: Pyright](https://img.shields.io/badge/type%20checked-pyright-blue.svg)](https://github.com/microsoft/pyright)
+## Phase 1: Framework Primitive Taxonomy
 
----
+The TTA.dev framework is organized around five core "primitive" types. These types are abstract enough to describe the framework itself, not any specific application built with it.
 
-## 🎯 What is TTA.dev?
+- **[C] CoreConcept**: A core architectural idea or principle of the framework (e.g., StateManagement, GraphCompilation, ToolBinding).
+- **[G] GraphComponent**: A specific LangGraph node, edge, or subgraph definition (e.g., EntrypointNode, PrimaryAgentState, SafetyCheckEdge).
+- **[D] DataSchema**: A key data structure, likely a Pydantic model, that defines state or message passing (e.g., AgentState, ToolCallRequest, GraphConfig).
+- **[T] ToolInterface**: An abstract definition or concrete implementation of a tool usable by agents (e.g., BaseTool, Neo4jSearchTool, RedisCacheTool).
+- **[S] Service**: A discrete microservice or infrastructure component (e.g., APIServer-FastAPI, GraphExecutor-LangGraph, VectorDB-Neo4j).
 
-TTA.dev is a curated collection of **battle-tested, production-ready** components for building reliable AI applications. Every component here has:
+## Phase 2: Logseq Metadata Schema Design
 
-- ✅ 100% test coverage
-- ✅ Real-world production usage
-- ✅ Comprehensive documentation
-- ✅ Zero known critical bugs
+Each primitive's Logseq page will embed properties to capture hierarchy, relationships, and context.
 
-**Philosophy:** Only proven code enters this repository.
+### Universal Properties (for all primitives):
 
----
+- `type::` (One of: `[C] CoreConcept`, `[G] GraphComponent`, `[D] DataSchema`, `[T] ToolInterface`, `[S] Service`)
+- `status::` (One of: `stable`, `beta`, `idea`, `deprecated`)
+- `tags::` (Comma-separated list, e.g., `#state`, `#routing`, `#tool-use`, `#langgraph`, `#fastapi`)
+- `context-level::` (The "altitude" of the concept: `1-Strategic`, `2-Operational`, `3-Technical`)
 
-## 📦 Packages
+### Context-Specific Properties (Examples):
 
-### tta-dev-primitives
+#### For `type:: [G] GraphComponent`:
 
-Production-ready composable workflow primitives for building reliable, observable agent workflows.
+- `component-type::` (e.g., `node`, `edge`, `graph`)
+- `in-graph::` (Link to the parent graph it belongs to, e.g., `[[TTA.dev/Graph/MainGraph]]`)
+- `modifies-state::` (Links to `[D] DataSchema` fields it alters, e.g., `[[TTA.dev/Data/AgentState.messages]]`)
+- `calls-tools::` (Links to `[T] ToolInterface`s, e.g., `[[TTA.dev/Tools/Neo4jSearchTool]]`)
+- `source-file::` (Path to code, e.g., ``tta_dev/graphs/main_graph.py``)
 
-**Features:**
-- 🔀 Router, Cache, Timeout, Retry primitives
-- 🔗 Composition operators (`>>`, `|`)
-- ⚡ Parallel and conditional execution
-- 📊 OpenTelemetry integration
-- 💪 Comprehensive error handling
-- 📉 30-40% cost reduction via intelligent caching
+#### For `type:: [C] CoreConcept`:
 
-**Installation:**
-```bash
-uv add tta-dev-primitives
-```
+- `summary::` (A one-sentence definition of the concept)
+- `implemented-by::` (Links to `[G] GraphComponent`s or `[S] Service`s that realize this idea)
 
-**Quick Start:**
+#### For `type:: [D] DataSchema`:
 
-```python
-from tta_dev_primitives import RouterPrimitive, CachePrimitive
+- `used-by::` (Links to `[G] GraphComponent`s or `[T] ToolInterface`s)
+- `source-file::` (Path to code, e.g., ``tta_dev/models/state.py``)
 
-# Compose workflow with operators
-workflow = (
-    validate_input >>
-    CachePrimitive(ttl=3600) >>
-    process_data >>
-    generate_response
-)
+#### For `type:: [S] Service`:
 
-# Execute
-result = await workflow.execute(data, context)
-```
+- `exposes::` (Links to related concepts, e.g., `[[API-Endpoint]]`, `[[TTA.dev/Graph/PrimaryAgentState]]`)
+- `depends-on::` (Links to other `[S] Service`s, e.g., `[[TTA.dev/Services/Infrastructure-Redis]]`)
 
-[📚 Full Documentation](packages/tta-dev-primitives/README.md)
+## Phase 3: Hierarchy & Linking Strategy
 
----
+### 1. Hierarchical Organization (via Logseq Namespaces):
 
-## 🧭 Knowledge Base & Learning
+Logseq's namespace feature (using `/` in page titles) is used to create a clear directory-like hierarchy.
 
-**Structured Learning:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - Intelligent navigation between documentation and knowledge base
+**Example Structure:**
+- `TTA.dev/Concepts/StateManagement`
+- `TTA.dev/Graph/MainGraph`
+- `TTA.dev/Graph/Nodes/ToolExecutorNode`
+- `TTA.dev/Graph/Edges/ConditionalSafetyEdge`
+- `TTA.dev/Data/AgentState`
+- `TTA.dev/Tools/BaseTool`
+- `TTA.dev/Services/FastAPI-Server`
 
-**Learning Paths:** [`TTA.dev Learning Paths`](logseq/pages/TTA.dev___Learning%20Paths.md) - Step-by-step progression from beginner to expert
+### 2. Contextual Linking (via `[[Page Links]]`):
 
-**Interactive Learning:** [`Learning TTA Primitives`](logseq/pages/Learning%20TTA%20Primitives.md) - Flashcards and exercises for mastering concepts
+The properties from Phase 2 are the primary source of relational links (e.g., `modifies-state:: [[...]]`).
 
----
+Within the content (the body) of each page, any mention of another framework primitive must be enclosed in `[[double-brackets]]` to create a backlink and visualize the connection.
 
-## 🚀 Quick Start
+**Example Page Content (TTA.dev/Graph/Nodes/ToolExecutorNode.md):**
 
-### Installation
-
-```bash
-# Install dependencies from pyproject.toml
-uv sync --all-extras
-```
-
-### Basic Workflow Example
-
-```python
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.core.base import LambdaPrimitive
-
-# Define primitives
-validate = LambdaPrimitive(lambda x, ctx: {"validated": True, **x})
-process = LambdaPrimitive(lambda x, ctx: {"processed": True, **x})
-generate = LambdaPrimitive(lambda x, ctx: {"result": "success"})
-
-# Compose with >> operator
-workflow = validate >> process >> generate
-
-# Execute
-context = WorkflowContext(workflow_id="demo", session_id="123")
-result = await workflow.execute({"input": "data"}, context)
-
-print(result)  # {"validated": True, "processed": True, "result": "success"}
-```
-
----
-
-## 🏗️ Architecture
-
-TTA.dev follows a **composable, modular architecture**:
-
-```
-┌─────────────────────────────────────────────────────┐
-│                  Your Application                   │
-└─────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│                 tta-dev-primitives                  │
-│  ┌────────────┬──────────────┬─────────────────┐   │
-│  │   Router   │    Cache     │    Timeout      │   │
-│  ├────────────┼──────────────┼─────────────────┤   │
-│  │  Parallel  │ Conditional  │     Retry       │   │
-│  └────────────┴──────────────┴─────────────────┘   │
-└─────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│        tta-observability-integration              │
-│  ┌────────────┬──────────────┬─────────────────┐   │
-│  │ APM Setup  │   Metrics    │     Tracing     │   │
-│  └────────────┴──────────────┴─────────────────┘   │
-└─────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│           universal-agent-context                 │
-│  ┌────────────┬──────────────┬─────────────────┐   │
-│  │ Coordination│   Handoff    │     Memory      │   │
-│  └────────────┴──────────────┴─────────────────┘   │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
-## 📚 Documentation
-
-- **[Getting Started Guide](GETTING_STARTED.md)** - 5-minute quickstart
-- **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
-- **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
-- **[MCP Integration](docs/mcp/README.md)** - Model Context Protocol guides
-- **[Package Documentation](packages/tta-dev-primitives/README.md)** - Detailed API reference
-
-### Cost Optimization
-
-- **[LLM Cost Guide](docs/guides/llm-cost-guide.md)** - Free vs paid model comparison, pricing analysis
-- **[Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md)** - Production patterns for 50-70% cost reduction
-
-### Additional Resources
-
-- [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
-- [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
-- [LLM Selection Guide](docs/guides/llm-selection-guide.md)
-- [Examples](packages/tta-dev-primitives/examples/)
-
----
-
-## 🧪 Testing
-
-All packages maintain **100% test coverage** with comprehensive test suites.
-
-```bash
-# Run all tests
-uv run pytest -v
-
-# Run with coverage
-uv run pytest --cov=packages --cov-report=html
-
-# Run specific package tests
-uv run pytest packages/tta-dev-primitives/tests/ -v
-```
-
----
-
-## 🛠️ Development
-
-### Prerequisites
-
-- Python 3.11+
-- [uv](https://github.com/astral-sh/uv)
-- VS Code with Copilot (recommended)
-
-### Setup
-
-```bash
-# Clone repository
-git clone https://github.com/theinterneti/TTA.dev
-cd TTA.dev
-
-# Install dependencies
-uv sync --all-extras
-
-# Run tests
-uv run pytest -v
-
-# Run quality checks
-uv run ruff format .
-uv run ruff check . --fix
-uvx pyright packages/
-```
-
-### VS Code Workflow
-
-We provide VS Code tasks for common operations:
-
-1. Press `Cmd/Ctrl+Shift+P`
-2. Type "Task: Run Task"
-3. Select from:
-   - 🧪 Run All Tests
-   - ✅ Quality Check (All)
-   - 📦 Validate Package
-   - 🔍 Lint Code
-   - ✨ Format Code
-
-[See full task list](.vscode/tasks.json)
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! However, **only battle-tested, proven code is accepted**.
-
-### Contribution Criteria
-
-Before submitting a PR, ensure:
-
-- ✅ All tests passing (100%)
-- ✅ Test coverage 100%
-- ✅ Documentation complete
-- ✅ Ruff + Pyright checks pass
-- ✅ **TODO compliance (100%)** - All Logseq TODOs properly formatted
-- ✅ Real-world usage validation
-- ✅ No known critical bugs
-
-#### TODO Compliance Requirement
-
-All TODOs in Logseq journals must follow the [TODO Management System](logseq/pages/TODO%20Management%20System.md):
-
-- **Category tag required**: `#dev-todo` or `#user-todo`
-- **For `#dev-todo`**: Must include `type::`, `priority::`, `package::` properties
-- **For `#user-todo`**: Must include `type::`, `audience::`, `difficulty::` properties
-
-**Validation:**
-```bash
-# Check TODO compliance locally
-uv run python scripts/validate-todos.py
-
-# Expected output: 100.0% compliance
-```
-
-The CI will automatically validate TODO compliance on all PRs. Non-compliant TODOs will block the merge.
-
-### Contribution Workflow
-
-1. **Create feature branch**
-
-   ```bash
-   git checkout -b feature/add-awesome-feature
-   ```
-
-2. **Make changes and validate**
-
-   ```bash
-   ./scripts/validate-package.sh <package-name>
-   ```
-
-3. **Commit with semantic message**
-
-   ```bash
-   git commit -m "feat(package): Add awesome feature"
-   ```
-
-4. **Create PR**
-
-   ```bash
-   gh pr create --title "feat: Add awesome feature"
-   ```
-
-5. **Squash merge after approval**
-
-[See full contribution guide](CONTRIBUTING.md)
-
----
-
-## 📋 Code Quality Standards
-
-### Formatting
-
-- **Ruff** with 88 character line length
-- Auto-format on save in VS Code
-
-### Linting
-
-- **Ruff** with strict rules
-- No unused imports or variables
-
-### Type Checking
-
-- **Pyright** in basic mode
-- Type hints required for all functions
-
-### Testing
-
-- **pytest** with AAA pattern
-- >80% coverage required
-- All tests must pass
-
-### Documentation
-
-- Google-style docstrings
-- README for each package
-- Examples for all features
-- **Examples:** See the `examples/` directory in each package for usage patterns.
-
----
-
-## 🚦 CI/CD
-
-All PRs automatically run:
-
-- ✅ Ruff format check
-- ✅ Ruff lint check
-- ✅ Pyright type check
-- ✅ pytest (all tests)
-- ✅ Coverage report
-- ✅ Multi-OS testing (Ubuntu, macOS, Windows)
-- ✅ Multi-Python testing (3.11, 3.12)
-
-**Merging requires all checks to pass.**
-
----
-
-## 📊 Project Status
-
-### Current Release: v0.1.0 (Initial)
-
-| Package | Version | Status |
-|---------|---------|--------|
-| tta-dev-primitives | 0.1.0 | 🟢 Stable |
-| tta-observability-integration | 0.1.0 | 🟢 Stable |
-| universal-agent-context | 0.1.0 | 🟢 Stable |
-
-### Roadmap
-
-- [ ] v0.2.0: Add more workflow primitives (saga, circuit breaker)
-- [ ] v0.3.0: Enhanced observability features
-- [ ] v1.0.0: First stable release
-
----
-
-## 🔗 Related Projects
-
-- **TTA** - Therapeutic text adventure game (private)
-- **Augment Code** - AI coding assistant
-- **GitHub Copilot** - AI pair programmer
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details
-
----
-
-## 🙏 Acknowledgments
-
-Built with:
-
-- [Python](https://www.python.org/)
-- [uv](https://github.com/astral-sh/uv) - Fast Python package installer
-- [Ruff](https://github.com/astral-sh/ruff) - Fast Python linter
-- [Pyright](https://github.com/microsoft/pyright) - Type checker
-- [pytest](https://pytest.org/) - Testing framework
-- [GitHub Copilot](https://github.com/features/copilot) - AI assistance
-
----
-
-## 📧 Contact
-
-- **Maintainer:** @theinterneti
-- **Issues:** [GitHub Issues](https://github.com/theinterneti/TTA.dev/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/theinterneti/TTA.dev/discussions)
-
----
-
-## ⭐ Star History
-
-If you find TTA.dev useful, please consider giving it a star! ⭐
-
----
-
-**Last Updated:** 2025-10-27
-**Status:** 🚀 Ready for migration
+```markdown
+- ---
+- type:: [G] GraphComponent
+- component-type:: node
+- status:: stable
+- tags:: #tool-use, #langgraph, #execution
+- context-level:: 3-Technical
+- in-graph:: [[TTA.dev/Graph/MainGraph]]
+- modifies-state:: [[TTA.dev/Data/AgentState.tool_calls]], [[TTA.dev/Data/AgentState.messages]]
+- calls-tools:: [[TTA.dev/Tools/BaseTool]]
+- source-file:: `tta_dev/graphs/nodes/tools.py`
+- ---
+- ### Summary
+  - This node is responsible for invoking one or more tools based on the last message in the `[[TTA.dev/Data/AgentState]]`.
+- ### Logic
+  - 1. Reads the `tool_calls` attribute from the state.
+  - 2. Iterates through each request and dynamically calls the corresponding `[[TTA.dev/Tools/BaseTool]]` implementation.
+  - 3. Appends the tool's output as a new `ToolMessage` to the `messages` list.

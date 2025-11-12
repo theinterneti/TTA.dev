@@ -1,0 +1,15 @@
+- ---
+- type:: [[D]] DataSchema
+- status:: stable
+- tags:: #orchestration, #task-management, #llm, #enum
+- context-level:: 3-Technical
+- used-by:: [[TTA.dev/Data/TaskClassification]], [[TTA.dev/Graph/TaskClassifierPrimitive]]
+- source-file:: `packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/task_classifier_primitive.py`
+- ---
+- ### Summary
+  - `TaskComplexity` is an Enum defining standardized levels of complexity for tasks processed by the `[[TTA.dev/Graph/TaskClassifierPrimitive]]`.
+- ### Fields
+  - `SIMPLE`: Simple queries, factual questions.
+  - `MODERATE`: Analysis, summarization, basic reasoning.
+  - `COMPLEX`: Multi-step reasoning, planning, creative tasks.
+  - `EXPERT`: Advanced reasoning, code generation, research.
