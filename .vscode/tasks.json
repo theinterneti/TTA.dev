@@ -58,6 +58,66 @@
                 "panel": "new"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "📊 PR Dashboard",
+            "type": "shell",
+            "command": "python scripts/pr_manager.py dashboard",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🔍 PR Analytics",
+            "type": "shell",
+            "command": "python scripts/pr_manager.py analyze",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🏥 PR Triage",
+            "type": "shell",
+            "command": "python scripts/pr_manager.py triage",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🏥 PR Health Check",
+            "type": "shell",
+            "command": "python scripts/pr_manager.py health-check",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "💡 PR Recommendations",
+            "type": "shell",
+            "command": "python scripts/pr_manager.py recommend",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
         }
     ]
 }
