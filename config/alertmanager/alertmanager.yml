@@ -6,7 +6,7 @@ global:
   smtp_smarthost: 'localhost:587'
   smtp_from: 'alerts@tta.dev'
   smtp_auth_username: 'alerts@tta.dev'
-  smtp_auth_password: 'your-smtp-password'
+  smtp_auth_password: '${SMTP_PASSWORD}'
 
 # Template files for custom notification formats
 templates:
