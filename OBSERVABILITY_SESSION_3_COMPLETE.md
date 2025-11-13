@@ -221,11 +221,11 @@ job: "tta-primitives"
 Prometheus has **2 active targets** scraping port 9464:
 
 1. **`tta-live-metrics`** job
-   - URL: `http://172.17.0.1:9464/metrics?target=172.17.0.1%3A9464`
+   - URL: `http://host.docker.internal:9464/metrics?target=host.docker.internal%3A9464`
    - Health: ✅ UP
 
 2. **`tta-primitives`** job
-   - URL: `http://172.17.0.1:9464/metrics`
+   - URL: `http://host.docker.internal:9464/metrics`
    - Health: ✅ UP
 
 ### Recording Rules Status

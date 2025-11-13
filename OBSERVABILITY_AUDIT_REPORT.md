@@ -36,7 +36,7 @@
 ✅ prometheus (localhost:9090) - UP
 ✅ otel-collector (8888, 8889) - UP
 ✅ pushgateway (9091) - UP
-✅ tta-primitives (172.17.0.1:9464) - UP
+✅ tta-primitives (host.docker.internal:9464) - UP
 🔴 agent-activity-tracker (host.docker.internal:8000) - DOWN
 ```
 
