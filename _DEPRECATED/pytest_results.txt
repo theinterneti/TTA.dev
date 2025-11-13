@@ -1,0 +1,62 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-8.4.2, pluggy-1.6.0
+rootdir: /home/thein/repos/TTA.dev-cline/packages/tta-dev-primitives
+configfile: pyproject.toml
+plugins: asyncio-1.2.0, anyio-4.11.0, mock-3.15.1, timeout-2.4.0, cov-7.0.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 6 items
+
+packages/tta-dev-primitives/tests/primitives/test_sequential.py ....F.   [100%]
+
+=================================== FAILURES ===================================
+__________ test_sequential_primitive_chaining_with_nested_sequential ___________
+
+    @pytest.mark.asyncio
+    async def test_sequential_primitive_chaining_with_nested_sequential():
+        """
+        Test that chaining with a nested SequentialPrimitive flattens correctly.
+        """
+        mock_primitive1 = MockPrimitive(name="Mock1", return_value="output1")
+        nested_sequential = SequentialPrimitive(
+            [
+                MockPrimitive(name="Nested1", return_value="nested_output1"),
+                MockPrimitive(name="Nested2", return_value="nested_output2"),
+            ]
+        )
+        mock_primitive3 = MockPrimitive(name="Mock3", return_value="output3")
+    
+        workflow = mock_primitive1 >> nested_sequential >> mock_primitive3
+        context = WorkflowContext(workflow_id="test-workflow")
+    
+        result = await workflow.execute("initial_input", context)
+    
+        assert result == "output3"
+        assert len(workflow.primitives) == 3  # Should be flattened
+    
+        # Verify execution order and inputs
+        assert workflow.primitives[0].call_count == 1
+        assert workflow.primitives[0].calls[-1][0] == "initial_input"
+        # The second primitive in the flattened list is the first MockPrimitive from nested_sequential
+>       assert workflow.primitives[1].call_count == 1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'SequentialPrimitive' object has no attribute 'call_count'
+
+packages/tta-dev-primitives/tests/primitives/test_sequential.py:109: AttributeError
+----------------------------- Captured stdout call -----------------------------
+2025-11-13 07:59:09 [info     ] sequential_workflow_start      correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf step_count=3 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_start          correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf primitive_type=MockPrimitive step=0 total_steps=3 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_complete       correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf duration_ms=0.016450881958007812 elapsed_ms=0.39315223693847656 primitive_type=MockPrimitive step=0 total_steps=3 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_start          correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf primitive_type=SequentialPrimitive step=1 total_steps=3 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_workflow_start      correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf step_count=2 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_start          correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf primitive_type=MockPrimitive step=0 total_steps=2 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_complete       correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf duration_ms=0.010967254638671875 elapsed_ms=0.6363391876220703 primitive_type=MockPrimitive step=0 total_steps=2 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_start          correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf primitive_type=MockPrimitive step=1 total_steps=2 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_complete       correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf duration_ms=0.00858306884765625 elapsed_ms=0.7398128509521484 primitive_type=MockPrimitive step=1 total_steps=2 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_workflow_complete   correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf step_count=2 total_duration_ms=0.7855892181396484 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_complete       correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf duration_ms=0.3440380096435547 elapsed_ms=0.8349418640136719 primitive_type=SequentialPrimitive step=1 total_steps=3 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_start          correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf primitive_type=MockPrimitive step=2 total_steps=3 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_step_complete       correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf duration_ms=0.008344650268554688 elapsed_ms=0.9312629699707031 primitive_type=MockPrimitive step=2 total_steps=3 workflow_id=test-workflow
+2025-11-13 07:59:09 [info     ] sequential_workflow_complete   correlation_id=bd1f0ad7-33d3-45af-a87f-38b7865855bf step_count=3 total_duration_ms=0.9751319885253906 workflow_id=test-workflow
+=========================== short test summary info ============================
+FAILED packages/tta-dev-primitives/tests/primitives/test_sequential.py::test_sequential_primitive_chaining_with_nested_sequential
+========================= 1 failed, 5 passed in 0.32s ==========================

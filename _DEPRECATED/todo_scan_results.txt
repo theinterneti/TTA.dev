@@ -1,0 +1,67 @@
+🔍 Scanning codebase for TODOs...
+  📁 Scanning packages/
+  📁 Scanning scripts/
+  📁 Scanning local/
+  📁 Scanning .augment/
+  📁 Scanning .github/
+
+✅ Scanned 568 files
+📋 Found 1078 TODOs in 197 files
+
+================================================================================
+📊 CODEBASE TODO SCAN RESULTS
+================================================================================
+
+📈 Summary:
+  Total TODOs: 1078
+  Files scanned: 568
+  Files with TODOs: 197
+
+📂 By Category:
+  code: 348
+  config: 228
+  augment: 220
+  other: 212
+  non-actionable: 70
+
+📄 By File Type:
+  .md: 606
+  .py: 361
+  .yml: 89
+  .sh: 18
+  .json: 3
+  .toml: 1
+
+📋 Sample TODOs (first 10):
+
+  packages/tta-dev-primitives/README.md:5
+  **Note**: These are development tools for building TTA, not player-facing game components.
+
+  packages/tta-dev-primitives/apm.yml:11
+  NOTE: This is for development tooling, not player-facing game components.
+
+  packages/tta-dev-primitives/CURSOR_AGENT.md:32
+  - Never print code blocks with "TODO" or placeholder comments
+
+  packages/tta-dev-primitives/CURSOR_AGENT.md:199
+  # TODO: Add tests later
+
+  packages/tta-dev-primitives/CLINE_AGENT.md:32
+  - Never print code blocks with "TODO" or placeholder comments
+
+  packages/tta-dev-primitives/CLINE_AGENT.md:199
+  # TODO: Add tests later
+
+  packages/tta-dev-primitives/AUGMENT_AGENT.md:32
+  - Never print code blocks with "TODO" or placeholder comments
+
+  packages/tta-dev-primitives/AUGMENT_AGENT.md:199
+  # TODO: Add tests later
+
+  packages/tta-dev-primitives/AGENTS.md:32
+  - Never print code blocks with "TODO" or placeholder comments
+
+  packages/tta-dev-primitives/AGENTS.md:199
+  # TODO: Add tests later
+
+================================================================================
