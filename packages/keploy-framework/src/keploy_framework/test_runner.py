@@ -1,11 +1,11 @@
 """Test runner with validation and reporting."""
 
-import asyncio
+import html
 import subprocess
-import json
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+
 from rich.console import Console
 from rich.table import Table
 
@@ -72,12 +72,16 @@ class KeployTestRunner:
             "docker",
             "run",
             "--rm",
-            "--network", "host",
-            "-v", f"{self.keploy_dir.absolute()}:/keploy",
+            "--network",
+            "host",
+            "-v",
+            f"{self.keploy_dir.absolute()}:/keploy",
             self.docker_image,
             "test",
-            "-c", self.api_url,
-            "--delay", "5",
+            "-c",
+            self.api_url,
+            "--delay",
+            "5",
         ]
 
         try:
@@ -164,9 +168,7 @@ class KeployTestRunner:
         if results.is_success:
             console.print("[bold green]✅ All tests passed![/bold green]")
         else:
-            console.print(
-                f"[bold yellow]⚠️  {results.failed} test(s) failed[/bold yellow]"
-            )
+            console.print(f"[bold yellow]⚠️  {results.failed} test(s) failed[/bold yellow]")
 
     def _generate_report(self, results: TestResults) -> None:
         """Generate HTML test report.
@@ -176,7 +178,15 @@ class KeployTestRunner:
         """
         report_path = self.keploy_dir / "test-report.html"
 
-        html = f"""
+        # Generate table rows with proper HTML escaping
+        table_rows = "".join(
+            f"<tr><td>{html.escape(tc['name'])}</td>"
+            f'<td class="{html.escape(tc["status"])}">'
+            f"{html.escape(tc['status'])}</td></tr>"
+            for tc in results.test_cases
+        )
+
+        html_content = f"""
 <!DOCTYPE html>
 <html>
 <head>
@@ -206,11 +216,11 @@ class KeployTestRunner:
             <th>Test Name</th>
             <th>Status</th>
         </tr>
-        {"".join(f'<tr><td>{tc["name"]}</td><td class="{tc["status"]}">{tc["status"]}</td></tr>' for tc in results.test_cases)}
+        {table_rows}
     </table>
 </body>
 </html>
 """
 
-        report_path.write_text(html)
+        report_path.write_text(html_content)
         console.print(f"[bold green]📊 Report generated: {report_path}[/bold green]")

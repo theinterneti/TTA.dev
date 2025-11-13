@@ -1,8 +1,10 @@
 """Recording session utilities."""
 
-import httpx
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from types import TracebackType
+
+import httpx
 
 
 class RecordingSession:
@@ -26,7 +28,12 @@ class RecordingSession:
         self.client = httpx.AsyncClient(base_url=self.api_url)
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore[no-untyped-def]
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Exit recording context."""
         if self.client:
             await self.client.aclose()

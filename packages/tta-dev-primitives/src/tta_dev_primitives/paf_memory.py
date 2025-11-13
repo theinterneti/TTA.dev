@@ -4,6 +4,7 @@ This primitive provides access to permanent architectural constraints
 stored in PAFCORE.md and validates code against these immutable facts.
 """
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
@@ -143,11 +144,12 @@ class PAFMemoryPrimitive:
 
             # Parse PAF entries (e.g., "- **LANG-001**: Description")
             if line.strip().startswith("- **") and current_category:
-                # Extract PAF ID and description
-                parts = line.split("**:", 1)
-                if len(parts) == 2:
-                    paf_id_part = parts[0].replace("- **", "").strip()
-                    description = parts[1].strip()
+                # Use regex for more robust parsing
+                # Pattern: "- **CATEGORY-NNN**: Description"
+                match = re.match(r"- \*\*([A-Z]+-\d+)\*\*:\s*(.+)", line.strip())
+                if match:
+                    paf_id_part = match.group(1)
+                    description = match.group(2)
 
                     # Check if deprecated
                     status = PAFStatus.ACTIVE
