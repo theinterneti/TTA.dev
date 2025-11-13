@@ -22,6 +22,10 @@ alerting:
           - alertmanager:9093
 
 # Scrape configurations for comprehensive monitoring
+# Note: Uses 'host.docker.internal' for cross-platform Docker host access
+# This works on Docker Desktop (Mac/Windows) and recent Docker on Linux
+# For older Linux Docker installations, you may need to use bridge IP (e.g., 172.17.0.1)
+# or configure extra_hosts in docker-compose.yml
 scrape_configs:
   # Self-monitoring
   - job_name: 'prometheus'
@@ -33,7 +37,7 @@ scrape_configs:
   # TTA.dev Live Metrics Server (your current running server)
   - job_name: 'tta-live-metrics'
     static_configs:
-      - targets: ['172.17.0.1:9464']  # Docker host IP
+      - targets: ['host.docker.internal:9464']  # Cross-platform Docker host
     scrape_interval: 5s
     scrape_timeout: 3s
     metrics_path: '/metrics'
@@ -43,7 +47,7 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: 172.17.0.1:9464
+        replacement: host.docker.internal:9464
 
   # TTA.dev Applications (dynamic discovery for multiple apps)
   - job_name: 'tta-applications'
@@ -96,7 +100,7 @@ scrape_configs:
   # TTA.dev Package-specific metrics
   - job_name: 'tta-primitives'
     static_configs:
-      - targets: ['172.17.0.1:9464']
+      - targets: ['host.docker.internal:9464']
     scrape_interval: 5s
     metrics_path: '/metrics'
     metric_relabel_configs:
@@ -108,7 +112,7 @@ scrape_configs:
 
   - job_name: 'tta-observability'
     static_configs:
-      - targets: ['172.17.0.1:9465']  # Future observability package metrics
+      - targets: ['host.docker.internal:9465']  # Future observability package metrics
     scrape_interval: 10s
     metrics_path: '/metrics'
     metric_relabel_configs:
