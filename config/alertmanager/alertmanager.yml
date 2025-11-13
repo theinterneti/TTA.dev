@@ -124,7 +124,7 @@ receivers:
           {{ end }}
     # Slack webhook for critical alerts (configure with your Slack webhook URL)
     webhook_configs:
-      - url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      - url: '${SLACK_WEBHOOK_URL}'  # Injected from environment variable at runtime
         title: '🚨 Critical TTA.dev Alert'
         text: |
           {{ range .Alerts }}
