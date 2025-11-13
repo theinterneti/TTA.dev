@@ -65,7 +65,7 @@ tta_workflow_executions_total{job="tta-primitives",status="success",workflow_nam
 ### ✅ PASS - Prometheus Targets
 
 **Status:** WORKING
-**Target Found:** `http://172.17.0.1:9464/metrics`
+**Target Found:** `http://host.docker.internal:9464/metrics`
 **Target Status:** UP ✅
 **Job:** `tta-live-metrics`
 **Screenshot:** `/tmp/prometheus_targets.png`
@@ -73,7 +73,7 @@ tta_workflow_executions_total{job="tta-primitives",status="success",workflow_nam
 **Verification:**
 ```bash
 curl -s 'http://localhost:9090/api/v1/targets' | grep 9464
-# Returns: instance="172.17.0.1:9464", health="up"
+# Returns: instance="host.docker.internal:9464", health="up"
 ```
 
 ---
