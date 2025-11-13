@@ -36,6 +36,9 @@ services:
     restart: unless-stopped
     ports:
       - "9090:9090"
+    environment:
+      # Allow configurable Docker host IP for different environments
+      - DOCKER_HOST_IP=${DOCKER_HOST_IP:-host.docker.internal}
     volumes:
       # Professional configuration files
       - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
