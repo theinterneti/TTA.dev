@@ -117,6 +117,8 @@ For a comprehensive quick start guide, including installation and your first wor
 
 ### Additional Resources
 
+- [PR Management Guide](docs/guides/pr-management-guide.md) - Intelligent PR oversight and automation
+- [PR Management Quick Reference](docs/guides/pr-management-quickref.md) - Quick commands and best practices
 - [LLM Cost Guide](docs/guides/llm-cost-guide.md) - Free vs paid model comparison, pricing analysis
 - [Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md) - Production patterns for 50-70% cost reduction
 - [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
@@ -182,8 +184,44 @@ We provide VS Code tasks for common operations:
    - 📦 Validate Package
    - 🔍 Lint Code
    - ✨ Format Code
+   - 📊 PR Dashboard
+   - 🔍 PR Analytics
+   - 🏥 PR Triage
+   - 🏥 PR Health Check
+   - 💡 PR Recommendations
 
 [See full task list](.vscode/tasks.json)
+
+### PR Management
+
+TTA.dev includes intelligent PR management tools:
+
+```bash
+# Dashboard - Visual overview of all open PRs
+python scripts/pr_manager.py dashboard
+
+# Analytics - Detailed metrics and insights
+python scripts/pr_manager.py analyze
+
+# Triage - Categorize and prioritize PRs
+python scripts/pr_manager.py triage
+
+# Health Check - Identify PRs needing attention
+python scripts/pr_manager.py health-check
+
+# Recommendations - Get actionable next steps
+python scripts/pr_manager.py recommend
+```
+
+**Features:**
+- 📊 Smart categorization (critical, ready-to-merge, stale, etc.)
+- 🎯 Priority scoring (0-100) based on urgency and impact
+- 🏥 Automated health monitoring
+- 💡 Actionable recommendations
+- 🔗 Integration with Logseq TODO system
+- 🤖 Weekly automated monitoring via GitHub Actions
+
+[See PR Management Guide](docs/guides/pr-management-guide.md) for details.
 
 ---
 
