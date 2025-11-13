@@ -258,8 +258,9 @@ TTA.dev/
 
 ## Copilot Toolsets (VS Code Extension)
 
-TTA.dev leverages Copilot toolsets for specialized development tasks. Refer to [`.vscode/copilot-toolsets.jsonc`](../.vscode/copilot-toolsets.jsonc) for the full configuration.
+TTA.dev leverages Copilot toolsets for specialized development tasks.
 
+**Available toolsets:**
 - Use `#tta-package-dev` for primitive development
 - Use `#tta-testing` for test development
 - Use `#tta-observability` for tracing/metrics work
@@ -280,6 +281,8 @@ Show me CPU usage for the last 30 minutes
 
 # Copilot automatically invokes appropriate MCP tools
 ```
+
+**See:** [`docs/guides/copilot-toolsets-guide.md`](../docs/guides/copilot-toolsets-guide.md) for detailed usage
 
 ---
 
@@ -342,7 +345,6 @@ These files use YAML frontmatter to target specific file patterns and provide de
 - **Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](../PRIMITIVES_CATALOG.md) - Complete primitive reference
 - **MCP Servers:** [`MCP_SERVERS.md`](../MCP_SERVERS.md) - MCP integration guide
 - **Contributing:** [`CONTRIBUTING.md`](../CONTRIBUTING.md) - Contribution guidelines
-- **Copilot Toolsets:** [`.vscode/copilot-toolsets.jsonc`](../.vscode/copilot-toolsets.jsonc) - Toolset configuration
 - **Toolset Guide:** [`docs/guides/copilot-toolsets-guide.md`](../docs/guides/copilot-toolsets-guide.md) - Detailed toolset usage
 
 ---
