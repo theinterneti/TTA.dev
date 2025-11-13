@@ -256,25 +256,43 @@ class PrometheusExporter:
             if self._check_cardinality(labels_success):
                 # Note: Counter can only increase, so we set to total
                 # If request_total is a Counter, increment by the difference
-                current = self.request_total.labels(primitive_name=name, status="success")._value.get()
-                increment = throughput_metrics.total_requests - current
-                if increment > 0:
-                    self.request_total.labels(primitive_name=name, status="success").inc(increment)
+                # Note: Counter can only increase, so we increment by the difference
+                counter = self.request_total.labels(primitive_name=name, status="success")
+                current_value = getattr(counter, '_value', None)
+                if current_value is not None:
+                    increment = throughput_metrics.total_requests - current_value.get()
+                    if increment > 0:
+                        counter.inc(increment)
+                else:
+                    # Fallback: just inc by total_requests (first time)
+                    counter.inc(throughput_metrics.total_requests)
 
         # Update cost metrics
         for name, cost_metrics in collector._cost_metrics.items():
             for operation, cost in cost_metrics.cost_by_operation.items():
                 labels_cost = (name, operation)
                 if self._check_cardinality(labels_cost):
-                    self.cost_total.labels(primitive_name=name, operation=operation).set(
-                        cost
-                    )
+                    # Note: Counter can only increase, so we increment by the difference
+                    counter = self.cost_total.labels(primitive_name=name, operation=operation)
+                    current_value = getattr(counter, '_value', None)
+                    if current_value is not None:
+                        increment = cost - current_value.get()
+                        if increment > 0:
+                            counter.inc(increment)
+                    else:
+                        counter.inc(cost)
 
             labels_savings = (name,)
             if self._check_cardinality(labels_savings):
-                self.savings_total.labels(primitive_name=name).set(
-                    cost_metrics.total_savings
-                )
+                # Note: Counter can only increase, so we increment by the difference
+                counter = self.savings_total.labels(primitive_name=name)
+                current_value = getattr(counter, '_value', None)
+                if current_value is not None:
+                    increment = cost_metrics.total_savings - current_value.get()
+                    if increment > 0:
+                        counter.inc(increment)
+                else:
+                    counter.inc(cost_metrics.total_savings)
 
     def export(self) -> bytes:
         """
