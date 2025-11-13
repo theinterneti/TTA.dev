@@ -1,9 +1,12 @@
 """Tests for Keploy Framework."""
 
+import tempfile
+from pathlib import Path
+
 import pytest
 
 from keploy_framework import KeployConfig, ResultValidator
-from keploy_framework.test_runner import TestResults
+from keploy_framework.test_runner import KeployTestRunner, TestResults
 
 
 def test_config_creation():
@@ -72,3 +75,43 @@ def test_validation_assertion():
 
     with pytest.raises(AssertionError, match="below threshold"):
         validator.assert_pass_rate(results)
+
+
+def test_html_report_escapes_xss():
+    """Test HTML report escapes user-controlled data to prevent XSS."""
+    # Create a temporary directory for the report
+    with tempfile.TemporaryDirectory() as tmpdir:
+        keploy_dir = Path(tmpdir)
+
+        # Create test results with potentially malicious input
+        results = TestResults(
+            total=2,
+            passed=1,
+            failed=1,
+            pass_rate=50.0,
+            test_cases=[
+                {"name": "<script>alert('XSS')</script>", "status": "passed"},
+                {"name": "normal_test", "status": "<img src=x onerror=alert('XSS')>"},
+            ],
+        )
+
+        # Create runner and generate report
+        runner = KeployTestRunner(
+            api_url="http://localhost:8000",
+            keploy_dir=keploy_dir,
+        )
+        runner._generate_report(results)
+
+        # Read the generated HTML
+        report_path = keploy_dir / "test-report.html"
+        html_content = report_path.read_text()
+
+        # Verify that malicious scripts are escaped
+        assert "<script>alert('XSS')</script>" not in html_content
+        assert "&lt;script&gt;alert(&#x27;XSS&#x27;)&lt;/script&gt;" in html_content
+
+        assert "<img src=x onerror=alert('XSS')>" not in html_content
+        assert "&lt;img src=x onerror=alert(&#x27;XSS&#x27;)&gt;" in html_content
+
+        # Verify normal test name is still present (but escaped)
+        assert "normal_test" in html_content
