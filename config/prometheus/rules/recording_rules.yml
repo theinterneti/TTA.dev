@@ -92,11 +92,17 @@ groups:
       # Cost per hour (dashboard-friendly metric)
       - record: tta:cost_per_hour_dollars
         expr: |
-          sum by (job) (
-            rate(tta_llm_cost_total[1h]) * 3600
+          label_replace(
+            sum by (job) (
+              rate(tta_llm_cost_total[1h]) * 3600
+            ),
+            "cost_status", "$1", "", ""
           )
           or
-          vector(0)  # Default to 0 if metric doesn't exist yet
+          label_replace(
+            vector(0),
+            "cost_status", "missing_metric", "", ""
+          )
 
       # Alternative: p95_latency_seconds (alias for dashboard compatibility)
       - record: tta:p95_latency_seconds
