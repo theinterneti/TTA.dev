@@ -109,6 +109,7 @@ For a comprehensive quick start guide, including installation and your first wor
 - **[Getting Started Guide](GETTING_STARTED.md)** - 5-minute quickstart
 - **[Primitives Catalog](PRIMITIVES_CATALOG.md)** - Complete reference for all primitives
 - **[Agent Instructions](AGENTS.md)** - Guidance for AI agents working on TTA.dev
+- **[GitHub Copilot Instructions](.github/copilot-instructions.md)** - Comprehensive Copilot configuration and best practices
 - **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
 - **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
 - **[MCP Integration](MCP_SERVERS.md)** - Model Context Protocol guides
