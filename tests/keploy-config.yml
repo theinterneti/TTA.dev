@@ -1,0 +1,69 @@
+version: 1
+name: "TTA API Tests"
+test_mode: "replay"
+
+config:
+  # Global timeout for test execution (seconds)
+  timeout: 30
+  
+  # Delay between requests (seconds)
+  delay: 0
+  
+  # Ports to monitor for API traffic
+  ports:
+    - 8000
+    - 8080
+  
+  # API endpoints to record/test
+  filters:
+    # Health check endpoint
+    - path: /health
+      method: GET
+      
+    # API v1 endpoints
+    - path: /api/v1/*
+      method: POST
+      
+    - path: /api/v1/*
+      method: GET
+    
+    # Workflow endpoints
+    - path: /workflow/*
+      method: POST
+
+# Test organization
+test_sets:
+  - name: "health_checks"
+    description: "Health and status endpoints"
+    patterns:
+      - "/health"
+      - "/status"
+  
+  - name: "workflow_api"
+    description: "Workflow execution API"
+    patterns:
+      - "/workflow/*"
+      - "/api/v1/workflow/*"
+
+# Validation rules
+validation:
+  # Response time thresholds (ms)
+  response_time:
+    health: 100
+    api: 500
+    workflow: 2000
+  
+  # Status code expectations
+  status_codes:
+    success: [200, 201, 202]
+    client_error: [400, 404]
+    server_error: [500]
+
+# Mocking configuration
+mocks:
+  # Mock external LLM calls in tests
+  external_services:
+    - name: "openai"
+      enabled: true
+    - name: "anthropic"
+      enabled: true

@@ -1,391 +1,335 @@
 # Contributing to TTA.dev
 
-Thank you for your interest in contributing to TTA.dev! This project maintains high quality standards to ensure all components are production-ready and battle-tested.
+Thank you for your interest in contributing to TTA.dev! This document provides guidelines for contributing to the framework.
 
-## Philosophy
+## Table of Contents
 
-**Only proven code enters this repository.**
+- [Code of Conduct](#code-of-conduct)
+- [Getting Started](#getting-started)
+- [Development Workflow](#development-workflow)
+- [Project Structure](#project-structure)
+- [Contributing Guidelines](#contributing-guidelines)
+- [Testing](#testing)
+- [Documentation](#documentation)
+- [Pull Request Process](#pull-request-process)
 
-Every component must have:
-- ✅ 100% test coverage
-- ✅ Real-world production usage
-- ✅ Comprehensive documentation
-- ✅ Zero known critical bugs
+## Code of Conduct
+
+We are committed to providing a welcoming and inclusive environment. Be respectful, constructive, and professional in all interactions.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.11 or higher
-- [uv](https://github.com/astral-sh/uv) package manager
+- Python 3.10 or higher
+- [uv](https://docs.astral.sh/uv/) for dependency management
 - Git
-- VS Code (recommended)
 
 ### Setup Development Environment
 
 ```bash
-# Clone repository
-git clone https://github.com/theinterneti/TTA.dev
+# Clone the repository
+git clone https://github.com/theinterneti/TTA.dev.git
 cd TTA.dev
 
-# Install dependencies
+# Install development dependencies
 uv sync --all-extras
 
-# Verify installation
-uv run pytest -v
+# Install packages in editable mode
+uv pip install -e packages/tta-dev-primitives
+uv pip install -e packages/tta-dev-integrations
+uv pip install -e packages/tta-agent-coordination
 ```
 
-## Contribution Process
+## Development Workflow
 
-### 1. Find or Create an Issue
-
-- Check existing [issues](https://github.com/theinterneti/TTA.dev/issues)
-- Create a new issue if needed, describing:
-  - The problem you're solving
-  - Your proposed solution
-  - Real-world use case
-  - Expected impact
-
-### 2. Fork and Branch
+### 1. Create a Branch
 
 ```bash
-# Fork the repository on GitHub
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/TTA.dev
-cd TTA.dev
-
-# Create a feature branch
 git checkout -b feature/your-feature-name
+# or
+git checkout -b fix/your-bug-fix
 ```
 
-### 3. Make Changes
+Use descriptive branch names:
+- `feature/` for new features
+- `fix/` for bug fixes
+- `docs/` for documentation
+- `refactor/` for code refactoring
 
-Follow our [Coding Standards](docs/development/CodingStandards.md):
+### 2. Make Changes
 
-- Write clean, readable code
-- Add comprehensive type hints
-- Include docstrings (Google style)
-- Follow PEP 8 (enforced by Ruff)
-- Keep functions focused and small
+Follow the coding standards:
+- Use type hints
+- Write docstrings for public APIs
+- Keep functions focused and testable
+- Follow existing patterns in the codebase
 
-### 4. Write Tests
-
-**100% test coverage is required.**
+### 3. Test Your Changes
 
 ```bash
-# Run tests
+# Run all tests
 uv run pytest -v
 
-# Check coverage
+# Run tests with coverage
 uv run pytest --cov=packages --cov-report=html
+
+# Run specific test file
+uv run pytest packages/tta-dev-primitives/tests/test_adaptive.py -v
 ```
 
-Test requirements:
-- Unit tests for all new code
-- Integration tests for component interactions
-- Docstring examples that work as doctests
-- Edge cases and error conditions
-
-### 5. Document Your Changes
-
-Documentation requirements:
-- Update relevant README files
-- Add docstrings to all public APIs
-- Include usage examples
-- Update architecture docs if applicable
-- Add entry to CHANGELOG.md
-
-### 6. Run Quality Checks
+### 4. Format and Lint
 
 ```bash
 # Format code
 uv run ruff format .
 
-# Lint code
+# Lint and fix issues
 uv run ruff check . --fix
 
 # Type check
 uvx pyright packages/
-
-# Validate TODO compliance (REQUIRED!)
-uv run python scripts/validate-todos.py
-
-# Run all quality checks
-uv run task "✅ Quality Check (All)"
 ```
 
-All checks must pass before submitting PR.
+### 5. Commit Changes
 
-#### TODO Compliance Requirement ⚠️
-
-**All TODOs in Logseq journals must be 100% compliant with the [TODO Management System](logseq/pages/TODO%20Management%20System.md).**
-
-Every TODO must have:
-1. **Category tag**: `#dev-todo` or `#user-todo`
-2. **Required properties** (based on category)
-
-**For `#dev-todo` (Development Work):**
-```markdown
-- TODO Implement feature #dev-todo
-  type:: implementation
-  priority:: high
-  package:: tta-dev-primitives
-  related:: [[TTA.dev/Primitives/FeatureName]]
-```
-
-Required properties: `type::`, `priority::`, `package::`, `related::`
-
-**For `#user-todo` (Learning/Documentation):**
-```markdown
-- TODO Create guide #user-todo
-  type:: learning
-  audience:: intermediate-users
-  difficulty:: intermediate
-  related:: [[TTA.dev/Guides/GuideName]]
-```
-
-Required properties: `type::`, `audience::`, `difficulty::`, `related::`
-
-**Validation:**
-```bash
-# Check compliance locally
-uv run python scripts/validate-todos.py
-
-# Expected output: 100.0% compliance
-```
-
-The CI will automatically validate TODO compliance on all PRs. Non-compliant TODOs will block the merge.
-
-### 7. Commit Changes
-
-Use [Conventional Commits](https://www.conventionalcommits.org/):
+Write clear, descriptive commit messages:
 
 ```bash
-git commit -m "feat(primitives): add circuit breaker primitive"
-git commit -m "fix(cache): resolve TTL expiration bug"
-git commit -m "docs(examples): add LLM chain example"
-git commit -m "test(recovery): add retry edge cases"
+git add .
+git commit -m "feat: add retry primitive with exponential backoff
+
+- Implement RetryPrimitive class
+- Add configurable max attempts and delay
+- Include exponential backoff strategy
+- Add comprehensive tests
 ```
 
-Commit types:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `test`: Test additions/changes
-- `refactor`: Code refactoring
-- `perf`: Performance improvements
-- `chore`: Maintenance tasks
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+- `feat:` new feature
+- `fix:` bug fix
+- `docs:` documentation changes
+- `test:` adding or updating tests
+- `refactor:` code refactoring
+- `chore:` maintenance tasks
 
-### 8. Push and Create Pull Request
+## Project Structure
 
-```bash
-git push origin feature/your-feature-name
+```
+TTA.dev/
+├── packages/                  # Framework packages
+│   ├── tta-dev-primitives/   # Core primitives
+│   ├── tta-dev-integrations/ # LLM & service integrations
+│   └── tta-agent-coordination/ # Agent coordination
+├── examples/                  # Usage examples
+├── docs/                      # Documentation
+├── tests/                     # Integration tests
+└── archive/                   # Historical code
 ```
 
-Create a PR with:
-- Clear, descriptive title
-- Detailed description of changes
-- Link to related issues
-- Screenshots/examples if applicable
-- Checklist of completed items
+### Package Structure
 
-## Pull Request Checklist
+Each package follows this structure:
 
-Before submitting, ensure:
+```
+package-name/
+├── src/package_name/
+│   ├── __init__.py
+│   ├── module1.py
+│   └── module2.py
+├── tests/
+│   ├── test_module1.py
+│   └── test_module2.py
+├── README.md
+└── pyproject.toml
+```
 
-- [ ] All tests pass (`uv run pytest -v`)
-- [ ] Test coverage is 100% for new code
-- [ ] Code is formatted (`uv run ruff format .`)
-- [ ] No lint errors (`uv run ruff check .`)
-- [ ] Type checks pass (`uvx pyright packages/`)
-- [ ] Documentation is complete
-- [ ] CHANGELOG.md is updated
-- [ ] Commit messages follow convention
-- [ ] PR description is clear and complete
+## Contributing Guidelines
 
-## Code Review Process
+### Adding a New Primitive
 
-1. **Automated Checks**: CI/CD runs all quality checks
-2. **Maintainer Review**: Code review by project maintainers
-3. **Testing**: Manual testing if needed
-4. **Approval**: At least one approval required
-5. **Merge**: Squash and merge to main
+1. **Identify the category**: adaptive, orchestration, memory, etc.
+2. **Create the primitive class**: Inherit from appropriate base class
+3. **Add tests**: Cover happy path, error cases, edge cases
+4. **Document**: Add docstrings and usage examples
+5. **Update docs**: Add to relevant documentation
 
-## What We Look For
-
-### Code Quality
-- Clean, readable, maintainable code
-- Proper error handling
-- Performance considerations
-- Security best practices
-
-### Testing
-- Comprehensive test coverage
-- Clear test names and structure
-- AAA pattern (Arrange, Act, Assert)
-- Edge cases covered
-
-### Documentation
-- Clear, concise docstrings
-- Usage examples
-- Type hints on all public APIs
-- README updates where applicable
-
-### Real-World Validation
-- Evidence of production usage
-- Performance metrics
-- User feedback
-- Battle-tested in real scenarios
-
-## Types of Contributions
-
-### 🐛 Bug Fixes
-- Always welcome!
-- Include reproduction steps
-- Add regression tests
-- Document the fix
-
-### ✨ New Features
-- Discuss in an issue first
-- Must solve real-world problem
-- Requires production validation
-- Full documentation required
-
-### 📚 Documentation
-- Clarifications and improvements
-- New examples and guides
-- API documentation
-- Architecture diagrams
-
-### 🧪 Tests
-- Additional test coverage
-- Edge case testing
-- Performance benchmarks
-- Integration tests
-
-### ⚡ Performance
-- Benchmarks required
-- Profiling data appreciated
-- No premature optimization
-- Maintain readability
-
-## Style Guide
-
-### Python Code
+Example primitive structure:
 
 ```python
+"""Module description."""
+
 from typing import Any
-
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
-
+from tta_dev_primitives.primitives import WorkflowPrimitive
 
 class MyPrimitive(WorkflowPrimitive):
-    """One-line summary of what this primitive does.
-
-    Longer description with more details about usage, behavior,
-    and any important considerations.
-
+    """Brief description.
+    
     Args:
-        param: Description of parameter
-
+        param1: Description of param1
+        param2: Description of param2
+        
     Example:
-        >>> primitive = MyPrimitive()
-        >>> result = await primitive.execute(data, context)
-        {"status": "success"}
+        >>> primitive = MyPrimitive(param1="value")
+        >>> result = await primitive.execute(context)
     """
-
-    def __init__(self, param: str) -> None:
+    
+    def __init__(self, param1: str, param2: int = 10):
         super().__init__()
-        self.param = param
-
-    async def _execute(
-        self,
-        data: dict[str, Any],
-        context: WorkflowContext
-    ) -> dict[str, Any]:
+        self.param1 = param1
+        self.param2 = param2
+        
+    async def execute(self, context: dict[str, Any]) -> Any:
         """Execute the primitive logic."""
         # Implementation
-        return {"result": "value"}
+        pass
 ```
 
-### Tests
+### Adding a New LLM Provider
+
+1. **Create provider module**: `packages/tta-dev-integrations/src/tta_dev_integrations/llm/providers/new_provider.py`
+2. **Implement provider interface**: Follow existing provider patterns
+3. **Add to UniversalLLMPrimitive**: Register the provider
+4. **Add tests**: Test provider-specific functionality
+5. **Document**: Add provider configuration guide
+
+### Writing Examples
+
+1. **Self-contained**: Examples should run independently
+2. **Well-commented**: Explain what's happening and why
+3. **Realistic**: Show real-world usage patterns
+4. **Simple**: Start simple, then show advanced features
+
+## Testing
+
+### Test Organization
+
+- **Unit tests**: In `packages/*/tests/` for each package
+- **Integration tests**: In `tests/integration/` for cross-package tests
+- **Examples**: Ensure examples run without errors
+
+### Writing Tests
 
 ```python
 import pytest
+from tta_dev_primitives.adaptive import RetryPrimitive
 
-from tta_dev_primitives.core.base import WorkflowContext
-
-
-@pytest.fixture
-def context():
-    """Create a test workflow context."""
-    return WorkflowContext(
-        workflow_id="test",
-        session_id="test-session"
-    )
-
-
-async def test_my_primitive_success(context):
-    """Test that MyPrimitive succeeds with valid input."""
-    # Arrange
-    primitive = MyPrimitive(param="test")
-    data = {"input": "value"}
-
-    # Act
-    result = await primitive.execute(data, context)
-
-    # Assert
-    assert result["result"] == "value"
-    assert "input" in result
-
-
-async def test_my_primitive_handles_error(context):
-    """Test that MyPrimitive handles errors gracefully."""
-    # Arrange
-    primitive = MyPrimitive(param="test")
-    data = {}  # Missing required field
-
-    # Act & Assert
-    with pytest.raises(ValueError, match="Missing required field"):
-        await primitive.execute(data, context)
+@pytest.mark.asyncio
+async def test_retry_success_on_second_attempt():
+    """Test that retry succeeds on second attempt."""
+    attempt_count = 0
+    
+    async def flaky_function():
+        nonlocal attempt_count
+        attempt_count += 1
+        if attempt_count == 1:
+            raise ValueError("First attempt fails")
+        return "success"
+    
+    primitive = RetryPrimitive(wrapped=flaky_function, max_attempts=3)
+    result = await primitive.execute({})
+    
+    assert result == "success"
+    assert attempt_count == 2
 ```
 
-## Community Guidelines
+### Test Coverage
 
-### Be Respectful
-- Treat everyone with respect
-- Welcome newcomers
-- Provide constructive feedback
-- Assume good intentions
+Aim for >80% test coverage on new code. Run coverage reports:
 
-### Be Collaborative
-- Share knowledge
-- Help others learn
-- Review PRs thoughtfully
-- Celebrate contributions
+```bash
+uv run pytest --cov=packages --cov-report=html
+open htmlcov/index.html
+```
 
-### Be Professional
-- Keep discussions on-topic
-- Be patient with questions
-- Admit when you're wrong
-- Give credit where due
+## Documentation
 
-## Questions?
+### Docstring Format
 
-- 📖 Read the [docs](docs/)
-- 💬 Open a [discussion](https://github.com/theinterneti/TTA.dev/discussions)
-- 🐛 Report [issues](https://github.com/theinterneti/TTA.dev/issues)
-- 📧 Email: [contact info needed]
+Use Google-style docstrings:
 
-## License
+```python
+def function(arg1: str, arg2: int = 0) -> bool:
+    """Brief description.
+    
+    More detailed description if needed.
+    
+    Args:
+        arg1: Description of arg1
+        arg2: Description of arg2 (default: 0)
+        
+    Returns:
+        Description of return value
+        
+    Raises:
+        ValueError: When input is invalid
+        
+    Example:
+        >>> function("test", 5)
+        True
+    """
+    pass
+```
 
-By contributing, you agree that your contributions will be licensed under the same license as the project (see [LICENSE](LICENSE)).
+### Documentation Files
+
+- **Architecture docs**: `docs/architecture/` - system design, patterns
+- **Guides**: `docs/guides/` - how-to guides for users
+- **Integration docs**: `docs/integrations/` - integration guides
+
+## Pull Request Process
+
+### Before Submitting
+
+- [ ] All tests pass
+- [ ] Code is formatted (ruff format)
+- [ ] Code is linted (ruff check)
+- [ ] Type checking passes (pyright)
+- [ ] Documentation is updated
+- [ ] Examples are updated if needed
+- [ ] CHANGELOG is updated (if applicable)
+
+### PR Template
+
+```markdown
+## Description
+Brief description of changes
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Documentation update
+- [ ] Refactoring
+
+## Testing
+Describe testing performed
+
+## Checklist
+- [ ] Tests added/updated
+- [ ] Documentation updated
+- [ ] Code formatted and linted
+- [ ] Type checking passes
+```
+
+### Review Process
+
+1. **Automated checks**: CI/CD runs tests, linting, type checking
+2. **Code review**: Maintainer reviews code quality, design, tests
+3. **Feedback**: Address review comments
+4. **Approval**: Once approved, PR can be merged
+5. **Merge**: Squash merge into main branch
+
+## Getting Help
+
+- **Questions**: Open a [Discussion](https://github.com/theinterneti/TTA.dev/discussions)
+- **Bugs**: Open an [Issue](https://github.com/theinterneti/TTA.dev/issues)
+- **Chat**: Join our community (link TBD)
 
 ## Recognition
 
 Contributors are recognized in:
-- CONTRIBUTORS.md file
+- GitHub contributors page
 - Release notes
-- Project README
+- CONTRIBUTORS.md file
 
-Thank you for helping make TTA.dev better! 🎉
+Thank you for contributing to TTA.dev! 🚀

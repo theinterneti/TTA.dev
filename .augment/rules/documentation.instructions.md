@@ -1,8 +1,3 @@
----
-type: "agent_requested"
-description: "Example description"
----
-
 # Documentation Guidelines
 
 ## Documentation Principles
@@ -223,7 +218,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - New feature X with brief description
 
-### Changed
+### Changed  
 - Changed behavior Y with brief description
 
 ### Fixed

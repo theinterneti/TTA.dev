@@ -18,6 +18,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 try:
     import yaml
@@ -28,7 +29,6 @@ except ImportError:
 
 class ValidationError(Exception):
     """Custom exception for validation errors."""
-
     pass
 
 
@@ -38,8 +38,8 @@ class ExportPackageValidator:
     def __init__(self, root_dir: Path, strict: bool = False):
         self.root_dir = root_dir
         self.strict = strict
-        self.errors: list[str] = []
-        self.warnings: list[str] = []
+        self.errors: List[str] = []
+        self.warnings: List[str] = []
 
     def validate_all(self) -> bool:
         """Run all validations."""
@@ -144,7 +144,7 @@ class ExportPackageValidator:
                     self.errors.append(f"{file_path.name}: 'tags' must be a list")
                 else:
                     for tag in frontmatter["tags"]:
-                        if not isinstance(tag, str) or not re.match(r"^[a-z0-9-]+$", tag):
+                        if not isinstance(tag, str) or not re.match(r'^[a-z0-9-]+$', tag):
                             self.errors.append(f"{file_path.name}: Invalid tag format '{tag}'")
 
             # Validate priority (if present)
@@ -156,7 +156,7 @@ class ExportPackageValidator:
             # Validate version (if present)
             if "version" in frontmatter:
                 version = frontmatter["version"]
-                if not re.match(r"^\d+\.\d+\.\d+$", str(version)):
+                if not re.match(r'^\d+\.\d+\.\d+$', str(version)):
                     self.errors.append(f"{file_path.name}: Invalid version format (use semver)")
 
         except Exception as e:
@@ -197,18 +197,14 @@ class ExportPackageValidator:
             # Validate mode format
             if "mode" in frontmatter:
                 mode = frontmatter["mode"]
-                if not re.match(r"^[a-z0-9-]+$", mode):
-                    self.errors.append(
-                        f"{file_path.name}: Invalid mode format (use lowercase-with-hyphens)"
-                    )
+                if not re.match(r'^[a-z0-9-]+$', mode):
+                    self.errors.append(f"{file_path.name}: Invalid mode format (use lowercase-with-hyphens)")
 
             # Validate security level
             if "security_level" in frontmatter:
                 security_level = frontmatter["security_level"]
                 if security_level not in ["LOW", "MEDIUM", "HIGH"]:
-                    self.errors.append(
-                        f"{file_path.name}: Invalid security_level (must be LOW, MEDIUM, or HIGH)"
-                    )
+                    self.errors.append(f"{file_path.name}: Invalid security_level (must be LOW, MEDIUM, or HIGH)")
 
             # Validate tool lists (if present)
             if "allowed_tools" in frontmatter and "denied_tools" in frontmatter:
@@ -216,9 +212,7 @@ class ExportPackageValidator:
                 denied = set(frontmatter["denied_tools"])
                 overlap = allowed & denied
                 if overlap:
-                    self.errors.append(
-                        f"{file_path.name}: Tools in both allowed and denied: {overlap}"
-                    )
+                    self.errors.append(f"{file_path.name}: Tools in both allowed and denied: {overlap}")
 
         except Exception as e:
             self.errors.append(f"{file_path.name}: Validation error - {str(e)}")
@@ -232,9 +226,7 @@ class ExportPackageValidator:
         if agents_md.exists():
             content = agents_md.read_text()
             if "# TTA" in content and self.strict:
-                self.warnings.append(
-                    "AGENTS.md contains TTA-specific content (should be generic for export)"
-                )
+                self.warnings.append("AGENTS.md contains TTA-specific content (should be generic for export)")
 
         # Validate apm.yml
         apm_yml = self.root_dir / "apm.yml"
@@ -271,13 +263,11 @@ class ExportPackageValidator:
                 if ref_text in content:
                     ref_path = self.root_dir / ref_file
                     if not ref_path.exists():
-                        self.warnings.append(
-                            f"AGENTS.md references {ref_file} but file doesn't exist"
-                        )
+                        self.warnings.append(f"AGENTS.md references {ref_file} but file doesn't exist")
 
-    def extract_frontmatter(self, content: str) -> tuple[dict, str]:
+    def extract_frontmatter(self, content: str) -> Tuple[Dict, str]:
         """Extract YAML frontmatter from markdown content."""
-        match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
+        match = re.match(r'^---\s*\n(.*?)\n---\s*\n(.*)$', content, re.DOTALL)
         if not match:
             return {}, content
 
@@ -321,12 +311,8 @@ class ExportPackageValidator:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Validate Universal Agent Context System export package"
-    )
-    parser.add_argument(
-        "--root", type=Path, default=Path.cwd(), help="Root directory of export package"
-    )
+    parser = argparse.ArgumentParser(description="Validate Universal Agent Context System export package")
+    parser.add_argument("--root", type=Path, default=Path.cwd(), help="Root directory of export package")
     parser.add_argument("--strict", action="store_true", help="Enable strict validation mode")
     args = parser.parse_args()
 
@@ -338,3 +324,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

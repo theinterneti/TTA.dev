@@ -1,477 +1,252 @@
-# TTA.dev - AI Development Toolkit
+# TTA.dev - Agentic Primitives Framework
 
-**Production-ready agentic primitives and workflow patterns for building reliable AI applications.**
+**A framework for building AI agents with budget-aware, multi-provider LLM orchestration.**
 
-[![CI](https://github.com/theinterneti/TTA.dev/workflows/CI/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
-[![Quality](https://github.com/theinterneti/TTA.dev/workflows/Quality%20Checks/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
-[![TODO Compliance](https://github.com/theinterneti/TTA.dev/workflows/TODO%20Compliance%20Validation/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Type checked: Pyright](https://img.shields.io/badge/type%20checked-pyright-blue.svg)](https://github.com/microsoft/pyright)
+## What is TTA.dev?
 
----
+TTA.dev is a Python framework that provides **agentic primitives** - reusable building blocks for creating sophisticated AI agent workflows. It emphasizes:
 
-## 🎯 What is TTA.dev?
+- **Budget Awareness**: Choose between FREE, CAREFUL, and UNLIMITED budget profiles
+- **Multi-Provider Support**: OpenAI, Anthropic, Google, OpenRouter, HuggingFace
+- **Multi-Coder Integration**: Works with Copilot, Cline, Augment Code, and more
+- **Cost Transparency**: Track and justify every LLM call with detailed cost reporting
+- **Composable Primitives**: Build complex workflows from simple, testable components
 
-TTA.dev is a curated collection of **battle-tested, production-ready** components for building reliable AI applications. Every component here has:
+## Quick Start
 
-- ✅ 100% test coverage
-- ✅ Real-world production usage
-- ✅ Comprehensive documentation
-- ✅ Zero known critical bugs
-
-**Philosophy:** Only proven code enters this repository.
-
-## 🔍 Built-in Observability
-
-TTA.dev comes with **production-grade observability** out of the box:
-
-- **📊 Metrics**: Prometheus metrics with percentile latencies, throughput, error rates
-- **🔍 Tracing**: OpenTelemetry distributed tracing with Jaeger integration
-- **📈 Dashboards**: Pre-configured Grafana dashboards for all primitives
-- **🚨 Alerting**: SLO monitoring with automatic error budget tracking
-- **⚡ Real-time**: Live metrics during development and production
-
-**Quick Start**: `docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d`
-
-Access your observability stack:
-- 📊 **Prometheus**: http://localhost:9090
-- 🔍 **Jaeger**: http://localhost:16686
-- 📈 **Grafana**: http://localhost:3000 (admin/admin)
-
----
-
-## 🏗️ Architecture
-
-### Platform Packages (Production-Ready)
-
-| Package | Purpose | Status | Version |
-|---------|---------|--------|---------|
-| **tta-dev-primitives** | Core workflow primitives (Router, Cache, Retry, etc.) | ✅ Stable | 1.0.0 |
-| **tta-observability-integration** | OpenTelemetry integration and monitoring | ✅ Stable | 1.0.0 |
-| **universal-agent-context** | Agent context management and coordination | ✅ Stable | 1.0.0 |
-| **tta-documentation-primitives** | Documentation generation and management | ✅ Stable | 1.0.0 |
-| **tta-kb-automation** | Knowledge base automation tools | ✅ Stable | 1.0.0 |
-| **tta-agent-coordination** | Multi-agent coordination patterns | ✅ Stable | 1.0.0 |
-
-### Reference Implementation
-
-| Package | Purpose | Status | Version |
-|---------|---------|--------|---------|
-| **tta-rebuild** | **Rebuild of theinterneti/TTA using TTA.dev primitives** | 🔧 Development | 0.1.0 |
-
-**Meta-Development Strategy:** We use TTA.dev to rebuild our predecessor (TTA), creating a natural feedback loop that drives platform improvement and validates real-world usage patterns.
-
-## 📦 Core Package: tta-dev-primitives
-
-Production-ready composable workflow primitives for building reliable, observable agent workflows.
-
-**Features:**
-- 🔀 Router, Cache, Timeout, Retry primitives
-- 🔗 Composition operators (`>>`, `|`)
-- ⚡ Parallel and conditional execution
-- 📊 OpenTelemetry integration
-- 💪 Comprehensive error handling
-- 📉 30-40% cost reduction via intelligent caching
-
-**Installation:**
 ```bash
-pip install tta-dev-primitives
+# Install the framework
+uv pip install -e packages/tta-dev-primitives
+uv pip install -e packages/tta-dev-integrations
+
+# Run an example
+python examples/workflows/free_flagship_models.py
 ```
 
-**Quick Start:**
+## Core Concepts
+
+### 1. Universal LLM Primitive
+
+The `UniversalLLMPrimitive` is the foundation of TTA.dev's multi-provider architecture:
 
 ```python
-from tta_dev_primitives import RouterPrimitive, CachePrimitive
+from tta_dev_integrations.llm import UniversalLLMPrimitive, UserBudgetProfile
 
-# Compose workflow with operators
-workflow = (
-    validate_input >>
-    CachePrimitive(ttl=3600) >>
-    process_data >>
-    generate_response
+# Create a budget-aware LLM client
+llm = UniversalLLMPrimitive(
+    budget_profile=UserBudgetProfile.CAREFUL,  # Mix free + paid models
+    default_provider="openai"
 )
 
-# Execute
-result = await workflow.execute(data, context)
+# Make a request with automatic cost tracking
+response = await llm.generate(
+    prompt="Explain agentic primitives",
+    complexity="medium"  # Automatically selects appropriate model
+)
 ```
 
-[📚 Full Documentation](packages/tta-workflow-primitives/README.md)
+### 2. Budget Profiles
 
----
+Control costs with three predefined profiles:
 
-### dev-primitives
+- **FREE**: Only use free models (Gemini, DeepSeek, Kimi) - for hobbyists and students
+- **CAREFUL**: Mix of free and paid models with cost tracking - for solo devs
+- **UNLIMITED**: Always use the best model, cost tracked but not limiting - for companies
 
-Development utilities and meta-level primitives for building robust development processes.
+### 3. Adaptive Primitives
 
-**Features:**
-
-- 🛠️ Development and debugging tools
-- 📝 Structured logging utilities
-- ♻️ Retry mechanisms
-- 🧪 Testing helpers
-
-**Installation:**
-
-```bash
-pip install dev-primitives
-```
-
-[📚 Full Documentation](packages/dev-primitives/README.md)
-
----
-
-## 🧭 Knowledge Base & Learning
-
-**Structured Learning:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - Intelligent navigation between documentation and knowledge base
-
-**Learning Paths:** [`TTA.dev Learning Paths`](logseq/pages/TTA.dev___Learning%20Paths.md) - Step-by-step progression from beginner to expert
-
-**Interactive Learning:** [`Learning TTA Primitives`](logseq/pages/Learning%20TTA%20Primitives.md) - Flashcards and exercises for mastering concepts
-
----
-
-## 🚀 Quick Start
-
-### Installation
-
-```bash
-# Install with pip
-pip install tta-workflow-primitives dev-primitives
-
-# Or with uv (recommended)
-uv pip install tta-workflow-primitives dev-primitives
-```
-
-### Basic Workflow Example
+Build resilient workflows with built-in retry, fallback, timeout, and caching:
 
 ```python
-from tta_workflow_primitives import WorkflowContext
-from tta_workflow_primitives.core.base import LambdaPrimitive
+from tta_dev_primitives.adaptive import RetryPrimitive, FallbackPrimitive
 
-# Define primitives
-validate = LambdaPrimitive(lambda x, ctx: {"validated": True, **x})
-process = LambdaPrimitive(lambda x, ctx: {"processed": True, **x})
-generate = LambdaPrimitive(lambda x, ctx: {"result": "success"})
+# Automatically retry failed LLM calls
+reliable_llm = RetryPrimitive(
+    wrapped=llm,
+    max_attempts=3,
+    exponential_backoff=True
+)
 
-# Compose with >> operator
-workflow = validate >> process >> generate
-
-# Execute
-context = WorkflowContext(workflow_id="demo", session_id="123")
-result = await workflow.execute({"input": "data"}, context)
-
-print(result)  # {"validated": True, "processed": True, "result": "success"}
+# Fall back to cheaper model if primary fails
+resilient_llm = FallbackPrimitive(
+    primary=expensive_model,
+    fallback=free_model
+)
 ```
 
-### Enable Observability (Optional but Recommended)
+### 4. Orchestration Primitives
+
+Coordinate multiple agents and workflows:
+
+```python
+from tta_dev_primitives.orchestration import SequentialPrimitive, ParallelPrimitive
+
+# Run tasks in sequence
+sequential_workflow = SequentialPrimitive(tasks=[
+    analyze_requirements,
+    generate_code,
+    write_tests
+])
+
+# Run tasks in parallel
+parallel_workflow = ParallelPrimitive(tasks=[
+    lint_code,
+    type_check,
+    run_tests
+])
+```
+
+## Architecture
+
+```
+TTA.dev Framework
+├── packages/
+│   ├── tta-dev-primitives/      # Core primitives (adaptive, orchestration, memory)
+│   ├── tta-dev-integrations/    # LLM and service integrations
+│   └── tta-agent-coordination/  # Agent coordination framework
+├── examples/                     # Workflow and integration examples
+├── docs/                         # Architecture and guides
+└── archive/                      # Historical code (legacy-tta-game)
+```
+
+## Key Features
+
+### 🆓 50% Free, 50% Paid Model Strategy
+
+TTA.dev is designed for developers who want to:
+- Use free models (Gemini, Kimi, DeepSeek) for simple tasks
+- Reserve paid models (Claude Sonnet) for complex work
+- Track and justify every cost decision
+
+### 🔄 Multi-Provider Support
+
+Switch between providers seamlessly:
+- **OpenAI**: GPT-4, GPT-3.5
+- **Anthropic**: Claude 3.5 Sonnet, Claude 3 Opus
+- **Google**: Gemini Pro (free tier available)
+- **OpenRouter**: Access to 100+ models
+- **HuggingFace**: Open source models
+
+### 🧩 Composable Primitives
+
+Build complex agents from simple, tested primitives:
+- **Adaptive**: Retry, fallback, timeout, cache
+- **Orchestration**: Sequential, parallel, router, conditional
+- **Memory**: Redis-backed persistence
+- **APM**: Observability and monitoring
+
+### 🎯 Multi-Coder Integration
+
+Works with your favorite AI coding assistant:
+- **GitHub Copilot** (VS Code, CLI, GitHub.com)
+- **Cline** (VS Code extension)
+- **Augment Code** (VS Code extension)
+- Extensible to other coders
+
+## Documentation
+
+- **[Architecture Overview](docs/architecture/SYSTEM_DESIGN.md)**: High-level system design
+- **[Universal LLM Architecture](docs/architecture/UNIVERSAL_LLM_ARCHITECTURE.md)**: Multi-provider LLM design
+- **[Primitive Patterns](docs/architecture/PRIMITIVE_PATTERNS.md)**: How to use and create primitives
+- **[Free Model Selection Guide](docs/guides/FREE_MODEL_SELECTION.md)**: Choosing free vs paid models
+- **[LLM Cost Guide](docs/guides/llm-cost-guide.md)**: Cost tracking and budgeting
+- **[How to Create a Primitive](docs/guides/how-to-create-primitive.md)**: Extending the framework
+
+## Examples
+
+Explore real-world workflows in the [`examples/`](examples/) directory:
+
+### Workflows
+- **Agentic RAG**: Retrieval-augmented generation with agents
+- **Multi-Agent Coordination**: Multiple agents working together
+- **Cost-Tracked Workflows**: Budget-aware task execution
+- **PR Review Automation**: Automated code review
+- **Test Generation**: Automated test creation
+
+### Integrations
+- **CI/CD Automation**: GitHub Actions and similar
+- **Infrastructure Management**: Docker, Kubernetes orchestration
+- **Quality Assurance**: Automated testing and validation
+
+## Development
 
 ```bash
-# Start observability stack (Prometheus, Jaeger, Grafana)
-cd TTA.dev
-docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d
-
-# Run the observability demo
-uv run python packages/tta-dev-primitives/examples/observability_demo.py
-```
-
-**View Results**:
-- 📊 **Metrics**: http://localhost:9090 (Prometheus)
-- 🔍 **Traces**: http://localhost:16686 (Jaeger)
-- 📈 **Dashboards**: http://localhost:3000 (Grafana - admin/admin)
-
-Your workflow will automatically emit:
-- ✅ **Latency percentiles** (p50, p90, p95, p99)
-- ✅ **Throughput metrics** (requests/second)
-- ✅ **Error rates and SLO compliance**
-- ✅ **Distributed traces** with correlation IDs
-
----
-
-## 🏗️ Architecture
-
-TTA.dev follows a **composable, modular architecture**:
-
-```
-┌─────────────────────────────────────────────────────┐
-│                  Your Application                   │
-└─────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│           tta-workflow-primitives                   │
-│  ┌────────────┬──────────────┬─────────────────┐   │
-│  │   Router   │    Cache     │    Timeout      │   │
-│  ├────────────┼──────────────┼─────────────────┤   │
-│  │  Parallel  │ Conditional  │     Retry       │   │
-│  └────────────┴──────────────┴─────────────────┘   │
-└─────────────────────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│              dev-primitives                         │
-│  ┌────────────┬──────────────┬─────────────────┐   │
-│  │  Logging   │   Retries    │   Test Utils    │   │
-│  └────────────┴──────────────┴─────────────────┘   │
-└─────────────────────────────────────────────────────┘
-```
-
----
-
-## 📚 Documentation
-
-- **[Getting Started Guide](GETTING_STARTED.md)** - 5-minute quickstart
-- **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
-- **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
-- **[MCP Integration](docs/mcp/README.md)** - Model Context Protocol guides
-- **[Package Documentation](packages/tta-dev-primitives/README.md)** - Detailed API reference
-
-### Cost Optimization
-
-- **[LLM Cost Guide](docs/guides/llm-cost-guide.md)** - Free vs paid model comparison, pricing analysis
-- **[Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md)** - Production patterns for 50-70% cost reduction
-
-### Additional Resources
-
-- [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
-- [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
-- [LLM Selection Guide](docs/guides/llm-selection-guide.md)
-- [Examples](packages/tta-dev-primitives/examples/)
-
----
-
-## 🧪 Testing
-
-All packages maintain **100% test coverage** with comprehensive test suites.
-
-```bash
-# Run all tests
-uv run pytest -v
-
-# Run with coverage
-uv run pytest --cov=packages --cov-report=html
-
-# Run specific package tests
-uv run pytest packages/tta-workflow-primitives/tests/ -v
-```
-
----
-
-## 🛠️ Development
-
-### Prerequisites
-
-- Python 3.11+
-- [uv](https://github.com/astral-sh/uv) (recommended) or pip
-- VS Code with Copilot (recommended)
-
-### Setup
-
-```bash
-# Clone repository
-git clone https://github.com/theinterneti/TTA.dev
-cd TTA.dev
-
-# Install dependencies
+# Install development dependencies
 uv sync --all-extras
 
 # Run tests
 uv run pytest -v
 
-# Run quality checks
+# Run with coverage
+uv run pytest --cov=packages --cov-report=html
+
+# Format code
 uv run ruff format .
+
+# Lint code
 uv run ruff check . --fix
+
+# Type check
 uvx pyright packages/
 ```
 
-### VS Code Workflow
+## Contributing
 
-We provide VS Code tasks for common operations:
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-1. Press `Cmd/Ctrl+Shift+P`
-2. Type "Task: Run Task"
-3. Select from:
-   - 🧪 Run All Tests
-   - ✅ Quality Check (All)
-   - 📦 Validate Package
-   - 🔍 Lint Code
-   - ✨ Format Code
+Key areas for contribution:
+- New primitive patterns
+- Additional LLM provider integrations
+- Example workflows
+- Documentation improvements
+- Bug fixes and performance improvements
 
-[See full task list](.vscode/tasks.json)
+## Roadmap
 
----
+### Current (v0.1)
+- ✅ Universal LLM Primitive with budget profiles
+- ✅ Core adaptive primitives (retry, fallback, timeout, cache)
+- ✅ Orchestration primitives (sequential, parallel)
+- ✅ Multi-provider support (OpenAI, Anthropic, Google)
+- ✅ Agent coordination framework
 
-## 🤝 Contributing
+### Upcoming (v0.2)
+- 🔄 Enhanced observability with Langfuse integration
+- 🔄 Additional provider support (Mistral, Cohere)
+- 🔄 Advanced memory primitives (vector stores)
+- 🔄 Workflow visualization and debugging tools
 
-We welcome contributions! However, **only battle-tested, proven code is accepted**.
+### Future (v0.3+)
+- 📋 Visual workflow builder
+- 📋 Pre-built agent templates
+- 📋 Cost optimization recommendations
+- 📋 Multi-modal support (vision, audio)
 
-### Contribution Criteria
+## License
 
-Before submitting a PR, ensure:
+[MIT License](LICENSE)
 
-- ✅ All tests passing (100%)
-- ✅ Test coverage >80%
-- ✅ Documentation complete
-- ✅ Ruff + Pyright checks pass
-- ✅ **TODO compliance (100%)** - All Logseq TODOs properly formatted
-- ✅ Real-world usage validation
-- ✅ No known critical bugs
+## Credits
 
-#### TODO Compliance Requirement
+TTA.dev is built by developers who believe in:
+- **Open source**: Framework code is open for inspection and contribution
+- **Cost transparency**: Every LLM call should be tracked and justified
+- **Developer empowerment**: You control your budget and model selection
+- **Composability**: Complex agents built from simple, testable primitives
 
-All TODOs in Logseq journals must follow the [TODO Management System](logseq/pages/TODO%20Management%20System.md):
+## Related Projects
 
-- **Category tag required**: `#dev-todo` or `#user-todo`
-- **For `#dev-todo`**: Must include `type::`, `priority::`, `package::` properties
-- **For `#user-todo`**: Must include `type::`, `audience::`, `difficulty::` properties
+- **Primitive Branches**:
+  - `agent/copilot` (PR #80): Original universal LLM architecture
+  - `refactor/tta-dev-framework-cleanup` (PR #98): Framework structure refactor
+  - This branch (`agentic/core-architecture`) supersedes both
 
-**Validation:**
-```bash
-# Check TODO compliance locally
-uv run python scripts/validate-todos.py
+## Support
 
-# Expected output: 100.0% compliance
-```
-
-The CI will automatically validate TODO compliance on all PRs. Non-compliant TODOs will block the merge.
-
-### Contribution Workflow
-
-1. **Create feature branch**
-
-   ```bash
-   git checkout -b feature/add-awesome-feature
-   ```
-
-2. **Make changes and validate**
-
-   ```bash
-   ./scripts/validate-package.sh <package-name>
-   ```
-
-3. **Commit with semantic message**
-
-   ```bash
-   git commit -m "feat(package): Add awesome feature"
-   ```
-
-4. **Create PR**
-
-   ```bash
-   gh pr create --title "feat: Add awesome feature"
-   ```
-
-5. **Squash merge after approval**
-
-[See full contribution guide](CONTRIBUTING.md) (Coming soon)
+- **Issues**: [GitHub Issues](https://github.com/theinterneti/TTA.dev/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/theinterneti/TTA.dev/discussions)
+- **Documentation**: [`docs/`](docs/)
 
 ---
 
-## 📋 Code Quality Standards
-
-### Formatting
-
-- **Ruff** with 88 character line length
-- Auto-format on save in VS Code
-
-### Linting
-
-- **Ruff** with strict rules
-- No unused imports or variables
-
-### Type Checking
-
-- **Pyright** in basic mode
-- Type hints required for all functions
-
-### Testing
-
-- **pytest** with AAA pattern
-- >80% coverage required
-- All tests must pass
-
-### Documentation
-
-- Google-style docstrings
-- README for each package
-- Examples for all features
-- **Phase 3 Examples:** See [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
-
----
-
-## 🚦 CI/CD
-
-All PRs automatically run:
-
-- ✅ Ruff format check
-- ✅ Ruff lint check
-- ✅ Pyright type check
-- ✅ pytest (all tests)
-- ✅ Coverage report
-- ✅ Multi-OS testing (Ubuntu, macOS, Windows)
-- ✅ Multi-Python testing (3.11, 3.12)
-
-**Merging requires all checks to pass.**
-
----
-
-## 📊 Project Status
-
-### Current Release: v0.1.0 (Initial)
-
-| Package | Version | Tests | Coverage | Status |
-|---------|---------|-------|----------|--------|
-| tta-workflow-primitives | 0.1.0 | 12/12 ✅ | 100% | 🟢 Stable |
-| dev-primitives | 0.1.0 | TBD | TBD | 🟢 Stable |
-
-### Roadmap
-
-- [ ] v0.2.0: Add more workflow primitives (saga, circuit breaker)
-- [ ] v0.3.0: Enhanced observability features
-- [ ] v1.0.0: First stable release
-
----
-
-## 🔗 Related Projects
-
-- **TTA** - Therapeutic text adventure game (private)
-- **Augment Code** - AI coding assistant
-- **GitHub Copilot** - AI pair programmer
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details
-
----
-
-## 🙏 Acknowledgments
-
-Built with:
-
-- [Python](https://www.python.org/)
-- [uv](https://github.com/astral-sh/uv) - Fast Python package installer
-- [Ruff](https://github.com/astral-sh/ruff) - Fast Python linter
-- [Pyright](https://github.com/microsoft/pyright) - Type checker
-- [pytest](https://pytest.org/) - Testing framework
-- [GitHub Copilot](https://github.com/features/copilot) - AI assistance
-
----
-
-## 📧 Contact
-
-- **Maintainer:** @theinterneti
-- **Issues:** [GitHub Issues](https://github.com/theinterneti/TTA.dev/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/theinterneti/TTA.dev/discussions)
-
----
-
-## ⭐ Star History
-
-If you find TTA.dev useful, please consider giving it a star! ⭐
-
----
-
-**Last Updated:** 2025-10-27
-**Status:** 🚀 Ready for migration
+**TTA.dev**: Build intelligent agents, not expensive bills. 🤖💰

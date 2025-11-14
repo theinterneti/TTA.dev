@@ -32,6 +32,7 @@ from tta_dev_primitives import (
     WorkflowPrimitive,
 )
 
+
 # ============================================================================
 # Data Models
 # ============================================================================
@@ -53,9 +54,7 @@ class ToolConfig(BaseModel):
     repository_wide_file: str | None = Field(None, description="Repository-wide instructions file")
     # Note: agent_instructions_file removed - AGENTS.md is now workspace-wide hub
     path_specific_dir: str | None = Field(None, description="Directory for path-specific rules")
-    path_specific_extension: str = Field(
-        ".md", description="File extension for path-specific files"
-    )
+    path_specific_extension: str = Field(".md", description="File extension for path-specific files")
     frontmatter_format: str = Field("yaml", description="Frontmatter format (yaml, none)")
 
 
@@ -78,7 +77,7 @@ class ReadFilePrimitive(WorkflowPrimitive[Path, str]):
         Returns:
             File content as string
         """
-        with open(input_data, encoding="utf-8") as f:
+        with open(input_data, "r", encoding="utf-8") as f:
             return f.read()
 
 
@@ -122,7 +121,7 @@ class ReadYAMLPrimitive(WorkflowPrimitive[Path, dict[str, Any]]):
         Returns:
             Parsed YAML as dict
         """
-        with open(input_data, encoding="utf-8") as f:
+        with open(input_data, "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
 
 
@@ -148,7 +147,7 @@ class CombineCorePrimitive(WorkflowPrimitive[list[str], str]):
         sections = []
         titles = ["Project Overview", "Architecture", "Development Workflow", "Quality Standards"]
 
-        for title, content in zip(titles, input_data, strict=False):
+        for title, content in zip(titles, input_data):
             sections.append(f"# {title}\n\n{content}")
 
         return "\n\n".join(sections)
@@ -171,7 +170,7 @@ class CombineAgentBehaviorPrimitive(WorkflowPrimitive[list[str], str]):
         sections = []
         titles = ["Communication Style", "Priority Order", "Anti-Patterns to Avoid"]
 
-        for title, content in zip(titles, input_data, strict=False):
+        for title, content in zip(titles, input_data):
             sections.append(f"# {title}\n\n{content}")
 
         return "\n\n".join(sections)
@@ -208,8 +207,8 @@ class AddFrontmatterPrimitive(WorkflowPrimitive[dict[str, Any], str]):
 
         # YAML frontmatter
         frontmatter = f"""---
-applyTo: "{input_data["apply_to"]}"
-description: "{input_data["description"]}"
+applyTo: "{input_data['apply_to']}"
+description: "{input_data['description']}"
 ---
 
 """

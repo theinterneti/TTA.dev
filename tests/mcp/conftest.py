@@ -5,16 +5,16 @@ This module provides fixtures and utilities for testing MCP servers.
 """
 
 import os
-import subprocess
 import sys
-import time
-
 import pytest
+import asyncio
+import subprocess
+import time
+from typing import Dict, Any, List, Optional, Callable, Tuple
 import pytest_asyncio
 
-
 # Add the project root to the Python path dynamically by searching for a marker file
-def find_project_root(marker_files=("pyproject.toml", ".git")):
+def find_project_root(marker_files=('pyproject.toml', '.git')):
     current = os.path.abspath(os.path.dirname(__file__))
     while True:
         if any(os.path.exists(os.path.join(current, marker)) for marker in marker_files):
@@ -25,16 +25,14 @@ def find_project_root(marker_files=("pyproject.toml", ".git")):
         current = parent
     raise RuntimeError("Project root not found. Please ensure a marker file exists.")
 
-
 project_root = find_project_root()
 if project_root not in sys.path:
     sys.path.append(project_root)
 
 # Import the MCP servers
-from examples.mcp.agent_tool_server import mcp as agent_tool_mcp
 from examples.mcp.basic_server import mcp as basic_mcp
+from examples.mcp.agent_tool_server import mcp as agent_tool_mcp
 from examples.mcp.knowledge_resource_server import mcp as knowledge_resource_mcp
-
 
 @pytest_asyncio.fixture
 async def basic_server():
@@ -46,7 +44,6 @@ async def basic_server():
     """
     return basic_mcp
 
-
 @pytest_asyncio.fixture
 async def agent_tool_server():
     """
@@ -57,7 +54,6 @@ async def agent_tool_server():
     """
     return agent_tool_mcp
 
-
 @pytest_asyncio.fixture
 async def knowledge_resource_server():
     """
@@ -67,7 +63,6 @@ async def knowledge_resource_server():
         The knowledge resource MCP server instance.
     """
     return knowledge_resource_mcp
-
 
 @pytest.fixture
 def server_process():
@@ -93,7 +88,10 @@ def server_process():
             The subprocess.Popen instance.
         """
         process = subprocess.Popen(
-            ["python3", script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+            ["python3", script_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
         )
         processes.append(process)
 

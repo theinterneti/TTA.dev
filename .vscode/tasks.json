@@ -2,9 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "🧪 Run Fast Tests (Unit Only)",
+      "label": "🧪 Run All Tests",
       "type": "shell",
-      "command": "./scripts/test_fast.sh",
+      "command": "uv run pytest -v",
       "group": {
         "kind": "test",
         "isDefault": true
@@ -17,45 +17,9 @@
       "problemMatcher": []
     },
     {
-      "label": "🧪 Run All Tests",
-      "type": "shell",
-      "command": "uv run pytest -v",
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "🧪 Run Integration Tests (Safe)",
-      "type": "shell",
-      "command": "RUN_INTEGRATION=true ./scripts/test_integration.sh",
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
       "label": "🧪 Run Tests with Coverage",
       "type": "shell",
-      "command": "uv run pytest --cov=packages --cov-report=html --cov-report=term-missing -m 'not integration and not slow'",
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "📝 Check Markdown Docs",
-      "type": "shell",
-      "command": "python scripts/docs/check_md.py --all",
+      "command": "uv run pytest --cov=packages --cov-report=html --cov-report=term-missing",
       "group": "test",
       "presentation": {
         "reveal": "always",
@@ -154,42 +118,90 @@
       "problemMatcher": []
     },
     {
-      "label": "🔭 Setup Observability Stack",
+      "label": "🔬 Observability Health Check",
       "type": "shell",
-      "command": "./scripts/setup-observability.sh",
-      "group": "none",
+      "command": "uv run python -c 'from observability_integration import initialize_observability, is_observability_enabled; success = initialize_observability(service_name=\"tta-dev\", enable_prometheus=True, enable_console_traces=True); print(\"✅ Observability OK\" if success and is_observability_enabled() else \"❌ Observability Failed\")'",
+      "group": "test",
       "presentation": {
         "reveal": "always",
-        "panel": "new",
-        "clear": true
+        "panel": "shared"
       },
-      "problemMatcher": [],
-      "runOptions": {
-        "runOn": "folderOpen"
-      }
+      "problemMatcher": []
     },
     {
-      "label": "📊 Run Observability Demo",
+      "label": "🧪 Run Keploy API Tests",
       "type": "shell",
-      "command": "uv run python packages/tta-dev-primitives/examples/observability_demo.py",
-      "group": "none",
+      "command": "uv run pytest packages/keploy-framework/tests/ -v",
+      "group": "test",
       "presentation": {
         "reveal": "always",
-        "panel": "new",
-        "clear": true
+        "panel": "new"
       },
-      "problemMatcher": [],
-      "dependsOn": "🔭 Setup Observability Stack"
+      "problemMatcher": []
     },
     {
-      "label": "🏥 Development Environment Check",
+      "label": "📹 Record Keploy API Tests",
       "type": "shell",
-      "command": "./scripts/dev-env-check.sh",
-      "group": "none",
+      "command": "echo 'Start your API server first, then run: uv run python -m keploy_framework.cli record --app-cmd \"uvicorn main:app\"'",
+      "group": "test",
       "presentation": {
         "reveal": "always",
-        "panel": "new",
-        "clear": true
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "💰 Validate Cost Optimization",
+      "type": "shell",
+      "command": "uv run python scripts/validation/validate-cost-optimization.py",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🚀 Validate LLM Efficiency",
+      "type": "shell",
+      "command": "uv run python scripts/validation/validate-llm-efficiency.py",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Start Test Services",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.test.yml up -d && echo '✅ Test services started (Redis, Prometheus)'",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🐳 Stop Test Services",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.test.yml down && echo '✅ Test services stopped'",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Run All Integration Tests",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose.test.yml up -d && sleep 3 && uv run pytest tests/integration/ -v && docker-compose -f docker-compose.test.yml down",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
       },
       "problemMatcher": []
     }

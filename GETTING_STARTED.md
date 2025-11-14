@@ -58,18 +58,6 @@ Your workflow now has:
 - ✅ Retry logic for transient failures
 - ✅ Full observability with traces
 
-### 4. Enable Observability (Optional)
-
-```bash
-# Start observability stack
-./scripts/setup-observability.sh
-
-# Run your workflow and view metrics at:
-# 📊 http://localhost:9090 (Prometheus)
-# 🔍 http://localhost:16686 (Jaeger)
-# 📈 http://localhost:3000 (Grafana)
-```
-
 ## Core Concepts
 
 ### Primitives
@@ -159,105 +147,6 @@ workflow = ParallelPrimitive([
 results = await workflow.execute({"user_id": 123}, context)
 ```
 
-### Pattern 4: Conversational Memory
-
-```python
-from tta_dev_primitives.performance import MemoryPrimitive
-
-# Zero-setup conversational memory (no Docker/Redis required)
-memory = MemoryPrimitive(max_size=100)
-
-async def handle_conversation(user_input: str) -> str:
-    # Store user message
-    await memory.add(
-        f"user_{timestamp}",
-        {"role": "user", "content": user_input, "timestamp": timestamp}
-    )
-
-    # Search conversation history for context
-    history = await memory.search(keywords=user_input.split()[:3])
-
-    # Generate response with context
-    response = await llm_generate(user_input, history)
-
-    # Store assistant response
-    await memory.add(
-        f"assistant_{timestamp}",
-        {"role": "assistant", "content": response, "timestamp": timestamp}
-    )
-
-    return response
-
-# Multi-turn conversation
-response1 = await handle_conversation("What is a primitive?")
-response2 = await handle_conversation("Can you give me an example?")  # Has context from turn 1
-
-# Optional: Enable Redis for persistence and scaling
-memory_persistent = MemoryPrimitive(
-    redis_url="redis://localhost:6379",
-    enable_redis=True
-)
-# Same API, enhanced backend - automatic fallback if Redis unavailable
-```
-
-**Benefits:**
-
-- ✅ **Zero Setup**: Works immediately without Docker or Redis
-- ✅ **Hybrid Architecture**: Automatic upgrade to Redis if available
-- ✅ **Graceful Degradation**: Falls back to in-memory if Redis fails
-- ✅ **Search**: Keyword search across conversation history
-- ✅ **LRU Eviction**: Built-in memory management
-
-**Use Cases:**
-
-- Multi-turn conversational agents
-- Task context spanning operations
-- Agent memory and recall
-- Personalization based on history
-
-### Pattern 5: Self-Improving Workflows
-
-```python
-from tta_dev_primitives.adaptive import (
-    AdaptiveRetryPrimitive,
-    LogseqStrategyIntegration,
-    LearningMode
-)
-
-# Zero-setup self-improving retry (no manual tuning required)
-logseq = LogseqStrategyIntegration("my_app")
-adaptive_retry = AdaptiveRetryPrimitive(
-    target_primitive=unreliable_api,
-    logseq_integration=logseq,
-    enable_auto_persistence=True,
-    learning_mode=LearningMode.ACTIVE
-)
-
-# Learning happens automatically from execution patterns
-result = await adaptive_retry.execute(data, context)
-
-# Check what was learned
-for name, strategy in adaptive_retry.strategies.items():
-    print(f"{name}: {strategy.metrics.success_rate:.1%} success")
-
-# Strategies automatically saved to logseq/pages/Strategies/
-```
-
-**Benefits:**
-
-- ✅ **Automatic Learning**: Learns optimal retry parameters without manual tuning
-- ✅ **Context-Aware**: Different strategies for production/staging/dev
-- ✅ **Production-Safe**: Circuit breakers and validation prevent bad strategies
-- ✅ **Knowledge Base**: Strategies persist to Logseq for sharing
-- ✅ **Observable**: Full OpenTelemetry integration
-
-**Use Cases:**
-
-- Unreliable external APIs needing adaptive retry strategies
-- Services with varying load patterns across contexts
-- Teams wanting to share learned strategies via knowledge base
-- Production systems requiring automatic optimization
-
 ## Cost Optimization
 
 ### Smart Caching
@@ -283,35 +172,6 @@ router = RouterPrimitive(
 ```
 
 ## Observability
-
-TTA.dev includes **production-grade observability** built-in. Every primitive automatically emits metrics, traces, and logs.
-
-### Quick Setup (5 minutes)
-
-```bash
-# Start observability stack (one-time setup)
-./scripts/setup-observability.sh
-
-# Run the demo to see it in action
-uv run python packages/tta-dev-primitives/examples/observability_demo.py
-```
-
-**Access Your Data**:
-- 📊 **Metrics**: http://localhost:9090 (Prometheus)
-- 🔍 **Traces**: http://localhost:16686 (Jaeger)
-- 📈 **Dashboards**: http://localhost:3000 (Grafana - admin/admin)
-
-### What You Get Automatically
-
-Every workflow execution provides:
-
-- ✅ **Latency percentiles** (p50, p90, p95, p99)
-- ✅ **Throughput metrics** (requests/second, active requests)
-- ✅ **Error rates and success rates**
-- ✅ **SLO compliance monitoring** with error budgets
-- ✅ **Distributed traces** with correlation IDs
-- ✅ **Cache hit rates** and performance impact
-- ✅ **Cost tracking** (API calls, cache savings)
 
 ### OpenTelemetry Integration
 
@@ -347,16 +207,6 @@ logger.info(
 )
 ```
 
-### Production Monitoring
-
-For production deployments, TTA.dev integrates with:
-
-- **Prometheus** - Metrics collection and alerting
-- **Jaeger** - Distributed tracing
-- **Grafana** - Dashboards and visualization
-- **OpenTelemetry** - Standards-compliant telemetry
-- **Any OTLP-compatible system** (Datadog, New Relic, etc.)
-
 ## Testing
 
 ### Testing Your Workflows
@@ -381,20 +231,6 @@ async def test_my_workflow():
 
 ## Next Steps
 
-### 🎓 Structured Learning
-
-**Learning Paths:** [`TTA.dev Learning Paths`](logseq/pages/TTA.dev___Learning%20Paths.md) - Follow structured sequences from beginner to expert
-
-**Interactive Learning:** [`Learning TTA Primitives`](logseq/pages/Learning%20TTA%20Primitives.md) - Flashcards and exercises for mastering concepts
-
-**Knowledge Base:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - Navigate between documentation and knowledge systems
-
-### 📋 Task Management
-
-**TODO System:** [`TODO Management System`](logseq/pages/TODO%20Management%20System.md) - Central dashboard for all project tasks
-
-Add tasks to today's journal: `logseq/journals/YYYY_MM_DD.md`
-
 ### Learn More
 
 - 📚 [Architecture Overview](docs/architecture/Overview.md) - Understand the design
@@ -402,42 +238,13 @@ Add tasks to today's journal: `logseq/journals/YYYY_MM_DD.md`
 - 🔧 [MCP Integration](docs/mcp/README.md) - Model Context Protocol
 - 📦 [Package README](packages/tta-dev-primitives/README.md) - Detailed docs
 
-### Production Examples
+### Examples
 
-**Start here!** 5 validated, working examples ready to run:
-
-| Example | What It Shows | Use When |
-|---------|---------------|----------|
-| [**RAG Workflow**](packages/tta-dev-primitives/examples/rag_workflow.py) | Caching + Fallback + Retry | Building document retrieval systems |
-| [**Agentic RAG**](packages/tta-dev-primitives/examples/agentic_rag_workflow.py) | Router + Grading + Validation | Production RAG with quality controls |
-| [**Cost Tracking**](packages/tta-dev-primitives/examples/cost_tracking_workflow.py) | Budget Enforcement + Metrics | Managing LLM API costs |
-| [**Streaming**](packages/tta-dev-primitives/examples/streaming_workflow.py) | AsyncIterator + Buffering | Real-time response streaming |
-| [**Multi-Agent**](packages/tta-dev-primitives/examples/multi_agent_workflow.py) | Coordinator + Parallel Execution | Complex agent orchestration |
-| [**Memory Workflow**](packages/tta-dev-primitives/examples/memory_workflow.py) | Conversational Memory + Search | Multi-turn conversations with context |
-
-**Quick Start:**
-
-```bash
-# Run any example
-uv run python packages/tta-dev-primitives/examples/rag_workflow.py
-
-# Or explore all examples
-ls packages/tta-dev-primitives/examples/
-```
-
-**Implementation Guide:** [PHASE3_EXAMPLES_COMPLETE.md](PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
-- Complete implementation details for all examples
-- InstrumentedPrimitive pattern guide
-- Test results and validation
-- Production usage recommendations
-
-### Additional Examples
-
-More patterns in the examples directory:
-- [Basic workflows](packages/tta-dev-primitives/examples/basic_workflow.py) - Foundation patterns
-- [Composition patterns](packages/tta-dev-primitives/examples/composition.py) - Combining primitives
-- [Error handling](packages/tta-dev-primitives/examples/error_handling.py) - Recovery patterns
-- [Observability](packages/tta-dev-primitives/examples/observability.py) - Tracing and metrics
+Check out the examples directory:
+- [Basic workflows](packages/tta-dev-primitives/examples/basic_workflow.py)
+- [Composition patterns](packages/tta-dev-primitives/examples/composition.py)
+- [Error handling](packages/tta-dev-primitives/examples/error_handling.py)
+- [Observability](packages/tta-dev-primitives/examples/observability.py)
 
 ### Get Help
 
