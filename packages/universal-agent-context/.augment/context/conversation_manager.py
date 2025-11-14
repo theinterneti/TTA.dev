@@ -173,7 +173,9 @@ class InstructionLoader:
             content = file_path.read_text(encoding="utf-8")
 
             # Extract YAML frontmatter (between --- markers)
-            frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
+            frontmatter_match = re.match(
+                r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL
+            )
             if not frontmatter_match:
                 logger.warning(f"No YAML frontmatter found in {file_path.name}")
                 return None
@@ -294,7 +296,9 @@ class InstructionLoader:
                 return False
         return True
 
-    def get_relevant_instructions(self, current_file: str | None = None) -> list[dict[str, Any]]:
+    def get_relevant_instructions(
+        self, current_file: str | None = None
+    ) -> list[dict[str, Any]]:
         """
         Get instructions relevant to the current file context.
 
@@ -383,7 +387,9 @@ class MemoryLoader:
             content = file_path.read_text(encoding="utf-8")
 
             # Extract YAML frontmatter (between --- markers)
-            frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
+            frontmatter_match = re.match(
+                r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL
+            )
             if not frontmatter_match:
                 logger.warning(f"No YAML frontmatter found in {file_path.name}")
                 return None
@@ -849,11 +855,15 @@ class AIConversationContextManager:
         system_msgs = [m for m in context.messages if m.role == "system"]
 
         # Keep high-importance messages (importance > 0.8)
-        important_msgs = [m for m in context.messages if m.importance > 0.8 and m.role != "system"]
+        important_msgs = [
+            m for m in context.messages if m.importance > 0.8 and m.role != "system"
+        ]
 
         # Keep most recent messages
         recent_msgs = [
-            m for m in context.messages[-5:] if m not in system_msgs and m not in important_msgs
+            m
+            for m in context.messages[-5:]
+            if m not in system_msgs and m not in important_msgs
         ]
 
         # Combine and deduplicate
@@ -1048,5 +1058,8 @@ def create_tta_session(
     # Load instructions
     manager.load_instructions(session_id, current_file)
 
-    logger.info(f"Created TTA development session: {session_id} (file: {current_file or 'global'})")
+    logger.info(
+        f"Created TTA development session: {session_id} "
+        f"(file: {current_file or 'global'})"
+    )
     return manager, session_id

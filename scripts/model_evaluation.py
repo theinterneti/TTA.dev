@@ -10,18 +10,19 @@ This script tests phi4 mini instruct, qwen 2.5 (.5b and 8b) models and
 provides quantitative and qualitative results for comparison.
 """
 
-import argparse
-import asyncio
-import json
-import logging
+import os
 import sys
+import json
 import time
-from typing import Any
-
+import asyncio
+import argparse
+import logging
+from pathlib import Path
+from typing import Dict, Any, List, Optional, Tuple
 from dotenv import load_dotenv
 
 # Add the project root to the Python path
-sys.path.append("/app")
+sys.path.append('/app')
 
 # Configure logging
 logging.basicConfig(
@@ -34,7 +35,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Import the LLM client
-from src.models.llm_client import get_llm_client
+from src.models.llm_client import get_llm_client, Message
 
 # Target models to evaluate
 TARGET_MODELS = [
@@ -42,7 +43,7 @@ TARGET_MODELS = [
     "Qwen/Qwen2.5-0.5B-Instruct",
     "Qwen/Qwen2.5-1.5B-Instruct",
     "Qwen/Qwen2.5-3B-Instruct",
-    "Qwen/Qwen2.5-7B-Instruct",
+    "Qwen/Qwen2.5-7B-Instruct"
 ]
 
 # Test cases for different evaluation dimensions
@@ -52,44 +53,44 @@ TEST_CASES = {
             "name": "Short Response",
             "system_prompt": "You are a helpful assistant.",
             "user_prompt": "What is the capital of France?",
-            "expected_tokens": 20,
+            "expected_tokens": 20
         },
         {
             "name": "Medium Response",
             "system_prompt": "You are a helpful assistant.",
             "user_prompt": "Explain how photosynthesis works in simple terms.",
-            "expected_tokens": 150,
+            "expected_tokens": 150
         },
         {
             "name": "Long Response",
             "system_prompt": "You are a helpful assistant.",
             "user_prompt": "Write a short story about a robot discovering emotions.",
-            "expected_tokens": 300,
-        },
+            "expected_tokens": 300
+        }
     ],
     "creativity": [
         {
             "name": "Creative Writing",
             "system_prompt": "You are a creative writing assistant.",
-            "user_prompt": "Write a poem about the relationship between technology and nature.",
+            "user_prompt": "Write a poem about the relationship between technology and nature."
         },
         {
             "name": "Idea Generation",
             "system_prompt": "You are a brainstorming assistant.",
-            "user_prompt": "Generate 5 unique ideas for a mobile app that helps people reduce their carbon footprint.",
-        },
+            "user_prompt": "Generate 5 unique ideas for a mobile app that helps people reduce their carbon footprint."
+        }
     ],
     "reasoning": [
         {
             "name": "Logical Reasoning",
             "system_prompt": "You are a logical reasoning assistant.",
-            "user_prompt": "If all A are B, and some B are C, can we conclude that some A are C? Explain your reasoning step by step.",
+            "user_prompt": "If all A are B, and some B are C, can we conclude that some A are C? Explain your reasoning step by step."
         },
         {
             "name": "Problem Solving",
             "system_prompt": "You are a problem-solving assistant.",
-            "user_prompt": "A farmer needs to cross a river with a fox, a chicken, and a bag of grain. The boat can only carry the farmer and one item at a time. If left alone, the fox will eat the chicken, and the chicken will eat the grain. How can the farmer get everything across safely?",
-        },
+            "user_prompt": "A farmer needs to cross a river with a fox, a chicken, and a bag of grain. The boat can only carry the farmer and one item at a time. If left alone, the fox will eat the chicken, and the chicken will eat the grain. How can the farmer get everything across safely?"
+        }
     ],
     "structured_output": [
         {
@@ -109,11 +110,11 @@ TEST_CASES = {
                             "street": {"type": "string"},
                             "city": {"type": "string"},
                             "state": {"type": "string"},
-                            "zip": {"type": "string"},
-                        },
-                    },
-                },
-            },
+                            "zip": {"type": "string"}
+                        }
+                    }
+                }
+            }
         },
         {
             "name": "Structured Extraction",
@@ -127,10 +128,10 @@ TEST_CASES = {
                     "occupation": {"type": "string"},
                     "location": {"type": "string"},
                     "hobbies": {"type": "array", "items": {"type": "string"}},
-                    "email": {"type": "string"},
-                },
-            },
-        },
+                    "email": {"type": "string"}
+                }
+            }
+        }
     ],
     "tool_use": [
         {
@@ -141,7 +142,7 @@ TEST_CASES = {
 - calculate_route(start: str, end: str): Calculate route between locations
 - translate_text(text: str, target_language: str): Translate text to target language""",
             "user_prompt": "I'm planning a trip to Paris next week and need to know what clothes to pack. I also need directions from my hotel to the Eiffel Tower. I'll be staying at Hotel de Ville.",
-            "expected_tools": ["get_weather", "calculate_route"],
+            "expected_tools": ["get_weather", "calculate_route"]
         },
         {
             "name": "Tool Calling",
@@ -163,17 +164,14 @@ Available tools:
                 "parameters": {
                     "prompt": "futuristic city with flying cars",
                     "style": "cyberpunk",
-                    "size": "large",
-                },
-            },
-        },
-    ],
+                    "size": "large"
+                }
+            }
+        }
+    ]
 }
 
-
-async def evaluate_model(
-    model_name: str, test_category: str, test_case: dict[str, Any]
-) -> dict[str, Any]:
+async def evaluate_model(model_name: str, test_category: str, test_case: Dict[str, Any]) -> Dict[str, Any]:
     """
     Evaluate a model on a specific test case.
 
@@ -201,7 +199,7 @@ async def evaluate_model(
         "duration": 0,
         "tokens_generated": 0,
         "tokens_per_second": 0,
-        "response": "",
+        "response": ""
     }
 
     try:
@@ -217,7 +215,7 @@ async def evaluate_model(
                 temperature=0.7,
                 max_tokens=1024,
                 expect_json=True,
-                json_schema=test_case["schema"],
+                json_schema=test_case["schema"]
             )
             # Check if response is valid JSON
             try:
@@ -233,7 +231,7 @@ async def evaluate_model(
                 model=model_name,
                 temperature=0.7,
                 max_tokens=1024,
-                expect_json=False,
+                expect_json=False
             )
 
         # End timer
@@ -270,7 +268,6 @@ async def evaluate_model(
             if "expected_tool_call" in test_case:
                 # Check if the response contains a tool call in the expected format
                 import re
-
                 tool_match = re.search(r"<tool>(.*?)</tool>", response)
                 params_match = re.search(r"<parameters>(.*?)</parameters>", response, re.DOTALL)
 
@@ -278,7 +275,10 @@ async def evaluate_model(
                     tool_name = tool_match.group(1).strip()
                     try:
                         params = json.loads(params_match.group(1).strip())
-                        result["tool_call"] = {"tool": tool_name, "parameters": params}
+                        result["tool_call"] = {
+                            "tool": tool_name,
+                            "parameters": params
+                        }
 
                         # Compare with expected tool call
                         expected = test_case["expected_tool_call"]
@@ -299,8 +299,7 @@ async def evaluate_model(
 
     return result
 
-
-async def run_evaluations(models: list[str] = None, categories: list[str] = None) -> dict[str, Any]:
+async def run_evaluations(models: List[str] = None, categories: List[str] = None) -> Dict[str, Any]:
     """
     Run evaluations on specified models and test categories.
 
@@ -324,7 +323,7 @@ async def run_evaluations(models: list[str] = None, categories: list[str] = None
         "models": models,
         "categories": categories,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "results": [],
+        "results": []
     }
 
     # Run evaluations
@@ -355,8 +354,7 @@ async def run_evaluations(models: list[str] = None, categories: list[str] = None
 
     return results
 
-
-def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
+def analyze_results(results: Dict[str, Any]) -> Dict[str, Any]:
     """
     Analyze evaluation results and provide insights.
 
@@ -377,7 +375,7 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         "timestamp": results["timestamp"],
         "model_performance": {},
         "category_performance": {},
-        "overall_ranking": {},
+        "overall_ranking": {}
     }
 
     # Analyze performance by model
@@ -397,36 +395,19 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
         # Calculate average tokens per second (for speed tests)
         speed_results = [r for r in model_results if r["category"] == "speed" and r["success"]]
-        avg_tokens_per_second = (
-            sum(r["tokens_per_second"] for r in speed_results) / len(speed_results)
-            if speed_results
-            else 0
-        )
+        avg_tokens_per_second = sum(r["tokens_per_second"] for r in speed_results) / len(speed_results) if speed_results else 0
 
         # Calculate structured output success rate
-        structured_results = [
-            r for r in model_results if r["category"] == "structured_output" and r["success"]
-        ]
-        json_valid_rate = (
-            sum(1 for r in structured_results if r.get("is_valid_json", False))
-            / len(structured_results)
-            if structured_results
-            else 0
-        )
+        structured_results = [r for r in model_results if r["category"] == "structured_output" and r["success"]]
+        json_valid_rate = sum(1 for r in structured_results if r.get("is_valid_json", False)) / len(structured_results) if structured_results else 0
 
         # Calculate tool use success rate
         tool_results = [r for r in model_results if r["category"] == "tool_use" and r["success"]]
         tool_success_rate = 0
         if tool_results:
             tool_mentions = sum(1 for r in tool_results if r.get("tools_mentioned", False))
-            tool_calls = sum(
-                1
-                for r in tool_results
-                if r.get("correct_tool", False) and r.get("correct_parameters", False)
-            )
-            tool_success_rate = (
-                (tool_mentions + tool_calls) / (len(tool_results) * 2) if tool_results else 0
-            )
+            tool_calls = sum(1 for r in tool_results if r.get("correct_tool", False) and r.get("correct_parameters", False))
+            tool_success_rate = (tool_mentions + tool_calls) / (len(tool_results) * 2) if tool_results else 0
 
         # Store model performance
         analysis["model_performance"][model] = {
@@ -434,7 +415,7 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
             "avg_duration": avg_duration,
             "avg_tokens_per_second": avg_tokens_per_second,
             "json_valid_rate": json_valid_rate,
-            "tool_success_rate": tool_success_rate,
+            "tool_success_rate": tool_success_rate
         }
 
     # Analyze performance by category
@@ -450,13 +431,13 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         for model in models:
             model_category_results = [r for r in category_results if r["model"] == model]
             if model_category_results:
-                success_rate = sum(1 for r in model_category_results if r["success"]) / len(
-                    model_category_results
-                )
+                success_rate = sum(1 for r in model_category_results if r["success"]) / len(model_category_results)
                 model_success[model] = success_rate
 
         # Store category performance
-        analysis["category_performance"][category] = {"model_success": model_success}
+        analysis["category_performance"][category] = {
+            "model_success": model_success
+        }
 
     # Calculate overall ranking
     ranking_scores = {}
@@ -475,10 +456,10 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
         # Combined score (adjust weights as needed)
         score = (
-            speed_score * 0.3  # 30% weight for speed
-            + success_score * 0.3  # 30% weight for general success
-            + json_score * 0.2  # 20% weight for structured output
-            + tool_score * 0.2  # 20% weight for tool use
+            speed_score * 0.3 +  # 30% weight for speed
+            success_score * 0.3 +  # 30% weight for general success
+            json_score * 0.2 +  # 20% weight for structured output
+            tool_score * 0.2  # 20% weight for tool use
         )
 
         ranking_scores[model] = score
@@ -488,12 +469,14 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
     # Store overall ranking
     for i, model in enumerate(sorted_models):
-        analysis["overall_ranking"][model] = {"rank": i + 1, "score": ranking_scores[model]}
+        analysis["overall_ranking"][model] = {
+            "rank": i + 1,
+            "score": ranking_scores[model]
+        }
 
     return analysis
 
-
-def print_analysis(analysis: dict[str, Any]):
+def print_analysis(analysis: Dict[str, Any]):
     """
     Print analysis results in a readable format.
 
@@ -521,29 +504,16 @@ def print_analysis(analysis: dict[str, Any]):
     print("\n----- CATEGORY PERFORMANCE -----")
     for category, perf in analysis["category_performance"].items():
         print(f"\n{category.upper()}:")
-        for model, success_rate in sorted(
-            perf["model_success"].items(), key=lambda x: x[1], reverse=True
-        ):
+        for model, success_rate in sorted(perf["model_success"].items(), key=lambda x: x[1], reverse=True):
             print(f"  {model}: {success_rate * 100:.1f}%")
-
 
 async def main():
     """Main function."""
     parser = argparse.ArgumentParser(description="Evaluate models on various metrics")
-    parser.add_argument(
-        "--models",
-        nargs="+",
-        choices=TARGET_MODELS + ["all"],
-        default=["all"],
-        help="Models to evaluate",
-    )
-    parser.add_argument(
-        "--categories",
-        nargs="+",
-        choices=list(TEST_CASES.keys()) + ["all"],
-        default=["all"],
-        help="Test categories to run",
-    )
+    parser.add_argument("--models", nargs="+", choices=TARGET_MODELS + ["all"], default=["all"],
+                      help="Models to evaluate")
+    parser.add_argument("--categories", nargs="+", choices=list(TEST_CASES.keys()) + ["all"], default=["all"],
+                      help="Test categories to run")
     parser.add_argument("--output", help="Output file for results (JSON)")
     args = parser.parse_args()
 
@@ -570,13 +540,15 @@ async def main():
 
     # Save results if output file specified
     if args.output:
-        output_data = {"results": results, "analysis": analysis}
+        output_data = {
+            "results": results,
+            "analysis": analysis
+        }
 
         with open(args.output, "w") as f:
             json.dump(output_data, f, indent=2)
 
         print(f"\nResults saved to {args.output}")
-
 
 if __name__ == "__main__":
     asyncio.run(main())

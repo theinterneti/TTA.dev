@@ -4,16 +4,16 @@ Integration tests for MCP servers.
 This module contains integration tests that test the MCP servers as a whole.
 """
 
-import os
+import pytest
 import subprocess
+import time
+import os
 import sys
+import json
 import tempfile
 
-import pytest
-
 # Add the project root to the Python path
-sys.path.append("/app")
-
+sys.path.append('/app')
 
 def test_basic_server_process(server_process):
     """Test that the basic server can be started as a process."""
@@ -29,7 +29,6 @@ def test_basic_server_process(server_process):
     # Check that the process has terminated
     assert process.poll() is not None
 
-
 def test_agent_tool_server_process(server_process):
     """Test that the agent tool server can be started as a process."""
     process = server_process("examples/mcp/agent_tool_server.py")
@@ -44,7 +43,6 @@ def test_agent_tool_server_process(server_process):
     # Check that the process has terminated
     assert process.poll() is not None
 
-
 def test_knowledge_resource_server_process(server_process):
     """Test that the knowledge resource server can be started as a process."""
     process = server_process("examples/mcp/knowledge_resource_server.py")
@@ -58,7 +56,6 @@ def test_knowledge_resource_server_process(server_process):
 
     # Check that the process has terminated
     assert process.poll() is not None
-
 
 def test_multiple_servers_simultaneously(server_process):
     """Test that multiple servers can run simultaneously."""
@@ -86,7 +83,6 @@ def test_multiple_servers_simultaneously(server_process):
     assert agent_tool_process.poll() is not None
     assert knowledge_resource_process.poll() is not None
 
-
 def test_agent_adapter_example(server_process):
     """Test that the agent adapter example can be started as a process."""
     # This test may fail if the WorldBuildingAgent class is not available
@@ -105,7 +101,6 @@ def test_agent_adapter_example(server_process):
         assert process.poll() is not None
     except Exception as e:
         pytest.skip(f"Skipping agent adapter test due to error: {e}")
-
 
 def test_server_communication():
     """
@@ -179,7 +174,7 @@ if __name__ == "__main__":
             ["python3", f.name],
             capture_output=True,
             text=True,
-            timeout=30,  # Increased timeout
+            timeout=30  # Increased timeout
         )
 
         # Check that the client script succeeded

@@ -5,8 +5,9 @@ This module contains tests for the agent tool MCP server's tools and resources.
 """
 
 import pytest
+import json
+import pytest_asyncio
 from fastmcp import FastMCP
-
 
 @pytest.mark.asyncio
 async def test_agent_tool_server_initialization(agent_tool_server):
@@ -19,7 +20,6 @@ async def test_agent_tool_server_initialization(agent_tool_server):
     assert "list_agents" in tools
     assert "get_agent_info" in tools
     assert "process_with_agent" in tools
-
 
 @pytest.mark.asyncio
 async def test_list_agents_tool(agent_tool_server):
@@ -60,7 +60,6 @@ async def test_list_agents_tool(agent_tool_server):
         assert "character_creation" in result
         assert "lore_keeper" in result
         assert "narrative_management" in result
-
 
 @pytest.mark.asyncio
 async def test_get_agent_info_tool(agent_tool_server):
@@ -108,7 +107,6 @@ async def test_get_agent_info_tool(agent_tool_server):
         assert "Error:" in result
         assert "Agent 'nonexistent_agent' not found" in result
 
-
 @pytest.mark.asyncio
 async def test_process_with_agent_tool(agent_tool_server):
     """Test the process_with_agent tool."""
@@ -142,8 +140,8 @@ async def test_process_with_agent_tool(agent_tool_server):
         {
             "agent_id": "world_building",
             "goal": "Create a forest",
-            "context": {"type": "forest", "features": ["trees", "wildlife"]},
-        },
+            "context": {"type": "forest", "features": ["trees", "wildlife"]}
+        }
     )
 
     # Check that the result contains expected information
@@ -165,7 +163,11 @@ async def test_process_with_agent_tool(agent_tool_server):
     # Test with an invalid agent ID
     result = await agent_tool_server.call_tool(
         "process_with_agent",
-        {"agent_id": "nonexistent_agent", "goal": "Create a forest", "context": {}},
+        {
+            "agent_id": "nonexistent_agent",
+            "goal": "Create a forest",
+            "context": {}
+        }
     )
     # The result might be a string or a list of TextContent objects
     if isinstance(result, list):
@@ -175,7 +177,6 @@ async def test_process_with_agent_tool(agent_tool_server):
     else:
         assert "Error:" in result
         assert "Agent 'nonexistent_agent' not found" in result
-
 
 @pytest.mark.asyncio
 async def test_agents_list_resource(agent_tool_server):
@@ -220,7 +221,6 @@ async def test_agents_list_resource(agent_tool_server):
         assert "Character Creation Agent" in result
         assert "Lore Keeper Agent" in result
         assert "Narrative Management Agent" in result
-
 
 @pytest.mark.asyncio
 @pytest.mark.skip("Agent info resource with parameters is no longer available in the API")

@@ -10,12 +10,17 @@
 
 ## Overview
 
-The Universal Agent Context System provides two complementary approaches to AI-native development:
+The Universal Agent Context System provides **language-agnostic** development patterns and workflows for AI-native development:
 
 1. **Augment CLI-Specific Primitives** (`.augment/`) - Advanced agentic capabilities for Augment CLI
 2. **Cross-Platform Primitives** (`.github/`) - Universal primitives that work across Claude, Gemini, Copilot, and Augment
 
-Both structures are **actively maintained** and demonstrate different strategies for building sophisticated AI-powered development workflows.
+**Language-Specific Pathways**: For Python, JavaScript, Rust, Go, and other language-specific tooling, see:
+- **Python**: `packages/python-pathway/` (uv, pytest, ruff, pyright)
+- **JavaScript** (planned): `packages/javascript-pathway/`
+- **Rust** (planned): `packages/rust-pathway/`
+
+This package focuses on **language-agnostic concepts** like testing philosophy, API security patterns, and component maturity workflows.
 
 ---
 

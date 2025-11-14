@@ -25,15 +25,14 @@ TTA is an AI-powered therapeutic text adventure platform that combines evidence-
 
 ## Development Workflow
 
-### Package Management
-- **Tool**: `uv` (not pip/poetry) - use `uv sync --all-extras` for dependencies
-- **Python**: 3.12+ required, workspace packages: `tta-ai-framework`, `tta-narrative-engine`
+### Package Management & Testing (Python-specific)
 
-### Testing Strategy
-- **Comprehensive Battery**: `tests/comprehensive_battery/` with mock fallbacks
-- **Categories**: Standard, Adversarial, Load/Stress, Data Pipeline, Dashboard
-- **Markers**: `@pytest.mark.redis`, `@pytest.mark.neo4j`, `@pytest.mark.integration`
-- **Mutation Tests**: 100% scores for ModelSelector, FallbackHandler, PerformanceMonitor
+For Python projects, see `packages/python-pathway/instructions/`:
+- **Tooling & Package Management**: `tooling.md`, `package-management.md` (uv, uvx patterns)
+- **Testing**: `testing.md` (pytest markers, async patterns, comprehensive battery)
+- **Quality**: `quality.md` (ruff, pyright), `python-quality-standards.instructions.md`
+
+Key Python workspace packages: `tta-ai-framework`, `tta-narrative-engine`
 
 ### Service Management
 - **Docker Compose**: Consolidated architecture with base + environment overrides
@@ -162,17 +161,20 @@ Project root contains `GEMINI.md` with:
 - **Docker MCP Images**: Available for Neo4j, PostgreSQL, Grafana, Prometheus
 - **Environment Variables**: See `.env.example` for MCP_SERVER_* configurations
 
-## Development Commands
+## Common Commands (Python-specific)
+
+See `packages/python-pathway/instructions/tooling.md` and `testing.md` for complete command reference.
 
 ```bash
-# Environment setup
+# Environment setup (Python)
 uv sync --all-extras
 
-# Quality checks
-uv run ruff check src/ tests/ --fix
-uv run ruff format src/ tests/
+# Quality checks (Python)
+uvx ruff check src/ tests/ --fix
+uvx ruff format src/ tests/
+uvx pyright src/
 
-# Testing
+# Testing (Python)
 uv run pytest tests/unit/                    # Unit tests
 uv run pytest -m "redis or neo4j"          # Database tests
 uv run pytest --cov=src --cov-report=html  # Coverage
@@ -190,4 +192,4 @@ gemini "@{file} analyze this for testability"  # File injection
 gemini "/memory show"                          # View project context
 ```
 
-Focus on circuit breaker patterns, Redis-based messaging, and comprehensive error handling when working with agent orchestration. Always prefer `uv` over other Python package managers and ensure circuit breakers wrap external service calls. Leverage MCP servers (especially Context7 and Serena) for deep codebase understanding before making architectural changes.
+Focus on circuit breaker patterns, Redis-based messaging, and comprehensive error handling when working with agent orchestration. For Python projects, see `packages/python-pathway/` for language-specific tooling guidance (uv, pytest, ruff). Leverage MCP servers (especially Context7 and Serena) for deep codebase understanding before making architectural changes.

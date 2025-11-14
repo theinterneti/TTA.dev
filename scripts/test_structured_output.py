@@ -6,18 +6,19 @@ This script evaluates phi4 mini instruct, qwen 2.5 (.5b and 8b) models on their
 ability to generate valid structured outputs (JSON) and follow schemas.
 """
 
-import argparse
-import asyncio
-import json
-import logging
+import os
 import sys
+import json
 import time
-from typing import Any
-
+import asyncio
+import argparse
+import logging
+from pathlib import Path
+from typing import Dict, Any, List, Optional, Tuple
 from dotenv import load_dotenv
 
 # Add the project root to the Python path
-sys.path.append("/app")
+sys.path.append('/app')
 
 # Configure logging
 logging.basicConfig(
@@ -30,7 +31,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Import the LLM client
-from src.models.llm_client import get_llm_client
+from src.models.llm_client import get_llm_client, Message
 
 # Target models to evaluate
 TARGET_MODELS = [
@@ -38,7 +39,7 @@ TARGET_MODELS = [
     "Qwen/Qwen2.5-0.5B-Instruct",
     "Qwen/Qwen2.5-1.5B-Instruct",
     "Qwen/Qwen2.5-3B-Instruct",
-    "Qwen/Qwen2.5-7B-Instruct",
+    "Qwen/Qwen2.5-7B-Instruct"
 ]
 
 # Test cases for structured output
@@ -52,11 +53,11 @@ STRUCTURED_OUTPUT_TESTS = [
             "properties": {
                 "name": {"type": "string"},
                 "age": {"type": "integer"},
-                "email": {"type": "string"},
+                "email": {"type": "string"}
             },
-            "required": ["name", "age", "email"],
+            "required": ["name", "age", "email"]
         },
-        "complexity": "low",
+        "complexity": "low"
     },
     {
         "name": "Nested JSON Object",
@@ -75,14 +76,14 @@ STRUCTURED_OUTPUT_TESTS = [
                         "street": {"type": "string"},
                         "city": {"type": "string"},
                         "state": {"type": "string"},
-                        "zip": {"type": "string"},
+                        "zip": {"type": "string"}
                     },
-                    "required": ["street", "city", "state", "zip"],
-                },
+                    "required": ["street", "city", "state", "zip"]
+                }
             },
-            "required": ["name", "age", "email", "address"],
+            "required": ["name", "age", "email", "address"]
         },
-        "complexity": "medium",
+        "complexity": "medium"
     },
     {
         "name": "Array of Objects",
@@ -96,12 +97,12 @@ STRUCTURED_OUTPUT_TESTS = [
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
                     "price": {"type": "number"},
-                    "categories": {"type": "array", "items": {"type": "string"}},
+                    "categories": {"type": "array", "items": {"type": "string"}}
                 },
-                "required": ["id", "name", "price", "categories"],
-            },
+                "required": ["id", "name", "price", "categories"]
+            }
         },
-        "complexity": "medium",
+        "complexity": "medium"
     },
     {
         "name": "Complex Nested Structure",
@@ -118,8 +119,8 @@ STRUCTURED_OUTPUT_TESTS = [
                         "id": {"type": "string"},
                         "name": {"type": "string"},
                         "email": {"type": "string"},
-                        "phone": {"type": "string"},
-                    },
+                        "phone": {"type": "string"}
+                    }
                 },
                 "shipping_address": {
                     "type": "object",
@@ -128,8 +129,8 @@ STRUCTURED_OUTPUT_TESTS = [
                         "city": {"type": "string"},
                         "state": {"type": "string"},
                         "zip": {"type": "string"},
-                        "country": {"type": "string"},
-                    },
+                        "country": {"type": "string"}
+                    }
                 },
                 "billing_address": {
                     "type": "object",
@@ -138,8 +139,8 @@ STRUCTURED_OUTPUT_TESTS = [
                         "city": {"type": "string"},
                         "state": {"type": "string"},
                         "zip": {"type": "string"},
-                        "country": {"type": "string"},
-                    },
+                        "country": {"type": "string"}
+                    }
                 },
                 "payment": {
                     "type": "object",
@@ -150,11 +151,11 @@ STRUCTURED_OUTPUT_TESTS = [
                             "properties": {
                                 "last_four": {"type": "string"},
                                 "expiry": {"type": "string"},
-                                "card_type": {"type": "string"},
-                            },
+                                "card_type": {"type": "string"}
+                            }
                         },
-                        "amount": {"type": "number"},
-                    },
+                        "amount": {"type": "number"}
+                    }
                 },
                 "items": {
                     "type": "array",
@@ -165,17 +166,17 @@ STRUCTURED_OUTPUT_TESTS = [
                             "name": {"type": "string"},
                             "quantity": {"type": "integer"},
                             "price": {"type": "number"},
-                            "subtotal": {"type": "number"},
-                        },
-                    },
+                            "subtotal": {"type": "number"}
+                        }
+                    }
                 },
                 "subtotal": {"type": "number"},
                 "tax": {"type": "number"},
                 "shipping": {"type": "number"},
-                "total": {"type": "number"},
-            },
+                "total": {"type": "number"}
+            }
         },
-        "complexity": "high",
+        "complexity": "high"
     },
     {
         "name": "Data Extraction",
@@ -189,15 +190,14 @@ STRUCTURED_OUTPUT_TESTS = [
                 "occupation": {"type": "string"},
                 "location": {"type": "string"},
                 "hobbies": {"type": "array", "items": {"type": "string"}},
-                "email": {"type": "string"},
-            },
+                "email": {"type": "string"}
+            }
         },
-        "complexity": "medium",
-    },
+        "complexity": "medium"
+    }
 ]
 
-
-async def test_structured_output(model_name: str, test_case: dict[str, Any]) -> dict[str, Any]:
+async def test_structured_output(model_name: str, test_case: Dict[str, Any]) -> Dict[str, Any]:
     """
     Test a model's structured output capabilities.
 
@@ -225,7 +225,7 @@ async def test_structured_output(model_name: str, test_case: dict[str, Any]) -> 
         "duration": 0,
         "is_valid_json": False,
         "schema_conformance": 0.0,
-        "response": "",
+        "response": ""
     }
 
     try:
@@ -240,7 +240,7 @@ async def test_structured_output(model_name: str, test_case: dict[str, Any]) -> 
             temperature=0.2,  # Lower temperature for more deterministic output
             max_tokens=1024,
             expect_json=True,
-            json_schema=schema,
+            json_schema=schema
         )
 
         # End timer
@@ -271,8 +271,7 @@ async def test_structured_output(model_name: str, test_case: dict[str, Any]) -> 
 
     return result
 
-
-def validate_against_schema(data: Any, schema: dict[str, Any]) -> float:
+def validate_against_schema(data: Any, schema: Dict[str, Any]) -> float:
     """
     Validate data against a JSON schema and return a conformance score.
 
@@ -284,7 +283,7 @@ def validate_against_schema(data: Any, schema: dict[str, Any]) -> float:
         conformance: Schema conformance score (0.0 to 1.0)
     """
     try:
-        from jsonschema import Draft7Validator, ValidationError, validate
+        from jsonschema import validate, ValidationError, Draft7Validator
 
         # Create validator
         validator = Draft7Validator(schema)
@@ -342,8 +341,7 @@ def validate_against_schema(data: Any, schema: dict[str, Any]) -> float:
         # Default
         return 0.5
 
-
-async def run_tests(models: list[str] = None) -> dict[str, Any]:
+async def run_tests(models: List[str] = None) -> Dict[str, Any]:
     """
     Run structured output tests on specified models.
 
@@ -358,7 +356,11 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
         models = TARGET_MODELS
 
     # Prepare results dictionary
-    results = {"models": models, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "results": []}
+    results = {
+        "models": models,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "results": []
+    }
 
     # Run tests
     for model in models:
@@ -379,25 +381,17 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
             # Log result
             if result["success"]:
                 valid_str = "Valid JSON" if result["is_valid_json"] else "Invalid JSON"
-                logger.info(
-                    f"    {valid_str}, Schema Conformance: {result['schema_conformance']:.2f}, Duration: {result['duration']:.2f}s"
-                )
+                logger.info(f"    {valid_str}, Schema Conformance: {result['schema_conformance']:.2f}, Duration: {result['duration']:.2f}s")
             else:
                 logger.error(f"    Failed: {result.get('error', 'Unknown error')}")
 
         # Calculate model statistics
         success_rate = sum(1 for r in model_results if r["success"]) / len(model_results)
-        json_valid_rate = sum(1 for r in model_results if r.get("is_valid_json", False)) / len(
-            model_results
-        )
-        avg_conformance = sum(r.get("schema_conformance", 0) for r in model_results) / len(
-            model_results
-        )
-        avg_duration = sum(r["duration"] for r in model_results if r["success"]) / sum(
-            1 for r in model_results if r["success"]
-        )
+        json_valid_rate = sum(1 for r in model_results if r.get("is_valid_json", False)) / len(model_results)
+        avg_conformance = sum(r.get("schema_conformance", 0) for r in model_results) / len(model_results)
+        avg_duration = sum(r["duration"] for r in model_results if r["success"]) / sum(1 for r in model_results if r["success"])
 
-        logger.info("  Model Statistics:")
+        logger.info(f"  Model Statistics:")
         logger.info(f"    Success Rate: {success_rate * 100:.1f}%")
         logger.info(f"    JSON Valid Rate: {json_valid_rate * 100:.1f}%")
         logger.info(f"    Avg Schema Conformance: {avg_conformance:.2f}")
@@ -405,8 +399,7 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
 
     return results
 
-
-def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
+def analyze_results(results: Dict[str, Any]) -> Dict[str, Any]:
     """
     Analyze test results and provide insights.
 
@@ -425,7 +418,7 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         "timestamp": results["timestamp"],
         "model_performance": {},
         "complexity_performance": {},
-        "overall_ranking": {},
+        "overall_ranking": {}
     }
 
     # Analyze performance by model
@@ -440,17 +433,11 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         success_rate = sum(1 for r in model_results if r["success"]) / len(model_results)
 
         # Calculate JSON valid rate
-        json_valid_rate = sum(1 for r in model_results if r.get("is_valid_json", False)) / len(
-            model_results
-        )
+        json_valid_rate = sum(1 for r in model_results if r.get("is_valid_json", False)) / len(model_results)
 
         # Calculate average schema conformance
-        conformance_values = [
-            r.get("schema_conformance", 0) for r in model_results if r.get("is_valid_json", False)
-        ]
-        avg_conformance = (
-            sum(conformance_values) / len(conformance_values) if conformance_values else 0
-        )
+        conformance_values = [r.get("schema_conformance", 0) for r in model_results if r.get("is_valid_json", False)]
+        avg_conformance = sum(conformance_values) / len(conformance_values) if conformance_values else 0
 
         # Calculate average duration
         durations = [r["duration"] for r in model_results if r["success"]]
@@ -461,23 +448,13 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         for complexity in ["low", "medium", "high"]:
             complexity_results = [r for r in model_results if r.get("complexity") == complexity]
             if complexity_results:
-                complexity_valid_rate = sum(
-                    1 for r in complexity_results if r.get("is_valid_json", False)
-                ) / len(complexity_results)
-                complexity_conformance = sum(
-                    r.get("schema_conformance", 0)
-                    for r in complexity_results
-                    if r.get("is_valid_json", False)
-                )
-                complexity_conformance /= (
-                    sum(1 for r in complexity_results if r.get("is_valid_json", False))
-                    if sum(1 for r in complexity_results if r.get("is_valid_json", False)) > 0
-                    else 1
-                )
+                complexity_valid_rate = sum(1 for r in complexity_results if r.get("is_valid_json", False)) / len(complexity_results)
+                complexity_conformance = sum(r.get("schema_conformance", 0) for r in complexity_results if r.get("is_valid_json", False))
+                complexity_conformance /= sum(1 for r in complexity_results if r.get("is_valid_json", False)) if sum(1 for r in complexity_results if r.get("is_valid_json", False)) > 0 else 1
 
                 complexity_performance[complexity] = {
                     "valid_rate": complexity_valid_rate,
-                    "conformance": complexity_conformance,
+                    "conformance": complexity_conformance
                 }
 
         # Store model performance
@@ -486,7 +463,7 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
             "json_valid_rate": json_valid_rate,
             "avg_conformance": avg_conformance,
             "avg_duration": avg_duration,
-            "complexity_performance": complexity_performance,
+            "complexity_performance": complexity_performance
         }
 
     # Analyze performance by complexity
@@ -502,24 +479,19 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         for model in models:
             model_complexity_results = [r for r in complexity_results if r["model"] == model]
             if model_complexity_results:
-                valid_rate = sum(
-                    1 for r in model_complexity_results if r.get("is_valid_json", False)
-                ) / len(model_complexity_results)
-                conformance = sum(
-                    r.get("schema_conformance", 0)
-                    for r in model_complexity_results
-                    if r.get("is_valid_json", False)
-                )
-                conformance /= (
-                    sum(1 for r in model_complexity_results if r.get("is_valid_json", False))
-                    if sum(1 for r in model_complexity_results if r.get("is_valid_json", False)) > 0
-                    else 1
-                )
+                valid_rate = sum(1 for r in model_complexity_results if r.get("is_valid_json", False)) / len(model_complexity_results)
+                conformance = sum(r.get("schema_conformance", 0) for r in model_complexity_results if r.get("is_valid_json", False))
+                conformance /= sum(1 for r in model_complexity_results if r.get("is_valid_json", False)) if sum(1 for r in model_complexity_results if r.get("is_valid_json", False)) > 0 else 1
 
-                model_performance[model] = {"valid_rate": valid_rate, "conformance": conformance}
+                model_performance[model] = {
+                    "valid_rate": valid_rate,
+                    "conformance": conformance
+                }
 
         # Store complexity performance
-        analysis["complexity_performance"][complexity] = {"model_performance": model_performance}
+        analysis["complexity_performance"][complexity] = {
+            "model_performance": model_performance
+        }
 
     # Calculate overall ranking
     ranking_scores = {}
@@ -533,9 +505,7 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         # Adjust weights based on your priorities
         valid_score = perf["json_valid_rate"] * 10
         conformance_score = perf["avg_conformance"] * 10
-        speed_score = min(
-            10, 10 / (perf["avg_duration"] + 0.1)
-        )  # Inverse of duration, capped at 10
+        speed_score = min(10, 10 / (perf["avg_duration"] + 0.1))  # Inverse of duration, capped at 10
 
         # Calculate complexity scores
         complexity_scores = {}
@@ -552,10 +522,10 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
         # Combined score (adjust weights as needed)
         score = (
-            valid_score * 0.3  # 30% weight for JSON validity
-            + conformance_score * 0.3  # 30% weight for schema conformance
-            + speed_score * 0.1  # 10% weight for speed
-            + weighted_complexity_score * 0.3  # 30% weight for complexity handling
+            valid_score * 0.3 +  # 30% weight for JSON validity
+            conformance_score * 0.3 +  # 30% weight for schema conformance
+            speed_score * 0.1 +  # 10% weight for speed
+            weighted_complexity_score * 0.3  # 30% weight for complexity handling
         )
 
         ranking_scores[model] = score
@@ -565,12 +535,14 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
     # Store overall ranking
     for i, model in enumerate(sorted_models):
-        analysis["overall_ranking"][model] = {"rank": i + 1, "score": ranking_scores[model]}
+        analysis["overall_ranking"][model] = {
+            "rank": i + 1,
+            "score": ranking_scores[model]
+        }
 
     return analysis
 
-
-def print_analysis(analysis: dict[str, Any]):
+def print_analysis(analysis: Dict[str, Any]):
     """
     Print analysis results in a readable format.
 
@@ -595,33 +567,19 @@ def print_analysis(analysis: dict[str, Any]):
 
         print("  Performance by Complexity:")
         for complexity, comp_perf in perf["complexity_performance"].items():
-            print(
-                f"    {complexity.upper()}: Valid Rate: {comp_perf['valid_rate'] * 100:.1f}%, Conformance: {comp_perf['conformance']:.2f}"
-            )
+            print(f"    {complexity.upper()}: Valid Rate: {comp_perf['valid_rate'] * 100:.1f}%, Conformance: {comp_perf['conformance']:.2f}")
 
     print("\n----- COMPLEXITY PERFORMANCE -----")
     for complexity, perf in analysis["complexity_performance"].items():
         print(f"\n{complexity.upper()}:")
-        for model, model_perf in sorted(
-            perf["model_performance"].items(),
-            key=lambda x: (x[1]["valid_rate"] * x[1]["conformance"]),
-            reverse=True,
-        ):
-            print(
-                f"  {model}: Valid Rate: {model_perf['valid_rate'] * 100:.1f}%, Conformance: {model_perf['conformance']:.2f}"
-            )
-
+        for model, model_perf in sorted(perf["model_performance"].items(), key=lambda x: (x[1]["valid_rate"] * x[1]["conformance"]), reverse=True):
+            print(f"  {model}: Valid Rate: {model_perf['valid_rate'] * 100:.1f}%, Conformance: {model_perf['conformance']:.2f}")
 
 async def main():
     """Main function."""
     parser = argparse.ArgumentParser(description="Test models on structured output capabilities")
-    parser.add_argument(
-        "--models",
-        nargs="+",
-        choices=TARGET_MODELS + ["all"],
-        default=["all"],
-        help="Models to test",
-    )
+    parser.add_argument("--models", nargs="+", choices=TARGET_MODELS + ["all"], default=["all"],
+                      help="Models to test")
     parser.add_argument("--output", help="Output file for results (JSON)")
     args = parser.parse_args()
 
@@ -642,13 +600,15 @@ async def main():
 
     # Save results if output file specified
     if args.output:
-        output_data = {"results": results, "analysis": analysis}
+        output_data = {
+            "results": results,
+            "analysis": analysis
+        }
 
         with open(args.output, "w") as f:
             json.dump(output_data, f, indent=2)
 
         print(f"\nResults saved to {args.output}")
-
 
 if __name__ == "__main__":
     asyncio.run(main())

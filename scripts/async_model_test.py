@@ -6,18 +6,17 @@ This script tests multiple models asynchronously, allowing for parallel evaluati
 of different models to speed up the testing process.
 """
 
-import argparse
-import asyncio
-import json
-import logging
 import os
 import sys
 import time
+import json
+import torch
+import asyncio
+import logging
+import argparse
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 from pathlib import Path
-from typing import Any
-
-import torch
 
 # Configure logging
 logging.basicConfig(
@@ -35,9 +34,8 @@ try:
         AutoModelForCausalLM,
         AutoTokenizer,
         BitsAndBytesConfig,
-        GenerationConfig,
+        GenerationConfig
     )
-
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     logger.warning("Transformers library not available. Some functionality will be limited.")
@@ -55,7 +53,7 @@ TEST_PROMPTS = {
     "creative": "Write a short story about a robot that discovers it has emotions.",
     "reasoning": "If a train travels at 60 mph for 2 hours, then at 80 mph for 1 hour, what is the average speed for the entire journey?",
     "structured_output": "Generate a JSON object that represents a person with the following attributes: name, age, occupation, and a list of hobbies.",
-    "tool_use": "I need to analyze the sentiment of this text: 'I absolutely loved the movie, it was fantastic!' Can you use a sentiment analysis tool to help me?",
+    "tool_use": "I need to analyze the sentiment of this text: 'I absolutely loved the movie, it was fantastic!' Can you use a sentiment analysis tool to help me?"
 }
 
 # Quantization configurations
@@ -64,11 +62,12 @@ QUANTIZATION_CONFIGS = {
         "load_in_4bit": True,
         "bnb_4bit_compute_dtype": torch.float16,
         "bnb_4bit_use_double_quant": True,
-        "bnb_4bit_quant_type": "nf4",
+        "bnb_4bit_quant_type": "nf4"
     },
-    "8bit": {"load_in_8bit": True},
+    "8bit": {
+        "load_in_8bit": True
+    }
 }
-
 
 class AsyncModelTester:
     """
@@ -124,8 +123,8 @@ class AsyncModelTester:
         quantization: str = "4bit",
         use_flash_attention: bool = True,
         temperature: float = 0.7,
-        max_new_tokens: int = 200,
-    ) -> dict[str, Any]:
+        max_new_tokens: int = 200
+    ) -> Dict[str, Any]:
         """
         Test a model with various configurations and prompts.
 
@@ -151,7 +150,9 @@ class AsyncModelTester:
             "max_new_tokens": max_new_tokens,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "tests": {},
-            "memory": {"initial": self.get_memory_usage()},
+            "memory": {
+                "initial": self.get_memory_usage()
+            }
         }
 
         try:
@@ -171,7 +172,7 @@ class AsyncModelTester:
                 model_name,
                 cache_dir=self.model_cache_dir,
                 trust_remote_code=True,
-                token=HF_TOKEN if HF_TOKEN else None,
+                token=HF_TOKEN if HF_TOKEN else None
             )
 
             # Load model
@@ -187,15 +188,13 @@ class AsyncModelTester:
                 quantization_config=quant_config,
                 # Only use flash attention if explicitly requested and available
                 attn_implementation="eager",  # Default to eager attention
-                token=HF_TOKEN if HF_TOKEN else None,
+                token=HF_TOKEN if HF_TOKEN else None
             )
             model_load_time = time.time() - model_load_start
 
             # Record memory after model loading
             results["memory"]["after_load"] = self.get_memory_usage()
-            results["memory"]["model_size_mb"] = (
-                results["memory"]["after_load"] - results["memory"]["initial"]
-            )
+            results["memory"]["model_size_mb"] = results["memory"]["after_load"] - results["memory"]["initial"]
             results["model_load_time"] = model_load_time
 
             # Test each prompt type
@@ -229,7 +228,10 @@ class AsyncModelTester:
                 # Generate response
                 with torch.no_grad():
                     # Always use standard generation to avoid flash attention issues
-                    outputs = model.generate(input_ids, generation_config=gen_config)
+                    outputs = model.generate(
+                        input_ids,
+                        generation_config=gen_config
+                    )
 
                 # End timer
                 end_time = time.time()
@@ -251,15 +253,13 @@ class AsyncModelTester:
                     "tokens_generated": tokens_generated,
                     "tokens_per_second": tokens_per_second,
                     "memory_usage_mb": memory_during_gen,
-                    "response": output_text,
+                    "response": output_text
                 }
 
                 # Add to results
                 results["tests"][prompt_type] = test_results
 
-                logger.info(
-                    f"  Generated {tokens_generated} tokens in {duration:.2f}s ({tokens_per_second:.2f} tokens/s)"
-                )
+                logger.info(f"  Generated {tokens_generated} tokens in {duration:.2f}s ({tokens_per_second:.2f} tokens/s)")
 
             # Final memory usage
             results["memory"]["final"] = self.get_memory_usage()
@@ -277,18 +277,18 @@ class AsyncModelTester:
             return {
                 "model": model_name,
                 "error": str(e),
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
 
     async def run_tests_async(
         self,
-        models: list[str],
-        quantizations: list[str] = None,
-        flash_attention_settings: list[bool] = None,
-        temperatures: list[float] = None,
+        models: List[str],
+        quantizations: List[str] = ["4bit"],
+        flash_attention_settings: List[bool] = [True],
+        temperatures: List[float] = [0.7],
         max_concurrent: int = 1,
-        output_file: str | None = None,
-    ) -> dict[str, Any]:
+        output_file: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Run tests on models asynchronously.
 
@@ -304,19 +304,13 @@ class AsyncModelTester:
             results: Test results
         """
         # Create results dictionary
-        if temperatures is None:
-            temperatures = [0.7]
-        if flash_attention_settings is None:
-            flash_attention_settings = [True]
-        if quantizations is None:
-            quantizations = ["4bit"]
         results = {
             "models": models,
             "quantizations": quantizations,
             "flash_attention_settings": flash_attention_settings,
             "temperatures": temperatures,
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "results": [],
+            "results": []
         }
 
         # Create a semaphore to limit concurrent tests
@@ -333,27 +327,23 @@ class AsyncModelTester:
                             logger.info("Skipping flash attention test as CUDA is not available")
                             continue
 
-                        test_configs.append(
-                            {
-                                "model": model,
-                                "quantization": quantization,
-                                "use_flash_attention": use_flash_attention,
-                                "temperature": temperature,
-                            }
-                        )
+                        test_configs.append({
+                            "model": model,
+                            "quantization": quantization,
+                            "use_flash_attention": use_flash_attention,
+                            "temperature": temperature
+                        })
 
         # Define a wrapper function that acquires and releases the semaphore
         async def test_with_semaphore(config):
             async with semaphore:
-                logger.info(
-                    f"Testing {config['model']} with quantization={config['quantization']}, "
-                    f"flash_attention={config['use_flash_attention']}, temperature={config['temperature']}"
-                )
+                logger.info(f"Testing {config['model']} with quantization={config['quantization']}, "
+                           f"flash_attention={config['use_flash_attention']}, temperature={config['temperature']}")
                 return await self.test_model(
                     config["model"],
                     quantization=config["quantization"],
                     use_flash_attention=config["use_flash_attention"],
-                    temperature=config["temperature"],
+                    temperature=config["temperature"]
                 )
 
         # Run tests concurrently with semaphore
@@ -372,7 +362,7 @@ class AsyncModelTester:
 
         return results
 
-    def analyze_results(self, results: dict[str, Any]) -> dict[str, Any]:
+    def analyze_results(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """
         Analyze test results.
 
@@ -387,7 +377,7 @@ class AsyncModelTester:
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "model_performance": {},
             "prompt_type_performance": {},
-            "overall_ranking": [],
+            "overall_ranking": []
         }
 
         # Extract model results
@@ -404,19 +394,15 @@ class AsyncModelTester:
                 analysis["model_performance"][model_name] = {
                     "tokens_per_second": [],
                     "load_time": [],
-                    "memory_usage": [],
+                    "memory_usage": []
                 }
 
             # Add performance metrics
             if "model_load_time" in result:
-                analysis["model_performance"][model_name]["load_time"].append(
-                    result["model_load_time"]
-                )
+                analysis["model_performance"][model_name]["load_time"].append(result["model_load_time"])
 
             if "memory" in result and "model_size_mb" in result["memory"]:
-                analysis["model_performance"][model_name]["memory_usage"].append(
-                    result["memory"]["model_size_mb"]
-                )
+                analysis["model_performance"][model_name]["memory_usage"].append(result["memory"]["model_size_mb"])
 
             # Add test results
             for prompt_type, test_result in result["tests"].items():
@@ -426,62 +412,34 @@ class AsyncModelTester:
                 if model_name not in analysis["prompt_type_performance"][prompt_type]:
                     analysis["prompt_type_performance"][prompt_type][model_name] = {
                         "tokens_per_second": [],
-                        "duration": [],
+                        "duration": []
                     }
 
-                analysis["prompt_type_performance"][prompt_type][model_name][
-                    "tokens_per_second"
-                ].append(test_result["tokens_per_second"])
-                analysis["prompt_type_performance"][prompt_type][model_name]["duration"].append(
-                    test_result["duration"]
-                )
+                analysis["prompt_type_performance"][prompt_type][model_name]["tokens_per_second"].append(test_result["tokens_per_second"])
+                analysis["prompt_type_performance"][prompt_type][model_name]["duration"].append(test_result["duration"])
 
-                analysis["model_performance"][model_name]["tokens_per_second"].append(
-                    test_result["tokens_per_second"]
-                )
+                analysis["model_performance"][model_name]["tokens_per_second"].append(test_result["tokens_per_second"])
 
         # Calculate averages
         for model_name, performance in analysis["model_performance"].items():
-            performance["avg_tokens_per_second"] = (
-                sum(performance["tokens_per_second"]) / len(performance["tokens_per_second"])
-                if performance["tokens_per_second"]
-                else 0
-            )
-            performance["avg_load_time"] = (
-                sum(performance["load_time"]) / len(performance["load_time"])
-                if performance["load_time"]
-                else 0
-            )
-            performance["avg_memory_usage"] = (
-                sum(performance["memory_usage"]) / len(performance["memory_usage"])
-                if performance["memory_usage"]
-                else 0
-            )
+            performance["avg_tokens_per_second"] = sum(performance["tokens_per_second"]) / len(performance["tokens_per_second"]) if performance["tokens_per_second"] else 0
+            performance["avg_load_time"] = sum(performance["load_time"]) / len(performance["load_time"]) if performance["load_time"] else 0
+            performance["avg_memory_usage"] = sum(performance["memory_usage"]) / len(performance["memory_usage"]) if performance["memory_usage"] else 0
 
         for prompt_type, models in analysis["prompt_type_performance"].items():
             for model_name, performance in models.items():
-                performance["avg_tokens_per_second"] = (
-                    sum(performance["tokens_per_second"]) / len(performance["tokens_per_second"])
-                    if performance["tokens_per_second"]
-                    else 0
-                )
-                performance["avg_duration"] = (
-                    sum(performance["duration"]) / len(performance["duration"])
-                    if performance["duration"]
-                    else 0
-                )
+                performance["avg_tokens_per_second"] = sum(performance["tokens_per_second"]) / len(performance["tokens_per_second"]) if performance["tokens_per_second"] else 0
+                performance["avg_duration"] = sum(performance["duration"]) / len(performance["duration"]) if performance["duration"] else 0
 
         # Create overall ranking
         model_ranking = []
         for model_name, performance in analysis["model_performance"].items():
-            model_ranking.append(
-                {
-                    "model": model_name,
-                    "avg_tokens_per_second": performance["avg_tokens_per_second"],
-                    "avg_load_time": performance["avg_load_time"],
-                    "avg_memory_usage": performance["avg_memory_usage"],
-                }
-            )
+            model_ranking.append({
+                "model": model_name,
+                "avg_tokens_per_second": performance["avg_tokens_per_second"],
+                "avg_load_time": performance["avg_load_time"],
+                "avg_memory_usage": performance["avg_memory_usage"]
+            })
 
         # Sort by tokens per second (descending)
         model_ranking.sort(key=lambda x: x["avg_tokens_per_second"], reverse=True)
@@ -491,7 +449,7 @@ class AsyncModelTester:
 
         return analysis
 
-    def print_analysis(self, analysis: dict[str, Any]) -> None:
+    def print_analysis(self, analysis: Dict[str, Any]) -> None:
         """
         Print analysis of test results.
 
@@ -503,7 +461,7 @@ class AsyncModelTester:
 
         print("\n----- OVERALL RANKING -----")
         for i, model in enumerate(analysis["overall_ranking"]):
-            print(f"{i + 1}. {model['model']}")
+            print(f"{i+1}. {model['model']}")
             print(f"   Avg. Tokens/s: {model['avg_tokens_per_second']:.2f}")
             print(f"   Avg. Load Time: {model['avg_load_time']:.2f}s")
             print(f"   Avg. Memory Usage: {model['avg_memory_usage']:.2f} MB")
@@ -514,42 +472,26 @@ class AsyncModelTester:
 
             # Sort models by average tokens per second
             sorted_models = sorted(
-                [
-                    (model_name, performance["avg_tokens_per_second"])
-                    for model_name, performance in models.items()
-                ],
+                [(model_name, performance["avg_tokens_per_second"]) for model_name, performance in models.items()],
                 key=lambda x: x[1],
-                reverse=True,
+                reverse=True
             )
 
             for i, (model_name, avg_tokens_per_second) in enumerate(sorted_models):
-                print(f"{i + 1}. {model_name}: {avg_tokens_per_second:.2f} tokens/s")
-
+                print(f"{i+1}. {model_name}: {avg_tokens_per_second:.2f} tokens/s")
 
 async def main():
     """Main function."""
     parser = argparse.ArgumentParser(description="Test models asynchronously")
     parser.add_argument("--models", nargs="+", help="Models to test")
-    parser.add_argument(
-        "--quantizations",
-        nargs="+",
-        choices=["4bit", "8bit", "none"],
-        default=["4bit"],
-        help="Quantization levels to test",
-    )
-    parser.add_argument(
-        "--flash-attention",
-        nargs="+",
-        choices=["true", "false"],
-        default=["true"],
-        help="Flash attention settings to test",
-    )
-    parser.add_argument(
-        "--temperatures", nargs="+", type=float, default=[0.7], help="Temperature settings to test"
-    )
-    parser.add_argument(
-        "--max-concurrent", type=int, default=1, help="Maximum number of concurrent tests"
-    )
+    parser.add_argument("--quantizations", nargs="+", choices=["4bit", "8bit", "none"], default=["4bit"],
+                      help="Quantization levels to test")
+    parser.add_argument("--flash-attention", nargs="+", choices=["true", "false"], default=["true"],
+                      help="Flash attention settings to test")
+    parser.add_argument("--temperatures", nargs="+", type=float, default=[0.7],
+                      help="Temperature settings to test")
+    parser.add_argument("--max-concurrent", type=int, default=1,
+                      help="Maximum number of concurrent tests")
     parser.add_argument("--output", help="Output file for results")
     args = parser.parse_args()
 
@@ -560,9 +502,7 @@ async def main():
     if not args.models:
         model_cache_dir = Path(MODEL_CACHE_DIR)
         if model_cache_dir.exists():
-            model_dirs = [
-                d for d in model_cache_dir.iterdir() if d.is_dir() and d.name.startswith("models--")
-            ]
+            model_dirs = [d for d in model_cache_dir.iterdir() if d.is_dir() and d.name.startswith("models--")]
             args.models = [d.name.replace("models--", "").replace("--", "/") for d in model_dirs]
             logger.info(f"Found models in cache: {args.models}")
         else:
@@ -579,7 +519,7 @@ async def main():
         flash_attention_settings=flash_attention_settings,
         temperatures=args.temperatures,
         max_concurrent=args.max_concurrent,
-        output_file=args.output,
+        output_file=args.output
     )
 
     # Analyze results
@@ -587,7 +527,6 @@ async def main():
 
     # Print analysis
     tester.print_analysis(analysis)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

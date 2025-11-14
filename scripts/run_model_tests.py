@@ -6,17 +6,19 @@ This script runs the model evaluation, structured output, and tool use tests
 for the specified models and generates a comprehensive report with the results.
 """
 
-import argparse
-import asyncio
-import json
-import logging
 import os
 import sys
+import json
+import time
+import asyncio
+import argparse
+import logging
+from pathlib import Path
+from typing import Dict, Any, List
 from datetime import datetime
-from typing import Any
 
 # Add the project root to the Python path
-sys.path.append("/app")
+sys.path.append('/app')
 
 # Configure logging
 logging.basicConfig(
@@ -26,12 +28,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import the test scripts
-from scripts.model_evaluation import analyze_results as analyze_general_results
-from scripts.model_evaluation import run_evaluations as run_general_evaluations
-from scripts.test_structured_output import analyze_results as analyze_structured_results
-from scripts.test_structured_output import run_tests as run_structured_tests
-from scripts.test_tool_use import analyze_results as analyze_tool_results
-from scripts.test_tool_use import run_tests as run_tool_tests
+from scripts.model_evaluation import run_evaluations as run_general_evaluations, analyze_results as analyze_general_results
+from scripts.test_structured_output import run_tests as run_structured_tests, analyze_results as analyze_structured_results
+from scripts.test_tool_use import run_tests as run_tool_tests, analyze_results as analyze_tool_results
 
 # Target models to evaluate
 TARGET_MODELS = [
@@ -39,13 +38,10 @@ TARGET_MODELS = [
     "Qwen/Qwen2.5-0.5B-Instruct",
     "Qwen/Qwen2.5-1.5B-Instruct",
     "Qwen/Qwen2.5-3B-Instruct",
-    "Qwen/Qwen2.5-7B-Instruct",
+    "Qwen/Qwen2.5-7B-Instruct"
 ]
 
-
-async def run_all_tests(
-    models: list[str] = None, output_dir: str = "test_results"
-) -> dict[str, Any]:
+async def run_all_tests(models: List[str] = None, output_dir: str = "test_results") -> Dict[str, Any]:
     """
     Run all tests for the specified models and generate a comprehensive report.
 
@@ -68,7 +64,7 @@ async def run_all_tests(
         "models": models,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "tests": {},
-        "overall_ranking": {},
+        "overall_ranking": {}
     }
 
     # Run general evaluations
@@ -79,12 +75,18 @@ async def run_all_tests(
     # Save general results
     general_output_file = os.path.join(output_dir, "general_evaluation_results.json")
     with open(general_output_file, "w") as f:
-        json.dump({"results": general_results, "analysis": general_analysis}, f, indent=2)
+        json.dump({
+            "results": general_results,
+            "analysis": general_analysis
+        }, f, indent=2)
 
     logger.info(f"General evaluation results saved to {general_output_file}")
 
     # Add to report
-    report["tests"]["general"] = {"results": general_results, "analysis": general_analysis}
+    report["tests"]["general"] = {
+        "results": general_results,
+        "analysis": general_analysis
+    }
 
     # Run structured output tests
     logger.info("Running structured output tests...")
@@ -94,14 +96,17 @@ async def run_all_tests(
     # Save structured output results
     structured_output_file = os.path.join(output_dir, "structured_output_results.json")
     with open(structured_output_file, "w") as f:
-        json.dump({"results": structured_results, "analysis": structured_analysis}, f, indent=2)
+        json.dump({
+            "results": structured_results,
+            "analysis": structured_analysis
+        }, f, indent=2)
 
     logger.info(f"Structured output results saved to {structured_output_file}")
 
     # Add to report
     report["tests"]["structured_output"] = {
         "results": structured_results,
-        "analysis": structured_analysis,
+        "analysis": structured_analysis
     }
 
     # Run tool use tests
@@ -112,12 +117,18 @@ async def run_all_tests(
     # Save tool use results
     tool_output_file = os.path.join(output_dir, "tool_use_results.json")
     with open(tool_output_file, "w") as f:
-        json.dump({"results": tool_results, "analysis": tool_analysis}, f, indent=2)
+        json.dump({
+            "results": tool_results,
+            "analysis": tool_analysis
+        }, f, indent=2)
 
     logger.info(f"Tool use results saved to {tool_output_file}")
 
     # Add to report
-    report["tests"]["tool_use"] = {"results": tool_results, "analysis": tool_analysis}
+    report["tests"]["tool_use"] = {
+        "results": tool_results,
+        "analysis": tool_analysis
+    }
 
     # Calculate overall ranking
     overall_scores = {}
@@ -136,9 +147,9 @@ async def run_all_tests(
 
         # Calculate weighted overall score (adjust weights as needed)
         overall_score = (
-            general_score * 0.4  # 40% weight for general performance
-            + structured_score * 0.3  # 30% weight for structured output
-            + tool_score * 0.3  # 30% weight for tool use
+            general_score * 0.4 +  # 40% weight for general performance
+            structured_score * 0.3 +  # 30% weight for structured output
+            tool_score * 0.3  # 30% weight for tool use
         )
 
         overall_scores[model] = overall_score
@@ -153,7 +164,7 @@ async def run_all_tests(
             "score": overall_scores[model],
             "general_score": general_ranking.get(model, {}).get("score", 0),
             "structured_score": structured_ranking.get(model, {}).get("score", 0),
-            "tool_score": tool_ranking.get(model, {}).get("score", 0),
+            "tool_score": tool_ranking.get(model, {}).get("score", 0)
         }
 
     # Save comprehensive report
@@ -165,8 +176,7 @@ async def run_all_tests(
 
     return report
 
-
-def print_comprehensive_report(report: dict[str, Any]):
+def print_comprehensive_report(report: Dict[str, Any]):
     """
     Print a comprehensive report in a readable format.
 
@@ -180,9 +190,7 @@ def print_comprehensive_report(report: dict[str, Any]):
     print("\n----- OVERALL RANKING -----")
     for model, ranking in sorted(report["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
         print(f"{ranking['rank']}. {model} (Score: {ranking['score']:.2f})")
-        print(
-            f"   General: {ranking['general_score']:.2f}, Structured: {ranking['structured_score']:.2f}, Tool: {ranking['tool_score']:.2f}"
-        )
+        print(f"   General: {ranking['general_score']:.2f}, Structured: {ranking['structured_score']:.2f}, Tool: {ranking['tool_score']:.2f}")
 
     # Print summary of each test
     print("\n----- TEST SUMMARIES -----")
@@ -191,74 +199,36 @@ def print_comprehensive_report(report: dict[str, Any]):
     if "general" in report["tests"]:
         general_analysis = report["tests"]["general"]["analysis"]
         print("\nGeneral Evaluation:")
-        for model, ranking in sorted(
-            general_analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]
-        ):
+        for model, ranking in sorted(general_analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
             perf = general_analysis["model_performance"].get(model, {})
-            print(
-                f"  {model}: Score: {ranking['score']:.2f}, Success Rate: {perf.get('success_rate', 0) * 100:.1f}%, Avg Tokens/Second: {perf.get('avg_tokens_per_second', 0):.2f}"
-            )
+            print(f"  {model}: Score: {ranking['score']:.2f}, Success Rate: {perf.get('success_rate', 0) * 100:.1f}%, Avg Tokens/Second: {perf.get('avg_tokens_per_second', 0):.2f}")
 
     # Structured output summary
     if "structured_output" in report["tests"]:
         structured_analysis = report["tests"]["structured_output"]["analysis"]
         print("\nStructured Output:")
-        for model, ranking in sorted(
-            structured_analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]
-        ):
+        for model, ranking in sorted(structured_analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
             perf = structured_analysis["model_performance"].get(model, {})
-            print(
-                f"  {model}: Score: {ranking['score']:.2f}, JSON Valid Rate: {perf.get('json_valid_rate', 0) * 100:.1f}%, Avg Conformance: {perf.get('avg_conformance', 0):.2f}"
-            )
+            print(f"  {model}: Score: {ranking['score']:.2f}, JSON Valid Rate: {perf.get('json_valid_rate', 0) * 100:.1f}%, Avg Conformance: {perf.get('avg_conformance', 0):.2f}")
 
     # Tool use summary
     if "tool_use" in report["tests"]:
         tool_analysis = report["tests"]["tool_use"]["analysis"]
         print("\nTool Use:")
-        for model, ranking in sorted(
-            tool_analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]
-        ):
+        for model, ranking in sorted(tool_analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
             perf = tool_analysis["model_performance"].get(model, {})
-            print(
-                f"  {model}: Score: {ranking['score']:.2f}, Tool Call Rate: {perf.get('tool_call_correct_rate', 0) * 100:.1f}%, Tool Mention Rate: {perf.get('avg_tool_mention_rate', 0) * 100:.1f}%"
-            )
+            print(f"  {model}: Score: {ranking['score']:.2f}, Tool Call Rate: {perf.get('tool_call_correct_rate', 0) * 100:.1f}%, Tool Mention Rate: {perf.get('avg_tool_mention_rate', 0) * 100:.1f}%")
 
     # Print recommendations
     print("\n----- RECOMMENDATIONS -----")
 
     # Get the top model overall
-    top_model = next(
-        iter(sorted(report["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None)
-    )[0]
+    top_model = next(iter(sorted(report["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None))[0]
 
     # Get the top model for each category
-    top_general = next(
-        iter(
-            sorted(
-                report["tests"]["general"]["analysis"]["overall_ranking"].items(),
-                key=lambda x: x[1]["rank"],
-            )
-        ),
-        (None, None),
-    )[0]
-    top_structured = next(
-        iter(
-            sorted(
-                report["tests"]["structured_output"]["analysis"]["overall_ranking"].items(),
-                key=lambda x: x[1]["rank"],
-            )
-        ),
-        (None, None),
-    )[0]
-    top_tool = next(
-        iter(
-            sorted(
-                report["tests"]["tool_use"]["analysis"]["overall_ranking"].items(),
-                key=lambda x: x[1]["rank"],
-            )
-        ),
-        (None, None),
-    )[0]
+    top_general = next(iter(sorted(report["tests"]["general"]["analysis"]["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None))[0]
+    top_structured = next(iter(sorted(report["tests"]["structured_output"]["analysis"]["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None))[0]
+    top_tool = next(iter(sorted(report["tests"]["tool_use"]["analysis"]["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None))[0]
 
     print(f"Best overall model: {top_model}")
     print(f"Best model for general tasks: {top_general}")
@@ -274,13 +244,9 @@ def print_comprehensive_report(report: dict[str, Any]):
     # Print final recommendation
     print("\nFinal recommendation:")
     if top_model == top_general == top_structured == top_tool:
-        print(
-            f"{top_model} is the best model across all categories and is recommended for all use cases."
-        )
+        print(f"{top_model} is the best model across all categories and is recommended for all use cases.")
     else:
-        print(
-            f"{top_model} is the best overall model, but consider using specialized models for specific tasks:"
-        )
+        print(f"{top_model} is the best overall model, but consider using specialized models for specific tasks:")
         if top_general != top_model:
             print(f"  - Use {top_general} for speed-critical applications")
         if top_structured != top_model:
@@ -288,22 +254,12 @@ def print_comprehensive_report(report: dict[str, Any]):
         if top_tool != top_model:
             print(f"  - Use {top_tool} for tool/function calling")
 
-
 async def main():
     """Main function."""
-    parser = argparse.ArgumentParser(
-        description="Run all model tests and generate a comprehensive report"
-    )
-    parser.add_argument(
-        "--models",
-        nargs="+",
-        choices=TARGET_MODELS + ["all"],
-        default=["all"],
-        help="Models to test",
-    )
-    parser.add_argument(
-        "--output-dir", default="test_results", help="Directory to save test results"
-    )
+    parser = argparse.ArgumentParser(description="Run all model tests and generate a comprehensive report")
+    parser.add_argument("--models", nargs="+", choices=TARGET_MODELS + ["all"], default=["all"],
+                      help="Models to test")
+    parser.add_argument("--output-dir", default="test_results", help="Directory to save test results")
     args = parser.parse_args()
 
     # Process model selection
@@ -317,7 +273,6 @@ async def main():
 
     # Print comprehensive report
     print_comprehensive_report(report)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
