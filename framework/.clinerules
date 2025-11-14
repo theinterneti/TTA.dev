@@ -192,6 +192,29 @@ result = await workflow.execute(context, input_data)
 USER_ID = "user-789"  # Don't use globals
 ```
 
+## MCP Server Usage
+
+When a task requires external information or capabilities, leverage the installed MCP servers.
+
+### Available Servers and Use Cases
+
+| Server Name | Primary Use Case | Example Tools |
+|---|---|---|
+| `context7-mcp` | Fetching up-to-date documentation for any library. | `resolve-library-id`, `get-library-docs` |
+| `playwright` | Browser automation, web scraping, and end-to-end testing. | `browser_navigate`, `browser_click`, `browser_snapshot` |
+| `serena` | Semantic code analysis, symbol search, and code manipulation. | `get_symbols_overview`, `find_symbol` |
+| `postman` | Interacting with the Postman API to manage collections and environments. | `run_collection`, `api_lint` |
+| `github` | Interacting with the GitHub API for repository and issue management. | `create_issue`, `get_file_contents`, `create_pull_request` |
+| `sequential-thinking` | Breaking down complex problems and getting tool recommendations. | `sequentialthinking_tools` |
+| `gitmcp` | Accessing documentation and code from GitHub repositories. | `fetch_TTA_dev_documentation`, `search_TTA_dev_code` |
+
+### Workflow
+
+1.  **Identify the need:** Determine if the task requires external data or actions.
+2.  **Select the right tool:** Choose the appropriate MCP server and tool based on the task.
+3.  **Execute the tool:** Use the `use_mcp_tool` to call the server with the necessary arguments.
+4.  **Process the results:** Use the output from the MCP server to complete the task.
+
 ## Response Style
 
 - **Be concise and direct** - avoid verbose explanations
