@@ -74,13 +74,10 @@ class PrometheusExporter:
         # Track label cardinality
         self._label_combinations: set[tuple[str, ...]] = set()
 
-        # Track last exported values for counters to calculate deltas
-        # Format: {(primitive_name, status): last_value}
-        self._last_request_totals: dict[tuple[str, str], float] = {}
-        # Format: {(primitive_name, operation): last_value}
-        self._last_cost_totals: dict[tuple[str, str], float] = {}
-        # Format: {primitive_name: last_value}
-        self._last_savings_totals: dict[str, float] = {}
+        # Track last reported values to calculate increments for Counters
+        self._last_request_total: dict[tuple[str, str], float] = {}
+        self._last_cost_total: dict[tuple[str, str], float] = {}
+        self._last_savings_total: dict[str, float] = {}
 
         # Initialize Prometheus metrics
         self._init_metrics()
@@ -262,39 +259,42 @@ class PrometheusExporter:
                 )
 
             if self._check_cardinality(labels_success):
-                # Counter can only increase, so we increment by the difference
-                # from the last exported value
-                counter = self.request_total.labels(primitive_name=name, status="success")
-                last_value = self._last_request_totals.get(labels_success, 0.0)
-                increment = throughput_metrics.total_requests - last_value
+                # Track last reported value to calculate increment
+                key = (name, "success")
+                current_total = throughput_metrics.total_requests
+                last_total = self._last_request_total.get(key, 0.0)
+
+                increment = current_total - last_total
                 if increment > 0:
-                    counter.inc(increment)
-                    self._last_request_totals[labels_success] = throughput_metrics.total_requests
+                    self.request_total.labels(primitive_name=name, status="success").inc(increment)
+                    self._last_request_total[key] = current_total
 
         # Update cost metrics
         for name, cost_metrics in collector._cost_metrics.items():
             for operation, cost in cost_metrics.cost_by_operation.items():
                 labels_cost = (name, operation)
                 if self._check_cardinality(labels_cost):
-                    # Counter can only increase, so we increment by the difference
-                    # from the last exported value
-                    counter = self.cost_total.labels(primitive_name=name, operation=operation)
-                    last_value = self._last_cost_totals.get(labels_cost, 0.0)
-                    increment = cost - last_value
+                    # Track last reported value to calculate increment
+                    key = (name, operation)
+                    last_cost = self._last_cost_total.get(key, 0.0)
+
+                    increment = cost - last_cost
                     if increment > 0:
-                        counter.inc(increment)
-                        self._last_cost_totals[labels_cost] = cost
+                        self.cost_total.labels(primitive_name=name, operation=operation).inc(
+                            increment
+                        )
+                        self._last_cost_total[key] = cost
 
             labels_savings = (name,)
             if self._check_cardinality(labels_savings):
-                # Counter can only increase, so we increment by the difference
-                # from the last exported value
-                counter = self.savings_total.labels(primitive_name=name)
-                last_value = self._last_savings_totals.get(name, 0.0)
-                increment = cost_metrics.total_savings - last_value
+                # Track last reported value to calculate increment
+                current_savings = cost_metrics.total_savings
+                last_savings = self._last_savings_total.get(name, 0.0)
+
+                increment = current_savings - last_savings
                 if increment > 0:
-                    counter.inc(increment)
-                    self._last_savings_totals[name] = cost_metrics.total_savings
+                    self.savings_total.labels(primitive_name=name).inc(increment)
+                    self._last_savings_total[name] = current_savings
 
     def export(self) -> bytes:
         """
