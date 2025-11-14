@@ -48,10 +48,15 @@ def upload_augster_instructions() -> dict[str, any]:
 
         try:
             # Use create_prompt_from_instruction_file helper
+            # Extract name from filename (e.g., "augster-core-identity.instructions.md" -> "identity")
+            base_name = filename.replace("augster-core-", "").replace("augster-", "").replace(".instructions.md", "")
             result = create_prompt_from_instruction_file(
-                file_path=file_path,
-                additional_labels=["augster", "core", "tta-dev"],
-                additional_tags=["augster", "identity", "behavior"],
+                instruction_file_path=str(file_path),
+                name=f"augster-{base_name}",
+                apply_to_pattern="**/*.md",
+                description=f"Augster core instruction: {base_name}",
+                labels=["augster", "core", "tta-dev"],
+                tags=["augster", "identity", "behavior"],
             )
 
             if result:
@@ -113,10 +118,15 @@ def upload_domain_specific() -> dict[str, any]:
             continue
 
         try:
+            # Extract name from filename
+            base_name = filename.replace(".instructions.md", "")
             result = create_prompt_from_instruction_file(
-                file_path=file_path,
-                additional_labels=["domain-specific", "tta-dev"],
-                additional_tags=["template", "instruction"],
+                instruction_file_path=str(file_path),
+                name=f"augster-{base_name}",
+                apply_to_pattern="**/*.md",
+                description=f"Augster domain-specific instruction: {base_name}",
+                labels=["domain-specific", "tta-dev"],
+                tags=["template", "instruction"],
             )
 
             if result:
