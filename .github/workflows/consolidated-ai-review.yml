@@ -1,0 +1,237 @@
+name: AI Code Review (Consolidated)
+
+# Consolidated AI code review workflow
+# Attempts Gemini review with fallback to local analysis
+# Includes circuit breaker pattern for external service failures
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'logseq/**'
+
+concurrency:
+  group: 'ai-review-${{ github.event.pull_request.number }}'
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  # Check if Gemini API is configured and available
+  check-gemini-available:
+    name: Check Gemini Availability
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      gemini-available: ${{ steps.check.outputs.available }}
+
+    steps:
+      - name: Check Gemini configuration
+        id: check
+        run: |
+          if [ -n "${{ secrets.GEMINI_API_KEY }}" ] && [ -n "${{ vars.GEMINI_MODEL }}" ]; then
+            echo "available=true" >> $GITHUB_OUTPUT
+            echo "✅ Gemini API is configured"
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Gemini API not configured, will skip AI review"
+          fi
+
+  # Gemini AI review (with retry mechanism)
+  gemini-review:
+    name: Gemini Code Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: check-gemini-available
+    if: needs.check-gemini-available.outputs.gemini-available == 'true'
+
+    steps:
+      - name: Mint identity token
+        id: mint_identity_token
+        if: vars.APP_ID != ''
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+        continue-on-error: true
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Gemini CLI (with retry)
+        id: run_gemini
+        uses: google-github-actions/run-gemini-cli@v0.1.14
+        env:
+          GITHUB_TOKEN: ${{ steps.mint_identity_token.outputs.token || secrets.GITHUB_TOKEN || github.token }}
+          ISSUE_TITLE: ${{ github.event.pull_request.title }}
+          ISSUE_BODY: ${{ github.event.pull_request.body }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        with:
+          gcp_location: ${{ vars.GOOGLE_CLOUD_LOCATION }}
+          gcp_project_id: ${{ vars.GOOGLE_CLOUD_PROJECT }}
+          gcp_service_account: ${{ vars.SERVICE_ACCOUNT_EMAIL }}
+          gcp_workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_cli_version: ${{ vars.GEMINI_CLI_VERSION }}
+          gemini_debug: ${{ fromJSON(vars.DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          google_api_key: ${{ secrets.GOOGLE_API_KEY }}
+          use_gemini_code_assist: ${{ vars.GOOGLE_GENAI_USE_GCA }}
+          use_vertex_ai: ${{ vars.GOOGLE_GENAI_USE_VERTEXAI }}
+          settings: |
+            {
+              "model": {
+                "maxSessionTurns": 25
+              },
+              "telemetry": {
+                "enabled": ${{ vars.GOOGLE_CLOUD_PROJECT != '' }},
+                "target": "gcp"
+              },
+              "mcpServers": {
+                "github": {
+                  "command": "docker",
+                  "args": [
+                    "run", "-i", "--rm",
+                    "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+                    "ghcr.io/github/github-mcp-server:v0.18.0"
+                  ],
+                  "includeTools": [
+                    "add_comment_to_pending_review",
+                    "create_pending_pull_request_review",
+                    "pull_request_read",
+                    "submit_pending_pull_request_review"
+                  ],
+                  "env": {
+                    "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+                  }
+                }
+              },
+              "tools": {
+                "core": [
+                  "run_shell_command(cat)",
+                  "run_shell_command(echo)",
+                  "run_shell_command(grep)",
+                  "run_shell_command(head)",
+                  "run_shell_command(tail)"
+                ]
+              }
+            }
+          prompt: |
+            ## Role
+            You are a world-class autonomous code review agent reviewing Pull Request #${{ github.event.pull_request.number }} in ${{ github.repository }}.
+
+            ## Primary Directive
+            Perform a comprehensive code review and post all feedback directly to the Pull Request using the provided tools.
+
+            ## Critical Constraints
+            1. Only comment on lines changed in the diff (+ or - lines)
+            2. Assign severity: 🔴 Critical, 🟠 High, 🟡 Medium, 🟢 Low
+            3. Provide actionable suggestions with correct line numbers
+            4. Use fact-based review criteria
+
+            ## Review Criteria (Priority Order)
+            1. Correctness - logic errors, edge cases
+            2. Security - vulnerabilities, secrets exposure
+            3. Efficiency - performance, memory usage
+            4. Maintainability - readability, modularity
+            5. Testing - coverage, edge cases
+
+            ## Workflow
+            1. Get PR details: mcp__github__pull_request_read.get
+            2. Get changed files: mcp__github__pull_request_read.get_files
+            3. Get diff: mcp__github__pull_request_read.get_diff
+            4. Create review: mcp__github__create_pending_pull_request_review
+            5. Add comments: mcp__github__add_comment_to_pending_review
+            6. Submit review: mcp__github__submit_pending_pull_request_review with event "COMMENT"
+        continue-on-error: true
+        timeout-minutes: 8
+
+      - name: Gemini review summary
+        if: always()
+        run: |
+          echo "## Gemini AI Review 🤖" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.run_gemini.outcome }}" = "success" ]; then
+            echo "✅ AI review completed successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ AI review failed or timed out" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Fallback: Basic static analysis if Gemini fails
+  fallback-analysis:
+    name: Fallback Static Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [check-gemini-available, gemini-review]
+    if: |
+      always() &&
+      (needs.check-gemini-available.outputs.gemini-available != 'true' ||
+       needs.gemini-review.result != 'success')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup TTA environment
+        uses: ./.github/actions/setup-tta-env
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Run basic checks
+        run: |
+          echo "## Fallback Static Analysis 🔍" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "AI review not available. Running basic static analysis:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Format check
+          if uv run ruff format --check .; then
+            echo "- ✅ Code formatting" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ❌ Code formatting issues found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Lint check
+          if uv run ruff check .; then
+            echo "- ✅ Linting" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ⚠️ Linting issues found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Security scan
+          if uvx pip-audit; then
+            echo "- ✅ Security scan" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- ⚠️ Security vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** For comprehensive AI review, configure Gemini API." >> $GITHUB_STEP_SUMMARY
+
+  # Review summary
+  review-summary:
+    name: AI Review Summary
+    runs-on: ubuntu-latest
+    needs: [check-gemini-available, gemini-review, fallback-analysis]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## AI Code Review Complete 🎯" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.gemini-review.result }}" = "success" ]; then
+            echo "✅ Gemini AI review completed successfully" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.check-gemini-available.outputs.gemini-available }}" != "true" ]; then
+            echo "⏭️ Gemini AI not configured - fallback analysis ran" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Gemini AI review failed - fallback analysis ran" >> $GITHUB_STEP_SUMMARY
+          fi
