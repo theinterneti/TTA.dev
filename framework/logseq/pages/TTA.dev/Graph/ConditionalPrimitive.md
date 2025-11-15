@@ -1,0 +1,18 @@
+- ---
+- type:: [[G]] GraphComponent
+- status:: stable
+- tags:: #workflow, #branching, #routing, #conditional-logic
+- context-level:: 2-Operational
+- component-type:: node
+- in-graph:: [[TTA.dev/Concepts/WorkflowPrimitive]]
+- modifies-state::
+- calls-tools::
+- source-file:: `packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py`
+- ---
+- ### Summary
+  - `ConditionalPrimitive` enables branching logic within a workflow, executing one of two `[[TTA.dev/Concepts/WorkflowPrimitive]]` instances based on the evaluation of a condition function.
+- ### Logic
+  - It takes a `condition` (a callable that returns a boolean), a `then_primitive`, and an optional `else_primitive` during initialization.
+  - The `execute` method first evaluates the `condition` with the current input and `[[TTA.dev/Data/WorkflowContext]]`.
+  - If the condition is `True`, `then_primitive` is executed. If `False` and `else_primitive` is provided, `else_primitive` is executed. Otherwise, the input is passed through.
+  - Includes logging, metrics, and tracing for condition evaluation and branch execution.
