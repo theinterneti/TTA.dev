@@ -1,0 +1,451 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "hypertool-persona-overview",
+    "title": "Hypertool Persona Overview",
+    "tags": ["hypertool", "personas", "apm"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "type": "graph",
+        "title": "Persona Switch Rate",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(hypertool_persona_switches_total[5m])",
+            "legendFormat": "{{from_persona}} → {{to_persona}} ({{chatmode}})",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "max", "last"]
+          },
+          "tooltip": {
+            "mode": "multi"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "showPoints": "auto",
+              "spanNulls": false
+            },
+            "unit": "ops",
+            "decimals": 2
+          }
+        },
+        "description": "Rate of persona switches per second, grouped by transition and chatmode"
+      },
+      {
+        "id": 2,
+        "type": "heatmap",
+        "title": "Persona Duration Distribution",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(rate(hypertool_persona_duration_seconds_bucket[5m])) by (le, persona)",
+            "format": "heatmap",
+            "legendFormat": "{{persona}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "calculate": true,
+          "cellGap": 2,
+          "cellRadius": 0,
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-orange",
+            "mode": "scheme",
+            "scale": "exponential",
+            "scheme": "Oranges",
+            "steps": 64
+          },
+          "exemplars": {
+            "color": "rgba(255,0,255,0.7)"
+          },
+          "filterValues": {
+            "le": 1e-9
+          },
+          "legend": {
+            "show": true
+          },
+          "rowsFrame": {
+            "layout": "auto"
+          },
+          "tooltip": {
+            "show": true,
+            "yHistogram": true
+          },
+          "yAxis": {
+            "axisPlacement": "left",
+            "decimals": 1,
+            "unit": "s"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "viz": false,
+                "legend": false
+              },
+              "scaleDistribution": {
+                "type": "linear"
+              }
+            }
+          }
+        },
+        "description": "Distribution of time spent in each persona session"
+      },
+      {
+        "id": 3,
+        "type": "barchart",
+        "title": "Token Usage by Persona",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(increase(hypertool_persona_tokens_used_total[1h])) by (persona)",
+            "legendFormat": "{{persona}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "xTickLabelRotation": 0,
+          "xTickLabelSpacing": 100,
+          "showValue": "always",
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": []
+          },
+          "tooltip": {
+            "mode": "single"
+          },
+          "text": {
+            "valueSize": 12
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "lineWidth": 1,
+              "fillOpacity": 80,
+              "gradientMode": "none"
+            },
+            "unit": "short",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                },
+                {
+                  "value": 1500,
+                  "color": "yellow"
+                },
+                {
+                  "value": 1800,
+                  "color": "red"
+                }
+              ]
+            }
+          }
+        },
+        "description": "Total tokens consumed by each persona in the last hour"
+      },
+      {
+        "id": 4,
+        "type": "gauge",
+        "title": "Token Budget Remaining",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "hypertool_persona_token_budget_remaining",
+            "legendFormat": "{{persona}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "textMode": "value_and_name",
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true,
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "unit": "short",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "red"
+                },
+                {
+                  "value": 0,
+                  "color": "red"
+                },
+                {
+                  "value": 500,
+                  "color": "yellow"
+                },
+                {
+                  "value": 1000,
+                  "color": "green"
+                }
+              ]
+            },
+            "mappings": [],
+            "min": -500,
+            "max": 2500
+          }
+        },
+        "description": "Remaining token budget for each persona (negative values indicate over-budget)"
+      },
+      {
+        "id": 5,
+        "type": "table",
+        "title": "Top Persona Transitions",
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 16
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "topk(10, sum(increase(hypertool_persona_switches_total[1h])) by (from_persona, to_persona, chatmode))",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "footer": {
+            "show": false,
+            "reducer": ["sum"],
+            "fields": ""
+          },
+          "sortBy": [
+            {
+              "displayName": "Value",
+              "desc": true
+            }
+          ]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            },
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                },
+                {
+                  "value": 5,
+                  "color": "yellow"
+                },
+                {
+                  "value": 10,
+                  "color": "red"
+                }
+              ]
+            },
+            "mappings": []
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "from_persona"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "From Persona"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 200
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "to_persona"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "To Persona"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 200
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "chatmode"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Chatmode"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 200
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Value"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Switches (1h)"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 150
+                },
+                {
+                  "id": "unit",
+                  "value": "short"
+                },
+                {
+                  "id": "decimals",
+                  "value": 0
+                },
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                }
+              ]
+            }
+          ]
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "instance": true,
+                "job": true
+              },
+              "indexByName": {
+                "from_persona": 0,
+                "to_persona": 1,
+                "chatmode": 2,
+                "Value": 3
+              },
+              "renameByName": {}
+            }
+          }
+        ],
+        "description": "Most frequent persona transitions in the last hour"
+      }
+    ],
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "links": [],
+    "liveNow": false,
+    "style": "dark",
+    "templating": {
+      "list": []
+    }
+  }
+}

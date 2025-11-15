@@ -1,0 +1,13 @@
+# Logseq internals
+.logseq/
+logseq/.recycle/
+logseq/bak/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor temporary files
+*~
+*.swp
+*.swo

@@ -1,0 +1,44 @@
+name: 📋 List Gemini Models
+
+on:
+  workflow_dispatch:
+
+jobs:
+  list-models:
+    name: List available Gemini models
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: List all available models
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          echo "=== Listing Available Gemini Models ==="
+          echo ""
+          
+          RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
+            "https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}")
+          
+          HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE:" | cut -d: -f2)
+          BODY=$(echo "$RESPONSE" | sed '/HTTP_CODE:/d')
+          
+          echo "HTTP Status Code: $HTTP_CODE"
+          echo ""
+          
+          if [ "$HTTP_CODE" == "200" ]; then
+            echo "✅ Successfully retrieved model list"
+            echo ""
+            echo "=== All Gemini Models ==="
+            echo "$BODY" | jq -r '.models[] | select(.name | contains("gemini")) | "\(.name) - \(.displayName)"'
+            echo ""
+            echo "=== Models Supporting generateContent ==="
+            echo "$BODY" | jq -r '.models[] | select(.name | contains("gemini")) | select(.supportedGenerationMethods[] | contains("generateContent")) | "\(.name) - \(.displayName)"'
+            echo ""
+            echo "=== Full Details (JSON) ==="
+            echo "$BODY" | jq '.models[] | select(.name | contains("gemini")) | {name, displayName, supportedGenerationMethods}'
+          else
+            echo "❌ Failed to retrieve model list (HTTP $HTTP_CODE)"
+            echo "$BODY" | jq '.' || echo "$BODY"
+            exit 1
+          fi
+

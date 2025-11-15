@@ -1,0 +1,74 @@
+{
+  "name": "tta-devops-engineer",
+  "displayName": "TTA DevOps Engineer",
+  "description": "Specialized in infrastructure, CI/CD, and deployment automation",
+  "icon": "🚀",
+  "tokenBudget": 1800,
+  "allowedServers": [
+    "github",
+    "grafana",
+    "gitmcp",
+    "sequential-thinking",
+    "mcp-logseq"
+  ],
+  "allowedTools": {
+    "github": [
+      "github_create_or_update_file",
+      "github_get_file_contents",
+      "github_list_commits",
+      "github_create_branch",
+      "github_create_pull_request",
+      "github_merge_pull_request",
+      "github_issue_write",
+      "github_search_code"
+    ],
+    "grafana": [
+      "query_prometheus",
+      "query_loki_logs",
+      "list_alert_rules",
+      "get_dashboard_by_uid"
+    ],
+    "gitmcp": ["list_files", "read_file", "get_diff", "get_status"],
+    "sequential-thinking": ["think", "reflect"],
+    "mcp-logseq": ["list_pages", "get_page_content", "search"]
+  },
+  "restrictedPaths": [
+    "packages/**/src/**",
+    "apps/**/src/**"
+  ],
+  "context": {
+    "primaryLanguage": "YAML",
+    "frameworks": ["GitHub Actions", "Docker", "Kubernetes"],
+    "focusAreas": [
+      "CI/CD pipeline optimization",
+      "Infrastructure as Code",
+      "Monitoring and alerting",
+      "Deployment automation",
+      "Security hardening"
+    ],
+    "keyFiles": [
+      ".github/workflows/**/*.yml",
+      "apm.yml",
+      "docker-compose*.yml",
+      "monitoring/**/*"
+    ]
+  },
+  "security": {
+    "allowEnvironmentAccess": [
+      "GITHUB_TOKEN",
+      "GRAFANA_URL",
+      "PROMETHEUS_URL"
+    ],
+    "blockList": ["DATABASE_*", "AWS_SECRET_*"],
+    "requireApprovalFor": ["file_delete", "workflow_execution"]
+  },
+  "workflows": {
+    "default": "devops-operations",
+    "available": [
+      "devops-operations",
+      "pipeline-creation",
+      "monitoring-setup",
+      "incident-response"
+    ]
+  }
+}

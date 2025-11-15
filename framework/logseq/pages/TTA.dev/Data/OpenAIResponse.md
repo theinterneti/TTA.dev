@@ -1,0 +1,15 @@
+- ---
+- type:: [[D]] DataSchema
+- status:: stable
+- tags:: #llm, #openai, #response, #api
+- context-level:: 3-Technical
+- used-by:: [[TTA.dev/Tools/OpenAIPrimitive]]
+- source-file:: `packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py`
+- ---
+- ### Summary
+  - `OpenAIResponse` is a Pydantic model defining the output structure received from the OpenAI API after a chat completion request via the `[[TTA.dev/Tools/OpenAIPrimitive]]`.
+- ### Fields
+  - `content`: The generated text response from the LLM.
+  - `model`: The specific OpenAI model that was used for generation.
+  - `usage`: A dictionary containing token usage statistics (prompt, completion, total tokens).
+  - `finish_reason`: The reason why the LLM stopped generating (e.g., "stop", "length").
