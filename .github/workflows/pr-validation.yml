@@ -1,4 +1,8 @@
-name: PR Validation
+name: PR Validation (DEPRECATED)
+
+# ⚠️ DEPRECATED: This workflow is being replaced by consolidated-pr-validation.yml
+# Will be removed after migration is complete
+# See .github/workflows/MIGRATION_PLAN.md for details
 
 on:
   pull_request:
@@ -14,7 +18,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  deprecation-notice:
+    name: Deprecation Notice
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show deprecation notice
+        run: |
+          echo "## ⚠️ Workflow Deprecated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow (\`pr-validation.yml\`) is deprecated." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**New workflow:** \`consolidated-pr-validation.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See \`.github/workflows/MIGRATION_PLAN.md\` for migration details." >> $GITHUB_STEP_SUMMARY
+
   validate:
+    if: false  # Disabled during migration
     name: Fast PR Validation
     runs-on: ubuntu-latest
     timeout-minutes: 10
