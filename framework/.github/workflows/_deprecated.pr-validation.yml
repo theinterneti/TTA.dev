@@ -1,0 +1,43 @@
+# DEPRECATED: This workflow has been replaced by pull_request_validation.yml
+#
+# Migration Guide:
+# - This workflow provided basic PR validation
+# - Use pull_request_validation.yml for equivalent functionality
+# - New workflow includes: format check, lint, type check, unit tests, coverage, security scan, package validation
+# - Migration completed on: 2025-11-14
+#
+# To restore this workflow temporarily, rename this file back to pr-validation.yml
+# This file will be removed in a future cleanup phase.
+
+name: 'PR Validation (DEPRECATED)'
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deprecated:
+    name: '⚠️ DEPRECATED WORKFLOW'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Migration Required'
+        run: |
+          echo "❌ This workflow has been deprecated!"
+          echo ""
+          echo "🔄 Migration Path:"
+          echo "   Old: pr-validation.yml"
+          echo "   New: pull_request_validation.yml"
+          echo ""
+          echo "🚀 New workflow features:"
+          echo "   • Consolidated validation steps"
+          echo "   • Better caching"
+          echo "   • Enhanced reporting"
+          echo "   • Security scanning"
+          echo ""
+          echo "📋 To migrate immediately:"
+          echo "   1. Update any workflow_dispatch calls"
+          echo "   2. Update branch protection rules"
+          echo "   3. Test the new workflow"
+          echo ""
+          echo "For support, see: https://github.com/theinterneti/TTA.dev/issues/103"
+          exit 1

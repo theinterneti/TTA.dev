@@ -1,0 +1,62 @@
+# TTA.dev Orchestration Configuration
+#
+# This file configures multi-model orchestration for cost optimization.
+# Orchestrator (Claude) delegates tasks to free executors (Gemini, Groq, DeepSeek).
+#
+# Documentation: docs/guides/orchestration-configuration-guide.md
+
+orchestration:
+  # Enable/disable orchestration globally
+  enabled: true
+  
+  # Prefer free models when quality is sufficient
+  prefer_free_models: true
+  
+  # Minimum quality score (0-1) to use free models
+  # If free model quality < threshold, use paid orchestrator
+  quality_threshold: 0.85
+  
+  # Orchestrator configuration (planning + validation)
+  orchestrator:
+    model: claude-sonnet-4.5
+    api_key_env: ANTHROPIC_API_KEY
+  
+  # Executor configurations (bulk execution)
+  executors:
+    # Gemini Pro - Best for moderate/complex tasks
+    - model: gemini-2.5-pro
+      provider: google-ai-studio
+      api_key_env: GOOGLE_API_KEY
+      use_cases:
+        - moderate  # Analysis, summarization
+        - complex   # Multi-step reasoning
+    
+    # Groq - Best for speed-critical tasks
+    - model: llama-3.3-70b-versatile
+      provider: groq
+      api_key_env: GROQ_API_KEY
+      use_cases:
+        - simple          # Simple queries
+        - speed-critical  # Ultra-fast inference
+    
+    # DeepSeek R1 - Best for complex reasoning
+    - model: deepseek/deepseek-r1:free
+      provider: openrouter
+      api_key_env: OPENROUTER_API_KEY
+      use_cases:
+        - complex    # Multi-step reasoning
+        - reasoning  # Advanced reasoning tasks
+  
+  # Fallback strategy (try in order)
+  fallback_strategy:
+    models:
+      - gemini-2.5-pro              # Try free flagship first
+      - llama-3.3-70b-versatile     # Try fast free model
+      - claude-sonnet-4.5           # Last resort (paid)
+  
+  # Cost tracking and budgeting
+  cost_tracking:
+    enabled: true
+    budget_limit_usd: 100.0  # Monthly budget limit
+    alert_threshold: 0.8     # Alert at 80% of budget
+

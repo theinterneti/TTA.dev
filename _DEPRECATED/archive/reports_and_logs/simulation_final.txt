@@ -1,0 +1,185 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0 -- /home/thein/repos/TTA.dev/.venv/bin/python3
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.3', 'Platform': 'Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39', 'Packages': {'pytest': '8.4.2', 'pluggy': '1.6.0'}, 'Plugins': {'asyncio': '1.2.0', 'json-report': '1.5.0', 'anyio': '4.11.0', 'mock': '3.15.1', 'timeout': '2.4.0', 'langsmith': '0.4.41', 'metadata': '3.1.1', 'cov': '7.0.0'}}
+rootdir: /home/thein/repos/TTA.dev/packages/tta-rebuild
+configfile: pyproject.toml
+plugins: asyncio-1.2.0, json-report-1.5.0, anyio-4.11.0, mock-3.15.1, timeout-2.4.0, langsmith-0.4.41, metadata-3.1.1, cov-7.0.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1 item
+
+packages/tta-rebuild/tests/simulations/quick_proof.py::test_simulation Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+Traceback (most recent call last):
+  File "/home/thein/repos/TTA.dev/packages/tta-rebuild/tests/simulations/quick_proof.py", line 154, in run_simulation
+    cost = context.metadata.get("cost", 0)
+           ^^^^^^^^^^^^^^^^
+AttributeError: 'TTAContext' object has no attribute 'metadata'
+================================================================================
+🎭 COMPREHENSIVE STORY GENERATION SIMULATION
+================================================================================
+Scenarios: 10
+Started: 2025-11-09T16:10:37.655912+00:00
+
+
+================================================================================
+[1/10] 🧙 Anxiety in Fantasy
+================================================================================
+Theme: overcoming fear through small, brave steps in an enchanted forest
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[2/10] 🚀 Depression in Sci-Fi
+================================================================================
+Theme: finding light in darkness through space exploration
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[3/10] 🎨 Trauma in Historical Paris
+================================================================================
+Theme: reclaiming personal narrative through artistic expression
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[4/10] 📚 Grief in Coastal Town
+================================================================================
+Theme: honoring memories while building new connections
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[5/10] ✨ Social Anxiety in Urban Fantasy
+================================================================================
+Theme: authentic connection and self-acceptance in magical city
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[6/10] 🌆 Identity in Cyberpunk
+================================================================================
+Theme: discovering authentic self in digital world
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[7/10] 🔍 PTSD in Mystery Setting
+================================================================================
+Theme: regaining sense of safety through investigation
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[8/10] 🏛️ Self-Esteem in Adventure
+================================================================================
+Theme: recognizing inherent worth through epic quest
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[9/10] ⛰️ Mindfulness in Nature
+================================================================================
+Theme: present moment awareness through wilderness journey
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+[10/10] 💕 Relationship Healing in Romance
+================================================================================
+Theme: healthy boundaries and authentic communication
+
+❌ FAILED: 'TTAContext' object has no attribute 'metadata'
+Full traceback:
+
+================================================================================
+📊 SIMULATION SUMMARY
+================================================================================
+
+✅ Success Rate: 0/10 (0.0%)
+
+❌ Failed: 10
+   🧙 Anxiety in Fantasy: 'TTAContext' object has no attribute 'metadata'
+   🚀 Depression in Sci-Fi: 'TTAContext' object has no attribute 'metadata'
+   🎨 Trauma in Historical Paris: 'TTAContext' object has no attribute 'metadata'
+   📚 Grief in Coastal Town: 'TTAContext' object has no attribute 'metadata'
+   ✨ Social Anxiety in Urban Fantasy: 'TTAContext' object has no attribute 'metadata'
+   🌆 Identity in Cyberpunk: 'TTAContext' object has no attribute 'metadata'
+   🔍 PTSD in Mystery Setting: 'TTAContext' object has no attribute 'metadata'
+   🏛️ Self-Esteem in Adventure: 'TTAContext' object has no attribute 'metadata'
+   ⛰️ Mindfulness in Nature: 'TTAContext' object has no attribute 'metadata'
+   💕 Relationship Healing in Romance: 'TTAContext' object has no attribute 'metadata'
+
+⏱️  Completed: 2025-11-09T16:13:58.009997+00:00
+================================================================================
+
+⚠️  Results need improvement
+PASSED/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/coverage/inorout.py:521: CoverageWarning: Module src/tta_rebuild was never imported. (module-not-imported); see https://coverage.readthedocs.io/en/7.11.0/messages.html#warning-module-not-imported
+  self.warn(f"Module {pkg} was never imported.", slug="module-not-imported")
+/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/coverage/control.py:946: CoverageWarning: No data was collected. (no-data-collected); see https://coverage.readthedocs.io/en/7.11.0/messages.html#warning-no-data-collected
+  self._warn("No data was collected.", slug="no-data-collected")
+/home/thein/repos/TTA.dev/.venv/lib/python3.12/site-packages/pytest_cov/plugin.py:363: CovReportWarning: Failed to generate report: No data to report.
+
+  warnings.warn(CovReportWarning(message), stacklevel=1)
+
+WARNING: Failed to generate report: No data to report.
+
+
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+======================== 1 passed in 200.44s (0:03:20) =========================

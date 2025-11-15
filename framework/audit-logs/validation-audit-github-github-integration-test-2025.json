@@ -1,0 +1,47 @@
+{
+  "correlation_id": "github-integration-test-2025",
+  "service": "github",
+  "completed_at": "2025-11-15T17:17:50.995537+00:00",
+  "validation_type": "post_rotation",
+  "total_events": 3,
+  "events": [
+    {
+      "timestamp": "2025-11-15T17:17:50.550950+00:00",
+      "correlation_id": "github-integration-test-2025",
+      "service": "github",
+      "event_type": "validation_start",
+      "success": true,
+      "environment": "development",
+      "details": {
+        "has_token": true,
+        "token_prefix_valid": false,
+        "target_repo": "TTA.dev/TTA.dev"
+      }
+    },
+    {
+      "timestamp": "2025-11-15T17:17:50.994925+00:00",
+      "correlation_id": "github-integration-test-2025",
+      "service": "github",
+      "event_type": "api_access_test",
+      "success": true,
+      "environment": "development",
+      "details": {
+        "test_passed": false,
+        "test_type": "basic_access"
+      }
+    },
+    {
+      "timestamp": "2025-11-15T17:17:50.995295+00:00",
+      "correlation_id": "github-integration-test-2025",
+      "service": "github",
+      "event_type": "validation_failed",
+      "success": false,
+      "environment": "development",
+      "details": {
+        "error": "GitHub API access test failed",
+        "error_type": "ValidationError",
+        "partial_success": false
+      }
+    }
+  ]
+}

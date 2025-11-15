@@ -1,0 +1,328 @@
+{
+  "name": "Git Automation for Cline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git status --porcelain"
+      },
+      "id": "check-git-status",
+      "name": "Check Git Status",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.stdout }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "has-changes",
+      "name": "Has Changes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git diff --stat"
+      },
+      "id": "get-diff",
+      "name": "Get Diff Details",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        900,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-flash",
+        "prompt": "=Based on these git changes, generate a concise, conventional commit message:\n\n{{ $json.stdout }}\n\nFormat: <type>(<scope>): <description>\n\nTypes: feat, fix, docs, style, refactor, test, chore\n\nBe specific and professional. Return ONLY the commit message, nothing else.",
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 100
+        }
+      },
+      "id": "generate-commit-message",
+      "name": "AI: Generate Commit Message",
+      "type": "n8n-nodes-base.gemini",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        200
+      ],
+      "credentials": {
+        "geminiApi": {
+          "id": "gemini-api",
+          "name": "Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=cd /home/thein/repos/TTA.dev && git add -A && git commit -m \"{{ $json.text }}\""
+      },
+      "id": "git-commit",
+      "name": "Git Add & Commit",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && ./scripts/test_fast.sh"
+      },
+      "id": "run-tests",
+      "name": "Run Fast Tests",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.exitCode }}",
+              "operation": "equals",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "tests-passed",
+      "name": "Tests Passed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git push origin main"
+      },
+      "id": "git-push",
+      "name": "Git Push",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git reset --soft HEAD~1"
+      },
+      "id": "rollback-commit",
+      "name": "Rollback Commit",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "issue",
+        "operation": "create",
+        "owner": "={{ $env.GITHUB_OWNER || 'theinterneti' }}",
+        "repository": "={{ $env.GITHUB_REPO || 'TTA.dev' }}",
+        "title": "=\ud83d\udea8 Tests Failed After Commit: {{ $node['Git Add & Commit'].json.stdout }}",
+        "body": "=Automated commit was made but tests failed.\n\n**Commit Message:**\n{{ $node['Git Add & Commit'].json.stdout }}\n\n**Test Output:**\n```\n{{ $json.stderr }}\n```\n\n**Action Taken:**\nCommit has been rolled back.\n\n**Next Steps:**\n1. Fix the failing tests\n2. Manually commit the changes\n3. Close this issue",
+        "labels": [
+          "automated",
+          "ci-failed",
+          "needs-attention"
+        ]
+      },
+      "id": "create-issue",
+      "name": "Create GitHub Issue",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        300
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "github-api",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "=\u2705 **Git Automation Success**\n\nCommit: {{ $node['Git Add & Commit'].json.stdout }}\nTests: Passed \u2713\nPushed to: main\n\nTime: {{ new Date().toISOString() }}",
+        "options": {}
+      },
+      "id": "success-notification",
+      "name": "Success Notification",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Every 5 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Check Git Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Git Status": {
+      "main": [
+        [
+          {
+            "node": "Has Changes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Changes?": {
+      "main": [
+        [
+          {
+            "node": "Get Diff Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Diff Details": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Commit Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate Commit Message": {
+      "main": [
+        [
+          {
+            "node": "Git Add & Commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Git Add & Commit": {
+      "main": [
+        [
+          {
+            "node": "Run Fast Tests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Fast Tests": {
+      "main": [
+        [
+          {
+            "node": "Tests Passed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tests Passed?": {
+      "main": [
+        [
+          {
+            "node": "Git Push",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rollback Commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rollback Commit": {
+      "main": [
+        [
+          {
+            "node": "Create GitHub Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-09T09:15:00.000Z",
+  "versionId": "1",
+  "active": false
+}

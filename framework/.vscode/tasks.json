@@ -1,0 +1,184 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "🧪 Run Fast Tests (Unit Only)",
+      "type": "shell",
+      "command": "./scripts/test_fast.sh",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Run All Tests",
+      "type": "shell",
+      "command": "uv run pytest -v",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Run Integration Tests (Safe)",
+      "type": "shell",
+      "command": "RUN_INTEGRATION=true ./scripts/test_integration.sh",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧪 Run Tests with Coverage",
+      "type": "shell",
+      "command": "uv run pytest --cov=packages --cov-report=html --cov-report=term-missing -m 'not integration and not slow'",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📝 Check Markdown Docs",
+      "type": "shell",
+      "command": "python scripts/docs/check_md.py --all",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "✨ Format Code",
+      "type": "shell",
+      "command": "uv run ruff format .",
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Lint Code",
+      "type": "shell",
+      "command": "uv run ruff check . --fix",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔬 Type Check",
+      "type": "shell",
+      "command": "uvx pyright packages/",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "✅ Quality Check (All)",
+      "type": "shell",
+      "command": "echo '=== Formatting ===' && uv run ruff format . && echo '' && echo '=== Linting ===' && uv run ruff check . --fix && echo '' && echo '=== Type Checking ===' && uvx pyright packages/ && echo '' && echo '=== Tests ===' && uv run pytest -v",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 Validate Package",
+      "type": "shell",
+      "command": "./scripts/validate-package.sh ${input:packageName}",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📦 Sync Dependencies",
+      "type": "shell",
+      "command": "uv sync --all-extras",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🧹 Clean Build Artifacts",
+      "type": "shell",
+      "command": "find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null; find . -type d -name '.pytest_cache' -exec rm -rf {} + 2>/dev/null; find . -type d -name '.ruff_cache' -exec rm -rf {} + 2>/dev/null; find . -type d -name '.mypy_cache' -exec rm -rf {} + 2>/dev/null; echo '✅ Cleaned build artifacts'",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🏷️ Create Release Tag",
+      "type": "shell",
+      "command": "git tag -a ${input:releaseTag} -m 'Release ${input:releaseTag}' && git push origin ${input:releaseTag}",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔭 Verify Observability Setup",
+      "type": "shell",
+      "command": "./scripts/verify-and-setup-persistence.sh",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "packageName",
+      "type": "promptString",
+      "description": "Package name to validate (e.g., tta-workflow-primitives)"
+    },
+    {
+      "id": "releaseTag",
+      "type": "promptString",
+      "description": "Release tag (e.g., v0.1.0)"
+    }
+  ]
+}

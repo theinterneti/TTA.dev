@@ -1,0 +1,371 @@
+{
+  "name": "4. Release Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "weekly-check",
+      "name": "Weekly Check (Mondays)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git fetch origin && git log origin/main --since='7 days ago' --pretty=format:'%h|%s|%an|%ad' --date=short"
+      },
+      "id": "get-weekly-commits",
+      "name": "Get Weekly Commits",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        460,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.stdout;\nconst lines = output.split('\\n').filter(l => l.trim());\n\nconst commits = lines.map(line => {\n  const [hash, message, author, date] = line.split('|');\n  \n  // Parse conventional commit\n  const match = message.match(/^(\\w+)(\\(([^)]+)\\))?:\\s*(.+)$/);\n  \n  return {\n    hash,\n    message,\n    author,\n    date,\n    type: match ? match[1] : 'other',\n    scope: match ? match[3] : null,\n    description: match ? match[4] : message\n  };\n});\n\n// Group by type\nconst grouped = commits.reduce((acc, commit) => {\n  if (!acc[commit.type]) acc[commit.type] = [];\n  acc[commit.type].push(commit);\n  return acc;\n}, {});\n\n// Determine version bump\nconst hasBreaking = commits.some(c => c.message.includes('BREAKING CHANGE'));\nconst hasFeatures = grouped.feat && grouped.feat.length > 0;\nconst hasFixes = grouped.fix && grouped.fix.length > 0;\n\nlet bumpType = 'none';\nif (hasBreaking) bumpType = 'major';\nelse if (hasFeatures) bumpType = 'minor';\nelse if (hasFixes) bumpType = 'patch';\n\nreturn {\n  commits,\n  grouped,\n  bumpType,\n  shouldRelease: bumpType !== 'none',\n  stats: {\n    total: commits.length,\n    features: grouped.feat?.length || 0,\n    fixes: grouped.fix?.length || 0,\n    chores: grouped.chore?.length || 0,\n    docs: grouped.docs?.length || 0\n  }\n};"
+      },
+      "id": "analyze-commits",
+      "name": "Analyze Commits",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.shouldRelease }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "should-release",
+      "name": "Should Release?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && cat packages/tta-dev-primitives/pyproject.toml | grep '^version' | cut -d'\"' -f2"
+      },
+      "id": "get-current-version",
+      "name": "Get Current Version",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const currentVersion = $input.first().json.stdout.trim();\nconst [major, minor, patch] = currentVersion.split('.').map(Number);\nconst bumpType = $node['Analyze Commits'].json.bumpType;\n\nlet newVersion;\nif (bumpType === 'major') {\n  newVersion = `${major + 1}.0.0`;\n} else if (bumpType === 'minor') {\n  newVersion = `${major}.${minor + 1}.0`;\n} else if (bumpType === 'patch') {\n  newVersion = `${major}.${minor}.${patch + 1}`;\n}\n\nreturn {\n  currentVersion,\n  newVersion,\n  bumpType\n};"
+      },
+      "id": "calculate-version",
+      "name": "Calculate New Version",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a CHANGELOG entry for TTA.dev version {{ $json.newVersion }}.\n\n**Version Bump:** {{ $json.bumpType }} ({{ $node['Analyze Commits'].json.stats.total }} commits)\n\n**Commit Breakdown:**\n- Features: {{ $node['Analyze Commits'].json.stats.features }}\n- Fixes: {{ $node['Analyze Commits'].json.stats.fixes }}\n- Chores: {{ $node['Analyze Commits'].json.stats.chores }}\n- Docs: {{ $node['Analyze Commits'].json.stats.docs }}\n\n**Recent Commits:**\n{{ $node['Analyze Commits'].json.commits.map(c => `- ${c.type}(${c.scope || 'core'}): ${c.description}`).join('\\n') }}\n\nGenerate a professional CHANGELOG entry following this format:\n\n```markdown\n## [{{ $json.newVersion }}] - {{ $now.toFormat('yyyy-MM-dd') }}\n\n### \u2728 Features\n(list new features with descriptions)\n\n### \ud83d\udc1b Bug Fixes\n(list fixes)\n\n### \ud83d\udcda Documentation\n(list doc updates)\n\n### \ud83d\udd27 Maintenance\n(list chores, refactors)\n\n### \ud83d\udea8 Breaking Changes\n(if any)\n```\n\nBe specific and user-focused. Include package names in parentheses.",
+        "options": {}
+      },
+      "id": "generate-changelog",
+      "name": "AI: Generate CHANGELOG",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGemini",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        400
+      ],
+      "credentials": {
+        "googleGeminiApi": {
+          "id": "gemini-api",
+          "name": "Google Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=cd /home/thein/repos/TTA.dev && git checkout -b release/v{{ $node['Calculate New Version'].json.newVersion }}"
+      },
+      "id": "create-release-branch",
+      "name": "Create Release Branch",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=cd /home/thein/repos/TTA.dev && \necho '{{ $node['AI: Generate CHANGELOG'].json.response }}' | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md && \nsed -i 's/^version = .*/version = \"{{ $node['Calculate New Version'].json.newVersion }}\"/' packages/tta-dev-primitives/pyproject.toml && \ncat CHANGELOG.md"
+      },
+      "id": "update-files",
+      "name": "Update Version Files",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=cd /home/thein/repos/TTA.dev && \ngit add CHANGELOG.md packages/*/pyproject.toml && \ngit commit -m 'chore(release): prepare v{{ $node['Calculate New Version'].json.newVersion }}\n\nBump version from {{ $node['Calculate New Version'].json.currentVersion }} to {{ $node['Calculate New Version'].json.newVersion }}\n\nThis is a {{ $node['Calculate New Version'].json.bumpType }} release with {{ $node['Analyze Commits'].json.stats.total }} changes.'"
+      },
+      "id": "commit-version-bump",
+      "name": "Commit Version Bump",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=cd /home/thein/repos/TTA.dev && git push -u origin release/v{{ $node['Calculate New Version'].json.newVersion }}"
+      },
+      "id": "push-release-branch",
+      "name": "Push Release Branch",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "resource": "pullRequest",
+        "operation": "create",
+        "owner": "theinterneti",
+        "repository": "TTA.dev",
+        "title": "=\ud83d\ude80 Release v{{ $node['Calculate New Version'].json.newVersion }}",
+        "body": "=## Release v{{ $node['Calculate New Version'].json.newVersion }}\n\n**Version Bump:** {{ $node['Calculate New Version'].json.bumpType }} ({{ $node['Calculate New Version'].json.currentVersion }} \u2192 {{ $node['Calculate New Version'].json.newVersion }})\n\n---\n\n{{ $node['AI: Generate CHANGELOG'].json.response }}\n\n---\n\n## \ud83d\udcca Release Stats\n\n- **Total Commits:** {{ $node['Analyze Commits'].json.stats.total }}\n- **Features:** {{ $node['Analyze Commits'].json.stats.features }}\n- **Bug Fixes:** {{ $node['Analyze Commits'].json.stats.fixes }}\n- **Documentation:** {{ $node['Analyze Commits'].json.stats.docs }}\n- **Maintenance:** {{ $node['Analyze Commits'].json.stats.chores }}\n\n## \u2705 Pre-Merge Checklist\n\n- [ ] All tests passing\n- [ ] Version bumped in all package pyproject.toml files\n- [ ] CHANGELOG.md updated\n- [ ] Documentation reviewed\n- [ ] No breaking changes without migration guide\n\n## \ud83d\ude80 Post-Merge Actions\n\n1. Create GitHub release with tag `v{{ $node['Calculate New Version'].json.newVersion }}`\n2. Publish packages to PyPI (if applicable)\n3. Update documentation site\n4. Announce in discussions/Discord\n\n---\n\n*Auto-generated by n8n Release Automation*\n*Generated: {{ $now.toISO() }}*",
+        "head": "=release/v{{ $node['Calculate New Version'].json.newVersion }}",
+        "base": "main"
+      },
+      "id": "create-release-pr",
+      "name": "Create Release PR",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        2660,
+        400
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "github-api-tta",
+          "name": "GitHub API - TTA.dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "resource": "label",
+        "operation": "add",
+        "owner": "theinterneti",
+        "repository": "TTA.dev",
+        "issueNumber": "={{ $json.number }}",
+        "labels": [
+          "release",
+          "automated",
+          "high-priority"
+        ]
+      },
+      "id": "label-release-pr",
+      "name": "Label Release PR",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        400
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "github-api-tta",
+          "name": "GitHub API - TTA.dev"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Weekly Check (Mondays)": {
+      "main": [
+        [
+          {
+            "node": "Get Weekly Commits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weekly Commits": {
+      "main": [
+        [
+          {
+            "node": "Analyze Commits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Commits": {
+      "main": [
+        [
+          {
+            "node": "Should Release?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Release?": {
+      "main": [
+        [
+          {
+            "node": "Get Current Version",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Version": {
+      "main": [
+        [
+          {
+            "node": "Calculate New Version",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate New Version": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate CHANGELOG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate CHANGELOG": {
+      "main": [
+        [
+          {
+            "node": "Create Release Branch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Release Branch": {
+      "main": [
+        [
+          {
+            "node": "Update Version Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Version Files": {
+      "main": [
+        [
+          {
+            "node": "Commit Version Bump",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Commit Version Bump": {
+      "main": [
+        [
+          {
+            "node": "Push Release Branch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push Release Branch": {
+      "main": [
+        [
+          {
+            "node": "Create Release PR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Release PR": {
+      "main": [
+        [
+          {
+            "node": "Label Release PR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-09T10:00:00.000Z",
+  "versionId": "1",
+  "active": false
+}

@@ -1,0 +1,21 @@
+--- Generated for page: WorkflowContext ---
+
+New Filename: TTA.dev_Data_WorkflowContext.md
+
+--- Properties to add ---
+type:: [D] DataSchema
+status:: stable
+tags:: #migration-v2
+context-level:: 3-Technical
+created-date:: [[2025-11-12]]
+last-updated:: [[2025-11-12]]
+migrated:: true
+migration-date:: [[2025-11-12]]
+migration-version:: 2.0
+source-file:: packages/tta-dev-primitives/src/...
+base-class:: BaseModel | TypedDict | dataclass
+used-by::
+fields::
+validation::
+
+-------------------------

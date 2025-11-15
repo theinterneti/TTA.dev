@@ -1,0 +1,9 @@
+[
+  {
+    "key": "recursive_algorithms:use memoization for better performance",
+    "strategy": "use memoization for better performance",
+    "context": "recursive_algorithms",
+    "successes": 0,
+    "failures": 0
+  }
+]

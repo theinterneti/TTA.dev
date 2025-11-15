@@ -1,0 +1,46 @@
+{
+  "correlation_id": "gemini-test-001",
+  "service": "gemini",
+  "completed_at": "2025-11-15T17:06:49.903027+00:00",
+  "validation_type": "post_rotation",
+  "total_events": 3,
+  "events": [
+    {
+      "timestamp": "2025-11-15T17:06:49.902217+00:00",
+      "correlation_id": "gemini-test-001",
+      "service": "gemini",
+      "event_type": "validation_start",
+      "success": true,
+      "environment": "development",
+      "details": {
+        "has_api_key": true,
+        "key_prefix_valid": true
+      }
+    },
+    {
+      "timestamp": "2025-11-15T17:06:49.902618+00:00",
+      "correlation_id": "gemini-test-001",
+      "service": "gemini",
+      "event_type": "api_connectivity_test",
+      "success": true,
+      "environment": "development",
+      "details": {
+        "test_passed": false,
+        "test_type": "connectivity"
+      }
+    },
+    {
+      "timestamp": "2025-11-15T17:06:49.902776+00:00",
+      "correlation_id": "gemini-test-001",
+      "service": "gemini",
+      "event_type": "validation_failed",
+      "success": false,
+      "environment": "development",
+      "details": {
+        "error": "Gemini API connectivity test failed",
+        "error_type": "ValidationError",
+        "partial_success": false
+      }
+    }
+  ]
+}

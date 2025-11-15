@@ -1,0 +1,9 @@
+[
+  {
+    "key": "create a function to calculate fibonacci of 35:current approach is performant",
+    "strategy": "current approach is performant",
+    "context": "create a function to calculate fibonacci of 35",
+    "successes": 0,
+    "failures": 0
+  }
+]

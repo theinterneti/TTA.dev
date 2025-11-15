@@ -1,0 +1,25 @@
+{
+  "player_id": "player_001",
+  "total_runs_completed": 2,
+  "total_turns_played": 270,
+  "completed_run_ids": [
+    "run_alex_001",
+    "run_sam_001"
+  ],
+  "advanced_narratives_unlocked": true,
+  "complex_characters_unlocked": false,
+  "multi_path_stories_unlocked": false,
+  "universes_explored": [
+    "enchanted_realm_001"
+  ],
+  "metaconcepts_mastered": [
+    "Metaconcept_1",
+    "Metaconcept_2",
+    "Metaconcept_3",
+    "Metaconcept_4",
+    "Metaconcept_5",
+    "Metaconcept_6",
+    "Metaconcept_7"
+  ],
+  "therapeutic_milestones_total": 13
+}

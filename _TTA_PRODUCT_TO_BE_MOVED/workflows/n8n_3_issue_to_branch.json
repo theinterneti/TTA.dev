@@ -1,0 +1,356 @@
+{
+  "name": "3. Issue-to-Branch Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "event": "issues",
+        "events": [
+          "issues.labeled"
+        ]
+      },
+      "id": "issue-labeled-webhook",
+      "name": "Issue Labeled",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        400
+      ],
+      "webhookId": "tta-issue-to-branch",
+      "credentials": {
+        "githubApi": {
+          "id": "github-api-tta",
+          "name": "GitHub API - TTA.dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.label.name }}",
+              "operation": "equals",
+              "value2": "auto-branch"
+            }
+          ]
+        }
+      },
+      "id": "check-label",
+      "name": "Is Auto-Branch Label?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        460,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "issue-number",
+              "name": "issue_number",
+              "type": "number",
+              "value": "={{ $json.issue.number }}"
+            },
+            {
+              "id": "issue-title",
+              "name": "issue_title",
+              "type": "string",
+              "value": "={{ $json.issue.title }}"
+            },
+            {
+              "id": "issue-labels",
+              "name": "issue_labels",
+              "type": "array",
+              "value": "={{ $json.issue.labels.map(l => l.name) }}"
+            },
+            {
+              "id": "branch-type",
+              "name": "branch_type",
+              "type": "string",
+              "value": "={{ $json.issue.labels.some(l => l.name === 'bug') ? 'fix' : ($json.issue.labels.some(l => l.name === 'enhancement') ? 'feat' : 'chore') }}"
+            },
+            {
+              "id": "branch-name",
+              "name": "branch_name",
+              "type": "string",
+              "value": "={{ $json.branch_type }}/issue-{{ $json.issue_number }}-{{ $json.issue_title.toLowerCase().replace(/[^a-z0-9]+/g, '-').substring(0, 50) }}"
+            }
+          ]
+        }
+      },
+      "id": "prepare-branch-data",
+      "name": "Prepare Branch Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        680,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git fetch origin && git checkout -b {{ $json.branch_name }} origin/main"
+      },
+      "id": "create-branch",
+      "name": "Create Branch",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git push -u origin {{ $node['Prepare Branch Data'].json.branch_name }}"
+      },
+      "id": "push-branch",
+      "name": "Push Branch",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a TTA.dev development assistant.\n\n**Issue #{{ $node['Prepare Branch Data'].json.issue_number }}:** {{ $node['Prepare Branch Data'].json.issue_title }}\n**Labels:** {{ $node['Prepare Branch Data'].json.issue_labels.join(', ') }}\n**Type:** {{ $node['Prepare Branch Data'].json.branch_type }}\n\nGenerate a structured implementation plan for this issue:\n\n1. **Scope Assessment**:\n   - Which packages are affected? (tta-dev-primitives, tta-observability-integration, etc.)\n   - What files need changes?\n   - Are there dependencies?\n\n2. **Implementation Steps** (numbered checklist):\n   - List specific code changes needed\n   - Include test requirements\n   - Note documentation updates\n\n3. **Testing Strategy**:\n   - Unit tests needed\n   - Integration tests needed\n   - Manual testing steps\n\n4. **Documentation**:\n   - Which docs need updating?\n   - Examples to add?\n   - CHANGELOG entry needed?\n\n5. **Estimated Complexity**: Low / Medium / High\n\nFormat as markdown for GitHub comment.",
+        "options": {}
+      },
+      "id": "ai-implementation-plan",
+      "name": "AI: Generate Implementation Plan",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGemini",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        400
+      ],
+      "credentials": {
+        "googleGeminiApi": {
+          "id": "gemini-api",
+          "name": "Google Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "resource": "issue",
+        "operation": "createComment",
+        "owner": "theinterneti",
+        "repository": "TTA.dev",
+        "issueNumber": "={{ $node['Prepare Branch Data'].json.issue_number }}",
+        "body": "=\ud83c\udf3f **Branch Created Automatically**\n\n**Branch:** `{{ $node['Prepare Branch Data'].json.branch_name }}`\n\n**Quick Start:**\n```bash\ngit fetch origin\ngit checkout {{ $node['Prepare Branch Data'].json.branch_name }}\n```\n\n---\n\n## \ud83d\udccb Implementation Plan\n\n{{ $json.response }}\n\n---\n\n**Next Steps:**\n1. Check out the branch\n2. Follow the implementation plan\n3. Run tests: `./scripts/test_fast.sh`\n4. Create PR when ready\n\n*Auto-generated by n8n TTA.dev automation*"
+      },
+      "id": "post-plan-comment",
+      "name": "Post Implementation Plan",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        400
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "github-api-tta",
+          "name": "GitHub API - TTA.dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "resource": "label",
+        "operation": "add",
+        "owner": "theinterneti",
+        "repository": "TTA.dev",
+        "issueNumber": "={{ $node['Prepare Branch Data'].json.issue_number }}",
+        "labels": [
+          "in-progress",
+          "has-branch"
+        ]
+      },
+      "id": "label-in-progress",
+      "name": "Label: In Progress",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        400
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "github-api-tta",
+          "name": "GitHub API - TTA.dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['Prepare Branch Data'].json.branch_type }}",
+              "operation": "equals",
+              "value2": "feat"
+            }
+          ]
+        }
+      },
+      "id": "is-feature",
+      "name": "Is Feature?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "resource": "issue",
+        "operation": "createComment",
+        "owner": "theinterneti",
+        "repository": "TTA.dev",
+        "issueNumber": "={{ $node['Prepare Branch Data'].json.issue_number }}",
+        "body": "\ud83d\udcda **Feature Implementation Reminders**\n\n**Required for new features:**\n- [ ] Add examples to `packages/*/examples/`\n- [ ] Update `PRIMITIVES_CATALOG.md` if adding primitive\n- [ ] Add entry to package `CHANGELOG.md`\n- [ ] Update package README with API docs\n- [ ] Create flashcards in Logseq if user-facing\n- [ ] Add TODO to daily journal for tracking\n\n**Quality Standards:**\n- 100% test coverage required\n- Type hints on all public APIs\n- Docstrings with examples\n- Integration with observability (InstrumentedPrimitive)\n\n**Documentation Locations:**\n- Package docs: `packages/*/README.md`\n- Architecture docs: `docs/architecture/`\n- User guides: `docs/guides/`\n- Knowledge base: `logseq/pages/`\n\nSee: [Coding Standards](https://github.com/theinterneti/TTA.dev/blob/main/docs/development/CodingStandards.md)"
+      },
+      "id": "comment-feature-requirements",
+      "name": "Comment: Feature Requirements",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        300
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "github-api-tta",
+          "name": "GitHub API - TTA.dev"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Issue Labeled": {
+      "main": [
+        [
+          {
+            "node": "Is Auto-Branch Label?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Auto-Branch Label?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Branch Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Branch Data": {
+      "main": [
+        [
+          {
+            "node": "Create Branch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Branch": {
+      "main": [
+        [
+          {
+            "node": "Push Branch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push Branch": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Implementation Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate Implementation Plan": {
+      "main": [
+        [
+          {
+            "node": "Post Implementation Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Implementation Plan": {
+      "main": [
+        [
+          {
+            "node": "Label: In Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label: In Progress": {
+      "main": [
+        [
+          {
+            "node": "Is Feature?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Feature?": {
+      "main": [
+        [
+          {
+            "node": "Comment: Feature Requirements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-09T10:00:00.000Z",
+  "versionId": "1",
+  "active": false
+}

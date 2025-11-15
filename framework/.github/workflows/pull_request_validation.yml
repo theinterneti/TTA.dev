@@ -1,0 +1,207 @@
+name: '🔍 Pull Request Validation'
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'logseq/**'
+      - 'archive/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUNBUFFERED: 1
+  UV_CACHE_DIR: ~/.cache/uv
+
+jobs:
+  validate-pr:
+    name: 'PR Validation Suite'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: '📥 Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: '⚙️ Setup TTA environment'
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: '3.12'
+
+      - name: '📦 Cache uv dependencies'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-deps-${{ runner.os }}-py312-${{ hashFiles('uv.lock', 'pyproject.toml') }}
+          restore-keys: |
+            uv-deps-${{ runner.os }}-py312-
+            uv-deps-${{ runner.os }}-
+
+      - name: '🔧 Sync dependencies'
+        run: uv sync --all-extras --no-install-project
+
+      - name: '🔍 Format check'
+        id: format-check
+        run: |
+          echo "🔍 Running Ruff format check..."
+          if uv run ruff format --check .; then
+            echo "✅ Code formatting is valid"
+          else
+            echo "❌ Code formatting issues found" >&2
+            exit 1
+          fi
+
+      - name: '🧹 Lint check'
+        id: lint-check
+        run: |
+          echo "🧹 Running Ruff lint check..."
+          if uv run ruff check .; then
+            echo "✅ Code linting passed"
+          else
+            echo "❌ Code linting issues found" >&2
+            exit 1
+          fi
+
+      - name: '🔍 Type check'
+        id: type-check
+        run: |
+          echo "🔍 Running Pyright type check..."
+          if uv run pyright packages/; then
+            echo "✅ Type checking passed"
+          else
+            echo "❌ Type checking failed" >&2
+            exit 1
+          fi
+
+      - name: '🧪 Unit tests'
+        id: unit-tests
+        run: |
+          echo "🧪 Running unit tests..."
+          if uv run pytest -v -m "not integration and not slow and not external" --maxfail=5 --tb=short; then
+            echo "✅ Unit tests passed"
+          else
+            echo "❌ Unit tests failed" >&2
+            exit 1
+          fi
+
+      - name: '📝 Validation summary'
+        if: always()
+        run: |
+          echo "## 🔍 Pull Request Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status | Time |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Format | ${{ steps.format-check.outcome == 'success' && '✅ Passed' || '❌ Failed' }} | ${{ steps.format-check.conclusion != 'skipped' && format('~{0}s', steps.format-check.outputs.duration || 'N/A') || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧹 Lint | ${{ steps.lint-check.outcome == 'success' && '✅ Passed' || '❌ Failed' }} | ${{ steps.lint-check.conclusion != 'skipped' && format('~{0}s', steps.lint-check.outputs.duration || 'N/A') || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Type Check | ${{ steps.type-check.outcome == 'success' && '✅ Passed' || '❌ Failed' }} | ${{ steps.type-check.conclusion != 'skipped' && format('~{0}s', steps.type-check.outputs.duration || 'N/A') || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Unit Tests | ${{ steps.unit-tests.outcome == 'success' && '✅ Passed' || '❌ Failed' }} | ${{ steps.unit-tests.conclusion != 'skipped' && format('~{0}s', steps.unit-tests.outputs.duration || 'N/A') || 'N/A' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Summary" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.format-check.outcome }}" == "success" ] && [ "${{ steps.lint-check.outcome }}" == "success" ] && [ "${{ steps.type-check.outcome }}" == "success" ] && [ "${{ steps.unit-tests.outcome }}" == "success" ]; then
+            echo "✅ **All checks passed!** Ready for review." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Some checks failed.** Please review the issues above." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  validate-quality:
+    name: 'Quality Assurance'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    needs: validate-pr
+
+    steps:
+      - name: '📥 Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: '⚙️ Setup TTA environment'
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: '3.12'
+
+      - name: '📦 Restore uv cache'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-deps-${{ runner.os }}-py312-${{ hashFiles('uv.lock', 'pyproject.toml') }}
+
+      - name: '🔧 Sync dependencies'
+        run: uv sync --all-extras --no-install-project
+
+      - name: '📊 Code coverage'
+        id: coverage
+        run: |
+          echo "📊 Running tests with coverage..."
+          uv run pytest -m "not integration and not slow and not external" --cov=packages --cov-branch --cov-report=xml --cov-report=term-missing
+          echo "✅ Coverage analysis completed"
+
+      - name: '📤 Upload coverage'
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: pr-validation
+          name: pr-validation-coverage
+          fail_ci_if_error: false
+          verbose: false
+
+      - name: '🔒 Security scan'
+        id: security
+        run: |
+          echo "🔒 Running security audit..."
+          # Use continue-on-error to avoid blocking PRs due to false positives
+          if uv run pip-audit --format text > security-audit.txt 2>&1; then
+            echo "✅ Security audit completed without critical issues"
+          else
+            echo "⚠️ Security audit found potential issues (review security-audit.txt)"
+          fi
+        continue-on-error: true
+
+      - name: '📦 Package validation'
+        id: package-check
+        run: |
+          echo "📦 Validating package builds..."
+          for package in packages/*/pyproject.toml; do
+            dir=$(dirname $package)
+            echo "📦 Checking $dir..."
+            (
+              cd $dir && uv build --check
+              echo "✅ $dir build check passed"
+            ) || (
+              echo "❌ $dir build check failed" >&2
+              exit 1
+            )
+          done
+          echo "✅ All packages validated successfully"
+
+      - name: '📝 Quality summary'
+        if: always()
+        run: |
+          echo "## 🛡️ Quality Assurance Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Code Quality" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 Coverage report uploaded to Codecov" >> $GITHUB_STEP_SUMMARY
+          echo "- 📦 Package validation: ${{ steps.package-check.outcome == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Security" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔒 Audit: ${{ steps.security.outcome == 'success' && '✅ Clean' || '⚠️ Issues found' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "• Review Codecov report for coverage gaps" >> $GITHUB_STEP_SUMMARY
+          if [ -f security-audit.txt ]; then
+            echo "• Check security-audit.txt for details" >> $GITHUB_STEP_SUMMARY
+          fi

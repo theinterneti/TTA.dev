@@ -1,0 +1,215 @@
+# CachePrimitive Examples for Cline
+
+**Purpose:** Learn how to implement caching with TTA.dev's CachePrimitive for 40-60% cost reduction
+
+## Example 1: Cache Expensive LLM Calls
+
+**When to Use:** You notice repetitive LLM calls in your code and want to reduce costs/latency
+
+**Cline Prompt Example:**
+
+```
+I have an LLM service that gets called with the same prompts repeatedly.
+Implement CachePrimitive to reduce costs and improve response time.
+```
+
+**Expected Implementation:**
+
+```python
+from tta_dev_primitives.performance import CachePrimitive
+from tta_dev_primitives import WorkflowContext
+
+# Cache expensive LLM calls
+cached_llm = CachePrimitive(
+    primitive=expensive_llm_call,
+    ttl_seconds=3600,  # Cache for 1 hour
+    max_size=1000,     # Max 1000 entries
+    key_fn=lambda data, ctx: data.get("prompt", "")
+)
+
+# Use in your service
+context = WorkflowContext(workflow_id="llm-service")
+result = await cached_llm.execute(
+    {"prompt": "What is the weather?"},
+    context
+)
+```
+
+**Cline's Learning Pattern:**
+
+- Identifies repetitive calls (same prompt)
+- Suggests CachePrimitive with appropriate TTL
+- Uses proper WorkflowContext for tracing
+- Includes type hints and proper error handling
+
+## Example 2: Cache Database Queries
+
+**When to Use:** Your application makes the same database queries frequently
+
+**Cline Prompt Example:**
+
+```
+Add caching to this database service that queries user profiles repeatedly.
+The data changes infrequently so can be cached for 30 minutes.
+```
+
+**Expected Implementation:**
+
+```python
+from tta_dev_primitives.performance import CachePrimitive
+from tta_dev_primitives import WorkflowContext
+import aiohttp
+
+class UserProfileService:
+    def __init__(self):
+        # Cache user profile queries for 30 minutes
+        self.cached_query = CachePrimitive(
+            primitive=self._fetch_user_profile,
+            ttl_seconds=1800,  # 30 minutes
+            max_size=500,      # Max 500 cached profiles
+            key_fn=lambda data, ctx: data.get("user_id", "")
+        )
+
+    async def get_user_profile(self, user_id: str) -> dict:
+        context = WorkflowContext(
+            workflow_id="user-service",
+            metadata={"user_id": user_id}
+        )
+        return await self.cached_query.execute(
+            {"user_id": user_id},
+            context
+        )
+
+    async def _fetch_user_profile(self, data: dict) -> dict:
+        # Your actual database query implementation
+        pass
+```
+
+## Example 3: Multi-Parameter Cache Key
+
+**When to Use:** Cache needs to consider multiple parameters for cache key
+
+**Cline Prompt Example:**
+
+```
+This API call depends on both user_id and search_query.
+Create a cache that considers both parameters.
+```
+
+**Expected Implementation:**
+
+```python
+from tta_dev_primitives.performance import CachePrimitive
+from tta_dev_primitives import WorkflowContext
+
+# Multi-parameter cache key
+search_service = CachePrimitive(
+    primitive=search_api_call,
+    ttl_seconds=900,  # 15 minutes
+    max_size=2000,    # Large cache for search results
+    key_fn=lambda data, ctx: f"{data.get('user_id')}_{data.get('search_query')}"
+)
+
+# Usage
+result = await search_service.execute({
+    "user_id": "user123",
+    "search_query": "python primitives"
+}, context)
+```
+
+## Example 4: Cache with Automatic Invalidation
+
+**When to Use:** You need to clear cache when data updates
+
+**Cline Prompt Example:**
+
+```
+Add cache invalidation when user data is updated.
+The cache should be cleared to ensure fresh data.
+```
+
+**Expected Implementation:**
+
+```python
+from tta_dev_primitives.performance import CachePrimitive
+from tta_dev_primitives import WorkflowContext
+import asyncio
+from collections import defaultdict
+
+class CacheManager:
+    def __init__(self):
+        self.caches: dict[str, CachePrimitive] = {}
+
+    def create_cached_service(self, service_name: str):
+        cache = CachePrimitive(
+            primitive=self._get_service_data,
+            ttl_seconds=3600,
+            key_fn=lambda data, ctx: f"{service_name}:{data.get('key', '')}"
+        )
+        self.caches[service_name] = cache
+        return cache
+
+    async def invalidate_cache(self, service_name: str, key_prefix: str = ""):
+        """Clear cache entries that match the prefix"""
+        # Implementation would clear specific cache entries
+        pass
+
+# Usage in service
+user_cache = cache_manager.create_cached_service("user-service")
+await user_cache.execute({"key": "user123"}, context)
+
+# When user data updates
+await cache_manager.invalidate_cache("user-service", "user123")
+```
+
+## Cline Detection Patterns
+
+**CachePrimitive Indicators:**
+
+- "same call repeatedly"
+- "expensive operation"
+- "reduce costs"
+- "improve response time"
+- "querying the same data"
+
+**Cline's Response Strategy:**
+
+1. Identify the repetitive operation
+2. Suggest CachePrimitive with appropriate TTL
+3. Design cache key strategy
+4. Include proper error handling
+5. Add type hints and context management
+
+## Common Mistakes to Avoid
+
+❌ **Wrong:** Cache without TTL
+
+```python
+# Too aggressive caching
+cache = CachePrimitive(primitive=call, ttl_seconds=0)  # No TTL
+```
+
+✅ **Right:** Appropriate TTL
+
+```python
+# Reasonable caching
+cache = CachePrimitive(primitive=call, ttl_seconds=3600)
+```
+
+❌ **Wrong:** Poor cache key
+
+```python
+# Generic key
+key_fn=lambda data, ctx: "default"
+```
+
+✅ **Right:** Specific cache key
+
+```python
+# Unique key per request
+key_fn=lambda data, ctx: data.get("id", "")
+```
+
+---
+
+**Next Steps:** When cline detects caching patterns, it should automatically suggest CachePrimitive with appropriate configuration based on the use case.

@@ -1,0 +1,32 @@
+{
+  "correlation_id": "test-n8n-001",
+  "service": "n8n",
+  "completed_at": "2025-11-15T17:00:40.169887+00:00",
+  "total_events": 2,
+  "events": [
+    {
+      "timestamp": "2025-11-15T17:00:40.169382+00:00",
+      "correlation_id": "test-n8n-001",
+      "service": "n8n",
+      "event_type": "rotation_start",
+      "success": true,
+      "environment": "development",
+      "dry_run": true,
+      "details": {
+        "has_current_key": true
+      }
+    },
+    {
+      "timestamp": "2025-11-15T17:00:40.169571+00:00",
+      "correlation_id": "test-n8n-001",
+      "service": "n8n",
+      "event_type": "rotation_simulated",
+      "success": true,
+      "environment": "development",
+      "dry_run": true,
+      "details": {
+        "simulated_action": "key_rotation"
+      }
+    }
+  ]
+}

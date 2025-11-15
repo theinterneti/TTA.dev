@@ -1,0 +1,40 @@
+{
+  "run_id": "run_alex_001",
+  "character_id": "char_alex_001",
+  "character_name": "Alex",
+  "universe_id": "enchanted_realm_001",
+  "state": "completed",
+  "timeline_position": 150,
+  "turn_count": 150,
+  "session_count": 5,
+  "created_at": "2025-11-09T16:23:43.198052+00:00",
+  "last_played": "2025-11-09T16:23:44.903493+00:00",
+  "completed_at": "2025-11-09T16:23:47.527207+00:00",
+  "completion_reason": "Character retired peacefully",
+  "current_scene": "",
+  "recent_events": [
+    "Turn 141: Action at turn 141",
+    "Turn 142: Action at turn 142",
+    "Turn 143: Action at turn 143",
+    "Turn 144: Action at turn 144",
+    "Turn 145: Action at turn 145",
+    "Turn 146: Action at turn 146",
+    "Turn 147: Action at turn 147",
+    "Turn 148: Action at turn 148",
+    "Turn 149: Action at turn 149",
+    "Turn 150: Action at turn 150"
+  ],
+  "active_storylines": [],
+  "therapeutic_focus": "anxiety_management",
+  "metaconcepts_integrated": [
+    "Metaconcept_1",
+    "Metaconcept_2",
+    "Metaconcept_3",
+    "Metaconcept_4",
+    "Metaconcept_5",
+    "Metaconcept_6",
+    "Metaconcept_7"
+  ],
+  "insights_discovered": [],
+  "therapeutic_milestones": 7
+}

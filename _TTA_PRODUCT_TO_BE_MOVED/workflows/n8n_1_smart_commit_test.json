@@ -1,0 +1,424 @@
+{
+  "name": "1. TTA.dev Smart Commit & Test",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "id": "trigger-timer",
+      "name": "Every 10 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git status --porcelain"
+      },
+      "id": "check-status",
+      "name": "Check Git Status",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        460,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.stdout }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "has-changes",
+      "name": "Has Changes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        680,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git diff --cached --name-status || git diff --name-status"
+      },
+      "id": "get-changed-files",
+      "name": "Get Changed Files",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git diff --stat"
+      },
+      "id": "get-diff-stats",
+      "name": "Get Diff Stats",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior developer writing commit messages for TTA.dev, a production AI toolkit.\n\nAnalyze these changes and generate a conventional commit message:\n\n{{ $node['Get Changed Files'].json.stdout }}\n\nStats:\n{{ $node['Get Diff Stats'].json.stdout }}\n\nRules:\n- Format: <type>(<scope>): <description>\n- Types: feat|fix|docs|style|refactor|perf|test|build|ci|chore\n- Scope: package name (tta-dev-primitives, tta-observability-integration, etc.) or 'workspace'\n- Description: clear, specific, imperative mood\n- Max 72 characters for title\n- Add body if complex changes (separated by blank line)\n\nExamples:\n- feat(primitives): add AdaptiveRetryPrimitive with learning strategies\n- fix(observability): resolve metrics export port conflict\n- docs(README): update quick start guide with memory primitives\n- test(primitives): add integration tests for CachePrimitive TTL\n- ci(workflows): update GitHub Actions to use uv package manager\n\nReturn ONLY the commit message (title + optional body), nothing else.",
+        "options": {}
+      },
+      "id": "ai-commit-message",
+      "name": "AI: Generate Commit Message",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGemini",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ],
+      "credentials": {
+        "googleGeminiApi": {
+          "id": "gemini-api",
+          "name": "Google Gemini API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "commit-msg",
+              "name": "commit_message",
+              "type": "string",
+              "value": "={{ $json.response }}"
+            },
+            {
+              "id": "files-changed",
+              "name": "files_changed",
+              "type": "string",
+              "value": "={{ $node['Get Changed Files'].json.stdout }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-commit-data",
+      "name": "Prepare Commit Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        1560,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=cd /home/thein/repos/TTA.dev && git add -A && git commit -m \"{{ $json.commit_message.split('\\n')[0] }}\" {{ $json.commit_message.split('\\n').length > 1 ? '-m \"' + $json.commit_message.split('\\n').slice(1).join('\\n') + '\"' : '' }}"
+      },
+      "id": "git-commit",
+      "name": "Git Commit",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && ./scripts/test_fast.sh 2>&1"
+      },
+      "id": "run-tests",
+      "name": "Run Fast Tests",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        300
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.exitCode }}",
+              "operation": "equals",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "tests-passed",
+      "name": "Tests Passed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git push origin main 2>&1"
+      },
+      "id": "git-push",
+      "name": "Git Push to Main",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /home/thein/repos/TTA.dev && git reset --soft HEAD~1"
+      },
+      "id": "rollback-commit",
+      "name": "Rollback Commit",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "resource": "issue",
+        "operation": "create",
+        "owner": "theinterneti",
+        "repository": "TTA.dev",
+        "title": "=\ud83d\udea8 CI: Tests Failed After Automated Commit",
+        "body": "=## Automated Commit Failed Tests\n\n**Commit Message:**\n```\n{{ $node['Git Commit'].json.stdout }}\n```\n\n**Files Changed:**\n```\n{{ $node['Prepare Commit Data'].json.files_changed }}\n```\n\n**Test Output:**\n```\n{{ $node['Run Fast Tests'].json.stderr || $node['Run Fast Tests'].json.stdout }}\n```\n\n---\n\n**Action Taken:**\n\u2705 Commit has been rolled back to prevent breaking main branch\n\n**Next Steps:**\n1. Review the test failures above\n2. Fix the failing tests locally\n3. Manually commit and push the changes\n4. Close this issue once resolved\n\n**Labels:** `automated`, `ci-failed`, `tests`\n**Priority:** High\n**Created:** {{ $now.toISO() }}",
+        "labels": [
+          "automated",
+          "ci-failed",
+          "tests",
+          "high-priority"
+        ]
+      },
+      "id": "create-failure-issue",
+      "name": "Create Failure Issue",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        2660,
+        400
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "github-api-tta",
+          "name": "GitHub API - TTA.dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status",
+              "name": "status",
+              "type": "string",
+              "value": "success"
+            },
+            {
+              "id": "commit-sha",
+              "name": "commit_sha",
+              "type": "string",
+              "value": "={{ $node['Git Push to Main'].json.stdout.match(/\\b[0-9a-f]{7,40}\\b/)?.[0] || 'unknown' }}"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "type": "string",
+              "value": "={{ $node['Prepare Commit Data'].json.commit_message }}"
+            }
+          ]
+        }
+      },
+      "id": "success-summary",
+      "name": "Success Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        2660,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Every 10 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Check Git Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Git Status": {
+      "main": [
+        [
+          {
+            "node": "Has Changes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Changes?": {
+      "main": [
+        [
+          {
+            "node": "Get Changed Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Changed Files": {
+      "main": [
+        [
+          {
+            "node": "Get Diff Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Diff Stats": {
+      "main": [
+        [
+          {
+            "node": "AI: Generate Commit Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Generate Commit Message": {
+      "main": [
+        [
+          {
+            "node": "Prepare Commit Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Commit Data": {
+      "main": [
+        [
+          {
+            "node": "Git Commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Git Commit": {
+      "main": [
+        [
+          {
+            "node": "Run Fast Tests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Fast Tests": {
+      "main": [
+        [
+          {
+            "node": "Tests Passed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tests Passed?": {
+      "main": [
+        [
+          {
+            "node": "Git Push to Main",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rollback Commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Git Push to Main": {
+      "main": [
+        [
+          {
+            "node": "Success Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rollback Commit": {
+      "main": [
+        [
+          {
+            "node": "Create Failure Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-09T10:00:00.000Z",
+  "versionId": "1",
+  "active": false
+}
