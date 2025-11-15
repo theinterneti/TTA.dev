@@ -532,6 +532,50 @@ from tta_dev_primitives.observability import InstrumentedPrimitive
 
 ---
 
+### Callback Primitives
+
+**Primitives for observing and reacting to workflow events.**
+
+**Import:**
+```python
+from tta_dev_primitives.callbacks import BaseTTACallbackHandler, WebhookCallbackHandler
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/callbacks/`](packages/tta-dev-primitives/src/tta_dev_primitives/callbacks/)
+
+**Usage:**
+```python
+# 1. Define a custom callback handler
+class MyCustomHandler(BaseTTACallbackHandler):
+    def on_primitive_start(self, primitive, context):
+        print(f"--- Primitive Start: {primitive.name} ---")
+
+    def on_primitive_end(self, primitive, context, result):
+        print(f"--- Primitive End: {primitive.name} ---")
+
+# 2. Instantiate the handler
+handler = MyCustomHandler()
+
+# 3. Inject the handler at runtime
+context = WorkflowContext(callbacks=[handler])
+result = await workflow.execute(input_data, context)
+```
+
+**WebhookCallbackHandler:**
+```python
+# Use the built-in WebhookCallbackHandler
+webhook_handler = WebhookCallbackHandler(
+    on_start_url="http://localhost:8000/start",
+    on_end_url="http://localhost:8000/end",
+    on_error_url="http://localhost:8000/error",
+)
+
+# Inject it into the context
+context = WorkflowContext(callbacks=[webhook_handler])
+```
+
+---
+
 ## Adaptive/Self-Improving Primitives
 
 ### AdaptivePrimitive[TInput, TOutput]
