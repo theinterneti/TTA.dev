@@ -1,0 +1,274 @@
+name: '📦 Release Preparation'
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.2.3)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as prerelease'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  PYTHONUNBUFFERED: 1
+  UV_CACHE_DIR: ~/.cache/uv
+
+jobs:
+  validate-release:
+    name: 'Release Validation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      tag: ${{ steps.extract-version.outputs.tag }}
+      packages: ${{ steps.discover-packages.outputs.packages }}
+
+    steps:
+      - name: '📥 Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
+      - name: '🔍 Extract version info'
+        id: extract-version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            TAG="v${VERSION}"
+          else
+            TAG="${{ github.ref_name }}"
+            VERSION="${TAG#v}"
+          fi
+
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "📦 Release version: ${VERSION} (tag: ${TAG})"
+
+      - name: '📋 Validate version format'
+        run: |
+          VERSION="${{ steps.extract-version.outputs.version }}"
+          if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "❌ Invalid version format: ${VERSION}"
+            echo "Expected format: x.y.z or x.y.z-prerelease"
+            exit 1
+          fi
+          echo "✅ Version format valid"
+
+      - name: '📦 Discover packages'
+        id: discover-packages
+        run: |
+          PACKAGES=$(find packages -name "pyproject.toml" -exec dirname {} \; | jq -R . | jq -s .)
+          echo "packages=${PACKAGES}" >> $GITHUB_OUTPUT
+          echo "📦 Found packages: ${PACKAGES}"
+
+  build-all-packages:
+    name: 'Build All Packages'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: validate-release
+
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.validate-release.outputs.packages) }}
+
+    steps:
+      - name: '📥 Checkout repository'
+        uses: actions/checkout@v4
+
+      - name: '⚙️ Setup TTA environment'
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: '3.12'
+
+      - name: '📦 Cache build dependencies'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-deps-${{ runner.os }}-py312-${{ hashFiles('uv.lock', 'pyproject.toml', format('{0}/pyproject.toml', matrix.package)) }}
+          restore-keys: |
+            uv-deps-${{ runner.os }}-py312-
+            uv-deps-${{ runner.os }}-
+
+      - name: '🔧 Sync dependencies'
+        run: uv sync --all-extras
+
+      - name: '🏗️ Build package'
+        id: build
+        working-directory: ${{ matrix.package }}
+        run: |
+          echo "🏗️ Building ${{ matrix.package }} v${{ needs.validate-release.outputs.version }}..."
+
+          # Update version in pyproject.toml if needed
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            sed -i "s/^version = .*/version = \"${{ needs.validate-release.outputs.version }}\"/" pyproject.toml
+          fi
+
+          # Build package
+          uv build
+
+          # Extract package name and verify build
+          PACKAGE_NAME=$(grep '^name = ' pyproject.toml | sed 's/name = "\(.*\)"/\1/')
+          WHEEL_FILE=$(ls dist/*.whl 2>/dev/null | head -1)
+          TARBALL_FILE=$(ls dist/*.tar.gz 2>/dev/null | head -1)
+
+          echo "package-name=${PACKAGE_NAME}" >> $GITHUB_OUTPUT
+          echo "wheel-file=${WHEEL_FILE}" >> $GITHUB_OUTPUT
+          echo "tarball-file=${TARBALL_FILE}" >> $GITHUB_OUTPUT
+
+          echo "✅ Package ${PACKAGE_NAME} built successfully"
+          echo "📦 Wheel: ${WHEEL_FILE}"
+          echo "📦 Tarball: ${TARBALL_FILE}"
+
+      - name: '🔍 Validate package'
+        working-directory: ${{ matrix.package }}
+        run: |
+          echo "🔍 Validating built package..."
+          uv run twine check dist/*
+
+          if [ -f "dist/*.whl" ]; then
+            uv run pip install dist/*.whl --dry-run --ignore-installed
+          fi
+
+          echo "✅ Package validation passed"
+
+      - name: '📤 Upload package artifacts'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.package-name }}-${{ needs.validate-release.outputs.version }}
+          path: ${{ matrix.package }}/dist/
+          retention-days: 30
+
+  test-package-installation:
+    name: 'Test Package Installation'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    needs: [validate-release, build-all-packages]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        package: ${{ fromJSON(needs.validate-release.outputs.packages) }}
+
+    steps:
+      - name: '📥 Download package artifacts'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.package }}-${{ needs.validate-release.outputs.version }}
+          path: ./test-packages
+
+      - name: '⚙️ Setup Python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: '📦 Test installation'
+        run: |
+          echo "📦 Testing package installation on ${{ matrix.os }}..."
+
+          # Test wheel installation
+          if ls test-packages/*.whl 1> /dev/null 2>&1; then
+            python -m pip install test-packages/*.whl --dry-run
+            echo "✅ Wheel installation test passed"
+          fi
+
+          # Test source distribution
+          if ls test-packages/*.tar.gz 1> /dev/null 2>&1; then
+            python -m pip install test-packages/*.tar.gz --dry-run
+            echo "✅ Source distribution installation test passed"
+          fi
+
+  create-release:
+    name: 'Create Release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [validate-release, build-all-packages, test-package-installation]
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.prerelease != true
+
+    steps:
+      - name: '📥 Checkout repository'
+        uses: actions/checkout@v4
+
+      - name: '📦 Download all package artifacts'
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release-artifacts
+
+      - name: '🏷️ Generate release notes'
+        id: release-notes
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          TAG="${{ needs.validate-release.outputs.tag }}"
+
+          # Generate changelog from recent commits
+          CHANGELOG=$(git log --oneline --pretty=format:"• %s" "${TAG}~1"..HEAD 2>/dev/null || echo "• Version ${VERSION} release")
+
+          cat > release-notes.md << EOF
+          ## Release ${TAG}
+
+          **Version:** ${VERSION}
+          **Date:** $(date -u +"%Y-%m-%d")
+
+          ### Changes
+          ${CHANGELOG}
+
+          ### Installation
+          \`\`\`bash
+          pip install tta-dev-primitives==${VERSION}
+          \`\`\`
+
+          ### Verification
+          All packages have been tested across Ubuntu, macOS, and Windows platforms.
+          EOF
+
+          echo "release-notes<<EOF" >> $GITHUB_OUTPUT
+          cat release-notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: '🚀 Create GitHub release'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.validate-release.outputs.tag }}
+          release_name: Release ${{ needs.validate-release.outputs.tag }}
+          body: ${{ steps.release-notes.outputs.release-notes }}
+          draft: false
+          prerelease: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true' || false }}
+
+      - name: '📤 Upload release assets'
+        run: |
+          for artifact_dir in release-artifacts/*/; do
+            if [ -d "$artifact_dir" ]; then
+              echo "📤 Uploading assets from ${artifact_dir}..."
+              gh release upload ${{ needs.validate-release.outputs.tag }} ${artifact_dir}/* \
+                --repo ${{ github.repository }}
+            fi
+          done
+
+      - name: '📝 Release summary'
+        run: |
+          echo "## 📦 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.validate-release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** ${{ needs.validate-release.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Packages:** ${{ join(fromJSON(needs.validate-release.outputs.packages), ', ') }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Release Complete" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub release created" >> $GITHUB_STEP_SUMMARY
+          echo "- Package artifacts uploaded" >> $GITHUB_STEP_SUMMARY
+          echo "- Cross-platform installation tested" >> $GITHUB_STEP_SUMMARY
