@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# Read the JSON payload from stdin
+input=$(cat)
+
+# Extract the tool name and parameters using jq
+tool_name=$(echo "$input" | jq -r '.postToolUse.toolName')
+parameters=$(echo "$input" | jq -r '.postToolUse.parameters')
+
+# Check if the tool that was used is 'write_to_file' or 'replace_in_file'
+if [ "$tool_name" == "write_to_file" ] || [ "$tool_name" == "replace_in_file" ]; then
+  # Extract the file path
+  file_path=$(echo "$parameters" | jq -r '.path')
+  
+  # Get the current date in the required format
+  current_date=$(date +'%Y_%m_%d')
+  
+  # Create the journal entry content
+  journal_entry="- TODO Review changes in \`$file_path\` #dev-todo
+  type:: documentation
+  priority:: medium
+  package:: unknown
+  related:: \[\[$file_path\]\]"
+  
+  # Append the entry to the daily journal file
+  echo -e "$journal_entry" >> "logseq/journals/$current_date.md"
+  
+  # Output a success message
+  echo '{"cancel": false, "contextModification": "Logseq journal entry created for the file modification."}'
+else
+  # If the tool is not a file modification tool, do nothing
+  echo '{"cancel": false}'
+fi

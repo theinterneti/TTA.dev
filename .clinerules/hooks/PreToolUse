@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Read the JSON payload from stdin
+input=$(cat)
+
+# Extract the tool name using jq
+tool_name=$(echo "$input" | jq -r '.preToolUse.toolName')
+
+# Check if the tool being used is 'attempt_completion'
+if [ "$tool_name" == "attempt_completion" ]; then
+  # Run the quality checks
+  echo "Running quality checks before completion..."
+  
+  # 1. Format code
+  uv run ruff format .
+  
+  # 2. Lint code
+  uv run ruff check . --fix
+  
+  # 3. Type check
+  uvx pyright packages/
+  
+  # 4. Run tests
+  uv run pytest -v
+  
+  # Check the exit code of the last command
+  if [ $? -eq 0 ]; then
+    # If all checks pass, allow the completion
+    echo '{"cancel": false, "contextModification": "All quality checks passed."}'
+  else
+    # If any check fails, block the completion and provide an error message
+    echo '{"cancel": true, "errorMessage": "One or more quality checks failed. Please review the output and fix the issues before attempting to complete the task."}'
+  fi
+else
+  # If the tool is not 'attempt_completion', allow it to proceed
+  echo '{"cancel": false}'
+fi
