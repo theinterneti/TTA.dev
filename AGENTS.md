@@ -80,7 +80,20 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 
 ### 🎯 Agent Context & Tooling
 
-For GitHub Copilot users, specific instructions and toolset configurations are available in [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+For GitHub Copilot users, comprehensive instructions are available in [`.github/copilot-instructions.md`](.github/copilot-instructions.md), including:
+
+- Package manager requirements (uv)
+- Python version and type hints (3.11+)
+- Testing standards and examples
+- Code style and formatting rules
+- Security practices
+- Documentation standards
+- TTA.dev primitives patterns
+- TODO management with Logseq
+- Development workflow
+- Copilot toolsets (VS Code)
+
+Additionally, context-specific modular instructions are in `.github/instructions/` for tests, scripts, documentation, package source, and Logseq integration.
 
 ### ⚡ Before You Code: Primitive Usage Rules
 
