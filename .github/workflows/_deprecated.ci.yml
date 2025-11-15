@@ -1,0 +1,46 @@
+# DEPRECATED: This workflow has been replaced by merge_gate.yml
+#
+# Migration Guide:
+# - CI workflow provided matrix testing and coverage
+# - Use merge_gate.yml for equivalent functionality
+# - New workflow includes: comprehensive testing, integration tests, cross-platform validation, security audits
+# - Migration completed on: 2025-11-14
+#
+# To restore this workflow temporarily, rename this file back to ci.yml
+# This file will be removed in a future cleanup phase.
+
+name: 'CI (DEPRECATED)'
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  deprecated:
+    name: '⚠️ DEPRECATED WORKFLOW'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Migration Required'
+        run: |
+          echo "❌ This CI workflow has been deprecated!"
+          echo ""
+          echo "🔄 Migration Path:"
+          echo "   Old: ci.yml"
+          echo "   New: merge_gate.yml (for main branch pushes)"
+          echo "   New: pull_request_validation.yml (for PRs)"
+          echo ""
+          echo "🚀 New workflow features:"
+          echo "   • Scalable matrix testing (only on main)"
+          echo "   • Integration tests with databases"
+          echo "   • Cross-platform compatibility checks"
+          echo "   • Enhanced security validation"
+          echo "   • Better performance monitoring"
+          echo ""
+          echo "📋 To migrate:"
+          echo "   1. Branch protection rules auto-update"
+          echo "   2. Status checks now use new workflow names"
+          echo ""
+          echo "For support, see: https://github.com/theinterneti/TTA.dev/issues/103"
+          exit 1
