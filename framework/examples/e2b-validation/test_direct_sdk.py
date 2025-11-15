@@ -18,7 +18,7 @@ async def test_template_directly():
     api_key = os.getenv("E2B_API_KEY") or os.getenv("E2B_KEY")
     if api_key:
         os.environ["E2B_API_KEY"] = api_key
-        print(f"✅ API key set: {api_key[:20]}...")
+        print("✅ API key is set.")
     else:
         print("❌ No API key found in E2B_API_KEY or E2B_KEY")
         print(f"Environment keys: {list(os.environ.keys())[:5]}...")
