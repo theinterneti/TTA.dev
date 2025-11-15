@@ -110,9 +110,7 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
         self.workspace_dir = workspace_dir
 
         # Default MCP server configurations
-        self.mcp_servers_config = (
-            mcp_servers_config or self._get_default_server_config()
-        )
+        self.mcp_servers_config = mcp_servers_config or self._get_default_server_config()
 
         # Track generated filesystem for cleanup
         self._generated_files: list[str] = []
@@ -234,9 +232,7 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
             # Cleanup generated files if needed
             await self._cleanup_generated_files()
 
-    async def _setup_mcp_environment(
-        self, workspace_data: dict[str, Any] | None = None
-    ) -> None:
+    async def _setup_mcp_environment(self, workspace_data: dict[str, Any] | None = None) -> None:
         """Setup MCP execution environment.
 
         Creates:
@@ -315,7 +311,7 @@ It handles the protocol communication and error handling.
 import asyncio
 import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -408,7 +404,7 @@ async def _handle_grafana_call(tool: str, input_data: dict[str, Any]) -> dict[st
     else:
         raise ValueError(f"Unknown Grafana tool: {tool}")
 
-async def _handle_pylance_call(tool: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
+async def _handle_pylance_call(tool: str, input_data: dict[str, Any]) -> dict[str, Any]:
     """Handle Pylance MCP server calls."""
     if tool == "check_syntax":
         # Mock syntax check
@@ -433,7 +429,7 @@ async def _handle_pylance_call(tool: str, input_data: Dict[str, Any]) -> Dict[st
     else:
         raise ValueError(f"Unknown Pylance tool: {tool}")
 
-async def _handle_github_pr_call(tool: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
+async def _handle_github_pr_call(tool: str, input_data: dict[str, Any]) -> dict[str, Any]:
     """Handle GitHub PR MCP server calls."""
     if tool == "get_active_pr":
         # Mock active PR
@@ -464,9 +460,7 @@ async def _handle_github_pr_call(tool: str, input_data: Dict[str, Any]) -> Dict[
         # Generate parameter documentation
         param_docs = []
         for param_name, param_type in parameters.items():
-            param_docs.append(
-                f"        {param_name} ({param_type}): Parameter description"
-            )
+            param_docs.append(f"        {param_name} ({param_type}): Parameter description")
 
         param_doc_str = "\n".join(param_docs) if param_docs else "        No parameters"
 
@@ -494,9 +488,7 @@ async def {tool_name}(input_data: dict) -> dict:
     )
 '''
 
-    def _generate_server_index(
-        self, server_name: str, server_config: MCPServerConfig
-    ) -> str:
+    def _generate_server_index(self, server_name: str, server_config: MCPServerConfig) -> str:
         """Generate __init__.py for MCP server module."""
         tools = server_config.get("tools", [])
         tool_imports = []
@@ -537,7 +529,7 @@ without loading all definitions upfront - enabling the 98.7% token reduction.
 """
 
 import os
-from typing import List, Dict, Any
+from typing import Any
 
 def search_tools(query: str = "", detail_level: str = "name") -> list[dict[str, Any]]:
     """Search available MCP tools.
@@ -670,9 +662,9 @@ Example:
 """
 
 import os
-from typing import List, Dict, Any
+from typing import Any
 
-def list_skills() -> List[str]:
+def list_skills() -> list[str]:
     """List all available skills."""
     skills_dir = os.path.dirname(__file__)
     skills = []
@@ -683,7 +675,7 @@ def list_skills() -> List[str]:
 
     return skills
 
-def search_skills(query: str) -> List[Dict[str, Any]]:
+def search_skills(query: str) -> list[dict[str, Any]]:
     """Search skills by name or description."""
     skills = []
     skills_dir = os.path.dirname(__file__)
@@ -750,9 +742,7 @@ async def get_error_rate(service_name: str, time_window: str = "5m") -> dict:
     }
 '''
 
-        await self._create_file_in_sandbox(
-            "skills/example_error_rate.py", example_skill
-        )
+        await self._create_file_in_sandbox("skills/example_error_rate.py", example_skill)
 
     async def _setup_workspace_directory(
         self, workspace_data: dict[str, Any] | None = None
