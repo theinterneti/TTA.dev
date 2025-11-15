@@ -1,0 +1,114 @@
+name: PR Health Monitoring
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      report_type:
+        description: 'Type of report to generate'
+        required: true
+        default: 'health-check'
+        type: choice
+        options:
+          - dashboard
+          - analyze
+          - triage
+          - health-check
+          - recommend
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-health-check:
+    name: PR Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || sudo apt update && sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+            sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) \
+            signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] \
+            https://cli.github.com/packages stable main" | \
+            sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+
+      - name: Authenticate GitHub CLI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "$GH_TOKEN" | gh auth login --with-token
+
+      - name: Run PR Dashboard
+        if: github.event.inputs.report_type == 'dashboard' || github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "# 📊 PR Dashboard" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          python scripts/pr_manager.py dashboard >> $GITHUB_STEP_SUMMARY
+
+      - name: Run PR Analytics
+        if: github.event.inputs.report_type == 'analyze' || github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "# 🔍 PR Analytics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          python scripts/pr_manager.py analyze >> $GITHUB_STEP_SUMMARY
+
+      - name: Run PR Triage
+        if: github.event.inputs.report_type == 'triage'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "# 🏥 PR Triage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          python scripts/pr_manager.py triage >> $GITHUB_STEP_SUMMARY
+
+      - name: Run PR Health Check
+        if: github.event.inputs.report_type == 'health-check' || github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "# 🏥 PR Health Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          python scripts/pr_manager.py health-check >> $GITHUB_STEP_SUMMARY
+
+      - name: Run PR Recommendations
+        if: github.event.inputs.report_type == 'recommend' || github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "# 💡 PR Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          python scripts/pr_manager.py recommend >> $GITHUB_STEP_SUMMARY
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Report generated:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next scheduled run:** Every Monday at 9 AM UTC" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "For manual runs, use 'Actions' → 'PR Health Monitoring' → 'Run workflow'" >> $GITHUB_STEP_SUMMARY

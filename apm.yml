@@ -1,0 +1,140 @@
+# Agent Package Manager Configuration for TTA.dev
+# Manages AI agent dependencies including MCP servers for automated workflows
+
+name: tta-dev
+version: 1.0.0
+description: AI Development Toolkit with production-ready agentic primitives
+
+# MCP Server Dependencies
+# These provide tool capabilities to the Gemini CLI agent
+dependencies:
+  mcp:
+    # GitHub MCP Server - Enables repository interaction
+    # Tools: create_issue, search_code, create_pull_request, etc.
+    - github/github-mcp-server
+
+    # File System MCP Server - For reading/writing files
+    # Tools: read_file, write_file, list_directory, etc.
+    # - modelcontextprotocol/server-filesystem
+
+    # Additional MCP servers can be added as needed:
+    # - microsoft/azure-devops-mcp     # Azure DevOps integration
+    # - anthropic/mcp-server-postgres  # Database operations
+    # - other custom MCP servers
+
+# Workflow Scripts
+# Define reusable agent workflows that can be triggered via APM
+scripts:
+  # Custom prompt mode - accepts dynamic input
+  custom: "gemini --yolo --model gemini-2.5-flash --output-format json"
+
+  # Automated PR Review
+  pr-review: "gemini --yolo -p .github/prompts/pr-review.prompt.md"
+
+  # Test Generation
+  generate-tests: "gemini --yolo -p .github/prompts/generate-tests.prompt.md"
+
+  # Documentation Sync
+  sync-docs: "gemini --yolo -p .github/prompts/sync-docs.prompt.md"
+
+  # Issue Triage
+  triage-issue: "gemini --yolo -p .github/prompts/triage-issue.prompt.md"
+
+  # Code Review with Context
+  code-review: "gemini --yolo -p .github/prompts/code-review.prompt.md"
+
+  # Architecture Analysis
+  analyze-architecture: "gemini --yolo -p .github/prompts/architecture-analysis.prompt.md"
+
+# Configuration
+config:
+  # Gemini CLI settings
+  gemini:
+    model: "gemini-2.5-flash"
+    temperature: 0.7
+    max_output_tokens: 8192
+
+  # MCP Configuration
+  mcp:
+    # GitHub MCP Server settings
+    github:
+      # Authorization will be provided via GITHUB_COPILOT_PAT env var
+      # Configured in workflow using secrets
+      enable_tools:
+        - create_issue
+        - search_code
+        - create_pull_request
+        - create_or_update_file
+        - get_file_contents
+
+    # File System MCP Server settings (if enabled)
+    # filesystem:
+    #   allowed_paths:
+    #     - /workspace
+    #     - /packages
+    #     - /docs
+
+# Quality Gates
+# Define required checks before agent actions
+quality:
+  # Require tests to pass before code generation
+  require_tests: true
+
+  # Require type checking
+  require_type_check: true
+
+  # Require linting
+  require_lint: true
+
+  # Minimum test coverage
+  min_coverage: 80
+
+# Context Files
+# Additional context provided to the agent
+context:
+  files:
+    - GEMINI.md           # Primary project context
+    - AGENTS.md           # Agent-specific instructions
+    - README.md           # Project overview
+    - PRIMITIVES_CATALOG.md  # Primitive reference
+
+  # Directories to exclude from context
+  exclude:
+    - node_modules
+    - .venv
+    - __pycache__
+    - .git
+    - htmlcov
+    - .pytest_cache
+
+# Permissions
+# Define what the agent can do
+permissions:
+  # Read permissions
+  read:
+    - packages/**/*.py
+    - docs/**/*.md
+    - tests/**/*.py
+    - .github/**/*.yml
+
+  # Write permissions (for automated changes)
+  write:
+    - docs/**/*.md        # Can update documentation
+    - tests/**/*.py       # Can generate tests
+    # NOTE: Code changes require PR review
+
+  # Restricted (agent cannot modify)
+  restricted:
+    - .github/workflows/**/*.yml  # Workflows require human review
+    - pyproject.toml              # Dependencies require review
+    - apm.yml                     # Self-modification restricted
+
+# Telemetry
+# Track agent performance and usage
+telemetry:
+  enabled: true
+  metrics:
+    - execution_time
+    - token_usage
+    - tool_calls
+    - success_rate

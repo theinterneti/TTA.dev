@@ -1,0 +1,69 @@
+name: Auto-assign Copilot Reviewer
+
+# This workflow automatically assigns GitHub Copilot as a reviewer on all new pull requests
+# It serves as a fallback if CODEOWNERS doesn't work for the Copilot bot
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  assign-copilot:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Assign Copilot as reviewer
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            console.log(`Processing PR #${prNumber} in ${owner}/${repo}`);
+            
+            try {
+              // Get current reviewers
+              const { data: currentReviewers } = await github.rest.pulls.listRequestedReviewers({
+                owner,
+                repo,
+                pull_number: prNumber,
+              });
+              
+              // Check if Copilot is already assigned
+              const copilotAlreadyAssigned = currentReviewers.users.some(
+                user => user.login === 'Copilot'
+              );
+              
+              if (copilotAlreadyAssigned) {
+                console.log('Copilot is already assigned as a reviewer');
+                return;
+              }
+              
+              // Assign Copilot as reviewer
+              await github.rest.pulls.requestReviewers({
+                owner,
+                repo,
+                pull_number: prNumber,
+                reviewers: ['Copilot'],
+              });
+              
+              console.log('Successfully assigned Copilot as a reviewer');
+              
+            } catch (error) {
+              // Log error but don't fail the workflow
+              // This handles cases where Copilot cannot be assigned (e.g., not a collaborator)
+              console.error('Error assigning Copilot as reviewer:', error.message);
+              
+              // If the error is about Copilot not being a collaborator, provide helpful info
+              if (error.message.includes('not a collaborator')) {
+                console.log('Note: Copilot may need to be added as a collaborator to the repository');
+                console.log('Alternatively, ensure CODEOWNERS file is properly configured');
+              }
+            }
+

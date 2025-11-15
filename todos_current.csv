@@ -1,0 +1,7 @@
+Task,Priority,Status,Owner,Notes
+Create missing CLINE_INTEGRATION_API_REFERENCE.md,Low,Deferred,User Request,API reference file is missing - ENOENT error
+Review existing Cline integration documentation,Low,Deferred,Technical,Analyze guide completeness and accuracy
+Check setup scripts functionality,High,Complete,Technical,Verify .cline/instructions.md and setup scripts work
+Implement planned primitives,Low,Future,Planned,LogseqContextLoader and ClineEnvSensor primitives
+Validate MCP server integration,Medium,Complete,Testing,Test Context7 and other MCP servers
+Test agent handoff patterns,Medium,Complete,Testing,Verify multi-agent workflows

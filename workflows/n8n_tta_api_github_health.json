@@ -1,0 +1,313 @@
+{
+  "name": "GitHub Health Dashboard - TTA.dev API",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:8000/health",
+        "options": {}
+      },
+      "id": "check-api-health",
+      "name": "Check TTA.dev API Health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "healthy"
+            }
+          ]
+        }
+      },
+      "id": "check-if-healthy",
+      "name": "Check if API Healthy",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "repo_owner",
+              "value": "theinterneti"
+            },
+            {
+              "name": "repo_name",
+              "value": "TTA.dev"
+            },
+            {
+              "name": "analysis_prompt",
+              "value": "Analyze this GitHub repository and provide: 1) Overall health score (0-100), 2) Top 3 strengths, 3) Top 3 areas for improvement, 4) Recommended next actions"
+            }
+          ]
+        }
+      },
+      "id": "set-repo-data",
+      "name": "Set Repository Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "url": "https://api.github.com/repos/theinterneti/TTA.dev",
+        "options": {}
+      },
+      "id": "get-github-data",
+      "name": "Get GitHub Repository Stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 200],
+      "credentials": {
+        "githubApi": {
+          "id": "your-github-credential-id",
+          "name": "GitHub API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "full_prompt",
+              "value": "={{ $('Set Repository Data').item.json.analysis_prompt }}\n\nRepository: {{ $json.full_name }}\nStars: {{ $json.stargazers_count }}\nForks: {{ $json.forks_count }}\nOpen Issues: {{ $json.open_issues_count }}\nLanguage: {{ $json.language }}\nDescription: {{ $json.description }}\nLast Updated: {{ $json.updated_at }}\nCreated: {{ $json.created_at }}\n\nProvide analysis in JSON format."
+            }
+          ]
+        }
+      },
+      "id": "format-analysis-prompt",
+      "name": "Format Analysis Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/analyze",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.full_prompt }}"
+            },
+            {
+              "name": "model",
+              "value": "gemini-1.5-flash"
+            },
+            {
+              "name": "temperature",
+              "value": 0.7
+            },
+            {
+              "name": "use_cache",
+              "value": true
+            },
+            {
+              "name": "max_retries",
+              "value": 3
+            },
+            {
+              "name": "context",
+              "value": "={{ { \"repo\": $('Get GitHub Repository Stats').item.json.full_name, \"type\": \"github_health_analysis\" } }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "call-tta-api",
+      "name": "Call TTA.dev Analysis API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "repository",
+              "value": "={{ $('Get GitHub Repository Stats').item.json.full_name }}"
+            },
+            {
+              "name": "analysis",
+              "value": "={{ $json.response }}"
+            },
+            {
+              "name": "execution_time_ms",
+              "value": "={{ $json.execution_time_ms }}"
+            },
+            {
+              "name": "cache_hit",
+              "value": "={{ $json.cache_hit }}"
+            },
+            {
+              "name": "model_used",
+              "value": "={{ $json.model_used }}"
+            },
+            {
+              "name": "correlation_id",
+              "value": "={{ $json.correlation_id }}"
+            }
+          ],
+          "number": [
+            {
+              "name": "stars",
+              "value": "={{ $('Get GitHub Repository Stats').item.json.stargazers_count }}"
+            },
+            {
+              "name": "forks",
+              "value": "={{ $('Get GitHub Repository Stats').item.json.forks_count }}"
+            },
+            {
+              "name": "open_issues",
+              "value": "={{ $('Get GitHub Repository Stats').item.json.open_issues_count }}"
+            }
+          ]
+        }
+      },
+      "id": "format-result",
+      "name": "Format Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [1650, 200]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "error_message",
+              "value": "TTA.dev API is not healthy. Please start the API server."
+            },
+            {
+              "name": "api_status",
+              "value": "={{ $json.status || 'unknown' }}"
+            },
+            {
+              "name": "suggestion",
+              "value": "Run: python scripts/api/tta_api_server.py"
+            }
+          ]
+        }
+      },
+      "id": "api-not-healthy",
+      "name": "API Not Healthy",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [850, 400]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check TTA.dev API Health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check TTA.dev API Health": {
+      "main": [
+        [
+          {
+            "node": "Check if API Healthy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if API Healthy": {
+      "main": [
+        [
+          {
+            "node": "Set Repository Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API Not Healthy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Repository Data": {
+      "main": [
+        [
+          {
+            "node": "Get GitHub Repository Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get GitHub Repository Stats": {
+      "main": [
+        [
+          {
+            "node": "Format Analysis Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Analysis Prompt": {
+      "main": [
+        [
+          {
+            "node": "Call TTA.dev Analysis API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call TTA.dev Analysis API": {
+      "main": [
+        [
+          {
+            "node": "Format Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1",
+  "id": "tta-api-github-health",
+  "meta": {
+    "instanceId": "local"
+  },
+  "tags": []
+}

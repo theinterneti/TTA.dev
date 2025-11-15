@@ -1,0 +1,31 @@
+{
+    "python.defaultInterpreterPath": ".venv/bin/python",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticMode": "workspace",
+    
+    // Ruff - New Native Server Configuration (November 2025)
+    "ruff.nativeServer": true,
+    "ruff.configuration": "./pyproject.toml",
+    "ruff.lineLength": 88,
+    "ruff.fixAll": true,
+    "ruff.organizeImports": true,
+    "ruff.codeAction.fixViolation": {
+        "enable": true
+    },
+    "ruff.codeAction.disableRuleComment": {
+        "enable": true
+    },
+    
+    "pyright.disableTypeCheck": false,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.fixAll.ruff": "explicit"
+    },
+    "terminal.integrated.defaultProfile.linux": "zsh",
+    "terminal.integrated.profiles.linux": {
+        "zsh": {
+            "path": "/usr/bin/zsh"
+        }
+    }
+}

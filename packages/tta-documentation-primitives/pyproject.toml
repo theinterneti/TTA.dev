@@ -1,0 +1,139 @@
+[project]
+name = "tta-documentation-primitives"
+version = "1.0.0"
+description = "Automated documentation-to-Logseq integration with AI-powered metadata generation for TTA.dev"
+authors = [{ name = "TTA Development Team" }]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "watchdog>=4.0.0",
+    "click>=8.1.0",
+    "rich>=13.7.0",
+    "google-generativeai>=0.3.0",
+    "pydantic>=2.6.0",
+    "structlog>=24.1.0",
+    "opentelemetry-api>=1.24.0",
+    "opentelemetry-sdk>=1.24.0",
+    # TTA.dev dependencies - use workspace packages
+    "tta-dev-primitives",
+    "tta-observability-integration",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+]
+ollama = ["ollama>=0.1.0"]
+
+[project.scripts]
+tta-docs = "tta_documentation_primitives.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tta_documentation_primitives"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--cov=src/tta_documentation_primitives",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "ANN",   # flake8-annotations
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit
+    "B",     # flake8-bugbear
+    "A",     # flake8-builtins
+    "COM",   # flake8-commas
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "EXE",   # flake8-executable
+    "ISC",   # flake8-implicit-str-concat
+    "ICN",   # flake8-import-conventions
+    "G",     # flake8-logging-format
+    "INP",   # flake8-no-pep420
+    "PIE",   # flake8-pie
+    "T20",   # flake8-print
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SIM",   # flake8-simplify
+    "TID",   # flake8-tidy-imports
+    "TCH",   # flake8-type-checking
+    "ARG",   # flake8-unused-arguments
+    "PTH",   # flake8-use-pathlib
+    "ERA",   # eradicate
+    "PD",    # pandas-vet
+    "PGH",   # pygrep-hooks
+    "PL",    # pylint
+    "TRY",   # tryceratops
+    "RUF",   # ruff-specific rules
+]
+ignore = [
+    "ANN101", # Missing type annotation for self
+    "ANN102", # Missing type annotation for cls
+    "ANN401", # Dynamically typed expressions (Any) are disallowed
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",
+    "PLR2004",
+    "ANN",
+    "E501",
+    "ARG002",
+    "PLC0415",
+    "TRY003",
+] # Allow assert, magic values, missing annotations, long lines, unused args, and test patterns
+"examples/*" = [
+    "ANN",
+    "E501",
+    "SIM105",
+    "S110",
+] # Allow missing annotations, long lines, and intentional error swallowing in examples
+"src/tta_documentation_primitives/config.py" = [
+    "PTH123",
+] # Allow open() in config file
+"src/tta_documentation_primitives/primitives.py" = [
+    "TRY003",
+] # Allow long error messages
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.uv.sources]
+tta-dev-primitives = { workspace = true }
+tta-observability-integration = { workspace = true }

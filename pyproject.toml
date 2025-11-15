@@ -1,0 +1,124 @@
+# Workspace-level configuration for TTA.dev platform
+# This is NOT a buildable package - individual packages are in packages/
+
+[tool.uv.workspace]
+# Active production packages only
+# Note: keploy-framework, python-pathway, and js-dev-primitives are under review
+# and not included in workspace until architectural decisions are made
+members = [
+    "packages/tta-dev-primitives",
+    "packages/tta-observability-integration",
+    "packages/tta-observability-ui",
+    "packages/universal-agent-context",
+    "packages/tta-documentation-primitives",
+    "packages/tta-kb-automation",
+    "packages/tta-agent-coordination",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "aiohttp>=3.13.2",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.14.0",
+    "pytest-timeout>=2.2.0",
+    "ruff>=0.8.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [
+    "archive/**",
+    "scripts/**",
+    "tests/integration/test_mcp*.py",
+    "tests/mcp/conftest.py",
+    "local/**",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "N",  # pep8-naming
+    "UP", # pyupgrade
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+]
+ignore = [
+    "ANN",     # Type annotations - not required for this project
+    "E402",    # Module level import not at top - allowed for conditional imports
+    "S110",    # Try-except-pass - allowed in examples
+    "SIM105",  # Contextlib suppress - allowed in examples
+    "TRY003",  # Long error messages - allowed
+    "ARG002",  # Unused method arguments - allowed in tests
+    "PLC0415", # Import at top level - allowed in tests
+    "PTH123",  # Use Path.open - allowed for compatibility
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*.py" = [
+    "E501",
+    "ANN",
+    "E402",
+    "ARG002",
+    "PLC0415",
+    "TRY003",
+] # Allow long lines, missing annotations, import order, unused args, and test-specific patterns
+"**/examples/**/*.py" = [
+    "E501",
+    "E402",
+    "S110",
+    "SIM105",
+    "TRY003",
+    "ARG002",
+    "PLC0415",
+    "N806",
+    "PTH123",
+    "B007",
+] # Allow long lines, import order, error handling, and example-specific patterns
+"**/__init__.py" = ["F401"] # Allow unused imports in __init__.py (re-exports)
+"**/primitives.py" = [
+    "TRY003",
+] # Allow long error messages in primitive implementations
+"**/config.py" = ["PTH123"] # Allow open() in config files
+"**/src/tta_dev_primitives/apm/decorators.py" = [
+    "ANN",
+] # Decorators use complex generic types
+"**/src/tta_dev_primitives/integrations/*_primitive.py" = [
+    "ANN204",
+    "ANN001",
+] # Async context managers have standard signatures
+"**/src/tta_dev_primitives/recovery/*.py" = [
+    "B904",
+] # Intentional exception re-raise patterns
+"**/*_wrapper.py" = [
+    "PTH123",
+    "E501",
+] # Wrappers may use open() and have long docstrings
+
+[tool.pyright]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+reportMissingImports = true
+reportMissingTypeStubs = false
+include = ["packages"]
+exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["packages/tta-dev-primitives/tests"]
+asyncio_mode = "auto"
+addopts = "-v --strict-markers --timeout=60"
+timeout = 60
+timeout_method = "thread"
+markers = [
+    "asyncio: mark test as async",
+    "integration: mark test as integration test",
+    "unit: mark test as unit test",
+    "slow: mark test as slow running",
+    "external: mark test as requiring external services",
+]

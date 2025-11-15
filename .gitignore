@@ -1,1 +1,167 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# Testing
+.pytest_cache/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+junit*.xml
+.tox/
+*.log
+test-results/
+playwright-report/
+
+# Type checking & linting
+.mypy_cache/
+.ruff_cache/
+.pyright/
+.pytype/
+.pyre/
+.cache/
+
+# === Node.js ===
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist-ssr/
+*.local
+*.tsbuildinfo
+
+# === VS Code ===
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/extensions.json
+!.vscode/launch.json
+.vscode/*.code-workspace
+
+# === Environment & Secrets ===
+.env
+.env.local
+.env.*.local
+.env.production
+*.pem
+*.key
+secrets/
+.secret/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+
+# === Project-Specific ===
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+
+# Documentation builds
+site/
+docs/_build/
+docs/.build/
+_build/
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Lock files (we commit these for reproducibility)
+!uv.lock
+!package-lock.json
+!pnpm-lock.yaml
+
+# Database files (local dev only)
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE-specific
+.idea/
+*.iml
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Build artifacts
+*.whl
+*.tar.gz
+
+# Documentation generators
+docs/api/_autosummary/
+
+# Profiling
+*.prof
+*.lprof
+*.pstats
+
+# Monitoring/Observability (local dev)
+prometheus-data/
+grafana-data/
+
+# AI/ML artifacts (if any)
+*.pkl
+*.pickle
+*.h5
+*.onnx
+models/
+checkpoints/
+
+# Ignore common artifact directories
+artifacts/
+.artifacts/
+uv-x86_64-unknown-linux-gnu/
+
+# === Logseq Knowledge Base ===
+# Logseq internal files are handled by logseq/.gitignore
+# We track: pages/, journals/, and documentation .md files
+# We ignore: .logseq/, .recycle/, bak/ (via logseq/.gitignore)
+
+# SpecKit example outputs (generated during development)
+examples/features/
+examples/plan_output/
+examples/tasks_output/
+
+# Logseq personal content
+logseq/journals/
+logseq/logseq/
+logseq/pages/AI\ Research.md

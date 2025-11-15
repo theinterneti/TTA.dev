@@ -1,0 +1,94 @@
+# ============================================================================
+# TTA.dev Zsh User Configuration (User-Managed)
+# ============================================================================
+# This file is for YOUR personal settings and is NEVER modified by AI agents.
+# 
+# CRITICAL: This file should be in your .gitignore to prevent committing
+# secrets to version control!
+#
+# What goes here:
+# - API keys and tokens (OPENAI_API_KEY, GITHUB_TOKEN, etc.)
+# - Personal aliases and functions
+# - Machine-specific settings
+# - Anything you don't want automated agents to touch
+#
+# Last Updated: 2025-11-10
+# ============================================================================
+
+# Environment Variables & Secrets
+# ----------------------------------------------------------------------------
+# IMPORTANT: Never commit real secrets! This is just a template.
+
+# Example: OpenAI API Key
+# export OPENAI_API_KEY="sk-..."
+
+# Example: GitHub Personal Access Token
+# export GITHUB_TOKEN="ghp_..."
+
+# Example: Anthropic API Key
+# export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Example: Other API keys
+# export GROQ_API_KEY="..."
+# export TOGETHER_API_KEY="..."
+
+# Personal Aliases
+# ----------------------------------------------------------------------------
+# Add your personal shortcuts here
+
+# Example: Quick navigation to projects
+# alias proj='cd ~/projects'
+# alias tta='cd ~/repos/TTA.dev'
+
+# Example: Custom git shortcuts
+# alias gfp='git fetch && git pull'
+# alias gcm='git commit -m'
+
+# Example: Editor preference
+# export EDITOR='vim'
+# export VISUAL='code'
+
+# Machine-Specific Settings
+# ----------------------------------------------------------------------------
+
+# Example: Work vs Personal machine settings
+# if [[ $(hostname) == "work-laptop" ]]; then
+#   export COMPANY_PROXY="http://proxy.company.com:8080"
+# fi
+
+# Example: Custom PATH additions
+# export PATH="$HOME/custom-tools:$PATH"
+
+# Personal Functions
+# ----------------------------------------------------------------------------
+
+# Example: Quick note-taking
+# note() {
+#   echo "$(date): $*" >> ~/notes.txt
+# }
+
+# Example: Open current directory in VS Code
+# c() {
+#   code "${1:-.}"
+# }
+
+# Custom Prompt Additions (If Not Using Powerlevel10k)
+# ----------------------------------------------------------------------------
+# Only if you want to add to the prompt without using p10k
+
+# Performance Tuning (Personal Preferences)
+# ----------------------------------------------------------------------------
+
+# Example: Customize fzf behavior
+# export FZF_DEFAULT_COMMAND='fd --type f'
+# export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+# Example: Customize zoxide behavior
+# export _ZO_DATA_DIR="$HOME/.local/share"
+
+# ============================================================================
+# End of User Configuration
+# ============================================================================
+
+# Debug: Uncomment to verify this file is being loaded
+# echo "✓ .zsh_local loaded"

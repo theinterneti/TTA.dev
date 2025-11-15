@@ -1,0 +1,47 @@
+{
+  "general": {
+    "sessionRetention": {
+      "enabled": true
+    },
+    "disableAutoUpdate": true
+  },
+  "ui": {
+    "showStatusInTitle": true,
+    "hideTips": true,
+    "hideBanner": true,
+    "hideFooter": true
+  },
+  "context": {
+    "loadMemoryFromIncludeDirectories": true
+  },
+  "tools": {
+    "autoAccept": true,
+    "shell": {
+      "showColor": true
+    }
+  },
+  "security": {
+    "folderTrust": {
+      "featureEnabled": false,
+      "enabled": true
+    }
+  },
+  "mcpServers": {
+    "github": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server:latest"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      },
+      "description": "GitHub MCP server for repository operations",
+      "trust": true
+    }
+  }
+}

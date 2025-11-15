@@ -1,0 +1,64 @@
+name: PR Validation v2
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'logseq/**'
+      - 'archive/**'
+
+concurrency:
+  group: pr-v2-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  quality-checks:
+    name: Quality Checks
+    uses: ./.github/workflows/reusable-quality-checks.yml
+    with:
+      python-version: '3.11'
+      check-format: true
+      check-lint: true
+      check-types: true
+      fail-on-type-errors: false
+
+  unit-tests:
+    name: Unit Tests
+    uses: ./.github/workflows/reusable-run-tests.yml
+    with:
+      test-type: 'unit'
+      python-versions: '["3.11"]'
+      coverage: false
+      pytest-markers: 'not integration and not slow'
+      timeout-minutes: 10
+
+  pr-summary:
+    name: PR Validation Summary
+    needs: [quality-checks, unit-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## 🚀 PR Validation Results (v2)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Quality Checks" >> $GITHUB_STEP_SUMMARY
+          echo "- **Format:** ${{ needs.quality-checks.outputs.format-result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Lint:** ${{ needs.quality-checks.outputs.lint-result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type Check:** ${{ needs.quality-checks.outputs.type-result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Type Errors:** ${{ needs.quality-checks.outputs.type-error-count }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Unit Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- **Result:** ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          if [ "${{ needs.quality-checks.result }}" == "success" ] && [ "${{ needs.unit-tests.result }}" == "success" ]; then
+            echo "### ✅ All Checks Passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Some Checks Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the failed jobs above." >> $GITHUB_STEP_SUMMARY
+          fi

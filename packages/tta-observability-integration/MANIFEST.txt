@@ -1,0 +1,29 @@
+# Observability Package File Manifest
+# Generated: Tue Oct 28 13:32:44 PDT 2025
+
+Source Files (6):
+  src/observability_integration/__init__.py
+  src/observability_integration/apm_setup.py
+  src/observability_integration/primitives/__init__.py
+  src/observability_integration/primitives/router.py
+  src/observability_integration/primitives/cache.py
+  src/observability_integration/primitives/timeout.py
+
+Test Files (4):
+  tests/unit/observability_integration/test_apm_setup.py
+  tests/unit/observability_integration/test_router_primitive.py
+  tests/unit/observability_integration/test_cache_primitive.py
+  tests/unit/observability_integration/test_timeout_primitive.py
+
+Documentation (3):
+  specs/observability-integration.md
+  docs/OBSERVABILITY_INTEGRATION_PROGRESS.md
+  docs/OBSERVABILITY_PACKAGE_EXPORT_PLAN.md
+
+Configuration Files (4):
+  pyproject.toml
+  README.md
+  CHANGELOG.md
+  MANIFEST.txt
+
+Total Files: 17

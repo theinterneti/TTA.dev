@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+input=$(cat)
+
+# Run uv sync --all-extras to ensure all dependencies are in place
+echo "Running uv sync --all-extras to ensure all dependencies are in place..."
+uv sync --all-extras
+
+# Inject TTA.dev-specific context
+echo '{"cancel": false, "contextModification": "WORKSPACE_RULES: TTA.dev uses agentic primitives for workflows, uv for package management, and enforces 100% test coverage. Always use WorkflowContext for state management. Avoid manual async orchestration, try/except retry loops, and global variables."}'
