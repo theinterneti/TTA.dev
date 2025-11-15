@@ -1,0 +1,19 @@
+[project]
+name = "webhook-ingestion"
+version = "0.1.0"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "httpx",
+    "redis",
+]
+
+[project.scripts]
+webhook-cli = "webhook_ingestion.cli:app"
+
+[tool.setuptools]
+packages = ["webhook_ingestion"]
+package-dir = {"" = "src"}
+
+[tool.uv]
+package = true
