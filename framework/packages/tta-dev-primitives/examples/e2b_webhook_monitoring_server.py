@@ -267,7 +267,7 @@ def main():
     print("🚀 Starting E2B Webhook Monitor")
     print(f"📊 Daily limit: {DAILY_SANDBOX_LIMIT} sandboxes")
     print(f"⏱️  Timeout threshold: {SANDBOX_TIMEOUT_MINUTES} minutes")
-    print(f"🔑 Using webhook secret: {WEBHOOK_SECRET[:8]}...")
+    print(f"🔑 Using webhook secret: {WEBHOOK_SECRET[:4]}...{WEBHOOK_SECRET[-4:] if len(WEBHOOK_SECRET) > 8 else '****'}")
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
 

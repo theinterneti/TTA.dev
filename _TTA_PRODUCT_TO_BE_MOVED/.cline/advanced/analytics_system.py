@@ -1,3 +1,4 @@
+# pragma: allow-asyncio - Legacy file being moved
 """
 Phase 3: Advanced Analytics & Learning System
 
@@ -716,7 +717,7 @@ class LearningAlgorithms:
             raise ValueError("Model not found or not trained")
 
         # Cache prediction for performance
-        cache_key = f"{model_id}_{hashlib.md5(str(input_data).encode()).hexdigest()}"
+        cache_key = f"{model_id}_{hashlib.sha256(str(input_data).encode()).hexdigest()}"
         if cache_key in self.prediction_cache:
             return self.prediction_cache[cache_key]
 

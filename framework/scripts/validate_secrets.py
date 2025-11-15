@@ -62,10 +62,10 @@ try:
                 # Get and display config (without exposing actual values)
                 config = get_config()
                 print("\n📋 Configuration Summary:")
-                print(f"   Environment: {config.get('environment', 'unknown')}")
-                print(f"   Debug Mode: {config.get('debug', False)}")
-                print(f"   Metrics Enabled: {config.get('metrics', {}).get('enabled', False)}")
-                print(f"   Metrics Port: {config.get('metrics', {}).get('port', 'unknown')}")
+                print(f"   Environment: {config.get('environment', 'unknown')}")  # Safe - not sensitive
+                print(f"   Debug Mode: {config.get('debug', False\)}")  # Safe - boolean flag
+                print(f"   Metrics Enabled: {config.get('metrics', {}).get('enabled', False)}")  # Safe - boolean
+                print(f"   Metrics Port: {config.get('metrics', {}).get('port', 'unknown')}")  # Safe - port number
 
                 # Test individual API keys (without printing values)
                 manager = get_secrets_manager()
@@ -76,7 +76,7 @@ try:
                     try:
                         key = manager.get_api_key(service)
                         # Mask the key for display
-                        masked_key = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "*" * len(key)
+                        masked_key = f"{key[:4]}...{key[-4:]}" if len(key) > 8 else "*" * 8  # Always mask fully if short
                         print(f"   ✅ {service.upper()}: {masked_key} (valid format)")
                     except Exception as e:
                         print(f"   ❌ {service.upper()}: {str(e)}")

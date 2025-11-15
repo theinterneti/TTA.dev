@@ -21,7 +21,7 @@ async def test_primitive_with_template():
         print("❌ Neither E2B_KEY nor E2B_API_KEY found in environment")
         return False
 
-    print(f"✅ API key loaded: {api_key[:20]}...")
+    print(f"✅ API key loaded: {api_key[:4]}...{api_key[-4:]}")
 
     # Create primitive with our template
     primitive = CodeExecutionPrimitive(
