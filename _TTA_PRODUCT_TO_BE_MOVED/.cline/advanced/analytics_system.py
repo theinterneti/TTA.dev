@@ -408,7 +408,7 @@ class ContinuousImprovement:
 
         # Use consistent hashing to ensure same user gets same variant
         hash_input = f"{user_id}_{test_id}"
-        hash_value = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
+        hash_value = int(hashlib.sha256(hash_input.encode()).hexdigest(), 16)
 
         # Determine variant based on hash and traffic split
         if (hash_value % 100) < (test.traffic_split * 100):
