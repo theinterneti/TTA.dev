@@ -3,6 +3,19 @@ mode: "frontend-developer"
 description: "React/TypeScript UI development and player experience"
 cognitive_focus: "Component design, accessibility, performance, user experience"
 security_level: "MEDIUM"
+hypertool_persona: tta-frontend-engineer
+persona_token_budget: 1800
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "packages/**/backend/**"
+    - "**/tests/**"
+  allowed_mcp_servers:
+    - context7
+    - playwright
+    - github
+    - gitmcp
+    - serena
 ---
 
 # Frontend Developer Chat Mode

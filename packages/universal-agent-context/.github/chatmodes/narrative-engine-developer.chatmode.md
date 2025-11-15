@@ -3,6 +3,20 @@ mode: "narrative-engine-developer"
 description: "Story design, narrative generation, content creation, and coherence validation"
 cognitive_focus: "Story design, narrative consistency, content generation, player experience"
 security_level: "MEDIUM"
+hypertool_persona: tta-backend-engineer
+persona_token_budget: 2000
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "packages/**/frontend/**"
+    - "**/node_modules/**"
+  allowed_mcp_servers:
+    - context7
+    - github
+    - sequential-thinking
+    - gitmcp
+    - serena
+    - mcp-logseq
 ---
 
 # Narrative Engine Developer Chat Mode

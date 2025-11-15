@@ -3,6 +3,18 @@ mode: "langgraph-engineer"
 description: "LangGraph workflow orchestration and agent development"
 cognitive_focus: "Workflow design, state management, async execution, agent coordination"
 security_level: "MEDIUM"
+hypertool_persona: tta-data-scientist
+persona_token_budget: 1700
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "**/.github/workflows/**"
+    - "**/infrastructure/**"
+  allowed_mcp_servers:
+    - context7
+    - github
+    - sequential-thinking
+    - mcp-logseq
 ---
 
 # LangGraph Engineer Chat Mode

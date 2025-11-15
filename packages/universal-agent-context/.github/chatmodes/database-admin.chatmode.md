@@ -3,6 +3,20 @@ mode: "database-admin"
 description: "Database management, schema design, and data operations"
 cognitive_focus: "Database architecture, schema design, performance optimization, data integrity"
 security_level: "CRITICAL"
+hypertool_persona: tta-backend-engineer
+persona_token_budget: 2000
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "packages/**/frontend/**"
+    - "**/node_modules/**"
+  allowed_mcp_servers:
+    - context7
+    - github
+    - sequential-thinking
+    - gitmcp
+    - serena
+    - mcp-logseq
 ---
 
 # Database Admin Chat Mode

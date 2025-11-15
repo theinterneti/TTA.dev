@@ -17,6 +17,20 @@ tools:
     - deployStaging
     - deployProduction
     - editFrontendAssets
+hypertool_persona: tta-backend-engineer
+persona_token_budget: 2000
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "packages/**/frontend/**"
+    - "**/node_modules/**"
+  allowed_mcp_servers:
+    - context7
+    - github
+    - sequential-thinking
+    - gitmcp
+    - serena
+    - mcp-logseq
 ---
 
 # Backend Implementer Chat Mode
