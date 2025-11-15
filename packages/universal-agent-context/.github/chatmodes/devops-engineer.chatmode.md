@@ -3,6 +3,18 @@ mode: "devops-engineer"
 description: "Deployment, infrastructure, CI/CD, monitoring, and containerization"
 cognitive_focus: "Automation, reliability, scalability, observability"
 security_level: "CRITICAL"
+hypertool_persona: tta-devops-engineer
+persona_token_budget: 1800
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "packages/**/src/**/*.py"
+    - "packages/**/frontend/**"
+  allowed_mcp_servers:
+    - github
+    - gitmcp
+    - serena
+    - grafana
 ---
 
 # DevOps Engineer Chat Mode

@@ -1,0 +1,91 @@
+# E2B ML Template - Minimal (FREE Tier Optimized)
+# November 2025 - Latest stable packages, minimal footprint
+#
+# Philosophy: Install only essentials, let users add more at runtime
+# Why: Faster builds, smaller size, free tier friendly
+
+FROM e2bdev/code-interpreter:latest
+
+# ESSENTIAL ML STACK ONLY (latest stable versions)
+# ~2-3 minute build time on free tier
+RUN pip install --no-cache-dir \
+    torch \
+    transformers \
+    numpy \
+    pandas
+
+# Cache directories for HuggingFace models
+ENV HF_HOME=/root/.cache/huggingface
+ENV TORCH_HOME=/root/.cache/torch
+RUN mkdir -p /root/.cache/huggingface /root/.cache/torch
+
+# Work in user directory
+WORKDIR /home/user
+
+# ============================================================================
+# RUNTIME EXTENSIBILITY
+# ============================================================================
+# Need more packages? Install at runtime in your code:
+#
+#   await sandbox.run_code("""
+#   !pip install scikit-learn matplotlib seaborn
+#   """)
+#
+# This approach:
+# ✅ Keeps template build fast (<3 min)
+# ✅ Stays within free tier limits
+# ✅ Gives you latest versions
+# ✅ Pay-as-you-go for specialized needs
+#
+# ============================================================================
+# BUILD INSTRUCTIONS
+# ============================================================================
+#
+# 1. Build template:
+#    e2b template build -d e2b.Dockerfile.ml-minimal -n tta-ml-minimal
+#
+# 2. Get your template ID (example: 3xmp0rmfztawhlpysu4v)
+#
+# 3. Save it:
+#    export E2B_ML_TEMPLATE_ID="<your-template-id>"
+#
+# 4. Use in code:
+#    from e2b_code_interpreter import AsyncSandbox
+#
+#    sandbox = await AsyncSandbox.create(
+#        template=os.getenv("E2B_ML_TEMPLATE_ID")
+#    )
+#
+#    # Now executes in ~100ms with PyTorch & Transformers ready!
+#    result = await sandbox.run_code("""
+#    import torch
+#    import transformers
+#    print(f"PyTorch: {torch.__version__}")
+#    print(f"Transformers: {transformers.__version__}")
+#    """)
+#
+# ============================================================================
+# FREE TIER TIPS
+# ============================================================================
+#
+# E2B Free Tier (Nov 2025):
+# - Sandboxes: Free tier available
+# - Templates: 1 hour usage/month free
+# - Builds: Keep under 5 min for smooth experience
+#
+# Optimization strategies:
+# 1. Use this minimal template for base
+# 2. Install specialized packages at runtime
+# 3. Cache template ID (build once, use many times)
+# 4. Monitor usage in E2B dashboard
+#
+# ============================================================================
+# MIGRATION NOTE
+# ============================================================================
+#
+# E2B is migrating to v2 build system. This template uses v1 (current).
+# When ready to migrate: https://e2b.dev/docs/template/migration-v2
+#
+# No action needed now - this template will work with both v1 and v2.
+#
+# ============================================================================

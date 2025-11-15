@@ -1,0 +1,503 @@
+{
+  "package": "tta-narrative-engine",
+  "files": {
+    "src/tta_narrative/generation/engine.py": {
+      "classes": [
+        {
+          "name": "NarrativeEngine",
+          "line": 33,
+          "methods": [
+            "__init__",
+            "_determine_emotional_tone"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/generation/scene_generator.py": {
+      "classes": [
+        {
+          "name": "SceneTemplate",
+          "line": 18,
+          "methods": [
+            "__init__"
+          ],
+          "bases": []
+        },
+        {
+          "name": "SceneGenerator",
+          "line": 29,
+          "methods": [
+            "__init__"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/generation/complexity_adapter.py": {
+      "classes": [
+        {
+          "name": "ComplexityDimension",
+          "line": 20,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "AdaptationStrategy",
+          "line": 32,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "NarrativeComplexityAdapter",
+          "line": 42,
+          "methods": [
+            "__init__",
+            "_analyze_recent_performance",
+            "_assess_cognitive_load_indicators"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/generation/immersion_manager.py": {
+      "classes": [
+        {
+          "name": "ImmersionTechnique",
+          "line": 20,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "ImmersionLevel",
+          "line": 32,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "ImmersionManager",
+          "line": 41,
+          "methods": [
+            "__init__"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/generation/pacing_controller.py": {
+      "classes": [
+        {
+          "name": "PacingStrategy",
+          "line": 20,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "PacingDimension",
+          "line": 30,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "SessionPhase",
+          "line": 40,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "PacingController",
+          "line": 50,
+          "methods": [
+            "__init__",
+            "_calculate_therapeutic_intensity",
+            "_calculate_cognitive_load",
+            "_calculate_emotional_engagement",
+            "_calculate_narrative_momentum"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/generation/therapeutic_storyteller.py": {
+      "classes": [
+        {
+          "name": "TherapeuticApproach",
+          "line": 20,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "StorytellingTechnique",
+          "line": 32,
+          "methods": [],
+          "bases": [
+            "str",
+            "Enum"
+          ]
+        },
+        {
+          "name": "TherapeuticStoryteller",
+          "line": 43,
+          "methods": [
+            "__init__"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/coherence/models.py": {
+      "classes": [
+        {
+          "name": "ValidationSeverity",
+          "line": 9,
+          "methods": [],
+          "bases": [
+            "Enum"
+          ]
+        },
+        {
+          "name": "ConsistencyIssueType",
+          "line": 16,
+          "methods": [],
+          "bases": [
+            "Enum"
+          ]
+        },
+        {
+          "name": "ConsistencyIssue",
+          "line": 27,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "ValidationResult",
+          "line": 41,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "NarrativeContent",
+          "line": 56,
+          "methods": [
+            "characters",
+            "locations"
+          ],
+          "bases": []
+        },
+        {
+          "name": "LoreEntry",
+          "line": 81,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "Contradiction",
+          "line": 94,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "CreativeSolution",
+          "line": 106,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "NarrativeResolution",
+          "line": 119,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "RetroactiveChange",
+          "line": 131,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "StorylineThread",
+          "line": 143,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "ConvergenceValidation",
+          "line": 155,
+          "methods": [],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/coherence/coherence_validator.py": {
+      "classes": [
+        {
+          "name": "CoherenceValidator",
+          "line": 26,
+          "methods": [
+            "__init__",
+            "_get_character_lore",
+            "_get_location_lore",
+            "_get_theme_lore",
+            "_calculate_lore_compliance_score",
+            "_calculate_character_consistency_score",
+            "_calculate_therapeutic_alignment_score",
+            "_calculate_overall_consistency_score"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/coherence/rules.py": {
+      "classes": [],
+      "functions": []
+    },
+    "src/tta_narrative/coherence/contradiction_detector.py": {
+      "classes": [
+        {
+          "name": "ContradictionDetector",
+          "line": 19,
+          "methods": [
+            "__init__",
+            "_load_contradiction_patterns",
+            "_load_temporal_markers",
+            "_load_causal_indicators"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/coherence/causal_validator.py": {
+      "classes": [
+        {
+          "name": "CausalValidator",
+          "line": 24,
+          "methods": [
+            "__init__",
+            "_load_causal_rules",
+            "_load_logical_operators",
+            "_load_consequence_patterns",
+            "_calculate_causal_consistency_score"
+          ],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/orchestration/impact_analysis.py": {
+      "classes": [],
+      "functions": [
+        {
+          "name": "calculate_base_magnitude",
+          "line": 20
+        },
+        {
+          "name": "identify_affected_elements",
+          "line": 42
+        },
+        {
+          "name": "calculate_causal_strength",
+          "line": 63
+        },
+        {
+          "name": "assess_therapeutic_alignment",
+          "line": 83
+        },
+        {
+          "name": "calculate_confidence_score",
+          "line": 96
+        },
+        {
+          "name": "calculate_temporal_decay",
+          "line": 108
+        },
+        {
+          "name": "create_narrative_event",
+          "line": 117
+        },
+        {
+          "name": "evaluate_cross_scale_influences",
+          "line": 140
+        }
+      ]
+    },
+    "src/tta_narrative/orchestration/scale_manager.py": {
+      "classes": [
+        {
+          "name": "ScaleManager",
+          "line": 63,
+          "methods": [
+            "__init__",
+            "get_scale_window",
+            "get_active_events",
+            "_calculate_base_magnitude",
+            "_calculate_confidence_score",
+            "_calculate_temporal_decay"
+          ],
+          "bases": []
+        },
+        {
+          "name": "_RobustEventLoopPolicy",
+          "line": 45,
+          "methods": [
+            "get_event_loop"
+          ],
+          "bases": [
+            "asyncio.DefaultEventLoopPolicy"
+          ]
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/orchestration/resolution_engine.py": {
+      "classes": [],
+      "functions": [
+        {
+          "name": "build_simple_resolution",
+          "line": 13
+        },
+        {
+          "name": "apply_resolution",
+          "line": 25
+        }
+      ]
+    },
+    "src/tta_narrative/orchestration/models.py": {
+      "classes": [
+        {
+          "name": "NarrativeScale",
+          "line": 9,
+          "methods": [],
+          "bases": [
+            "Enum"
+          ]
+        },
+        {
+          "name": "PlayerChoice",
+          "line": 17,
+          "methods": [
+            "__post_init__"
+          ],
+          "bases": []
+        },
+        {
+          "name": "NarrativeResponse",
+          "line": 32,
+          "methods": [
+            "__post_init__"
+          ],
+          "bases": []
+        },
+        {
+          "name": "NarrativeStatus",
+          "line": 49,
+          "methods": [
+            "__post_init__"
+          ],
+          "bases": []
+        },
+        {
+          "name": "NarrativeEvent",
+          "line": 61,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "ImpactAssessment",
+          "line": 72,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "ScaleConflict",
+          "line": 84,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "Resolution",
+          "line": 96,
+          "methods": [],
+          "bases": []
+        },
+        {
+          "name": "EmergentEvent",
+          "line": 108,
+          "methods": [],
+          "bases": []
+        }
+      ],
+      "functions": []
+    },
+    "src/tta_narrative/orchestration/causal_graph.py": {
+      "classes": [],
+      "functions": [
+        {
+          "name": "add_edge",
+          "line": 9
+        },
+        {
+          "name": "detect_simple_cycles",
+          "line": 13
+        },
+        {
+          "name": "remove_weak_link",
+          "line": 24
+        }
+      ]
+    },
+    "src/tta_narrative/orchestration/conflict_detection.py": {
+      "classes": [],
+      "functions": [
+        {
+          "name": "detect_temporal_conflicts",
+          "line": 11
+        },
+        {
+          "name": "detect_character_conflicts",
+          "line": 16
+        },
+        {
+          "name": "detect_thematic_conflicts",
+          "line": 23
+        },
+        {
+          "name": "detect_therapeutic_conflicts",
+          "line": 28
+        }
+      ]
+    }
+  }
+}

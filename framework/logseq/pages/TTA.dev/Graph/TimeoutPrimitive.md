@@ -1,0 +1,18 @@
+- ---
+- type:: [[G]] GraphComponent
+- status:: stable
+- tags:: #recovery, #resilience, #timeout, #concurrency
+- context-level:: 2-Operational
+- component-type:: node
+- in-graph:: [[TTA.dev/Concepts/WorkflowPrimitive]]
+- modifies-state:: [[TTA.dev/Data/WorkflowContext.state]]
+- calls-tools::
+- source-file:: `packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py`
+- ---
+- ### Summary
+  - `TimeoutPrimitive` enforces a maximum execution time for a wrapped `[[TTA.dev/Concepts/WorkflowPrimitive]]`, with an optional fallback primitive to execute if the timeout is exceeded.
+- ### Logic
+  - It takes a target primitive, a `timeout_seconds` value, and an optional `fallback` primitive during initialization.
+  - The `execute` method uses `asyncio.wait_for` to run the target primitive.
+  - If the primitive exceeds the `timeout_seconds`, a `TimeoutError` is caught. If a `fallback` primitive is provided, it is executed; otherwise, a `TimeoutError` is raised.
+  - It tracks timeout occurrences in the `[[TTA.dev/Data/WorkflowContext.state]]` if `track_timeouts` is enabled.

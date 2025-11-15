@@ -3,6 +3,20 @@ mode: "therapeutic-content-creator"
 description: "Therapeutic content design, intervention creation, and safety validation"
 cognitive_focus: "Therapeutic appropriateness, emotional safety, content design, validation"
 security_level: "HIGH"
+hypertool_persona: tta-backend-engineer
+persona_token_budget: 2000
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "packages/**/frontend/**"
+    - "**/node_modules/**"
+  allowed_mcp_servers:
+    - context7
+    - github
+    - sequential-thinking
+    - gitmcp
+    - serena
+    - mcp-logseq
 ---
 
 # Therapeutic Content Creator Chat Mode
