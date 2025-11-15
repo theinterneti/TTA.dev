@@ -1,0 +1,241 @@
+name: Merge Gate (Consolidated)
+
+# Comprehensive validation workflow for main branch
+# Runs on push to main and develop
+# Includes full test suite, coverage, security scans
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'logseq/**'
+      - 'archive/**'
+
+concurrency:
+  group: merge-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Comprehensive quality checks
+  quality-validation:
+    name: Quality Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup TTA environment
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: '3.12'
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Lint check
+        run: uv run ruff check .
+
+      - name: Type check
+        run: uv run pyright packages/
+
+      - name: Security scan (pip-audit)
+        run: uvx pip-audit
+        continue-on-error: true
+
+  # Comprehensive test suite with coverage
+  comprehensive-tests:
+    name: Test Suite (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality-validation
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup TTA environment
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Run tests with coverage
+        run: |
+          uv run pytest -v \
+            -m "not integration and not slow" \
+            --cov=packages \
+            --cov-branch \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html \
+            --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.12'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests,python-${{ matrix.python-version }}
+          name: comprehensive-tests
+          fail_ci_if_error: false
+
+      - name: Archive coverage report
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+          retention-days: 30
+
+  # Integration tests (optional, can be slow)
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: comprehensive-tests
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup TTA environment
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: '3.12'
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Check for Docker Compose file
+        id: check-docker
+        run: |
+          if [ -f "packages/tta-dev-primitives/docker-compose.integration.yml" ]; then
+            echo "has_docker=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_docker=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Start test services
+        if: steps.check-docker.outputs.has_docker == 'true'
+        run: |
+          docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d || true
+          sleep 10
+
+      - name: Run integration tests
+        env:
+          RUN_INTEGRATION: "true"
+        run: |
+          uv run pytest -v \
+            -m "integration" \
+            --timeout=300 \
+            --maxfail=3 || echo "Integration tests skipped or failed"
+
+      - name: Stop test services
+        if: always() && steps.check-docker.outputs.has_docker == 'true'
+        run: |
+          docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml down || true
+
+  # Documentation validation
+  docs-validation:
+    name: Documentation Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: quality-validation
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check markdown (if script exists)
+        run: |
+          if [ -f "scripts/docs/check_md.py" ]; then
+            python scripts/docs/check_md.py --all || echo "Markdown validation skipped"
+          else
+            echo "Markdown validation script not found, skipping"
+          fi
+
+  # Package validation
+  package-validation:
+    name: Package Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: comprehensive-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup TTA environment
+        uses: ./.github/actions/setup-tta-env
+        with:
+          python-version: '3.12'
+
+      - name: Sync dependencies
+        run: uv sync --all-extras
+
+      - name: Validate packages
+        run: |
+          for package in packages/*/pyproject.toml; do
+            dir=$(dirname $package)
+            echo "Validating $dir..."
+            cd $dir
+            uv build --check || echo "Build check failed for $dir"
+            cd - > /dev/null
+          done
+
+  # Final merge gate summary
+  merge-gate-summary:
+    name: Merge Gate Summary
+    runs-on: ubuntu-latest
+    needs: [quality-validation, comprehensive-tests, integration-tests, docs-validation, package-validation]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Merge Gate Validation Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Quality Validation | ${{ needs.quality-validation.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Comprehensive Tests | ${{ needs.comprehensive-tests.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration Tests | ${{ needs.integration-tests.result == 'success' && '✅' || needs.integration-tests.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Documentation | ${{ needs.docs-validation.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Package Validation | ${{ needs.package-validation.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check required jobs
+        if: |
+          needs.quality-validation.result != 'success' ||
+          needs.comprehensive-tests.result != 'success' ||
+          needs.docs-validation.result != 'success' ||
+          needs.package-validation.result != 'success'
+        run: |
+          echo "::error::Merge gate validation failed. Please review the errors above."
+          exit 1

@@ -1,4 +1,8 @@
-name: '🔀 Gemini Dispatch'
+name: '🔀 Gemini Dispatch (DEPRECATED)'
+
+# ⚠️ DEPRECATED: This workflow is being replaced by consolidated-ai-review.yml
+# Will be removed after migration is complete
+# See .github/workflows/MIGRATION_PLAN.md for details
 
 on:
   pull_request_review_comment:
@@ -23,7 +27,22 @@ defaults:
     shell: 'bash'
 
 jobs:
+  deprecation-notice:
+    name: Deprecation Notice
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show deprecation notice
+        run: |
+          echo "## ⚠️ Workflow Deprecated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow (\`gemini-dispatch.yml\`) is deprecated." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**New workflow:** \`consolidated-ai-review.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See \`.github/workflows/MIGRATION_PLAN.md\` for migration details." >> $GITHUB_STEP_SUMMARY
+
   debugger:
+    if: false  # Disabled during migration
     if: |-
      ${{ fromJSON(vars.DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}
     runs-on: 'ubuntu-latest'

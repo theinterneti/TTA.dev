@@ -1,4 +1,8 @@
-name: Merge Validation v2
+name: Merge Validation v2 (DEPRECATED)
+
+# ⚠️ DEPRECATED: This workflow is being replaced by consolidated-merge-gate.yml
+# Will be removed after migration is complete
+# See .github/workflows/MIGRATION_PLAN.md for details
 
 on:
   push:
@@ -10,7 +14,22 @@ on:
       - 'archive/**'
 
 jobs:
+  deprecation-notice:
+    name: Deprecation Notice
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show deprecation notice
+        run: |
+          echo "## ⚠️ Workflow Deprecated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow (\`merge-validation-v2.yml\`) is deprecated." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**New workflow:** \`consolidated-merge-gate.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See \`.github/workflows/MIGRATION_PLAN.md\` for migration details." >> $GITHUB_STEP_SUMMARY
+
   quality-checks:
+    if: false  # Disabled during migration
     name: Quality Checks
     uses: ./.github/workflows/reusable-quality-checks.yml
     with:
