@@ -61,7 +61,7 @@ alias status='$LAZY_DEV_ROOT/scripts/lazy_dev.py status'
 alias lazy='$LAZY_DEV_ROOT/scripts/lazy_dev.py'
 
 # Advanced commands
-alias ship='git add . && git commit -m "update" && $LAZY_DEV_ROOT/scripts/lazy_dev.py pr'
+alias ship='git add . && read -p "Commit message: " msg && [ -n "$msg" ] && git commit -m "$msg" && $LAZY_DEV_ROOT/scripts/lazy_dev.py pr'
 alias milestone='$LAZY_DEV_ROOT/scripts/issue_manager.py progress'
 alias label='$LAZY_DEV_ROOT/scripts/issue_manager.py auto-label'
 
