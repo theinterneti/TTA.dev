@@ -1,4 +1,10 @@
-name: CI
+name: CI (DEPRECATED)
+
+# ⚠️ DEPRECATED: This workflow is being replaced by:
+# - consolidated-pr-validation.yml (for PRs)
+# - consolidated-platform-compatibility.yml (for matrix builds)
+# Will be removed after migration is complete
+# See .github/workflows/MIGRATION_PLAN.md for details
 
 on:
   pull_request:
@@ -19,7 +25,24 @@ on:
       - 'uv.lock'
 
 jobs:
+  deprecation-notice:
+    name: Deprecation Notice
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show deprecation notice
+        run: |
+          echo "## ⚠️ Workflow Deprecated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This workflow (\`ci.yml\`) is deprecated." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Replacements:**" >> $GITHUB_STEP_SUMMARY
+          echo "- PRs: \`consolidated-pr-validation.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Matrix builds: \`consolidated-platform-compatibility.yml\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See \`.github/workflows/MIGRATION_PLAN.md\` for migration details." >> $GITHUB_STEP_SUMMARY
+
   test:
+    if: false  # Disabled during migration
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
