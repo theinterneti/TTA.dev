@@ -4,16 +4,15 @@ import time
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 
+from .config import get_webhook_config
 from .redis_queue import enqueue_webhook
 
 app = FastAPI()
 
-# This secret would be retrieved from a secure store based on the webhook ID
-WEBHOOK_SECRET = "whsec_temp_secret_for_development"
 MAX_TIMESTAMP_SKEW_SECONDS = 300  # 5 minutes
 
 
-async def verify_signature(request: Request):
+async def verify_signature(request: Request, webhook_id: str):
     """
     FastAPI dependency to verify a TTA.dev (Stripe-style) webhook signature.
     This protects against spoofing and replay attacks.
@@ -51,24 +50,33 @@ async def verify_signature(request: Request):
                 detail="Webhook timestamp expired. Possible replay attack.",
             )
 
-        # 5. Prepare the signed payload string
+        # 5. Get the webhook secret from config
+        config = await get_webhook_config(webhook_id)
+        if not config or "secret" not in config:
+            raise HTTPException(
+                status_code=404, detail=f"Webhook ID not found: {webhook_id}"
+            )
+        webhook_secret = config["secret"]
+
+        # 6. Prepare the signed payload string
         signed_payload = f"{timestamp_str}.{payload_body.decode('utf-8')}"
 
-        # 6. Compute the expected signature
+        # 7. Compute the expected signature
         hash_object = hmac.new(
-            WEBHOOK_SECRET.encode("utf-8"),
+            webhook_secret.encode("utf-8"),
             msg=signed_payload.encode("utf-8"),
             digestmod=hashlib.sha256,
         )
         expected_signature = hash_object.hexdigest()
+        expected_signature = hash_object.hexdigest()
 
-        # 7. (Timing Attack Defense) Compare signatures
+        # 8. (Timing Attack Defense) Compare signatures
         if not hmac.compare_digest(signature_v1_str, expected_signature):
             raise HTTPException(
                 status_code=403, detail="Request signatures didn't match."
             )
 
-        # 8. Store the validated raw body for the async worker
+        # 9. Store the validated raw body for the async worker
         request.state.raw_body = payload_body
 
     except HTTPException as he:

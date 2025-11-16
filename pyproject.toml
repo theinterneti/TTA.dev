@@ -13,6 +13,7 @@ members = [
     "packages/tta-documentation-primitives",
     "packages/tta-kb-automation",
     "packages/tta-agent-coordination",
+    "apps/webhook-ingestion",
 ]
 
 [tool.uv]

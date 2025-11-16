@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.scripts]
-webhook-cli = "webhook_ingestion.cli:app"
+webhook-cli = "webhook_ingestion.cli:main"
 
 [tool.setuptools]
 packages = ["webhook_ingestion"]
