@@ -152,27 +152,29 @@ class IssueManager:
         content = f"{issue.title} {issue.body}".lower()
         labels_to_add = []
 
-        # Category detection
-        if any(kw in content for kw in ["primitive", "workflow", "composition"]):
-            labels_to_add.append("primitive")
-        if any(kw in content for kw in ["trace", "metric", "observability", "telemetry"]):
+        # Category detection (using actual repo labels)
+        if any(kw in content for kw in ["trace", "metric", "observability", "telemetry", "otel"]):
             labels_to_add.append("observability")
-        if any(kw in content for kw in ["test", "coverage", "pytest"]):
+        if any(kw in content for kw in ["test", "coverage", "pytest", "testing"]):
             labels_to_add.append("testing")
         if any(kw in content for kw in ["doc", "documentation", "guide", "readme"]):
             labels_to_add.append("documentation")
-        if any(kw in content for kw in ["agent", "coordination", "multi-agent"]):
-            labels_to_add.append("agent-coordination")
-        if any(kw in content for kw in ["mcp", "model context protocol"]):
-            labels_to_add.append("mcp-integration")
+        if any(kw in content for kw in ["performance", "speed", "optimize", "slow"]):
+            labels_to_add.append("performance")
+        if any(kw in content for kw in ["reliability", "stable", "crash", "failure"]):
+            labels_to_add.append("reliability")
+        if any(kw in content for kw in ["metric", "prometheus", "grafana"]):
+            labels_to_add.append("metrics")
+        if any(kw in content for kw in ["package", "dependency", "install"]):
+            labels_to_add.append("package")
 
-        # Priority detection
+        # Priority detection (using actual repo labels: P0, P1, P2)
         if any(kw in content for kw in ["critical", "urgent", "blocker", "p0"]):
-            labels_to_add.append("P0: Critical")
+            labels_to_add.append("P0")
         elif any(kw in content for kw in ["important", "high priority", "p1"]):
-            labels_to_add.append("P1: High")
+            labels_to_add.append("P1")
         elif any(kw in content for kw in ["medium", "p2"]):
-            labels_to_add.append("P2: Medium")
+            labels_to_add.append("P2")
 
         # Type detection
         if any(kw in content for kw in ["bug", "error", "fix", "broken"]):
