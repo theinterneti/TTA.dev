@@ -249,8 +249,10 @@ class IssueManager:
         for milestone in milestones:
             try:
                 # Check if milestone exists
+                # Escape double quotes in milestone title for jq
+                milestone_title_escaped = milestone["title"].replace('"', '\\"')
                 result = subprocess.run(
-                    ["gh", "api", f"/repos/{self.repo}/milestones", "--jq", f'.[] | select(.title == "{milestone["title"]}") | .number'],
+                    ["gh", "api", f"/repos/{self.repo}/milestones", "--jq", f'.[] | select(.title == "{milestone_title_escaped}") | .number'],
                     capture_output=True,
                     text=True,
                 )
