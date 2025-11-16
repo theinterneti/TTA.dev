@@ -26,6 +26,43 @@ Practical guides for working with TTA.dev components.
   - Grafana dashboards
   - Time: 1-2 hours
 
+### Infrastructure & Deployment
+
+#### Observability Stack
+
+- **[Unified Observability Architecture](UNIFIED_OBSERVABILITY_ARCHITECTURE.md)** - ⭐ **START HERE** - Complete observability guide
+  - OpenTelemetry (automatic for all primitives)
+  - Grafana Cloud (metrics, logs, traces)
+  - Langfuse (LLM-specific: prompts, costs, quality)
+  - Multi-workspace setup
+  - Persona tracking integration
+  - Time: 15 minutes to understand, 30 minutes to implement
+
+- **[Linux-Native Observability Stack](LINUX_NATIVE_OBSERVABILITY.md)** - Replace Docker with native Linux services
+  - Grafana Alloy installation and configuration
+  - Grafana Cloud integration
+  - 700MB RAM savings, 2-second startup
+  - Complete migration guide
+  - Time: 30-60 minutes
+
+- **[Native Observability Quick Reference](NATIVE_OBSERVABILITY_QUICKREF.md)** - Fast-access commands and troubleshooting
+  - Service management commands
+  - Verification steps
+  - Common troubleshooting scenarios
+  - Configuration file locations
+
+- **[Multi-Workspace Observability](MULTI_WORKSPACE_OBSERVABILITY.md)** - Managing observability across multiple TTA.dev workspace clones
+  - Single port vs multi-port strategies
+  - Service name labeling
+  - Grafana Alloy configuration
+  - Querying across workspaces
+
+- **[Docker-Free Observability Migration](DOCKER_FREE_OBSERVABILITY_MIGRATION.md)** - Summary and implementation roadmap
+  - Migration phases
+  - Resource comparison
+  - Success criteria
+  - Rollback procedures
+
 - **[How to Compose Complex Workflows](how-to-compose-workflows.md)** - *(Coming soon)*
   - Sequential and parallel patterns
   - Router-based workflows

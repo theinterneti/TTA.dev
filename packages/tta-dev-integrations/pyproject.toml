@@ -52,6 +52,9 @@ all = [
     "pyjwt>=2.8.0",
 ]
 
+[tool.uv.sources]
+tta-dev-primitives = { workspace = true }
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
