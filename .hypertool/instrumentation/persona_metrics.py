@@ -207,10 +207,9 @@ class PersonaMetricsCollector:
 
         # Update remaining budget (if persona has a budget)
         if persona in self._token_budgets:
-            current_budget = self.persona_token_budget.labels(
-                persona=persona
-            )._value._value
+            current_budget = self._token_budgets[persona]
             new_budget = max(0, current_budget - tokens)
+            self._token_budgets[persona] = new_budget
             self.persona_token_budget.labels(persona=persona).set(new_budget)
 
     def record_workflow_stage(
@@ -288,13 +287,7 @@ class PersonaMetricsCollector:
         Returns:
             Remaining token budget (0 if persona not found)
         """
-        if not PROMETHEUS_AVAILABLE:
-            return self._token_budgets.get(persona, 0)
-
-        try:
-            return int(self.persona_token_budget.labels(persona=persona)._value._value)
-        except (AttributeError, ValueError):
-            return self._token_budgets.get(persona, 0)
+        return self._token_budgets.get(persona, 0)
 
     def reset_budget(self, persona: str) -> None:
         """
