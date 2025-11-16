@@ -233,7 +233,7 @@ Format as:
             )
             if description:
                 return description
-        except:
+        except Exception:
             pass
         
         # Fallback to simple description
