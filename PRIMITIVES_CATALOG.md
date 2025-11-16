@@ -839,8 +839,67 @@ Learned during Black Friday traffic spike. Higher retry count needed.
 
 **Purpose**: Manages the knowledge base and strategy selection.
 **Import**: `from tta_dev_primitives.ace.agents.curator import CuratorAgent`
-**Source**: [\`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py)
+**Source**: [`packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py`](packages/tta-dev-primitives/src/tta_dev_primitives/ace/agents/curator.py)
 **Description**: Intelligently manages learned strategies, including deduplication, relevance scoring, and selection for future tasks, ensuring the playbook remains efficient and effective.
+
+---
+
+## Cline Hook Management Primitives
+
+### ListHooksPrimitive
+
+**Lists all executable hooks in the `.cline/hooks` directory.**
+
+**Import:**
+```python
+from tta_dev_primitives.hooks import ListHooksPrimitive
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/hooks/list_hooks.py`](packages/tta-dev-primitives/src/tta_dev_primitives/hooks/list_hooks.py)
+
+### CreateHookPrimitive
+
+**Creates a new Cline hook script.**
+
+**Import:**
+```python
+from tta_dev_primitives.hooks import CreateHookPrimitive, CreateHookInput
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/hooks/create_hook.py`](packages/tta-dev-primitives/src/tta_dev_primitives/hooks/create_hook.py)
+
+### ValidateHookPrimitive
+
+**Validates a Cline hook script using `shellcheck`.**
+
+**Import:**
+```python
+from tta_dev_primitives.hooks import ValidateHookPrimitive, ValidateHookInput
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/hooks/validate_hook.py`](packages/tta-dev-primitives/src/tta_dev_primitives/hooks/validate_hook.py)
+
+### TestHookPrimitive
+
+**Tests a Cline hook script in a controlled environment.**
+
+**Import:**
+```python
+from tta_dev_primitives.hooks import TestHookPrimitive, TestHookInput
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/hooks/test_hook.py`](packages/tta-dev-primitives/src/tta_dev_primitives/hooks/test_hook.py)
+
+### RefineHookPrimitive
+
+**Intelligently generates, validates, tests, and refines a Cline hook script.**
+
+**Import:**
+```python
+from tta_dev_primitives.hooks import RefineHookPrimitive, RefineHookInput
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/hooks/refine_hook.py`](packages/tta-dev-primitives/src/tta_dev_primitives/hooks/refine_hook.py)
 
 ---
 

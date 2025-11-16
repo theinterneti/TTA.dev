@@ -1,0 +1,1 @@
+../../../logseq/pages/TTA.dev___Guides___Beginner Quickstart.md
