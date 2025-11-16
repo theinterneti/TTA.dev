@@ -135,7 +135,7 @@ class IssueManager:
             body=data.get("body", ""),
             labels=[label["name"] for label in data.get("labels", [])],
             state=data.get("state", "OPEN"),
-            milestone=data.get("milestone", {}).get("title"),
+            milestone=data["milestone"]["title"] if data.get("milestone") else None,
             assignees=[a["login"] for a in data.get("assignees", [])],
             created_at=data.get("createdAt", ""),
             updated_at=data.get("updatedAt", ""),
