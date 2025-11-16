@@ -37,12 +37,11 @@ from __future__ import annotations
 
 import asyncio
 import json
-import statistics
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, Tuple
+from typing import Any, Protocol
 
 import numpy as np
 from scipy import stats
@@ -289,7 +288,7 @@ class RAGWorkflowBenchmark(Benchmark):
         """Run TTA.dev RAG implementation."""
         code = '''
 # TTA.dev RAG Implementation
-from typing import Dict, List, Any
+from typing import Any
 import asyncio
 
 # Simulated TTA.dev primitives approach
@@ -305,11 +304,11 @@ class TTARAGWorkflow:
             self.generate_response
         )
 
-    async def embed_query(self, query: str) -> Dict[str, Any]:
+    async def embed_query(self, query: str) -> dict[str, Any]:
         """Embed query using cached embedding primitive."""
         return {"query_embedding": [0.1, 0.2, 0.3], "query": query}
 
-    async def retrieve_docs(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def retrieve_docs(self, data: dict[str, Any]) -> dict[str, Any]:
         """Retrieve relevant documents."""
         docs = [
             {"text": "Document 1", "score": 0.9},
@@ -317,12 +316,12 @@ class TTARAGWorkflow:
         ]
         return {**data, "documents": docs}
 
-    async def rank_results(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def rank_results(self, data: dict[str, Any]) -> dict[str, Any]:
         """Rank and filter results."""
         ranked_docs = sorted(data["documents"], key=lambda x: x["score"], reverse=True)
         return {**data, "ranked_documents": ranked_docs[:3]}
 
-    async def generate_response(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def generate_response(self, data: dict[str, Any]) -> dict[str, Any]:
         """Generate final response."""
         context_text = " ".join([doc["text"] for doc in data["ranked_documents"]])
         response = f"Based on: {context_text}, the answer is: TTA RAG response"
@@ -364,7 +363,7 @@ print(f"Response: {result.get('response', 'No response')}")
         code = '''
 # Vanilla Python RAG Implementation
 import asyncio
-from typing import Dict, List, Any
+from typing import Any
 
 class VanillaRAG:
     """Manual RAG implementation without primitives."""
@@ -373,7 +372,7 @@ class VanillaRAG:
         self.embeddings_cache = {}
         self.max_retries = 3
 
-    async def process_query(self, query: str) -> Dict[str, Any]:
+    async def process_query(self, query: str) -> dict[str, Any]:
         """Process RAG query with manual orchestration."""
         try:
             # Manual embedding with caching
@@ -405,7 +404,7 @@ class VanillaRAG:
         except Exception as e:
             return {"error": str(e), "query": query}
 
-    async def _embed_with_retry(self, text: str) -> List[float]:
+    async def _embed_with_retry(self, text: str) -> list[float]:
         """Embed text with manual retry logic."""
         for attempt in range(self.max_retries):
             try:
@@ -417,7 +416,7 @@ class VanillaRAG:
                     raise
                 await asyncio.sleep(2 ** attempt)  # Exponential backoff
 
-    async def _retrieve_documents(self, embedding: List[float]) -> List[Dict[str, Any]]:
+    async def _retrieve_documents(self, embedding: list[float]) -> list[dict[str, Any]]:
         """Retrieve documents manually."""
         # Simulate document retrieval
         return [
@@ -426,7 +425,7 @@ class VanillaRAG:
             {"text": "Document 3", "score": 0.7}
         ]
 
-    async def _rank_documents(self, docs: List[Dict], query_embedding: List[float]) -> List[Dict]:
+    async def _rank_documents(self, docs: list[dict], query_embedding: list[float]) -> list[dict]:
         """Rank documents manually."""
         # Manual sorting with error handling
         try:
@@ -434,7 +433,7 @@ class VanillaRAG:
         except Exception:
             return docs  # Fallback to original order
 
-    async def _generate_response(self, query: str, docs: List[Dict]) -> str:
+    async def _generate_response(self, query: str, docs: list[dict]) -> str:
         """Generate response with manual error handling."""
         if not docs:
             raise ValueError("No documents provided")
@@ -442,7 +441,7 @@ class VanillaRAG:
         context_text = " ".join([doc.get("text", "") for doc in docs])
         return f"Based on: {context_text}, the answer is: Vanilla RAG response"
 
-    async def _fallback_response(self, query: str, docs: List[Dict]) -> str:
+    async def _fallback_response(self, query: str, docs: list[dict]) -> str:
         """Fallback response generation."""
         return f"Fallback response for: {query}"
 
@@ -481,7 +480,7 @@ print(f"Response: {result.get('response', result.get('error', 'No response'))}")
         """Run LangChain RAG implementation."""
         code = '''
 # Simulated LangChain RAG Implementation
-from typing import Dict, List, Any
+from typing import Any
 import asyncio
 
 class LangChainRAG:
@@ -518,7 +517,7 @@ class LangChainRAG:
             "prompt_template": "Context: {context}\\nQuestion: {question}\\nAnswer:"
         }
 
-    async def query(self, question: str) -> Dict[str, Any]:
+    async def query(self, question: str) -> dict[str, Any]:
         """Process query using LangChain chain."""
         # Simulate LangChain execution
         retrieved_docs = await self._retrieve(question)
@@ -533,7 +532,7 @@ class LangChainRAG:
             "response": response
         }
 
-    async def _retrieve(self, query: str) -> List[Dict[str, Any]]:
+    async def _retrieve(self, query: str) -> list[dict[str, Any]]:
         """Retrieve documents."""
         return [
             {"text": "Document 1", "score": 0.9},
