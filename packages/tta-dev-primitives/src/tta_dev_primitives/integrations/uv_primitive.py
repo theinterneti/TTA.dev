@@ -15,6 +15,8 @@ Example:
     result = await uv_workflow.execute(context, worktree_context)
 """
 
+# pragma: allow-asyncio  # Required for WorkflowPrimitive async interface
+
 import asyncio
 import subprocess
 from dataclasses import dataclass
@@ -118,7 +120,7 @@ class UVPrimitive(WorkflowPrimitive[dict[str, Any], UVResult]):
                 )
 
                 # Execute command with timeout
-                result = await self._execute_command(cmd, worktree_path)
+                result = self._execute_command(cmd, worktree_path)
 
                 execution_time = asyncio.get_event_loop().time() - start_time
 
@@ -232,29 +234,20 @@ class UVPrimitive(WorkflowPrimitive[dict[str, Any], UVResult]):
         # Default to current directory
         return Path.cwd()
 
-    async def _execute_command(
+    def _execute_command(
         self, cmd: list[str], worktree_path: Path
     ) -> subprocess.CompletedProcess:
-        """Execute the uv command"""
+        """Execute the uv command with timeout handling"""
         try:
-            return await asyncio.wait_for(
-                asyncio.create_subprocess_exec(
-                    *cmd,
-                    cwd=worktree_path,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                    text=True,
-                ).communicate(),
+            return subprocess.run(
+                cmd,
+                cwd=worktree_path,
                 timeout=self.timeout,
+                capture_output=True,
+                text=True,
             )
-        except TimeoutError:
-            # Kill the process if it times out
-            process = await asyncio.create_subprocess_exec(*cmd, cwd=worktree_path)
-            try:
-                await asyncio.wait_for(process.wait(), timeout=5.0)
-            except TimeoutError:
-                process.kill()
-            raise
+        except subprocess.TimeoutExpired:
+            raise TimeoutError(f"Command timed out after {self.timeout} seconds")
 
 
 class WorktreeAwareUVPrimitive(WorkflowPrimitive[dict[str, Any], UVResult]):
@@ -283,7 +276,7 @@ class WorktreeAwareUVPrimitive(WorkflowPrimitive[dict[str, Any], UVResult]):
         """Execute uv command with worktree awareness"""
         with tracer.start_as_span("worktree-aware-uv") as span:
             # Detect current worktree info
-            worktree_info = await self._get_worktree_info()
+            worktree_info = self._get_worktree_info()
 
             # Adapt command based on worktree configuration
             adapted_input = self._adapt_for_worktree(input_data, worktree_info)
@@ -298,21 +291,19 @@ class WorktreeAwareUVPrimitive(WorkflowPrimitive[dict[str, Any], UVResult]):
             # Execute with adapted input
             return await self.uv_primitive.execute(context, adapted_input)
 
-    async def _get_worktree_info(self) -> dict[str, Any]:
+    def _get_worktree_info(self) -> dict[str, Any]:
         """Get information about the current worktree"""
         try:
             # Get current branch
-            result = await asyncio.create_subprocess_exec(
-                "git",
-                "branch",
-                "--show-current",
+            result = subprocess.run(
+                ["git", "branch", "--show-current"],
                 cwd=self.repo_root,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
+                capture_output=True,
                 text=True,
             )
-            stdout, _ = await result.communicate()
-            current_branch = stdout.strip() if result.returncode == 0 else "detached"
+            current_branch = (
+                result.stdout.strip() if result.returncode == 0 else "detached"
+            )
 
             return {
                 "branch": current_branch,
