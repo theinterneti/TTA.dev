@@ -25,6 +25,7 @@ dev-dependencies = [
     "pytest-mock>=3.14.0",
     "pytest-timeout>=2.2.0",
     "ruff>=0.8.0",
+    "toml>=0.10.2",
 ]
 
 [tool.ruff]
@@ -110,8 +111,7 @@ include = ["packages"]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
-testpaths = ["packages/tta-dev-primitives/tests"]
+testpaths = ["packages"]
 asyncio_mode = "auto"
 addopts = "-v --strict-markers --timeout=60"
 timeout = 60
