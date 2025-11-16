@@ -26,6 +26,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import instrumentation
+# NOTE: The following import assumes that `observability_integration.py` exists at the package root level.
+# To enable full observability (Prometheus, OpenTelemetry, Langfuse), ensure that
+# `.hypertool/observability_integration.py` is present and contains `initialize_observability`.
+# If running in a development environment, you may need to install or symlink this module.
+# If the import fails, instrumentation will be disabled and a warning will be printed.
 try:
     from observability_integration import initialize_observability
 
