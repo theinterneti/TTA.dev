@@ -303,13 +303,8 @@ Format as:
         
         print(f"✅ PR created: {pr_url}")
         
-        # Auto-request @copilot review
-        print("   Requesting @copilot review...")
-        self.run_gh(
-            "pr", "edit", str(pr_number),
-            "--add-reviewer", "copilot",
-            check=False
-        )
+        # Optionally, agent collaboration can be started separately
+        # (No reviewer request for 'copilot' as it is not a valid GitHub user)
         
         return pr_number
     
