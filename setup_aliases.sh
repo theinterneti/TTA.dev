@@ -38,7 +38,11 @@ if grep -q "# Lazy Dev Aliases" "$SHELL_CONFIG" 2>/dev/null; then
         exit 0
     fi
     # Remove old aliases
-    sed -i '/# Lazy Dev Aliases/,/# End Lazy Dev Aliases/d' "$SHELL_CONFIG"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i.bak '/# Lazy Dev Aliases/,/# End Lazy Dev Aliases/d' "$SHELL_CONFIG" && rm -f "$SHELL_CONFIG.bak"
+    else
+        sed -i '/# Lazy Dev Aliases/,/# End Lazy Dev Aliases/d' "$SHELL_CONFIG"
+    fi
 fi
 
 # Get repo root directory
