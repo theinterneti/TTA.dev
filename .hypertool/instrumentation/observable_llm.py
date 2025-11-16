@@ -179,7 +179,7 @@ class ObservableLLM:
             # Update Prometheus metrics
             self.metrics.record_token_usage(
                 persona=persona,
-                chatmode="package-release",  # TODO: Get from context
+                chatmode=chatmode,
                 model=self.model,
                 tokens=total_tokens,
             )
