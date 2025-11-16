@@ -1,0 +1,73 @@
+name: Integration & Documentation Tests
+
+on:
+  # Manual trigger for integration tests
+  workflow_dispatch:
+  # Scheduled nightly run
+  schedule:
+    - cron: '0 2 * * *'  # 2 AM UTC daily
+  # Also run on push to main for integration test validation
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/**/tests/integration/**'
+      - 'packages/**/tests/mcp/**'
+      - 'docs/**'
+      - 'scripts/docs/**'
+
+jobs:
+  # Job 1: Documentation checks - lightweight
+  docs-checks:
+    name: Documentation Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check markdown
+        run: python scripts/docs/check_md.py --all
+
+  # Job 2: Integration tests - heavy, needs Docker services
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Start Docker services for integration tests
+        run: |
+          cd packages/tta-dev-primitives
+          docker compose -f docker-compose.integration.yml up -d
+          sleep 10  # Wait for services to be ready
+
+      - name: Run integration tests
+        env:
+          RUN_INTEGRATION: true
+        run: uv run pytest -v -m "integration" --timeout=300 --maxfail=3
+
+      - name: Stop Docker services
+        if: always()
+        run: |
+          cd packages/tta-dev-primitives
+          docker compose -f docker-compose.integration.yml down -v

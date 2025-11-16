@@ -3,6 +3,20 @@ mode: "api-gateway-engineer"
 description: "API design, authentication, authorization, rate limiting, and security"
 cognitive_focus: "API architecture, security, performance, documentation"
 security_level: "CRITICAL"
+hypertool_persona: tta-backend-engineer
+persona_token_budget: 2000
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "packages/**/frontend/**"
+    - "**/node_modules/**"
+  allowed_mcp_servers:
+    - context7
+    - github
+    - sequential-thinking
+    - gitmcp
+    - serena
+    - mcp-logseq
 ---
 
 # API Gateway Engineer Chat Mode

@@ -1,0 +1,569 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "hypertool-workflow-performance",
+    "title": "Hypertool Workflow Performance",
+    "tags": ["hypertool", "workflows", "performance", "apm"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
+    },
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "type": "graph",
+        "title": "Workflow Stage Duration",
+        "gridPos": {
+          "h": 9,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(hypertool_workflow_stage_duration_seconds_bucket[5m])) by (le, workflow, stage))",
+            "legendFormat": "p95: {{workflow}} - {{stage}}",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(hypertool_workflow_stage_duration_seconds_bucket[5m])) by (le, workflow, stage))",
+            "legendFormat": "p50: {{workflow}} - {{stage}}",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "max", "last"],
+            "sortBy": "Last",
+            "sortDesc": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "opacity",
+              "showPoints": "auto",
+              "spanNulls": false
+            },
+            "unit": "s",
+            "decimals": 2,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                },
+                {
+                  "value": 30,
+                  "color": "yellow"
+                },
+                {
+                  "value": 60,
+                  "color": "red"
+                }
+              ]
+            }
+          }
+        },
+        "description": "Duration of workflow stages (p50 and p95 percentiles)"
+      },
+      {
+        "id": 2,
+        "type": "stat",
+        "title": "Quality Gate Success Rate",
+        "gridPos": {
+          "h": 7,
+          "w": 12,
+          "x": 0,
+          "y": 9
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(rate(hypertool_workflow_quality_gate_total{result=\"pass\"}[5m])) / sum(rate(hypertool_workflow_quality_gate_total[5m])) * 100",
+            "legendFormat": "Overall",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(hypertool_workflow_quality_gate_total{result=\"pass\"}[5m])) by (workflow) / sum(rate(hypertool_workflow_quality_gate_total[5m])) by (workflow) * 100",
+            "legendFormat": "{{workflow}}",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background",
+          "orientation": "auto",
+          "textMode": "value_and_name",
+          "wideLayout": true,
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "unit": "percent",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "red"
+                },
+                {
+                  "value": 80,
+                  "color": "yellow"
+                },
+                {
+                  "value": 95,
+                  "color": "green"
+                }
+              ]
+            },
+            "mappings": [],
+            "min": 0,
+            "max": 100
+          }
+        },
+        "description": "Percentage of quality gates that passed (overall and per workflow)"
+      },
+      {
+        "id": 3,
+        "type": "barchart",
+        "title": "Failed Quality Gates (Last Hour)",
+        "gridPos": {
+          "h": 7,
+          "w": 12,
+          "x": 12,
+          "y": 9
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "topk(10, sum(increase(hypertool_workflow_quality_gate_total{result=\"fail\"}[1h])) by (workflow, stage))",
+            "legendFormat": "{{workflow}} - {{stage}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "xTickLabelRotation": 0,
+          "xTickLabelSpacing": 100,
+          "showValue": "always",
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": []
+          },
+          "tooltip": {
+            "mode": "single"
+          },
+          "text": {
+            "valueSize": 12
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "lineWidth": 1,
+              "fillOpacity": 80,
+              "gradientMode": "none"
+            },
+            "unit": "short",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                },
+                {
+                  "value": 1,
+                  "color": "yellow"
+                },
+                {
+                  "value": 5,
+                  "color": "red"
+                }
+              ]
+            }
+          }
+        },
+        "description": "Top 10 workflow stages with the most quality gate failures in the last hour"
+      },
+      {
+        "id": 4,
+        "type": "table",
+        "title": "Slowest Workflow Stages",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "topk(10, histogram_quantile(0.95, sum(rate(hypertool_workflow_stage_duration_seconds_bucket[1h])) by (le, workflow, stage, persona)))",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "footer": {
+            "show": false,
+            "reducer": ["sum"],
+            "fields": ""
+          },
+          "sortBy": [
+            {
+              "displayName": "P95 Duration (s)",
+              "desc": true
+            }
+          ]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            },
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                },
+                {
+                  "value": 30,
+                  "color": "yellow"
+                },
+                {
+                  "value": 60,
+                  "color": "red"
+                }
+              ]
+            },
+            "mappings": []
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "workflow"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Workflow"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 200
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "stage"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Stage"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 200
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "persona"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Persona"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 180
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Value"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "P95 Duration (s)"
+                },
+                {
+                  "id": "custom.width",
+                  "value": 150
+                },
+                {
+                  "id": "unit",
+                  "value": "s"
+                },
+                {
+                  "id": "decimals",
+                  "value": 2
+                },
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                }
+              ]
+            }
+          ]
+        },
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "__name__": true,
+                "instance": true,
+                "job": true,
+                "le": true
+              },
+              "indexByName": {
+                "workflow": 0,
+                "stage": 1,
+                "persona": 2,
+                "Value": 3
+              },
+              "renameByName": {}
+            }
+          }
+        ],
+        "description": "Top 10 slowest workflow stages by p95 duration in the last hour"
+      },
+      {
+        "id": 5,
+        "type": "timeseries",
+        "title": "Workflow Execution Trends",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        },
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(rate(hypertool_workflow_quality_gate_total{result=\"pass\"}[5m])) by (workflow)",
+            "legendFormat": "✓ {{workflow}}",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(hypertool_workflow_quality_gate_total{result=\"fail\"}[5m])) by (workflow)",
+            "legendFormat": "✗ {{workflow}}",
+            "refId": "B"
+          }
+        ],
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "right",
+            "calcs": ["mean", "max", "last"]
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "lineWidth": 2,
+              "fillOpacity": 15,
+              "gradientMode": "opacity",
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              },
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              }
+            },
+            "unit": "ops",
+            "decimals": 3,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": "/✓.*/"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "green"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byRegexp",
+                "options": "/✗.*/"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "fixed",
+                    "fixedColor": "red"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "description": "Quality gate pass/fail rates over time by workflow"
+      }
+    ],
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "links": [],
+    "liveNow": false,
+    "style": "dark",
+    "templating": {
+      "list": [
+        {
+          "allValue": ".*",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": "Prometheus",
+          "definition": "label_values(hypertool_workflow_stage_duration_seconds_bucket, workflow)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Workflow",
+          "multi": true,
+          "name": "workflow",
+          "options": [],
+          "query": {
+            "query": "label_values(hypertool_workflow_stage_duration_seconds_bucket, workflow)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        },
+        {
+          "allValue": ".*",
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": "Prometheus",
+          "definition": "label_values(hypertool_workflow_stage_duration_seconds_bucket{workflow=~\"$workflow\"}, persona)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Persona",
+          "multi": true,
+          "name": "persona",
+          "options": [],
+          "query": {
+            "query": "label_values(hypertool_workflow_stage_duration_seconds_bucket{workflow=~\"$workflow\"}, persona)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        }
+      ]
+    }
+  }
+}
