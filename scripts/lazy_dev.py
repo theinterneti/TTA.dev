@@ -100,7 +100,12 @@ class LazyDevManager:
     def get_repo_state(self) -> RepoState:
         """Get current repository state."""
         current_branch = self.run_git("branch", "--show-current")
-        main_branch = "main"  # or detect from remote
+        # Detect main branch from remote, fallback to "main" if detection fails
+        symbolic_ref = self.run_git("symbolic-ref", "refs/remotes/origin/HEAD", check=False)
+        if symbolic_ref.startswith("refs/remotes/origin/"):
+            main_branch = symbolic_ref.split("/")[-1]
+        else:
+            main_branch = "main"
         
         status = self.run_git("status", "--porcelain")
         staged = self.run_git("diff", "--cached", "--name-only")
