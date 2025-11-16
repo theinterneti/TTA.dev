@@ -1,32 +1,6 @@
 # Workspace-level configuration for TTA.dev platform
 # This is NOT a buildable package - individual packages are in packages/
-
-[tool.uv.workspace]
-# Active production packages only
-# Note: keploy-framework, python-pathway, and js-dev-primitives are under review
-# and not included in workspace until architectural decisions are made
-members = [
-    "packages/tta-dev-primitives",
-    "packages/tta-observability-integration",
-    "packages/tta-observability-ui",
-    "packages/universal-agent-context",
-    "packages/tta-documentation-primitives",
-    "packages/tta-kb-automation",
-    "packages/tta-agent-coordination",
-    "apps/webhook-ingestion",
-]
-
-[tool.uv]
-dev-dependencies = [
-    "aiohttp>=3.13.2",
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.24.0",
-    "pytest-cov>=4.1.0",
-    "pytest-mock>=3.14.0",
-    "pytest-timeout>=2.2.0",
-    "ruff>=0.8.0",
-    "toml>=0.10.2",
-]
+# UV configuration is now centralized in uv.toml for worktree-aware management
 
 [tool.ruff]
 line-length = 100
@@ -123,3 +97,6 @@ markers = [
     "slow: mark test as slow running",
     "external: mark test as requiring external services",
 ]
+
+# Workspace-level Python requirement
+requires-python = ">=3.11"

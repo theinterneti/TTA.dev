@@ -1,0 +1,5 @@
+# TTA.dev uv configuration - optimized for worktree development
+# Global settings for all worktrees: TTA.dev, TTA.dev-augment, TTA.dev-cline, TTA.dev-copilot
+
+# Performance optimizations for worktree environments
+concurrent-downloads = 4

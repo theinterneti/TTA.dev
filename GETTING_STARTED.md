@@ -13,7 +13,56 @@ This guide provides a rapid introduction to TTA.dev. For a detailed overview, re
 uv add tta-dev-primitives
 ```
 
-### 2. Your First Workflow
+### 2. UV Package Management Setup
+
+TTA.dev uses `uv` as the primary package manager for worktree-aware dependency management:
+
+```bash
+# Check uv is installed
+uv --version
+
+# Sync all dependencies across worktrees
+uv sync --all-extras
+
+# Run tests
+uv run pytest
+
+# Format code
+uv run ruff format .
+
+# Lint code
+uv run ruff check . --fix
+```
+
+**Worktree Management:**
+```bash
+# List all worktrees and their packages
+python scripts/worktree_init.py list
+
+# Initialize a new worktree
+python scripts/worktree_init.py init /path/to/worktree
+
+# Clean cache for specific worktree
+python scripts/worktree_init.py clean /path/to/worktree
+```
+
+**Shell Aliases (Recommended):**
+```bash
+# Generate convenient shortcuts for your shell
+python scripts/create_shell_aliases.py --list          # Show available aliases
+python scripts/create_shell_aliases.py --install       # Add to shell config permanently
+
+# Common aliases you'll get:
+# uvsync      → uv sync --all-extras
+# uvr         → uv run
+# uvtest      → uv run pytest
+# uvfmt       → uv run ruff format .
+# wtlist      → uv run python scripts/worktree_init.py list
+# dev-up      → uvsync && uvlint
+# quality-check → uvfmt && uvlint && type-check && uvtest
+```
+
+### 3. Your First Workflow
 
 ```python
 from tta_dev_primitives import (
