@@ -97,7 +97,7 @@ Phase 1 workflow rebuild is **COMPLETE and VALIDATED**. Both `pr-validation.yml`
 
 **Problem:** Workflow referenced non-existent `docker-compose.test.yml` at root
 **Impact:** "No such file or directory" error
-**Solution:** Updated path to `packages/tta-dev-primitives/docker-compose.integration.yml`
+**Solution:** Updated path to `platform/primitives/docker-compose.integration.yml`
 **Result:** Docker Compose successfully finds and uses configuration
 
 ### Issue 4: Lifecycle Test Timeout

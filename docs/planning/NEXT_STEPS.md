@@ -146,8 +146,8 @@ uv run python scripts/validation/validate-llm-efficiency.py packages/
 uv run python scripts/validation/validate-cost-optimization.py packages/
 
 # Check observability package structure
-ls -la packages/tta-observability-integration/src/observability_integration/primitives/
-ls -la packages/tta-observability-integration/src/observability_integration/apm/
+ls -la platform/observability/src/observability_integration/primitives/
+ls -la platform/observability/src/observability_integration/apm/
 ```
 
 ---
@@ -305,7 +305,7 @@ docker-compose -f docker-compose.test.yml up -d
 
 ```bash
 # Install observability package
-cd packages/tta-observability-integration
+cd platform/observability
 uv pip install -e .
 
 # Run with verbose output

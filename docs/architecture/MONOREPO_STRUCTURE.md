@@ -113,7 +113,7 @@ packages/<package-name>/
 
 **Used By:** All other packages
 
-**Path:** `packages/tta-dev-primitives/`
+**Path:** `platform/primitives/`
 
 #### 2. tta-observability-integration
 
@@ -128,7 +128,7 @@ packages/<package-name>/
 
 **Depends On:** tta-dev-primitives
 
-**Path:** `packages/tta-observability-integration/`
+**Path:** `platform/observability/`
 
 #### 3. universal-agent-context
 
@@ -141,7 +141,7 @@ packages/<package-name>/
 
 **Dependencies:** tta-dev-primitives
 
-**Path:** `packages/universal-agent-context/`
+**Path:** `platform/agent-context/`
 
 #### 4. keploy-framework
 
@@ -180,9 +180,9 @@ Root `pyproject.toml` defines workspace:
 ```toml
 [tool.uv.workspace]
 members = [
-    "packages/tta-dev-primitives",
-    "packages/tta-observability-integration",
-    "packages/universal-agent-context",
+    "platform/primitives",
+    "platform/observability",
+    "platform/agent-context",
     "packages/keploy-framework",
     "packages/python-pathway",
 ]
@@ -241,7 +241,7 @@ dev = [
 uv sync --all-extras
 
 # Add dependency to specific package
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv add httpx
 
 # Add dev dependency
@@ -276,7 +276,7 @@ uv run pytest -v
 
 ```bash
 # Navigate to package
-cd packages/tta-dev-primitives
+cd platform/primitives
 
 # Run package tests
 uv run pytest tests/ -v
@@ -292,11 +292,11 @@ uv run pytest tests/ --cov=src --cov-report=html
 
 ```bash
 # Make changes in tta-dev-primitives
-cd packages/tta-dev-primitives
+cd platform/primitives
 # ... edit code ...
 
 # Test in dependent package
-cd packages/tta-observability-integration
+cd platform/observability
 uv run pytest tests/  # Uses local tta-dev-primitives
 
 # Run integration tests
@@ -323,7 +323,7 @@ uv run ruff check .
 uv run ruff check . --fix
 
 # Check specific package
-uv run ruff check packages/tta-dev-primitives/
+uv run ruff check platform/primitives/
 ```
 
 ### Pyright (Type Checking)
@@ -335,7 +335,7 @@ uv run ruff check packages/tta-dev-primitives/
 uvx pyright packages/
 
 # Type check specific package
-uvx pyright packages/tta-dev-primitives/
+uvx pyright platform/primitives/
 
 # Type check with watch mode
 uvx pyright --watch packages/
@@ -350,7 +350,7 @@ uvx pyright --watch packages/
 uv run pytest -v
 
 # Run package tests
-uv run pytest packages/tta-dev-primitives/tests/ -v
+uv run pytest platform/primitives/tests/ -v
 
 # Run integration tests
 uv run pytest tests/integration/ -v
@@ -467,13 +467,13 @@ tests/
 uv run pytest -v
 
 # Package unit tests only
-uv run pytest packages/tta-dev-primitives/tests/ -v
+uv run pytest platform/primitives/tests/ -v
 
 # Integration tests only
 uv run pytest tests/integration/ -v
 
 # Specific test file
-uv run pytest packages/tta-dev-primitives/tests/test_sequential.py -v
+uv run pytest platform/primitives/tests/test_sequential.py -v
 
 # With coverage
 uv run pytest --cov=packages --cov-report=html --cov-report=term-missing
@@ -662,8 +662,8 @@ Update root `pyproject.toml`:
 ```toml
 [tool.uv.workspace]
 members = [
-    "packages/tta-dev-primitives",
-    "packages/tta-observability-integration",
+    "platform/primitives",
+    "platform/observability",
     # ... existing packages ...
     "packages/new-package",  # Add here
 ]

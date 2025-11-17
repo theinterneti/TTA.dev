@@ -508,7 +508,7 @@ Once CLI is working:
 2. ✅ **Try TTA.dev Specific Task:**
    ```bash
    cd /home/thein/repos/TTA.dev
-   cline "List all primitives in packages/tta-dev-primitives/src/"
+   cline "List all primitives in platform/primitives/src/"
    ```
 
 3. ✅ **Test Autonomous Mode:**
@@ -552,7 +552,7 @@ uv run ruff check . 2>&1 | cline -y "Fix these errors"
 
 ```bash
 # Generate tests for file
-cat packages/tta-dev-primitives/src/cache.py | \
+cat platform/primitives/src/cache.py | \
   cline "Generate pytest tests for this code"
 ```
 
@@ -560,7 +560,7 @@ cat packages/tta-dev-primitives/src/cache.py | \
 
 ```bash
 # Document function
-cline "Add docstring to CachePrimitive class in packages/tta-dev-primitives/src/cache.py"
+cline "Add docstring to CachePrimitive class in platform/primitives/src/cache.py"
 ```
 
 ---

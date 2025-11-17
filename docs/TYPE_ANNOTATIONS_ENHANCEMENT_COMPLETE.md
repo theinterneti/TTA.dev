@@ -187,9 +187,9 @@ from typing import Protocol  # For ContextExtractor
 ### Pyright Results
 
 **Files Checked:**
-- `packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py`
-- `packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py`
-- `packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py`
+- `platform/primitives/src/tta_dev_primitives/adaptive/base.py`
+- `platform/primitives/src/tta_dev_primitives/adaptive/retry.py`
+- `platform/primitives/src/tta_dev_primitives/adaptive/logseq_integration.py`
 
 **Expected Errors (logseq_integration.py):**
 - ⚠️ `create_logseq_page` undefined - Expected (utils module not implemented)
@@ -433,7 +433,7 @@ Updated adaptive primitives section with Protocol examples and type annotations 
 
 ## 🔗 Related Documentation
 
-- [Adaptive Primitives README](../packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/README.md)
+- [Adaptive Primitives README](../platform/primitives/src/tta_dev_primitives/adaptive/README.md)
 - [Integration Tests Status](./INTEGRATION_TESTS_CURRENT_STATUS.md)
 - [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md)
 - [Python Typing Documentation](https://docs.python.org/3/library/typing.html)

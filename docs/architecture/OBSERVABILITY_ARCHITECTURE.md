@@ -24,7 +24,7 @@ TTA.dev's observability architecture provides comprehensive monitoring, tracing,
 
 ### Layer 1: Core Observability (Built-in)
 
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/observability/`
+**Location:** `platform/primitives/src/tta_dev_primitives/observability/`
 
 **Components:**
 - `InstrumentedPrimitive` - Base class with automatic tracing
@@ -40,7 +40,7 @@ TTA.dev's observability architecture provides comprehensive monitoring, tracing,
 
 ### Layer 2: Enhanced Observability (Optional)
 
-**Location:** `packages/tta-observability-integration/`
+**Location:** `platform/observability/`
 
 **Components:**
 - `initialize_observability()` - OpenTelemetry setup
@@ -766,7 +766,7 @@ tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
 
 ## Related Documentation
 
-- **Package README:** [`packages/tta-observability-integration/README.md`](../../packages/tta-observability-integration/README.md)
+- **Package README:** [`platform/observability/README.md`](../../platform/observability/README.md)
 - **Integration Guide:** [`docs/integration/observability-integration.md`](../integration/observability-integration.md)
 - **Component Analysis:** [`COMPONENT_INTEGRATION_ANALYSIS.md`](COMPONENT_INTEGRATION_ANALYSIS.md)
 - **Monitoring Dashboard:** [`WEEK1_MONITORING_DASHBOARD.md`](../../WEEK1_MONITORING_DASHBOARD.md)

@@ -548,7 +548,7 @@ async def test_circuit_breaker_error_handling(adaptive_primitive):
 
 ## 📚 Related Documentation
 
-- [Adaptive Primitives README](../packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/README.md)
+- [Adaptive Primitives README](../platform/primitives/src/tta_dev_primitives/adaptive/README.md)
 - [Type Annotations Enhancement](./TYPE_ANNOTATIONS_ENHANCEMENT_COMPLETE.md)
 - [Integration Tests Status](./INTEGRATION_TESTS_CURRENT_STATUS.md)
 - [Python Exception Handling](https://docs.python.org/3/tutorial/errors.html)

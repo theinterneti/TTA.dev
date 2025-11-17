@@ -121,8 +121,8 @@ docs/
 
 | Task | Start With | Then Reference |
 |------|------------|----------------|
-| **Core Primitives** | `packages/tta-dev-primitives/AGENTS.md` | `PRIMITIVES_CATALOG.md` |
-| **Observability** | `packages/tta-observability-integration/` | `docs/observability/` |
+| **Core Primitives** | `platform/primitives/AGENTS.md` | `PRIMITIVES_CATALOG.md` |
+| **Observability** | `platform/observability/` | `docs/observability/` |
 | **MCP Integration** | `MCP_SERVERS.md` | `docs/mcp/` |
 | **Agent Development** | `AGENTS.md` | `docs/guides/` |
 | **Architecture** | `docs/architecture/Overview.md` | `docs/architecture/` |

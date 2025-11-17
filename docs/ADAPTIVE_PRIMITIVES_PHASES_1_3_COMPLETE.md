@@ -220,7 +220,7 @@ AdaptiveError (base)
 
 ### Module Documentation
 
-1. ✅ `packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/README.md` (750+ lines)
+1. ✅ `platform/primitives/src/tta_dev_primitives/adaptive/README.md` (750+ lines)
    - Comprehensive module documentation
    - Architecture overview
    - Usage examples and patterns
@@ -484,7 +484,7 @@ raise PerformanceRegressionError(
 
 ### Module Documentation
 
-- [Adaptive Module README](../packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/README.md)
+- [Adaptive Module README](../platform/primitives/src/tta_dev_primitives/adaptive/README.md)
 - [AGENTS.md](../AGENTS.md) - Adaptive primitives section
 - [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md) - Complete catalog
 - [GETTING_STARTED.md](../GETTING_STARTED.md) - Self-improving workflows

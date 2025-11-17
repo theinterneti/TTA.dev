@@ -125,7 +125,7 @@ node --version && npx --version
 
 ```bash
 # Test Cline integration
-cline "List all Python files in packages/tta-dev-primitives/src/"
+cline "List all Python files in platform/primitives/src/"
 
 # Test MCP integration
 cline "Use Context7 to search for documentation about primitives"
@@ -135,7 +135,7 @@ cline "Use Context7 to search for documentation about primitives"
 
 ### Context Management
 
-- Provide specific file paths: `packages/tta-dev-primitives/src/`
+- Provide specific file paths: `platform/primitives/src/`
 - Use role-specific toolsets: `@workspace #tta-package-dev`
 - Reference existing patterns: `Follow RetryPrimitive patterns`
 

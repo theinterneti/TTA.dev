@@ -120,7 +120,7 @@ MemoryPrimitive
 ### Attempt 1: In-Memory Fallback (Build This First)
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/performance/memory.py
+# platform/primitives/src/tta_dev_primitives/performance/memory.py
 
 from typing import Dict, List, Optional
 from collections import OrderedDict

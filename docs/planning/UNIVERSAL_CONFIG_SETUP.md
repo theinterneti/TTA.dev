@@ -101,8 +101,8 @@ Simplifies usage with correct workspace resolution
 
 ## Files Modified
 
-- `packages/tta-dev-primitives/pyproject.toml` - Added PyYAML dependency
-- `packages/tta-dev-primitives/src/tta_dev_primitives/apm/setup.py` - Fixed OpenTelemetry imports
+- `platform/primitives/pyproject.toml` - Added PyYAML dependency
+- `platform/primitives/src/tta_dev_primitives/apm/setup.py` - Fixed OpenTelemetry imports
 - `scripts/generate_assistant_configs.py` - Complete generator implementation (590 lines)
 - `scripts/generate-configs.sh` - Wrapper script for easy execution
 - `.universal-instructions/` - Complete universal instruction system

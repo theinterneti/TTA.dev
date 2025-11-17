@@ -217,7 +217,7 @@ outputs:
 ```yaml
 inputs:
   package-path:
-    description: 'Path to package (e.g., packages/tta-dev-primitives)'
+    description: 'Path to package (e.g., platform/primitives)'
     required: true
     type: string
   python-version:

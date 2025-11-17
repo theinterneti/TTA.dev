@@ -199,14 +199,14 @@ Cline should call MCP tools automatically.
 **Simple Test:**
 
 1. Open Cline panel
-2. Type in chat: "List all files in packages/tta-dev-primitives/src/"
+2. Type in chat: "List all files in platform/primitives/src/"
 3. Cline will use `list_files` tool
 4. Review results
 
 **More Complex Task:**
 
 ```plaintext
-"Create a new Python file at packages/tta-dev-primitives/examples/hello_cline.py
+"Create a new Python file at platform/primitives/examples/hello_cline.py
 that demonstrates basic primitive usage. Include:
 1. Import statements
 2. Create a simple workflow
@@ -274,12 +274,12 @@ User: "Yes, please"
 Copilot: "I've analyzed the codebase. Here's the Cline task:
 
 @cline Please add comprehensive type hints to all primitives in
-packages/tta-dev-primitives/src/tta_dev_primitives/:
+platform/primitives/src/tta_dev_primitives/:
 - Add parameter types
 - Add return types
 - Use modern Python 3.11+ syntax (X | None instead of Optional[X])
 - Follow TTA.dev patterns in base.py
-- Verify with: uvx pyright packages/tta-dev-primitives/
+- Verify with: uvx pyright platform/primitives/
 - Files to update: [list of 15 files]
 
 Start with core/ directory, then recovery/, performance/, etc."
@@ -415,7 +415,7 @@ cline task status
 
 ```bash
 # Pipe file content
-cat packages/tta-dev-primitives/src/cache.py | \
+cat platform/primitives/src/cache.py | \
   cline task send "Add comprehensive docstrings to this code"
 
 # Pipe git diff

@@ -280,9 +280,9 @@ db = SupabasePrimitive(url=SUPABASE_URL, key=SUPABASE_KEY)
 
 ## 📚 Related Documentation
 
-- **SQLitePrimitive API:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py)
-- **SupabasePrimitive API:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/supabase_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/supabase_primitive.py)
-- **Integration Tests:** [`packages/tta-dev-primitives/tests/test_integrations.py`](../../packages/tta-dev-primitives/tests/test_integrations.py)
+- **SQLitePrimitive API:** [`platform/primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py`](../../platform/primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py)
+- **SupabasePrimitive API:** [`platform/primitives/src/tta_dev_primitives/integrations/supabase_primitive.py`](../../platform/primitives/src/tta_dev_primitives/integrations/supabase_primitive.py)
+- **Integration Tests:** [`platform/primitives/tests/test_integrations.py`](../../platform/primitives/tests/test_integrations.py)
 - **Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)
 
 ---

@@ -49,7 +49,7 @@ from tta_dev_primitives.performance import MemoryPrimitive, InMemoryStore, creat
 
 ### 2. Package README.md Section Added ✅
 
-**Location:** `/home/thein/repos/TTA.dev/packages/tta-dev-primitives/README.md`
+**Location:** `/home/thein/repos/TTA.dev/platform/primitives/README.md`
 
 **Changes:**
 - Added "Memory Primitives" section after "Performance Optimization"
@@ -91,7 +91,7 @@ from tta_dev_primitives.performance import MemoryPrimitive, InMemoryStore, creat
 
 **Examples Table Entry:**
 ```markdown
-| [**Memory Workflow**](packages/tta-dev-primitives/examples/memory_workflow.py) | Conversational Memory + Search | Multi-turn conversations with context |
+| [**Memory Workflow**](platform/primitives/examples/memory_workflow.py) | Conversational Memory + Search | Multi-turn conversations with context |
 ```
 
 **Lines Added:** ~50 lines including complete working example
@@ -102,7 +102,7 @@ from tta_dev_primitives.performance import MemoryPrimitive, InMemoryStore, creat
 
 ### Files Updated
 - **PRIMITIVES_CATALOG.md** - Core primitives reference catalog
-- **packages/tta-dev-primitives/README.md** - Package documentation
+- **platform/primitives/README.md** - Package documentation
 - **GETTING_STARTED.md** - User onboarding guide
 
 ### Documentation Added
@@ -141,7 +141,7 @@ from tta_dev_primitives.performance import MemoryPrimitive, InMemoryStore, creat
 5. Follow link to detailed docs
 
 **Path 3: Package README**
-1. Explore packages/tta-dev-primitives/
+1. Explore platform/primitives/
 2. Read README.md
 3. Find Memory Primitives section
 4. See both in-memory and Redis examples
@@ -407,7 +407,7 @@ These can be addressed in a separate documentation formatting pass if desired.
 
 **Files Updated:**
 - `/home/thein/repos/TTA.dev/PRIMITIVES_CATALOG.md`
-- `/home/thein/repos/TTA.dev/packages/tta-dev-primitives/README.md`
+- `/home/thein/repos/TTA.dev/platform/primitives/README.md`
 - `/home/thein/repos/TTA.dev/GETTING_STARTED.md`
 - `/home/thein/repos/TTA.dev/logseq/journals/2025_11_03.md`
 

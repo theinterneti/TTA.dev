@@ -6,7 +6,7 @@ status: active
 related:
   - docs/integration/keploy-integration.md
   - docs/integration/observability-integration.md
-  - packages/tta-dev-primitives/README.md
+  - platform/primitives/README.md
 ---
 
 # Gemini CLI GitHub Actions Integration

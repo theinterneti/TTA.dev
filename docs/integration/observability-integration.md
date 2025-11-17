@@ -948,8 +948,8 @@ class ObservabilityConfig:
 
 ## Related Documentation
 
-- **Package README:** [`packages/tta-observability-integration/README.md`](../../packages/tta-observability-integration/README.md)
-- **Core Observability:** [`packages/tta-dev-primitives/src/tta_dev_primitives/observability/`](../../packages/tta-dev-primitives/src/tta_dev_primitives/observability/)
+- **Package README:** [`platform/observability/README.md`](../../platform/observability/README.md)
+- **Core Observability:** [`platform/primitives/src/tta_dev_primitives/observability/`](../../platform/primitives/src/tta_dev_primitives/observability/)
 - **Architecture:** [`docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md`](../architecture/COMPONENT_INTEGRATION_ANALYSIS.md)
 - **Monitoring Dashboard:** [`WEEK1_MONITORING_DASHBOARD.md`](../../WEEK1_MONITORING_DASHBOARD.md)
 

@@ -17,7 +17,7 @@ Built **MemoryPrimitive** with hybrid architecture (in-memory fallback + optiona
 ## What We Built
 
 ### 1. InMemoryStore (~150 lines)
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/performance/memory.py`
+**File:** `platform/primitives/src/tta_dev_primitives/performance/memory.py`
 
 - OrderedDict-based LRU cache
 - Keyword search (substring matching)
@@ -55,7 +55,7 @@ results = await memory.search(query, limit=5)
 ```
 
 ### 3. Tests (19 tests, all passing ✅)
-**File:** `packages/tta-dev-primitives/tests/performance/test_memory.py`
+**File:** `platform/primitives/tests/performance/test_memory.py`
 
 **Coverage:**
 - InMemoryStore: LRU eviction, access order, search, clear, keys
@@ -64,12 +64,12 @@ results = await memory.search(query, limit=5)
 
 **Run:**
 ```bash
-uv run pytest packages/tta-dev-primitives/tests/performance/test_memory.py -v
+uv run pytest platform/primitives/tests/performance/test_memory.py -v
 # Result: 19 passed in 10.64s
 ```
 
 ### 4. Example (memory_workflow.py)
-**File:** `packages/tta-dev-primitives/examples/memory_workflow.py`
+**File:** `platform/primitives/examples/memory_workflow.py`
 
 **Demonstrates:**
 - Multi-turn conversation with context storage
@@ -79,12 +79,12 @@ uv run pytest packages/tta-dev-primitives/tests/performance/test_memory.py -v
 
 **Run:**
 ```bash
-uv run python packages/tta-dev-primitives/examples/memory_workflow.py
+uv run python platform/primitives/examples/memory_workflow.py
 # Works immediately - no Docker, no setup!
 ```
 
 ### 5. Documentation
-**File:** `packages/tta-dev-primitives/docs/memory/README.md`
+**File:** `platform/primitives/docs/memory/README.md`
 
 **Includes:**
 - Quick start (zero setup)
@@ -177,10 +177,10 @@ All external integrations should follow this pattern to ensure accessibility.
 ## Files Created/Modified
 
 ### Created:
-1. `packages/tta-dev-primitives/src/tta_dev_primitives/performance/memory.py` (~330 lines)
-2. `packages/tta-dev-primitives/tests/performance/test_memory.py` (~215 lines)
-3. `packages/tta-dev-primitives/examples/memory_workflow.py` (~130 lines)
-4. `packages/tta-dev-primitives/docs/memory/README.md` (~350 lines)
+1. `platform/primitives/src/tta_dev_primitives/performance/memory.py` (~330 lines)
+2. `platform/primitives/tests/performance/test_memory.py` (~215 lines)
+3. `platform/primitives/examples/memory_workflow.py` (~130 lines)
+4. `platform/primitives/docs/memory/README.md` (~350 lines)
 
 ### Modified:
 1. `docs/architecture/REDIS_MEMORY_SPIKE.md` - Added experiment results

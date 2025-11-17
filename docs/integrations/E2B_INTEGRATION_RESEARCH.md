@@ -22,8 +22,8 @@
 
 ### Key Files
 
-- **Primitive:** `packages/tta-dev-primitives/src/tta_dev_primitives/integrations/e2b_primitive.py`
-- **Tests:** `packages/tta-dev-primitives/tests/integrations/test_e2b_integration.py`
+- **Primitive:** `platform/primitives/src/tta_dev_primitives/integrations/e2b_primitive.py`
+- **Tests:** `platform/primitives/tests/integrations/test_e2b_integration.py`
 - **Documentation:** `E2B_PHASE1_COMPLETE.md`
 
 ### API Discovery
@@ -865,10 +865,10 @@ class SecureCodeExecutor(E2BCodeExecutionPrimitive):
 
 **Deliverables:**
 
-- `packages/tta-dev-primitives/src/tta_dev_primitives/execution/e2b_code_execution.py`
-- `packages/tta-dev-primitives/tests/execution/test_e2b_code_execution.py` (comprehensive, not minimal)
-- `packages/tta-dev-primitives/tests/integration/test_e2b_real.py` (full coverage!)
-- `packages/tta-dev-primitives/examples/e2b_code_execution.py`
+- `platform/primitives/src/tta_dev_primitives/execution/e2b_code_execution.py`
+- `platform/primitives/tests/execution/test_e2b_code_execution.py` (comprehensive, not minimal)
+- `platform/primitives/tests/integration/test_e2b_real.py` (full coverage!)
+- `platform/primitives/examples/e2b_code_execution.py`
 - `docs/integrations/E2B_CODE_EXECUTION.md`
 
 **Estimated Cost:** $0 ✅
@@ -895,9 +895,9 @@ class SecureCodeExecutor(E2BCodeExecutionPrimitive):
 
 **Deliverables:**
 
-- `packages/tta-dev-primitives/src/tta_dev_primitives/execution/sandbox_pool.py`
-- `packages/tta-dev-primitives/src/tta_dev_primitives/execution/session_rotator.py`
-- `packages/tta-dev-primitives/src/tta_dev_primitives/execution/usage_tracker.py`
+- `platform/primitives/src/tta_dev_primitives/execution/sandbox_pool.py`
+- `platform/primitives/src/tta_dev_primitives/execution/session_rotator.py`
+- `platform/primitives/src/tta_dev_primitives/execution/usage_tracker.py`
 - Template configuration in `templates/e2b-tta-dev/`
 
 **Estimated Cost:** $0 ✅
@@ -921,8 +921,8 @@ class SecureCodeExecutor(E2BCodeExecutionPrimitive):
 
 **Deliverables:**
 
-- `packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/sandbox_orchestrator.py`
-- `packages/tta-dev-primitives/examples/multi_agent_e2b.py`
+- `platform/primitives/src/tta_dev_primitives/orchestration/sandbox_orchestrator.py`
+- `platform/primitives/examples/multi_agent_e2b.py`
 
 **Estimated Cost:** $0 ✅
 
@@ -1118,7 +1118,7 @@ class SecureCodeExecutor(E2BCodeExecutionPrimitive):
 ### Related TTA.dev Components
 
 - **TTA Primitives Catalog**: `PRIMITIVES_CATALOG.md`
-- **Observability Integration**: `packages/tta-observability-integration/README.md`
+- **Observability Integration**: `platform/observability/README.md`
 - **MCP Servers**: `MCP_SERVERS.md`
 - **Production Patterns**: `docs/guides/PRODUCTION_INTEGRATIONS_QUICKREF.md`
 

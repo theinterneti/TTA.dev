@@ -372,7 +372,7 @@ for action in readiness.recommended_actions:
 ### Unit Tests
 
 ```python
-# packages/tta-dev-primitives/tests/knowledge/test_knowledge_base.py
+# platform/primitives/tests/knowledge/test_knowledge_base.py
 
 async def test_kb_search_by_tags_when_available():
     """Test KB search when LogSeq MCP is available."""

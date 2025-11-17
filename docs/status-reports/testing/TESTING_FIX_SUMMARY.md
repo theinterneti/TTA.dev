@@ -25,7 +25,7 @@ Tests were crashing WSL due to resource exhaustion. Root cause: Tests that spawn
 ## Solution Applied
 
 ### 1. Fixed Groq Import Issue
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/__init__.py`
+**File:** `platform/primitives/src/tta_dev_primitives/__init__.py`
 
 Made groq import optional to prevent collection errors:
 ```python
