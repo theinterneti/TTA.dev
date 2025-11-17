@@ -32,8 +32,13 @@
 | Pylance | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
 | Database Client | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
 | GitHub PR Tools | ✅ Yes | ✅ Yes | ⚠️ Different | ❌ No |
+| GitHub API | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| GitMCP | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
 | Sift (Docker) | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
 | LogSeq | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| Playwright | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| Sequential Thinking | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| Serena | ⚠️ Optional | ⚠️ Optional | ❌ No | ❌ No |
 
 **Why MCP isn't available in GitHub Actions:**
 
@@ -417,6 +422,208 @@ Create a new LogSeq page called "Meeting Notes 2025-11-01" with the summary from
 
 ---
 
+### 9. Playwright - Browser Automation
+
+**Purpose:** Headless browser automation with vision and PDF capabilities
+
+**Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `playwright_navigate` | Navigate to URL | Browser testing and automation |
+| `playwright_screenshot` | Capture screenshots | Visual testing |
+| `playwright_pdf` | Generate PDFs | Documentation generation |
+| `playwright_click` | Click elements | UI interaction |
+| `playwright_type` | Type text | Form filling |
+| `playwright_evaluate` | Execute JavaScript | DOM manipulation |
+
+**Example Usage:**
+
+```text
+@workspace Navigate to https://tta.dev and take a screenshot
+
+@workspace Fill out the form at https://example.com/contact
+```
+
+**Configuration:**
+
+- Location: `~/.config/mcp/mcp_settings.json`
+- Outputs saved to: `./browser-outputs/`
+- Browser: Chromium (headless)
+- Capabilities: Vision analysis, PDF generation
+- Timeout: 5000ms per action
+
+**Use Cases:**
+
+- Visual regression testing
+- Screenshot documentation
+- PDF report generation
+- Form automation
+- E2E testing validation
+- Web scraping for analysis
+
+---
+
+### 10. Sequential Thinking - Structured Reasoning
+
+**Purpose:** Enable step-by-step reasoning with thought persistence
+
+**Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `sequential_think` | Multi-step reasoning | Complex problem solving |
+| `sequential_record_thought` | Save reasoning step | Knowledge building |
+| `sequential_retrieve_thoughts` | Get thought history | Context recall |
+
+**Example Usage:**
+
+```text
+@workspace Use sequential thinking to analyze this architecture decision
+
+@workspace Break down this problem step-by-step
+```
+
+**Configuration:**
+
+- Location: `~/.config/mcp/mcp_settings.json`
+- Max history: 1000 thoughts
+- Persistent across sessions
+
+**Use Cases:**
+
+- Complex architecture decisions
+- Multi-step debugging
+- Design pattern analysis
+- Requirement decomposition
+- Root cause analysis
+
+---
+
+### 11. GitHub - Repository Integration
+
+**Purpose:** GitHub API integration for repository management
+
+**Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `github_create_issue` | Create GitHub issues | Bug tracking |
+| `github_create_pr` | Create pull requests | Code review workflow |
+| `github_list_issues` | List repository issues | Issue management |
+| `github_get_pr` | Get PR details | Review preparation |
+| `github_merge_pr` | Merge pull requests | Release workflow |
+| `github_create_project` | Create GitHub projects | Project planning |
+| `github_add_label` | Add labels to issues | Organization |
+
+**Example Usage:**
+
+```text
+@workspace Create a GitHub issue for the bug we just found
+
+@workspace Show me all open PRs in this repository
+
+@workspace Create a project board for the next sprint
+```
+
+**Configuration:**
+
+- Location: `~/.config/mcp/mcp_settings.json`
+- Requires: `GITHUB_TOKEN` environment variable
+- Toolsets: default, projects, labels, orgs
+- Docker-based for isolation
+
+**Use Cases:**
+
+- Automated issue creation from bugs
+- PR workflow automation
+- Project board management
+- Label organization
+- Organization management
+
+---
+
+### 12. GitMCP - Enhanced Git Operations
+
+**Purpose:** Advanced Git operations via web API
+
+**Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `gitmcp_analyze_diff` | Analyze commit diffs | Code review |
+| `gitmcp_search_commits` | Search commit history | Investigation |
+| `gitmcp_compare_branches` | Branch comparison | Release planning |
+| `gitmcp_file_history` | File change history | Blame analysis |
+
+**Example Usage:**
+
+```text
+@workspace Analyze the diff for the last 5 commits
+
+@workspace Find all commits that modified the retry logic
+```
+
+**Configuration:**
+
+- Location: `~/.config/mcp/mcp_settings.json`
+- URL: `https://gitmcp.io/theinterneti/TTA.dev`
+- No authentication required (public API)
+
+**Use Cases:**
+
+- Code review assistance
+- Historical analysis
+- Change impact assessment
+- Refactoring planning
+
+---
+
+### 13. Serena - Project Context Management
+
+**Purpose:** TTA.dev project-specific context and workflow management
+
+**Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `serena_get_context` | Retrieve project context | Understanding project state |
+| `serena_update_task` | Update task status | Task management |
+| `serena_list_tasks` | List project tasks | Planning |
+| `serena_get_dependencies` | Get task dependencies | Dependency tracking |
+
+**Example Usage:**
+
+```text
+@workspace Get the current project context
+
+@workspace Show me all tasks for the primitives package
+```
+
+**Configuration:**
+
+- Location: `~/.config/mcp/mcp_settings.json`
+- Status: Disabled by default (requires setup)
+- Project file: `.serena/project.yml`
+- Command: `uv run serena-mcp-server`
+
+**Setup Required:**
+
+1. Create `.serena/project.yml` in workspace
+2. Enable in MCP configuration
+3. Initialize project context
+
+**Use Cases:**
+
+- Project-aware task management
+- Context switching between packages
+- Dependency tracking
+- Workflow automation
+
+**Note:** Currently disabled - requires Serena package installation and configuration.
+
+---
+
 ## MCP Tools by Toolset
 
 ### Core Development Toolsets
@@ -432,12 +639,13 @@ Create a new LogSeq page called "Meeting Notes 2025-11-01" with the summary from
 
 | Toolset | MCP Tools Included |
 |---------|-------------------|
-| `#tta-agent-dev` | Context7, AI Toolkit |
+| `#tta-agent-dev` | Context7, AI Toolkit, Sequential Thinking |
 | `#tta-mcp-integration` | All available MCP tools |
-| `#tta-docs` | Context7 |
-| `#tta-pr-review` | GitHub PR tools |
-| `#tta-troubleshoot` | Sift, Grafana |
-| `#tta-full-stack` | Database, Grafana, Context7 |
+| `#tta-docs` | Context7, Sequential Thinking |
+| `#tta-pr-review` | GitHub PR tools, GitHub API, GitMCP |
+| `#tta-troubleshoot` | Sift, Grafana, Sequential Thinking |
+| `#tta-full-stack` | Database, Grafana, Context7, GitHub |
+| `#tta-browser` | Playwright (browser automation) |
 
 ---
 

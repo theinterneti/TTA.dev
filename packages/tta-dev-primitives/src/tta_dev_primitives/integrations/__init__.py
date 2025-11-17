@@ -4,20 +4,34 @@ This module provides TTA.dev primitives that wrap popular external services:
 - LLM providers (OpenAI, Anthropic, Ollama, Google AI Studio, Groq, OpenRouter, Hugging Face, Together.ai)
 - Databases (Supabase, SQLite)
 - Code Execution (E2B Sandboxes)
+- MCP Servers (GitHub, Context7, general MCP configuration)
 
 All integration primitives follow the WorkflowPrimitive interface for consistent
 composition and observability.
 """
 
 from tta_dev_primitives.integrations.anthropic_primitive import AnthropicPrimitive
+from tta_dev_primitives.integrations.context7_mcp_primitive import (
+    Context7MCPConfigValidator,
+    Context7MCPPrimitive,
+)
 from tta_dev_primitives.integrations.e2b_primitive import (
     CodeExecutionPrimitive,
     E2BPrimitive,
+)
+from tta_dev_primitives.integrations.github_mcp_primitive import (
+    GitHubMCPConfigValidator,
+    GitHubMCPPrimitive,
 )
 from tta_dev_primitives.integrations.google_ai_studio_primitive import (
     GoogleAIStudioPrimitive,
 )
 from tta_dev_primitives.integrations.huggingface_primitive import HuggingFacePrimitive
+from tta_dev_primitives.integrations.mcp_config import (
+    MCPConfigurationPrimitive,
+    MCPSetupGuidePrimitive,
+    detect_all_mcp_servers,
+)
 from tta_dev_primitives.integrations.ollama_primitive import OllamaPrimitive
 from tta_dev_primitives.integrations.openai_primitive import OpenAIPrimitive
 from tta_dev_primitives.integrations.openrouter_primitive import OpenRouterPrimitive
@@ -32,6 +46,7 @@ from tta_dev_primitives.integrations.supabase_primitive import SupabasePrimitive
 from tta_dev_primitives.integrations.together_ai_primitive import TogetherAIPrimitive
 
 __all__ = [
+    # LLM Providers
     "OpenAIPrimitive",
     "AnthropicPrimitive",
     "OllamaPrimitive",
@@ -40,8 +55,18 @@ __all__ = [
     "OpenRouterPrimitive",
     "HuggingFacePrimitive",
     "TogetherAIPrimitive",
+    # Databases
     "SupabasePrimitive",
     "SQLitePrimitive",
+    # Code Execution
     "CodeExecutionPrimitive",
     "E2BPrimitive",
+    # MCP Servers
+    "GitHubMCPPrimitive",
+    "GitHubMCPConfigValidator",
+    "Context7MCPPrimitive",
+    "Context7MCPConfigValidator",
+    "MCPConfigurationPrimitive",
+    "MCPSetupGuidePrimitive",
+    "detect_all_mcp_servers",
 ]

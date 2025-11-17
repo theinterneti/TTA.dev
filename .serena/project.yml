@@ -1,0 +1,101 @@
+name: TTA.dev-copilot
+version: 1.0.0
+description: Production-ready AI development toolkit with agentic primitives
+
+packages:
+  - name: tta-dev-primitives
+    path: packages/tta-dev-primitives
+    description: Core workflow primitives (Sequential, Parallel, Router, Retry, Cache)
+    status: active
+
+  - name: tta-observability-integration
+    path: packages/tta-observability-integration
+    description: OpenTelemetry integration with Prometheus and Grafana
+    status: active
+
+  - name: universal-agent-context
+    path: packages/universal-agent-context
+    description: Agent context management and orchestration
+    status: active
+
+  - name: keploy-framework
+    path: packages/keploy-framework
+    description: API testing framework
+    status: under-review
+
+  - name: python-pathway
+    path: packages/python-pathway
+    description: Python code analysis utilities
+    status: under-review
+
+tasks:
+  - id: dev-setup
+    name: Development environment setup
+    package: all
+    status: completed
+    priority: high
+
+  - id: testing
+    name: Run comprehensive test suite
+    package: all
+    status: in-progress
+    priority: high
+
+  - id: documentation
+    name: Update documentation and examples
+    package: all
+    status: in-progress
+    priority: medium
+
+  - id: mcp-integration
+    name: MCP server integration
+    package: universal-agent-context
+    status: in-progress
+    priority: high
+
+  - id: observability
+    name: Enhanced observability features
+    package: tta-observability-integration
+    status: in-progress
+    priority: medium
+
+workflows:
+  - name: code-quality
+    description: Run all quality checks
+    steps:
+      - ruff format .
+      - ruff check . --fix
+      - uvx pyright packages/
+      - uv run pytest -v
+
+  - name: release
+    description: Prepare for release
+    steps:
+      - Run code-quality workflow
+      - Update CHANGELOG.md
+      - Create git tag
+      - Build packages
+
+dependencies:
+  build:
+    - uv >= 0.1.0
+    - python >= 3.11
+    - docker
+    - node >= 18
+
+  runtime:
+    - opentelemetry-sdk
+    - prometheus-client
+    - pydantic >= 2.0
+
+  dev:
+    - pytest
+    - pytest-asyncio
+    - ruff
+    - pyright
+
+metadata:
+  repository: https://github.com/theinterneti/TTA.dev-copilot
+  documentation: https://tta.dev/docs
+  license: See individual package licenses
+  maintainer: TTA.dev Team

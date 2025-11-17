@@ -1,392 +1,783 @@
-# GitHub Copilot Instructions for TTA.dev
+# GitHub Copilot Instructions for TTA.dev# GitHub Copilot Instructions for TTA.dev
 
-This file provides workspace-level guidance for GitHub Copilot when working with TTA.dev.
 
----
 
-## 📍 CRITICAL: Know Your Context
+**Critical workspace guidance for AI coding in TTA.dev**This file provides workspace-level guidance for GitHub Copilot when working with TTA.dev.
 
-**This file is read by MULTIPLE Copilot contexts. Know which one YOU are:**
 
-### 🖥️ **Are you the VS Code Extension? (LOCAL)**
 
-- ✅ Running in developer's VS Code on local machine
-- ✅ Have access to: MCP servers, Copilot toolsets, local filesystem
-- ✅ Read sections marked: 🎯 (all), 🖥️ (local only)
+------
+
+
+
+## 🎯 Project Overview## 📍 CRITICAL: Know Your Context
+
+
+
+TTA.dev is a Python monorepo providing **agentic primitives** - composable building blocks for AI agent workflows with built-in observability, recovery patterns, and multi-provider LLM orchestration.**This file is read by MULTIPLE Copilot contexts. Know which one YOU are:**
+
+
+
+**Core Value:** Stop reinventing workflow orchestration. Use tested, composable primitives instead.### 🖥️ **Are you the VS Code Extension? (LOCAL)**
+
+
+
+---- ✅ Running in developer's VS Code on local machine
+
+- ✅ Have access to: VS Code API, workspace files, Git integration, local filesystem
+
+## ⚡ Critical Rules - Read First- ✅ Read sections marked: 🎯 (all), 🖥️ (local only)
+
 - ❌ Ignore sections marked: ☁️ (cloud only - not for you)
 
-### ☁️ **Are you the Coding Agent? (CLOUD/GitHub Actions)**
+### 1. Package Manager: uv (NOT pip)- ⚠️ **Note:** MCP servers are Cline/Claude-specific, not available to GitHub Copilot
 
-- ✅ Running in ephemeral GitHub Actions environment
-- ✅ Have access to: GitHub Actions tools, installed packages
-- ✅ Read sections marked: 🎯 (all), ☁️ (cloud only)
-- ❌ Ignore sections marked: 🖥️ (local only - not available to you)
+
+
+```bash### ☁️ **Are you the Coding Agent? (CLOUD/GitHub Actions)**
+
+# ✅ ALWAYS use uv
+
+uv add package-name                  # Add dependency- ✅ Running in ephemeral GitHub Actions environment
+
+uv sync --all-extras                 # Sync dependencies- ✅ Have access to: GitHub Actions tools, installed packages
+
+uv run pytest                        # Run tests- ✅ Read sections marked: 🎯 (all), ☁️ (cloud only)
+
+uv run python script.py              # Run Python- ❌ Ignore sections marked: 🖥️ (local only - not available to you)
+
 - ⚠️ **You do NOT have access to:** MCP servers, VS Code extensions, Copilot toolsets
 
-### 💻 **Are you the GitHub CLI? (TERMINAL)**
+# ❌ NEVER use pip
 
-- ✅ Running in terminal via `gh copilot`
+pip install ...  # WRONG### 💻 **Are you the GitHub CLI? (TERMINAL)**
+
+python -m pip ... # WRONG
+
+```- ✅ Running in terminal via `gh copilot`
+
 - ✅ Have access to: Terminal environment, GitHub API
-- ✅ Read sections marked: 🎯 (all)
+
+### 2. Python 3.11+ Type Hints- ✅ Read sections marked: 🎯 (all)
+
 - ❌ Ignore sections marked: 🖥️ (local) and ☁️ (cloud)
 
-**Not sure which you are?**
-- In VS Code with chat UI? → 🖥️ VS Code Extension
-- In GitHub Actions workflow logs? → ☁️ Coding Agent
+```python
+
+# ✅ CORRECT - Modern Python 3.11+**Not sure which you are?**
+
+def process(data: str | None) -> dict[str, Any]:- In VS Code with chat UI? → 🖥️ VS Code Extension
+
+    ...- In GitHub Actions workflow logs? → ☁️ Coding Agent
+
 - In terminal with `gh copilot`? → 💻 GitHub CLI
 
----
+# ❌ WRONG - Old style
 
-## 🎯 FOR ALL CONTEXTS: Project Overview
+from typing import Optional, Dict---
+
+def process(data: Optional[str]) -> Dict[str, Any]:
+
+    ...## 🎯 FOR ALL CONTEXTS: Project Overview
+
+```
 
 **TTA.dev** is a production-ready AI development toolkit providing composable agentic primitives for building reliable AI workflows.
 
+### 3. ALWAYS Use Primitives (Never Manual Orchestration)
+
 ### Core Concepts
 
-- **Agentic Primitives**: Reusable workflow components that compose via operators
-- **Type-Safe Composition**: `>>` (sequential) and `|` (parallel) operators
-- **Built-in Observability**: OpenTelemetry integration across all primitives
+```python
+
+# ✅ CORRECT - Use primitives- **Agentic Primitives**: Reusable workflow components that compose via operators
+
+from tta_dev_primitives import SequentialPrimitive- **Type-Safe Composition**: `>>` (sequential) and `|` (parallel) operators
+
+workflow = step1 >> step2 >> step3- **Built-in Observability**: OpenTelemetry integration across all primitives
+
 - **Recovery Patterns**: Retry, Fallback, Timeout, Compensation primitives
-- **Monorepo Structure**: Multiple focused packages in `/packages`
 
-### � Observability Persistence Check (Required for Local Sessions)
+# ❌ WRONG - Manual async code- **Monorepo Structure**: Multiple focused packages in `/packages`
 
-**🖥️ LOCAL ONLY:** If you're the VS Code Extension, verify observability infrastructure on session start:
+async def workflow():
+
+    result1 = await step1()### � Observability Persistence Check (Required for Local Sessions)
+
+    result2 = await step2(result1)
+
+    return await step3(result2)**🖥️ LOCAL ONLY:** If you're the VS Code Extension, verify observability infrastructure on session start:
+
+```
 
 ```bash
-./scripts/verify-and-setup-persistence.sh
+
+**Pattern Reference Table:**./scripts/verify-and-setup-persistence.sh
+
 ```
 
-**What this checks:**
-- ✅ Agent activity tracker (systemd service)
-- ✅ Docker containers (Jaeger, Prometheus, Grafana, OTLP, Pushgateway)
-- ✅ Restart policies configured
-- ✅ Git post-commit hook installed
+| Need | ❌ Don't Use | ✅ Use This Primitive |
 
-**If not set up:** The script will offer to run `./scripts/setup-persistence.sh` automatically.
+|------|-------------|----------------------|**What this checks:**
 
-**Why this matters:** TTA.dev's observability infrastructure must be running to track agent activity, capture metrics, and provide distributed tracing. Without it, you're working blind.
+| Sequential steps | Manual async chains | `SequentialPrimitive` or `>>` |- ✅ Agent activity tracker (systemd service)
 
-**Documentation:** See `scripts/PERSISTENCE_SETUP.md` for details.
+| Parallel execution | `asyncio.gather()` | `ParallelPrimitive` or `\|` |- ✅ Docker containers (Jaeger, Prometheus, Grafana, OTLP, Pushgateway)
 
----
+| Retry logic | try/except loops | `RetryPrimitive` |- ✅ Restart policies configured
 
-### �📋 TODO Management (Required for All Agents)
+| Timeouts | `asyncio.wait_for()` | `TimeoutPrimitive` |- ✅ Git post-commit hook installed
 
-**ALL agents must use the Logseq TODO management system:**
+| Fallback | Nested try/except | `FallbackPrimitive` |
 
-- **System Documentation:** `logseq/pages/TODO Management System.md`
-- **Daily Journals:** `logseq/journals/YYYY_MM_DD.md`
-- **Tag Convention:**
-  - `#dev-todo` - Development tasks (code, tests, CI/CD, infrastructure)
+| Caching | Manual dicts | `CachePrimitive` |**If not set up:** The script will offer to run `./scripts/setup-persistence.sh` automatically.
+
+
+
+---**Why this matters:** TTA.dev's observability infrastructure must be running to track agent activity, capture metrics, and provide distributed tracing. Without it, you're working blind.
+
+
+
+## 📦 Monorepo Structure**Documentation:** See `scripts/PERSISTENCE_SETUP.md` for details.
+
+
+
+```---
+
+TTA.dev-copilot/
+
+├── packages/                         # 3 production packages### �📋 TODO Management (Required for All Agents)
+
+│   ├── tta-dev-primitives/          # Core: Sequential, Parallel, Retry, Cache, etc.
+
+│   ├── tta-observability-integration/  # OpenTelemetry + Prometheus**ALL agents must use the Logseq TODO management system:**
+
+│   └── keploy-framework/            # API testing (under review)
+
+├── pyproject.toml                   # Workspace config (NOT a package)- **System Documentation:** `logseq/pages/TODO Management System.md`
+
+├── scripts/                         # Automation scripts- **Daily Journals:** `logseq/journals/YYYY_MM_DD.md`
+
+└── tests/integration/               # Cross-package tests- **Tag Convention:**
+
+```  - `#dev-todo` - Development tasks (code, tests, CI/CD, infrastructure)
+
   - `#user-todo` - User/agent tasks (learning, onboarding, examples)
 
-**Agent Requirements:**
+**Active Packages (use these):**
+
+- `tta-dev-primitives` - Workflow primitives**Agent Requirements:**
+
+- `tta-observability-integration` - Tracing/metrics
 
 1. **Add TODOs:** When creating work items, add to today's journal with proper tags/properties
-2. **Update Status:** Mark tasks as DOING when starting, DONE when complete
-3. **Link Context:** Use `related::` property to link Logseq pages
+
+**Under Review (may be archived):**2. **Update Status:** Mark tasks as DOING when starting, DONE when complete
+
+- `keploy-framework` - Minimal implementation, unclear value3. **Link Context:** Use `related::` property to link Logseq pages
+
 4. **Document Blockers:** Use `blocked::` and `blocker::` properties
-5. **Daily Review:** Check TODO dashboards before/after work sessions
 
-**Properties to Use:**
+---5. **Daily Review:** Check TODO dashboards before/after work sessions
 
-```markdown
+
+
+## 🔄 Standard Workflow Patterns**Properties to Use:**
+
+
+
+### Pattern 1: Sequential Processing```markdown
+
 - TODO [Task] #dev-todo
-  type:: implementation | testing | documentation | infrastructure
-  priority:: high | medium | low
+
+```python  type:: implementation | testing | documentation | infrastructure
+
+from tta_dev_primitives import WorkflowContext  priority:: high | medium | low
+
   package:: [package-name]
-  related:: [[Page Reference]]
-  status:: not-started | in-progress | blocked | waiting
-```
+
+# Define steps  related:: [[Page Reference]]
+
+async def validate(data, ctx): ...  status:: not-started | in-progress | blocked | waiting
+
+async def process(data, ctx): ...```
+
+async def save(data, ctx): ...
 
 **See:** `logseq/ADVANCED_FEATURES.md` for complete Logseq usage guide.
 
----
+# Compose with >> operator
 
-## 🎯 FOR ALL CONTEXTS: Monorepo Structure
+workflow = validate >> process >> save---
 
-### Package Architecture
+
+
+# Execute## 🎯 FOR ALL CONTEXTS: Monorepo Structure
+
+context = WorkflowContext(trace_id="req-123")
+
+result = await workflow.execute(input_data, context)### Package Architecture
+
+```
 
 ```text
-TTA.dev/
+
+### Pattern 2: Parallel + AggregationTTA.dev/
+
 ├── packages/
-│   ├── tta-dev-primitives/          # Core workflow primitives (START HERE)
-│   ├── tta-observability-integration/  # OpenTelemetry + Prometheus
+
+```python│   ├── tta-dev-primitives/          # Core workflow primitives (START HERE)
+
+from tta_dev_primitives import ParallelPrimitive│   ├── tta-observability-integration/  # OpenTelemetry + Prometheus
+
 │   ├── universal-agent-context/      # Agent context management
-│   ├── keploy-framework/             # API testing framework
-│   └── python-pathway/               # Python analysis utilities
-├── docs/                             # Documentation
-├── scripts/                          # Automation scripts
-└── tests/                            # Integration tests
+
+# Run multiple LLMs concurrently│   ├── keploy-framework/             # API testing framework
+
+workflow = (│   └── python-pathway/               # Python analysis utilities
+
+    input_formatter >>├── docs/                             # Documentation
+
+    (gpt4_mini | claude_haiku | gemini_flash) >>  # Parallel├── scripts/                          # Automation scripts
+
+    best_response_selector└── tests/                            # Integration tests
+
+)```
+
 ```
 
 ### When to Use Which Package
 
+### Pattern 3: Resilient API Call
+
 | Task | Package | Files to Focus On |
-|------|---------|------------------|
-| Creating new workflow primitives | `tta-dev-primitives` | `src/tta_dev_primitives/core/`, `examples/` |
-| Adding recovery patterns | `tta-dev-primitives` | `src/tta_dev_primitives/recovery/` |
-| Adding observability | `tta-observability-integration` | `src/observability_integration/primitives/` |
-| Agent coordination | `universal-agent-context` | `src/universal_agent_context/` |
-| API testing | `keploy-framework` | `src/keploy_framework/` |
+
+```python|------|---------|------------------|
+
+from tta_dev_primitives.recovery import (| Creating new workflow primitives | `tta-dev-primitives` | `src/tta_dev_primitives/core/`, `examples/` |
+
+    RetryPrimitive, | Adding recovery patterns | `tta-dev-primitives` | `src/tta_dev_primitives/recovery/` |
+
+    TimeoutPrimitive, | Adding observability | `tta-observability-integration` | `src/observability_integration/primitives/` |
+
+    FallbackPrimitive| Agent coordination | `universal-agent-context` | `src/universal_agent_context/` |
+
+)| API testing | `keploy-framework` | `src/keploy_framework/` |
+
 | Python code analysis | `python-pathway` | `src/python_pathway/` |
 
----
+# Layer protections
 
-## Key Patterns & Best Practices
+reliable_api = (---
 
-### 1. Workflow Primitive Composition
+    TimeoutPrimitive(api_call, timeout_seconds=30) >>
+
+    RetryPrimitive(max_retries=3, backoff="exponential") >>## Key Patterns & Best Practices
+
+    FallbackPrimitive(fallback=cached_response)
+
+)### 1. Workflow Primitive Composition
+
+```
 
 **Always use primitives** instead of manual async orchestration:
 
+---
+
 ```python
-# ✅ GOOD - Use primitive composition
+
+## 🧪 Testing Standards# ✅ GOOD - Use primitive composition
+
 from tta_dev_primitives import SequentialPrimitive, ParallelPrimitive
 
-workflow = (
-    input_processor >>
-    (fast_llm | slow_llm | cached_llm) >>
+### Requirements
+
+- **100% coverage** for all new codeworkflow = (
+
+- **pytest-asyncio** for async tests    input_processor >>
+
+- **MockPrimitive** for testing workflows    (fast_llm | slow_llm | cached_llm) >>
+
     aggregator
-)
 
-# ❌ BAD - Manual async orchestration
-async def workflow(input_data):
-    processed = await input_processor(input_data)
+### Example Test)
+
+
+
+```python# ❌ BAD - Manual async orchestration
+
+from tta_dev_primitives.testing import MockPrimitiveasync def workflow(input_data):
+
+import pytest    processed = await input_processor(input_data)
+
     results = await asyncio.gather(
-        fast_llm(processed),
-        slow_llm(processed),
-        cached_llm(processed)
-    )
-    return await aggregator(results)
-```
 
-### 2. WorkflowContext for State Management
+@pytest.mark.asyncio        fast_llm(processed),
 
-**Always pass state via WorkflowContext**:
+async def test_workflow():        slow_llm(processed),
 
-```python
+    # Mock expensive LLM call        cached_llm(processed)
+
+    mock_llm = MockPrimitive(return_value={"output": "test"})    )
+
+        return await aggregator(results)
+
+    # Test workflow```
+
+    workflow = step1 >> mock_llm >> step3
+
+    result = await workflow.execute(data, context)### 2. WorkflowContext for State Management
+
+
+
+    assert result["output"] == "processed_test"**Always pass state via WorkflowContext**:
+
+    assert mock_llm.call_count == 1
+
+``````python
+
 # ✅ GOOD - Use WorkflowContext
-from tta_dev_primitives import WorkflowContext
 
-context = WorkflowContext(
-    correlation_id="req-123",
-    data={"user_id": "user-789"}
+### Running Testsfrom tta_dev_primitives import WorkflowContext
+
+
+
+```bashcontext = WorkflowContext(
+
+# All tests    correlation_id="req-123",
+
+uv run pytest -v    data={"user_id": "user-789"}
+
 )
-result = await workflow.execute(context, input_data)
+
+# Specific packageresult = await workflow.execute(context, input_data)
+
+uv run pytest packages/tta-dev-primitives/tests/ -v
 
 # ❌ BAD - Global variables or function parameters
-USER_ID = "user-789"  # Don't use globals
-```
 
-### 3. Type Safety
+# With coverageUSER_ID = "user-789"  # Don't use globals
+
+uv run pytest --cov=packages --cov-report=html```
+
+
+
+# Available VS Code task: "🧪 Run All Tests"### 3. Type Safety
+
+```
 
 **Use Python 3.11+ type hints**:
 
+---
+
 ```python
-# ✅ GOOD - Modern type hints
+
+## 🔍 Observability Integration# ✅ GOOD - Modern type hints
+
 def process(data: str | None) -> dict[str, Any]:
-    ...
 
-class MyPrimitive(WorkflowPrimitive[InputModel, OutputModel]):
+### WorkflowContext (Required)    ...
+
+
+
+**Every primitive execution needs context:**class MyPrimitive(WorkflowPrimitive[InputModel, OutputModel]):
+
     async def _execute_impl(
-        self,
-        context: WorkflowContext,
+
+```python        self,
+
+from tta_dev_primitives import WorkflowContext        context: WorkflowContext,
+
         input_data: InputModel
-    ) -> OutputModel:
-        ...
 
-# ❌ BAD - Old type hints
-from typing import Optional, Dict
+# Create context with correlation ID    ) -> OutputModel:
 
-def process(data: Optional[str]) -> Dict[str, Any]:
-    ...
-```
+context = WorkflowContext(        ...
 
-### 4. Recovery Patterns
+    correlation_id="req-12345",
 
-**Use recovery primitives** instead of manual error handling:
+    data={"user_id": "user-789"}# ❌ BAD - Old type hints
 
-```python
-# ✅ GOOD - Use RetryPrimitive
+)from typing import Optional, Dict
+
+
+
+# Context propagates through entire workflowdef process(data: Optional[str]) -> Dict[str, Any]:
+
+result = await workflow.execute(input_data, context)    ...
+
+``````
+
+
+
+### OpenTelemetry Tracing### 4. Recovery Patterns
+
+
+
+**All primitives auto-create spans:****Use recovery primitives** instead of manual error handling:
+
+
+
+```python```python
+
+from observability_integration import initialize_observability# ✅ GOOD - Use RetryPrimitive
+
 from tta_dev_primitives.recovery import RetryPrimitive
 
-workflow = RetryPrimitive(
-    primitive=api_call,
-    max_retries=3,
-    backoff_strategy="exponential"
+# One-time setup
+
+initialize_observability(workflow = RetryPrimitive(
+
+    service_name="my-service",    primitive=api_call,
+
+    enable_prometheus=True    max_retries=3,
+
+)    backoff_strategy="exponential"
+
 )
 
-# ❌ BAD - Manual retry logic
-async def api_call_with_retry():
+# Primitives automatically create spans
+
+workflow = step1 >> step2 >> step3  # Each step gets a span# ❌ BAD - Manual retry logic
+
+```async def api_call_with_retry():
+
     for i in range(3):
-        try:
+
+---        try:
+
             return await api_call()
-        except Exception:
+
+## 💰 Cost Optimization Patterns        except Exception:
+
             await asyncio.sleep(2 ** i)
-    raise Exception("Failed after retries")
+
+### 1. Aggressive Caching    raise Exception("Failed after retries")
+
 ```
-
-### 5. Testing
-
-**Use MockPrimitive for testing**:
 
 ```python
-# ✅ GOOD - Use MockPrimitive
-from tta_dev_primitives.testing import MockPrimitive
+
+from tta_dev_primitives.performance import CachePrimitive### 5. Testing
+
+
+
+cached_llm = CachePrimitive(**Use MockPrimitive for testing**:
+
+    primitive=expensive_llm,
+
+    ttl_seconds=3600,      # 1 hour TTL```python
+
+    max_size=1000          # LRU eviction# ✅ GOOD - Use MockPrimitive
+
+)from tta_dev_primitives.testing import MockPrimitive
+
 import pytest
 
-@pytest.mark.asyncio
+# Typical savings: 40-60% cost reduction
+
+```@pytest.mark.asyncio
+
 async def test_workflow():
-    mock_llm = MockPrimitive(return_value={"output": "test"})
+
+### 2. Tiered Routing    mock_llm = MockPrimitive(return_value={"output": "test"})
+
     workflow = step1 >> mock_llm >> step3
-    result = await workflow.execute(context, input_data)
-    assert mock_llm.call_count == 1
 
-# ❌ BAD - Complex mocking
-@patch('module.llm_call')
-async def test_workflow(mock_llm):
-    mock_llm.return_value = {"output": "test"}
-    ...
+```python    result = await workflow.execute(context, input_data)
+
+from tta_dev_primitives.core import RouterPrimitive    assert mock_llm.call_count == 1
+
+
+
+router = RouterPrimitive(# ❌ BAD - Complex mocking
+
+    routes={@patch('module.llm_call')
+
+        "fast": gpt4_mini,      # Cheap, fastasync def test_workflow(mock_llm):
+
+        "quality": gpt4,        # Expensive, best    mock_llm.return_value = {"output": "test"}
+
+        "free": gemini_flash    # Free tier    ...
+
+    },```
+
+    router_fn=lambda data, ctx: "fast" if len(data) < 1000 else "quality"
+
+)---
+
 ```
-
----
 
 ## 🖥️ FOR VS CODE EXTENSION ONLY: Copilot Toolsets
 
+---
+
 **⚠️ Coding Agent:** This section is NOT for you. Toolsets are a VS Code feature not available in GitHub Actions.
+
+## 🚨 Common Mistakes to Avoid
 
 TTA.dev provides **focused toolsets** to optimize your workflow. Use the appropriate toolset hashtag in your Copilot chat:
 
+### ❌ Don't: Modify Core Primitives
+
 ### Core Development Toolsets
 
-| Toolset | When to Use | Tools Included |
-|---------|-------------|----------------|
-| `#tta-minimal` | Quick edits, reading code | search, read_file, edit, problems |
-| `#tta-package-dev` | Developing primitives | All dev tools + runTests, configurePythonEnvironment |
-| `#tta-testing` | Writing/running tests | runTests, edit, search, terminal, get_errors |
+```python
+
+# WRONG - Don't edit tta-dev-primitives source| Toolset | When to Use | Tools Included |
+
+class SequentialPrimitive:  # Editing framework code|---------|-------------|----------------|
+
+    def execute(self, ...):| `#tta-minimal` | Quick edits, reading code | search, read_file, edit, problems |
+
+        # Custom logic| `#tta-package-dev` | Developing primitives | All dev tools + runTests, configurePythonEnvironment |
+
+```| `#tta-testing` | Writing/running tests | runTests, edit, search, terminal, get_errors |
+
 | `#tta-observability` | Tracing/metrics work | Prometheus, Loki, observability tools + dev tools |
+
+### ✅ Do: Compose New Primitives
 
 ### Specialized Toolsets
 
-| Toolset | When to Use | Tools Included |
-|---------|-------------|----------------|
-| `#tta-agent-dev` | Building AI agents | Context7, AI Toolkit, agent development tools |
-| `#tta-mcp-integration` | MCP server work | MCP tools, semantic search, documentation |
-| `#tta-validation` | Running quality checks | Linting, type checking, validation scripts |
-| `#tta-pr-review` | Reviewing PRs | GitHub PR tools, diff analysis, changed files |
+```python
 
-**Full toolset documentation:** [`.vscode/README.md`](.vscode/README.md)
+# RIGHT - Create custom primitive via composition| Toolset | When to Use | Tools Included |
 
----
+class MyCustomWorkflow(WorkflowPrimitive):|---------|-------------|----------------|
 
-## Common Workflows
+    def __init__(self):| `#tta-agent-dev` | Building AI agents | Context7, AI Toolkit, agent development tools |
 
-### Adding a New Primitive
+        self.workflow = step1 >> step2 >> step3| `#tta-mcp-integration` | MCP server work | MCP tools, semantic search, documentation |
 
-1. **Create primitive class** in `packages/tta-dev-primitives/src/tta_dev_primitives/`
-   - Extend `WorkflowPrimitive[InputType, OutputType]`
-   - Implement `_execute_impl()` method
-   - Add type hints and docstrings
+    | `#tta-validation` | Running quality checks | Linting, type checking, validation scripts |
 
-2. **Add tests** in `packages/tta-dev-primitives/tests/`
+    async def execute(self, data, context):| `#tta-pr-review` | Reviewing PRs | GitHub PR tools, diff analysis, changed files |
+
+        return await self.workflow.execute(data, context)
+
+```**Full toolset documentation:** [`.vscode/README.md`](.vscode/README.md)
+
+
+
+### ❌ Don't: Use Global State---
+
+
+
+```python## Common Workflows
+
+# WRONG
+
+CURRENT_USER = None  # Global variable### Adding a New Primitive
+
+
+
+async def process(data, ctx):1. **Create primitive class** in `packages/tta-dev-primitives/src/tta_dev_primitives/`
+
+    global CURRENT_USER   - Extend `WorkflowPrimitive[InputType, OutputType]`
+
+    ...   - Implement `_execute_impl()` method
+
+```   - Add type hints and docstrings
+
+
+
+### ✅ Do: Use WorkflowContext2. **Add tests** in `packages/tta-dev-primitives/tests/`
+
    - Test success case
-   - Test error cases
-   - Test edge cases
-   - Aim for 100% coverage
 
-3. **Create example** in `packages/tta-dev-primitives/examples/`
+```python   - Test error cases
+
+# RIGHT   - Test edge cases
+
+context = WorkflowContext(data={"user_id": "user-789"})   - Aim for 100% coverage
+
+result = await workflow.execute(input_data, context)
+
+```3. **Create example** in `packages/tta-dev-primitives/examples/`
+
    - Show real-world usage
-   - Include comments explaining pattern
+
+---   - Include comments explaining pattern
+
    - Demonstrate composition
 
+## 📋 Quality Checklist (Before Commit)
+
 4. **Update documentation**
-   - Add to package README
+
+Run this before every commit:   - Add to package README
+
    - Update `PRIMITIVES_CATALOG.md`
-   - Update relevant guides in `docs/`
 
-**Use toolset:** `#tta-package-dev`
+```bash   - Update relevant guides in `docs/`
 
-### Adding Observability
+# Format code
+
+uv run ruff format .**Use toolset:** `#tta-package-dev`
+
+
+
+# Lint### Adding Observability
+
+uv run ruff check . --fix
 
 1. **Choose package:**
-   - Core tracing → `tta-observability-integration`
-   - Primitive-specific → `tta-dev-primitives/observability/`
 
-2. **Follow OpenTelemetry standards:**
-   - Use span names: `primitive_name.operation`
+# Type check   - Core tracing → `tta-observability-integration`
+
+uvx pyright packages/   - Primitive-specific → `tta-dev-primitives/observability/`
+
+
+
+# Run tests2. **Follow OpenTelemetry standards:**
+
+uv run pytest -v   - Use span names: `primitive_name.operation`
+
    - Add attributes for context
-   - Record events for key milestones
-   - Handle errors properly
 
-3. **Test with Prometheus:**
+# Or use VS Code task: "✅ Quality Check (All)"   - Record events for key milestones
+
+```   - Handle errors properly
+
+
+
+**Available in `.vscode/tasks.json`** - Use VS Code Tasks menu.3. **Test with Prometheus:**
+
    ```bash
-   docker-compose -f docker-compose.test.yml up -d
+
+---   docker-compose -f docker-compose.test.yml up -d
+
    # Run your code
-   # Check http://localhost:9090
+
+## 🔗 Key Documentation Files   # Check http://localhost:9090
+
    ```
 
-**Use toolset:** `#tta-observability`
+| File | Purpose |
 
-### Running Tests
+|------|---------|**Use toolset:** `#tta-observability`
 
-```bash
-# All tests
+| `../AGENTS.md` | Comprehensive agent guide (START HERE) |
+
+| `../PRIMITIVES_CATALOG.md` | Complete primitive reference |### Running Tests
+
+| `../README.md` | Project overview |
+
+| `../packages/tta-dev-primitives/README.md` | API documentation |```bash
+
+| `../packages/tta-dev-primitives/examples/` | Working code examples |# All tests
+
 uv run pytest -v
-
-# Specific package
-uv run pytest packages/tta-dev-primitives/tests/ -v
-
-# With coverage
-uv run pytest --cov=packages --cov-report=html
-
-# Integration tests
-uv run pytest tests/integration/ -v
-```
-
-**Use toolset:** `#tta-testing`
 
 ---
 
-## File-Type Specific Instructions
+# Specific package
 
-TTA.dev uses **path-based instruction files** in `.github/instructions/`:
+## 🎯 Quick Decision Guideuv run pytest packages/tta-dev-primitives/tests/ -v
 
-| File Pattern | Instruction File | Key Rules |
+
+
+**Should I create a new primitive?**# With coverage
+
+uv run pytest --cov=packages --cov-report=html
+
+✅ YES if:
+
+- Pattern is reusable across workflows# Integration tests
+
+- Has clear input/output typesuv run pytest tests/integration/ -v
+
+- Can compose with other primitives```
+
+
+
+❌ NO if:**Use toolset:** `#tta-testing`
+
+- One-off operation (just use a function)
+
+- Tightly coupled to specific workflow---
+
+
+
+**Which package does this belong in?**## File-Type Specific Instructions
+
+
+
+- Workflow patterns → `tta-dev-primitives`TTA.dev uses **path-based instruction files** in `.github/instructions/`:
+
+- Tracing/metrics → `tta-observability-integration`
+
+- API testing → `keploy-framework` (under review)| File Pattern | Instruction File | Key Rules |
+
 |--------------|-----------------|-----------|
-| `packages/**/src/**/*.py` | `package-source.instructions.md` | Production quality, full types, comprehensive tests |
+
+**How do I add a dependency?**| `packages/**/src/**/*.py` | `package-source.instructions.md` | Production quality, full types, comprehensive tests |
+
 | `**/tests/**/*.py` | `tests.instructions.md` | 100% coverage, pytest-asyncio, MockPrimitive usage |
-| `scripts/**/*.py` | `scripts.instructions.md` | Use primitives for orchestration, clear documentation |
-| `**/*.md`, `**/README.md` | `documentation.instructions.md` | Clear, actionable, with code examples |
-| `**` (all files) | `logseq-knowledge-base.instructions.md` | Use Logseq for TODOs, journals, and knowledge management |
+
+```bash| `scripts/**/*.py` | `scripts.instructions.md` | Use primitives for orchestration, clear documentation |
+
+# To specific package| `**/*.md`, `**/README.md` | `documentation.instructions.md` | Clear, actionable, with code examples |
+
+cd packages/tta-dev-primitives| `**` (all files) | `logseq-knowledge-base.instructions.md` | Use Logseq for TODOs, journals, and knowledge management |
+
+uv add package-name
 
 **Always check the relevant instruction file** before editing files of that type.
 
----
+# To workspace dev dependencies
+
+uv add --dev package-name---
+
+```
 
 ## Package Manager: uv (NOT pip)
 
-TTA.dev uses **uv** for dependency management:
-
-```bash
-# ✅ CORRECT - Use uv
-uv add package-name                  # Add dependency
-uv sync --all-extras                 # Sync all dependencies
-uv run pytest                        # Run command in venv
-uv run python script.py              # Run Python script
-
-# ❌ WRONG - Don't use pip
-pip install package-name             # Don't do this
-python -m pip install package-name   # Don't do this
-```
-
 ---
 
-## Code Quality Standards
+TTA.dev uses **uv** for dependency management:
 
-### Required Checks Before Commit
+## 🔍 Finding Code Examples
 
-1. **Format code:** `uv run ruff format .`
+```bash
+
+**Best approach:** Check `packages/tta-dev-primitives/examples/` first# ✅ CORRECT - Use uv
+
+uv add package-name                  # Add dependency
+
+```bashuv sync --all-extras                 # Sync all dependencies
+
+# List all examplesuv run pytest                        # Run command in venv
+
+ls packages/tta-dev-primitives/examples/uv run python script.py              # Run Python script
+
+
+
+# Common examples:# ❌ WRONG - Don't use pip
+
+basic_sequential.py       # Sequential workflowspip install package-name             # Don't do this
+
+parallel_execution.py     # Parallel processingpython -m pip install package-name   # Don't do this
+
+router_llm_selection.py   # Dynamic routing```
+
+error_handling_patterns.py # Retry, fallback, timeout
+
+```---
+
+
+
+---## Code Quality Standards
+
+
+
+**Last Updated:** November 14, 2025### Required Checks Before Commit
+
+**For:** GitHub Copilot (VS Code Extension and GitHub Actions)
+
+**Note:** This file is optimized for GitHub Copilot. For Cline/Claude, see `../.clinerules`1. **Format code:** `uv run ruff format .`
+
 2. **Lint code:** `uv run ruff check . --fix`
 3. **Type check:** `uvx pyright packages/`
 4. **Run tests:** `uv run pytest -v`

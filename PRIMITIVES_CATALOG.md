@@ -2,7 +2,7 @@
 
 **Complete Reference for All Workflow Primitives**
 
-**Last Updated:** November 7, 2025
+**Last Updated:** November 14, 2025
 
 ---
 
@@ -18,7 +18,9 @@ This catalog provides a complete reference for all TTA.dev workflow primitives, 
 4. [Orchestration Primitives](#orchestration-primitives) - Multi-agent coordination
 5. [Testing Primitives](#testing-primitives) - Testing utilities
 6. [Observability Primitives](#observability-primitives) - Tracing and metrics
-7. [ACE Framework Agents](#ace-framework-agents) - LLM-powered code generation and learning
+7. [Adaptive/Self-Improving Primitives](#adaptiveself-improving-primitives) - Learning from execution patterns
+8. [MCP Integration Primitives](#mcp-integration-primitives) - ⭐ NEW - Model Context Protocol workflows
+9. [ACE Framework Agents](#ace-framework-agents) - LLM-powered code generation and learning
 
 ---
 
@@ -754,6 +756,187 @@ Learned during Black Friday traffic spike. Higher retry count needed.
 - ✅ **Transparency**: Full visibility into what was learned
 - ✅ **Sharing**: Export strategies for other services
 - ✅ **Auditing**: Complete learning history in journals
+
+---
+
+## MCP Integration Primitives
+
+**Adaptive workflows for Model Context Protocol servers - auto-detect configuration, validate setup, and provide actionable guidance.**
+
+### GitHubMCPPrimitive
+
+**Type-safe interface for GitHub MCP operations with adaptive configuration detection.**
+
+**Import:**
+```python
+from tta_dev_primitives.integrations import GitHubMCPPrimitive
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/github_mcp_primitive.py`](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/github_mcp_primitive.py)
+
+**Usage:**
+```python
+github = GitHubMCPPrimitive()
+
+# Create issue
+result = await github.create_issue(
+    repo="theinterneti/TTA.dev",
+    title="Add new feature",
+    body="Description here",
+    labels=["enhancement"],
+    context=context
+)
+
+# Search code
+code_results = await github.search_code(
+    query="CachePrimitive language:python",
+    context=context
+)
+
+# List issues
+issues = await github.list_issues(
+    repo="theinterneti/TTA.dev",
+    state="open",
+    context=context
+)
+```
+
+**Configuration:**
+- Auto-detects VS Code Copilot or Cline configuration
+- Validates GITHUB_TOKEN from environment
+- Provides actionable error messages
+
+---
+
+### Context7MCPPrimitive
+
+**Query library documentation via Context7 MCP with adaptive configuration.**
+
+**Import:**
+```python
+from tta_dev_primitives.integrations import Context7MCPPrimitive
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/context7_mcp_primitive.py`](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/context7_mcp_primitive.py)
+
+**Usage:**
+```python
+context7 = Context7MCPPrimitive()
+
+# Resolve library ID
+library_id = await context7.resolve_library(
+    library_name="httpx",
+    context=context
+)
+
+# Get documentation
+docs = await context7.get_docs(
+    library="httpx",
+    topic="async client usage",
+    tokens=5000,
+    context=context
+)
+```
+
+**Configuration:**
+- Auto-detects VS Code Copilot or Cline configuration
+- No authentication required (public API)
+- Provides setup guidance when not configured
+
+---
+
+### MCPConfigurationPrimitive
+
+**Validate all MCP server configurations with comprehensive health check.**
+
+**Import:**
+```python
+from tta_dev_primitives.integrations import MCPConfigurationPrimitive
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_config.py`](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_config.py)
+
+**Usage:**
+```python
+validator = MCPConfigurationPrimitive()
+result = await validator.execute(None, context)
+
+print(f"Total servers: {result['total_servers']}")
+print(f"Valid: {result['valid_servers']}")
+print(f"Invalid: {result['invalid_servers']}")
+
+if not result["all_valid"]:
+    for server, issues in result["issues"].items():
+        print(f"\n{server} issues:")
+        for issue in issues:
+            print(f"  - {issue}")
+```
+
+**Features:**
+- Detects all configured MCP servers
+- Validates authentication requirements
+- Provides actionable fix suggestions
+- Adapts to new AI agents and servers
+
+---
+
+### MCPSetupGuidePrimitive
+
+**Generate contextual setup guide for specific MCP server.**
+
+**Import:**
+```python
+from tta_dev_primitives.integrations import MCPSetupGuidePrimitive
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_config.py`](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_config.py)
+
+**Usage:**
+```python
+guide = MCPSetupGuidePrimitive()
+result = await guide.execute(
+    {"server": "github", "agent": "copilot"},
+    context
+)
+
+print(result["guide"])
+# Outputs step-by-step setup instructions
+```
+
+**Features:**
+- Adaptive guidance based on agent type
+- Server-specific authentication instructions
+- Current, actionable steps
+- Prevents documentation drift
+
+---
+
+### detect_all_mcp_servers()
+
+**Utility function to detect all configured MCP servers.**
+
+**Import:**
+```python
+from tta_dev_primitives.integrations import detect_all_mcp_servers
+```
+
+**Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_config.py`](packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_config.py)
+
+**Usage:**
+```python
+servers = detect_all_mcp_servers()
+
+for server in servers:
+    print(f"{server.name} ({server.agent_type})")
+    print(f"  Config: {server.config_path}")
+    if server.requires_auth:
+        print(f"  Auth: {server.auth_env_var}")
+```
+
+**Returns:**
+- List of `MCPServerInfo` objects
+- Includes server name, agent type, config path
+- Authentication requirements
 
 ---
 

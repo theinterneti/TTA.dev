@@ -13,6 +13,15 @@ dependencies = [
     "tenacity>=8.2.3",
     "e2b-code-interpreter>=2.3.0",
     "google-generativeai>=0.8.5",
+    "anthropic>=0.72.0",
+    "ollama>=0.6.0",
+    "openai>=2.6.1",
+    "groq>=0.34.1",
+    "openrouter>=0.0.15",
+    "together>=1.5.30",
+    "aiosqlite>=0.21.0",
+    "supabase>=2.22.3",
+    "huggingface-hub>=1.1.4",
 ]
 
 [project.optional-dependencies]
