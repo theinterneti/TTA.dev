@@ -169,7 +169,7 @@ For a comprehensive quick start guide, including installation and your first wor
 - **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
 - **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
 - **[MCP Integration](MCP_SERVERS.md)** - Model Context Protocol guides
-- **[Cline Integration](CLINE_INTEGRATION_GUIDE.md)** - Enhanced Cline development experience
+- **[Workspace Organization](docs/WORKSPACE_ORGANIZATION.md)** - Repository structure and navigation guide
 
 ### Additional Resources
 
@@ -177,6 +177,7 @@ For a comprehensive quick start guide, including installation and your first wor
 - [PR Management Quick Reference](docs/guides/pr-management-quickref.md) - Quick commands and best practices
 - [LLM Cost Guide](docs/guides/llm-cost-guide.md) - Free vs paid model comparison, pricing analysis
 - [Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md) - Production patterns for 50-70% cost reduction
+- [Cline Integration](docs/guides/CLINE_INTEGRATION_GUIDE.md) - Enhanced Cline development experience
 - [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
 - [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
 - [LLM Selection Guide](docs/guides/llm-selection-guide.md)
