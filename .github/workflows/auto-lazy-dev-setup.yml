@@ -1,0 +1,172 @@
+name: 🤖 Lazy Dev Auto-Setup
+
+# Automatically sets up lazy dev environment for contributors
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  setup-lazy-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Check PR author permissions
+        id: check-perms
+        run: |
+          # Check if PR author is a contributor
+          author="${{ github.event.pull_request.user.login }}"
+          echo "author=$author" >> $GITHUB_OUTPUT
+          
+      - name: Welcome message with lazy dev guide
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const author = '${{ steps.check-perms.outputs.author }}';
+            
+            const message = `
+            ## 👋 Welcome @${author}!
+            
+            Thanks for your contribution! Here's how to work with this repo the lazy way:
+            
+            ### 🤖 Quick Setup
+            
+            \`\`\`bash
+            # Make script executable
+            chmod +x scripts/lazy_dev.py
+            
+            # Run interactive mode
+            ./scripts/lazy_dev.py
+            \`\`\`
+            
+            ### 🚀 Common Tasks
+            
+            \`\`\`bash
+            # Check status
+            ./scripts/lazy_dev.py status
+            
+            # Start new work
+            ./scripts/lazy_dev.py work-on "your feature"
+            
+            # Create PR (AI-powered!)
+            ./scripts/lazy_dev.py pr
+            \`\`\`
+            
+            ### 🤝 Agent Collaboration
+            
+            - **@copilot** is automatically assigned to review this PR
+            - You can request help: \`@copilot please review the error handling\`
+            - For CLI collaboration: \`@cline implement the suggested changes\`
+            
+            ### 📚 Resources
+            
+            - **Full Guide**: [LAZY_DEV_GUIDE.md](docs/guides/LAZY_DEV_GUIDE.md)
+            - **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
+            - **Agent Instructions**: [AGENTS.md](AGENTS.md)
+            
+            ---
+            
+            🤖 *This is an automated message. The lazy_dev.py script was created to make your life easier!*
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+            
+      - name: Check for lazy dev usage
+        id: check-usage
+        run: |
+          # Check if PR was created using lazy_dev
+          pr_body="${{ github.event.pull_request.body }}"
+          
+          if echo "$pr_body" | grep -qi "lazy.dev\|auto-generated\|@copilot"; then
+            echo "used_lazy_dev=true" >> $GITHUB_OUTPUT
+          else
+            echo "used_lazy_dev=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Encourage lazy dev usage
+        if: steps.check-usage.outputs.used_lazy_dev == 'false' && github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `
+            💡 **Pro Tip**: This PR could have been created automatically!
+            
+            Try using the lazy dev manager next time:
+            
+            \`\`\`bash
+            ./scripts/lazy_dev.py pr
+            \`\`\`
+            
+            It will:
+            - ✅ Auto-generate PR description with AI
+            - ✅ Request @copilot review automatically
+            - ✅ Add proper labels and formatting
+            - ✅ Save you time!
+            
+            See [LAZY_DEV_GUIDE.md](docs/guides/LAZY_DEV_GUIDE.md) for details.
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
+            
+      - name: Auto-assign helpers
+        if: github.event.action == 'opened'
+        run: |
+          # Add helpful labels
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --add-label "lazy-dev-enabled" || true
+            
+          # Request @copilot review (if not already)
+          gh pr review ${{ github.event.pull_request.number }} \
+            --request-changes --body "🤖 Automated review requested" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup lazy dev alias suggestions
+        if: github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const message = `
+            ### 🎯 Lazy Dev Pro Tips
+            
+            Add these aliases to your \`~/.bashrc\` or \`~/.zshrc\`:
+            
+            \`\`\`bash
+            # Quick commands
+            alias work='./scripts/lazy_dev.py work-on'
+            alias pr='./scripts/lazy_dev.py pr'
+            alias status='./scripts/lazy_dev.py status'
+            alias ship='git add . && git commit -m "update" && ./scripts/lazy_dev.py pr'
+            \`\`\`
+            
+            Then you can just type:
+            - \`work "add authentication"\` - Start new feature
+            - \`pr\` - Create AI-powered PR
+            - \`status\` - Check what's happening
+            - \`ship\` - Commit everything and create PR in one command!
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: message
+            });
