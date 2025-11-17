@@ -7,7 +7,7 @@
 # and not included in workspace until architectural decisions are made
 members = [
     "platform/primitives",
-    "packages/tta-dev-integrations",
+    "platform/integrations",
     "platform/observability",
     "packages/tta-observability-ui",
     "platform/agent-context",
