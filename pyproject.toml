@@ -8,7 +8,7 @@
 members = [
     "platform/primitives",
     "packages/tta-dev-integrations",
-    "packages/tta-observability-integration",
+    "platform/observability",
     "packages/tta-observability-ui",
     "packages/universal-agent-context",
     "packages/tta-documentation-primitives",

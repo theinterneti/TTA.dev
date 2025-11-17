@@ -2830,7 +2830,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3.0" },
     { name = "structlog", specifier = ">=24.1.0" },
     { name = "tta-dev-primitives", editable = "platform/primitives" },
-    { name = "tta-observability-integration", editable = "packages/tta-observability-integration" },
+    { name = "tta-observability-integration", editable = "platform/observability" },
     { name = "watchdog", specifier = ">=4.0.0" },
 ]
 provides-extras = ["dev", "ollama"]
@@ -2863,14 +2863,14 @@ requires-dist = [
     { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.0" },
     { name = "tta-dev-primitives", editable = "platform/primitives" },
-    { name = "tta-observability-integration", editable = "packages/tta-observability-integration" },
+    { name = "tta-observability-integration", editable = "platform/observability" },
 ]
 provides-extras = ["dev"]
 
 [[package]]
 name = "tta-observability-integration"
 version = "1.0.0"
-source = { editable = "packages/tta-observability-integration" }
+source = { editable = "platform/observability" }
 dependencies = [
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-prometheus" },
