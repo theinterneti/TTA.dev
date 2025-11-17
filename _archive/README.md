@@ -1,0 +1,81 @@
+# Archive Directory
+
+This directory contains deprecated, historical, and under-review content from the TTA.dev repository reorganization.
+
+**Created:** November 17, 2025  
+**Reorganization:** Issue #113  
+**Branch:** refactor/repo-reorg
+
+## Structure
+
+```
+_archive/
+├── e2b-debug-session-2025-11-07/    # Historical debugging session
+├── legacy-tta-game/                  # Legacy TTA game code
+├── packages/                         # Historical package versions
+├── packages-under-review/            # Packages pending architectural review
+├── phase3-status/                    # Phase 3 completion reports
+├── planning/                         # Historical planning documents
+├── reports/                          # Old status reports
+├── speckit-planning/                 # SpecKit planning (deprecated)
+├── status-reports/                   # Status reports archive
+└── status-reports-2025/              # 2025 status reports
+```
+
+## Contents
+
+### Legacy Code
+- **e2b-debug-session-2025-11-07/**: E2B debugging session from November 2025
+- **legacy-tta-game/**: Old TTA game codebase (pre-reorganization)
+
+### Packages
+- **packages/**: Historical package versions
+- **packages-under-review/**: 
+  - `keploy-framework` - Under architectural review (Issue #TBD)
+  - `python-pathway` - Under architectural review (Issue #TBD)
+  - `js-dev-primitives` - Placeholder, not implemented
+
+### Planning & Status
+- **planning/**: Historical planning documents (ACE TODO, Agent Adoption, etc.)
+- **phase3-status/**: Phase 3 completion reports
+- **reports/**: Old status and analysis reports
+- **speckit-planning/**: SpecKit planning (deprecated)
+- **status-reports/**: Historical status reports
+- **status-reports-2025/**: 2025 status reports
+
+## Packages Under Review
+
+The following packages are archived pending architectural decisions:
+
+| Package | Status | Reason | Decision Date |
+|---------|--------|--------|---------------|
+| keploy-framework | Under Review | No pyproject.toml, minimal implementation | TBD (by Nov 7, 2025) |
+| python-pathway | Under Review | Unclear use case, not documented | TBD (by Nov 7, 2025) |
+| js-dev-primitives | Placeholder | Directory structure only, no code | TBD (by Nov 14, 2025) |
+
+## Related Issues
+
+- **#113** - Repository Reorganization: Establish Platform Structure
+- **#114** - Create platform/shared/ utilities directory (deferred)
+- **#115** - Migrate and organize apps/examples/ (deferred)
+
+## Notes
+
+- Content in this directory is NOT included in the active workspace
+- Files are preserved for historical reference and potential future use
+- Do not import or depend on archived code in active packages
+- Review issues above before considering re-integration
+
+## Restoration
+
+If content from this archive needs to be restored:
+
+1. Create an issue describing the use case
+2. Review and update the code to current standards
+3. Add comprehensive tests and documentation
+4. Submit PR for review
+5. Add to active workspace in pyproject.toml
+
+---
+
+**Last Updated:** November 17, 2025
