@@ -16,6 +16,8 @@
 
 For more details on agent context and tooling, refer to [`AGENTS.md`](AGENTS.md).
 
+**Knowledge Base:** See [[TTA.dev/Integrations/MCP Servers]] for detailed integration documentation and troubleshooting.
+
 ---
 
 ## Available MCP Servers
