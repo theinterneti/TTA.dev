@@ -42,11 +42,11 @@
   - 8 instruction files from `.github/instructions/`
   - 5 system prompts (code review, test gen, docs, etc.)
   - Automatic frontmatter parsing
-  
+
 - ✅ **`setup_playground.py`** - Creates datasets and tests evaluators
   - 3 datasets with 6 total test cases
   - Live evaluator testing
-  
+
 - ✅ **`maintenance.py`** - Complete one-command setup
   - Runs all maintenance tasks
   - Provides dashboard links
@@ -242,10 +242,10 @@ Based on the test run:
 ### 2. **Run Evaluators on Real Traces**
    ```python
    from langfuse_integration import get_evaluator
-   
+
    # Get recent traces from your code
    code_eval = get_evaluator('code')
-   
+
    # Score them
    result = code_eval.evaluate(generated_code)
    code_eval.create_score(
@@ -270,14 +270,14 @@ Based on the test run:
 ### 5. **Create Custom Evaluators**
    ```python
    from langfuse_integration.evaluators import BaseEvaluator
-   
+
    class SecurityEvaluator(BaseEvaluator):
        def __init__(self):
            super().__init__(
                name="security-check",
                description="Checks for security issues"
            )
-       
+
        def evaluate(self, output, input_data=None):
            # Your security checks here
            return {"score": 0.9, "reasoning": "..."}

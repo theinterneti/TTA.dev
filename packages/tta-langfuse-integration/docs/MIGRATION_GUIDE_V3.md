@@ -61,7 +61,7 @@ with client.start_as_current_span(
         user_id="user-456",
         tags=["production"]
     )
-    
+
     with span.start_as_current_generation(
         name="llm_call",
         input={"prompt": "Hello"},
@@ -274,14 +274,14 @@ def function_with_error():
 ```python
 with client.start_as_current_span(name="user-query") as span:
     result = process_query(data)
-    
+
     span.score(
         name="response_quality",
         value=0.87,
         data_type="NUMERIC",
         comment="High quality response"
     )
-    
+
     span.score_trace(
         name="user_satisfaction",
         value=True,
@@ -321,7 +321,7 @@ with client.start_as_current_span(name="workflow") as span:
     with span.start_as_current_span(name="step1") as step1:
         # Do work
         pass
-    
+
     with span.start_as_current_span(name="step2") as step2:
         # Do work
         pass
@@ -497,5 +497,5 @@ langfuse = Langfuse(
 | Cost Field | `cost=0.003` | `cost_details={"total_cost": 0.003}` |
 | Observation Types | Limited | 9 types (`generation`, `agent`, `tool`, etc.) |
 
-**Migration Effort**: Medium (2-4 hours for typical codebase)  
+**Migration Effort**: Medium (2-4 hours for typical codebase)
 **Benefits**: Improved API, automatic cleanup, better type safety, more features

@@ -68,24 +68,24 @@ async def optimize_prompt(
     evaluator_type: str = "response"
 ):
     """Optimize a prompt using ACE + Langfuse.
-    
+
     Args:
         prompt_name: Name of base prompt in Langfuse
         focus_areas: List of improvement focuses (e.g., ["clarity", "conciseness"])
         test_dataset: Dataset name for testing
         evaluator_type: Which evaluator to use for scoring
-    
+
     Returns:
         dict with winner variation and scores
     """
     # 1. Get base prompt from Langfuse
     manager = PromptManager()
     base_prompt = manager.get_prompt(prompt_name)
-    
+
     # 2. Use ACE to generate variations
     ace = SelfLearningCodePrimitive()
     context = WorkflowContext(correlation_id=f"optimize-{prompt_name}")
-    
+
     variations_result = await ace.execute({
         "task": f"Generate 5 improved variations of this prompt",
         "base_prompt": base_prompt["prompt"],
@@ -96,13 +96,13 @@ async def optimize_prompt(
             "Optimize for LLM comprehension"
         ]
     }, context)
-    
+
     variations = variations_result["code_generated"]  # Parsed variations
-    
+
     # 3. Test each variation in playground
     dataset_mgr = DatasetManager()
     dataset = dataset_mgr.get_dataset(test_dataset)
-    
+
     results = []
     for i, variation in enumerate(variations):
         # Run on each test case
@@ -110,22 +110,22 @@ async def optimize_prompt(
         for test_case in dataset["items"]:
             # Apply variation to test case
             output = apply_prompt(variation, test_case["input"])
-            
+
             # Score with evaluator
             evaluator = get_evaluator(evaluator_type)
             score_result = evaluator.evaluate(output, test_case)
             scores.append(score_result["score"])
-        
+
         avg_score = sum(scores) / len(scores)
         results.append({
             "variation": variation,
             "avg_score": avg_score,
             "individual_scores": scores
         })
-    
+
     # 4. Select winner
     winner = max(results, key=lambda x: x["avg_score"])
-    
+
     # 5. Upload winner as new version
     if winner["avg_score"] > base_prompt.get("score", 0):
         manager.update_prompt(
@@ -136,7 +136,7 @@ async def optimize_prompt(
         print(f"✅ Uploaded improved version (score: {winner['avg_score']:.2f})")
     else:
         print(f"⚠️ No improvement found (best: {winner['avg_score']:.2f})")
-    
+
     return {
         "winner": winner,
         "all_results": results,

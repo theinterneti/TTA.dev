@@ -59,7 +59,7 @@ def main():
         },
         {
             "evaluator": "tests",
-            "input": 'import pytest\n\ndef test_addition():\n    assert 1 + 1 == 2\n\ndef test_negative():\n    assert -1 + 1 == 0',
+            "input": "import pytest\n\ndef test_addition():\n    assert 1 + 1 == 2\n\ndef test_negative():\n    assert -1 + 1 == 0",
             "name": "Simple test suite",
         },
     ]

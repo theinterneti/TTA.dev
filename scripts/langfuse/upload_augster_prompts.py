@@ -11,9 +11,20 @@ import sys
 from pathlib import Path
 
 # Add package to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "packages" / "tta-langfuse-integration" / "src"))
+sys.path.insert(
+    0,
+    str(
+        Path(__file__).parent.parent.parent
+        / "packages"
+        / "tta-langfuse-integration"
+        / "src"
+    ),
+)
 
-from langfuse_integration import create_prompt_from_instruction_file, get_langfuse_client
+from langfuse_integration import (
+    create_prompt_from_instruction_file,
+    get_langfuse_client,
+)
 
 
 def upload_augster_instructions() -> dict[str, any]:
@@ -25,7 +36,13 @@ def upload_augster_instructions() -> dict[str, any]:
     print("\n📤 Uploading Augster instruction prompts...")
 
     # Augster instruction directory
-    augster_dir = Path(__file__).parent.parent.parent / "packages" / "universal-agent-context" / ".augment" / "instructions"
+    augster_dir = (
+        Path(__file__).parent.parent.parent
+        / "packages"
+        / "universal-agent-context"
+        / ".augment"
+        / "instructions"
+    )
 
     instruction_files = [
         "augster-core-identity.instructions.md",
@@ -49,7 +66,11 @@ def upload_augster_instructions() -> dict[str, any]:
         try:
             # Use create_prompt_from_instruction_file helper
             # Extract name from filename (e.g., "augster-core-identity.instructions.md" -> "identity")
-            base_name = filename.replace("augster-core-", "").replace("augster-", "").replace(".instructions.md", "")
+            base_name = (
+                filename.replace("augster-core-", "")
+                .replace("augster-", "")
+                .replace(".instructions.md", "")
+            )
             result = create_prompt_from_instruction_file(
                 instruction_file_path=str(file_path),
                 name=f"augster-{base_name}",
@@ -98,7 +119,13 @@ def upload_domain_specific() -> dict[str, any]:
     """
     print("\n📤 Uploading domain-specific instruction prompts...")
 
-    augster_dir = Path(__file__).parent.parent.parent / "packages" / "universal-agent-context" / ".augment" / "instructions"
+    augster_dir = (
+        Path(__file__).parent.parent.parent
+        / "packages"
+        / "universal-agent-context"
+        / ".augment"
+        / "instructions"
+    )
 
     domain_files = [
         "narrative-engine.instructions.md",

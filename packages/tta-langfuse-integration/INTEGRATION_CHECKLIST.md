@@ -178,6 +178,6 @@ dependencies = [
 
 ---
 
-**Status**: Package complete, ready for installation and testing ✅  
-**Version**: 0.1.0  
+**Status**: Package complete, ready for installation and testing ✅
+**Version**: 0.1.0
 **Date**: 2024-11-14

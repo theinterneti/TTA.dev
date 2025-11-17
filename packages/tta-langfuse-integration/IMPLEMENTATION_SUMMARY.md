@@ -2,8 +2,8 @@
 
 ## ✅ Implementation Complete
 
-**Status**: Production-ready Langfuse v3.10.0 integration  
-**Updated**: 2024 (Latest API)  
+**Status**: Production-ready Langfuse v3.10.0 integration
+**Updated**: 2024 (Latest API)
 **Tests**: 5/5 passing ✓
 
 ---
@@ -18,12 +18,12 @@ A complete Langfuse integration package for TTA.dev that provides specialized LL
    - Environment-based configuration
    - Graceful degradation when disabled
    - Singleton pattern with proper lifecycle
-   
+
 2. **`primitives.py`** - LLM-aware workflow primitives (Updated to v3.10.0 API)
    - `LangfusePrimitive`: Manual tracing with context managers
    - `LangfuseObservablePrimitive`: Decorator-based tracing with `@observe`
    - Automatic token tracking, cost attribution, and error capture
-   
+
 3. **Comprehensive Tests** - Full coverage of initialization and primitives
    - Initialization without credentials
    - Disabled mode behavior
@@ -165,24 +165,24 @@ from langfuse import observe, get_client
 @observe(name="multi_step_workflow", as_type="agent")
 async def process_request(query: str, context: WorkflowContext):
     langfuse = get_client()
-    
+
     # Update trace with workflow context
     langfuse.update_current_trace(
         session_id=context.correlation_id,
         user_id="user-456",
         tags=["production"]
     )
-    
+
     # Nested generation
     response = await call_llm(query)
-    
+
     # Update with LLM-specific metadata
     langfuse.update_current_generation(
         model="gpt-4",
         usage_details={"input": 150, "output": 85, "total": 235},
         cost_details={"total_cost": 0.0047}
     )
-    
+
     return response
 ```
 
@@ -261,7 +261,7 @@ uv run pytest packages/tta-langfuse-integration/tests/ -v
    ```bash
    # Sign up at https://cloud.langfuse.com
    # Or self-host: https://langfuse.com/docs/deployment/self-host
-   
+
    export LANGFUSE_PUBLIC_KEY="pk-lf-..."
    export LANGFUSE_SECRET_KEY="sk-lf-..."
    ```
@@ -269,7 +269,7 @@ uv run pytest packages/tta-langfuse-integration/tests/ -v
 2. **Integrate with Real LLM Calls**
    ```python
    from langfuse.openai import OpenAI  # Drop-in replacement
-   
+
    client = OpenAI()  # Automatically traced!
    response = client.chat.completions.create(
        model="gpt-4",

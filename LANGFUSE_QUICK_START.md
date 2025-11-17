@@ -66,23 +66,23 @@ from langfuse import observe, get_client
 @observe(name="my_function", as_type="generation")
 async def process_llm_call(query: str, context: WorkflowContext):
     langfuse = get_client()
-    
+
     # Update trace with context
     langfuse.update_current_trace(
         session_id=context.correlation_id,
         metadata={"workflow_id": context.workflow_id}
     )
-    
+
     # Your LLM logic here
     response = await call_llm(query)
-    
+
     # Update with LLM metrics
     langfuse.update_current_generation(
         model="gpt-4",
         usage_details={"input": 100, "output": 50, "total": 150},
         cost_details={"total_cost": 0.003}
     )
-    
+
     return response
 ```
 
@@ -123,7 +123,7 @@ packages/tta-langfuse-integration/
 
 ### Documentation (8 files, 3,000+ lines)
 - `README.md` - Quick start
-- `QUICK_REFERENCE.md` - API reference  
+- `QUICK_REFERENCE.md` - API reference
 - `IMPLEMENTATION_SUMMARY.md` - What we built
 - `READY_FOR_PRODUCTION.md` - Production guide
 - `CHANGELOG.md` - Version history

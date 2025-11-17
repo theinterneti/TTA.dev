@@ -119,7 +119,9 @@ class LangfusePrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
                 ) as generation:
                     # Execute wrapped primitive
                     if self.wrapped_primitive:
-                        result = await self.wrapped_primitive.execute(input_data, context)
+                        result = await self.wrapped_primitive.execute(
+                            input_data, context
+                        )
                     else:
                         # If no primitive wrapped, just pass through
                         result = input_data
@@ -171,7 +173,9 @@ class LangfusePrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
                 raise
 
 
-class LangfuseObservablePrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
+class LangfuseObservablePrimitive(
+    InstrumentedPrimitive[dict[str, Any], dict[str, Any]]
+):
     """Primitive using Langfuse @observe decorator.
 
     Alternative to LangfusePrimitive that uses decorators for simpler syntax.

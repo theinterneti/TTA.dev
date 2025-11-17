@@ -157,7 +157,9 @@ class DatasetManager:
             return None
 
 
-def create_code_generation_dataset(manager: DatasetManager | None = None) -> dict[str, Any]:
+def create_code_generation_dataset(
+    manager: DatasetManager | None = None,
+) -> dict[str, Any]:
     """
     Create a dataset for testing code generation.
 
@@ -193,14 +195,18 @@ def create_code_generation_dataset(manager: DatasetManager | None = None) -> dic
             "metadata": {"difficulty": "easy", "topic": "recursion"},
         },
         {
-            "input": {"prompt": "Create a class for a binary search tree with insert and search methods"},
+            "input": {
+                "prompt": "Create a class for a binary search tree with insert and search methods"
+            },
             "expected_output": {
                 "code": "class BSTNode:\n    def __init__(self, value):\n        self.value = value\n        self.left = None\n        self.right = None\n\nclass BST:\n    def __init__(self):\n        self.root = None\n\n    def insert(self, value):\n        if not self.root:\n            self.root = BSTNode(value)\n        else:\n            self._insert_recursive(self.root, value)\n\n    def _insert_recursive(self, node, value):\n        if value < node.value:\n            if node.left is None:\n                node.left = BSTNode(value)\n            else:\n                self._insert_recursive(node.left, value)\n        else:\n            if node.right is None:\n                node.right = BSTNode(value)\n            else:\n                self._insert_recursive(node.right, value)"
             },
             "metadata": {"difficulty": "medium", "topic": "data-structures"},
         },
         {
-            "input": {"prompt": "Write a decorator that retries a function up to 3 times"},
+            "input": {
+                "prompt": "Write a decorator that retries a function up to 3 times"
+            },
             "expected_output": {
                 "code": "import functools\nimport time\n\ndef retry(max_attempts=3, delay=1):\n    def decorator(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            for attempt in range(max_attempts):\n                try:\n                    return func(*args, **kwargs)\n                except Exception as e:\n                    if attempt == max_attempts - 1:\n                        raise\n                    time.sleep(delay)\n            return None\n        return wrapper\n    return decorator"
             },
@@ -228,7 +234,9 @@ def create_code_generation_dataset(manager: DatasetManager | None = None) -> dic
     }
 
 
-def create_documentation_dataset(manager: DatasetManager | None = None) -> dict[str, Any]:
+def create_documentation_dataset(
+    manager: DatasetManager | None = None,
+) -> dict[str, Any]:
     """
     Create a dataset for testing documentation generation.
 
@@ -292,7 +300,9 @@ def create_documentation_dataset(manager: DatasetManager | None = None) -> dict[
     }
 
 
-def create_test_generation_dataset(manager: DatasetManager | None = None) -> dict[str, Any]:
+def create_test_generation_dataset(
+    manager: DatasetManager | None = None,
+) -> dict[str, Any]:
     """
     Create a dataset for testing test generation.
 

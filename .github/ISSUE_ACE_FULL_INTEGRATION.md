@@ -8,7 +8,7 @@ assignees: []
 
 Replace the current mock ACE implementation with full LLM-powered Generator, Reflector, and Curator agents as outlined in the ACE Integration Roadmap.
 
-**Current state:** Mock implementation (100% test pass rate, but limited learning)  
+**Current state:** Mock implementation (100% test pass rate, but limited learning)
 **Target:** Full three-agent architecture with sophisticated learning
 
 ## Background
@@ -98,17 +98,17 @@ class GeneratorAgent:
     def __init__(self, llm_provider="google", model="gemini-2.0-flash"):
         self.llm = LiteLLM(provider=llm_provider, model=model)
         self.playbook = ACEPlaybook()
-    
+
     async def generate(self, task: str, context: dict, strategies: list):
         # Build prompt with task + context + strategies
         prompt = self._build_generation_prompt(task, context, strategies)
-        
+
         # Call LLM
         result = await self.llm.generate(prompt)
-        
+
         # Track cost
         self._track_cost(result.usage)
-        
+
         return result.content
 ```
 
@@ -139,14 +139,14 @@ class ReflectorAgent:
             result=execution_result,
             context=context
         )
-        
+
         # Get LLM analysis
         analysis = await self.llm.generate(prompt)
-        
+
         # Extract patterns and strategies
         patterns = self._extract_patterns(analysis)
         new_strategies = self._identify_strategies(analysis)
-        
+
         return {
             "success": execution_result.get("success", False),
             "patterns": patterns,
@@ -178,19 +178,19 @@ class CuratorAgent:
     async def select_strategies(self, task: str, context: dict, max_strategies: int = 5):
         # Get all relevant strategies from playbook
         candidates = self.playbook.search(task, context)
-        
+
         # Use LLM to rank and select
         prompt = self._build_selection_prompt(task, context, candidates)
         ranking = await self.llm.generate(prompt)
-        
+
         # Return top strategies
         return self._parse_ranking(ranking, max_strategies)
-    
+
     async def refine_strategy(self, strategy: dict, feedback: dict):
         # Use LLM to improve strategy based on feedback
         prompt = self._build_refinement_prompt(strategy, feedback)
         refined = await self.llm.generate(prompt)
-        
+
         return self._parse_refined_strategy(refined)
 ```
 

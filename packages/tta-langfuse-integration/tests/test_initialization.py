@@ -21,24 +21,30 @@ def reset_langfuse():
     """Reset Langfuse state before each test."""
     # Clear environment variables
     old_env = {}
-    for key in ["LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY", "LANGFUSE_HOST", "LANGFUSE_ENABLED"]:
+    for key in [
+        "LANGFUSE_PUBLIC_KEY",
+        "LANGFUSE_SECRET_KEY",
+        "LANGFUSE_HOST",
+        "LANGFUSE_ENABLED",
+    ]:
         old_env[key] = os.environ.pop(key, None)
-    
+
     # Shutdown existing client
     shutdown_langfuse()
-    
+
     # Reset global state
     import langfuse_integration.initialization as init_module
+
     init_module._langfuse_client = None
     init_module._initialized = False
-    
+
     yield
-    
+
     # Restore environment
     for key, value in old_env.items():
         if value is not None:
             os.environ[key] = value
-    
+
     # Shutdown again
     shutdown_langfuse()
     init_module._langfuse_client = None

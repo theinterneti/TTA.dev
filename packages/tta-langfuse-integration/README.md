@@ -89,7 +89,7 @@ fast_llm = LangfusePrimitive(
 )
 
 premium_llm = LangfusePrimitive(
-    name="premium_model", 
+    name="premium_model",
     metadata={"provider": "openai", "model": "gpt-4"}
 )
 

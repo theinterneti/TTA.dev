@@ -6,6 +6,7 @@ members = [
     "packages/tta-dev-primitives",
     "packages/tta-observability-integration",
     "packages/keploy-framework",
+    "packages/tta-langfuse-integration",
 ]
 
 [tool.uv]

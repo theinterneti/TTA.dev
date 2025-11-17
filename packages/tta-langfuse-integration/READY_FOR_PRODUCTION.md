@@ -2,11 +2,11 @@
 
 ## ✅ Implementation Status: COMPLETE
 
-**Package**: `tta-langfuse-integration`  
-**Version**: 0.1.0  
-**Langfuse SDK**: v3.10.0 (latest stable)  
-**Tests**: 5/5 passing ✅  
-**Code Quality**: Formatted & linted ✅  
+**Package**: `tta-langfuse-integration`
+**Version**: 0.1.0
+**Langfuse SDK**: v3.10.0 (latest stable)
+**Tests**: 5/5 passing ✅
+**Code Quality**: Formatted & linted ✅
 **Documentation**: Comprehensive (7 files) ✅
 
 ---
@@ -294,9 +294,9 @@ Trace: my_llm_call
 3. **Test Integration**
    ```python
    from langfuse_integration import initialize_langfuse, LangfusePrimitive
-   
+
    initialize_langfuse()  # Should connect successfully
-   
+
    # Test with a simple primitive
    llm = LangfusePrimitive(name="test_call")
    result = await llm.execute(
@@ -310,7 +310,7 @@ Trace: my_llm_call
 1. **Integrate with Real LLMs**
    ```python
    from langfuse.openai import OpenAI  # Drop-in replacement
-   
+
    client = OpenAI()
    response = client.chat.completions.create(
        model="gpt-4",

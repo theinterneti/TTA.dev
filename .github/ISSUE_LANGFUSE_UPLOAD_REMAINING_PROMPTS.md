@@ -8,7 +8,7 @@ assignees: []
 
 Upload the remaining 12 prompts discovered in the prompt audit to complete Langfuse prompt library coverage.
 
-**Current state:** 13/25 prompts uploaded  
+**Current state:** 13/25 prompts uploaded
 **Target:** 25/25 prompts uploaded
 
 ## Prompts to Upload

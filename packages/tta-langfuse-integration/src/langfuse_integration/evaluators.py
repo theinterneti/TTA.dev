@@ -33,7 +33,9 @@ class BaseEvaluator:
         self.description = description
         self.client = client or get_langfuse_client()
 
-    def evaluate(self, output: str, input_data: dict[str, Any] | None = None) -> dict[str, Any]:
+    def evaluate(
+        self, output: str, input_data: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         Evaluate an LLM output.
 
@@ -109,7 +111,9 @@ class CodeQualityEvaluator(BaseEvaluator):
             client=client,
         )
 
-    def evaluate(self, output: str, input_data: dict[str, Any] | None = None) -> dict[str, Any]:
+    def evaluate(
+        self, output: str, input_data: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         Evaluate code quality.
 
@@ -193,7 +197,9 @@ class DocumentationEvaluator(BaseEvaluator):
             client=client,
         )
 
-    def evaluate(self, output: str, input_data: dict[str, Any] | None = None) -> dict[str, Any]:
+    def evaluate(
+        self, output: str, input_data: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         Evaluate documentation quality.
 
@@ -282,7 +288,9 @@ class TestCoverageEvaluator(BaseEvaluator):
             client=client,
         )
 
-    def evaluate(self, output: str, input_data: dict[str, Any] | None = None) -> dict[str, Any]:
+    def evaluate(
+        self, output: str, input_data: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         Evaluate test coverage and quality.
 
@@ -383,7 +391,9 @@ class ResponseQualityEvaluator(BaseEvaluator):
             client=client,
         )
 
-    def evaluate(self, output: str, input_data: dict[str, Any] | None = None) -> dict[str, Any]:
+    def evaluate(
+        self, output: str, input_data: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """
         Evaluate general response quality.
 

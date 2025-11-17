@@ -39,27 +39,27 @@ class WorkflowQualityEvaluator(BaseEvaluator):
             name="workflow-quality",
             description="Evaluates workflow execution completeness"
         )
-    
+
     def evaluate(self, output, input_data=None):
         score = 0.0
         issues = []
         strengths = []
-        
+
         # Check stage completeness
         if self._has_all_stages(output):
             score += 0.30
             strengths.append("All workflow stages present")
         else:
             issues.append("Missing workflow stages")
-        
+
         # Check task breakdown
         tasks = self._extract_tasks(output)
         if len(tasks) > 0 and self._tasks_are_actionable(tasks):
             score += 0.25
             strengths.append("Clear task breakdown")
-        
+
         # ... additional checks
-        
+
         return {
             "score": score,
             "reasoning": self._generate_reasoning(score, issues, strengths),

@@ -11,7 +11,15 @@ import sys
 from pathlib import Path
 
 # Add package to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "packages" / "tta-langfuse-integration" / "src"))
+sys.path.insert(
+    0,
+    str(
+        Path(__file__).parent.parent.parent
+        / "packages"
+        / "tta-langfuse-integration"
+        / "src"
+    ),
+)
 
 from langfuse_integration import PromptManager, get_langfuse_client
 
@@ -27,7 +35,13 @@ def upload_workflow_prompts() -> dict[str, any]:
     manager = PromptManager()
 
     # Workflow prompt files
-    workflow_dir = Path(__file__).parent.parent.parent / "packages" / "universal-agent-context" / ".augment" / "workflows"
+    workflow_dir = (
+        Path(__file__).parent.parent.parent
+        / "packages"
+        / "universal-agent-context"
+        / ".augment"
+        / "workflows"
+    )
 
     workflow_files = [
         "augster-axiomatic-workflow.prompt.md",

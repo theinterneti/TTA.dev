@@ -81,7 +81,7 @@ def upload_instruction_files() -> dict[str, any]:
             )
 
             if result.get("disabled"):
-                print(f"   ⚠️  Langfuse disabled, skipped")
+                print("   ⚠️  Langfuse disabled, skipped")
             else:
                 print(f"   ✅ Version: {result.get('version', 'N/A')}")
                 uploaded += 1
@@ -148,7 +148,7 @@ def upload_prompt_templates() -> dict[str, any]:
             )
 
             if result.get("disabled"):
-                print(f"   ⚠️  Langfuse disabled, skipped")
+                print("   ⚠️  Langfuse disabled, skipped")
             else:
                 print(f"   ✅ Version: {result.get('version', 'N/A')}")
                 uploaded += 1
@@ -173,7 +173,7 @@ def upload_system_prompts() -> dict[str, any]:
     """
     manager = PromptManager()
 
-    print(f"\n🤖 Uploading system prompts")
+    print("\n🤖 Uploading system prompts")
     print("=" * 60)
 
     system_prompts = [
@@ -229,7 +229,7 @@ When you need to use a tool, respond with: TOOL: tool_name(arguments)""",
             result = manager.create_prompt(**prompt_data)
 
             if result.get("disabled"):
-                print(f"   ⚠️  Langfuse disabled, skipped")
+                print("   ⚠️  Langfuse disabled, skipped")
             else:
                 print(f"   ✅ Version: {result.get('version', 'N/A')}")
                 uploaded += 1
@@ -279,12 +279,12 @@ def main():
     for category, stats in results.items():
         print(f"\n{category.title()}:")
         print(f"  ✅ Uploaded: {stats['uploaded']}/{stats['total']}")
-        if stats['failed'] > 0:
+        if stats["failed"] > 0:
             print(f"  ❌ Failed: {stats['failed']}")
 
-        total_uploaded += stats['uploaded']
-        total_failed += stats['failed']
-        total_all += stats['total']
+        total_uploaded += stats["uploaded"]
+        total_failed += stats["failed"]
+        total_all += stats["total"]
 
     print(f"\n{'=' * 60}")
     print(f"TOTAL: {total_uploaded}/{total_all} prompts uploaded")
