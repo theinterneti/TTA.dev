@@ -348,7 +348,7 @@ env | grep CLINE
 
 ```python
 # Provide clear, specific context
-@cline "In packages/tta-dev-primitives/src/tta_dev_primitives/performance/, implement a new cache primitive"
+@cline "In platform/primitives/src/tta_dev_primitives/performance/, implement a new cache primitive"
 
 # Use role-specific toolsets
 @workspace #tta-package-dev  # For development tasks
@@ -392,7 +392,7 @@ env | grep CLINE
 ```bash
 
 # Test Cline configuration
-cline "List all Python files in packages/tta-dev-primitives/src/"
+cline "List all Python files in platform/primitives/src/"
 
 # Test MCP integration
 cline "Use Context7 to search for documentation about primitives"

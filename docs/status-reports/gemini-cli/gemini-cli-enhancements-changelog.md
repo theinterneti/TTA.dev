@@ -190,7 +190,7 @@ Successfully implemented quality-first enhancements to Gemini CLI integration wi
 **Purpose:** Persistent architectural memory across sessions
 
 **Implementation:**
-1. Create `packages/universal-agent-context/src/universal_agent_context/mcp_server.py`
+1. Create `platform/agent-context/src/universal_agent_context/mcp_server.py`
 2. Expose memory primitives as MCP tools
 3. Add to workflow configuration
 4. Test cross-session memory

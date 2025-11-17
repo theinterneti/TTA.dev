@@ -142,7 +142,7 @@ logseq/journals/
 
 **Example in file:**
 ```markdown
-<!-- In packages/tta-dev-primitives/README.md -->
+<!-- In platform/primitives/README.md -->
 
 ## Advanced Features
 
@@ -166,7 +166,7 @@ TODO: Add example of streaming LLM responses with BufferPrimitive
      package:: tta-dev-primitives
      component:: examples
      related:: [[TTA Primitives/BufferPrimitive]]
-     source-file:: packages/tta-dev-primitives/README.md:345
+     source-file:: platform/primitives/README.md:345
      estimate:: 2 hours
      deliverables::
        - Code example with AsyncIterator
@@ -176,7 +176,7 @@ TODO: Add example of streaming LLM responses with BufferPrimitive
 
 2. **Add reference in markdown file:**
    ```markdown
-   <!-- In packages/tta-dev-primitives/README.md -->
+   <!-- In platform/primitives/README.md -->
 
    ## Advanced Features
 
@@ -277,7 +277,7 @@ Example:
 
 ## Final Implementation
 
-See: `packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py`
+See: `platform/primitives/src/tta_dev_primitives/performance/cache.py`
 
 Documentation: [[TTA Primitives/CachePrimitive]]
 ```

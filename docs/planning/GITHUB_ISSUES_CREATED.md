@@ -113,7 +113,7 @@
 
 - **[docs/observability/EXECUTIVE_SUMMARY.md](./docs/observability/EXECUTIVE_SUMMARY.md)** - Observability assessment
 - **[docs/observability/OBSERVABILITY_ASSESSMENT.md](./docs/observability/OBSERVABILITY_ASSESSMENT.md)** - Detailed assessment
-- **[packages/tta-observability-integration/](./packages/tta-observability-integration/)** - Package Augment worked on
+- **[platform/observability/](./platform/observability/)** - Package Augment worked on
 
 ---
 

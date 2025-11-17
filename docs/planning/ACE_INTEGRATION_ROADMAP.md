@@ -111,7 +111,7 @@ This document outlines the complete integration plan for replacing the current m
 2. **Create ACE Integration Package**
 
    ```
-   packages/tta-dev-primitives/src/tta_dev_primitives/ace/
+   platform/primitives/src/tta_dev_primitives/ace/
    ├── agents/
    │   ├── generator.py      # Code generation agent
    │   ├── reflector.py      # Result analysis agent

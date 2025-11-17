@@ -58,7 +58,7 @@ TTA.dev/
 │   │   └── documentation.instructions.md
 │   ├── ⚠️ workflows/                   # CI/CD (not agent-focused)
 │   │
-├── 📁 packages/tta-dev-primitives/  (EXCELLENT)
+├── 📁 platform/primitives/  (EXCELLENT)
 │   ├── ✅ AGENTS.md                     # Comprehensive agent guide
 │   ├── ✅ .github/copilot-instructions.md  # Detailed primitives guide
 │   ├── ✅ README.md                     # Package documentation
@@ -73,11 +73,11 @@ TTA.dev/
 │   │   ├── performance/                 # Cache
 │   │   └── observability/               # Logging, metrics
 │   │
-├── 📁 packages/tta-observability-integration/  (GOOD)
+├── 📁 platform/observability/  (GOOD)
 │   ├── ✅ README.md
 │   ├── ✅ src/observability_integration/primitives/
 │   │
-├── 📁 packages/universal-agent-context/  (STRONG)
+├── 📁 platform/agent-context/  (STRONG)
 │   ├── ✅ AGENTS.md                     # Agent-specific guide
 │   ├── ✅ .github/copilot-instructions.md
 │   │
@@ -111,7 +111,7 @@ graph TD
     D --> G[Discovers packages]
     E --> H[Should get workflow guidance]
 
-    G --> I[packages/tta-dev-primitives/]
+    G --> I[platform/primitives/]
     I --> J[✅ AGENTS.md - Excellent!]
     I --> K[✅ copilot-instructions.md]
     I --> L[✅ examples/]

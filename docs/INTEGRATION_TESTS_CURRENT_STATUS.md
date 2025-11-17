@@ -76,7 +76,7 @@
 ## 📊 Test Execution Results
 
 ```text
-packages/tta-dev-primitives/tests/adaptive/test_base.py
+platform/primitives/tests/adaptive/test_base.py
 ================================
 - 16 tests collected
 - 12 ERRORS (fixture failures - missing context_pattern)

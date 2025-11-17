@@ -122,8 +122,8 @@ Tests LLM-based classification (mocked):
 Tests package name inference from file paths:
 
 ```python
-"packages/tta-dev-primitives/src/core.py" → "tta-dev-primitives"
-"packages/tta-observability-integration/src/metrics.py" → "tta-observability-integration"
+"platform/primitives/src/core.py" → "tta-dev-primitives"
+"platform/observability/src/metrics.py" → "tta-observability-integration"
 "scripts/automation/tool.py" → "automation"
 "standalone.py" → "unknown"
 ```

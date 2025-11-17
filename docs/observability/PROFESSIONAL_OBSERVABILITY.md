@@ -57,7 +57,7 @@ This script will:
 
 ```bash
 # Run the observability demo to see real metrics
-uv run python packages/tta-dev-primitives/examples/observability_demo.py
+uv run python platform/primitives/examples/observability_demo.py
 ```
 
 ---
@@ -322,8 +322,8 @@ curl http://localhost:9090/api/v1/targets
 
 - **Architecture Analysis:** `docs/observability/ARCHITECTURE_ANALYSIS.md`
 - **Basic Setup:** `scripts/setup-observability.sh`
-- **Integration Testing:** `packages/tta-dev-primitives/docker-compose.integration.yml`
-- **Observability Examples:** `packages/tta-dev-primitives/examples/observability_demo.py`
+- **Integration Testing:** `platform/primitives/docker-compose.integration.yml`
+- **Observability Examples:** `platform/primitives/examples/observability_demo.py`
 
 ---
 

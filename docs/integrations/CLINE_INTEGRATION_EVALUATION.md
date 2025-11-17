@@ -148,7 +148,7 @@ Copilot: "This refactoring needs changes across 15 files"
 cline "Implement MemoryPrimitive tests with 100% coverage"
 
 # Pipe context to Cline
-cat packages/tta-dev-primitives/src/memory.py | cline task send "Add type hints to this code"
+cat platform/primitives/src/memory.py | cline task send "Add type hints to this code"
 
 # Autonomous mode (no approval needed)
 echo "Fix all ruff errors" | cline -y
@@ -337,7 +337,7 @@ Cline: "I'll implement the code and tests"
 cat ~/.config/mcp/mcp_settings.json
 
 # Test basic operation
-cline "List all files in packages/tta-dev-primitives/src/"
+cline "List all files in platform/primitives/src/"
 ```
 
 ### Phase 2: Copilot Integration (Day 2-3)

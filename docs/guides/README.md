@@ -99,27 +99,27 @@ Practical guides for working with TTA.dev components.
 
 The **Phase 3 Examples** demonstrate production-ready patterns:
 
-1. **[RAG Workflow](../../packages/tta-dev-primitives/examples/rag_workflow.py)**
+1. **[RAG Workflow](../../platform/primitives/examples/rag_workflow.py)**
    - Caching + Fallback + Retry
    - Reduces costs by 40-60%
    - Use for: Document retrieval systems
 
-2. **[Agentic RAG](../../packages/tta-dev-primitives/examples/agentic_rag_workflow.py)**
+2. **[Agentic RAG](../../platform/primitives/examples/agentic_rag_workflow.py)**
    - Router + Document Grading + Hallucination Detection
    - Production RAG pattern from NVIDIA
    - Use for: High-quality RAG with quality controls
 
-3. **[Cost Tracking](../../packages/tta-dev-primitives/examples/cost_tracking_workflow.py)**
+3. **[Cost Tracking](../../platform/primitives/examples/cost_tracking_workflow.py)**
    - Budget enforcement + Per-model metrics
    - Prometheus integration
    - Use for: Managing LLM API costs
 
-4. **[Streaming](../../packages/tta-dev-primitives/examples/streaming_workflow.py)**
+4. **[Streaming](../../platform/primitives/examples/streaming_workflow.py)**
    - Token-by-token streaming + Buffering
    - Throughput metrics
    - Use for: Real-time response streaming
 
-5. **[Multi-Agent](../../packages/tta-dev-primitives/examples/multi_agent_workflow.py)**
+5. **[Multi-Agent](../../platform/primitives/examples/multi_agent_workflow.py)**
    - Coordinator + Parallel specialists + Aggregation
    - Agent coordination pattern
    - Use for: Complex multi-agent workflows

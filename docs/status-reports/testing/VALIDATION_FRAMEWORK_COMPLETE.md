@@ -12,7 +12,7 @@ All TODO items have been successfully completed, providing TTA.dev with a compre
 
 ### 1. Standardized Benchmarking Suite ✅
 
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/benchmarking/__init__.py`
+**Location:** `platform/primitives/src/tta_dev_primitives/benchmarking/__init__.py`
 
 **Features Implemented:**
 - Complete benchmarking framework (600+ lines)

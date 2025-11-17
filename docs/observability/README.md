@@ -28,7 +28,7 @@ All 3 phases of the observability transformation have been successfully implemen
 ./scripts/import-dashboard.sh
 
 # 3. Generate test data
-PYTHONPATH=$PWD/packages uv run python packages/tta-dev-primitives/examples/test_core_metrics.py
+PYTHONPATH=$PWD/packages uv run python platform/primitives/examples/test_core_metrics.py
 
 # 4. Open Grafana
 open http://localhost:3000  # Login: admin/admin
@@ -122,7 +122,7 @@ Read [PHASE3_COMPLETION_SUMMARY.md](./PHASE3_COMPLETION_SUMMARY.md) for the cele
 ### 📦 Implementation Code
 
 **Observability Primitives:**
-- `packages/tta-dev-primitives/src/tta_dev_primitives/observability/`
+- `platform/primitives/src/tta_dev_primitives/observability/`
   - `instrumented_primitive.py` - ✅ Enhanced with semantic naming (Phase 1)
   - `metrics_v2.py` - ✅ NEW: 7 core OpenTelemetry metrics (Phase 2)
   - `context_propagation.py` - W3C trace context propagation
@@ -132,7 +132,7 @@ Read [PHASE3_COMPLETION_SUMMARY.md](./PHASE3_COMPLETION_SUMMARY.md) for the cele
   - `prometheus_exporter.py` - Prometheus export
 
 **Integration Package:**
-- `packages/tta-observability-integration/`
+- `platform/observability/`
   - `apm_setup.py` - OpenTelemetry initialization
   - `primitives/` - Enhanced primitives with observability
 
@@ -182,10 +182,10 @@ cat docs/observability/IMPLEMENTATION_SUMMARY.md
 **2. Review Current Implementation** (30 minutes)
 ```bash
 # Check existing observability code
-ls packages/tta-dev-primitives/src/tta_dev_primitives/observability/
+ls platform/primitives/src/tta_dev_primitives/observability/
 
 # Run existing demo
-uv run python packages/tta-dev-primitives/examples/observability_demo.py
+uv run python platform/primitives/examples/observability_demo.py
 
 # Check Jaeger: http://localhost:16686
 # Check Prometheus: http://localhost:9090

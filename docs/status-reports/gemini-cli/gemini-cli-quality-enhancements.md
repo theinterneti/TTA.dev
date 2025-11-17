@@ -470,7 +470,7 @@ To expose your `universal-agent-context` package as an MCP server:
 ### 1. Create MCP Server Script
 
 ```python
-# packages/universal-agent-context/src/universal_agent_context/mcp_server.py
+# platform/agent-context/src/universal_agent_context/mcp_server.py
 
 """MCP Server for Universal Agent Context System."""
 
@@ -792,7 +792,7 @@ Limit which MCP servers are available based on context:
 - [Gemini API Pricing](https://ai.google.dev/pricing)
 - [Context7 MCP Server](https://github.com/context7/mcp-server)
 - [MCP Protocol](https://modelcontextprotocol.io)
-- [Universal Agent Context Package](../../packages/universal-agent-context/)
+- [Universal Agent Context Package](../../platform/agent-context/)
 
 ---
 

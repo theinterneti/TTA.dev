@@ -319,7 +319,7 @@ Edit `FZF_DEFAULT_OPTS` in `~/.zshrc` or override in `~/.zsh_local`
 ```bash
 # After visiting directories, zoxide learns patterns
 cd ~/repos/TTA.dev
-cd ~/repos/TTA.dev/packages/tta-dev-primitives
+cd ~/repos/TTA.dev/platform/primitives
 
 # Later, just type:
 z TTA          # Jumps to ~/repos/TTA.dev

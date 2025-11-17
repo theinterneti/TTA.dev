@@ -53,12 +53,12 @@
 
 | File | Bucket | Rationale |
 |------|--------|-----------|
-| `packages/tta-dev-primitives/src/tta_dev_primitives/observability/metrics_v2.py` | **CORE** | Enhanced metrics system (v2) |
-| `packages/tta-dev-primitives/src/tta_dev_primitives/observability/prometheus_exporter.py` | **CORE** | Prometheus metrics exporter |
-| `packages/tta-dev-primitives/src/tta_dev_primitives/observability/prometheus_metrics.py` | **CORE** | Prometheus-compatible metrics |
-| `packages/tta-dev-primitives/examples/test_core_metrics.py` | **EXAMPLE** | Example demonstrating core metrics |
-| `packages/tta-dev-primitives/examples/test_semantic_tracing.py` | **EXAMPLE** | Example demonstrating semantic tracing |
-| `packages/tta-dev-primitives/examples/test_trace_propagation.py` | **EXAMPLE** | Example demonstrating trace propagation |
+| `platform/primitives/src/tta_dev_primitives/observability/metrics_v2.py` | **CORE** | Enhanced metrics system (v2) |
+| `platform/primitives/src/tta_dev_primitives/observability/prometheus_exporter.py` | **CORE** | Prometheus metrics exporter |
+| `platform/primitives/src/tta_dev_primitives/observability/prometheus_metrics.py` | **CORE** | Prometheus-compatible metrics |
+| `platform/primitives/examples/test_core_metrics.py` | **EXAMPLE** | Example demonstrating core metrics |
+| `platform/primitives/examples/test_semantic_tracing.py` | **EXAMPLE** | Example demonstrating semantic tracing |
+| `platform/primitives/examples/test_trace_propagation.py` | **EXAMPLE** | Example demonstrating trace propagation |
 | `docs/observability/*.md` | **CORE DOC** | Comprehensive observability documentation (multiple phases) |
 
 **Rationale:** Observability is critical for production agentic systems. These enhancements build on existing `tta-observability-integration` work.
@@ -171,12 +171,12 @@
 
 | File | Bucket | Rationale |
 |------|--------|-----------|
-| `packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py` | **MODIFIED** | Core base primitive modified |
-| `packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py` | **MODIFIED** | Parallel primitive modified |
-| `packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py` | **MODIFIED** | Sequential primitive modified |
-| `packages/tta-dev-primitives/src/tta_dev_primitives/observability/*.py` | **MODIFIED** | Observability modules modified (3 files) |
-| `packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_code_execution_primitive.py` | **MODIFIED** | MCP code execution modified |
-| `packages/tta-dev-primitives/examples/observability_demo.py` | **MODIFIED** | Observability demo updated |
+| `platform/primitives/src/tta_dev_primitives/core/base.py` | **MODIFIED** | Core base primitive modified |
+| `platform/primitives/src/tta_dev_primitives/core/parallel.py` | **MODIFIED** | Parallel primitive modified |
+| `platform/primitives/src/tta_dev_primitives/core/sequential.py` | **MODIFIED** | Sequential primitive modified |
+| `platform/primitives/src/tta_dev_primitives/observability/*.py` | **MODIFIED** | Observability modules modified (3 files) |
+| `platform/primitives/src/tta_dev_primitives/integrations/mcp_code_execution_primitive.py` | **MODIFIED** | MCP code execution modified |
+| `platform/primitives/examples/observability_demo.py` | **MODIFIED** | Observability demo updated |
 
 **Rationale:** Need to carefully review what changed in core primitives to ensure compatibility with current architecture.
 
@@ -275,7 +275,7 @@
 | `packages/tta-documentation-primitives/` | **DELETED** | Removed entire package (doc sync primitives) |
 | `packages/tta-kb-automation/` | **DELETED** | Removed entire package (KB automation workflows) |
 | `packages/tta-rebuild/` | **DELETED** | Removed entire package (Gemini narrative game) |
-| `packages/tta-observability-integration/LICENSE` | **DELETED** | Removed license file |
+| `platform/observability/LICENSE` | **DELETED** | Removed license file |
 
 **Rationale:** These packages were deleted as part of "cleanup". Need to decide:
 - `tta-agent-coordination`: Was it useful? Worth keeping?
@@ -317,13 +317,13 @@
 
 | File | Status | Rationale |
 |------|--------|-----------|
-| `packages/tta-dev-primitives/tests/test_cache.py` | **DELETED** | Test file removed - why? |
-| `packages/tta-dev-primitives/tests/test_composition.py` | **DELETED** | Test file removed - why? |
-| `packages/tta-dev-primitives/tests/test_integrations.py` | **DELETED** | Test file removed - why? |
-| `packages/tta-dev-primitives/tests/test_recovery.py` | **DELETED** | Test file removed - why? |
-| `packages/tta-dev-primitives/tests/test_routing.py` | **DELETED** | Test file removed - why? |
-| `packages/tta-dev-primitives/tests/test_stage_kb_integration.py` | **DELETED** | Test file removed - why? |
-| `packages/tta-dev-primitives/tests/test_timeout.py` | **DELETED** | Test file removed - why? |
+| `platform/primitives/tests/test_cache.py` | **DELETED** | Test file removed - why? |
+| `platform/primitives/tests/test_composition.py` | **DELETED** | Test file removed - why? |
+| `platform/primitives/tests/test_integrations.py` | **DELETED** | Test file removed - why? |
+| `platform/primitives/tests/test_recovery.py` | **DELETED** | Test file removed - why? |
+| `platform/primitives/tests/test_routing.py` | **DELETED** | Test file removed - why? |
+| `platform/primitives/tests/test_stage_kb_integration.py` | **DELETED** | Test file removed - why? |
+| `platform/primitives/tests/test_timeout.py` | **DELETED** | Test file removed - why? |
 
 **Rationale:** These test deletions are concerning. Need to understand why they were removed. Might have been moved or reorganized?
 

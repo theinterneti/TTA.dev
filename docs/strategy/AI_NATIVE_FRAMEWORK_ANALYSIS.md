@@ -199,7 +199,7 @@ tools_denied:
 
 #### 1.1 Create Speckit Primitives
 
-**Location**: `packages/tta-dev-primitives/src/tta_dev_primitives/speckit/`
+**Location**: `platform/primitives/src/tta_dev_primitives/speckit/`
 
 ```python
 # speckit_primitives.py
@@ -704,7 +704,7 @@ def mode(mode_name):
 
 #### 3.1 Add Validation Gates to Existing Workflows
 
-**Location**: `packages/tta-dev-primitives/src/tta_dev_primitives/gates/`
+**Location**: `platform/primitives/src/tta_dev_primitives/gates/`
 
 ```python
 # validation_gate.py
@@ -862,7 +862,7 @@ Otherwise, proceed to `/speckit.plan`.
 - Documentation
 
 **Deliverables**:
-- `packages/tta-dev-primitives/src/tta_dev_primitives/speckit/`
+- `platform/primitives/src/tta_dev_primitives/speckit/`
 - `.github/templates/feature.spec.md`
 - `.chatmodes/*.chatmode.md`
 - `apm.yml`

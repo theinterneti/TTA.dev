@@ -6,14 +6,14 @@
 # Note: keploy-framework, python-pathway, and js-dev-primitives are under review
 # and not included in workspace until architectural decisions are made
 members = [
-    "packages/tta-dev-primitives",
-    "packages/tta-dev-integrations",
-    "packages/tta-observability-integration",
-    "packages/tta-observability-ui",
-    "packages/universal-agent-context",
-    "packages/tta-documentation-primitives",
-    "packages/tta-kb-automation",
-    "packages/tta-agent-coordination",
+    "platform/primitives",
+    "platform/integrations",
+    "platform/observability",
+    "apps/observability-ui",
+    "platform/agent-context",
+    "platform/documentation",
+    "platform/kb-automation",
+    "platform/agent-coordination",
 ]
 
 [tool.uv]
