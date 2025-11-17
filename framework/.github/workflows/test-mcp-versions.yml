@@ -1,0 +1,112 @@
+name: 🔬 Test MCP Server Versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      mcp_version:
+        description: 'MCP Server Version to Test'
+        required: true
+        default: 'v0.20.1'
+        type: choice
+        options:
+          - v0.20.1  # Latest
+          - v0.20.0
+          - v0.19.1
+          - v0.19.0
+          - v0.18.0  # Current (known to hang)
+          - v0.17.1
+          - v0.17.0
+          - v0.16.0
+          - v0.15.0
+      command:
+        description: 'Command to test'
+        required: true
+        default: 'help'
+        type: choice
+        options:
+          - help
+          - 'What is TTA.dev?'
+
+jobs:
+  test-mcp-version:
+    name: Test MCP v${{ inputs.mcp_version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # Increased timeout for MCP server tests
+    
+    steps:
+      - name: Test Gemini CLI with MCP Server v${{ inputs.mcp_version }}
+        uses: google-github-actions/run-gemini-cli@main
+        with:
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
+          gemini_model: 'gemini-2.5-flash'
+          use_vertex_ai: false
+          use_gemini_code_assist: false
+          gemini_debug: true
+          prompt: '${{ inputs.command }}'
+          settings: |-
+            {
+              "general": {
+                "disableAutoUpdate": true
+              },
+              "ui": {
+                "hideTips": true,
+                "hideFooter": true
+              },
+              "model": {
+                "maxSessionTurns": 25
+              },
+              "telemetry": {
+                "enabled": false
+              },
+              "tools": {
+                "autoAccept": true,
+                "core": [
+                  "run_shell_command(cat)",
+                  "run_shell_command(echo)",
+                  "run_shell_command(grep)",
+                  "run_shell_command(head)",
+                  "run_shell_command(tail)"
+                ]
+              },
+              "security": {
+                "folderTrust": {
+                  "featureEnabled": false,
+                  "enabled": true
+                }
+              },
+              "mcpServers": {
+                "github": {
+                  "command": "docker",
+                  "args": [
+                    "run",
+                    "-i",
+                    "--rm",
+                    "-e",
+                    "GITHUB_PERSONAL_ACCESS_TOKEN",
+                    "ghcr.io/github/github-mcp-server:${{ inputs.mcp_version }}"
+                  ]
+                }
+              }
+            }
+          
+      - name: Summary
+        if: always()
+        run: |
+          echo ""
+          echo "=== Test Summary ==="
+          echo ""
+          echo "MCP Server Version: ${{ inputs.mcp_version }}"
+          echo "Command tested: ${{ inputs.command }}"
+          echo "Model used: gemini-2.5-flash"
+          echo ""
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Test PASSED - MCP Server v${{ inputs.mcp_version }} works!"
+            echo ""
+            echo "This version does NOT have the timeout issue."
+            echo "Consider updating gemini-invoke.yml to use this version."
+          else
+            echo "❌ Test FAILED - MCP Server v${{ inputs.mcp_version }} has issues"
+            echo ""
+            echo "This version may have the same timeout issue as v0.18.0."
+          fi
+
