@@ -11,7 +11,7 @@ members = [
     "platform/observability",
     "packages/tta-observability-ui",
     "platform/agent-context",
-    "packages/tta-documentation-primitives",
+    "platform/documentation",
     "packages/tta-kb-automation",
     "platform/agent-coordination",
 ]
