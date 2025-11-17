@@ -1,0 +1,32 @@
+#!/bin/bash
+# TTA.dev Multi-Agent Prepare Commit Message Hook
+# Automatically adds agent identifier to commit messages
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+# Identify which agent is committing
+WORKTREE_PATH=$(git rev-parse --show-toplevel)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [[ "$WORKTREE_PATH" == *"TTA.dev-augment"* ]]; then
+    AGENT="augment"
+elif [[ "$WORKTREE_PATH" == *"TTA.dev-cline"* ]]; then
+    AGENT="cline"
+elif [[ "$WORKTREE_PATH" == *"TTA.dev-copilot"* ]]; then
+    AGENT="copilot"
+else
+    AGENT="unknown"
+fi
+
+# Only modify message if it's a new commit (not amend, merge, etc.)
+if [ "$COMMIT_SOURCE" = "" ] || [ "$COMMIT_SOURCE" = "message" ]; then
+    COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+    
+    # Check if agent identifier already exists
+    if ! echo "$COMMIT_MSG" | grep -qE "\[agent:(augment|cline|copilot)\]"; then
+        # Add agent identifier to the beginning of the message
+        echo "[agent:$AGENT] $COMMIT_MSG" > "$COMMIT_MSG_FILE"
+    fi
+fi
