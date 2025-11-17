@@ -214,7 +214,7 @@ class CoherenceValidatorPrimitive(WorkflowPrimitive[StoryState, CoherenceResult]
 
 ### Package 3: universal-agent-context (1,937 lines)
 
-**Location:** `packages/universal-agent-context/`
+**Location:** `platform/agent-context/`
 
 **Priority:** Compare with TTA.dev's existing `universal-agent-context` package
 

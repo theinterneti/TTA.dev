@@ -108,9 +108,9 @@ result = await llm.execute(
 - Professional observability stack documentation
 
 **Files Added:**
-- `packages/tta-dev-primitives/src/tta_dev_primitives/observability/prometheus_exporter.py`
-- `packages/tta-dev-primitives/src/tta_dev_primitives/observability/prometheus_metrics.py`
-- `packages/tta-dev-primitives/src/tta_dev_primitives/observability/metrics_v2.py`
+- `platform/primitives/src/tta_dev_primitives/observability/prometheus_exporter.py`
+- `platform/primitives/src/tta_dev_primitives/observability/prometheus_metrics.py`
+- `platform/primitives/src/tta_dev_primitives/observability/metrics_v2.py`
 - `docs/observability/README.md`
 - `docs/observability/PROFESSIONAL_OBSERVABILITY.md`
 - `docs/observability/TTA_OBSERVABILITY_STRATEGY.md`

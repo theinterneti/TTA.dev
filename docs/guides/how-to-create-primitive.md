@@ -54,7 +54,7 @@ This guide walks you through creating a new primitive from scratch, including:
 
 ```bash
 # Choose appropriate directory
-cd packages/tta-dev-primitives/src/tta_dev_primitives/
+cd platform/primitives/src/tta_dev_primitives/
 
 # Examples:
 # - core/ for workflow primitives
@@ -69,7 +69,7 @@ touch category/my_primitive.py
 ### Create Test File
 
 ```bash
-cd packages/tta-dev-primitives/tests/
+cd platform/primitives/tests/
 
 # Create corresponding test file
 touch test_my_primitive.py
@@ -401,7 +401,7 @@ class MyPrimitive(InstrumentedPrimitive[dict, dict]):
 ### Create Example File
 
 ```python
-# packages/tta-dev-primitives/examples/my_primitive_example.py
+# platform/primitives/examples/my_primitive_example.py
 
 """Example usage of MyPrimitive."""
 
@@ -438,7 +438,7 @@ if __name__ == "__main__":
 ### Add to __init__.py
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/category/__init__.py
+# platform/primitives/src/tta_dev_primitives/category/__init__.py
 
 from .my_primitive import MyPrimitive
 
@@ -448,7 +448,7 @@ __all__ = ["MyPrimitive"]
 ### Update Main Package
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/__init__.py
+# platform/primitives/src/tta_dev_primitives/__init__.py
 
 from .category import MyPrimitive
 
@@ -470,13 +470,13 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # Type check
-uvx pyright packages/tta-dev-primitives/
+uvx pyright platform/primitives/
 
 # Run tests
-uv run pytest packages/tta-dev-primitives/tests/test_my_primitive.py -v
+uv run pytest platform/primitives/tests/test_my_primitive.py -v
 
 # Coverage
-uv run pytest --cov=packages/tta-dev-primitives --cov-report=html
+uv run pytest --cov=platform/primitives --cov-report=html
 ```
 
 ---
@@ -495,7 +495,7 @@ uv run pytest --cov=packages/tta-dev-primitives --cov-report=html
 from tta_dev_primitives.category import MyPrimitive
 \`\`\`
 
-**Source:** [my_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/category/my_primitive.py)
+**Source:** [my_primitive.py](platform/primitives/src/tta_dev_primitives/category/my_primitive.py)
 
 **Usage:**
 \`\`\`python
@@ -622,7 +622,7 @@ class MyPrimitive(InstrumentedPrimitive[InputType, OutputType]):
 
 - [[TTA Primitives]]
 - [[PRIMITIVES_CATALOG]]
-- [[packages/tta-dev-primitives/AGENTS.md]]
+- [[platform/primitives/AGENTS.md]]
 - [[How to Add Observability to Workflows]]
 
 ---

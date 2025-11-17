@@ -26,7 +26,7 @@ Created production-ready OpenTelemetry-based metrics collection for adaptive pri
 
 ### 1. Core Metrics Module (`adaptive/metrics.py`)
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/metrics.py`
+**File:** `platform/primitives/src/tta_dev_primitives/adaptive/metrics.py`
 **Lines:** 600+
 **Status:** ✅ COMPLETE
 
@@ -597,7 +597,7 @@ def test_metrics_reset():
 
 ### Created Files (3)
 
-1. **`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/metrics.py`**
+1. **`platform/primitives/src/tta_dev_primitives/adaptive/metrics.py`**
    - Lines: 600+
    - Purpose: Core metrics module
    - Status: ✅ Complete
@@ -614,7 +614,7 @@ def test_metrics_reset():
 
 ### Modified Files (1)
 
-1. **`packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/__init__.py`**
+1. **`platform/primitives/src/tta_dev_primitives/adaptive/__init__.py`**
    - Added: Metrics exports (3 items)
    - Status: ✅ Complete
 
@@ -711,7 +711,7 @@ async def stream_metrics():
 
 ### Module Documentation
 
-- [Adaptive Module README](../packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/README.md)
+- [Adaptive Module README](../platform/primitives/src/tta_dev_primitives/adaptive/README.md)
 - [AGENTS.md](../AGENTS.md) - Adaptive primitives section
 - [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md) - Complete catalog
 

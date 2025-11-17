@@ -312,7 +312,7 @@ Follow these steps to get free flagship model access working immediately:
 #### Step 1: Install TTA.dev Primitives
 
 ```bash
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv sync --extra integrations
 ```
 
@@ -357,7 +357,7 @@ GROQ_API_KEY=gsk_...your-key-here
 Run the free flagship models example:
 
 ```bash
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv run python examples/free_flagship_models.py
 ```
 
@@ -443,7 +443,7 @@ response = await llm.execute(request, context)
 5. **Production Deployment:** Implement fallback chain for 100% uptime
 
 **Full Documentation:**
-- [Free Flagship Models Example](../../packages/tta-dev-primitives/examples/free_flagship_models.py)
+- [Free Flagship Models Example](../../platform/primitives/examples/free_flagship_models.py)
 - [Cost Optimization Patterns](./cost-optimization-patterns.md)
 - [Integration Primitives Quick Reference](./integration-primitives-quickref.md)
 
@@ -961,12 +961,12 @@ def select_route(task):
 - **Integration Primitives Quick Reference:** [integration-primitives-quickref.md](integration-primitives-quickref.md) - Quick reference for all integration primitives
 
 ### Implementation
-- **OpenAI Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
-- **Anthropic Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
-- **Ollama Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
-- **Cache Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py)
-- **Router Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py)
-- **Fallback Primitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py)
+- **OpenAI Primitive:** [`platform/primitives/src/tta_dev_primitives/integrations/openai_primitive.py`](../../platform/primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
+- **Anthropic Primitive:** [`platform/primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py`](../../platform/primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
+- **Ollama Primitive:** [`platform/primitives/src/tta_dev_primitives/integrations/ollama_primitive.py`](../../platform/primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
+- **Cache Primitive:** [`platform/primitives/src/tta_dev_primitives/performance/cache.py`](../../platform/primitives/src/tta_dev_primitives/performance/cache.py)
+- **Router Primitive:** [`platform/primitives/src/tta_dev_primitives/core/routing.py`](../../platform/primitives/src/tta_dev_primitives/core/routing.py)
+- **Fallback Primitive:** [`platform/primitives/src/tta_dev_primitives/recovery/fallback.py`](../../platform/primitives/src/tta_dev_primitives/recovery/fallback.py)
 
 ---
 

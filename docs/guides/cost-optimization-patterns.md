@@ -1099,10 +1099,10 @@ test_routing()
 
 ### Implementation References
 
-- **CachePrimitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py)
-- **RouterPrimitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/core/routing.py)
-- **FallbackPrimitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py)
-- **RetryPrimitive:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py)
+- **CachePrimitive:** [`platform/primitives/src/tta_dev_primitives/performance/cache.py`](../../platform/primitives/src/tta_dev_primitives/performance/cache.py)
+- **RouterPrimitive:** [`platform/primitives/src/tta_dev_primitives/core/routing.py`](../../platform/primitives/src/tta_dev_primitives/core/routing.py)
+- **FallbackPrimitive:** [`platform/primitives/src/tta_dev_primitives/recovery/fallback.py`](../../platform/primitives/src/tta_dev_primitives/recovery/fallback.py)
+- **RetryPrimitive:** [`platform/primitives/src/tta_dev_primitives/recovery/retry.py`](../../platform/primitives/src/tta_dev_primitives/recovery/retry.py)
 
 ---
 

@@ -401,7 +401,7 @@ def process_data(data: dict[str, int]) -> dict[str, int]:
 ### TTA.dev Documentation
 
 - `AGENTS.md` - Agent instructions for type usage
-- `packages/tta-dev-primitives/README.md` - Primitive design patterns
+- `platform/primitives/README.md` - Primitive design patterns
 - `.github/instructions/package-source.instructions.md` - Type hint requirements
 
 ---

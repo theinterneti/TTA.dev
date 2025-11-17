@@ -49,7 +49,7 @@ sync = TODOSync()
 
 # Scan and create journal
 result = await sync.scan_and_create(
-    paths=["packages/tta-dev-primitives/src"],
+    paths=["platform/primitives/src"],
     journal_date="2025_11_03",
 )
 
@@ -234,8 +234,8 @@ paths = ["packages"]
 
 # Scan specific packages
 paths = [
-    "packages/tta-dev-primitives/src",
-    "packages/tta-observability-integration/src",
+    "platform/primitives/src",
+    "platform/observability/src",
 ]
 ```
 

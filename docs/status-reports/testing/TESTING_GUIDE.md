@@ -218,7 +218,7 @@ Located in `pyproject.toml`:
 ```toml
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["packages/tta-dev-primitives/tests"]
+testpaths = ["platform/primitives/tests"]
 asyncio_mode = "auto"
 addopts = "-v --strict-markers --timeout=60"
 timeout = 60
@@ -326,10 +326,10 @@ Run specific test files or functions:
 
 ```bash
 # Single file
-uv run pytest packages/tta-dev-primitives/tests/test_sequential.py
+uv run pytest platform/primitives/tests/test_sequential.py
 
 # Single test
-uv run pytest packages/tta-dev-primitives/tests/test_sequential.py::test_basic_sequence
+uv run pytest platform/primitives/tests/test_sequential.py::test_basic_sequence
 
 # By keyword
 uv run pytest -k "cache"

@@ -987,7 +987,7 @@ repos:
 name: Framework Benchmark
 on:
   pull_request:
-    paths: ['packages/tta-dev-primitives/**']
+    paths: ['platform/primitives/**']
 
 jobs:
   benchmark:

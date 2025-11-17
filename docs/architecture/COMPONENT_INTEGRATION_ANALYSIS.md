@@ -42,7 +42,7 @@ This document analyzes how TTA.dev's components integrate with the **agentic pri
 **Pattern:** Extends `WorkflowPrimitive` base class
 
 ```python
-# From: packages/tta-observability-integration/src/observability_integration/primitives/
+# From: platform/observability/src/observability_integration/primitives/
 from tta_dev_primitives.core.base import WorkflowPrimitive, WorkflowContext
 
 class CachePrimitive(WorkflowPrimitive[Any, Any]):
@@ -66,7 +66,7 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
 **Pattern:** Wraps primitives with OpenTelemetry
 
 ```python
-# From: packages/tta-dev-primitives/src/tta_dev_primitives/observability/
+# From: platform/primitives/src/tta_dev_primitives/observability/
 class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
     """Auto-instrumented primitive with tracing"""
 
@@ -85,7 +85,7 @@ class ObservablePrimitive(WorkflowPrimitive[Any, Any]):
 **Pattern:** Initialize observability early in application lifecycle
 
 ```python
-# From: packages/tta-observability-integration/src/observability_integration/apm_setup.py
+# From: platform/observability/src/observability_integration/apm_setup.py
 def initialize_observability(
     service_name: str = "tta",
     enable_prometheus: bool = True,
@@ -134,8 +134,8 @@ workflow = (
    - Graceful degradation
 
 4. **Examples and Documentation**
-   - `packages/tta-dev-primitives/examples/apm_example.py`
-   - `packages/tta-dev-primitives/examples/observability_demo.py`
+   - `platform/primitives/examples/apm_example.py`
+   - `platform/primitives/examples/observability_demo.py`
    - Complete API documentation
 
 ### Gaps ⚠️
@@ -187,7 +187,7 @@ workflow = (
 3. **Add Test Coverage**
    ```bash
    # Create missing tests
-   packages/tta-dev-primitives/tests/observability/
+   platform/primitives/tests/observability/
    ├── test_instrumented_primitive.py
    ├── test_observable_primitive.py
    ├── test_metrics_collector.py
@@ -207,7 +207,7 @@ workflow = (
 **Pattern:** Provides agent context and instructions
 
 ```
-packages/universal-agent-context/
+platform/agent-context/
 ├── .augment/              # Augment CLI-specific
 │   ├── instructions.md    # Agent instructions
 │   ├── chatmodes/         # Role-based modes
@@ -278,7 +278,7 @@ The universal-agent-context package provides:
 #### 2.1 Create Agent Coordination Primitives
 
 ```python
-# NEW: packages/universal-agent-context/src/universal_agent_context/primitives/
+# NEW: platform/agent-context/src/universal_agent_context/primitives/
 
 from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
 
@@ -305,7 +305,7 @@ class AgentCoordinationPrimitive(WorkflowPrimitive[list[dict], dict]):
 #### 2.2 Add Integration Examples
 
 ```python
-# NEW: packages/universal-agent-context/examples/primitive_integration.py
+# NEW: platform/agent-context/examples/primitive_integration.py
 
 from tta_dev_primitives import SequentialPrimitive, ParallelPrimitive
 from universal_agent_context.primitives import AgentHandoffPrimitive, AgentMemoryPrimitive
@@ -331,7 +331,7 @@ TTA.dev supports multi-agent workflows via universal-agent-context:
 - `AgentMemoryPrimitive` - Share context via architectural memory
 - `AgentCoordinationPrimitive` - Parallel agent execution
 
-See: packages/universal-agent-context/AGENTS.md
+See: platform/agent-context/AGENTS.md
 ```
 
 ### Priority: **HIGH**
@@ -834,8 +834,8 @@ MCP tools are primarily for AI agent assistance, not runtime workflow integratio
 
 3. **Add Observability Tests**
    ```bash
-   # NEW: packages/tta-dev-primitives/tests/observability/
-   packages/tta-dev-primitives/tests/observability/
+   # NEW: platform/primitives/tests/observability/
+   platform/primitives/tests/observability/
    ├── test_instrumented_primitive.py
    ├── test_observable_primitive.py
    ├── test_metrics_collector.py
@@ -860,7 +860,7 @@ CI/CD is functional. Main improvements:
 **Pattern:** `MockPrimitive` for testing workflows
 
 ```python
-# From: packages/tta-dev-primitives/src/tta_dev_primitives/testing/mocks.py
+# From: platform/primitives/src/tta_dev_primitives/testing/mocks.py
 
 from tta_dev_primitives.testing import MockPrimitive
 
@@ -917,7 +917,7 @@ assert mock_llm.call_count == 1
 
 1. **Add Observability Tests**
    ```python
-   # NEW: packages/tta-dev-primitives/tests/observability/test_instrumented_primitive.py
+   # NEW: platform/primitives/tests/observability/test_instrumented_primitive.py
 
    @pytest.mark.asyncio
    async def test_instrumented_primitive_creates_spans():
@@ -1000,7 +1000,7 @@ Testing is excellent but needs:
 1. **Add Observability Tests** ✅ COMPLETE
    ```bash
    # Tests already existed - verified comprehensive coverage
-   packages/tta-dev-primitives/tests/observability/
+   platform/primitives/tests/observability/
    ├── test_instrumented_primitive.py
    ├── test_observable_primitive.py
    ├── test_metrics_collector.py
@@ -1009,17 +1009,17 @@ Testing is excellent but needs:
 
 2. **Create Agent Coordination Primitives** ✅ COMPLETE
    ```bash
-   packages/universal-agent-context/src/universal_agent_context/primitives/
+   platform/agent-context/src/universal_agent_context/primitives/
    ├── __init__.py
    ├── handoff.py           # AgentHandoffPrimitive (170 lines)
    ├── memory.py            # AgentMemoryPrimitive (274 lines)
    └── coordination.py      # AgentCoordinationPrimitive (270 lines)
 
    # Tests: 19/19 passing (100%)
-   packages/universal-agent-context/tests/test_agent_coordination.py
+   platform/agent-context/tests/test_agent_coordination.py
 
    # Examples: 4 comprehensive examples with README
-   packages/universal-agent-context/examples/
+   platform/agent-context/examples/
    ├── agent_handoff_example.py
    ├── agent_memory_example.py
    ├── parallel_agents_example.py

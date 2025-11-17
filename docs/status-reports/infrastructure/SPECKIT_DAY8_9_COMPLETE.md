@@ -397,14 +397,14 @@ result = await primitive.execute(data, context)
 ## File Manifest
 
 ### Core Implementation
-- `packages/tta-dev-primitives/src/tta_dev_primitives/speckit/tasks_primitive.py` (1,052 lines)
-- `packages/tta-dev-primitives/src/tta_dev_primitives/speckit/__init__.py` (updated exports)
+- `platform/primitives/src/tta_dev_primitives/speckit/tasks_primitive.py` (1,052 lines)
+- `platform/primitives/src/tta_dev_primitives/speckit/__init__.py` (updated exports)
 
 ### Testing
-- `packages/tta-dev-primitives/tests/speckit/test_tasks_primitive.py` (1,070 lines, 36 tests)
+- `platform/primitives/tests/speckit/test_tasks_primitive.py` (1,070 lines, 36 tests)
 
 ### Examples
-- `packages/tta-dev-primitives/examples/speckit_tasks_example.py` (221 lines, 5 examples)
+- `platform/primitives/examples/speckit_tasks_example.py` (221 lines, 5 examples)
 
 ### Documentation
 - `docs/SPECKIT_DAY8_9_PLAN.md` (9,273 lines - planning document)

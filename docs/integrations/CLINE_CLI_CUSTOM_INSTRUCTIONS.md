@@ -367,7 +367,7 @@ cline "Use Optional[str] or str | None?"
 
 ```bash
 # Test response length
-cline "List files in packages/tta-dev-primitives/src/"
+cline "List files in platform/primitives/src/"
 # Should be concise, not multiple paragraphs
 ```
 

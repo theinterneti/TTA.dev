@@ -102,7 +102,7 @@ ls -la packages/
 # Count lines per package
 find packages/tta-narrative-engine -name "*.py" | xargs wc -l
 find packages/tta-ai-framework -name "*.py" | xargs wc -l
-find packages/universal-agent-context -name "*.py" | xargs wc -l
+find platform/agent-context -name "*.py" | xargs wc -l
 find packages/ai-dev-toolkit -name "*.py" | xargs wc -l
 ```
 

@@ -201,7 +201,7 @@ result = await analyze_error_spike('user-service', '2h')
 #### 1.1 Extend CodeExecutionPrimitive
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_code_execution_primitive.py
+# platform/primitives/src/tta_dev_primitives/integrations/mcp_code_execution_primitive.py
 
 class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
     """Code execution with MCP server integration."""
@@ -244,7 +244,7 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
 #### 1.2 MCP Filesystem Generator
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_filesystem_generator.py
+# platform/primitives/src/tta_dev_primitives/integrations/mcp_filesystem_generator.py
 
 class MCPFilesystemGenerator:
     """Generate filesystem structure for MCP servers."""
@@ -301,7 +301,7 @@ async def {tool.name}(input_data: dict) -> dict:
 #### 1.3 MCP Client Integration
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/integrations/mcp_client.py
+# platform/primitives/src/tta_dev_primitives/integrations/mcp_client.py
 
 async def call_mcp_tool(server: str, tool: str, input_data: dict) -> dict:
     """Call MCP tool from code execution environment.
@@ -326,7 +326,7 @@ async def call_mcp_tool(server: str, tool: str, input_data: dict) -> dict:
 #### 2.1 Skills Manager
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/integrations/skills_manager.py
+# platform/primitives/src/tta_dev_primitives/integrations/skills_manager.py
 
 class SkillsManager:
     """Manage persistent skills for MCP code execution."""
@@ -382,7 +382,7 @@ result = await {name}(input_data)
 #### 2.2 Logseq Skills Integration
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/integrations/logseq_skills_integration.py
+# platform/primitives/src/tta_dev_primitives/integrations/logseq_skills_integration.py
 
 class LogseqSkillsIntegration:
     """Integrate skills with Logseq knowledge base."""

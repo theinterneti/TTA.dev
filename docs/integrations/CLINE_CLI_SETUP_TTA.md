@@ -81,7 +81,7 @@ cline "Your task here"
 ```bash
 cd /home/thein/repos/TTA.dev
 
-cline "List all primitives in packages/tta-dev-primitives/src/tta_dev_primitives/core/"
+cline "List all primitives in platform/primitives/src/tta_dev_primitives/core/"
 ```
 
 **Expected behavior:**
@@ -179,7 +179,7 @@ cline "Using Context7, find documentation for asyncio.gather"
 
 ### Test 5: File Operations
 ```bash
-cline "Show me the first 10 lines of packages/tta-dev-primitives/README.md"
+cline "Show me the first 10 lines of platform/primitives/README.md"
 ```
 **✅ Pass:** Displays file contents
 **❌ Fail:** Can't access file or wrong directory
@@ -261,7 +261,7 @@ CLI has limited context:
 cd /home/thein/repos/TTA.dev
 
 # File operations
-cline "Add type hints to packages/tta-dev-primitives/src/cache.py"
+cline "Add type hints to platform/primitives/src/cache.py"
 
 # Simple code generation
 cline "Create a test file for CachePrimitive"

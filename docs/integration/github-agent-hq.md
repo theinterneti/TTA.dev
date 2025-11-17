@@ -769,7 +769,7 @@ workflow = ParallelPrimitive([agent1, agent2, agent3])
 - **Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)
 - **Main Agent Instructions:** [`AGENTS.md`](../../AGENTS.md)
 - **Getting Started:** [`GETTING_STARTED.md`](../../GETTING_STARTED.md)
-- **Examples:** [`packages/tta-dev-primitives/examples/`](../../packages/tta-dev-primitives/examples/)
+- **Examples:** [`platform/primitives/examples/`](../../platform/primitives/examples/)
 
 ### Get Help
 

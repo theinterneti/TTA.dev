@@ -113,7 +113,7 @@ jobs:
     steps:
       - name: Start Docker services
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           docker-compose -f docker-compose.integration.yml up -d
           sleep 10
 
@@ -129,7 +129,7 @@ jobs:
       - name: Stop Docker services
         if: always()
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           docker-compose -f docker-compose.integration.yml down -v
 ```
 
@@ -230,7 +230,7 @@ jobs:
 - [x] quality-check.yml reviewed and updated (line 50: marker exclusion added)
 - [x] tests-split.yml restructured (specialized for integration)
 - [x] YAML syntax validated (all workflows parse correctly)
-- [x] Docker Compose path verified (`packages/tta-dev-primitives/docker-compose.integration.yml` exists)
+- [x] Docker Compose path verified (`platform/primitives/docker-compose.integration.yml` exists)
 - [x] Trigger conditions reviewed (no conflicts)
 - [x] Job dependencies analyzed (no circular dependencies)
 
@@ -315,7 +315,7 @@ Test results: 209 unit tests passing in 16s locally
 - `tests/integration/test_otel_backend_integration.py`
 - `tests/integration/test_prometheus_metrics.py`
 - `tests/test_stage_kb_integration.py`
-- `packages/tta-dev-primitives/src/tta_dev_primitives/__init__.py`
+- `platform/primitives/src/tta_dev_primitives/__init__.py`
 
 **Scripts (4):**
 - `scripts/test_fast.sh`

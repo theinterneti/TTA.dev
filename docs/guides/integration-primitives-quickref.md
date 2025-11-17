@@ -22,7 +22,7 @@
 
 ```bash
 # Install with integration extras
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv sync --extra integrations
 ```
 
@@ -71,7 +71,7 @@ print(response.content)  # "Hello! How can I help you?"
 
 **When to use:** Production apps, cost-effective, fast  
 **Cost:** $0.15-$15 per 1M tokens  
-**Docs:** [OpenAI Primitive](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
+**Docs:** [OpenAI Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
 
 ---
 
@@ -102,7 +102,7 @@ print(response.content)
 
 **When to use:** Long context (200K tokens), safety-critical, complex reasoning  
 **Cost:** $3-$15 per 1M tokens  
-**Docs:** [Anthropic Primitive](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
+**Docs:** [Anthropic Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
 
 ---
 
@@ -132,7 +132,7 @@ print(response.content)
 
 **When to use:** Privacy-critical, offline, cost-free  
 **Cost:** $0 (free)  
-**Docs:** [Ollama Primitive](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
+**Docs:** [Ollama Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
 
 ---
 
@@ -189,7 +189,7 @@ await db.execute(delete_request, context)
 
 **When to use:** Multi-user apps, cloud deployment, real-time  
 **Cost:** Free tier → $25/month  
-**Docs:** [Supabase Primitive](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/supabase_primitive.py)
+**Docs:** [Supabase Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/supabase_primitive.py)
 
 ---
 
@@ -262,7 +262,7 @@ await db.execute(delete_request, context)
 
 **When to use:** Local apps, prototyping, single-user  
 **Cost:** $0 (free)  
-**Docs:** [SQLite Primitive](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py)
+**Docs:** [SQLite Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py)
 
 ---
 
@@ -391,7 +391,7 @@ llm = CachePrimitive(
 - **Full Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)
 - **LLM Selection Guide:** [llm-selection-guide.md](llm-selection-guide.md)
 - **Database Selection Guide:** [database-selection-guide.md](database-selection-guide.md)
-- **Integration Tests:** [`packages/tta-dev-primitives/tests/test_integrations.py`](../../packages/tta-dev-primitives/tests/test_integrations.py)
+- **Integration Tests:** [`platform/primitives/tests/test_integrations.py`](../../platform/primitives/tests/test_integrations.py)
 
 ---
 

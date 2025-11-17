@@ -175,7 +175,7 @@
 
    ```bash
    cd /home/thein/repos/TTA.dev
-   uv run pytest packages/tta-dev-primitives/tests/ -v
+   uv run pytest platform/primitives/tests/ -v
    ```
 
 ### Enhancement Opportunities
