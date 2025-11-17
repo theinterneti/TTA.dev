@@ -13,7 +13,7 @@ members = [
     "platform/agent-context",
     "packages/tta-documentation-primitives",
     "packages/tta-kb-automation",
-    "packages/tta-agent-coordination",
+    "platform/agent-coordination",
 ]
 
 [tool.uv]
