@@ -98,6 +98,7 @@ ModuleNotFoundError: No module named 'src'
 - Not related to migration (package structure unchanged)
 - Observability integration package functional (used in examples)
 - Tests need import path fixes (separate issue)
+- **Tracked in:** Issue #116
 
 **Impact:** ⚠️ **NON-BLOCKING** - Package functional, tests need update
 
@@ -243,6 +244,7 @@ apps/
 - Streamlit app has conftest.py that runs checks on import
 - Causes pytest collection to fail when running from repo root
 - Pre-existing issue, not related to migration
+- **Tracked in:** Issue #117
 
 **Workaround:** Run tests from specific package directories, not repo root
 
@@ -335,17 +337,20 @@ ModuleNotFoundError: No module named 'src'
 
 ### Follow-Up Actions (Separate Issues)
 
-#### Issue: Fix observability test imports
+#### Issue #116: Fix observability test imports
+
 - **Priority:** Low
 - **Action:** Update test imports from `src.*` to package imports
 - **Timeline:** After Phase 5 (separate PR)
 
-#### Issue: Add streamlit-mvp to pytest ignore
+#### Issue #117: Add streamlit-mvp to pytest ignore
+
 - **Priority:** Low
 - **Action:** Configure pytest to skip apps/streamlit-mvp/
 - **Timeline:** After Phase 5 (separate PR)
 
 #### Issue: Add test coverage to apps/observability-ui
+
 - **Priority:** Medium
 - **Action:** Create unit tests for UI components
 - **Timeline:** After Phase 5 (separate PR)
