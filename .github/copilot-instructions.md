@@ -31,7 +31,7 @@ uv run ruff format .
 uv run python script.py
 
 # Install local package for development
-uv pip install -e packages/tta-dev-primitives
+uv pip install -e platform/primitives
 ```
 
 ❌ **NEVER use:** `pip install`, `poetry add`, `python -m pip`
@@ -43,7 +43,7 @@ uv pip install -e packages/tta-dev-primitives
 - **Python:** 3.11+ required
 - **Type hints:** Use `str | None` NOT `Optional[str]`
 - **Dicts:** Use `dict[str, Any]` NOT `Dict[str, Any]`
-- **Type checking:** Run `uvx pyright packages/` before committing
+- **Type checking:** Run `uvx pyright platform/ apps/` before committing
 
 **Example:**
 ```python
@@ -75,7 +75,7 @@ uv run pytest -v
 uv run pytest --cov=packages --cov-report=html
 
 # Specific package
-uv run pytest packages/tta-dev-primitives/tests/ -v
+uv run pytest platform/primitives/tests/ -v
 ```
 
 **Test structure:**
@@ -116,10 +116,10 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # Type check
-uvx pyright packages/
+uvx pyright platform/ apps/
 
 # All checks (before commit)
-uv run ruff format . && uv run ruff check . --fix && uvx pyright packages/
+uv run ruff format . && uv run ruff check . --fix && uvx pyright platform/ apps/
 ```
 
 ---
@@ -241,7 +241,7 @@ workflow = input_processor >> (fast_path | slow_path) >> aggregator
 
 ```text
 TTA.dev/
-├── packages/                          # All production packages
+├── platform/              # Infrastructure packages
 │   ├── tta-dev-primitives/           # Core workflow primitives ✅
 │   ├── tta-observability-integration/ # OpenTelemetry integration ✅
 │   └── universal-agent-context/      # Agent context management ✅
@@ -316,7 +316,7 @@ These files use YAML frontmatter to target specific file patterns and provide de
    ```bash
    uv run ruff format .
    uv run ruff check . --fix
-   uvx pyright packages/
+   uvx pyright platform/ apps/
    uv run pytest -v
    ```
 
@@ -355,7 +355,7 @@ Before committing code, ensure:
 
 - [ ] Code formatted with `uv run ruff format .`
 - [ ] Linter passes with `uv run ruff check . --fix`
-- [ ] Type checks pass with `uvx pyright packages/`
+- [ ] Type checks pass with `uvx pyright platform/ apps/`
 - [ ] Tests pass with `uv run pytest -v`
 - [ ] Test coverage >80% for new code
 - [ ] Documentation updated (docstrings, README)
