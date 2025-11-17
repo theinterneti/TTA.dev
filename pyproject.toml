@@ -9,7 +9,7 @@ members = [
     "platform/primitives",
     "platform/integrations",
     "platform/observability",
-    "packages/tta-observability-ui",
+    "apps/observability-ui",
     "platform/agent-context",
     "platform/documentation",
     "platform/kb-automation",
