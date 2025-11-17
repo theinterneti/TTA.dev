@@ -2627,7 +2627,7 @@ requires-dist = [
     { name = "pytest-json-report", specifier = ">=1.5.0" },
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.11.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
-    { name = "tta-dev-primitives", editable = "packages/tta-dev-primitives" },
+    { name = "tta-dev-primitives", editable = "platform/primitives" },
 ]
 provides-extras = ["dev"]
 
@@ -2709,14 +2709,14 @@ requires-dist = [
     { name = "supabase", marker = "extra == 'all'", specifier = ">=2.0.0" },
     { name = "supabase", marker = "extra == 'supabase'", specifier = ">=2.0.0" },
     { name = "tenacity", specifier = ">=8.2.3" },
-    { name = "tta-dev-primitives", editable = "packages/tta-dev-primitives" },
+    { name = "tta-dev-primitives", editable = "platform/primitives" },
 ]
 provides-extras = ["dev", "openai", "anthropic", "ollama", "supabase", "database", "auth", "all"]
 
 [[package]]
 name = "tta-dev-primitives"
 version = "1.0.0"
-source = { editable = "packages/tta-dev-primitives" }
+source = { editable = "platform/primitives" }
 dependencies = [
     { name = "e2b-code-interpreter" },
     { name = "google-generativeai" },
@@ -2829,7 +2829,7 @@ requires-dist = [
     { name = "rich", specifier = ">=13.7.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3.0" },
     { name = "structlog", specifier = ">=24.1.0" },
-    { name = "tta-dev-primitives", editable = "packages/tta-dev-primitives" },
+    { name = "tta-dev-primitives", editable = "platform/primitives" },
     { name = "tta-observability-integration", editable = "packages/tta-observability-integration" },
     { name = "watchdog", specifier = ">=4.0.0" },
 ]
@@ -2862,7 +2862,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
     { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6.0" },
-    { name = "tta-dev-primitives", editable = "packages/tta-dev-primitives" },
+    { name = "tta-dev-primitives", editable = "platform/primitives" },
     { name = "tta-observability-integration", editable = "packages/tta-observability-integration" },
 ]
 provides-extras = ["dev"]
@@ -2899,7 +2899,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0.0" },
     { name = "redis", specifier = ">=6.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.0" },
-    { name = "tta-dev-primitives", editable = "packages/tta-dev-primitives" },
+    { name = "tta-dev-primitives", editable = "platform/primitives" },
 ]
 provides-extras = ["dev"]
 
@@ -2996,7 +2996,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.14.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8.0" },
-    { name = "tta-dev-primitives", editable = "packages/tta-dev-primitives" },
+    { name = "tta-dev-primitives", editable = "platform/primitives" },
 ]
 provides-extras = ["dev"]
 

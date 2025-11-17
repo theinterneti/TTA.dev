@@ -4,5 +4,7 @@
 			"path": "../TTA.dev-copilot"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.defaultInterpreterPath": "/home/thein/repos/TTA.dev-copilot/.venv/bin/python"
+	}
 }
