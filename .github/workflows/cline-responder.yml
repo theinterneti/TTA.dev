@@ -20,7 +20,7 @@ jobs:
             const body = context.payload.comment?.body || "";
             const isPR = !!context.payload.issue?.pull_request;
             const hit = body.toLowerCase().includes("@cline");
-            core.setOutput("hit", (!isPR && hit) ? "true" : "false");
+            core.setOutput("hit", hit ? "true" : "false");
             core.setOutput("issue_number", String(context.payload.issue?.number || ""));
             core.setOutput("issue_url", context.payload.issue?.html_url || "");
             core.setOutput("comment_body", body);
