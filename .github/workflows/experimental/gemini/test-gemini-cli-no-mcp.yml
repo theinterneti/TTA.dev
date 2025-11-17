@@ -25,7 +25,7 @@ jobs:
         with:
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           gemini_model: 'gemini-2.5-flash'  # Use valid model name
-          use_vertex_ai: false
+          # use_vertex_ai: # Disabled - requires GCP auth false
           use_gemini_code_assist: false
           gemini_debug: true
           prompt: '${{ inputs.command }}'
