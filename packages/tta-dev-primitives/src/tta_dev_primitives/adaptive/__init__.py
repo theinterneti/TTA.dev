@@ -82,6 +82,11 @@ Example - Custom Adaptive Primitive:
 
 from .base import AdaptivePrimitive, LearningMode, LearningStrategy, StrategyMetrics
 from .cache import AdaptiveCachePrimitive
+from .cline import (
+    ClineCLISubAgentPrimitive,
+    ClineExecutionStrategy,
+    ClineTaskClassifier,
+)
 from .exceptions import (
     AdaptiveError,
     CircuitBreakerError,
@@ -106,6 +111,9 @@ __all__ = [
     "AdaptiveCachePrimitive",
     "AdaptiveFallbackPrimitive",
     "AdaptiveTimeoutPrimitive",
+    "ClineCLISubAgentPrimitive",  # NEW: Cline CLI Sub-Agent primitive
+    "ClineExecutionStrategy",
+    "ClineTaskClassifier",
     "LearningStrategy",
     "StrategyMetrics",
     "LearningMode",

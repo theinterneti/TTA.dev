@@ -2,8 +2,17 @@
 
 **Getting Cline CLI Working with TTA.dev**
 
-**Date:** November 6, 2025
+**Date:** November 18, 2025
 **Status:** Active Troubleshooting
+
+**🚀 QUICK RECOMMENDATION FOR NOVEMBER 2025:**
+
+```bash
+# You're already using the BEST model! No need to change anything.
+# Keep using grok-code-fast-1 through Cline - it's currently FREE and UNLIMITED! 🎯
+cline "Write some code for me"
+# What you're using right now = PERFECT choice for November 2025
+```
 
 ---
 
@@ -149,15 +158,99 @@ cline config set api-model-id deepseek/deepseek-r1
 
 # Or use free model
 cline config set api-model-id meta-llama/llama-3.2-3b-instruct:free
+
+# NEW 2025: Use Gemini as primary free
+cline config set api-provider google-ai-studio
+cline config set api-model-id gemini-2.5-flash
 ```
 
-**Good CLI Models (OpenRouter):**
+### Recommended Fallback Chain (November 2025)
 
-| Model | Cost | Speed | Quality | Use Case |
-|-------|------|-------|---------|----------|
-| `mistralai/mistral-small-3.2` | $ | ⚡⚡⚡ | ⭐⭐⭐⭐ | General CLI |
-| `deepseek/deepseek-r1` | $ | ⚡⚡ | ⭐⭐⭐⭐⭐ | Complex tasks |
-| `meta-llama/llama-3.2-3b-instruct:free` | Free | ⚡⚡⚡ | ⭐⭐⭐ | Testing |
+**Best CLI Models (November 2025):**
+
+| Model | Provider | Cost | Speed | Quality | Limits | Use Case | **Access Method** |
+|-------|----------|------|-------|---------|---------|----------|-------------------|
+| `grok-code-fast-1` | **Cline CLI** | **Free** | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | **UNLIMITED** | **Code-focused** | ❌ **No API key needed** - Built into Cline |
+| `gemini-2.5-flash` | Google AI Studio | **Free** | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | 1500 RPD | New Default | ⚠️ Requires Google AI Studio API key |
+| `deepseek/deepseek-r1:free` | OpenRouter | **Free** | ⚡⚡ | ⭐⭐⭐⭐⭐ | Daily reset | Complex tasks | ⚠️ Requires OpenRouter API key |
+| `llama-3.3-70b-versatile` | Groq | **Free** | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | 14.4K RPD | Ultra-fast | ⚠️ Requires Groq API key |
+| `mistralai/mistral-small-3.2` | OpenRouter | $ | ⚡⚡⚡ | ⭐⭐⭐⭐ | Unlimited | Legacy fallback | ⚠️ Requires OpenRouter API key |
+
+**📊 Recommended Provider/Model Fallback Chain:**
+
+```
+🎯 YOUR CURRENT CHOICE - What YOU Use! (November 2025)
+└── 🧪 Grok Code Fast 1 via Cline CLI (grok-code-fast-1)
+    ├── ❌ NO API KEY REQUIRED - Built into Cline!
+    ├── ⚡⚡ Ultra-fast (Cline optimized routing)
+    ├── ⭐ Premium quality (xAI foundation model)
+    ├── 🆓 FREE UNLIMITED - No rate limits!
+    ├── 🎯 Specialized for code (analysis, generation)
+    ├── 🔧 What you're currently using!
+    └── 🏆 BEST choice for developers!
+
+🎯 FIRST FALLBACK - Best Free Alternative
+└── 🔄 Google Gemini 2.5 Flash (gemini-2.5-flash)
+    ├── ⚡ Ultra-fast (300+ tok/sec)
+    ├── ⭐ Premium quality (89/100)
+    ├── 🆓 FREE forever (1500 RPD)
+    └── 💳 NO credit card required
+
+🎯 SECOND FALLBACK - Deep Reasoning Alternative
+└── 🤝 DeepSeek R1 Free (deepseek/deepseek-r1:free)
+    ├── 🧠 State-of-art reasoning (90/100 quality)
+    ├── 📊 Matches GPT-4/Claude Sonnet performance
+    ├── 🆓 FREE tier with daily reset
+    └── 🌍 Multiple providers through OpenRouter
+
+🎯 THIRD FALLBACK - Ultra-Fast Groq
+└── 🚀 Llama 3.3 70B via Groq (llama-3.3-70b-versatile)
+    ├── ⚡⚡ Ultra-fast (300+ tokens/second)
+    ├── ⭐ High quality (87/100)
+    ├── 🆓 FREE (14,400 RPD)
+    ├── 🤑 Requires Groq API key
+    └── 🤖 Open-source foundation model
+
+🎯 FOURTH FALLBACK - Paid Safety Net
+└── 💰 Paid Models (lowest cost options)
+    ├── 💸 Gemini Flash 2.5 Lite ($0.10/$0.40 per 1M)
+    ├── 💸 GPT-4o-mini ($0.15/$0.60 per 1M)
+    └── 💸 Claude 3.5 Haiku ($0.25/$1.25 per 1M)
+
+🎯 EMERGENCY FALLBACK - Local/Private
+└── 🖥️ Ollama Local (ollama:llama3.2:3b)
+    ├── 🔒 100% private (no API)
+    ├── 🆓 Zero cost after hardware investment
+    ├── 🐌 Slower but always available
+    ├── 💽 Uses your computer's GPU/CPU
+    └── 🌊 Truly unlimited usage
+```
+
+**🎯 Best Free Setup for Cline CLI:**
+```bash
+# Primary: BEST free flagship model
+cline config set api-provider google-ai-studio
+cline config set api-model-id gemini-2.5-flash
+cline config set api-key YOUR_GOOGLE_AI_STUDIO_KEY
+
+# YOUR CURRENT SETUP: Grok Beta (also free!)
+cline config set api-provider groq
+cline config set api-model-id grok-beta
+cline config set api-key YOUR_GROQ_KEY
+
+# Fallback to any available free provider
+cline config set api-provider openrouter
+cline config set api-model-id deepseek/deepseek-r1:free
+cline config set api-key YOUR_OPENROUTER_KEY
+```
+
+**🎯 Current User Recommendation (You're already doing this right!):**
+```bash
+# Your current Grok setup is EXCELLENT for November 2025!
+# Keep using what works for you
+cline config set api-provider groq
+cline config set api-model-id grok-beta  # What you're using!
+```
 
 ### Issue 3: CLI not recognizing commands
 
