@@ -1,0 +1,14 @@
+⚠️ COORDINATION NOTICE
+
+This is the GitHub Copilot agent worktree.
+Branch: agent/copilot
+
+Before making changes:
+1. Check if another agent is working on related code
+2. Sync with main: git fetch origin && git rebase origin/main
+3. Coordinate via GitHub Issues/PRs
+
+Other Agent Worktrees:
+- Cline: ~/repos/TTA.dev-cline
+- Augment: ~/repos/TTA.dev-augment
+- Main: ~/repos/TTA.dev
