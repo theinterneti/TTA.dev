@@ -417,6 +417,97 @@ Create a new LogSeq page called "Meeting Notes 2025-11-01" with the summary from
 
 ---
 
+### 9. TTA Dev Primitives - Complete AI Development Toolkit
+
+**Purpose:** Complete TTA.dev Agent Primitives ecosystem providing AI workflow composition, recovery, performance, and coordination tools
+
+**Tools Provided:** (18+ tools available)
+
+| Tool | Category | Description | Usage |
+|------|----------|-------------|-------|
+| **Context Management** | Core | Workflow context lifecycle management | Session tracking and data persistence |
+| `create_workflow_context` | Context | Create new workflow context | Initialize workflow sessions with correlation IDs |
+| `context_get` | Context | Retrieve current context data | Get workflow state and metadata |
+| `context_update` | Context | Update context data | Modify workflow state and pass data between primitives |
+| **Workflow Primitives** | Core | Fundamental workflow composition | Sequential, parallel, conditional, routing |
+| `sequential_execute` | Workflow | Execute steps in sequence | Chain operations with output→input flow |
+| `parallel_execute` | Workflow | Run steps concurrently | Parallel processing for performance |
+| `conditional_execute` | Workflow | Branch based on conditions | True/false branching logic |
+| `router_execute` | Workflow | Dynamic routing decisions | Cost-based LLM selection, rule-based routing |
+| **Recovery Primitives** | Recovery | Fault tolerance and reliability | Handle failures, timeouts, retries |
+| `retry_execute` | Recovery | Automatic retry with backoff | Exponential/linear backoff strategies |
+| `fallback_execute` | Recovery | Graceful degradation | Primary→fallback execution paths |
+| `timeout_execute` | Recovery | Circuit breaker pattern | Protect against hanging operations |
+| **Performance Primitives** | Performance | Caching and optimization | Speed up expensive operations |
+| `cache_execute` | Performance | LRU cache with TTL | Avoid redundant LLM calls, DB queries |
+| **Testing Primitives** | Testing | Testing and simulation | Mock external services for testing |
+| `mock_create` | Testing | Create mock primitives | Simulate external APIs, databases |
+| **Memory & Pattern Learning** | Intelligence | Self-improving workflows | Learn from past usage patterns |
+| `memory_find_patterns` | Intelligence | Discover similar workflows | Reuse successful patterns |
+| `memory_record_usage` | Intelligence | Record pattern success | Train adaptive primitives |
+| **Context Analysis** | Analysis | Architecture and context understanding | Multi-file context awareness |
+| `diagnostics_context` | Analysis | Task-aware context retrieval | Relevant files, relationships |
+| `diagnostics_architecture` | Analysis | System architecture maps | Dependency graphs, component relationships |
+| `diagnostics_performance` | Analysis | Performance metrics integration | Response times, error rates (via observability) |
+| **Orchestration** | Advanced | Complex multi-primitive workflows | Full workflow automation |
+| `orchestrate_workflow` | Advanced | Execute complex specifications | Multi-stage orchestration pipelines |
+
+**Example Usage:**
+
+```bash
+# Workflow Context Management
+@workspace Create a workflow context for user authentication flow
+
+# Sequential Execution
+@workspace Execute these steps in sequence: validate_input, check_permissions, generate_token
+
+# Retry with Backoff
+@workspace Execute API call with exponential retry up to 5 attempts
+
+# Conditional Branching
+@workspace If user_role is "admin", execute privileged_workflow, else execute standard_workflow
+
+# Caching Expensive Operations
+@workspace Cache this LLM call with 1-hour TTL and max 1000 items
+
+# Memory Pattern Learning
+@workspace Find similar patterns to my current retry implementation
+```
+
+**Configuration:**
+
+- Location: `.cline/mcp-server/tta_primitives.py`
+- Status: Active ✅ (18+ tools loaded)
+- Dependencies: `packages/tta-dev-primitives/`
+- Loading method: `uv run python .cline/mcp-server/tta_primitives.py`
+
+**Advanced Features:**
+
+- **Workflow State Persistence** - Contexts survive across tool calls
+- **Correlation ID Tracking** - End-to-end request tracing
+- **Multi-File Context Awareness** - Understand complex code relationships
+- **Pattern Learning Integration** - Automatically improve workflows
+- **Observability Integration** - Metrics, tracing through observability stack
+- **Graceful Degradation** - Falls back when components unavailable
+
+**TTA.dev Integration:**
+
+- **Complete Primitive Coverage** - All core, recovery, performance, testing primitives
+- **Workflow Composition** - Use `>>` operator semantics through MCP
+- **Context Propagation** - `WorkflowContext` carries state through entire workflows
+- **Production Ready** - Built for production reliability and performance
+- **Multi-Agent Coordination** - Enables Cline ↔ Copilot ↔ CLI coordination
+
+**Primary Use Cases:**
+
+- **AI Workflow Development** - Build reliable, composable AI workflows
+- **System Integration** - Connect different AI components seamlessly
+- **Production Reliability** - Fault-tolerant, observable, performant systems
+- **Testing & Validation** - Comprehensive testing primitives for complex systems
+- **Pattern Learning** - Self-improving workflows that learn from usage
+
+---
+
 ## MCP Tools by Toolset
 
 ### Core Development Toolsets
@@ -424,9 +515,9 @@ Create a new LogSeq page called "Meeting Notes 2025-11-01" with the summary from
 | Toolset | MCP Tools Included |
 |---------|-------------------|
 | `#tta-minimal` | None (lightweight) |
-| `#tta-package-dev` | Pylance tools (automatic) |
-| `#tta-testing` | Pylance tools (automatic) |
-| `#tta-observability` | Grafana (Prometheus, Loki, alerts) |
+| `#tta-package-dev` | Pylance tools (automatic), TTA Dev Primitives |
+| `#tta-testing` | Pylance tools (automatic), TTA Dev Primitives (Mock, Retry, Cache) |
+| `#tta-observability` | Grafana (Prometheus, Loki, alerts), TTA Dev Primitives (Context) |
 
 ### Specialized Toolsets
 

@@ -6,13 +6,11 @@
 	],
 	"settings": {
 		"python.defaultInterpreterPath": ".venv/bin/python",
-		"github.copilot.enable": {
-			"*": true
-		}
+		"cline.enabled": true
 	},
 	"extensions": {
 		"recommendations": [
-			"github.copilot",
+			"saoudrizwan.claude-dev",
 			"ms-python.python",
 			"ms-python.vscode-pylance",
 			"charliermarsh.ruff"
