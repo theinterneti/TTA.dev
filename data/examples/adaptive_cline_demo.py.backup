@@ -18,13 +18,14 @@ Run with: python examples/adaptive_cline_demo.py
 
 import asyncio
 import logging
-import os
 import sys
+import os
 
 # Add packages to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../packages"))
 
 from tta_dev_primitives.adaptive import (
+    ClineCLISubAgentPrimitive,
     LearningMode,
     create_cline_cli_subagent,
 )
@@ -39,8 +40,8 @@ logger = logging.getLogger(__name__)
 
 async def create_mock_cline_binary():
     """Create a mock Cline binary for demonstration purposes."""
-    import stat
     import tempfile
+    import stat
 
     mock_script = """#!/bin/bash
 # Mock Cline CLI for demonstration
@@ -50,7 +51,7 @@ echo "Executed prompt: $CLINE_PROMPT"
 exit 0
 """
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix="_cline", delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode='w', suffix='_cline', delete=False) as f:
         f.write(mock_script)
         f.flush()
         os.chmod(f.name, stat.S_IEXEC | stat.S_IRUSR | stat.S_IWUSR)
@@ -94,7 +95,7 @@ async def demonstrate_adaptive_cline_learning():
                 "context": {
                     "environment": "development",
                     "priority": "high",
-                    "code_context": "def authenticate_user(username: str) -> bool:",
+                    "code_context": "def authenticate_user(username: str) -> bool:"
                 },
                 "expected_persona": "backend-developer",
                 "iterations": 5,
@@ -122,7 +123,7 @@ async def demonstrate_adaptive_cline_learning():
                 "context": {
                     "environment": "development",
                     "priority": "normal",
-                    "code_context": "function UserProfile({ user }) {",
+                    "code_context": "function UserProfile({ user }) {"
                 },
                 "expected_persona": "frontend-developer",
                 "iterations": 3,
@@ -133,7 +134,8 @@ async def demonstrate_adaptive_cline_learning():
         total_successes = 0
 
         for i, scenario in enumerate(test_scenarios, 1):
-            print("\n" + "=" * 60)
+            print("
+" + "=" * 60)
             print(f"📝 Scenario {i}/{len(test_scenarios)}: {scenario['task'][:50]}...")
             print("=" * 60)
             print(f"Expected Persona: {scenario['expected_persona']}")
@@ -149,7 +151,7 @@ async def demonstrate_adaptive_cline_learning():
                     metadata={
                         "environment": scenario["context"]["environment"],
                         "priority": scenario["context"]["priority"],
-                    },
+                    }
                 )
 
                 # Execute task
@@ -166,9 +168,7 @@ async def demonstrate_adaptive_cline_learning():
 
                         status = "✅"
                         persona_match = persona_used == scenario["expected_persona"]
-                        persona_note = (
-                            " (expected)" if persona_match else f" (was {persona_used})"
-                        )
+                        persona_note = " (expected)" if persona_match else f" (was {persona_used})"
                     else:
                         total_executions += 1
                         status = "❌"
@@ -197,9 +197,7 @@ async def demonstrate_adaptive_cline_learning():
         print("🎯 Final Learning Summary")
         print("=" * 60)
 
-        overall_success_rate = (
-            total_successes / total_executions if total_executions > 0 else 0
-        )
+        overall_success_rate = total_successes / total_executions if total_executions > 0 else 0
         learning_summary = adaptive_cline.get_learning_summary()
         cline_metrics = adaptive_cline.get_cline_specific_metrics()
 
@@ -217,18 +215,16 @@ async def demonstrate_adaptive_cline_learning():
             print(f"     - Avg Latency: {metrics['avg_latency']:.3f}s")
             print(f"     - Executions: {metrics['executions']}")
 
-        if cline_metrics["persona_performance"]:
+        if cline_metrics['persona_performance']:
             print("\n👥 Persona Effectiveness by Task Type:")
-            for persona, task_types in cline_metrics["persona_performance"].items():
+            for persona, task_types in cline_metrics['persona_performance'].items():
                 print(f"   • {persona}:")
                 for task_type, perf in task_types.items():
-                    print(
-                        f"     - {task_type}: {perf['success_rate']:.1%} ({perf['executions']} executions)"
-                    )
+                    print(f"     - {task_type}: {perf['success_rate']:.1%} ({perf['executions']} executions)")
 
     finally:
         # Clean up mock binary
-        if "mock_cline" in locals():
+        if 'mock_cline' in locals():
             try:
                 os.unlink(mock_cline)
             except:
@@ -264,11 +260,11 @@ async def demonstrate_cline_task_classification():
 
     for task in test_tasks:
         classification = ClineTaskClassifier.classify_task(task)
-        complexity = classification["complexity"]
-        persona = classification["recommended_persona"]
-        task_type = classification["task_type"]
-        needs_validation = classification["needs_validation"]
-        has_generation = classification["has_code_generation"]
+        complexity = classification['complexity']
+        persona = classification['recommended_persona']
+        task_type = classification['task_type']
+        needs_validation = classification['needs_validation']
+        has_generation = classification['has_code_generation']
 
         flags = []
         if needs_validation:
@@ -347,9 +343,7 @@ async def main():
         print("• Validation catches issues before they reach production")
         print("• Strategies improve continuously while maintaining safety")
         print("• All learning is persisted to the knowledge base")
-        print(
-            "\nThis represents the next evolution: AI agents that teach themselves! 🧠"
-        )
+        print("\nThis represents the next evolution: AI agents that teach themselves! 🧠")
 
     except Exception as e:
         logger.error(f"Demo failed: {e}")
