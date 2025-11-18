@@ -1,395 +1,369 @@
 # TTA.dev/Patterns/Caching
 
-**Performance optimization through intelligent caching strategies**
-
----
-
 ## Overview
 
-Caching is a critical pattern for reducing costs and improving performance in TTA.dev workflows. By storing and reusing results of expensive operations, caching can reduce API calls, lower costs, and improve response times.
+Caching is a critical performance optimization pattern in TTA.dev workflows. By intelligently caching expensive operations, you can reduce latency, lower costs, and improve user experience. TTA.dev provides the `CachePrimitive` as the primary tool for implementing caching patterns with built-in observability and automatic optimization.
 
-**Impact:** 40-60% cost reduction typical, up to 100x latency reduction on cache hits
-**Primitive:** [[CachePrimitive]]
-**Category:** Performance Pattern
+Tags: #performance #optimization #patterns
+Type: Pattern Guide
+Audience: Intermediate Developers, Performance Engineers
+Status: Stable
 
----
+## Core Concepts
 
-## When to Use Caching
+### CachePrimitive Architecture
 
-### ✅ Good Candidates for Caching
-
-1. **LLM API Calls**
-   - Same prompts repeated frequently
-   - Deterministic results expected
-   - Cost is significant factor
-
-2. **External API Requests**
-   - Slow response times (>100ms)
-   - Rate-limited services
-   - Expensive per-request cost
-
-3. **Database Queries**
-   - Complex aggregations
-   - Frequently accessed data
-   - Relatively static content
-
-4. **Computation-Heavy Operations**
-   - ML model inference
-   - Complex data transformations
-   - Expensive parsing/processing
-
-### ❌ Poor Candidates for Caching
-
-1. **User-Specific Data**
-   - Personalized content
-   - Session-dependent results
-   - Real-time user state
-
-2. **Rapidly Changing Data**
-   - Live feeds
-   - Stock prices
-   - Real-time metrics
-
-3. **Non-Deterministic Operations**
-   - Random number generation
-   - Time-sensitive calculations
-   - Creative generation (when variety needed)
-
----
-
-## Basic Caching Pattern
-
-### Simple LRU Cache
+The `CachePrimitive` wraps any expensive operation and provides:
 
 ```python
 from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives.core.base import WorkflowContext
 
-async def expensive_llm_call(data: dict, context: WorkflowContext) -> dict:
-    """Expensive operation that benefits from caching."""
-    # Simulate expensive LLM call
-    response = await openai.chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": data["prompt"]}]
-    )
-
-    return {
-        "response": response.choices[0].message.content,
-        "tokens": response.usage.total_tokens,
-        "cost": calculate_cost(response.usage)
-    }
-
-# Wrap with cache
+# Basic usage - cache LLM calls
 cached_llm = CachePrimitive(
     primitive=expensive_llm_call,
-    ttl_seconds=3600,      # 1 hour TTL
-    max_size=1000,         # Max 1000 cached items
-    key_fn=lambda d, c: d["prompt"]  # Cache key function
+    ttl_seconds=3600,  # Cache for 1 hour
+    max_size=1000      # Keep up to 1000 entries
 )
 
-# Use in workflow
-context = WorkflowContext(workflow_id="cached-workflow")
-
-# First call: cache miss (executes LLM call)
-result1 = await cached_llm.execute(
-    {"prompt": "What is TTA.dev?"},
-    context
-)
-
-# Second call with same prompt: cache hit (instant)
-result2 = await cached_llm.execute(
-    {"prompt": "What is TTA.dev?"},
-    context
-)
-
-# Different prompt: cache miss (new LLM call)
-result3 = await cached_llm.execute(
-    {"prompt": "What is a primitive?"},
-    context
-)
+# Use in workflow context
+context = WorkflowContext(correlation_id="req-123")
+result = await cached_llm.execute(input_data, context)
 ```
 
----
+### Key Caching Strategies
 
-## Multi-Level Caching
+#### 1. **Lookup Cache** (Most Common)
+- Cache by input hash
+- Perfect for deterministic operations
+- Example: API responses, LLM completions
 
-### Pattern: L1 + L2 Cache
+#### 2. **Time-based Expiration**
+- TTL (Time To Live) controls cache freshness
+- Balance freshness vs performance
+- Example: TTL=3600 for moderately stale data
+
+#### 3. **Size-based Eviction**
+- LRU (Least Recently Used) eviction
+- Prevents unbounded memory growth
+- Example: max_size=1000 for high-traffic caches
+
+#### 4. **Context-aware Caching**
+- Include metadata in cache keys
+- Different caching for different environments
+- Example: User-specific vs global caches
+
+## Implementation Patterns
+
+### Pattern 1: LLM Response Caching
 
 ```python
-from tta_dev_primitives.performance import CachePrimitive
-
-async def data_retrieval(data: dict, context: WorkflowContext) -> dict:
-    """Expensive data retrieval operation."""
-    # Simulate expensive database or API call
-    return await fetch_from_database(data["query"])
-
-# L1: Fast in-memory cache (small, short TTL)
-l1_cache = CachePrimitive(
-    primitive=data_retrieval,
-    ttl_seconds=300,       # 5 minutes
-    max_size=100,          # Small cache
-    key_fn=lambda d, c: d["query"]
+# Cache expensive LLM calls
+llm_cache = CachePrimitive(
+    primitive=gpt4_call,
+    ttl_seconds=1800,  # 30 minutes
+    max_size=500
 )
 
-# L2: Larger distributed cache (Redis-backed, longer TTL)
-l2_cache = CachePrimitive(
-    primitive=l1_cache,    # Wrap L1 cache
-    ttl_seconds=3600,      # 1 hour
-    max_size=10000,        # Larger cache
-    backend="redis",       # Distributed cache
-    redis_url="redis://localhost:6379"
+# Context-aware caching
+context = WorkflowContext(
+    correlation_id="llm-req-123",
+    metadata={
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "user_id": "user-456"
+    }
 )
 
-# Use multi-level cache
-result = await l2_cache.execute({"query": "user-123"}, context)
-
-# Cache hit path: L1 → instant
-# L1 miss, L2 hit: Redis lookup → fast
-# L1 miss, L2 miss: Database query → slow
+response = await llm_cache.execute(prompt, context)
 ```
 
----
-
-## Context-Aware Caching
-
-### Pattern: Include Context in Cache Key
+### Pattern 2: API Response Caching
 
 ```python
-from tta_dev_primitives.performance import CachePrimitive
-
-def context_aware_key(data: dict, context: WorkflowContext) -> str:
-    """Generate cache key including context."""
-    return f"{data['prompt']}:{context.user_id}:{context.get('tier', 'default')}"
-
-cached_personalized_llm = CachePrimitive(
-    primitive=personalized_llm_call,
-    ttl_seconds=1800,      # 30 minutes
-    max_size=1000,
-    key_fn=context_aware_key  # Include user_id in cache key
+# Cache external API calls
+api_cache = CachePrimitive(
+    primitive=external_api_call,
+    ttl_seconds=300,  # 5 minutes for dynamic data
+    max_size=200
 )
 
-# Different users get different cached results
-context_user1 = WorkflowContext(user_id="user-1")
-context_user2 = WorkflowContext(user_id="user-2")
+# Parallel with fallback
+workflow = api_cache | direct_api_call  # Try cache first, fallback to direct
+```
 
-# These create separate cache entries
-result1 = await cached_personalized_llm.execute(
-    {"prompt": "My settings"},
-    context_user1
+### Pattern 3: Database Query Caching
+
+```python
+# Cache expensive database queries
+query_cache = CachePrimitive(
+    primitive=db_complex_query,
+    ttl_seconds=600,  # 10 minutes for analytics
+    max_size=100
 )
 
-result2 = await cached_personalized_llm.execute(
-    {"prompt": "My settings"},  # Same prompt
-    context_user2                # Different user
+# Use specific cache key function
+def query_cache_key(query_params, context):
+    return f"{context.metadata.get('user_id')}_{hash(query_params)}"
+
+cached_query = CachePrimitive(
+    primitive=db_complex_query,
+    key_fn=query_cache_key
 )
 ```
 
----
+## Advanced Caching Patterns
 
-## Cache Warming
-
-### Pattern: Pre-populate Cache
+### Cache Hierarchy
 
 ```python
-async def warm_cache(common_queries: list[str], cache: CachePrimitive):
-    """Pre-populate cache with common queries."""
-    context = WorkflowContext(workflow_id="cache-warming")
+# Multi-level caching strategy
+fast_cache = CachePrimitive(expensive_op, ttl_seconds=60, max_size=100)   # L1: Fast, small, short TTL
+slow_cache = CachePrimitive(fast_cache, ttl_seconds=3600, max_size=1000)  # L2: Slower, larger, longer TTL
 
-    for query in common_queries:
-        await cache.execute({"prompt": query}, context)
-
-    print(f"Cache warmed with {len(common_queries)} queries")
-
-# Common queries
-common_queries = [
-    "What is TTA.dev?",
-    "How do I use primitives?",
-    "What is a workflow?",
-    "How do I cache results?",
-]
-
-# Warm cache on startup
-await warm_cache(common_queries, cached_llm)
-
-# Now users get instant responses for common questions
+# Try L1 first (fast), fallback to L2
+workflow = fast_cache | slow_cache
 ```
 
----
-
-## Cache Invalidation Strategies
-
-### Strategy 1: TTL-Based Invalidation
+### Conditional Caching
 
 ```python
-# Automatic expiration after TTL
-cache = CachePrimitive(
-    primitive=operation,
-    ttl_seconds=3600  # Expires after 1 hour
+# Only cache successful results
+def should_cache_condition(input_data, context):
+    return context.metadata.get("cache_enabled", True)
+
+conditional_cache = CachePrimitive(
+    primitive=my_operation,
+    condition_fn=should_cache_condition
 )
 ```
 
-### Strategy 2: Manual Invalidation
+### Cache Invalidation Strategies
 
 ```python
-# Clear entire cache
-cache.clear()
+# Time-based expiration (built-in)
 
-# Invalidate specific key
-cache.invalidate(key="specific-prompt")
+# Manual invalidation
+await cache.invalidate("specific_key")
 
-# Selective invalidation
-async def invalidate_user_cache(user_id: str):
-    """Invalidate all cache entries for a user."""
-    for key in cache.keys():
-        if user_id in key:
-            cache.invalidate(key=key)
+# Pattern-based invalidation
+await cache.invalidate_pattern("user_*")  # Clear all user-related cache
+
+# Complete cache flush
+await cache.clear()
 ```
 
-### Strategy 3: Conditional Invalidation
+## Performance Considerations
 
-```python
-async def cached_with_validation(data: dict, context: WorkflowContext) -> dict:
-    """Cache with validation on retrieval."""
+### Cache Hit Ratios
 
-    # Check if cached result is still valid
-    cached_result = cache.get(data)
+Monitor hit rates to optimize configuration:
 
-    if cached_result and is_still_valid(cached_result):
-        return cached_result
-
-    # Re-fetch if invalid
-    fresh_result = await expensive_operation(data, context)
-    cache.set(data, fresh_result)
-
-    return fresh_result
+```
+Good: >70% hit rate
+Okay: 40-70% hit rate
+Poor: <40% hit rate (consider removing cache)
 ```
 
----
+### Memory Usage
 
-## Monitoring Cache Performance
+- Monitor cache size vs hit rate tradeoffs
+- Set appropriate max_size limits
+- Consider cache size in resource planning
 
-### Metrics to Track
+### Latency Impact
 
-```python
-from tta_dev_primitives.performance import CachePrimitive
-from prometheus_client import Counter, Histogram
-
-# Prometheus metrics
-cache_hits = Counter('cache_hits_total', 'Total cache hits')
-cache_misses = Counter('cache_misses_total', 'Total cache misses')
-cache_latency = Histogram('cache_latency_seconds', 'Cache operation latency')
-
-# Enhanced cache with metrics
-class MetricsCachePrimitive(CachePrimitive):
-    async def execute(self, data: dict, context: WorkflowContext) -> dict:
-        start_time = time.time()
-
-        # Check cache
-        cached = self.get(data, context)
-
-        if cached:
-            cache_hits.inc()
-            cache_latency.observe(time.time() - start_time)
-            return cached
-
-        # Cache miss
-        cache_misses.inc()
-        result = await super().execute(data, context)
-        cache_latency.observe(time.time() - start_time)
-
-        return result
-
-# Query metrics in Prometheus
-# cache_hit_rate = cache_hits_total / (cache_hits_total + cache_misses_total)
-```
-
----
+- Cache hits: typically <1ms
+- Cache misses: full operation latency
+- Network costs: reduced by caching
 
 ## Best Practices
 
-### 1. Choose Appropriate TTL
+### ✅ Do This
+
+1. **Cache Deterministic Operations**: Only cache operations that produce consistent results for identical inputs
+2. **Set Appropriate TTLs**: Balance data freshness with performance gains
+3. **Use LRU Eviction**: Let the cache manage size automatically
+4. **Monitor Hit Rates**: Track cache effectiveness metrics
+5. **Include Context in Keys**: Make cache keys specific enough to avoid conflicts
+
+### ❌ Avoid This
+
+1. **Don't Cache Random Operations**: Functions with random outputs defeat caching purpose
+2. **Don't Set Unlimited TTL**: Stale data can cause bugs
+3. **Don't Ignore Memory Limits**: Unbounded caches can cause OOM
+4. **Don't Cache Secrets**: Never cache sensitive data
+5. **Don't Use Caching for Debugging**: Caching masks real performance issues
+
+## Common Pitfalls
+
+### Pitfall 1: Cache Key Collisions
 
 ```python
-# Short TTL for frequently changing data
-cache_short = CachePrimitive(ttl_seconds=300)   # 5 minutes
+# Bad: Generic key function
+def bad_key_fn(input_data, context):
+    return "cache_key"  # Always same key!
 
-# Medium TTL for semi-static data
-cache_medium = CachePrimitive(ttl_seconds=3600)  # 1 hour
-
-# Long TTL for static data
-cache_long = CachePrimitive(ttl_seconds=86400)   # 24 hours
+# Good: Specific key function
+def good_key_fn(input_data, context):
+    return f"{context.correlation_id}_{hash(input_data)}"
 ```
 
-### 2. Size Cache Appropriately
+### Pitfall 2: Ignoring Cache Invalidation
+
+Problem: Data updates don't clear cache
+Solution: Implement proper invalidation strategies
+
+### Pitfall 3: Cache Stampede
+
+Problem: Multiple requests hit cache miss simultaneously
+Solution: Use single-flight caching or request coalescing
+
+## Monitoring & Observability
+
+Cache primitives include built-in metrics:
+
+- `cache_hits_total`: Number of cache hits
+- `cache_misses_total`: Number of cache misses
+- `cache_size_gauge`: Current cache size
+- `cache_evictions_total`: Items evicted from cache
 
 ```python
-# Small cache for high-cardinality keys
-cache_small = CachePrimitive(max_size=100)
+# Monitor cache effectiveness
+cache_metrics = await cache.get_metrics()
+hit_rate = cache_metrics.hits / (cache_metrics.hits + cache_metrics.misses)
 
-# Medium cache for moderate cardinality
-cache_medium = CachePrimitive(max_size=1000)
-
-# Large cache for low cardinality
-cache_large = CachePrimitive(max_size=10000)
+# Alert if hit rate drops below 50%
+if hit_rate < 0.5:
+    logger.warning(f"Low cache hit rate: {hit_rate:.1%}")
 ```
 
-### 3. Use Semantic Cache Keys
+## Integration with Other Primitives
+
+### With RetryPrimitive
 
 ```python
-# ✅ Good: Semantic content-based key
-def semantic_key(data: dict, context: WorkflowContext) -> str:
-    prompt = data["prompt"]
-    # Hash or embed prompt for similarity matching
-    return f"semantic:{hash_prompt(prompt)}"
-
-# ❌ Bad: Random or opaque keys
-def bad_key(data: dict, context: WorkflowContext) -> str:
-    return str(uuid.uuid4())  # Every call generates new key
+# Cache + Retry for resilient calls
+cached_retry = CachePrimitive(
+    RetryPrimitive(api_call, max_retries=3),
+    ttl_seconds=300
+)
 ```
 
-### 4. Handle Cache Failures Gracefully
+### With ParallelPrimitive
 
 ```python
-async def fault_tolerant_cache(data: dict, context: WorkflowContext) -> dict:
-    """Cache that falls back on failure."""
-    try:
-        return await cached_operation.execute(data, context)
-    except CacheError as e:
-        logger.warning(f"Cache failure: {e}, falling back to direct execution")
-        return await direct_operation.execute(data, context)
+# Parallel cached operations
+parallel_cached = ParallelPrimitive([
+    CachePrimitive(op1, ttl_seconds=600),
+    CachePrimitive(op2, ttl_seconds=600),
+    CachePrimitive(op3, ttl_seconds=600)
+])
 ```
 
+### With RouterPrimitive
+
+```python
+# Route to fastest cached alternative
+cached_router = RouterPrimitive({
+    "fast": CachePrimitive(fast_model, ttl_seconds=1800),
+    "quality": CachePrimitive(slow_model, ttl_seconds=3600)
+})
+```
+
+## Production Deployment Considerations
+
+### Cache Warming
+
+Pre-populate cache with common queries:
+
+```python
+# Warm cache on startup
+common_queries = ["popular_query_1", "popular_query_2"]
+for query in common_queries:
+    await cache.execute(query, context)
+```
+
+### Cache Clustering
+
+For multi-instance deployments:
+
+```python
+# Use Redis or similar for shared caching
+redis_cache = RedisCachePrimitive(
+    primitive=my_operation,
+    redis_url="redis://cache-cluster:6379"
+)
+```
+
+### Cache Backup/Restore
+
+```python
+# Export cache state
+cache_state = await cache.export()
+
+# Import cache state
+await cache.import(cache_state)
+```
+
+## Troubleshooting Guide
+
+### Symptom: Poor Hit Rates
+
+**Check:**
+- Cache key granularity (too specific = low hits)
+- TTL settings (too short = rapid expiration)
+- Cache size (too small = frequent eviction)
+
+**Solutions:**
+- Simplify cache keys
+- Increase TTL
+- Increase cache size
+
+### Symptom: Memory Issues
+
+**Check:**
+- Cache size limits
+- Object sizes in cache
+- Memory leak patterns
+
+**Solutions:**
+- Implement size limits
+- Use cache serialization
+- Periodic cache cleanup
+
+### Symptom: Cache Miss Storms
+
+**Check:**
+- TTL expiration patterns
+- Concurrent request patterns
+- Cache key distribution
+
+**Solutions:**
+- Jitter TTL expiration
+- Implement request coalescing
+- Use longer TTLs with validation
+
+## Next Steps
+
+### Explore Related Patterns
+- [[TTA.dev/Patterns/Performance]]
+- [[TTA.dev/Patterns/Error Handling]]
+- [[TTA.dev/Primitives/CachePrimitive]]
+- [[TTA.dev/Examples/Cached LLM]]
+
+### Related How-To Guides
+- [[TTA.dev/How-To/Implement Caching]]
+- [[TTA.dev/How-To/Performance Tuning]]
+- [[TTA.dev/How-To/Monitor Cache Performance]]
+
+### Implementation Examples
+- [[TTA.dev/Examples/API Response Caching]]
+- [[TTA.dev/Examples/LLM Response Caching]]
+- [[TTA.dev/Examples/Database Query Caching]]
+
 ---
 
-## Related Patterns
-
-- [[TTA.dev/Patterns/Cost Optimization]] - Caching reduces costs
-- [[TTA.dev/Patterns/Performance]] - Caching improves performance
-- [[TTA.dev/Patterns/Resilience]] - Caching provides fallback data
-
----
-
-## Related Primitives
-
-- [[CachePrimitive]] - Main caching implementation
-- [[RouterPrimitive]] - Route to cached vs fresh data
-- [[FallbackPrimitive]] - Fallback to cache on failure
-
----
-
-## Related Examples
-
-- [[TTA.dev/Examples/Cached LLM]] - LLM caching example
-- [[TTA.dev/Examples/RAG Workflow]] - RAG with caching
-- [[TTA.dev/Examples/Cost Tracking]] - Cost reduction via caching
-
----
-
-**Category:** Performance Pattern
-**Impact:** High (40-60% cost reduction)
-**Complexity:** Low to Medium
-**Status:** Production-ready
-
-
----
-**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___patterns___caching]]
+**Last Updated:** 2025-11-18
+**Author:** TTA.dev Cline Adaptive Agent
+**Related Files:** `packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py`
