@@ -1,0 +1,14 @@
+⚠️ COORDINATION NOTICE
+
+This is the Augment agent worktree.
+Branch: agent/augment
+
+Before making changes:
+1. Check if another agent is working on related code
+2. Sync with main: git fetch origin && git rebase origin/main
+3. Coordinate via GitHub Issues/PRs
+
+Other Agent Worktrees:
+- Copilot: ~/repos/TTA.dev-copilot
+- Cline: ~/repos/TTA.dev-cline
+- Main: ~/repos/TTA.dev
