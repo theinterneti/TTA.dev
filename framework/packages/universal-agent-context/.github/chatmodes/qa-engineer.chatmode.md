@@ -1,0 +1,1 @@
+/home/thein/recovered-tta-storytelling/.augment/chatmodes/qa-engineer.chatmode.md

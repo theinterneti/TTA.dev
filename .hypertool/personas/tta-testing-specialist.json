@@ -1,0 +1,66 @@
+{
+  "name": "tta-testing-specialist",
+  "displayName": "TTA Testing Specialist",
+  "description": "Specialized in test development, quality assurance, and validation",
+  "icon": "🧪",
+  "tokenBudget": 1500,
+  "allowedServers": [
+    "context7",
+    "playwright",
+    "github",
+    "gitmcp",
+    "serena",
+    "sequential-thinking",
+    "mcp-logseq"
+  ],
+  "allowedTools": {
+    "context7": ["resolve-library-id", "get-library-docs"],
+    "playwright": ["navigate", "screenshot", "console", "puppeteer_*"],
+    "github": [
+      "github_create_or_update_file",
+      "github_get_file_contents",
+      "github_search_code",
+      "github_pull_request_read"
+    ],
+    "gitmcp": ["list_files", "read_file", "get_diff"],
+    "serena": ["analyze_code", "suggest_refactoring"],
+    "sequential-thinking": ["think", "reflect"],
+    "mcp-logseq": ["list_pages", "get_page_content", "search"]
+  },
+  "restrictedPaths": [
+    "**/.env",
+    "**/secrets/**",
+    "**/.github/workflows/**"
+  ],
+  "context": {
+    "primaryLanguage": "Python",
+    "frameworks": ["pytest", "pytest-asyncio", "Playwright"],
+    "focusAreas": [
+      "Unit test development",
+      "Integration testing",
+      "Test coverage improvement",
+      "Test automation",
+      "Quality metrics"
+    ],
+    "keyFiles": [
+      "**/tests/**/*.py",
+      "packages/**/tests/**",
+      "pytest.ini",
+      "pyproject.toml"
+    ]
+  },
+  "security": {
+    "allowEnvironmentAccess": [],
+    "blockList": ["*"],
+    "requireApprovalFor": ["file_delete", "system_command"]
+  },
+  "workflows": {
+    "default": "testing-development",
+    "available": [
+      "testing-development",
+      "test-creation",
+      "coverage-improvement",
+      "test-automation"
+    ]
+  }
+}

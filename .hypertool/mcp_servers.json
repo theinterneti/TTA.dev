@@ -1,0 +1,82 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Library documentation search and retrieval",
+      "tags": ["documentation", "research", "learning"]
+    },
+    "playwright": {
+      "command": "/usr/bin/npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--headless",
+        "--browser=chromium",
+        "--caps=vision,pdf",
+        "--output-dir=./browser-outputs",
+        "--timeout-action=5000"
+      ],
+      "description": "Browser automation and testing",
+      "tags": ["testing", "automation", "frontend"]
+    },
+    "github": {
+      "command": "/usr/bin/docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",
+        "GITHUB_TOOLSETS": "default,projects,labels,orgs"
+      },
+      "description": "GitHub repository operations and CI/CD",
+      "tags": ["vcs", "devops", "collaboration"]
+    },
+    "sequential-thinking": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-sequentialthinking-tools"],
+      "env": {
+        "MAX_HISTORY_SIZE": "1000"
+      },
+      "description": "Advanced reasoning and problem decomposition",
+      "tags": ["reasoning", "planning", "architecture"]
+    },
+    "gitmcp": {
+      "url": "https://gitmcp.io/theinterneti/TTA.dev",
+      "description": "Repository-specific Git operations",
+      "tags": ["vcs", "repository", "history"]
+    },
+    "serena": {
+      "command": "/usr/bin/uvx",
+      "args": [
+        "--from", "git+https://github.com/oraios/serena",
+        "serena", "start-mcp-server",
+        "--context", "ide-assistant",
+        "--project", "/home/thein/repos/TTA.dev-copilot"
+      ],
+      "description": "IDE integration and code assistance",
+      "tags": ["ide", "code-analysis", "refactoring"]
+    },
+    "grafana": {
+      "command": "/usr/bin/docker",
+      "args": ["run", "--rm", "-i", "--network=host", "mcp-grafana"],
+      "env": {
+        "GRAFANA_URL": "http://localhost:3000",
+        "PROMETHEUS_URL": "http://localhost:9090"
+      },
+      "description": "Observability metrics and monitoring",
+      "tags": ["observability", "metrics", "monitoring"]
+    },
+    "mcp-logseq": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "@ergut/mcp-logseq"],
+      "env": {
+        "LOGSEQ_API_TOKEN": "${LOGSEQ_API_TOKEN}",
+        "LOGSEQ_API_URL": "http://127.0.0.1:12315"
+      },
+      "description": "Knowledge base integration with Logseq",
+      "tags": ["knowledge-base", "documentation", "learning"]
+    }
+  }
+}

@@ -1,0 +1,475 @@
+# SessionContextBuilder Tool
+
+**Generate comprehensive synthetic context for AI agents from minimal input**
+
+⚠️ **Status**: Planned - Not yet implemented
+
+---
+
+## 🎯 Purpose
+
+The SessionContextBuilder will enable agents to work with minimal context by automatically gathering:
+
+- **Relevant KB pages** - Documentation about the topic
+- **Related code files** - Implementation and tests
+- **TODOs** - Outstanding work items
+- **Cross-references** - Bidirectional links
+- **Examples** - Usage patterns
+
+**Vision**: Agent provides just a topic name ("CachePrimitive"), tool returns complete working context.
+
+---
+
+## 🏗️ Planned Architecture
+
+### Intelligent Context Aggregation
+
+```python
+SessionContextBuilder Workflow (Planned):
+┌────────────────────────────┐
+│ Input: topic="CachePrimitive" │
+└────────────────────────────┘
+         │
+         ↓
+┌──────────────────────────────┐
+│ 1. Search KB for topic       │ ─► Find related pages
+└──────────────────────────────┘
+         │
+         ↓
+┌──────────────────────────────┐
+│ 2. Extract mentioned code    │ ─► Get code file references
+└──────────────────────────────┘
+         │
+         ↓
+┌──────────────────────────────┐
+│ 3. Find related code files   │ ─► Scan for implementations
+└──────────────────────────────┘
+         │
+         ↓
+┌──────────────────────────────┐
+│ 4. Extract TODOs from code   │ ─► Find related work items
+└──────────────────────────────┘
+         │
+         ↓
+┌──────────────────────────────┐
+│ 5. Gather test files         │ ─► Find usage examples
+└──────────────────────────────┘
+         │
+         ↓
+┌──────────────────────────────┐
+│ 6. Build cross-references    │ ─► Map relationships
+└──────────────────────────────┘
+         │
+         ↓
+┌──────────────────────────────┐
+│ 7. Rank by relevance         │ ─► Score and sort
+└──────────────────────────────┘
+         │
+         ↓
+┌──────────────────────────────┐
+│ Output: Synthetic Context    │
+└──────────────────────────────┘
+```
+
+---
+
+## 🚀 Planned Usage
+
+### Basic Context Generation
+
+```python
+from tta_kb_automation.tools.session_context_builder import SessionContextBuilder
+from pathlib import Path
+
+# Initialize builder
+builder = SessionContextBuilder(
+    kb_path=Path("logseq/"),
+    code_path=Path("packages/"),
+    max_files=20  # Limit context size
+)
+
+# Generate context for topic
+context = await builder.build_context(topic="CachePrimitive")
+
+# Use context
+print(f"Found {len(context['kb_pages'])} KB pages")
+print(f"Found {len(context['code_files'])} code files")
+print(f"Found {len(context['todos'])} TODOs")
+```
+
+### Agent Workflow Integration
+
+```python
+async def agent_task(task_description: str):
+    """Execute agent task with automatic context."""
+    # Extract topic from task description
+    topic = extract_topic(task_description)
+
+    # Build synthetic context
+    builder = SessionContextBuilder(...)
+    context = await builder.build_context(topic)
+
+    # Provide to agent
+    agent_prompt = f"""
+    Task: {task_description}
+
+    ## Relevant Documentation
+    {format_kb_pages(context['kb_pages'])}
+
+    ## Relevant Code
+    {format_code_files(context['code_files'])}
+
+    ## Related TODOs
+    {format_todos(context['todos'])}
+
+    ## Cross-References
+    {format_xrefs(context['cross_refs'])}
+    """
+
+    return await agent.execute(agent_prompt)
+```
+
+---
+
+## 📊 Planned Output Structure
+
+### Context Dictionary
+
+```python
+{
+    "topic": "CachePrimitive",
+    "kb_pages": [
+        {
+            "path": "pages/TTA Primitives/CachePrimitive.md",
+            "relevance": 1.0,  # 0.0 - 1.0
+            "excerpt": "# CachePrimitive\n\nLRU cache with TTL...",
+            "size_kb": 5.2
+        },
+        {
+            "path": "pages/TTA.dev/Best Practices/Caching.md",
+            "relevance": 0.85,
+            "excerpt": "## Caching Strategies...",
+            "size_kb": 3.1
+        }
+    ],
+    "code_files": [
+        {
+            "path": "packages/tta-dev-primitives/src/.../cache.py",
+            "relevance": 1.0,
+            "type": "implementation",
+            "size_kb": 8.7,
+            "lines": 287
+        },
+        {
+            "path": "packages/tta-dev-primitives/tests/test_cache.py",
+            "relevance": 0.9,
+            "type": "test",
+            "size_kb": 12.3,
+            "lines": 421
+        }
+    ],
+    "todos": [
+        {
+            "file": "cache.py",
+            "line": 156,
+            "text": "Add metrics for cache hit rate",
+            "priority": "medium"
+        }
+    ],
+    "cross_refs": {
+        "kb_to_code": {
+            "TTA Primitives/CachePrimitive.md": ["cache.py", "test_cache.py"]
+        },
+        "code_to_kb": {
+            "cache.py": ["[[TTA Primitives/CachePrimitive]]"]
+        }
+    },
+    "stats": {
+        "total_kb_pages": 3,
+        "total_code_files": 4,
+        "total_todos": 2,
+        "total_size_kb": 32.1,
+        "total_lines": 1543,
+        "relevance_threshold": 0.7
+    }
+}
+```
+
+---
+
+## 🔧 Planned Configuration
+
+### Constructor Parameters
+
+```python
+SessionContextBuilder(
+    kb_path: Path,                  # Logseq KB root
+    code_path: Path,                # Code root directory
+    max_files: int = 20,            # Max files per category
+    relevance_threshold: float = 0.5,  # Min relevance score
+    include_tests: bool = True,     # Include test files
+    include_examples: bool = True,  # Include example files
+    max_context_size_mb: float = 10.0  # Max total context size
+)
+```
+
+---
+
+## 🎓 Planned Use Cases
+
+### Use Case 1: Agent Task Execution
+
+```python
+async def execute_agent_task():
+    """Agent gets full context from just a topic name."""
+    builder = SessionContextBuilder(...)
+
+    # Agent asks: "Improve CachePrimitive performance"
+    context = await builder.build_context("CachePrimitive")
+
+    # Agent now has:
+    # - Documentation (how it works)
+    # - Implementation (current code)
+    # - Tests (usage examples, edge cases)
+    # - TODOs (known issues)
+    # - Cross-refs (related code/docs)
+
+    # Agent can make informed decisions without
+    # manually searching for context
+```
+
+### Use Case 2: Onboarding New Agent
+
+```python
+async def onboard_new_agent(agent_id: str):
+    """Provide comprehensive context for new agent."""
+    builder = SessionContextBuilder(...)
+
+    # Get context for all major topics
+    topics = ["WorkflowPrimitive", "RetryPrimitive", "CachePrimitive"]
+
+    onboarding_context = {}
+    for topic in topics:
+        onboarding_context[topic] = await builder.build_context(topic)
+
+    # Agent now has complete TTA.dev understanding
+    # without reading entire codebase
+```
+
+### Use Case 3: Code Review Context
+
+```python
+async def generate_review_context(changed_files: list[str]):
+    """Build context for code review."""
+    builder = SessionContextBuilder(...)
+
+    # Infer topics from changed files
+    topics = infer_topics_from_files(changed_files)
+
+    # Build context for each topic
+    review_context = {}
+    for topic in topics:
+        review_context[topic] = await builder.build_context(topic)
+
+    # Reviewer gets full context about affected areas
+```
+
+---
+
+## 🔍 Implementation Plan
+
+### Phase 1: Basic Context Building (Week 1)
+
+- ✅ Parse KB pages
+- ✅ Scan code files
+- ✅ Extract TODOs
+- ✅ Build cross-references
+- ⏳ Implement relevance ranking
+- ⏳ Aggregate into single context
+
+### Phase 2: Intelligent Relevance (Week 2)
+
+- ⏳ Keyword-based relevance scoring
+- ⏳ Path-based relevance (closer files = more relevant)
+- ⏳ Cross-reference weighting
+- ⏳ Size-based filtering (respect max_context_size)
+
+### Phase 3: Advanced Features (Week 3)
+
+- ⏳ LLM-based semantic relevance
+- ⏳ Historical context (git blame, recent changes)
+- ⏳ Dependency graph analysis
+- ⏳ Performance optimization (caching, parallel)
+
+### Phase 4: Agent Integration (Week 4)
+
+- ⏳ Standard agent context format
+- ⏳ Streaming context delivery
+- ⏳ Incremental context updates
+- ⏳ Context pruning strategies
+
+---
+
+## 🧪 Planned Testing
+
+### Unit Tests (To Be Written)
+
+```python
+@pytest.mark.asyncio
+async def test_session_context_builder_basic(tmp_path):
+    """Test basic context building."""
+    # Create mock structure
+    kb_dir = tmp_path / "logseq" / "pages"
+    kb_dir.mkdir(parents=True)
+
+    (kb_dir / "CachePrimitive.md").write_text("""
+    # CachePrimitive
+    LRU cache implementation.
+    See: `cache.py`
+    """)
+
+    code_dir = tmp_path / "packages" / "pkg" / "src"
+    code_dir.mkdir(parents=True)
+
+    (code_dir / "cache.py").write_text('''
+    """Cache implementation."""
+    # TODO: Add metrics
+    ''')
+
+    # Build context
+    builder = SessionContextBuilder(
+        kb_path=tmp_path / "logseq",
+        code_path=tmp_path / "packages"
+    )
+    context = await builder.build_context("CachePrimitive")
+
+    # Assertions
+    assert len(context["kb_pages"]) == 1
+    assert len(context["code_files"]) == 1
+    assert len(context["todos"]) == 1
+    assert context["kb_pages"][0]["relevance"] > 0.8
+```
+
+---
+
+## 🔗 Related
+
+### Tools (Leverages)
+
+- [[TTA KB Automation/LinkValidator]] - KB parsing
+- [[TTA KB Automation/TODO Sync]] - TODO extraction
+- [[TTA KB Automation/CrossReferenceBuilder]] - Reference mapping
+
+### Primitives (Uses)
+
+- [[TTA Primitives/ParseLogseqPages]]
+- [[TTA Primitives/ScanCodebase]]
+- [[TTA Primitives/ExtractTODOs]]
+- [[TTA Primitives/CrossReferenceBuilder]]
+
+### Documentation
+
+- [[TTA.dev/Guides/KB Integration Workflow]]
+- [[TTA.dev/Guides/KB Automation for Agents]] - Agent workflows
+
+---
+
+## 💡 Design Principles
+
+### 1. Minimal Agent Input
+
+**Goal**: Agent provides topic, tool does the rest
+
+```python
+# What agent wants to do:
+context = await builder.build_context("CachePrimitive")
+
+# What agent DON'T want to do:
+kb_pages = await find_kb_pages("CachePrimitive")
+code_files = await find_code_files("cache")
+todos = await extract_todos_from(code_files)
+xrefs = await build_xrefs(kb_pages, code_files)
+# ... etc
+```
+
+### 2. Relevance-First
+
+**Principle**: Return most relevant context first
+
+- Score by keyword matching
+- Weight by cross-references
+- Consider file proximity
+- Respect context size limits
+
+### 3. Complete but Bounded
+
+**Balance**: Comprehensive vs manageable
+
+- Include all high-relevance items
+- Cap total context size (default: 10MB)
+- Prioritize: docs > implementation > tests > TODOs
+- Allow agent to request more if needed
+
+### 4. Fast Enough
+
+**Performance**: Usable in agent workflows
+
+- Target: < 5 seconds for typical topic
+- Use caching aggressively
+- Parallelize independent operations
+- Stream results if possible
+
+---
+
+## 🎯 Flashcards
+
+### Q: What is SessionContextBuilder's main purpose? #card
+
+**A:** Generate comprehensive synthetic context from minimal input.
+
+Agent provides topic → Tool returns:
+- Relevant KB pages
+- Related code files
+- Associated TODOs
+- Cross-references
+- Examples and tests
+
+### Q: How does relevance scoring work (planned)? #card
+
+**A:** Multi-factor scoring:
+1. **Keyword matching** - Topic in filename/content
+2. **Cross-reference weighting** - More refs = more relevant
+3. **Path proximity** - Closer files more relevant
+4. **Type priority** - Docs > impl > tests > TODOs
+
+### Q: What's the default context size limit? #card
+
+**A:**
+- **Files**: 20 max per category
+- **Size**: 10MB total
+- **Relevance**: >= 0.5 threshold
+
+Configurable via constructor parameters.
+
+---
+
+## 📅 Development Timeline
+
+**Current Status**: Stub implementation (35 lines)
+
+**Estimated Effort**: 6-8 hours for full implementation
+
+**Phases**:
+- **Phase 1** (2-3 hours): Basic aggregation
+- **Phase 2** (2-3 hours): Relevance ranking
+- **Phase 3** (1-2 hours): Testing + docs
+- **Phase 4** (Future): Advanced features (LLM, streaming)
+
+**Priority**: Medium - Valuable but other tools work well without it
+
+---
+
+**Last Updated:** November 3, 2025
+**Package:** tta-kb-automation
+**Tool Status:** ⚠️ Planned - Not Implemented
+**Implementation**: Stub (68 lines, placeholder methods)

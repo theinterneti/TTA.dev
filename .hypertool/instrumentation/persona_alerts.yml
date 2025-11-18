@@ -1,0 +1,249 @@
+# Hypertool Persona System - Prometheus Alert Rules
+#
+# Configuration for Prometheus alerting on persona metrics
+# These alerts monitor persona switching, token budgets, quality gates, and workflow performance
+#
+# Usage:
+#   1. Copy this file to your Prometheus rules directory
+#   2. Add to prometheus.yml:
+#        rule_files:
+#          - "persona_alerts.yml"
+#   3. Reload Prometheus: curl -X POST http://localhost:9090/-/reload
+#
+# Alerts will be sent to configured Alertmanager endpoints
+
+groups:
+  - name: hypertool_persona_alerts
+    interval: 30s
+    rules:
+
+      # ============================================================
+      # Alert 1: Token Budget Exceeded
+      # ============================================================
+      - alert: TokenBudgetExceeded
+        expr: hypertool_persona_token_budget_remaining < 0
+        for: 1m
+        labels:
+          severity: critical
+          component: hypertool
+          category: cost
+        annotations:
+          summary: "Persona {{ $labels.persona }} has exceeded token budget"
+          description: |
+            Persona {{ $labels.persona }} has used more tokens than allocated.
+            Current budget: {{ $value }} tokens (negative = over budget)
+            
+            This indicates the persona is consuming more LLM tokens than expected.
+            
+            Impact:
+            - Increased API costs
+            - Potential rate limiting
+            - Budget overrun
+            
+          action: |
+            1. Check Langfuse UI for excessive LLM calls by this persona
+            2. Review prompt complexity and length
+            3. Consider increasing token budget if legitimate usage
+            4. Investigate if persona is being used for unexpected tasks
+            
+          runbook: "See ALERT_RUNBOOK.md#token-budget-exceeded"
+          dashboard: "https://grafana/d/hypertool-persona-overview"
+
+      # ============================================================
+      # Alert 2: High Quality Gate Failure Rate
+      # ============================================================
+      - alert: HighQualityGateFailureRate
+        expr: |
+          (
+            sum(rate(hypertool_workflow_quality_gate_total{result="fail"}[5m])) by (workflow, stage)
+            /
+            sum(rate(hypertool_workflow_quality_gate_total[5m])) by (workflow, stage)
+          ) > 0.20
+        for: 5m
+        labels:
+          severity: warning
+          component: hypertool
+          category: quality
+        annotations:
+          summary: "High quality gate failure rate in {{ $labels.workflow }}/{{ $labels.stage }}"
+          description: |
+            Quality gate failure rate is {{ $value | humanizePercentage }} in workflow {{ $labels.workflow }}, stage {{ $labels.stage }}.
+            Threshold: 20% failure rate
+            
+            This indicates LLM-generated content is frequently failing quality checks.
+            
+            Impact:
+            - Reduced output quality
+            - Increased retry costs
+            - Slower workflow execution
+            
+          action: |
+            1. Check Langfuse UI for failed generations in this workflow/stage
+            2. Review quality gate criteria - may be too strict
+            3. Examine recent prompt changes
+            4. Check if model performance has degraded
+            5. Consider switching to higher-tier model for this stage
+            
+          runbook: "See ALERT_RUNBOOK.md#high-quality-gate-failure-rate"
+          dashboard: "https://grafana/d/hypertool-workflow-performance"
+
+      # ============================================================
+      # Alert 3: Excessive Persona Switching
+      # ============================================================
+      - alert: ExcessivePersonaSwitching
+        expr: sum(rate(hypertool_persona_switches_total[1m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: hypertool
+          category: performance
+        annotations:
+          summary: "Excessive persona switching detected"
+          description: |
+            Persona switch rate is {{ $value | humanize }} switches per second.
+            Threshold: 2 switches/second
+            
+            This indicates rapid context switching which may impact:
+            - LLM quality (frequent context changes)
+            - Token efficiency (repeated context loading)
+            - Workflow coherence
+            
+          action: |
+            1. Check Grafana dashboard for switch patterns
+            2. Review chatmode logic - may be switching unnecessarily
+            3. Consider batching similar tasks under one persona
+            4. Investigate if workflow is oscillating between personas
+            5. Check for infinite loops in persona selection logic
+            
+          runbook: "See ALERT_RUNBOOK.md#excessive-persona-switching"
+          dashboard: "https://grafana/d/hypertool-persona-overview"
+
+      # ============================================================
+      # Alert 4: Slow Workflow Stage
+      # ============================================================
+      - alert: SlowWorkflowStage
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(hypertool_workflow_stage_duration_seconds_bucket[5m])) by (le, workflow, stage)
+          ) > 300
+        for: 10m
+        labels:
+          severity: warning
+          component: hypertool
+          category: performance
+        annotations:
+          summary: "Slow workflow stage {{ $labels.workflow }}/{{ $labels.stage }}"
+          description: |
+            P95 duration for {{ $labels.workflow }}/{{ $labels.stage }} is {{ $value | humanizeDuration }}.
+            Threshold: 5 minutes (300 seconds)
+            
+            This indicates the workflow stage is taking longer than expected.
+            
+            Impact:
+            - Slower overall workflow execution
+            - Poor user experience
+            - Increased costs (longer running time)
+            
+          action: |
+            1. Check Langfuse UI for slow LLM calls in this stage
+            2. Review OpenTelemetry traces for bottlenecks
+            3. Consider optimizing prompts to reduce tokens
+            4. Check if model is experiencing latency
+            5. Evaluate if stage complexity can be reduced
+            6. Consider switching to faster model tier if quality allows
+            
+          runbook: "See ALERT_RUNBOOK.md#slow-workflow-stage"
+          dashboard: "https://grafana/d/hypertool-workflow-performance"
+
+  # ============================================================
+  # Additional Alert Group: Token Usage Forecasting (Optional)
+  # ============================================================
+  - name: hypertool_token_forecasting
+    interval: 5m
+    rules:
+
+      - alert: TokenBudgetDepletionPredicted
+        expr: |
+          predict_linear(
+            hypertool_persona_token_budget_remaining[30m],
+            3600
+          ) < 0
+        for: 10m
+        labels:
+          severity: info
+          component: hypertool
+          category: cost
+        annotations:
+          summary: "Persona {{ $labels.persona }} predicted to exceed budget in 1 hour"
+          description: |
+            Based on current usage trends, persona {{ $labels.persona }} will exceed its token budget in approximately 1 hour.
+            Current budget: {{ $value }} tokens
+            
+            This is a predictive alert to give early warning before budget exhaustion.
+            
+          action: |
+            1. Monitor token usage in Langfuse UI
+            2. Prepare to increase budget if needed
+            3. Review current tasks for this persona
+            4. Consider if usage spike is expected (e.g., large feature implementation)
+            
+          runbook: "See ALERT_RUNBOOK.md#token-budget-depletion-predicted"
+          dashboard: "https://grafana/d/hypertool-persona-overview"
+
+  # ============================================================
+  # Alert Group: System Health
+  # ============================================================
+  - name: hypertool_system_health
+    interval: 1m
+    rules:
+
+      - alert: HypertoolMetricsNotReported
+        expr: up{job="hypertool"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: hypertool
+          category: availability
+        annotations:
+          summary: "Hypertool metrics endpoint is down"
+          description: |
+            The Hypertool Prometheus metrics endpoint has not reported data for 2 minutes.
+            
+            This indicates:
+            - Metrics collection has stopped
+            - Process may have crashed
+            - Network connectivity issues
+            
+          action: |
+            1. Check if Hypertool process is running
+            2. Verify Prometheus can reach metrics endpoint (port 9464)
+            3. Check application logs for errors
+            4. Restart Hypertool if necessary
+            
+          runbook: "See ALERT_RUNBOOK.md#hypertool-metrics-not-reported"
+
+      - alert: LangfuseIntegrationFailing
+        expr: |
+          sum(rate(hypertool_persona_tokens_used_total[5m])) > 0
+          and
+          absent(langfuse_trace_created_total)
+        for: 5m
+        labels:
+          severity: warning
+          component: hypertool
+          category: observability
+        annotations:
+          summary: "Langfuse integration appears to be failing"
+          description: |
+            LLM calls are being made (token usage detected) but no Langfuse traces are being created.
+            
+            This indicates Langfuse integration may be broken.
+            
+          action: |
+            1. Check LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY environment variables
+            2. Verify Langfuse API endpoint is reachable
+            3. Check application logs for Langfuse errors
+            4. Ensure langfuse SDK is installed
+            
+          runbook: "See ALERT_RUNBOOK.md#langfuse-integration-failing"

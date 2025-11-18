@@ -1,8 +1,26 @@
+---
+hypertool_persona: tta-backend-engineer
+persona_token_budget: 2000
+tools_via_hypertool: true
+security:
+  restricted_paths:
+    - "packages/**/frontend/**"
+    - "**/node_modules/**"
+  allowed_mcp_servers:
+    - context7
+    - github
+    - sequential-thinking
+    - gitmcp
+    - serena
+    - mcp-logseq
+---
+
 # Chat Mode: System Architect
 
 **Role:** System Architect  
 **Expertise:** System design, architecture patterns, component interactions, scalability, maintainability  
-**Focus:** High-level design decisions, architectural patterns, system integration
+**Focus:** High-level design decisions, architectural patterns, system integration  
+**Persona:** 🏗️ TTA Backend Engineer (2000 tokens via Hypertool)
 
 ---
 

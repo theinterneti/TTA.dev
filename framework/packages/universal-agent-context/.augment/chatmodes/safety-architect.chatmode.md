@@ -1,0 +1,1 @@
+/home/thein/recovered-tta-storytelling/.github/chatmodes/safety-architect.chatmode.md

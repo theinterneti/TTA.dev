@@ -1,0 +1,68 @@
+{
+  "name": "tta-frontend-engineer",
+  "displayName": "TTA Frontend Engineer",
+  "description": "Specialized in React, TypeScript, and UI development",
+  "icon": "🎨",
+  "tokenBudget": 1800,
+  "allowedServers": [
+    "context7",
+    "playwright",
+    "github",
+    "gitmcp",
+    "serena",
+    "mcp-logseq"
+  ],
+  "allowedTools": {
+    "context7": ["resolve-library-id", "get-library-docs"],
+    "playwright": [
+      "navigate",
+      "screenshot",
+      "console",
+      "puppeteer_*"
+    ],
+    "github": [
+      "github_create_or_update_file",
+      "github_get_file_contents",
+      "github_search_code",
+      "github_create_pull_request"
+    ],
+    "gitmcp": ["list_files", "read_file", "get_diff"],
+    "serena": ["analyze_code", "suggest_refactoring"],
+    "mcp-logseq": ["list_pages", "get_page_content"]
+  },
+  "restrictedPaths": [
+    "packages/**/backend/**",
+    "**/tests/**",
+    "**/.pytest_cache/**"
+  ],
+  "context": {
+    "primaryLanguage": "TypeScript",
+    "frameworks": ["React", "Next.js", "TailwindCSS"],
+    "focusAreas": [
+      "UI component development",
+      "Responsive design",
+      "Browser testing",
+      "Frontend performance",
+      "Accessibility"
+    ],
+    "keyFiles": [
+      "apps/**/frontend/**/*.tsx",
+      "apps/**/frontend/**/*.css",
+      "package.json"
+    ]
+  },
+  "security": {
+    "allowEnvironmentAccess": [],
+    "blockList": ["*"],
+    "requireApprovalFor": ["file_delete", "system_command", "network_request"]
+  },
+  "workflows": {
+    "default": "frontend-development",
+    "available": [
+      "frontend-development",
+      "component-creation",
+      "ui-testing",
+      "accessibility-audit"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+# E2B Debug Template - Minimal Test
+# Purpose: Identify what's breaking the ML template
+
+FROM e2bdev/code-interpreter:latest
+
+# Test 1: Add just numpy (lightweight, commonly used)
+RUN pip install --no-cache-dir numpy
+
+# Ensure we're in the right working directory
+WORKDIR /home/user
+
+# Add some debugging info
+RUN echo "Python version:" && python --version
+RUN echo "Pip packages:" && pip list
+RUN echo "Environment ready for debugging"

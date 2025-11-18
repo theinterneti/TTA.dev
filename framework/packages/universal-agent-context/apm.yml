@@ -1,0 +1,208 @@
+# Agent Package Manager (APM) Configuration
+# This file functions like package.json for AI-native projects
+# It specifies workflow scripts for execution via Agent CLI Runtimes (Copilot CLI, Auggie CLI)
+# and manages dependencies including required MCP servers
+
+name: tta-storytelling
+version: 1.0.0
+description: Therapeutic Text Adventure - AI-powered mental health support platform
+
+# Agent CLI Runtime Scripts
+# Execute via: copilot run <script-name> or auggie run <script-name>
+scripts:
+  # Development workflows
+  audit: "python scripts/analyze-component-maturity.py && python scripts/dev.sh quality"
+  test: "uv run pytest tests/unit/ --cov=src --cov-report=html"
+  test:integration: "uv run pytest tests/integration/ -m 'redis or neo4j'"
+  test:e2e: "uv run playwright test"
+  lint: "uv run ruff check src/ tests/ --fix"
+  format: "uv run ruff format src/ tests/"
+  typecheck: "uv run pyright src/"
+
+  # Component maturity workflows
+  promote:staging: "python scripts/workflow/spec_to_production.py --target staging"
+  promote:production: "python scripts/workflow/spec_to_production.py --target production"
+
+  # Service management (using new Docker architecture)
+  services:start: "bash docker/scripts/tta-docker.sh dev up -d"
+  services:stop: "bash docker/scripts/tta-docker.sh dev down"
+  services:logs: "bash docker/scripts/tta-docker.sh dev logs"
+  services:status: "bash docker/scripts/tta-docker.sh dev status"
+  services:restart: "bash docker/scripts/tta-docker.sh dev restart"
+
+  # AI context management
+  context:new: "python .augment/context/cli.py new"
+  context:list: "python .augment/context/cli.py list"
+  context:show: "python .augment/context/cli.py show"
+
+  # Quality gates
+  quality:check: "python scripts/dev.sh quality"
+  security:scan: "uv run bandit -r src/ -f json -o bandit-report.json"
+
+  # Agentic primitives validation
+  validate:primitives: "python scripts/validate-agentic-frontmatter.py"
+  validate:all: "bash scripts/validate-agentic-primitives.sh && python scripts/validate-agentic-frontmatter.py"
+
+  # Deployment
+  deploy:staging: "bash scripts/deploy-staging.sh"
+  deploy:production: "bash scripts/deploy-production.sh"
+
+# MCP Server Dependencies
+# These servers provide enhanced capabilities to AI agents
+mcp_servers:
+  # Documentation and context
+  - name: context7
+    package: "@upstash/context7-mcp"
+    description: "Up-to-date documentation lookup for libraries/frameworks"
+    required: true
+
+  # Code analysis and navigation
+  - name: serena
+    description: "Code symbol search, memory management, and architectural analysis"
+    required: true
+
+  # Database operations
+  - name: redis-mcp
+    description: "Direct Redis database operations and inspection"
+    required: true
+    env:
+      - REDIS_URL
+
+  - name: neo4j-mcp
+    docker_image: "mcp/neo4j-memory"
+    description: "Graph database operations for narrative and world state"
+    required: true
+    env:
+      - NEO4J_URI
+      - NEO4J_USER
+      - NEO4J_PASSWORD
+
+  # Testing and validation
+  - name: playwright
+    description: "Web application testing in browser"
+    required: false
+
+  # Monitoring and observability
+  - name: grafana-mcp
+    docker_image: "mcp/grafana"
+    description: "Monitoring and visualization tools"
+    required: false
+    env:
+      - GRAFANA_URL
+      - GRAFANA_API_KEY
+
+  # Advanced reasoning
+  - name: sequential-thinking
+    description: "Multi-step reasoning for complex procedures"
+    required: false
+
+# Environment variables required for operation
+environment:
+  required:
+    - OPENROUTER_API_KEY
+    - NEO4J_URI
+    - REDIS_URL
+  optional:
+    - GRAFANA_URL
+    - GRAFANA_API_KEY
+    - SENTRY_DSN
+
+# Agent behavior configuration
+agent_config:
+  # Default model for different agent types
+  models:
+    architect: "anthropic/claude-sonnet-4"
+    backend_dev: "anthropic/claude-sonnet-4"
+    qa_engineer: "anthropic/claude-sonnet-4"
+    devops: "anthropic/claude-sonnet-4"
+
+  # Context loading strategy
+  context:
+    auto_load:
+      - ".github/copilot-instructions.md"
+      - "GEMINI.md"
+      - "AGENTS.md"
+    session_management: true
+    max_context_tokens: 100000
+
+  # Tool boundaries by role
+  tool_boundaries:
+    architect:
+      allowed: ["fetch", "search", "githubRepo", "codebase-retrieval"]
+      denied: ["editFiles", "runCommands", "deleteFiles"]
+    backend_dev:
+      allowed: ["editFiles", "runCommands", "codebase-retrieval", "testFailure"]
+      denied: ["deleteFiles", "deployProduction"]
+    qa_engineer:
+      allowed: ["editFiles", "runCommands", "testFailure", "codebase-retrieval"]
+      denied: ["deleteFiles", "deployProduction"]
+    devops:
+      allowed:
+        ["editFiles", "runCommands", "deployStaging", "codebase-retrieval"]
+      denied: ["deployProduction"] # Requires explicit approval
+
+# Workflow automation
+workflows:
+  # Component promotion workflow
+  component_promotion:
+    trigger: "manual"
+    steps:
+      - "Load component specification"
+      - "Run quality gates"
+      - "Execute tests"
+      - "Update maturity status"
+      - "Create promotion PR"
+
+  # Bug fix workflow
+  bug_fix:
+    trigger: "manual"
+    steps:
+      - "Reproduce issue"
+      - "Identify root cause"
+      - "Implement fix"
+      - "Add regression test"
+      - "Validate fix"
+
+  # Feature implementation workflow
+  feature_implementation:
+    trigger: "manual"
+    steps:
+      - "Review specification"
+      - "Design implementation"
+      - "Implement feature"
+      - "Write tests"
+      - "Update documentation"
+      - "Run quality gates"
+
+# Quality gates configuration
+quality_gates:
+  development:
+    coverage: 70
+    mutation_score: 75
+    complexity: 10
+    file_size: 1000
+
+  staging:
+    coverage: 80
+    mutation_score: 80
+    complexity: 8
+    file_size: 800
+
+  production:
+    coverage: 85
+    mutation_score: 85
+    complexity: 6
+    file_size: 600
+
+# Metadata
+metadata:
+  repository: "https://github.com/theinterneti/recovered-tta-storytelling"
+  documentation: "https://tta-docs.example.com"
+  tech_stack:
+    - Python 3.12+
+    - FastAPI
+    - Redis
+    - Neo4j
+    - React
+    - Docker
+  architecture: "Multi-agent orchestration with circuit breaker patterns"
