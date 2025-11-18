@@ -77,6 +77,12 @@
       },
       "description": "Knowledge base integration with Logseq",
       "tags": ["knowledge-base", "documentation", "learning"]
+    },
+    "tta-dev-primitives": {
+      "command": "/usr/bin/uv",
+      "args": ["run", "python", ".cline/mcp-server/tta_primitives.py"],
+      "description": "Complete TTA.dev primitives ecosystem as MCP tools",
+      "tags": ["tta-dev", "primitives", "workflow", "orchestration", "context"]
     }
   }
 }
