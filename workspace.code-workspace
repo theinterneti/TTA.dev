@@ -5,14 +5,10 @@
 		}
 	],
 	"settings": {
-		"python.defaultInterpreterPath": ".venv/bin/python",
-		"github.copilot.enable": {
-			"*": true
-		}
+		"python.defaultInterpreterPath": ".venv/bin/python"
 	},
 	"extensions": {
 		"recommendations": [
-			"github.copilot",
 			"ms-python.python",
 			"ms-python.vscode-pylance",
 			"charliermarsh.ruff"
