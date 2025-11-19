@@ -97,100 +97,100 @@ Additionally, context-specific modular instructions are in `.github/instructions
 
 ## 🤖 Dynamic Agent Coordination
 
-### 🏥 System Health Status
+**🏗️ Layered Coordination Architecture - NEW**
 
-**Live Coordinator Status** *(Updated every 30 seconds)*
+### 5-Layer Persona System (L0-L4)
+
+TTA.dev implements a sophisticated **layered persona architecture** for intelligent task delegation and multi-agent coordination:
+
 ```
-Coordinator: ACTIVE | Health: 99.8%
-Personas: 6/6 available | Primitives: 7/7 active
-MCP Servers: 3/3 operational | Coordination Sessions: 0 active
-Last Update: [timestamp] | Confidence: High
-```
-
-#### **Available Personas (Real-time)**
-- ✅ **backend-developer** - Active (pyright, ruff, pytest capabilities, 25+ patterns loaded)
-- ✅ **frontend-developer** - Active (typescript, react, webpack, 18+ patterns loaded)
-- ✅ **data-scientist** - Active (pandas, numpy, scikit-learn, mlflow capabilities)
-- ✅ **testing-specialist** - Active (pytest-asyncio, coverage, playwright, 32+ test patterns)
-- ✅ **devops-engineer** - Active (terraform, k8s, docker, ci/cd pipelines)
-- ✅ **observability-expert** - Active (opentelemetry, prometheus, grafana integration)
-- 🔄 **Auto-switching enabled** - Switch based on task context detection
-
-#### **Active MCP Servers**
-- ✅ **tta-dev-primitives** - 14 tools active, response time: 45ms avg
-- ✅ **context7** - Library docs search, operational
-- ✅ **playwright** - Browser automation, headless mode
-- ⚡ **adf4e8b2** - Current coordination session
-
-### 🎯 Coordination Commands
-
-**Task Analysis & Persona Switching:**
-```bash
-# Automatic persona selection based on task content
-cline --coordinate "implement async retry logic with observability"
-
-# Manual persona override
-cline --persona backend-developer "debug API performance issue"
-
-# Get capability recommendations
-cline --analyze "build a complex ML pipeline with monitoring"
+L0: Meta-Control (System Overseer)
+├── L1: Strategy (Product Manager, DevEx Orchestrators)
+│   ├── L2: Workflow (Pipeline, Infra, AppSec Managers)
+│   │   ├── L3: Tool Experts (Backend, Frontend, K8s, DB Specialists)
+│   │   │   ├── L4: Execution Wrappers (AWS, Kubectl, Security CLI)
 ```
 
-**Workflow Orchestration:**
-```bash
-# Start orchestrated primitive development workflow
-cline --workflow primitive-development --input "CachePrimitive improvements"
+#### **Layer Responsibilities**
 
-# Parallel testing across multiple agents
-cline --parallel-test "integration suite" --agents 3
+**L0 - Meta-Control:** Task coordination, delegation strategy, system oversight
+- `system-overseer` - Primary coordinator with health monitoring
+- MCP Stack: `mcp-agent-monitor`, `mcp-sentry`, `mcp-openai-cost`, `mcp-cloudwatch`
 
-# Context sharing across agents
-cline --share-context --agents "backend-developer,testing-specialist" --scope "current-task"
+**L1 - Strategy:** High-level planning, requirements analysis, success criteria
+- `prodmgr-orchestrator` - Product strategy and prioritization
+- `devex-orchestrator` - Developer experience optimization
+- `ciso-orchestrator` - Security and compliance strategy
+- MCP Stack: `tta-primitives`, `context7`, `sequential-thinking`
+
+**L2 - Workflow Management:** Pipeline orchestration, CI/CD, compliance
+- `pipeline-manager` - Build and deployment pipelines
+- `infra-manager` - Infrastructure provisioning and scaling
+- `appsec-manager` - Security testing and vulnerability management
+- `netsec-manager` - Network security and firewall management
+- MCP Stack: `mcp-github-actions`, `mcp-terraform-cloud`, `mcp-snyk`, `mcp-sonarqube`
+
+**L3 - Tool Experts:** Technical implementation and domain expertise
+- `backend-developer` - API development, data processing, async workflows
+- `frontend-developer` - UI/UX, responsive design, component architecture
+- `k8s-cluster-expert` - Kubernetes cluster management and optimization
+- `db-data-expert` - Database design, migration, performance tuning
+- `testing-specialist` - TDD, integration testing, QA automation
+- `observability-expert` - Metrics, tracing, alerting, dashboard creation
+- `data-scientist` - ML, analytics, statistical modeling, visualization
+- MCP Stack: `mcp-postgres`, `mcp-prometheus`, `mcp-kubernetes`, `mcp-helm`, etc.
+
+**L4 - Execution Wrappers:** Direct system calls and CLI operations
+- `aws-api-wrapper` - AWS SDK operations and resource management
+- `kube-cli-wrapper` - Kubernetes kubectl command execution
+- `scanner-cli-wrapper` - Security scanning CLI tools
+- MCP Stack: `mcp-aws-sdk-python`, `mcp-kubectl-cli`, `mcp-trivy-cli`, `mcp-zap-cli`
+
+#### **Layer Selection Decision Tree**
+
+**Task Complexity → Layer Cascade:**
+
+- **Low Complexity** (simple function, basic validation): L0 → L3 (direct to implementation)
+- **Medium Complexity** (API with testing, database schema): L0 → L1 → L3 (strategy + implementation)
+- **High Complexity** (e-commerce platform, enterprise migration): L0 → L1 → L2 → L3 (full orchestration)
+- **Extreme Complexity** (multi-system deployment, data center migration): L0 → L1 → L2 → L3 → L4 (full stack)
+
+#### **MCP Server Layer Mapping**
+
+| Layer | Server Count | Key Servers | Purpose |
+|-------|-------------|-------------|---------|
+| **L0** | 4 | `mcp-agent-monitor`, `mcp-sentry` | Health monitoring, error tracking, cost optimization |
+| **L1** | 3 | `tta-primitives`, `context7` | Strategy planning, reasoning, context analysis |
+| **L2** | 4 | `mcp-github-actions`, `mcp-terraform-cloud` | CI/CD orchestration, infrastructure as code |
+| **L3** | 10 | `mcp-postgres`, `mcp-kubernetes` | Technical implementation, service management |
+| **L4** | 5 | `mcp-aws-sdk-python`, `mcp-kubectl-cli` | Direct execution, system operations |
+
+### 🎯 Delegation Chain Examples
+
+#### Example 1: Simple API Development
+```
+Task: "Build a simple REST API for user management"
+Delegation: L0(system-overseer) → L3(backend-developer)
+MCP Stack: tta-primitives, mcp-postgres
+Result: L0 coordinates L3 implementation with database integration
 ```
 
-**System Commands:**
-```bash
-# Registry status and health check
-cline --status coordination
-
-# Memory patterns for current task
-cline --memory-find-patterns "implement user authentication"
-
-# Performance metrics across agents
-cline --metrics coordination --period 1h
+#### Example 2: E-commerce Platform Deployment
+```
+Task: "Deploy e-commerce platform with payments and analytics"
+Delegation: L0 → L1(prodmgr-orchestrator) → L2(pipeline-manager) → L3(multiple experts)
+MCP Stack: Full orchestration with monitoring, databases, containers
+Result: Complete system deployment with observability
 ```
 
-### 🔄 Coordination Architecture
+#### Example 3: Infrastructure Migration
+```
+Task: "Migrate legacy app to Kubernetes with monitoring"
+Delegation: L0 → L1(devex-orchestrator) → L2(infra-manager) → L3(k8s-cluster-expert) → L4(kube-cli-wrapper)
+MCP Stack: Infrastructure + execution tools
+Result: Complete migration with direct system operations
+```
 
-#### **Agent Communication Protocols**
-TTA.dev uses standardized protocols for agent-to-agent coordination:
-
-1. **Task Handoff Protocol** - Formal transfer of work between agents
-2. **Context Sharing Protocol** - Secure context data exchange
-3. **Primitive Routing Protocol** - Dynamic primitive instantiation
-4. **Memory Synchronization** - Learned pattern sharing
-
-#### **Real-time Coordination Example**
-```python
-# Example: Complex workflow coordination
-from .coordination.capability_registry import capability_registry
-
-# 1. Task arrives → Analyze requirements
-task = "Build REST API with authentication, database integration, and observability"
-recommendations = capability_registry.get_capabilities_for_task(task)
-
-print(f"Domain: {recommendations['estimated_complexity']}")
-print(f"Recommended Personas: {len(recommendations['personas'])}")
-print(f"Required Primitives: {[p['primitive'] for p in recommendations['primitives']]}")
-
-# 2. Create coordination session
-session_id = capability_registry.create_coordination_session(
-    task=task,
-    participants=["backend-developer", "testing-specialist", "observability-expert"],
-    coordinator="cline"
-)
-
-# 3. Each agent gets their assignment through AGENTS.md routing
 # Backend-developer: API implementation with RetryPrimitive
 # Testing-specialist: Comprehensive test coverage
 # Observability-expert: Metrics and tracing integration
