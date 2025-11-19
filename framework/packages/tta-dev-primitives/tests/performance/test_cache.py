@@ -1,17 +1,21 @@
 import asyncio
+
 import pytest
 
-from tta_dev_primitives.performance.cache import CachePrimitive
 from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.performance.cache import CachePrimitive
 from tta_dev_primitives.testing import MockPrimitive
+
 
 @pytest.fixture
 def mock_primitive():
     return MockPrimitive(name="mock_primitive", return_value="mock_result")
 
+
 @pytest.fixture
 def cache_key_fn():
     return lambda data, ctx: str(data)
+
 
 @pytest.mark.asyncio
 async def test_cache_basic_caching(mock_primitive, cache_key_fn):
@@ -36,6 +40,7 @@ async def test_cache_basic_caching(mock_primitive, cache_key_fn):
     assert stats["misses"] == 1
     assert stats["hits"] == 1
 
+
 @pytest.mark.asyncio
 async def test_cache_miss(mock_primitive, cache_key_fn):
     """Tests that the underlying primitive is called on a cache miss."""
@@ -47,6 +52,7 @@ async def test_cache_miss(mock_primitive, cache_key_fn):
 
     await cached_primitive.execute({"key": "value2"}, context)
     assert mock_primitive.call_count == 2
+
 
 @pytest.mark.asyncio
 async def test_cache_ttl_expiration(mock_primitive, cache_key_fn):
@@ -65,6 +71,7 @@ async def test_cache_ttl_expiration(mock_primitive, cache_key_fn):
     stats = cached_primitive.get_stats()
     assert stats["expirations"] == 1
 
+
 @pytest.mark.asyncio
 async def test_cache_key_function(mock_primitive):
     """Tests that the cache key is generated correctly."""
@@ -80,6 +87,7 @@ async def test_cache_key_function(mock_primitive):
     await cached_primitive.execute({"user": "test"}, context2)
     assert mock_primitive.call_count == 2
 
+
 @pytest.mark.asyncio
 async def test_cache_exception_handling(cache_key_fn):
     """Tests that exceptions are propagated and not cached."""
@@ -94,12 +102,13 @@ async def test_cache_exception_handling(cache_key_fn):
     assert failing_primitive.call_count == 1
     stats = cached_primitive.get_stats()
     assert stats["misses"] == 1
-    assert stats["size"] == 0 # Should not cache failures
+    assert stats["size"] == 0  # Should not cache failures
 
     # Second call should still fail and not hit a cache
     with pytest.raises(ValueError, match="Failed"):
         await cached_primitive.execute(input_data, context)
     assert failing_primitive.call_count == 2
+
 
 def test_cache_clear(mock_primitive, cache_key_fn):
     """Tests that the cache is cleared when clear_cache is called."""
@@ -112,6 +121,7 @@ def test_cache_clear(mock_primitive, cache_key_fn):
     assert cached_primitive.get_stats()["size"] == 1
     cached_primitive.clear_cache()
     assert cached_primitive.get_stats()["size"] == 0
+
 
 @pytest.mark.asyncio
 async def test_cache_evict_expired(mock_primitive, cache_key_fn):

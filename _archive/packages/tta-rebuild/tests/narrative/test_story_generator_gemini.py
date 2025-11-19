@@ -51,8 +51,7 @@ def valid_input() -> StoryGenerationInput:
         timeline_position=5,
         active_characters=["hero", "mentor"],
         previous_context=(
-            "The hero has completed their training "
-            "and stands ready for the next challenge."
+            "The hero has completed their training and stands ready for the next challenge."
         ),
         player_preferences={"violence": "low", "mature_themes": "off"},
         narrative_style="therapeutic",
@@ -165,9 +164,7 @@ class TestGeminiIntegration:
             "confident",
         ]
 
-        found_indicators = [
-            term for term in therapeutic_indicators if term in narrative_lower
-        ]
+        found_indicators = [term for term in therapeutic_indicators if term in narrative_lower]
         assert len(found_indicators) >= 1, (
             "Story should reflect therapeutic themes from metaconcepts. "
             f"Expected at least one of: {therapeutic_indicators}"

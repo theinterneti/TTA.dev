@@ -414,9 +414,7 @@ class TestSuggestedFixes:
         state = await timeline_manager.execute(update, context)
 
         assert len(state.suggested_fixes) > 0
-        assert any(
-            "invalid causal link" in fix.lower() for fix in state.suggested_fixes
-        )
+        assert any("invalid causal link" in fix.lower() for fix in state.suggested_fixes)
 
     @pytest.mark.asyncio
     async def test_suggest_fix_for_time_paradox(self, timeline_manager, context):

@@ -210,9 +210,7 @@ class TestCharacterAlignmentValidation:
         validation = await branch_validator.execute(proposal, test_context)
 
         # Should have info about unmentioned characters
-        character_issues = [
-            issue for issue in validation.issues if issue.category == "character"
-        ]
+        character_issues = [issue for issue in validation.issues if issue.category == "character"]
         assert len(character_issues) > 0
 
     @pytest.mark.asyncio
@@ -230,9 +228,7 @@ class TestCharacterAlignmentValidation:
         validation = await branch_validator.execute(proposal, test_context)
 
         # Should have warning about removed agency
-        character_issues = [
-            issue for issue in validation.issues if issue.category == "character"
-        ]
+        character_issues = [issue for issue in validation.issues if issue.category == "character"]
         assert len(character_issues) > 0
 
 
@@ -255,9 +251,7 @@ class TestUniverseRulesValidation:
         validation = await branch_validator.execute(proposal, test_context)
 
         # Should have error about rule violation
-        universe_issues = [
-            issue for issue in validation.issues if issue.category == "universe"
-        ]
+        universe_issues = [issue for issue in validation.issues if issue.category == "universe"]
         assert len(universe_issues) > 0
 
     @pytest.mark.asyncio
@@ -276,9 +270,7 @@ class TestUniverseRulesValidation:
         validation = await branch_validator.execute(proposal, test_context)
 
         # Should have error about unrealistic elements
-        universe_issues = [
-            issue for issue in validation.issues if issue.category == "universe"
-        ]
+        universe_issues = [issue for issue in validation.issues if issue.category == "universe"]
         assert len(universe_issues) > 0
 
 

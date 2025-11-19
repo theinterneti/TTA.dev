@@ -33,9 +33,7 @@ class WorkflowContext(BaseModel):
     state: dict[str, Any] = Field(default_factory=dict)
 
     # Distributed tracing (W3C Trace Context)
-    trace_id: str | None = Field(
-        default=None, description="OpenTelemetry trace ID (hex)"
-    )
+    trace_id: str | None = Field(default=None, description="OpenTelemetry trace ID (hex)")
     span_id: str | None = Field(default=None, description="Current span ID (hex)")
     parent_span_id: str | None = Field(default=None, description="Parent span ID (hex)")
     trace_flags: int = Field(default=1, description="W3C trace flags (sampled=1)")

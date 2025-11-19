@@ -19,6 +19,7 @@ members = [
 [tool.uv]
 dev-dependencies = [
     "aiohttp>=3.13.2",
+    "hvac>=1.2.0",            # HashiCorp Vault client for production secrets
     "pytest>=8.0.0",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=4.1.0",

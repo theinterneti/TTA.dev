@@ -42,9 +42,7 @@ def test_ml_template_filesystem():
 
         ml_libraries = {
             "torch": any("torch" in name.lower() for name in package_names),
-            "transformers": any(
-                "transformers" in name.lower() for name in package_names
-            ),
+            "transformers": any("transformers" in name.lower() for name in package_names),
             "numpy": any("numpy" in name.lower() for name in package_names),
             "pandas": any("pandas" in name.lower() for name in package_names),
         }
@@ -86,9 +84,7 @@ def test_ml_template_filesystem():
             print("✅ Good performance improvement")
 
         expected_default = 30  # Conservative estimate for fresh install
-        improvement = (
-            expected_default / create_time if create_time > 0 else float("inf")
-        )
+        improvement = expected_default / create_time if create_time > 0 else float("inf")
         print(f"📈 Speed improvement: {improvement:.1f}x faster than fresh install")
 
         # Overall assessment

@@ -48,7 +48,9 @@ class LLMCodeGenerator:
         ```
     """
 
-    def __init__(self, api_key: str | None = None, model_name: str = "gemini-2.0-flash-exp") -> None:
+    def __init__(
+        self, api_key: str | None = None, model_name: str = "gemini-2.0-flash-exp"
+    ) -> None:
         """Initialize LLM code generator.
 
         Args:

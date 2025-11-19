@@ -43,7 +43,9 @@ async def test_basic():
     )
 
     # Test generation
-    prompt = "Write one sentence describing a friendly neighborhood investigator who solves puzzles."
+    prompt = (
+        "Write one sentence describing a friendly neighborhood investigator who solves puzzles."
+    )
     print(f"\n📝 Prompt: {prompt}")
 
     response = await provider.generate(prompt, context)
@@ -93,9 +95,7 @@ async def test_json():
 
     print(f"\n📝 Prompt: {prompt[:100]}...")
 
-    response = await provider.generate_json(
-        prompt, context, max_tokens=200, temperature=0.7
-    )
+    response = await provider.generate_json(prompt, context, max_tokens=200, temperature=0.7)
 
     print("\n✅ Generated JSON:")
     import json

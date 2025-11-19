@@ -209,8 +209,7 @@ class AnthropicProvider(LLMProvider):
             from anthropic import AsyncAnthropic
         except ImportError:
             raise ImportError(
-                "anthropic package not installed. "
-                "Install with: uv pip install anthropic"
+                "anthropic package not installed. Install with: uv pip install anthropic"
             )
 
         self.client = AsyncAnthropic(api_key=self.api_key)
@@ -310,9 +309,7 @@ class OpenAIProvider(LLMProvider):
         try:
             from openai import AsyncOpenAI
         except ImportError:
-            raise ImportError(
-                "openai package not installed. Install with: uv pip install openai"
-            )
+            raise ImportError("openai package not installed. Install with: uv pip install openai")
 
         self.client = AsyncOpenAI(api_key=self.api_key)
 

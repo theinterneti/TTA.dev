@@ -35,14 +35,10 @@ class LogseqSkillsIntegration:
     def __init__(self, logseq_path: str = "./logseq"):
         """Initialize with Logseq directory path."""
         self.logseq_path = Path(logseq_path)
-        self.skills_page_path = (
-            self.logseq_path / "pages" / "Agent Skills Development.md"
-        )
+        self.skills_page_path = self.logseq_path / "pages" / "Agent Skills Development.md"
         self.journals_path = self.logseq_path / "journals"
 
-    async def save_skill_progress(
-        self, skill_name: str, skill_data: dict, context: str = ""
-    ):
+    async def save_skill_progress(self, skill_name: str, skill_data: dict, context: str = ""):
         """Save skill progress to Logseq pages and daily journal."""
         # Ensure directories exist
         self.skills_page_path.parent.mkdir(parents=True, exist_ok=True)
@@ -54,9 +50,7 @@ class LogseqSkillsIntegration:
         # Log to today's journal
         await self._log_to_journal(skill_name, skill_data, context)
 
-    async def _update_skills_page(
-        self, skill_name: str, skill_data: dict, context: str
-    ):
+    async def _update_skills_page(self, skill_name: str, skill_data: dict, context: str):
         """Update the main agent skills page."""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -164,9 +158,7 @@ class EnhancedSkillsPrimitive:
             task=f"Develop skill: {skill_name} - {task_description}",
             language="python",
             context=f"Learning context: {learning_context}",
-            previous_attempts=self.skills_cache.get(skill_name, {}).get(
-                "previous_code", []
-            ),
+            previous_attempts=self.skills_cache.get(skill_name, {}).get("previous_code", []),
         )
 
         try:
@@ -175,9 +167,7 @@ class EnhancedSkillsPrimitive:
             ace_strategies = ace_result.strategies_learned
         except Exception as e:
             logger.warning(f"ACE learning failed, using fallback: {e}")
-            generated_code = self._generate_fallback_skill_code(
-                skill_name, task_description
-            )
+            generated_code = self._generate_fallback_skill_code(skill_name, task_description)
             ace_strategies = []
 
         # Step 3: Execute skill practice in MCP sandbox
@@ -287,9 +277,7 @@ metrics
         # Step 4: Update skills cache
         self.skills_cache[skill_name] = {
             "metrics": skill_metrics,
-            "previous_code": self.skills_cache.get(skill_name, {}).get(
-                "previous_code", []
-            )
+            "previous_code": self.skills_cache.get(skill_name, {}).get("previous_code", [])
             + [generated_code],
             "last_updated": datetime.now().isoformat(),
         }
@@ -326,9 +314,7 @@ metrics
             },
         }
 
-    def _generate_fallback_skill_code(
-        self, skill_name: str, task_description: str
-    ) -> str:
+    def _generate_fallback_skill_code(self, skill_name: str, task_description: str) -> str:
         """Generate fallback skill code when ACE fails."""
         return f"""
 # Fallback skill implementation for: {skill_name}
