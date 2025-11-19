@@ -99,6 +99,30 @@ Additionally, context-specific modular instructions are in `.github/instructions
 
 **CRITICAL:** When working on TTA.dev, **ALWAYS use primitives** for workflow patterns. Refer to the `.clinerules` file for detailed guidance on primitive usage, anti-patterns, and code quality standards.
 
+### 🧩 Git Collaboration for Agents
+
+Git hygiene for all AI agents (Copilot, Cline, augment, etc.) is defined by the `GitCollaborationPrimitive` in `tta_dev_primitives.collaboration`.
+
+**Every agent MUST:**
+
+- Use **conventional commits**:
+    - `<type>: <description>` (e.g., `feat: add cache primitive tests`)
+    - Minimum 20-character descriptions
+- Commit **small, frequent changes**:
+    - Aim for commits every 30–60 minutes while actively working
+    - Avoid long-lived branches with large diff sets
+- Include **tests for source changes**:
+    - When touching `platform/`, `packages/`, or `apps/`, update or add tests
+    - Matches `CommitFrequencyPolicy.require_tests_before_commit = True` in the primitive
+- Maintain **healthy integration frequency**:
+    - Integrate branches with `main` at least daily
+    - Target hourly integration for active work
+
+Agent-specific expectations (identities, branch prefixes, worktrees, integration frequencies) are documented in:
+
+- `docs/development/MULTI_AGENT_OVERSIGHT.md`
+- `packages/tta-dev-primitives/docs/collaboration/GIT_COLLABORATION_GUIDE.md`
+
 ### Repository Structure
 
 ```text

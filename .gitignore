@@ -178,3 +178,18 @@ examples/tasks_output/
 logseq/journals/
 logseq/logseq/
 logseq/pages/AI\ Research.md
+
+# Worktree-specific files (added by setup-worktrees.sh)
+workspace.code-workspace
+.COORDINATION_NOTICE
+.AGENT_ID
+
+# Agent-specific temp directories
+.copilot-temp/
+.cline-temp/
+.augment-temp/
+
+# Agent configuration caches
+.cline/sessions/
+.augment/cache/
+

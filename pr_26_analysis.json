@@ -1,0 +1,475 @@
+{
+  "already_exists": [
+    {
+      "path": ".github/prometheus/prometheus.yml",
+      "pr_additions": 9,
+      "status_in_pr": "added",
+      "category": "infrastructure",
+      "current_size": 9,
+      "size_diff": 0
+    }
+  ],
+  "new_files": [
+    {
+      "path": ".github/benchmarks/baseline.json",
+      "pr_additions": 81,
+      "status_in_pr": "added",
+      "category": "config"
+    },
+    {
+      "path": ".github/workflows/api-testing.yml",
+      "pr_additions": 131,
+      "status_in_pr": "added",
+      "category": "infrastructure"
+    },
+    {
+      "path": ".universal-instructions/memory-management/README.md",
+      "pr_additions": 308,
+      "status_in_pr": "added",
+      "category": "memory"
+    },
+    {
+      "path": ".universal-instructions/memory-management/context-engineering.md",
+      "pr_additions": 441,
+      "status_in_pr": "added",
+      "category": "memory"
+    },
+    {
+      "path": "packages/python-pathway/instructions/UV_WORKFLOW_FOUNDATION.md",
+      "pr_additions": 590,
+      "status_in_pr": "added",
+      "category": "docs"
+    },
+    {
+      "path": "packages/python-pathway/instructions/quality.md",
+      "pr_additions": 34,
+      "status_in_pr": "added",
+      "category": "docs"
+    },
+    {
+      "path": "packages/python-pathway/instructions/testing.md",
+      "pr_additions": 68,
+      "status_in_pr": "added",
+      "category": "docs"
+    },
+    {
+      "path": "packages/python-pathway/instructions/tooling.md",
+      "pr_additions": 41,
+      "status_in_pr": "added",
+      "category": "docs"
+    },
+    {
+      "path": "packages/tta-dev-primitives/dashboards/alertmanager/README.md",
+      "pr_additions": 355,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/dashboards/alertmanager/alertmanager.yaml",
+      "pr_additions": 223,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/dashboards/alertmanager/tta-alerts.yaml",
+      "pr_additions": 226,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/dashboards/grafana/README.md",
+      "pr_additions": 281,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/dashboards/grafana/cost-tracking.json",
+      "pr_additions": 413,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/dashboards/grafana/slo-tracking.json",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/dashboards/grafana/workflow-overview.json",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/memory_workflow.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "memory"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/paf_memory.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "memory"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/session_group.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "memory"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/workflow_hub.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "other"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/enhanced_metrics.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/instrumented_primitive.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/prometheus_exporter.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "infrastructure"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/context_propagation.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "other"
+    },
+    {
+      "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/enhanced_collector.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "other"
+    },
+    {
+      "path": "packages/tta-dev-primitives/tests/observability/test_context_propagation.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "testing"
+    },
+    {
+      "path": "packages/tta-dev-primitives/tests/observability/test_enhanced_metrics.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "observability"
+    },
+    {
+      "path": "packages/tta-dev-primitives/tests/observability/test_instrumented_primitives.py",
+      "pr_additions": 0,
+      "status_in_pr": "added",
+      "category": "observability"
+    }
+  ],
+  "modified_files": [
+    {
+      "path": ".augment/rules/package-source.instructions.md",
+      "pr_additions": 51,
+      "status_in_pr": "modified",
+      "category": "docs",
+      "current_size": 1154,
+      "size_diff": 51
+    },
+    {
+      "path": ".augment/rules/scripts.instructions.md",
+      "pr_additions": 31,
+      "status_in_pr": "modified",
+      "category": "docs",
+      "current_size": 371,
+      "size_diff": 31
+    },
+    {
+      "path": ".augment/rules/tests.instructions.md",
+      "pr_additions": 73,
+      "status_in_pr": "modified",
+      "category": "docs",
+      "current_size": 316,
+      "size_diff": 73
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "pr_additions": 97,
+      "status_in_pr": "modified",
+      "category": "infrastructure",
+      "current_size": 71,
+      "size_diff": 97
+    },
+    {
+      "path": ".github/workflows/quality-check.yml",
+      "pr_additions": 128,
+      "status_in_pr": "modified",
+      "category": "infrastructure",
+      "current_size": 69,
+      "size_diff": 128
+    }
+  ],
+  "by_category": {
+    "docs": {
+      "already_exists": [],
+      "new_files": [
+        {
+          "path": "packages/python-pathway/instructions/UV_WORKFLOW_FOUNDATION.md",
+          "pr_additions": 590,
+          "status_in_pr": "added",
+          "category": "docs"
+        },
+        {
+          "path": "packages/python-pathway/instructions/quality.md",
+          "pr_additions": 34,
+          "status_in_pr": "added",
+          "category": "docs"
+        },
+        {
+          "path": "packages/python-pathway/instructions/testing.md",
+          "pr_additions": 68,
+          "status_in_pr": "added",
+          "category": "docs"
+        },
+        {
+          "path": "packages/python-pathway/instructions/tooling.md",
+          "pr_additions": 41,
+          "status_in_pr": "added",
+          "category": "docs"
+        }
+      ],
+      "modified_files": [
+        {
+          "path": ".augment/rules/package-source.instructions.md",
+          "pr_additions": 51,
+          "status_in_pr": "modified",
+          "category": "docs",
+          "current_size": 1154,
+          "size_diff": 51
+        },
+        {
+          "path": ".augment/rules/scripts.instructions.md",
+          "pr_additions": 31,
+          "status_in_pr": "modified",
+          "category": "docs",
+          "current_size": 371,
+          "size_diff": 31
+        },
+        {
+          "path": ".augment/rules/tests.instructions.md",
+          "pr_additions": 73,
+          "status_in_pr": "modified",
+          "category": "docs",
+          "current_size": 316,
+          "size_diff": 73
+        }
+      ]
+    },
+    "config": {
+      "already_exists": [],
+      "new_files": [
+        {
+          "path": ".github/benchmarks/baseline.json",
+          "pr_additions": 81,
+          "status_in_pr": "added",
+          "category": "config"
+        }
+      ],
+      "modified_files": []
+    },
+    "infrastructure": {
+      "already_exists": [
+        {
+          "path": ".github/prometheus/prometheus.yml",
+          "pr_additions": 9,
+          "status_in_pr": "added",
+          "category": "infrastructure",
+          "current_size": 9,
+          "size_diff": 0
+        }
+      ],
+      "new_files": [
+        {
+          "path": ".github/workflows/api-testing.yml",
+          "pr_additions": 131,
+          "status_in_pr": "added",
+          "category": "infrastructure"
+        },
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/prometheus_exporter.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "infrastructure"
+        }
+      ],
+      "modified_files": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "pr_additions": 97,
+          "status_in_pr": "modified",
+          "category": "infrastructure",
+          "current_size": 71,
+          "size_diff": 97
+        },
+        {
+          "path": ".github/workflows/quality-check.yml",
+          "pr_additions": 128,
+          "status_in_pr": "modified",
+          "category": "infrastructure",
+          "current_size": 69,
+          "size_diff": 128
+        }
+      ]
+    },
+    "memory": {
+      "already_exists": [],
+      "new_files": [
+        {
+          "path": ".universal-instructions/memory-management/README.md",
+          "pr_additions": 308,
+          "status_in_pr": "added",
+          "category": "memory"
+        },
+        {
+          "path": ".universal-instructions/memory-management/context-engineering.md",
+          "pr_additions": 441,
+          "status_in_pr": "added",
+          "category": "memory"
+        },
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/memory_workflow.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "memory"
+        },
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/paf_memory.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "memory"
+        },
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/session_group.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "memory"
+        }
+      ],
+      "modified_files": []
+    },
+    "observability": {
+      "already_exists": [],
+      "new_files": [
+        {
+          "path": "packages/tta-dev-primitives/dashboards/alertmanager/README.md",
+          "pr_additions": 355,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/dashboards/alertmanager/alertmanager.yaml",
+          "pr_additions": 223,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/dashboards/alertmanager/tta-alerts.yaml",
+          "pr_additions": 226,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/dashboards/grafana/README.md",
+          "pr_additions": 281,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/dashboards/grafana/cost-tracking.json",
+          "pr_additions": 413,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/dashboards/grafana/slo-tracking.json",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/dashboards/grafana/workflow-overview.json",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/enhanced_metrics.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/instrumented_primitive.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/tests/observability/test_enhanced_metrics.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "observability"
+        },
+        {
+          "path": "packages/tta-dev-primitives/tests/observability/test_instrumented_primitives.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "observability"
+        }
+      ],
+      "modified_files": []
+    },
+    "other": {
+      "already_exists": [],
+      "new_files": [
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/workflow_hub.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "other"
+        },
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/context_propagation.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "other"
+        },
+        {
+          "path": "packages/tta-dev-primitives/src/tta_dev_primitives/observability/enhanced_collector.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "other"
+        }
+      ],
+      "modified_files": []
+    },
+    "testing": {
+      "already_exists": [],
+      "new_files": [
+        {
+          "path": "packages/tta-dev-primitives/tests/observability/test_context_propagation.py",
+          "pr_additions": 0,
+          "status_in_pr": "added",
+          "category": "testing"
+        }
+      ],
+      "modified_files": []
+    }
+  }
+}

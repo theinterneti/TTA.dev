@@ -343,6 +343,180 @@ jobs:
     steps:
       - name: Create PR from agent branch
         run: gh pr create --title "Agent commits: ${{ github.event.client_payload.agent }}"
+
+## Git Collaboration Policies for Agents
+
+TTA.dev uses the `GitCollaborationPrimitive` from `tta_dev_primitives.collaboration` as the **source of truth** for git hygiene across all AI agents (augment, cline, copilot).
+
+These policies apply to every agent worktree:
+
+- **Conventional commits**
+  - Format: `<type>: <description>`
+  - Types: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`
+  - Description: at least 20 characters of meaningful text
+  - Examples:
+    - `feat: add cache primitive tests`
+    - `fix: handle timeout edge case in router`
+- **Small, frequent commits**
+  - Commit every 30–60 minutes while actively working
+  - Avoid large, multi-file "mega commits"
+- **Tests with source changes**
+  - Any change under `platform/`, `packages/`, or `apps/` SHOULD include corresponding test updates
+  - Matches `CommitFrequencyPolicy.require_tests_before_commit = True` in the primitive
+- **Healthy integration frequency**
+  - Branches must integrate with `main` at least daily
+  - Target: integrate hourly for active work (elite DevOps standard)
+  - Branches SHOULD NOT drift for multiple days without sync
+
+These rules mirror the behavior of:
+
+- `IntegrationFrequency` (DAILY / HOURLY / CONTINUOUS)
+- `CommitFrequencyPolicy` (limits on time and size)
+- `GitCollaborationPrimitive(enforce_hygiene=True)` (strict mode)
+
+## ACE-Powered Git Oversight (Planned)
+
+> Goal: make git feel "automatic" for agents and humans by routing decisions through adaptive primitives, ACE benchmarks, and safe sandboxes (e2b) rather than ad‑hoc scripts.
+
+This section describes the **next evolution** of the multi-agent oversight system. It does **not** change existing behavior yet; instead, it defines the design target for future work.
+
+### Design Overview
+
+We treat git collaboration itself as an **adaptive primitive**:
+
+- `GitCollaborationPrimitive` remains the **policy source of truth** (commit formats, integration frequency, tests-before-commit).
+- A planned `AdaptiveGitPrimitive` will wrap this policy and:
+  - Observe how commits behave over time (CI results, reverts, human overrides).
+  - Route actions through different **strategies** (e.g., conservative vs aggressive pre‑commit checks).
+  - Feed those observations into **ACE agents** (Generator, Reflector, Curator) and **ACE benchmarks**.
+
+The high-level contract:
+
+- Input: git context + proposed action (branch, diff summary, agent persona, proposed commit message).
+- Output: recommended action, strategy id, and structured feedback (e.g., "split this commit", "run tests in e2b first").
+
+### Roles of ACE, e2b, and A/B Testing
+
+We reuse existing TTA.dev patterns instead of inventing new ones:
+
+- **ACE agents**
+  - **GeneratorAgent** proposes commit messages, branch names, and ways to slice large diffs.
+  - **ReflectorAgent** analyzes outcomes (CI pass rate, revert rate, policy violations) per strategy, branch, and persona.
+  - **CuratorAgent** turns those insights into updated strategies, docs, and Logseq knowledge (e.g., `[[GitStrategy/TTA.dev/agent-augment_v3]]`).
+
+- **e2b execution sandbox**
+  - Runs pre‑commit checks safely (tests, lint, typecheck) for a candidate strategy *before* we change the local repo.
+  - Provides timing and reliability metrics for each strategy ("tests‑only vs tests+lint+typecheck").
+
+- **A/B testing harness**
+  - Assigns commits or branches to different strategies (e.g., baseline vs ACE+e2b) within policy bounds.
+  - Collects metrics tagged by `strategy_id`, `agent_persona`, `branch_type`, and repo.
+  - Integrates with **ACE benchmarks** so git collaboration can be evaluated alongside model quality and latency.
+
+### Phased Rollout
+
+To keep this safe and project‑friendly, we will roll out in three phases:
+
+1. **Phase 1 – Observe Only**  
+   - `GitCollaborationPrimitive` emits structured events:
+     - `commit_planned`, `precommit_checks_run`, `commit_finalized`, `ci_result_observed`.
+   - e2b is used only for **dry‑run checks** and experiments, never as a hard gate.
+   - ACE agents and benchmarks consume these events to build dashboards and basic recommendations.
+
+2. **Phase 2 – Controlled Experiments (A/B)**  
+   - Introduce an A/B testing primitive around git strategies:
+     - Strategy A: current hooks + manual checks.
+     - Strategy B: pre‑commit tests in e2b + stricter commit hygiene.
+   - Traffic assignment is explicit and policy‑driven (per repo / per branch / per persona).
+   - No hard policy changes are made automatically; recommendations are surfaced to humans.
+
+3. **Phase 3 – Adaptive Strategies (Opt‑In)**  
+   - `AdaptiveGitPrimitive` learns which strategies work best for each **repo × branch type × agent persona**.
+   - Only parameters marked as **tunable** in the repo's policy may change (for example, minimum description length between 20–60 characters, or which checks run for docs‑only commits).
+   - All strategy changes are:
+     - Logged to Logseq (e.g., `[[GitStrategy/TTA.dev/feature-branches_v2]]`).
+     - Reflected in documentation (this file, `AGENTS.md`, per‑package docs).
+     - Ideally proposed as PRs for human review.
+
+### Hypertool Personas and Multi-Agent Branches
+
+Hypertool personas and the existing agent branches (`agent/augment`, `agent/cline`, `agent/copilot`, etc.) become **first‑class strategy inputs**:
+
+- Each persona/agent is tagged in events (e.g., `agent_persona="augment"`, `persona="infra"`).
+- The oversight system can learn persona‑specific strategies, such as:
+  - Infra‑focused personas: smaller commits, stricter pre‑commit checks in e2b.
+  - Docs‑focused personas: lighter checks, but still conventional commits and periodic integration with `main`.
+
+This lets TTA.dev move toward the vision of **"not having to worry about git"**:
+
+- Agents (and humans who opt in) interact with high‑level actions ("save work", "prepare PR", "sync with main").
+- `GitCollaborationPrimitive` and its adaptive layer decide *how* to perform those actions safely for the current repo, branch, and persona.
+
+Implementation of this ACE‑powered layer will happen incrementally, with tests and benchmarks, so existing hooks and workflows remain stable while we evolve toward fully adaptive git oversight.
+
+### Agent Profiles: Copilot and Cline
+
+We treat each AI agent as a first-class git contributor with its own identity and branch strategy.
+
+#### Copilot Agent
+
+- **Identity**
+  - Name: `GitHub Copilot`
+  - Email: `copilot@tta.dev`
+- **Branches**
+  - Prefix: `agent/copilot`
+  - Example: `agent/copilot/git-collaboration-docs`
+- **Worktree**
+  - Current: `/home/thein/repos/TTA.dev` (this worktree)
+  - Optional future: `/home/thein/repos/TTA.dev-copilot` (dedicated overseer worktree)
+- **Integration Frequency**
+  - Baseline: `IntegrationFrequency.DAILY`
+  - Target: `IntegrationFrequency.HOURLY` while active
+- **Enforcement Mode**
+  - Treat Copilot as running with `enforce_hygiene=True`
+  - Before opening PRs:
+    - Branch synced with `main`
+    - `Quality Check (All)` task passes in VS Code
+    - Commit history uses conventional commits
+
+#### Cline Agent
+
+- **Identity**
+  - Name: `Cline`
+  - Email: `cline@tta.dev`
+- **Branches**
+  - Prefix: `agent/cline`
+  - Example: `agent/cline/refactor-multi-agent-hooks`
+- **Worktree**
+  - Recommended: `/home/thein/repos/TTA.dev-cline` (dedicated worktree)
+- **Integration Frequency**
+  - Baseline: `IntegrationFrequency.DAILY`
+  - Target: `IntegrationFrequency.HOURLY` for larger tasks
+- **Enforcement Mode**
+  - Same hygiene rules as Copilot:
+    - Conventional commits
+    - Tests for source changes
+    - Frequent small commits
+  - Cline SHOULD run the same `Quality Check (All)` task before creating PRs
+
+### Relationship to Multi-Agent Oversight Hooks
+
+The git hooks installed via `scripts/install_agent_hooks.sh` and the `agent_oversight.py` CLI focus on:
+
+- Tagging commits with `[agent:name]`
+- Logging and notifying the overseer (copilot)
+- Providing an audit trail and review workflow
+
+The `GitCollaborationPrimitive` adds a **policy layer** on top of this:
+
+- Hooks + oversight → *who committed what, and how it was reviewed*
+- GitCollaborationPrimitive → *how often agents integrate, how they structure commits, and whether they include tests*
+
+Together, they ensure:
+
+- Every agent commit is visible and reviewable
+- Branches stay healthy and close to `main`
+- Copilot and Cline both behave like disciplined, research-aligned contributors
 ```
 
 ## Troubleshooting
