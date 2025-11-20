@@ -97,9 +97,7 @@ class VaultSecretsClient:
 
             # Verify connection and authentication
             if self._client.is_authenticated():
-                logger.info(
-                    f"Successfully authenticated with Vault at {self.vault_url}"
-                )
+                logger.info(f"Successfully authenticated with Vault at {self.vault_url}")
                 self._log_vault_health()
             else:
                 raise ValueError("Failed to authenticate with Vault")
@@ -110,25 +108,18 @@ class VaultSecretsClient:
 
     def _get_vault_url(self) -> str:
         """Get Vault URL from environment or default."""
-        import os
+        from .loader import require_env
 
-        url = os.getenv("VAULT_URL")
-        if not url:
-            raise ValueError(
-                "VAULT_URL environment variable required when vault_url not provided"
-            )
-        return url
+        return require_env("VAULT_URL")
 
     def _get_vault_token(self) -> str:
         """Get Vault token from environment or default."""
-        import os
+        from .loader import get_env
 
-        token = os.getenv("VAULT_TOKEN") or os.getenv("VAULT_TOKEN_FILE")
+        token = get_env("VAULT_TOKEN") or get_env("VAULT_TOKEN_FILE")
 
         if not token:
-            raise ValueError(
-                "VAULT_TOKEN or VAULT_TOKEN_FILE environment variable required"
-            )
+            raise ValueError("VAULT_TOKEN or VAULT_TOKEN_FILE environment variable required")
 
         # Check if token is a file path
         if token and not token.startswith("hvs.") and not token.startswith("hvb."):
@@ -203,9 +194,7 @@ class VaultSecretsClient:
                     )
                     raise RuntimeError(f"Vault access failed: {e}") from e
 
-                logger.warning(
-                    f"Vault request failed (attempt {attempt + 1}), retrying: {e}"
-                )
+                logger.warning(f"Vault request failed (attempt {attempt + 1}), retrying: {e}")
                 import time
 
                 time.sleep(0.5 * (2**attempt))  # Exponential backoff
@@ -249,9 +238,7 @@ class VaultSecretsClient:
             )
 
             keys = response.get("data", {}).get("keys", [])
-            return [
-                key.rstrip("/") for key in keys if key != ""
-            ]  # Remove trailing slashes
+            return [key.rstrip("/") for key in keys if key != ""]  # Remove trailing slashes
 
         except hvac.exceptions.InvalidPath:
             return []  # No secrets found

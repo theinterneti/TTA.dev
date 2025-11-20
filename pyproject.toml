@@ -107,12 +107,12 @@ pythonVersion = "3.11"
 typeCheckingMode = "basic"
 reportMissingImports = true
 reportMissingTypeStubs = false
-include = ["packages"]
+include = ["platform", "apps"]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["packages/tta-dev-primitives/tests"]
+testpaths = ["platform/primitives/tests"]
 asyncio_mode = "auto"
 addopts = "-v --strict-markers --timeout=60"
 timeout = 60
