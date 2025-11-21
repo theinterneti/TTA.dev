@@ -1,4 +1,4 @@
-name: Merge Validation v2
+name: Merge Validation v2 (Parallel Execution)
 
 on:
   push:
