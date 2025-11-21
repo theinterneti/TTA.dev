@@ -100,9 +100,7 @@ class ObservableLLM:
         # Track if function is async
         self.is_async = asyncio.iscoroutinefunction(llm_function)
 
-        logger.info(
-            f"Initialized ObservableLLM for model: {model} (async: {self.is_async})"
-        )
+        logger.info(f"Initialized ObservableLLM for model: {model} (async: {self.is_async})")
 
     async def __call__(
         self,
@@ -201,9 +199,7 @@ class ObservableLLM:
             if created_trace:
                 self.langfuse.end_trace(trace, status="error")
 
-            logger.error(
-                f"LLM call failed: {self.model} (persona: {persona}, error: {e})"
-            )
+            logger.error(f"LLM call failed: {self.model} (persona: {persona}, error: {e})")
             raise
 
     def wrap_sync(
@@ -238,9 +234,7 @@ class ObservableLLM:
                 )
             else:
                 # Run sync function directly
-                return asyncio.run(
-                    self(prompt, persona=persona, chatmode=chatmode, **kwargs)
-                )
+                return asyncio.run(self(prompt, persona=persona, chatmode=chatmode, **kwargs))
 
         return wrapper
 

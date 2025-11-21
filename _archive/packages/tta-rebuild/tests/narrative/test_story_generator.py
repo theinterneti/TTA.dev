@@ -83,9 +83,7 @@ class TestStoryGeneratorPrimitive:
     """Test StoryGeneratorPrimitive."""
 
     @pytest.fixture
-    def story_generator(
-        self, mock_llm_provider: MockLLMProvider
-    ) -> StoryGeneratorPrimitive:
+    def story_generator(self, mock_llm_provider: MockLLMProvider) -> StoryGeneratorPrimitive:
         """Create story generator for testing."""
         # Configure mock to return valid JSON
         mock_llm_provider.response = """{
@@ -154,9 +152,7 @@ class TestStoryGeneratorPrimitive:
             player_preferences={},
         )
 
-        with pytest.raises(
-            ValidationError, match="Theme must be at least 3 characters"
-        ):
+        with pytest.raises(ValidationError, match="Theme must be at least 3 characters"):
             await story_generator.execute(invalid_input, test_context)
 
     @pytest.mark.asyncio
@@ -175,9 +171,7 @@ class TestStoryGeneratorPrimitive:
             player_preferences={},
         )
 
-        with pytest.raises(
-            ValidationError, match="Theme must be at least 3 characters"
-        ):
+        with pytest.raises(ValidationError, match="Theme must be at least 3 characters"):
             await story_generator.execute(invalid_input, test_context)
 
     @pytest.mark.asyncio
@@ -215,9 +209,7 @@ class TestStoryGeneratorPrimitive:
             player_preferences={},
         )
 
-        with pytest.raises(
-            ValidationError, match="Timeline position must be non-negative"
-        ):
+        with pytest.raises(ValidationError, match="Timeline position must be non-negative"):
             await story_generator.execute(invalid_input, test_context)
 
     @pytest.mark.asyncio

@@ -1,13 +1,16 @@
 import asyncio
+
 import pytest
 
-from tta_dev_primitives.recovery.timeout import TimeoutPrimitive, TimeoutError
 from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.recovery.timeout import TimeoutError, TimeoutPrimitive
 from tta_dev_primitives.testing import MockPrimitive
+
 
 async def slow_primitive_task(delay, result):
     await asyncio.sleep(delay)
     return result
+
 
 @pytest.mark.asyncio
 async def test_timeout_succeeds_within_limit():
@@ -22,6 +25,7 @@ async def test_timeout_succeeds_within_limit():
     assert result == "success"
     assert primitive.call_count == 1
 
+
 @pytest.mark.asyncio
 async def test_timeout_exceeded_no_fallback():
     """Tests that a TimeoutError is raised when the timeout is exceeded and there is no fallback."""
@@ -34,6 +38,7 @@ async def test_timeout_exceeded_no_fallback():
     with pytest.raises(TimeoutError, match="Execution exceeded 0.1s timeout"):
         await timeout_primitive.execute({}, context)
     assert primitive.call_count == 1
+
 
 @pytest.mark.asyncio
 async def test_timeout_exceeded_with_fallback():
@@ -50,6 +55,7 @@ async def test_timeout_exceeded_with_fallback():
     assert primitive.call_count == 1
     assert fallback.call_count == 1
 
+
 @pytest.mark.asyncio
 async def test_timeout_tracking_in_context():
     """Tests that timeout occurrences are tracked in the workflow context."""
@@ -57,7 +63,9 @@ async def test_timeout_tracking_in_context():
     primitive.side_effect = lambda *args, **kwargs: slow_primitive_task(0.2, "should_fail")
     fallback = MockPrimitive(name="fallback")
 
-    timeout_primitive = TimeoutPrimitive(primitive, timeout_seconds=0.1, fallback=fallback, track_timeouts=True)
+    timeout_primitive = TimeoutPrimitive(
+        primitive, timeout_seconds=0.1, fallback=fallback, track_timeouts=True
+    )
     context = WorkflowContext()
 
     await timeout_primitive.execute({}, context)
@@ -69,6 +77,7 @@ async def test_timeout_tracking_in_context():
     assert history_item["timeout"] == 0.1
     assert history_item["had_fallback"] is True
 
+
 @pytest.mark.asyncio
 async def test_timeout_no_tracking_in_context():
     """Tests that timeouts are not tracked when track_timeouts is False."""
@@ -76,7 +85,9 @@ async def test_timeout_no_tracking_in_context():
     primitive.side_effect = lambda *args, **kwargs: slow_primitive_task(0.2, "should_fail")
     fallback = MockPrimitive(name="fallback")
 
-    timeout_primitive = TimeoutPrimitive(primitive, timeout_seconds=0.1, fallback=fallback, track_timeouts=False)
+    timeout_primitive = TimeoutPrimitive(
+        primitive, timeout_seconds=0.1, fallback=fallback, track_timeouts=False
+    )
     context = WorkflowContext()
 
     await timeout_primitive.execute({}, context)

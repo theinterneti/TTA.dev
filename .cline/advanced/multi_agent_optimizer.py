@@ -305,9 +305,7 @@ class AgentOrchestrator:
                 recent_performance = self.performance_metrics[agent.id][task.type]
 
             load_score = 1.0 - agent.current_load
-            total_score = (
-                (spec_score * 0.4) + (recent_performance * 0.4) + (load_score * 0.2)
-            )
+            total_score = (spec_score * 0.4) + (recent_performance * 0.4) + (load_score * 0.2)
 
             if total_score > best_score:
                 best_score = total_score
@@ -332,16 +330,10 @@ class AgentOrchestrator:
             context_match = 1.0 if context_agent.id == agent.id else 0.0
             load_score = 1.0 - agent.current_load
 
-            total_score = (
-                (skill_match * 0.35) + (context_match * 0.35) + (load_score * 0.3)
-            )
+            total_score = (skill_match * 0.35) + (context_match * 0.35) + (load_score * 0.3)
             agents_with_scores.append((agent, total_score))
 
-        return (
-            max(agents_with_scores, key=lambda x: x[1])[0]
-            if agents_with_scores
-            else None
-        )
+        return max(agents_with_scores, key=lambda x: x[1])[0] if agents_with_scores else None
 
     def complete_task(
         self,
@@ -367,34 +359,24 @@ class AgentOrchestrator:
 
                 if success:
                     # Exponential moving average of success rate
-                    current = self.performance_metrics[agent_id].get(
-                        "success_rate", 0.0
+                    current = self.performance_metrics[agent_id].get("success_rate", 0.0)
+                    self.performance_metrics[agent_id]["success_rate"] = (current * 0.9) + (
+                        1.0 * 0.1
                     )
-                    self.performance_metrics[agent_id]["success_rate"] = (
-                        current * 0.9
-                    ) + (1.0 * 0.1)
                 else:
-                    current = self.performance_metrics[agent_id].get(
-                        "success_rate", 0.0
+                    current = self.performance_metrics[agent_id].get("success_rate", 0.0)
+                    self.performance_metrics[agent_id]["success_rate"] = (current * 0.9) + (
+                        0.0 * 0.1
                     )
-                    self.performance_metrics[agent_id]["success_rate"] = (
-                        current * 0.9
-                    ) + (0.0 * 0.1)
 
     def get_system_status(self) -> dict[str, Any]:
         """Get current system status and metrics."""
         with self._lock:
             total_agents = len(self.agents)
-            idle_agents = sum(
-                1 for a in self.agents.values() if a.state == AgentState.IDLE
-            )
-            busy_agents = sum(
-                1 for a in self.agents.values() if a.state == AgentState.BUSY
-            )
+            idle_agents = sum(1 for a in self.agents.values() if a.state == AgentState.IDLE)
+            busy_agents = sum(1 for a in self.agents.values() if a.state == AgentState.BUSY)
 
-            avg_load = sum(a.current_load for a in self.agents.values()) / max(
-                total_agents, 1
-            )
+            avg_load = sum(a.current_load for a in self.agents.values()) / max(total_agents, 1)
 
             return {
                 "total_agents": total_agents,
@@ -402,8 +384,7 @@ class AgentOrchestrator:
                 "busy_agents": busy_agents,
                 "average_load": avg_load,
                 "agent_types": {
-                    at.value: len(agent_ids)
-                    for at, agent_ids in self.agent_pools.items()
+                    at.value: len(agent_ids) for at, agent_ids in self.agent_pools.items()
                 },
                 "queue_size": self.task_queue.qsize(),
                 "uptime": time.time() - getattr(self, "_start_time", time.time()),
@@ -535,9 +516,7 @@ class AdvancedWorkflowEngine:
 
             # Assign task to appropriate agent
             agent_type = self._get_agent_type_for_task(task)
-            agent = self.orchestrator.assign_task(
-                task, agent_type, workflow.coordination_strategy
-            )
+            agent = self.orchestrator.assign_task(task, agent_type, workflow.coordination_strategy)
 
             if not agent:
                 raise RuntimeError(f"No available agent for task {task.name}")
@@ -566,9 +545,7 @@ class AdvancedWorkflowEngine:
         assignments = []
         for task in workflow.tasks:
             agent_type = self._get_agent_type_for_task(task)
-            agent = self.orchestrator.assign_task(
-                task, agent_type, workflow.coordination_strategy
-            )
+            agent = self.orchestrator.assign_task(task, agent_type, workflow.coordination_strategy)
             if not agent:
                 raise RuntimeError(f"No available agent for task {task.name}")
             assignments.append((agent, task))
@@ -595,17 +572,13 @@ class AdvancedWorkflowEngine:
         for task in workflow.tasks:
             # Check if task should be executed
             condition = task.context.get("condition")
-            if condition and not await self._evaluate_condition(
-                condition, result, workflow
-            ):
+            if condition and not await self._evaluate_condition(condition, result, workflow):
                 logging.info(f"Skipping task {task.name} due to condition")
                 continue
 
             # Execute task
             agent_type = self._get_agent_type_for_task(task)
-            agent = self.orchestrator.assign_task(
-                task, agent_type, workflow.coordination_strategy
-            )
+            agent = self.orchestrator.assign_task(task, agent_type, workflow.coordination_strategy)
 
             if not agent:
                 raise RuntimeError(f"No available agent for task {task.name}")
@@ -623,9 +596,7 @@ class AdvancedWorkflowEngine:
                 task.input_data = data
 
             agent_type = self._get_agent_type_for_task(task)
-            agent = self.orchestrator.assign_task(
-                task, agent_type, workflow.coordination_strategy
-            )
+            agent = self.orchestrator.assign_task(task, agent_type, workflow.coordination_strategy)
 
             if not agent:
                 raise RuntimeError(f"No available agent for task {task.name}")
@@ -686,9 +657,7 @@ class AdvancedWorkflowEngine:
                     retry_count += 1
                     if retry_count >= max_retries:
                         raise
-                    logging.warning(
-                        f"Task {task.name} failed, retry {retry_count}/{max_retries}"
-                    )
+                    logging.warning(f"Task {task.name} failed, retry {retry_count}/{max_retries}")
                     await asyncio.sleep(0.1 * retry_count)  # Exponential backoff
 
     async def _execute_bulkhead(self, workflow: Workflow) -> Any:
@@ -757,9 +726,7 @@ class AdvancedWorkflowEngine:
 
         return task_type_mapping.get(task.type, AgentType.WORKER)
 
-    async def _evaluate_condition(
-        self, condition: Callable, data: Any, workflow: Workflow
-    ) -> bool:
+    async def _evaluate_condition(self, condition: Callable, data: Any, workflow: Workflow) -> bool:
         """Evaluate a workflow condition."""
         try:
             if asyncio.iscoroutinefunction(condition):
@@ -774,9 +741,7 @@ class AdvancedWorkflowEngine:
 class SelfHealingSystem:
     """System for automatic recovery and optimization."""
 
-    def __init__(
-        self, orchestrator: AgentOrchestrator, workflow_engine: AdvancedWorkflowEngine
-    ):
+    def __init__(self, orchestrator: AgentOrchestrator, workflow_engine: AdvancedWorkflowEngine):
         self.orchestrator = orchestrator
         self.workflow_engine = workflow_engine
         self.health_checks: dict[str, Callable] = {}
@@ -968,25 +933,15 @@ class MultiAgentOptimizer:
 
     def _register_default_strategies(self):
         """Register default health checks and recovery strategies."""
-        self.healing_system.register_health_check(
-            "agent_heartbeat", self._check_agent_heartbeat
-        )
-        self.healing_system.register_health_check(
-            "system_load", self._check_system_load
-        )
-        self.healing_system.register_health_check(
-            "task_success_rate", self._check_success_rate
-        )
+        self.healing_system.register_health_check("agent_heartbeat", self._check_agent_heartbeat)
+        self.healing_system.register_health_check("system_load", self._check_system_load)
+        self.healing_system.register_health_check("task_success_rate", self._check_success_rate)
 
-        self.healing_system.register_recovery_strategy(
-            "restart_agent", self._restart_agent
-        )
+        self.healing_system.register_recovery_strategy("restart_agent", self._restart_agent)
         self.healing_system.register_recovery_strategy(
             "redistribute_tasks", self._redistribute_tasks
         )
-        self.healing_system.register_recovery_strategy(
-            "scale_agents", self._scale_agents
-        )
+        self.healing_system.register_recovery_strategy("scale_agents", self._scale_agents)
 
     def _initialize_default_agents(self):
         """Initialize the system with default agents."""

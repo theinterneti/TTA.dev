@@ -105,9 +105,7 @@ class GenerationContext:
         self.start_time = datetime.now()
 
     def __repr__(self) -> str:
-        return (
-            f"GenerationContext(generation_id={self.generation_id}, model={self.model})"
-        )
+        return f"GenerationContext(generation_id={self.generation_id}, model={self.model})"
 
 
 class LangfuseIntegration:
@@ -177,9 +175,7 @@ class LangfuseIntegration:
                 host=self.host,
             )
             self.enabled = True
-            logger.info(
-                f"Langfuse integration initialized successfully (host: {self.host})"
-            )
+            logger.info(f"Langfuse integration initialized successfully (host: {self.host})")
         except ImportError:
             logger.warning(
                 "Langfuse SDK not installed. LLM tracing will be disabled. "
@@ -339,9 +335,7 @@ class LangfuseIntegration:
         generation_id = f"{name}-{model}-{datetime.now().isoformat()}"
 
         if not self.enabled or not trace.langfuse_trace:
-            logger.debug(
-                f"Langfuse disabled - creating no-op generation: {generation_id}"
-            )
+            logger.debug(f"Langfuse disabled - creating no-op generation: {generation_id}")
             return GenerationContext(
                 generation_id=generation_id,
                 name=name,

@@ -113,12 +113,8 @@ class FallbackPrimitive(WorkflowPrimitive[Any, Any]):
             if tracer and TRACING_AVAILABLE:
                 with tracer.start_as_current_span("fallback.primary") as span:
                     span.set_attribute("fallback.execution", "primary")
-                    span.set_attribute(
-                        "fallback.primary_type", self.primary.__class__.__name__
-                    )
-                    span.set_attribute(
-                        "fallback.fallback_type", self.fallback.__class__.__name__
-                    )
+                    span.set_attribute("fallback.primary_type", self.primary.__class__.__name__)
+                    span.set_attribute("fallback.fallback_type", self.fallback.__class__.__name__)
 
                     try:
                         result = await self.primary.execute(input_data, context)

@@ -5,6 +5,53 @@ All notable changes to TTA.dev will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-11-17
+
+### Added
+
+#### 🤖 GitHub Integration - @cline Agent
+
+**Autonomous AI issue analysis integrated into GitHub Actions:**
+
+- **Cline Responder Workflow** - Triggers on `@cline` mentions in GitHub issues
+  - Automatically starts Cline CLI instances in GitHub Actions
+  - Uses TTA.dev-specific knowledge base for intelligent analysis
+  - Posts structured responses as GitHub comments
+
+- **TTA.dev Specialized Analysis** - Agent understands our ecosystem deeply
+  - Reads AGENTS.md, PRIMITIVES_CATALOG.md, and package documentation
+  - Identifies relevant packages (tta-dev-primitives, tta-observability-integration, etc.)
+  - Suggests specific primitives and patterns (RetryPrimitive, CachePrimitive, etc.)
+  - References examples directory for working code samples
+  - Enforces TTA.dev standards (uv, type hints with `str | None`, primitives workflow patterns)
+
+- **Security & Infrastructure**
+  - Environment-scoped execution ("cline-actions" environment)
+  - OpenRouter API key storage in GitHub secrets
+  - No external script execution - all analysis within GitHub Actions
+  - Automated workflow triggers on issue comments
+
+- **Files Added:**
+  - `.github/workflows/cline-responder.yml` - GitHub Actions workflow
+  - `git-scripts/analyze-issue.sh` - TTA.dev-specialized analysis script
+  - `docs/guides/github-integration.md` - Complete usage guide
+
+**Benefits:**
+- 🚀 Instant assistance for developers using TTA.dev primitives
+- 📚 Direct connection between GitHub issues and knowledge base
+- 🔧 Standards compliance and anti-pattern avoidance
+- 📖 Working code examples and primitive recommendations
+- 🤖 Autonomous analysis using full TTA.dev context
+
+**Usage:** Comment `@cline [question]` on any GitHub issue to get AI-powered assistance tailored to TTA.dev patterns and standards.
+
+**Example:**
+```
+@cline What primitive should I use for retry logic?
+@cline Generate a WorkflowContext example
+@cline Analyze this error and suggest a pattern
+```
+
 ## [1.0.0] - 2025-11-07
 
 ### ⭐ Major Release - Production Ready
@@ -274,6 +321,7 @@ This is the first production-ready release of TTA.dev, featuring self-improving 
 
 ## Version History
 
+- **1.1.0** (2025-11-17) - GitHub Integration @cline Agent
 - **1.0.0** (2025-11-07) - First production release
 - **0.1.0** (2025-10-28) - Initial development release
 

@@ -10,9 +10,7 @@ async def test_sequential_primitive_init_empty_primitives_raises_error():
     """
     Test that SequentialPrimitive raises ValueError if initialized with an empty list.
     """
-    with pytest.raises(
-        ValueError, match="SequentialPrimitive requires at least one primitive"
-    ):
+    with pytest.raises(ValueError, match="SequentialPrimitive requires at least one primitive"):
         SequentialPrimitive([])
 
 
@@ -119,14 +117,10 @@ async def test_sequential_primitive_error_handling():
     Test that SequentialPrimitive correctly propagates exceptions from a failing primitive.
     """
     mock_primitive1 = MockPrimitive(name="Mock1", return_value="output1")
-    failing_primitive = MockPrimitive(
-        name="FailingMock", raise_error=Exception("Test error")
-    )
+    failing_primitive = MockPrimitive(name="FailingMock", raise_error=Exception("Test error"))
     mock_primitive3 = MockPrimitive(name="Mock3", return_value="output3")
 
-    workflow = SequentialPrimitive(
-        [mock_primitive1, failing_primitive, mock_primitive3]
-    )
+    workflow = SequentialPrimitive([mock_primitive1, failing_primitive, mock_primitive3])
     context = WorkflowContext(workflow_id="test-workflow")
 
     with pytest.raises(Exception, match="Test error"):

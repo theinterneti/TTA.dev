@@ -97,18 +97,14 @@ def main():
 
     if default_works and not custom_works:
         print("\n🔍 CONCLUSION: Our custom template broke the code interpreter service")
-        print(
-            "📝 Action needed: Fix our Dockerfile to preserve code interpreter service"
-        )
+        print("📝 Action needed: Fix our Dockerfile to preserve code interpreter service")
         return False
     elif not default_works and not custom_works:
         print("\n🔍 CONCLUSION: E2B service issue (not our template)")
         print("📝 Action needed: Check E2B service status and API limits")
         return False
     elif default_works and custom_works:
-        print(
-            "\n✅ CONCLUSION: Both templates work! Previous issues were intermittent."
-        )
+        print("\n✅ CONCLUSION: Both templates work! Previous issues were intermittent.")
         print("📝 Action: Template is actually working - investigate timeout settings")
         return True
     else:

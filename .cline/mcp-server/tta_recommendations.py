@@ -341,9 +341,7 @@ class PrimitiveMatcher:
             ):
                 score += 0.2
 
-            if analysis.error_handling_needed and "error_recovery" in info.get(
-                "requirements", []
-            ):
+            if analysis.error_handling_needed and "error_recovery" in info.get("requirements", []):
                 score += 0.15
 
             if analysis.concurrency_needed and "concurrent_execution" in info.get(
@@ -481,9 +479,7 @@ result = await cached_function.execute(data, context)""",
             },
         }
 
-    def get_template(
-        self, primitive_name: str, template_type: str = "basic"
-    ) -> str | None:
+    def get_template(self, primitive_name: str, template_type: str = "basic") -> str | None:
         """Get code template for a primitive"""
         if primitive_name in self.templates:
             return self.templates[primitive_name].get(template_type + "_template")
@@ -550,9 +546,7 @@ class TTAdevMCPService:
                 recommendation = PrimitiveRecommendation(
                     primitive_name=primitive_name,
                     confidence_score=confidence,
-                    reasoning=self._generate_reasoning(
-                        primitive_name, analysis, context
-                    ),
+                    reasoning=self._generate_reasoning(primitive_name, analysis, context),
                     code_template=template or "",
                     use_cases=examples,
                     related_primitives=related,
@@ -572,9 +566,7 @@ class TTAdevMCPService:
                 "metrics": {
                     "response_time_ms": response_time,
                     "recommendations_count": len(recommendations),
-                    "highest_confidence": max(
-                        [r.confidence_score for r in recommendations]
-                    )
+                    "highest_confidence": max([r.confidence_score for r in recommendations])
                     if recommendations
                     else 0.0,
                 },
@@ -606,19 +598,14 @@ class TTAdevMCPService:
         results = []
 
         for primitive_name, info in self.template_provider.templates.items():
-            if any(
-                query.lower() in example.lower() for example in info.get("examples", [])
-            ):
+            if any(query.lower() in example.lower() for example in info.get("examples", [])):
                 results.append(
                     {
                         "primitive_name": primitive_name,
                         "matched_examples": [
-                            ex
-                            for ex in info.get("examples", [])
-                            if query.lower() in ex.lower()
+                            ex for ex in info.get("examples", []) if query.lower() in ex.lower()
                         ],
-                        "template_preview": info.get("basic_template", "")[:200]
-                        + "...",
+                        "template_preview": info.get("basic_template", "")[:200] + "...",
                     }
                 )
 
@@ -630,9 +617,7 @@ class TTAdevMCPService:
 
         # Check for common issues
         if "time.sleep" in code and "async" in code:
-            issues.append(
-                "Blocking sleep in async function - use asyncio.sleep instead"
-            )
+            issues.append("Blocking sleep in async function - use asyncio.sleep instead")
 
         if "except:" in code and "Exception" not in code:
             issues.append("Bare except clause - specify exception types")
@@ -648,9 +633,7 @@ class TTAdevMCPService:
 
         return issues
 
-    def _detect_optimizations(
-        self, code: str, analysis: CodeAnalysisResult
-    ) -> list[str]:
+    def _detect_optimizations(self, code: str, analysis: CodeAnalysisResult) -> list[str]:
         """Detect optimization opportunities"""
         optimizations = []
 
@@ -661,17 +644,13 @@ class TTAdevMCPService:
             optimizations.append("Consider ParallelPrimitive for concurrent operations")
 
         if analysis.error_handling_needed:
-            optimizations.append(
-                "Consider RetryPrimitive or FallbackPrimitive for resilience"
-            )
+            optimizations.append("Consider RetryPrimitive or FallbackPrimitive for resilience")
 
         if "api" in code.lower() and "timeout" not in code.lower():
             optimizations.append("Add timeout handling with TimeoutPrimitive")
 
         if analysis.inferred_requirements and len(analysis.inferred_requirements) > 3:
-            optimizations.append(
-                "Consider wrapping in SequentialPrimitive for complex workflows"
-            )
+            optimizations.append("Consider wrapping in SequentialPrimitive for complex workflows")
 
         return optimizations
 
@@ -700,9 +679,7 @@ class TTAdevMCPService:
             related = [r for r in related if r != "CachePrimitive"]
 
         if "error_recovery" not in analysis.inferred_requirements:
-            related = [
-                r for r in related if r not in ["RetryPrimitive", "FallbackPrimitive"]
-            ]
+            related = [r for r in related if r not in ["RetryPrimitive", "FallbackPrimitive"]]
 
         return related
 
@@ -719,9 +696,7 @@ class TTAdevMCPService:
             if "timeout_handling" in analysis.inferred_requirements:
                 reasoning_parts.append("Detected timeout-related patterns in your code")
             if "api_resilience" in analysis.inferred_requirements:
-                reasoning_parts.append(
-                    "API calls detected - timeouts prevent hanging operations"
-                )
+                reasoning_parts.append("API calls detected - timeouts prevent hanging operations")
 
         elif primitive_name == "ParallelPrimitive":
             if "concurrent_execution" in analysis.inferred_requirements:
@@ -747,9 +722,7 @@ class TTAdevMCPService:
                     "Retry patterns detected - automatic retry logic recommended"
                 )
             if "error_recovery" in analysis.inferred_requirements:
-                reasoning_parts.append(
-                    "Error handling needed - RetryPrimitive provides resilience"
-                )
+                reasoning_parts.append("Error handling needed - RetryPrimitive provides resilience")
 
         elif primitive_name == "FallbackPrimitive":
             if "fallback_strategy" in analysis.inferred_requirements:
@@ -779,16 +752,12 @@ class TTAdevMCPService:
             "CachePrimitive": [".cline/examples/primitives/cache_primitive.md"],
             "RetryPrimitive": [".cline/examples/primitives/retry_primitive.md"],
             "FallbackPrimitive": [".cline/examples/primitives/fallback_primitive.md"],
-            "SequentialPrimitive": [
-                ".cline/examples/primitives/sequential_primitive.md"
-            ],
+            "SequentialPrimitive": [".cline/examples/primitives/sequential_primitive.md"],
         }
 
         return examples.get(primitive_name, [])
 
-    def _update_metrics(
-        self, recommendations: list[PrimitiveRecommendation], response_time: float
-    ):
+    def _update_metrics(self, recommendations: list[PrimitiveRecommendation], response_time: float):
         """Update performance metrics"""
         self.metrics["total_recommendations"] += 1
 
@@ -915,32 +884,24 @@ if Server is not None:
                     development_stage=arguments.get("development_stage", "development"),
                 )
 
-                return [
-                    types.TextContent(type="text", text=json.dumps(result, indent=2))
-                ]
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
             elif name == "get_primitive_info":
                 result = await tta_service.get_primitive_info(
                     primitive_name=arguments["primitive_name"]
                 )
 
-                return [
-                    types.TextContent(type="text", text=json.dumps(result, indent=2))
-                ]
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
             elif name == "search_examples":
                 result = await tta_service.search_examples(query=arguments["query"])
 
-                return [
-                    types.TextContent(type="text", text=json.dumps(result, indent=2))
-                ]
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
             elif name == "get_performance_metrics":
                 result = tta_service.get_performance_metrics()
 
-                return [
-                    types.TextContent(type="text", text=json.dumps(result, indent=2))
-                ]
+                return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
             else:
                 return [types.TextContent(type="text", text=f"Unknown tool: {name}")]

@@ -6,9 +6,7 @@ import sys
 from pathlib import Path
 
 # Add packages to path
-sys.path.insert(
-    0, str(Path(__file__).parent / "packages" / "tta-dev-primitives" / "src")
-)
+sys.path.insert(0, str(Path(__file__).parent / "packages" / "tta-dev-primitives" / "src"))
 
 from tta_dev_primitives import WorkflowContext
 from tta_dev_primitives.core.base import WorkflowPrimitive

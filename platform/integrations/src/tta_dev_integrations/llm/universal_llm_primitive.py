@@ -32,9 +32,7 @@ class UserBudgetProfile(str, Enum):
 
     FREE = "free"  # Broke students, hobbyists - FREE models only
     CAREFUL = "careful"  # Solo devs, small teams - Mix free+paid with tracking
-    UNLIMITED = (
-        "unlimited"  # Companies - Best model always, cost tracked but not limiting
-    )
+    UNLIMITED = "unlimited"  # Companies - Best model always, cost tracked but not limiting
 
 
 class CoderType(str, Enum):
@@ -405,9 +403,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             "free_tier_requests": self.free_tier_requests,
             "paid_requests": self.paid_requests,
             "free_tier_percentage": (
-                self.free_tier_requests / self.request_count * 100
-                if self.request_count > 0
-                else 0
+                self.free_tier_requests / self.request_count * 100 if self.request_count > 0 else 0
             ),
             "total_spend": self.total_spend,
             "budget_limit": self.monthly_limit,

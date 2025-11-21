@@ -1,9 +1,11 @@
 import asyncio
+
 import pytest
 
-from tta_dev_primitives.core.parallel import ParallelPrimitive
 from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.core.parallel import ParallelPrimitive
 from tta_dev_primitives.testing import MockPrimitive
+
 
 @pytest.mark.asyncio
 async def test_parallel_basic_execution():
@@ -23,6 +25,7 @@ async def test_parallel_basic_execution():
     assert mock2.call_count == 1
     assert mock3.call_count == 1
 
+
 @pytest.mark.asyncio
 async def test_parallel_input_data_distribution():
     """Tests that all parallel branches receive the same input data."""
@@ -37,6 +40,7 @@ async def test_parallel_input_data_distribution():
 
     assert mock1.calls[0][0] == input_data
     assert mock2.calls[0][0] == input_data
+
 
 @pytest.mark.asyncio
 async def test_parallel_exception_handling():
@@ -54,6 +58,7 @@ async def test_parallel_exception_handling():
     assert mock_success.call_count == 1
     assert mock_failure.call_count == 1
 
+
 @pytest.mark.asyncio
 async def test_parallel_or_operator():
     """Tests the `|` operator for composing a ParallelPrimitive."""
@@ -70,6 +75,7 @@ async def test_parallel_or_operator():
     assert isinstance(parallel_workflow, ParallelPrimitive)
     assert len(parallel_workflow.primitives) == 3
     assert results == [1, 2, 3]
+
 
 @pytest.mark.asyncio
 async def test_parallel_flattening_nested_primitives():
@@ -89,10 +95,12 @@ async def test_parallel_flattening_nested_primitives():
     results = await workflow.execute({}, context)
     assert results == [1, 2, 3, 4]
 
+
 def test_parallel_empty_initialization():
     """Tests that initializing with an empty list raises a ValueError."""
     with pytest.raises(ValueError, match="ParallelPrimitive requires at least one primitive"):
         ParallelPrimitive([])
+
 
 @pytest.mark.asyncio
 async def test_parallel_workflow_context_children():
@@ -118,15 +126,21 @@ async def test_parallel_workflow_context_children():
     assert context1.causation_id == parent_context.correlation_id
     assert context2.causation_id == parent_context.correlation_id
 
+
 @pytest.mark.asyncio
 async def test_parallel_with_async_primitives():
     """Tests parallel execution with primitives that have async delays."""
+
     async def slow_primitive(delay, result):
         await asyncio.sleep(delay)
         return result
 
-    mock1 = MockPrimitive(name="mock1", side_effect=lambda *args, **kwargs: slow_primitive(0.02, "fast"))
-    mock2 = MockPrimitive(name="mock2", side_effect=lambda *args, **kwargs: slow_primitive(0.01, "faster"))
+    mock1 = MockPrimitive(
+        name="mock1", side_effect=lambda *args, **kwargs: slow_primitive(0.02, "fast")
+    )
+    mock2 = MockPrimitive(
+        name="mock2", side_effect=lambda *args, **kwargs: slow_primitive(0.01, "faster")
+    )
 
     workflow = mock1 | mock2
     context = WorkflowContext()

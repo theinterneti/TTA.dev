@@ -115,9 +115,7 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
             if tracer and TRACING_AVAILABLE:
                 with tracer.start_as_current_span("saga.forward") as span:
                     span.set_attribute("saga.execution", "forward")
-                    span.set_attribute(
-                        "saga.forward_type", self.forward.__class__.__name__
-                    )
+                    span.set_attribute("saga.forward_type", self.forward.__class__.__name__)
                     span.set_attribute(
                         "saga.compensation_type", self.compensation.__class__.__name__
                     )
@@ -241,9 +239,7 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
 
                 # Compensation succeeded! Record metrics and log
                 context.checkpoint("saga.compensation.end")
-                compensation_duration_ms = (
-                    time.time() - compensation_start_time
-                ) * 1000
+                compensation_duration_ms = (time.time() - compensation_start_time) * 1000
 
                 metrics_collector.record_execution(
                     "SagaPrimitive.compensation",
@@ -282,9 +278,7 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
             except Exception as compensation_error:
                 # Compensation also failed - record metrics
                 context.checkpoint("saga.compensation.end")
-                compensation_duration_ms = (
-                    time.time() - compensation_start_time
-                ) * 1000
+                compensation_duration_ms = (time.time() - compensation_start_time) * 1000
 
                 metrics_collector.record_execution(
                     "SagaPrimitive.compensation",

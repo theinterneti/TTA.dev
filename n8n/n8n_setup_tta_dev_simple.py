@@ -16,9 +16,7 @@ import aiohttp
 from tta_dev_primitives.core.base import WorkflowContext
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -46,9 +44,7 @@ class TTADevRetryEngine:
 
                 # Calculate delay with exponential backoff
                 delay = min(base_delay * (backoff_multiplier**attempt), max_delay)
-                logger.warning(
-                    f"Attempt {attempt + 1} failed: {e}. Retrying in {delay}s..."
-                )
+                logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {delay}s...")
                 await asyncio.sleep(delay)
 
         return {"success": False, "error": "Max attempts reached"}
@@ -99,9 +95,7 @@ class TTADevTimeoutEngine:
     """TTA.dev inspired timeout engine for resilience"""
 
     @staticmethod
-    async def execute_with_timeout(
-        func, timeout_seconds: float = 30.0
-    ) -> dict[str, Any]:
+    async def execute_with_timeout(func, timeout_seconds: float = 30.0) -> dict[str, Any]:
         """TTA.dev inspired execution with timeout protection"""
 
         try:
@@ -173,9 +167,7 @@ class N8nSetupEngine:
 
         async def check_n8n_health():
             async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.n8n_base_url}/healthz", timeout=5
-                ) as resp:
+                async with session.get(f"{self.n8n_base_url}/healthz", timeout=5) as resp:
                     if resp.status == 200:
                         return {"status": "healthy", "web_interface": "ok"}
                     else:
@@ -195,10 +187,7 @@ class N8nSetupEngine:
         """Verify GitHub API with TTA.dev inspired fallback"""
         logger.info("🔑 Verifying GitHub API connectivity...")
 
-        github_token = (
-            os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
-            or "ghp_YOUR_GITHUB_TOKEN_HERE"
-        )
+        github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN") or "ghp_YOUR_GITHUB_TOKEN_HERE"
 
         async def test_github_api():
             async with aiohttp.ClientSession() as session:
@@ -240,9 +229,7 @@ class N8nSetupEngine:
         )
 
         if result["success"]:
-            logger.info(
-                f"✅ GitHub API working - {result.get('result', {}).get('repo', 'N/A')}"
-            )
+            logger.info(f"✅ GitHub API working - {result.get('result', {}).get('repo', 'N/A')}")
 
         return result
 
@@ -250,9 +237,7 @@ class N8nSetupEngine:
         """Verify Gemini API with TTA.dev inspired timeout"""
         logger.info("🤖 Verifying Gemini AI API connectivity...")
 
-        gemini_key = (
-            os.getenv("GEMINI_API_KEY") or "AIzaSyDgpvqlw7B2TqnEHpy6tUaIM-WbdScuioE"
-        )
+        gemini_key = os.getenv("GEMINI_API_KEY") or "AIzaSyDgpvqlw7B2TqnEHpy6tUaIM-WbdScuioE"
 
         async def test_gemini_api():
             payload = {"contents": [{"parts": [{"text": "Hello"}]}]}
@@ -313,9 +298,7 @@ class N8nSetupEngine:
                             workflow_id = result.get("id")
 
                             if workflow_id:
-                                logger.info(
-                                    f"✅ Workflow imported with ID: {workflow_id}"
-                                )
+                                logger.info(f"✅ Workflow imported with ID: {workflow_id}")
 
                                 # Activate workflow
                                 async with session.post(
@@ -334,9 +317,7 @@ class N8nSetupEngine:
                             return {"status": "imported", "workflow_id": workflow_id}
                         else:
                             text = await resp.text()
-                            raise Exception(
-                                f"Import failed: HTTP {resp.status} - {text}"
-                            )
+                            raise Exception(f"Import failed: HTTP {resp.status} - {text}")
 
             # Use TTA.dev inspired timeout for workflow import
             result = await self.timeout_engine.execute_with_timeout(
@@ -364,9 +345,7 @@ class N8nSetupEngine:
             "gemini_api": "working" if gemini_working else "unavailable",
             "workflow_import": workflow_success,
             "overall_status": "success" if workflow_success else "partial",
-            "workflow_id": results.get("workflow", {})
-            .get("result", {})
-            .get("workflow_id"),
+            "workflow_id": results.get("workflow", {}).get("result", {}).get("workflow_id"),
             "api_connectivity": {
                 "n8n_healthy": n8n_healthy,
                 "github_working": github_working,

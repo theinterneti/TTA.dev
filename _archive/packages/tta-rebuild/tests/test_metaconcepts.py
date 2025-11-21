@@ -69,9 +69,7 @@ class TestMetaconceptRegistry:
 
     def test_get_by_category(self) -> None:
         """Test filtering metaconcepts by category."""
-        therapeutic = MetaconceptRegistry.get_by_category(
-            MetaconceptCategory.THERAPEUTIC
-        )
+        therapeutic = MetaconceptRegistry.get_by_category(MetaconceptCategory.THERAPEUTIC)
 
         assert len(therapeutic) == 4
         assert all(mc.category == MetaconceptCategory.THERAPEUTIC for mc in therapeutic)
@@ -113,9 +111,7 @@ class TestMetaconceptRegistry:
 
     def test_category_counts(self) -> None:
         """Test that each category has expected number of metaconcepts."""
-        therapeutic = MetaconceptRegistry.get_by_category(
-            MetaconceptCategory.THERAPEUTIC
-        )
+        therapeutic = MetaconceptRegistry.get_by_category(MetaconceptCategory.THERAPEUTIC)
         narrative = MetaconceptRegistry.get_by_category(MetaconceptCategory.NARRATIVE)
         safety = MetaconceptRegistry.get_by_category(MetaconceptCategory.SAFETY)
         game = MetaconceptRegistry.get_by_category(MetaconceptCategory.GAME)

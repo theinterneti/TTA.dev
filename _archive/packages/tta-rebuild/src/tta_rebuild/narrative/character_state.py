@@ -135,9 +135,7 @@ class CharacterStatePrimitive(TTAPrimitive[CharacterInteraction, CharacterRespon
         consistency_score = self._calculate_consistency(character, dialogue)
 
         # Calculate personality alignment
-        personality_alignment = self._calculate_personality_alignment(
-            character, input_data
-        )
+        personality_alignment = self._calculate_personality_alignment(character, input_data)
 
         # Suggest arc direction
         suggested_arc = self._suggest_arc_direction(character)
@@ -203,9 +201,7 @@ class CharacterStatePrimitive(TTAPrimitive[CharacterInteraction, CharacterRespon
             arc_stage="setup",
         )
 
-    def _update_emotion(
-        self, character: CharacterState, trigger: str
-    ) -> CharacterState:
+    def _update_emotion(self, character: CharacterState, trigger: str) -> CharacterState:
         """Update character's emotional state.
 
         Args:
@@ -233,9 +229,7 @@ class CharacterStatePrimitive(TTAPrimitive[CharacterInteraction, CharacterRespon
 
         return character
 
-    def _update_memory(
-        self, character: CharacterState, events: list[str]
-    ) -> CharacterState:
+    def _update_memory(self, character: CharacterState, events: list[str]) -> CharacterState:
         """Update character's memory with new events.
 
         Args:
@@ -355,9 +349,7 @@ class CharacterStatePrimitive(TTAPrimitive[CharacterInteraction, CharacterRespon
         """
         # Consider recent memories and goals
         active_goals = [
-            goal
-            for goal, progress in character.development_goals.items()
-            if progress < 1.0
+            goal for goal, progress in character.development_goals.items() if progress < 1.0
         ]
 
         if active_goals:
@@ -380,9 +372,9 @@ class CharacterStatePrimitive(TTAPrimitive[CharacterInteraction, CharacterRespon
         score = 1.0
 
         # Check if emotion matches dialogue tone
-        if (
-            character.emotional_state == "fearful" and "confident" in dialogue.lower()
-        ) or (character.emotional_state == "joyful" and "sad" in dialogue.lower()):
+        if (character.emotional_state == "fearful" and "confident" in dialogue.lower()) or (
+            character.emotional_state == "joyful" and "sad" in dialogue.lower()
+        ):
             score -= 0.3
 
         return max(0.0, score)
@@ -438,9 +430,7 @@ class CharacterStatePrimitive(TTAPrimitive[CharacterInteraction, CharacterRespon
             Personality description
         """
         dominant_traits = [
-            trait
-            for trait, value in character.personality_traits.items()
-            if value > 0.7
+            trait for trait, value in character.personality_traits.items() if value > 0.7
         ]
 
         if dominant_traits:
@@ -507,9 +497,7 @@ class CharacterStatePrimitive(TTAPrimitive[CharacterInteraction, CharacterRespon
         """
         valid_stages = {"setup", "development", "climax", "resolution"}
         if stage not in valid_stages:
-            raise ValidationError(
-                f"Invalid arc stage '{stage}'. Must be one of {valid_stages}"
-            )
+            raise ValidationError(f"Invalid arc stage '{stage}'. Must be one of {valid_stages}")
 
         character = self._get_or_create_character(character_id)
         character.arc_stage = stage

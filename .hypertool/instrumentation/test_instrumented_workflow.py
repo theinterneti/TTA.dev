@@ -83,9 +83,7 @@ async def mock_backend_engineer_task(task: str, observable_llm: ObservableLLM) -
     }
 
 
-async def mock_testing_specialist_task(
-    task: str, observable_llm: ObservableLLM
-) -> dict:
+async def mock_testing_specialist_task(task: str, observable_llm: ObservableLLM) -> dict:
     """Simulate testing specialist work with ObservableLLM."""
     # Use ObservableLLM wrapper for automatic tracing
     response = await observable_llm(
@@ -176,9 +174,7 @@ async def package_release_workflow():
     )
 
     # Workflow execution with tracing
-    async with WorkflowTracer(
-        "package_release", metadata={"version": "1.2.0"}
-    ) as tracer:
+    async with WorkflowTracer("package_release", metadata={"version": "1.2.0"}) as tracer:
         # Stage 1: Version Bump (Backend Engineer)
         print("\n📝 Stage 1: Version Bump")
         print("   Persona: backend-engineer")
@@ -205,18 +201,14 @@ async def package_release_workflow():
 
         print(f"   ✅ {result1['result']}")
         print(f"   📊 Tokens: {result1['tokens_used']}")
-        print(
-            f"   💰 Budget remaining: {collector.get_remaining_budget('backend-engineer')}"
-        )
+        print(f"   💰 Budget remaining: {collector.get_remaining_budget('backend-engineer')}")
 
         # Stage 2: Quality Validation (Testing Specialist)
         print("\n🧪 Stage 2: Quality Validation")
         print("   Persona: testing-specialist")
 
         # Record persona switch
-        collector.switch_persona(
-            "backend-engineer", "testing-specialist", "package-release"
-        )
+        collector.switch_persona("backend-engineer", "testing-specialist", "package-release")
 
         # Execute stage with tracing
         result2 = await tracer.trace_stage(
@@ -237,18 +229,14 @@ async def package_release_workflow():
 
         print(f"   ✅ {result2['result']}")
         print(f"   📊 Tokens: {result2['tokens_used']}")
-        print(
-            f"   💰 Budget remaining: {collector.get_remaining_budget('testing-specialist')}"
-        )
+        print(f"   💰 Budget remaining: {collector.get_remaining_budget('testing-specialist')}")
 
         # Stage 3: Publish & Deploy (DevOps Engineer)
         print("\n🚀 Stage 3: Publish & Deploy")
         print("   Persona: devops-engineer")
 
         # Record persona switch
-        collector.switch_persona(
-            "testing-specialist", "devops-engineer", "package-release"
-        )
+        collector.switch_persona("testing-specialist", "devops-engineer", "package-release")
 
         # Execute stage with tracing
         result3 = await tracer.trace_stage(
@@ -269,9 +257,7 @@ async def package_release_workflow():
 
         print(f"   ✅ {result3['result']}")
         print(f"   📊 Tokens: {result3['tokens_used']}")
-        print(
-            f"   💰 Budget remaining: {collector.get_remaining_budget('devops-engineer')}"
-        )
+        print(f"   💰 Budget remaining: {collector.get_remaining_budget('devops-engineer')}")
 
     print("\n" + "=" * 60)
     print("✅ Package Release Workflow Complete!")
@@ -280,15 +266,9 @@ async def package_release_workflow():
     print(
         f"   Total tokens: {result1['tokens_used'] + result2['tokens_used'] + result3['tokens_used']}"
     )
-    print(
-        f"   Backend budget remaining: {collector.get_remaining_budget('backend-engineer')}"
-    )
-    print(
-        f"   Testing budget remaining: {collector.get_remaining_budget('testing-specialist')}"
-    )
-    print(
-        f"   DevOps budget remaining: {collector.get_remaining_budget('devops-engineer')}"
-    )
+    print(f"   Backend budget remaining: {collector.get_remaining_budget('backend-engineer')}")
+    print(f"   Testing budget remaining: {collector.get_remaining_budget('testing-specialist')}")
+    print(f"   DevOps budget remaining: {collector.get_remaining_budget('devops-engineer')}")
 
     # End Langfuse trace
     langfuse.end_trace(workflow_trace, status="success")
@@ -314,9 +294,7 @@ async def main():
         print("\n✅ Test workflow completed successfully!")
         print("\nNext steps:")
         print("1. View Prometheus metrics: http://localhost:9464/metrics")
-        print(
-            "2. Query metrics: curl http://localhost:9464/metrics | grep hypertool_persona"
-        )
+        print("2. Query metrics: curl http://localhost:9464/metrics | grep hypertool_persona")
         print("3. Check OpenTelemetry traces if OTLP exporter configured")
         print("4. View Langfuse traces if API keys configured (see Langfuse UI)")
 

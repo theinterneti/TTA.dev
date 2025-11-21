@@ -159,9 +159,7 @@ class PersonaMetricsCollector:
         for persona, budget in self._token_budgets.items():
             self.persona_token_budget.labels(persona=persona).set(budget)
 
-    def switch_persona(
-        self, from_persona: str | None, to_persona: str, chatmode: str
-    ) -> None:
+    def switch_persona(self, from_persona: str | None, to_persona: str, chatmode: str) -> None:
         """
         Record a persona switch.
 
@@ -174,9 +172,7 @@ class PersonaMetricsCollector:
         if from_persona and from_persona in self._active_sessions:
             start_time = self._active_sessions.pop(from_persona)
             duration = time.time() - start_time
-            self.persona_duration.labels(
-                persona=from_persona, chatmode=chatmode
-            ).observe(duration)
+            self.persona_duration.labels(persona=from_persona, chatmode=chatmode).observe(duration)
 
         # Record switch
         self.persona_switches.labels(
@@ -188,9 +184,7 @@ class PersonaMetricsCollector:
         # Start new session
         self._active_sessions[to_persona] = time.time()
 
-    def record_token_usage(
-        self, persona: str, chatmode: str, model: str, tokens: int
-    ) -> None:
+    def record_token_usage(self, persona: str, chatmode: str, model: str, tokens: int) -> None:
         """
         Record token usage for a persona.
 
@@ -201,15 +195,11 @@ class PersonaMetricsCollector:
             tokens: Number of tokens consumed
         """
         # Increment usage counter
-        self.persona_token_usage.labels(
-            persona=persona, chatmode=chatmode, model=model
-        ).inc(tokens)
+        self.persona_token_usage.labels(persona=persona, chatmode=chatmode, model=model).inc(tokens)
 
         # Update remaining budget (if persona has a budget)
         if persona in self._token_budgets:
-            current_budget = self.persona_token_budget.labels(
-                persona=persona
-            )._value._value
+            current_budget = self.persona_token_budget.labels(persona=persona)._value._value
             new_budget = max(0, current_budget - tokens)
             self.persona_token_budget.labels(persona=persona).set(new_budget)
 
@@ -243,9 +233,7 @@ class PersonaMetricsCollector:
         ).inc()
 
     @contextmanager
-    def track_stage(
-        self, workflow: str, stage: str, persona: str, auto_quality_gate: bool = True
-    ):
+    def track_stage(self, workflow: str, stage: str, persona: str, auto_quality_gate: bool = True):
         """
         Context manager to automatically track workflow stage.
 
@@ -304,9 +292,7 @@ class PersonaMetricsCollector:
             persona: Persona name
         """
         if persona in self._token_budgets:
-            self.persona_token_budget.labels(persona=persona).set(
-                self._token_budgets[persona]
-            )
+            self.persona_token_budget.labels(persona=persona).set(self._token_budgets[persona])
 
 
 # Global singleton instance
@@ -347,9 +333,7 @@ def reset_persona_metrics() -> None:
                 collectors = list(REGISTRY._collector_to_names.keys())
                 for collector in collectors:
                     try:
-                        if hasattr(collector, "_name") and "hypertool" in str(
-                            collector._name
-                        ):
+                        if hasattr(collector, "_name") and "hypertool" in str(collector._name):
                             REGISTRY.unregister(collector)
                     except Exception:
                         pass

@@ -1,0 +1,102 @@
+name: Workflow Comparison Report
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Number of days to analyze'
+        required: false
+        default: '1'
+      alert_threshold:
+        description: 'Performance degradation threshold (0.10 = 10%)'
+        required: false
+        default: '0.10'
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+jobs:
+  compare-workflows:
+    name: Compare v1 vs v2 Workflows
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install PyGithub
+      
+      - name: Run workflow comparison
+        id: comparison
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/workflow/workflow-monitor.py \
+            --days ${{ github.event.inputs.days || '1' }} \
+            --alert-threshold ${{ github.event.inputs.alert_threshold || '0.10' }} \
+            --output comparison-report.md \
+            --v1-workflow pr-validation.yml \
+            --v2-workflow pr-validation-v2.yml
+        continue-on-error: true
+      
+      - name: Upload comparison report
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-comparison-${{ github.run_id }}
+          path: comparison-report.md
+          retention-days: 30
+      
+      - name: Post summary
+        if: always()
+        run: |
+          if [ -f comparison-report.md ]; then
+            cat comparison-report.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Comparison Failed" >> $GITHUB_STEP_SUMMARY
+            echo "Unable to generate comparison report. Check logs for details." >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Create issue on alerts
+        if: failure() && steps.comparison.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read comparison report
+            let reportBody = 'Unable to read comparison report';
+            try {
+              reportBody = fs.readFileSync('comparison-report.md', 'utf8');
+            } catch (error) {
+              console.error('Error reading report:', error);
+            }
+            
+            // Create issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Workflow Migration Alert - ${new Date().toISOString().split('T')[0]}`,
+              body: `# Workflow Migration Phase 3.1 Alert\n\n` +
+                    `Automated comparison detected anomalies in v2 workflows.\n\n` +
+                    `---\n\n${reportBody}\n\n---\n\n` +
+                    `**Action Required:**\n` +
+                    `- Review the comparison report above\n` +
+                    `- Investigate unique v2 failures or performance issues\n` +
+                    `- Do NOT proceed to Phase 3.2 until resolved\n\n` +
+                    `**Related:** #79 (Workflow Rebuild Phase 3)\n` +
+                    `**Report Link:** https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              labels: ['P1', 'automation', 'ci/cd', 'workflow-migration']
+            });

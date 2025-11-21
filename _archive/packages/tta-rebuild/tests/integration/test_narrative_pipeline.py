@@ -82,9 +82,7 @@ class TestBasicIntegration:
     """Test basic integration between primitives."""
 
     @pytest.mark.asyncio
-    async def test_story_to_timeline_integration(
-        self, story_generator, timeline_manager, context
-    ):
+    async def test_story_to_timeline_integration(self, story_generator, timeline_manager, context):
         """Test that story generation flows into timeline tracking."""
         # Generate a story
         story_input = StoryGenerationInput(
@@ -113,9 +111,7 @@ class TestBasicIntegration:
 
         # Verify timeline tracked the event
         assert len(timeline_state.event_history) == 1
-        assert (
-            timeline_state.timeline_coherence_score >= 0.8
-        )  # Should be highly coherent
+        assert timeline_state.timeline_coherence_score >= 0.8  # Should be highly coherent
 
     @pytest.mark.asyncio
     async def test_story_to_character_integration(
@@ -170,9 +166,7 @@ class TestBasicIntegration:
         assert len(all_characters) > 0
 
     @pytest.mark.asyncio
-    async def test_timeline_to_branch_validation(
-        self, timeline_manager, branch_validator, context
-    ):
+    async def test_timeline_to_branch_validation(self, timeline_manager, branch_validator, context):
         """Test that timeline context informs branch validation."""
         # Build a timeline
         events = [
@@ -193,9 +187,7 @@ class TestBasicIntegration:
 
         # Get timeline context
         timeline = timeline_manager.get_timeline("integration_test")
-        timeline_context = [
-            event.event_data.get("description", "") for event in timeline
-        ]
+        timeline_context = [event.event_data.get("description", "") for event in timeline]
 
         # Validate a branch that's consistent with timeline
         valid_proposal = BranchProposal(
@@ -282,9 +274,7 @@ class TestFullNarrativePipeline:
         assert len(char_state.memory) > 0
 
         # Step 4: Validate a branching choice
-        timeline_context = [
-            event.event_data.get("description", "") for event in timeline
-        ]
+        timeline_context = [event.event_data.get("description", "") for event in timeline]
 
         branch_proposal = BranchProposal(
             universe_id="complete_pipeline",
@@ -326,9 +316,7 @@ class TestFullNarrativePipeline:
         await timeline_manager.execute(update, context)
 
         base_timeline = timeline_manager.get_timeline("main_universe")
-        timeline_context = [
-            event.event_data.get("description", "") for event in base_timeline
-        ]
+        timeline_context = [event.event_data.get("description", "") for event in base_timeline]
 
         # Validate two different branching paths
         branch_a = BranchProposal(
@@ -459,8 +447,7 @@ class TestErrorPropagation:
 
         # But branch validation should still work
         timeline_context = [
-            event.event_data.get("description", "")
-            for event in timeline_state.event_history
+            event.event_data.get("description", "") for event in timeline_state.event_history
         ]
 
         proposal = BranchProposal(
@@ -550,10 +537,7 @@ class TestConcurrentOperations:
 
         # Execute concurrently
         results = await asyncio.gather(
-            *[
-                character_manager.execute(interaction, context)
-                for interaction in interactions
-            ]
+            *[character_manager.execute(interaction, context) for interaction in interactions]
         )
 
         # All should succeed

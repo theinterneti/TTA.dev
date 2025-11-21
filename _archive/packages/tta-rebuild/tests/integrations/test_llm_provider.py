@@ -63,9 +63,7 @@ class TestMockLLMProvider:
     """Test MockLLMProvider."""
 
     @pytest.mark.asyncio
-    async def test_basic_generation(
-        self, mock_llm_provider: MockLLMProvider, test_context
-    ) -> None:
+    async def test_basic_generation(self, mock_llm_provider: MockLLMProvider, test_context) -> None:
         """Test basic text generation."""
         response = await mock_llm_provider.generate(
             "Tell me a story",
@@ -81,9 +79,7 @@ class TestMockLLMProvider:
         assert response.metadata["simulated_latency_ms"] == 50
 
     @pytest.mark.asyncio
-    async def test_tracks_calls(
-        self, mock_llm_provider: MockLLMProvider, test_context
-    ) -> None:
+    async def test_tracks_calls(self, mock_llm_provider: MockLLMProvider, test_context) -> None:
         """Test that provider tracks call count."""
         assert mock_llm_provider.call_count == 0
 
@@ -121,9 +117,7 @@ class TestMockLLMProvider:
         assert "brave adventurer" in full_text
 
     @pytest.mark.asyncio
-    async def test_streaming_failure(
-        self, failing_mock_llm: MockLLMProvider, test_context
-    ) -> None:
+    async def test_streaming_failure(self, failing_mock_llm: MockLLMProvider, test_context) -> None:
         """Test streaming with failures."""
         with pytest.raises(Exception, match="Mock LLM provider failure"):
             async for _ in failing_mock_llm.generate_stream("Prompt", test_context):

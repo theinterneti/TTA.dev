@@ -129,9 +129,7 @@ class GeminiLLMProvider(LLMProvider):
             except Exception as e:
                 if attempt == max_retries - 1:
                     # Last attempt failed
-                    raise Exception(
-                        f"Gemini API failed after {max_retries} attempts: {e}"
-                    ) from e
+                    raise Exception(f"Gemini API failed after {max_retries} attempts: {e}") from e
 
                 # Wait before retry (exponential backoff)
                 wait_time = 2**attempt  # 1s, 2s, 4s

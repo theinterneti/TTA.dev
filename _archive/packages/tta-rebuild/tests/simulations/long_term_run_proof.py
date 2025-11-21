@@ -63,9 +63,7 @@ class UniverseState:
     current_timeline_position: int
     timeline_events: list[TimelineEvent] = field(default_factory=list)
     world_state: dict[str, Any] = field(default_factory=dict)
-    active_characters: dict[str, int] = field(
-        default_factory=dict
-    )  # char_id -> timeline_pos
+    active_characters: dict[str, int] = field(default_factory=dict)  # char_id -> timeline_pos
 
 
 @dataclass
@@ -538,9 +536,7 @@ async def run_long_term_proof():
         therapeutic_focus="self_esteem",
     )
 
-    run_jordan = await simulator.simulate_session(
-        run_jordan, 40, "Jordan's journey begins"
-    )
+    run_jordan = await simulator.simulate_session(run_jordan, 40, "Jordan's journey begins")
 
     # Character C (Sam) - Will continue playing
     run_sam = CharacterRun(
@@ -591,9 +587,7 @@ async def run_long_term_proof():
     print("\n📊 PROGRESSION AFTER ALEX (COMPLETED):")
     print(f"   Total Completed Runs: {progression_after_alex.total_runs_completed}")
     print(f"   Total Turns: {progression_after_alex.total_turns_played}")
-    print(
-        f"   Advanced Narratives Unlocked: {progression_after_alex.advanced_narratives_unlocked}"
-    )
+    print(f"   Advanced Narratives Unlocked: {progression_after_alex.advanced_narratives_unlocked}")
 
     # Abandon Jordan's run
     run_jordan = await simulator.abandon_run(run_jordan)
@@ -602,9 +596,7 @@ async def run_long_term_proof():
     progression_after_jordan = progression_manager.load_progression(player_id)
 
     print("\n📊 PROGRESSION AFTER JORDAN (ABANDONED):")
-    print(
-        f"   Total Completed Runs: {progression_after_jordan.total_runs_completed} (unchanged)"
-    )
+    print(f"   Total Completed Runs: {progression_after_jordan.total_runs_completed} (unchanged)")
     print(f"   Total Turns: {progression_after_jordan.total_turns_played} (unchanged)")
 
     # Complete Sam's run
@@ -616,15 +608,9 @@ async def run_long_term_proof():
     print("\n📊 FINAL PROGRESSION AFTER SAM (COMPLETED):")
     print(f"   Total Completed Runs: {progression_final.total_runs_completed}")
     print(f"   Total Turns: {progression_final.total_turns_played}")
-    print(
-        f"   Advanced Narratives Unlocked: {progression_final.advanced_narratives_unlocked}"
-    )
-    print(
-        f"   Complex Characters Unlocked: {progression_final.complex_characters_unlocked}"
-    )
-    print(
-        f"   Multi-Path Stories Unlocked: {progression_final.multi_path_stories_unlocked}"
-    )
+    print(f"   Advanced Narratives Unlocked: {progression_final.advanced_narratives_unlocked}")
+    print(f"   Complex Characters Unlocked: {progression_final.complex_characters_unlocked}")
+    print(f"   Multi-Path Stories Unlocked: {progression_final.multi_path_stories_unlocked}")
 
     print("\n✅ PROOF 3 COMPLETE:")
     print(f"   Completed Runs: {progression_final.total_runs_completed}")
@@ -640,9 +626,7 @@ async def run_long_term_proof():
     print("=" * 80 + "\n")
 
     print("✅ PROOF 1: Long-Term Run")
-    print(
-        f"   - Alex: {run_alex.turn_count} turns across {run_alex.session_count} sessions"
-    )
+    print(f"   - Alex: {run_alex.turn_count} turns across {run_alex.session_count} sessions")
     print("   - State persisted and resumed successfully")
     print("   - Narrative continuity maintained")
     print("")
@@ -667,9 +651,7 @@ async def run_long_term_proof():
         f"   Total Sessions: {run_alex.session_count + run_jordan.session_count + run_sam.session_count}"
     )
     print(f"   Universe Timeline Position: {universe.current_timeline_position}")
-    print(
-        f"   Player Progression Level: {progression_final.total_runs_completed} completed runs"
-    )
+    print(f"   Player Progression Level: {progression_final.total_runs_completed} completed runs")
 
     print("\n" + "=" * 80)
     print("SUCCESS: All architectural requirements proven!")

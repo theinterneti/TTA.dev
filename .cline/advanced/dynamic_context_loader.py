@@ -283,9 +283,7 @@ class SmartContextDetector:
             pass
 
         structure["depth"] = max_depth
-        structure["largest_files"] = sorted(
-            file_sizes, key=lambda x: x[1], reverse=True
-        )[:10]
+        structure["largest_files"] = sorted(file_sizes, key=lambda x: x[1], reverse=True)[:10]
         structure["directories"] = list(structure["directories"])
 
         return structure
@@ -312,9 +310,7 @@ class SmartContextDetector:
 
         for framework_key, rules in self.detection_rules["frameworks"].items():
             framework = FrameworkType(framework_key)
-            confidence, evidence = self._calculate_framework_confidence(
-                framework, rules
-            )
+            confidence, evidence = self._calculate_framework_confidence(framework, rules)
 
             if confidence >= rules["confidence_threshold"]:
                 detection = FrameworkDetection(
@@ -435,9 +431,7 @@ class SmartContextDetector:
                                 pattern = CodePattern(
                                     name=pattern_name,
                                     confidence=0.8,
-                                    file_path=str(
-                                        file_path.relative_to(self.project_path)
-                                    ),
+                                    file_path=str(file_path.relative_to(self.project_path)),
                                     line_number=line_num,
                                     pattern_type=category,
                                     context={
@@ -494,9 +488,7 @@ class SmartContextDetector:
             "file_count": min(file_structure.get("total_files", 0) / 100, 1.0),
             "depth": min(file_structure.get("depth", 0) / 10, 1.0),
             "pattern_density": min(len(patterns) / 50, 1.0),
-            "file_type_diversity": min(
-                len(file_structure.get("file_types", {})) / 10, 1.0
-            ),
+            "file_type_diversity": min(len(file_structure.get("file_types", {})) / 10, 1.0),
         }
 
         return sum(factors.values()) / len(factors)
@@ -731,9 +723,7 @@ class AdaptiveLearningSystem:
 
         # Analyze low-performing primitives
         for developer_id, profile in self.user_profiles.items():
-            low_performers = [
-                (p, rate) for p, rate in profile.success_rates.items() if rate < 0.5
-            ]
+            low_performers = [(p, rate) for p, rate in profile.success_rates.items() if rate < 0.5]
             if low_performers:
                 suggestions.append(
                     {
@@ -785,9 +775,7 @@ class AdaptiveLearningSystem:
                     for dev_id, profile_data in data.items():
                         profile = UserPreferences(**profile_data)
                         # Convert sets and defaults back
-                        profile.usage_patterns = defaultdict(
-                            int, profile.usage_patterns
-                        )
+                        profile.usage_patterns = defaultdict(int, profile.usage_patterns)
                         self.user_profiles[dev_id] = profile
             except (OSError, json.JSONDecodeError):
                 pass
@@ -835,9 +823,7 @@ class DynamicContextLoader:
 
     def load_context(self, force_refresh: bool = False) -> ProjectContext:
         """Load and analyze current project context."""
-        self.current_context = self.detector.analyze_project_context(
-            force_refresh=force_refresh
-        )
+        self.current_context = self.detector.analyze_project_context(force_refresh=force_refresh)
         return self.current_context
 
     def get_primitive_recommendations(
@@ -851,9 +837,7 @@ class DynamicContextLoader:
         base_recommendations = self._get_base_recommendations(context)
 
         # Get personalized weights
-        weights = self.learning_system.get_recommendation_weights(
-            self.developer_id, context
-        )
+        weights = self.learning_system.get_recommendation_weights(self.developer_id, context)
 
         # Combine base and personalized recommendations
         combined_recommendations = []
@@ -1005,14 +989,10 @@ class DynamicContextLoader:
                 "total_patterns": len(context.patterns),
                 "pattern_types": list(set(p.pattern_type for p in context.patterns)),
                 "performance_patterns": [
-                    p.name
-                    for p in context.patterns
-                    if p.pattern_type == "performance_patterns"
+                    p.name for p in context.patterns if p.pattern_type == "performance_patterns"
                 ],
                 "error_patterns": [
-                    p.name
-                    for p in context.patterns
-                    if p.pattern_type == "error_patterns"
+                    p.name for p in context.patterns if p.pattern_type == "error_patterns"
                 ],
             },
             "structure": {
@@ -1027,9 +1007,7 @@ class DynamicContextLoader:
 
 
 # Utility functions for external integration
-def create_context_loader(
-    project_path: str, developer_id: str = "default"
-) -> DynamicContextLoader:
+def create_context_loader(project_path: str, developer_id: str = "default") -> DynamicContextLoader:
     """Create a configured DynamicContextLoader instance."""
     return DynamicContextLoader(project_path, developer_id)
 

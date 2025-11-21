@@ -797,9 +797,7 @@ async def demonstrate_agent_mcp_access():
     print("🎉 Agent MCP Access Summary:")
     print(f"📊 Total Token Reduction: {len(test_scenarios)} operations")
     print(f"💰 Total Tokens Saved: {total_tokens_saved:,}")
-    print(
-        f"📈 Overall Reduction: {(total_tokens_saved / total_traditional_tokens) * 100:.1f}%"
-    )
+    print(f"📈 Overall Reduction: {(total_tokens_saved / total_traditional_tokens) * 100:.1f}%")
 
     print("\n🚀 Benefits for Agents:")
     print("• 98.7% average token reduction across MCP operations")
@@ -811,8 +809,7 @@ async def demonstrate_agent_mcp_access():
     return {
         "scenarios_tested": len(test_scenarios),
         "total_tokens_saved": total_tokens_saved,
-        "overall_reduction_percentage": (total_tokens_saved / total_traditional_tokens)
-        * 100,
+        "overall_reduction_percentage": (total_tokens_saved / total_traditional_tokens) * 100,
         "agent_benefits": [
             "Unified MCP interface",
             "98.7% token reduction",

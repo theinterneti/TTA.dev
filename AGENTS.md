@@ -665,6 +665,7 @@ Tradeoff: Slightly more memory, but better reliability
 | [`MCP_SERVERS.md`](MCP_SERVERS.md) | MCP server integrations |
 | [`docs/architecture/`](docs/architecture/) | Architecture decisions and patterns |
 | [`docs/guides/`](docs/guides/) | Usage guides and tutorials |
+| [`docs/guides/git_overseer_checklist.md`](docs/guides/git_overseer_checklist.md) | Daily/weekly git, PR, and worktree coordination |
 
 ### Per-Package Documentation
 
@@ -764,7 +765,8 @@ For a detailed guide, see [`CLINE_INTEGRATION_GUIDE.md`](CLINE_INTEGRATION_GUIDE
 2. **Review examples** - Working code in `examples/`
 3. **Search documentation** - `docs/` directory
 4. **Check Copilot toolsets** - `.vscode/copilot-toolsets.jsonc`
-5. **Open an issue** - For bugs or feature requests
+5. **Git/PR Management** - See [`docs/guides/git_overseer_checklist.md`](docs/guides/git_overseer_checklist.md)
+6. **Open an issue** - For bugs or feature requests
 
 ---
 

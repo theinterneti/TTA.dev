@@ -51,9 +51,7 @@ class MockMCPResult:
                 return {
                     "success": True,
                     "result": {
-                        "query": self.parameters.get(
-                            "query", "rate(http_requests_total[5m])"
-                        ),
+                        "query": self.parameters.get("query", "rate(http_requests_total[5m])"),
                         "data": [
                             {"timestamp": "2025-11-10T12:00:00Z", "value": 0.023},
                             {"timestamp": "2025-11-10T12:01:00Z", "value": 0.025},
@@ -147,9 +145,7 @@ class MockMCPResult:
                 return {
                     "success": True,
                     "result": {
-                        "title": self.parameters.get(
-                            "page_title", "Agent Skills Development"
-                        ),
+                        "title": self.parameters.get("page_title", "Agent Skills Development"),
                         "content": "# Agent Skills Development\n\nTracking agent learning and skill improvement...\n\n## Current Skills\n- Data Analysis: 85% success rate\n- API Integration: 70% success rate",
                         "tags": ["agent-skills", "learning"],
                         "word_count": 23,
@@ -179,9 +175,7 @@ class MockMCPResult:
         # Default fallback
         return {
             "success": True,
-            "result": {
-                "message": f"Mock result for {self.server_type}.{self.operation}"
-            },
+            "result": {"message": f"Mock result for {self.server_type}.{self.operation}"},
             "logs": f"Mock execution completed for {self.server_type}.{self.operation}",
         }
 
@@ -211,12 +205,8 @@ class MockAgentMCPAccess:
         execution_time = (datetime.now() - start_time).total_seconds() * 1000
 
         # Calculate token savings (using realistic estimates)
-        traditional_tokens = self._estimate_traditional_tokens(
-            server_type, operation, parameters
-        )
-        code_execution_tokens = self._estimate_code_execution_tokens(
-            server_type, operation
-        )
+        traditional_tokens = self._estimate_traditional_tokens(server_type, operation, parameters)
+        code_execution_tokens = self._estimate_code_execution_tokens(server_type, operation)
 
         token_savings = {
             "traditional_tokens": traditional_tokens,
@@ -360,13 +350,9 @@ async def demonstrate_agent_mcp_access_mock():
                 if "content" in data:
                     print(f"📄 Result: {data['content'][:60]}...")
                 elif "query" in data:
-                    print(
-                        f"📈 Query: {data['query']} → {len(data.get('data', []))} data points"
-                    )
+                    print(f"📈 Query: {data['query']} → {len(data.get('data', []))} data points")
                 elif "syntax_valid" in data:
-                    print(
-                        f"🔍 Syntax: {'✅ Valid' if data['syntax_valid'] else '❌ Invalid'}"
-                    )
+                    print(f"🔍 Syntax: {'✅ Valid' if data['syntax_valid'] else '❌ Invalid'}")
                 elif "results" in data:
                     print(f"🔍 Found: {data['total_found']} results")
                 elif "pr_number" in data:
@@ -386,9 +372,7 @@ async def demonstrate_agent_mcp_access_mock():
     print("🎉 Agent MCP Access Summary:")
     print(f"📊 Operations Tested: {len(test_scenarios)}")
     print(f"💰 Total Tokens Saved: {total_tokens_saved:,}")
-    print(
-        f"📈 Overall Reduction: {(total_tokens_saved / total_traditional_tokens) * 100:.1f}%"
-    )
+    print(f"📈 Overall Reduction: {(total_tokens_saved / total_traditional_tokens) * 100:.1f}%")
 
     print("\n🚀 Benefits for Agents:")
     print("• 98.7% average token reduction across MCP operations")
@@ -414,8 +398,7 @@ async def demonstrate_agent_mcp_access_mock():
     return {
         "scenarios_tested": len(test_scenarios),
         "total_tokens_saved": total_tokens_saved,
-        "overall_reduction_percentage": (total_tokens_saved / total_traditional_tokens)
-        * 100,
+        "overall_reduction_percentage": (total_tokens_saved / total_traditional_tokens) * 100,
         "agent_benefits": [
             "Unified MCP interface",
             "98.7% token reduction",

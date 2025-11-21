@@ -117,9 +117,7 @@ class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):
         issues.extend(consistency_issues)
 
         # Assess meaningfulness
-        meaningfulness_score, meaningfulness_issues = self._check_meaningfulness(
-            input_data
-        )
+        meaningfulness_score, meaningfulness_issues = self._check_meaningfulness(input_data)
         issues.extend(meaningfulness_issues)
 
         # Validate character alignment
@@ -194,9 +192,7 @@ class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):
                 f"choice_text must be at most {self.MAX_CHOICE_LENGTH} characters"
             )
 
-    def _check_consistency(
-        self, proposal: BranchProposal
-    ) -> tuple[float, list[ValidationIssue]]:
+    def _check_consistency(self, proposal: BranchProposal) -> tuple[float, list[ValidationIssue]]:
         """Check consistency with timeline context.
 
         Args:
@@ -267,9 +263,7 @@ class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):
 
         # Check if choice is too vague
         vague_phrases = ["something", "maybe", "perhaps", "might"]
-        vague_count = sum(
-            1 for phrase in vague_phrases if phrase in proposal.choice_text.lower()
-        )
+        vague_count = sum(1 for phrase in vague_phrases if phrase in proposal.choice_text.lower())
 
         if vague_count >= 2:
             issues.append(
@@ -291,8 +285,7 @@ class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):
             "reveals",
         ]
         has_consequence = any(
-            indicator in proposal.branch_description.lower()
-            for indicator in consequence_indicators
+            indicator in proposal.branch_description.lower() for indicator in consequence_indicators
         )
 
         if not has_consequence:
@@ -354,9 +347,7 @@ class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):
 
         # Check for character agency
         passive_indicators = ["is forced", "has no choice", "must"]
-        passive_count = sum(
-            1 for phrase in passive_indicators if phrase in choice_lower
-        )
+        passive_count = sum(1 for phrase in passive_indicators if phrase in choice_lower)
 
         if passive_count >= 2:
             issues.append(
@@ -453,9 +444,7 @@ class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):
         # Check for very specific, limiting outcomes
         limiting_phrases = ["only", "never", "impossible", "final"]
         limiting_count = sum(
-            1
-            for phrase in limiting_phrases
-            if phrase in proposal.branch_description.lower()
+            1 for phrase in limiting_phrases if phrase in proposal.branch_description.lower()
         )
         risk += limiting_count * 0.1
 
@@ -481,22 +470,16 @@ class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):
                 suggestions.append(f"[{issue.category}] {issue.suggested_fix}")
 
         # Add general suggestions based on scores
-        error_count = sum(
-            1 for issue in issues if issue.severity == IssueSeverity.ERROR
-        )
+        error_count = sum(1 for issue in issues if issue.severity == IssueSeverity.ERROR)
 
         if error_count == 0 and len(issues) > 0:
-            suggestions.append(
-                "Address warnings to improve branch quality before implementation"
-            )
+            suggestions.append("Address warnings to improve branch quality before implementation")
 
         if len(proposal.affected_characters) == 0:
             suggestions.append("Consider involving at least one character for impact")
 
         if len(proposal.timeline_context) < 2:
-            suggestions.append(
-                "Add more timeline context for better consistency validation"
-            )
+            suggestions.append("Add more timeline context for better consistency validation")
 
         return suggestions
 
@@ -526,9 +509,7 @@ class BranchValidatorPrimitive(TTAPrimitive[BranchProposal, BranchValidation]):
             self._validated_branches.clear()
         else:
             keys_to_remove = [
-                key
-                for key in self._validated_branches
-                if key.startswith(f"{universe_id}:")
+                key for key in self._validated_branches if key.startswith(f"{universe_id}:")
             ]
             for key in keys_to_remove:
                 del self._validated_branches[key]

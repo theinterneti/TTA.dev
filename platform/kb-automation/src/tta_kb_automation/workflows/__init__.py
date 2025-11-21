@@ -56,9 +56,7 @@ async def build_cross_references(kb_path: str, code_path: str) -> dict:
     code_data = await scanner.execute({"root_path": code_path})
 
     analyzer = AnalyzeCodeStructure()
-    await analyzer.execute(
-        {"files": code_data["files"], "include_dependencies": True}
-    )
+    await analyzer.execute({"files": code_data["files"], "include_dependencies": True})
 
     # TODO: Integrate SuggestKBLinks to find relevant KB pages
     # TODO: Process extracted TODOs from ExtractTODOs primitive

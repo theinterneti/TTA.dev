@@ -1,9 +1,9 @@
 # Archive Directory
 
-This directory contains deprecated, historical, and under-review content from the TTA.dev repository reorganization.
+This directory contains deprecated, historical, under-review content, and deprecated tools from the TTA.dev repository reorganization.
 
-**Created:** November 17, 2025  
-**Reorganization:** Issue #113  
+**Created:** November 17, 2025
+**Reorganization:** Issue #113
 **Branch:** refactor/repo-reorg
 
 ## Structure
@@ -11,7 +11,10 @@ This directory contains deprecated, historical, and under-review content from th
 ```
 _archive/
 ├── e2b-debug-session-2025-11-07/    # Historical debugging session
+├── gemini/                          # Deprecated Gemini workflow files
+├── kiro/                            # Deprecated narrative tooling
 ├── legacy-tta-game/                  # Legacy TTA game code
+├── openhands/                        # Deprecated OpenHands integration
 ├── packages/                         # Historical package versions
 ├── packages-under-review/            # Packages pending architectural review
 ├── phase3-status/                    # Phase 3 completion reports
@@ -30,7 +33,7 @@ _archive/
 
 ### Packages
 - **packages/**: Historical package versions
-- **packages-under-review/**: 
+- **packages-under-review/**:
   - `keploy-framework` - Under architectural review (Issue #TBD)
   - `python-pathway` - Under architectural review (Issue #TBD)
   - `js-dev-primitives` - Placeholder, not implemented
@@ -42,6 +45,36 @@ _archive/
 - **speckit-planning/**: SpecKit planning (deprecated)
 - **status-reports/**: Historical status reports
 - **status-reports-2025/**: 2025 status reports
+
+### Deprecated Tools
+- **gemini/**: Gemini CLI workflow files (superseded by cline/serena integration)
+- **kiro/**: Experimental narrative tooling (superseded by platform_tta_dev primitives)
+- **openhands/**: OpenHands integration (replaced by cline with better MCP support)
+
+## Migration Details
+
+### Gemini Workflow Migration
+All Gemini CLI workflows have been moved to this archive. Current alternatives include:
+- **cline**: Superior MCP integration for VS Code workflows
+- **github-copilot**: Native GitHub integration for issue/PR automation
+- **Direct API calls**: For simple automation tasks
+
+### OpenHands Migration
+The OpenHands tool was evaluated but found to have:
+- Limited MCP protocol support
+- Poor VS Code integration
+- Higher complexity vs. features provided
+
+Replaced by cline which provides:
+- ✅ Native MCP protocol support
+- ✅ VS Code extension integration
+- ✅ Better terminal integration
+
+### Kiro Migration
+Kiro was an experimental narrative tooling framework that has been superseded by:
+- platform_tta_dev's agentic primitives
+- Enhanced workflow orchestration patterns
+- Better state management through WorkflowContext
 
 ## Packages Under Review
 
@@ -75,7 +108,5 @@ If content from this archive needs to be restored:
 3. Add comprehensive tests and documentation
 4. Submit PR for review
 5. Add to active workspace in pyproject.toml
-
----
 
 **Last Updated:** November 17, 2025

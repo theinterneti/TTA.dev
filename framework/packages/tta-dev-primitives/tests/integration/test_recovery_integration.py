@@ -1,15 +1,18 @@
-import pytest
 import asyncio
 
-from tta_dev_primitives.recovery.retry import RetryPrimitive, RetryStrategy
-from tta_dev_primitives.recovery.fallback import FallbackPrimitive
-from tta_dev_primitives.recovery.timeout import TimeoutPrimitive, TimeoutError
+import pytest
+
 from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.recovery.fallback import FallbackPrimitive
+from tta_dev_primitives.recovery.retry import RetryPrimitive, RetryStrategy
+from tta_dev_primitives.recovery.timeout import TimeoutPrimitive
 from tta_dev_primitives.testing import MockPrimitive
+
 
 async def slow_primitive_task(delay, result):
     await asyncio.sleep(delay)
     return result
+
 
 @pytest.mark.asyncio
 async def test_retry_with_fallback():
@@ -20,13 +23,17 @@ async def test_retry_with_fallback():
     - The FallbackPrimitive will then execute the fallback.
     """
     # A primitive that will always fail
-    failing_primitive = MockPrimitive(name="failing_primitive", raise_error=ValueError("Always fails"))
+    failing_primitive = MockPrimitive(
+        name="failing_primitive", raise_error=ValueError("Always fails")
+    )
 
     # A fallback primitive that will succeed
     fallback_primitive = MockPrimitive(name="fallback_primitive", return_value="fallback_success")
 
     # Wrap the failing primitive in a retry primitive
-    retry_primitive = RetryPrimitive(failing_primitive, strategy=RetryStrategy(max_retries=2, backoff_base=0.01))
+    retry_primitive = RetryPrimitive(
+        failing_primitive, strategy=RetryStrategy(max_retries=2, backoff_base=0.01)
+    )
 
     # Wrap the retry primitive in a fallback primitive
     workflow = FallbackPrimitive(primary=retry_primitive, fallback=fallback_primitive)
@@ -43,6 +50,7 @@ async def test_retry_with_fallback():
     # The fallback primitive should have been called once
     assert fallback_primitive.call_count == 1
 
+
 @pytest.mark.asyncio
 async def test_timeout_with_fallback():
     """
@@ -58,7 +66,9 @@ async def test_timeout_with_fallback():
     fallback_primitive = MockPrimitive(name="fallback_primitive", return_value="fallback_success")
 
     # Wrap the slow primitive in a timeout primitive
-    timeout_primitive = TimeoutPrimitive(slow_primitive, timeout_seconds=0.1, fallback=fallback_primitive)
+    timeout_primitive = TimeoutPrimitive(
+        slow_primitive, timeout_seconds=0.1, fallback=fallback_primitive
+    )
 
     context = WorkflowContext()
     result = await timeout_primitive.execute({}, context)

@@ -20,9 +20,7 @@ async def test_basic_generation():
 
     try:
         # Initialize provider
-        provider = GeminiLLMProvider(
-            api_key=os.getenv("GEMINI_API_KEY"), temperature=0.7
-        )
+        provider = GeminiLLMProvider(api_key=os.getenv("GEMINI_API_KEY"), temperature=0.7)
         print("✅ Provider initialized")
 
         # Test basic generation
@@ -115,9 +113,9 @@ Write in an engaging, descriptive style."""
 
         # Check quality
         assert len(response) > 100, "Response too short"
-        assert any(
-            word in response.lower() for word in ["warrior", "artifact", "ancient"]
-        ), "Missing key elements"
+        assert any(word in response.lower() for word in ["warrior", "artifact", "ancient"]), (
+            "Missing key elements"
+        )
 
         stats = provider.get_usage_stats()
         print("\n📊 This call:")

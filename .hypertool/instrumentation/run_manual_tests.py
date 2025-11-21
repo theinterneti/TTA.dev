@@ -113,12 +113,9 @@ class TestRunner:
             self.print_success("Langfuse environment variables set")
         else:
             self.print_warning(
-                "Langfuse environment variables not set "
-                "(tests will run with degradation)"
+                "Langfuse environment variables not set (tests will run with degradation)"
             )
-        checks.append(
-            True
-        )  # Don't fail on missing Langfuse        # Check Python dependencies
+        checks.append(True)  # Don't fail on missing Langfuse        # Check Python dependencies
         try:
             import langfuse  # noqa: F401
             from observability_integration import (  # noqa: F401
@@ -196,14 +193,10 @@ class TestRunner:
                 import json
 
                 data = json.loads(result.stdout)
-                hypertool_metrics = [
-                    m for m in data.get("data", []) if "hypertool" in m
-                ]
+                hypertool_metrics = [m for m in data.get("data", []) if "hypertool" in m]
 
                 if hypertool_metrics:
-                    self.print_success(
-                        f"Found {len(hypertool_metrics)} Hypertool metrics"
-                    )
+                    self.print_success(f"Found {len(hypertool_metrics)} Hypertool metrics")
                     for metric in hypertool_metrics[:5]:  # Show first 5
                         self.print_info(f"  - {metric}")
                     if len(hypertool_metrics) > 5:
@@ -211,9 +204,7 @@ class TestRunner:
                     return TestResult("Prometheus Metrics", duration, True)
                 else:
                     self.print_error("No Hypertool metrics found")
-                    return TestResult(
-                        "Prometheus Metrics", duration, False, "No metrics found"
-                    )
+                    return TestResult("Prometheus Metrics", duration, False, "No metrics found")
             else:
                 self.print_error("Failed to query Prometheus")
                 return TestResult("Prometheus Metrics", duration, False, "Query failed")
@@ -242,9 +233,7 @@ class TestRunner:
                 return TestResult("Grafana Dashboards", duration, True)
             else:
                 self.print_error("No dashboard files found")
-                return TestResult(
-                    "Grafana Dashboards", duration, False, "No dashboards"
-                )
+                return TestResult("Grafana Dashboards", duration, False, "No dashboards")
 
         except Exception as e:
             duration = (datetime.now() - start).total_seconds()
@@ -296,9 +285,7 @@ class TestRunner:
         # Individual test results
         print(f"\n{BOLD}Individual Test Results:{RESET}")
         for result in self.results:
-            status = (
-                f"{GREEN}✅ PASS{RESET}" if result.passed else f"{RED}❌ FAIL{RESET}"
-            )
+            status = f"{GREEN}✅ PASS{RESET}" if result.passed else f"{RED}❌ FAIL{RESET}"
             print(f"  {status} - {result.name} ({result.duration:.1f}s)")
             if result.notes and not result.passed:
                 print(f"         Notes: {result.notes}")
@@ -321,8 +308,7 @@ class TestRunner:
         if not await self.check_prerequisites():
             self.print_error("Prerequisites check failed. Please fix and retry.")
             self.print_info(
-                "\nTo start observability stack:\n  "
-                "docker-compose -f docker-compose.test.yml up -d"
+                "\nTo start observability stack:\n  docker-compose -f docker-compose.test.yml up -d"
             )
             return False
 

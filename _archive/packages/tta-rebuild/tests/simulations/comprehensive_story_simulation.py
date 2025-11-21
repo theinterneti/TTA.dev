@@ -329,14 +329,10 @@ class SimulationRunner:
                     story.narrative_text, scenario.metaconcepts
                 ),
                 "immersion_score": self._assess_immersion(story),
-                "therapeutic_integration": self._assess_therapeutic_integration(
-                    story, scenario
-                ),
+                "therapeutic_integration": self._assess_therapeutic_integration(story, scenario),
                 "narrative_sample": story.narrative_text[:300] + "...",
                 "dialogue_sample": story.dialogue[:2] if story.dialogue else [],
-                "branches_sample": story.story_branches[:2]
-                if story.story_branches
-                else [],
+                "branches_sample": story.story_branches[:2] if story.story_branches else [],
                 "cost": context.metadata.get("cost", 0),
             }
 
@@ -400,9 +396,7 @@ class SimulationRunner:
         score = 0.0
 
         # Check for metaconcept presence
-        metaconcepts_found = self._check_metaconcepts(
-            story.narrative_text, scenario.metaconcepts
-        )
+        metaconcepts_found = self._check_metaconcepts(story.narrative_text, scenario.metaconcepts)
         score += (metaconcepts_found / len(scenario.metaconcepts)) * 0.4
 
         # Check for theme alignment
@@ -501,16 +495,12 @@ class SimulationRunner:
 
             print("\n📝 NARRATIVE DEPTH:")
             print(f"  Average Length: {statistics.mean(narrative_lengths):.0f} chars")
-            print(
-                f"  Average Dialogue: {statistics.mean(dialogue_counts):.1f} exchanges"
-            )
+            print(f"  Average Dialogue: {statistics.mean(dialogue_counts):.1f} exchanges")
             print(f"  Average Branches: {statistics.mean(branch_counts):.1f} choices")
 
             print("\n🎭 IMMERSION & THERAPEUTIC INTEGRATION:")
             print(f"  Average Immersion Score: {statistics.mean(immersion_scores):.3f}")
-            print(
-                f"  Average Therapeutic Integration: {statistics.mean(therapeutic_scores):.3f}"
-            )
+            print(f"  Average Therapeutic Integration: {statistics.mean(therapeutic_scores):.3f}")
 
             print("\n💰 COST ANALYSIS:")
             print(f"  Total Cost: ${total_cost:.4f}")
@@ -540,9 +530,7 @@ class SimulationRunner:
 
             for setting, scores in sorted(settings.items()):
                 avg = statistics.mean(scores)
-                print(
-                    f"  {setting:20s}: {avg:.3f} avg quality ({len(scores)} scenarios)"
-                )
+                print(f"  {setting:20s}: {avg:.3f} avg quality ({len(scores)} scenarios)")
 
             # Excellence assessment
             print("\n⭐ EXCELLENCE ASSESSMENT:")
@@ -593,12 +581,8 @@ class SimulationRunner:
                 {
                     "timestamp": datetime.now().isoformat(),
                     "total_scenarios": len(self.results),
-                    "successful": sum(
-                        1 for r in self.results if r.get("success", False)
-                    ),
-                    "failed": sum(
-                        1 for r in self.results if not r.get("success", False)
-                    ),
+                    "successful": sum(1 for r in self.results if r.get("success", False)),
+                    "failed": sum(1 for r in self.results if not r.get("success", False)),
                     "results": self.results,
                 },
                 f,

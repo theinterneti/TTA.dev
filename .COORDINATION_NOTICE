@@ -1,0 +1,21 @@
+🔔 WORKTREE COORDINATION NOTICE 🔔
+===================================
+
+WORKSPACE CLEANUP COMPLETED IN MAIN WORKTREE
+Date: 2025-11-17
+Action Required: Integration needed
+
+📋 Quick Integration:
+   cd /home/thein/repos/TTA.dev-cline
+   git fetch TTA.dev
+   git merge TTA.dev/experimental/workflow-agent-integrations
+
+📚 Full Details:
+   See: .tta/coordination/2025-11-17-workspace-cleanup.md
+   (After fetching changes)
+
+⚡ Automated Integration:
+   ./scripts/worktree/integrate-workspace-cleanup.sh
+
+Priority: High
+Status: Ready for integration

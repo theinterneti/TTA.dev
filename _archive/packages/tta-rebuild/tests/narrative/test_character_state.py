@@ -447,9 +447,7 @@ class TestUtilityMethods:
         assert character.character_id == "hero"
 
     @pytest.mark.asyncio
-    async def test_get_nonexistent_character(
-        self, character_primitive: CharacterStatePrimitive
-    ):
+    async def test_get_nonexistent_character(self, character_primitive: CharacterStatePrimitive):
         """Test getting nonexistent character returns None."""
         character = character_primitive.get_character("nonexistent")
         assert character is None

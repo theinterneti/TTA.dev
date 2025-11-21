@@ -36,9 +36,7 @@ class CreateSessionPage:
         Returns:
             The path to the newly created Logseq page.
         """
-        WorkflowContext(
-            workflow_id=f"create_session_page_{topic.lower().replace(' ', '_')}"
-        )
+        WorkflowContext(workflow_id=f"create_session_page_{topic.lower().replace(' ', '_')}")
 
         # 1. Build the context
         context = await self.session_builder.build_context(topic)

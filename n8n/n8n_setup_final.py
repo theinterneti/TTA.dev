@@ -20,9 +20,7 @@ from tta_dev_primitives.adaptive.timeout import AdaptiveTimeoutPrimitive
 from tta_dev_primitives.core.base import WorkflowContext
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -78,9 +76,7 @@ class N8nSetupEngine:
             async with aiohttp.ClientSession() as session:
                 try:
                     # Check n8n web interface
-                    async with session.get(
-                        f"{self.n8n_base_url}/healthz", timeout=5
-                    ) as resp:
+                    async with session.get(f"{self.n8n_base_url}/healthz", timeout=5) as resp:
                         if resp.status == 200:
                             logger.info("✅ n8n web interface accessible")
                             return {"status": "healthy", "web_interface": "ok"}
@@ -107,10 +103,7 @@ class N8nSetupEngine:
         """Verify GitHub API connectivity with TTA.dev adaptive fallback"""
         logger.info("🔑 Verifying GitHub API connectivity...")
 
-        github_token = (
-            os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
-            or "ghp_YOUR_GITHUB_TOKEN_HERE"
-        )
+        github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN") or "ghp_YOUR_GITHUB_TOKEN_HERE"
 
         async def test_github_api():
             async with aiohttp.ClientSession() as session:
@@ -147,9 +140,7 @@ class N8nSetupEngine:
         """Verify Gemini API connectivity with TTA.dev adaptive timeout"""
         logger.info("🤖 Verifying Gemini AI API connectivity...")
 
-        gemini_key = (
-            os.getenv("GEMINI_API_KEY") or "AIzaSyDgpvqlw7B2TqnEHpy6tUaIM-WbdScuioE"
-        )
+        gemini_key = os.getenv("GEMINI_API_KEY") or "AIzaSyDgpvqlw7B2TqnEHpy6tUaIM-WbdScuioE"
 
         async def test_gemini_api():
             payload = {"contents": [{"parts": [{"text": "Hello, test message"}]}]}
@@ -213,9 +204,7 @@ class N8nSetupEngine:
                             workflow_id = result.get("id")
 
                             if workflow_id:
-                                logger.info(
-                                    f"✅ Workflow imported with ID: {workflow_id}"
-                                )
+                                logger.info(f"✅ Workflow imported with ID: {workflow_id}")
 
                                 # Activate workflow
                                 async with session.post(
@@ -234,9 +223,7 @@ class N8nSetupEngine:
                             return {"status": "imported", "workflow_id": workflow_id}
                         else:
                             text = await resp.text()
-                            raise Exception(
-                                f"Import failed: HTTP {resp.status} - {text}"
-                            )
+                            raise Exception(f"Import failed: HTTP {resp.status} - {text}")
 
             return await import_and_activate()
 
@@ -260,10 +247,8 @@ class N8nSetupEngine:
             "workflow_id": results.get("workflow", {}).get("workflow_id"),
             "api_connectivity": {
                 "n8n_healthy": results.get("n8n", {}).get("status") == "healthy",
-                "github_working": results.get("github", {}).get("status")
-                in ["ok", "degraded"],
-                "gemini_working": results.get("gemini", {}).get("status")
-                in ["ok", "degraded"],
+                "github_working": results.get("github", {}).get("status") in ["ok", "degraded"],
+                "gemini_working": results.get("gemini", {}).get("status") in ["ok", "degraded"],
             },
         }
 
