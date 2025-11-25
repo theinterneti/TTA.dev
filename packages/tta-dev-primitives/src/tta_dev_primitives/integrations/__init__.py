@@ -28,8 +28,15 @@ from tta_dev_primitives.integrations.google_ai_studio_primitive import (
     GoogleAIStudioPrimitive,
 )
 from tta_dev_primitives.integrations.huggingface_primitive import HuggingFacePrimitive
-from tta_dev_primitives.integrations.openai_primitive import OpenAIPrimitive
 from tta_dev_primitives.integrations.openrouter_primitive import OpenRouterPrimitive
+
+try:  # Optional dependency: OpenAI SDK
+    from tta_dev_primitives.integrations.openai_primitive import OpenAIPrimitive
+except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
+    if exc.name == "openai":
+        OpenAIPrimitive = None  # type: ignore[assignment]
+    else:  # Unexpected import error
+        raise
 
 # Optional integrations (require additional dependencies)
 try:  # Optional dependency: ollama SDK

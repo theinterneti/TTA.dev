@@ -6,10 +6,10 @@ import pytest
 
 from tta_dev_primitives.core.base import WorkflowContext
 
-# Anthropic SDK is an optional integration dependency. When it's not installed,
-# we still want other integration tests (OpenAI, Ollama, SQLite, Supabase) to
-# run, so we conditionally import the Anthropic primitive and skip only those
-# tests if the SDK is missing instead of failing collection for the whole file.
+# Anthropic and OpenAI SDKs are optional integration dependencies. When they're
+# not installed, we still want other integration tests (and the rest of the
+# suite) to run, so we conditionally import the primitives and skip only those
+# tests instead of failing collection for the whole file.
 try:  # pragma: no cover - import error handling path
     from tta_dev_primitives.integrations.anthropic_primitive import (
         AnthropicPrimitive,
@@ -23,11 +23,20 @@ except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK 
         _HAS_ANTHROPIC = False
     else:  # Re-raise unexpected import errors
         raise
-from tta_dev_primitives.integrations.openai_primitive import (
-    OpenAIPrimitive,
-    OpenAIRequest,
-    OpenAIResponse,
-)
+
+try:  # pragma: no cover - import error handling path
+    from tta_dev_primitives.integrations.openai_primitive import (
+        OpenAIPrimitive,
+        OpenAIRequest,
+        OpenAIResponse,
+    )
+    _HAS_OPENAI = True
+except ModuleNotFoundError as exc:  # pragma: no cover
+    if exc.name == "openai":
+        OpenAIPrimitive = OpenAIRequest = OpenAIResponse = None  # type: ignore[assignment]
+        _HAS_OPENAI = False
+    else:
+        raise
 
 # Ollama, SQLite (aiosqlite) and Supabase SDKs are also optional. Mirror the
 # Anthropic pattern so we don't fail collection when they are not installed.
@@ -74,8 +83,13 @@ except ModuleNotFoundError as exc:  # pragma: no cover
         raise
 
 
+@pytest.mark.skipif(not _HAS_OPENAI, reason="openai SDK not installed")
 class TestOpenAIPrimitive:
-    """Tests for OpenAIPrimitive."""
+    """Tests for OpenAIPrimitive.
+
+    These tests are skipped automatically when the optional ``openai`` package
+    is not installed so that other provider tests can still run.
+    """
 
     @pytest.mark.asyncio
     async def test_openai_basic_execution(self) -> None:
@@ -359,8 +373,13 @@ class TestOllamaPrimitive:
         assert response.model == "mistral"
 
 
+@pytest.mark.skipif(not _HAS_SUPABASE, reason="supabase SDK not installed")
 class TestSupabasePrimitive:
-    """Tests for SupabasePrimitive."""
+    """Tests for SupabasePrimitive.
+
+    These tests are skipped automatically when the optional ``supabase``
+    package is not installed so that other provider tests can still run.
+    """
 
     @pytest.mark.asyncio
     async def test_supabase_select(self) -> None:
@@ -437,8 +456,13 @@ class TestSupabasePrimitive:
         assert response.count == 1
 
 
+@pytest.mark.skipif(not _HAS_SQLITE, reason="aiosqlite not installed")
 class TestSQLitePrimitive:
-    """Tests for SQLitePrimitive."""
+    """Tests for SQLitePrimitive.
+
+    These tests are skipped automatically when the optional ``aiosqlite``
+    package is not installed so that other provider tests can still run.
+    """
 
     @pytest.mark.asyncio
     async def test_sqlite_create_and_select(self) -> None:
