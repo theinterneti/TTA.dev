@@ -5,31 +5,73 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.integrations.anthropic_primitive import (
-    AnthropicPrimitive,
-    AnthropicRequest,
-    AnthropicResponse,
-)
-from tta_dev_primitives.integrations.ollama_primitive import (
-    OllamaPrimitive,
-    OllamaRequest,
-    OllamaResponse,
-)
+
+# Anthropic SDK is an optional integration dependency. When it's not installed,
+# we still want other integration tests (OpenAI, Ollama, SQLite, Supabase) to
+# run, so we conditionally import the Anthropic primitive and skip only those
+# tests if the SDK is missing instead of failing collection for the whole file.
+try:  # pragma: no cover - import error handling path
+    from tta_dev_primitives.integrations.anthropic_primitive import (
+        AnthropicPrimitive,
+        AnthropicRequest,
+        AnthropicResponse,
+    )
+    _HAS_ANTHROPIC = True
+except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
+    if exc.name == "anthropic":
+        AnthropicPrimitive = AnthropicRequest = AnthropicResponse = None  # type: ignore[assignment]
+        _HAS_ANTHROPIC = False
+    else:  # Re-raise unexpected import errors
+        raise
 from tta_dev_primitives.integrations.openai_primitive import (
     OpenAIPrimitive,
     OpenAIRequest,
     OpenAIResponse,
 )
-from tta_dev_primitives.integrations.sqlite_primitive import (
-    SQLitePrimitive,
-    SQLiteRequest,
-    SQLiteResponse,
-)
-from tta_dev_primitives.integrations.supabase_primitive import (
-    SupabasePrimitive,
-    SupabaseRequest,
-    SupabaseResponse,
-)
+
+# Ollama, SQLite (aiosqlite) and Supabase SDKs are also optional. Mirror the
+# Anthropic pattern so we don't fail collection when they are not installed.
+try:  # pragma: no cover - import error handling path
+    from tta_dev_primitives.integrations.ollama_primitive import (
+        OllamaPrimitive,
+        OllamaRequest,
+        OllamaResponse,
+    )
+    _HAS_OLLAMA = True
+except ModuleNotFoundError as exc:  # pragma: no cover
+    if exc.name == "ollama":
+        OllamaPrimitive = OllamaRequest = OllamaResponse = None  # type: ignore[assignment]
+        _HAS_OLLAMA = False
+    else:
+        raise
+
+try:  # pragma: no cover - import error handling path
+    from tta_dev_primitives.integrations.sqlite_primitive import (
+        SQLitePrimitive,
+        SQLiteRequest,
+        SQLiteResponse,
+    )
+    _HAS_SQLITE = True
+except ModuleNotFoundError as exc:  # pragma: no cover
+    if exc.name == "aiosqlite":
+        SQLitePrimitive = SQLiteRequest = SQLiteResponse = None  # type: ignore[assignment]
+        _HAS_SQLITE = False
+    else:
+        raise
+
+try:  # pragma: no cover - import error handling path
+    from tta_dev_primitives.integrations.supabase_primitive import (
+        SupabasePrimitive,
+        SupabaseRequest,
+        SupabaseResponse,
+    )
+    _HAS_SUPABASE = True
+except ModuleNotFoundError as exc:  # pragma: no cover
+    if exc.name == "supabase":
+        SupabasePrimitive = SupabaseRequest = SupabaseResponse = None  # type: ignore[assignment]
+        _HAS_SUPABASE = False
+    else:
+        raise
 
 
 class TestOpenAIPrimitive:
@@ -125,8 +167,14 @@ class TestOpenAIPrimitive:
         assert call_args.kwargs["model"] == "gpt-4"
 
 
+@pytest.mark.skipif(not _HAS_ANTHROPIC, reason="anthropic SDK not installed")
 class TestAnthropicPrimitive:
-    """Tests for AnthropicPrimitive."""
+    """Tests for AnthropicPrimitive.
+
+    These tests exercise the Anthropic integration primitive using a mocked
+    client. They are skipped automatically when the optional ``anthropic``
+    package is not installed, so that other provider tests can still run.
+    """
 
     @pytest.mark.asyncio
     async def test_anthropic_basic_execution(self) -> None:
@@ -222,8 +270,13 @@ class TestAnthropicPrimitive:
         assert call_args.kwargs["model"] == "claude-3-opus-20240229"
 
 
+@pytest.mark.skipif(not _HAS_OLLAMA, reason="ollama SDK not installed")
 class TestOllamaPrimitive:
-    """Tests for OllamaPrimitive."""
+    """Tests for OllamaPrimitive.
+
+    These tests are skipped automatically when the optional ``ollama`` package
+    is not installed so that other provider tests can still run.
+    """
 
     @pytest.mark.asyncio
     async def test_ollama_basic_execution(self) -> None:
