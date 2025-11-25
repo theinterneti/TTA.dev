@@ -63,10 +63,15 @@ The `tta-dev-primitives` package includes **5 production-ready examples** showca
 
 ## Documentation
 
-See `docs/` directory for complete documentation:
-- `specs/observability-integration.md` - Complete specification
-- `docs/OBSERVABILITY_INTEGRATION_PROGRESS.md` - Implementation progress
-- `docs/OBSERVABILITY_PACKAGE_EXPORT_PLAN.md` - Export plan
+This package ships with its own **specs** and **docs** directories:
+
+- `specs/observability-integration.md` – Component specification for the observability integration
+- `docs/OBSERVABILITY_INTEGRATION_PROGRESS.md` – Historical implementation progress log
+- `docs/OBSERVABILITY_PACKAGE_EXPORT_PLAN.md` – Original export plan into TTA.dev
+
+For the **current, repo-level integration guide**, also see:
+
+- `docs/integration/observability-integration.md` – End-to-end observability integration documentation for TTA.dev
 
 ## Testing
 

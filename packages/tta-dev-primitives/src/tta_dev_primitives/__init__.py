@@ -10,6 +10,7 @@ from .core.sequential import SequentialPrimitive
 from .performance.cache import CachePrimitive
 
 # Recovery primitives
+from .recovery.compensation import CompensationPrimitive, CompensationStrategy
 from .recovery.retry import RetryPrimitive, RetryStrategy
 from .recovery.timeout import TimeoutPrimitive
 
@@ -26,6 +27,8 @@ __all__ = [
     # Performance primitives
     "CachePrimitive",
     # Recovery primitives
+    "CompensationPrimitive",
+    "CompensationStrategy",
     "RetryPrimitive",
     "RetryStrategy",
     "TimeoutPrimitive",
