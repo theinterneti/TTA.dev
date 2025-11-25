@@ -3,16 +3,22 @@
 This module tests the integration between KnowledgeBasePrimitive and
 StageManager for contextual stage transition guidance.
 
-NOTE: Tests that execute stage validations spawn subprocesses and should be marked as integration.
+NOTE: Tests that execute stage validations spawn subprocesses and should be
+marked as integration. To avoid nested ``pytest`` invocations (which can cause
+recursion and timeouts), we set an environment flag that tells the
+``check_tests_pass`` validation to short-circuit instead of spawning a
+subprocess.
 """
 
+import os
 from pathlib import Path
 
 import pytest
 
 from tta_dev_primitives import WorkflowContext
 
-# Mark ALL tests in this module as integration since they execute stage validations that spawn subprocesses
+# Mark ALL tests in this module as integration since they execute stage
+# validations that may spawn subprocesses.
 pytestmark = pytest.mark.integration
 from typing import Never
 
@@ -30,6 +36,11 @@ from tta_dev_primitives.lifecycle import (
 )
 
 
+# Ensure we don't spawn a nested pytest subprocess when these tests exercise
+# StageManager validations.
+os.environ.setdefault("TTA_LIFECYCLE_SKIP_TEST_SUBPROCESS", "1")
+
+
 class MockKBPrimitive(KnowledgeBasePrimitive):
     """Mock KB primitive that returns predefined results."""
 
@@ -39,8 +50,13 @@ class MockKBPrimitive(KnowledgeBasePrimitive):
         self.mock_pages = mock_pages or []
         self.query_count = 0
 
-    async def _execute_impl(self, context: WorkflowContext, input_data: KBQuery) -> KBResult:
-        """Return mock KB results."""
+    async def _execute_impl(self, input_data: KBQuery, context: WorkflowContext) -> KBResult:
+        """Return mock KB results.
+
+        The parameter order matches ``KnowledgeBasePrimitive._execute_impl``
+        (input_data first, then context), so calls via ``execute(query,
+        context)`` behave consistently.
+        """
         self.query_count += 1
 
         # Filter mock pages by query type
@@ -225,7 +241,7 @@ async def test_stage_manager_kb_error_handling() -> None:
     class ErrorKB(KnowledgeBasePrimitive):
         """KB that raises errors."""
 
-        async def _execute_impl(self, context, input_data) -> Never:
+        async def _execute_impl(self, input_data, context) -> Never:
             raise RuntimeError("KB query failed")
 
     error_kb = ErrorKB(logseq_available=False)
