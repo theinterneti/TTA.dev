@@ -17,12 +17,12 @@
 						"mcp",
 						"run",
 						"--mcp-config",
-						"${workspaceFolder}/TTA.dev/.hypertool/mcp_servers.json"
+						"/home/thein/repos/TTA.dev-copilot/TTA.dev/.hypertool/mcp_servers.json"
 					],
-					"cwd": "${workspaceFolder}/TTA.dev",
+					"cwd": "/home/thein/repos/TTA.dev-copilot/TTA.dev",
 					"env": {
-						"HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/TTA.dev/.hypertool",
-						"HYPERTOOL_SERVERS_FILE": "${workspaceFolder}/TTA.dev/.hypertool/mcp_servers.json",
+						"HYPERTOOL_CONFIG_DIR": "/home/thein/repos/TTA.dev-copilot/TTA.dev/.hypertool",
+						"HYPERTOOL_SERVERS_FILE": "/home/thein/repos/TTA.dev-copilot/TTA.dev/.hypertool/mcp_servers.json",
 						"LOGSEQ_API_TOKEN": "${env:LOGSEQ_API_TOKEN}",
 						"LOGSEQ_API_URL": "http://127.0.0.1:12315",
 						"GITHUB_TOKEN": "${env:GITHUB_PERSONAL_ACCESS_TOKEN}",
