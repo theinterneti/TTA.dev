@@ -5,6 +5,33 @@
 		}
 	],
 	"settings": {
-		"python.defaultInterpreterPath": "/home/thein/repos/TTA.dev-copilot/.venv/bin/python"
+		"python.defaultInterpreterPath": "/home/thein/repos/TTA.dev-copilot/.venv/bin/python",
+		"mcp": {
+			"servers": {
+				"hypertool-mcp": {
+					"type": "stdio",
+					"command": "npx",
+					"args": [
+						"-y",
+						"@toolprint/hypertool-mcp@0.0.45",
+						"mcp",
+						"run",
+						"--mcp-config",
+						"${workspaceFolder}/TTA.dev/.hypertool/mcp_servers.json"
+					],
+					"cwd": "${workspaceFolder}/TTA.dev",
+					"env": {
+						"HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/TTA.dev/.hypertool",
+						"HYPERTOOL_SERVERS_FILE": "${workspaceFolder}/TTA.dev/.hypertool/mcp_servers.json",
+						"LOGSEQ_API_TOKEN": "${env:LOGSEQ_API_TOKEN}",
+						"LOGSEQ_API_URL": "http://127.0.0.1:12315",
+						"GITHUB_TOKEN": "${env:GITHUB_PERSONAL_ACCESS_TOKEN}",
+						"GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_PERSONAL_ACCESS_TOKEN}",
+						"HOME": "${env:HOME}"
+					}
+				}
+			},
+			"inputs": []
+		}
 	}
 }
