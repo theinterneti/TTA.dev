@@ -38,10 +38,16 @@
         "ghcr.io/github/github-mcp-server:latest"
       ],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
       },
       "description": "GitHub MCP server for repository operations",
       "trust": true
+    },
+    "tta-knowledge": {
+      "command": "python3",
+      "args": [
+        "scripts/mcp/tta_knowledge_server.py"
+      ]
     }
   }
 }

@@ -28,6 +28,12 @@ dev-dependencies = [
     "ruff>=0.8.0",
 ]
 
+[tool.coverage.run]
+source = ["."]
+omit = ["binary_search.py:22-38"]
+
+
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

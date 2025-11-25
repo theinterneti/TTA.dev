@@ -43,7 +43,7 @@
 
 | Milestone | Actionable Steps (Autonomy) | Core Concepts |
 |-----------|-----------------------------|---------------|
-| **M4.1: Multi-Agent Delegation** | Create a "Coordinator" workflow that can break down a complex task and invoke specialized sub-agents (e.g., "Planner" -> "Coder" -> "Reviewer") using the existing runtime infrastructure. | Multi-Agent Systems (Orchestration) |
-| **M4.2: Self-Healing CI** | Enhance CI workflows to allow agents to attempt automatic fixes when tests or checks fail, creating a closed-loop repair system. | Autonomy (Self-Correction) |
-| **M4.3: Dynamic Tooling in CI** | Integrate MCP servers or equivalent toolsets into the CI environment, giving agents access to deeper capabilities (e.g., database schema inspection, external API calls) during automated runs. | Tooling (Advanced Capabilities) |
-| **M4.4: Autonomous Feature Dev** | Build an end-to-end workflow where an agent takes a GitHub Issue, generates a specification, implements the code, runs tests, and opens a Pull Request with minimal human intervention. | Autonomy (End-to-End Workflows) |
+| **M4.1: Multi-Agent Delegation** | ✅ **DONE** Create a "Coordinator" workflow (`scripts/coordinator.py`) that breaks down a complex task and invokes specialized sub-agents (e.g., "Planner" -> "Coder" -> "Reviewer") using the existing runtime infrastructure. | Multi-Agent Systems (Orchestration) |
+| **M4.2: Self-Healing CI** | ✅ **DONE** Enhance CI workflows (`scripts/ci_self_heal.py`) to allow agents to attempt automatic fixes when tests or checks fail, creating a closed-loop repair system. | Autonomy (Self-Correction) |
+| **M4.3: Dynamic Tooling in CI** | ✅ **DONE** Integrate MCP servers into the CI environment. Created `scripts/mcp/tta_knowledge_server.py` and verified `gemini mcp add` command to dynamically register custom tools (like documentation search) during automated runs. | Tooling (Advanced Capabilities) |
+| **M4.4: Autonomous Feature Dev** | ✅ **DONE** Build an end-to-end workflow (`scripts/autonomous_dev.py`) where an agent takes a task, generates a plan, implements code, runs self-healing tests, and performs a self-review before suggesting a PR. | Autonomy (End-to-End Workflows) |
