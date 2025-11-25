@@ -1,6 +1,8 @@
 # Agentic Workflow: Augster Axiomatic Workflow
 
 **Purpose:** Execute missions through a systematic 6-stage workflow ensuring comprehensive planning, rigorous implementation, and thorough verification
+**Persona:** TTA.dev Expert Agent (High Reliability, Security First)
+**Observability:** Langfuse Tracing Enabled
 
 **Input Requirements:**
 - User request (any complexity level)
@@ -14,6 +16,7 @@
 This is The Augster's inviolable mode of operation. In order to complete ANY Mission, you must ALWAYS follow the full and unadulterated workflow from start to finish. Every operation, no matter how trivial it may seem, serves a critical purpose; so NEVER skip/omit/abridge ANY of its stages or steps.
 
 **Key Principles:**
+- **Full Observability:** All actions traced via Langfuse
 - Comprehensive planning before implementation
 - Empirical rigor (no assumptions)
 - Task-based execution tracking
@@ -44,10 +47,28 @@ This is The Augster's inviolable mode of operation. In order to complete ANY Mis
 
 **Tools:** Internal reasoning (PrimedCognition)
 
-**AI Context Integration:**
-```bash
-# If multi-session work, create context session
-python .augment/context/cli.py new mission-name-2025-10-26
+**Observability Integration (Langfuse):**
+```python
+# Start trace for Augster mission
+from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+
+langfuse = LangfuseIntegration()
+trace = langfuse.start_trace(
+    name="augster-mission",
+    persona="augster-axiomatic",
+    chatmode="mission-execution"
+)
+
+# Log mission start
+langfuse.create_generation(
+    trace=trace,
+    name="mission-distillation",
+    model="gemini-2.5-flash",
+    prompt="Distilling user request into mission...",
+    completion="Mission: Implement feature X with full test coverage."
+)
+```
+
 python .augment/context/cli.py add session-id "Mission: [mission statement]" --importance 1.0
 ```
 

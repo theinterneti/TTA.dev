@@ -1,6 +1,8 @@
 # Agentic Workflow: Feature Implementation
 
 **Purpose:** Implement a new feature from specification following TTA development standards
+**Persona:** TTA.dev Expert Agent (High Reliability, Security First)
+**Observability:** Langfuse Tracing Enabled
 
 **Input Requirements:**
 - Feature specification file (`.spec.md`)
@@ -19,6 +21,7 @@ This workflow guides the systematic implementation of a new feature from specifi
 - Quality gate validation
 - Component maturity progression
 - Integration with Phase 1 primitives
+- **Full Observability:** All actions traced via Langfuse
 
 ---
 
@@ -60,15 +63,26 @@ cat specs/features/feature-name.spec.md
 grep -r "component-name" specs/
 ```
 
-**AI Context Integration:**
-```bash
-# Create session for feature implementation
-python .augment/context/cli.py new feature-name-implementation-2025-10-20
+**Observability Integration (Langfuse):**
+```python
+# Start trace for feature implementation
+from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
 
-# Track specification review
-python .augment/context/cli.py add feature-name-implementation-2025-10-20 \
-    "Reviewed feature specification: [key requirements]" \
-    --importance 1.0
+langfuse = LangfuseIntegration()
+trace = langfuse.start_trace(
+    name="feature-implementation",
+    persona="backend-engineer",
+    chatmode="feature-implementation"
+)
+
+# Log specification review
+langfuse.create_generation(
+    trace=trace,
+    name="spec-review",
+    model="gemini-2.5-flash",
+    prompt="Reviewing specification for completeness...",
+    completion="Specification validated. All sections present."
+)
 ```
 
 ---
@@ -97,7 +111,7 @@ python .augment/context/cli.py add feature-name-implementation-2025-10-20 \
 **Tools:**
 ```bash
 # Search for similar patterns
-uvx rg "similar_pattern" src/
+uv run rg "similar_pattern" src/
 
 # Review component structure
 tree src/component_name/
@@ -362,7 +376,7 @@ python scripts/workflow/spec_to_production.py \
 # Or run individually
 uv run pytest tests/component_name/ --cov=src/component_name
 uvx ruff check src/component_name/ tests/component_name/
-uvx pyright src/component_name/
+uvx pyright src_component_name/
 uvx detect-secrets scan src/component_name/
 ```
 
@@ -513,11 +527,15 @@ python scripts/workflow/spec_to_production.py \
 ## Integration with Phase 1 Primitives
 
 ### AI Context Management
-```bash
-# Track entire feature implementation
-python .augment/context/cli.py add feature-name-implementation-2025-10-20 \
-    "Feature implementation complete: [summary]" \
-    --importance 1.0
+```python
+# Track completion in Langfuse
+langfuse.create_generation(
+    trace=trace,
+    name="feature-complete",
+    model="gemini-2.5-flash",
+    prompt="Summarizing feature implementation...",
+    completion="Feature implementation complete. All quality gates passed."
+)
 ```
 
 ### Error Recovery
@@ -536,14 +554,14 @@ python .augment/context/cli.py add feature-name-implementation-2025-10-20 \
 
 ### TTA Documentation
 - Feature Spec Template: `specs/templates/feature.spec.template.md`
-- Testing Instructions: `.augment/instructions/testing.instructions.md`
-- Quality Gates: `.augment/instructions/quality-gates.instructions.md`
-- Component Maturity: `.augment/instructions/component-maturity.instructions.md`
+- Testing Instructions: `.github/instructions/testing.instructions.md`
+- Quality Gates: `.github/instructions/quality-gates.instructions.md`
+- Component Maturity: `.github/instructions/component-maturity.instructions.md`
 
 ### Related Workflows
-- Quality Gate Fix: `.augment/workflows/quality-gate-fix.prompt.md`
-- Test Coverage Improvement: `.augment/workflows/test-coverage-improvement.prompt.md`
-- Bug Fix: `.augment/workflows/bug-fix.prompt.md`
+- Quality Gate Fix: `.github/prompts/quality-gate-fix.prompt.md`
+- Test Coverage Improvement: `.github/prompts/test-coverage-improvement.prompt.md`
+- Bug Fix: `.github/prompts/bug-fix.prompt.md`
 
 ---
 

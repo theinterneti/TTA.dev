@@ -1,0 +1,44 @@
+name: Agentic PR Review
+
+on:
+    pull_request:
+        types: [opened, synchronize]
+        paths-ignore:
+            - "docs/**"
+            - "*.md"
+
+jobs:
+    ai-review:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: write
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install Dependencies
+              run: |
+                  npm install -g @google/gemini-cli
+                  pip install pyyaml
+
+            - name: Run AI PR Review
+              env:
+                  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+                  TTA_AGENT_RUNTIME: gemini
+                  GEMINI_MODEL: gemini-2.5-flash
+              run: |
+                  python scripts/apm.py run ci-pr-review -- --target-branch ${{ github.base_ref }}

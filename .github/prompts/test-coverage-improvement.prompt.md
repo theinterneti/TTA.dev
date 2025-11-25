@@ -1,6 +1,8 @@
 # Agentic Workflow: Test Coverage Improvement
 
 **Purpose:** Systematically increase test coverage to meet component maturity thresholds
+**Persona:** TTA.dev Expert Agent (High Reliability, Security First)
+**Observability:** Langfuse Tracing Enabled
 
 **Input Requirements:**
 - Component name
@@ -15,6 +17,7 @@
 This workflow guides the systematic improvement of test coverage for a component, ensuring comprehensive testing while meeting TTA quality gate thresholds for component maturity progression.
 
 **Key Principles:**
+- **Full Observability:** All actions traced via Langfuse
 - Focus on critical code paths first
 - Write meaningful tests, not just coverage
 - Use AAA pattern (Arrange-Act-Assert)
@@ -35,6 +38,28 @@ This workflow guides the systematic improvement of test coverage for a component
 3. Identify uncovered code sections
 4. Prioritize critical uncovered code
 5. Categorize gaps (unit, integration, E2E)
+
+**Observability Integration (Langfuse):**
+```python
+# Start trace for coverage improvement
+from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+
+langfuse = LangfuseIntegration()
+trace = langfuse.start_trace(
+    name="test-coverage-improvement",
+    persona="qa-engineer",
+    chatmode="test-coverage"
+)
+
+# Log initial analysis
+langfuse.create_generation(
+    trace=trace,
+    name="coverage-analysis",
+    model="gemini-2.5-flash",
+    prompt="Analyzing coverage gaps...",
+    completion="Identified critical gaps in core logic."
+)
+```
 
 **Tools:**
 ```bash

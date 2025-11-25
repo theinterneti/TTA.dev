@@ -1,6 +1,8 @@
 # Agentic Workflow: Component Promotion
 
 **Purpose:** Promote a TTA component through maturity stages (dev → staging → production)
+**Persona:** TTA.dev Expert Agent (High Reliability, Security First)
+**Observability:** Langfuse Tracing Enabled
 
 **When to Use:**
 - Component ready for next maturity stage
@@ -13,6 +15,14 @@
 ## Workflow Description
 
 This workflow guides the systematic promotion of a TTA component through maturity stages, ensuring all quality gates and criteria are met before advancement.
+
+**Key Principles:**
+- **Full Observability:** All actions traced via Langfuse
+- Strict adherence to quality gates
+- Automated validation where possible
+- Comprehensive documentation review
+- Security and performance verification
+- Rollback plan requirement
 
 **Maturity Stages:**
 1. **Development:** Initial implementation, ≥60% coverage
@@ -46,6 +56,28 @@ This workflow guides the systematic promotion of a TTA component through maturit
 2. Verify current stage matches expected
 3. Confirm specification file exists
 4. Review component status
+
+**Observability Integration (Langfuse):**
+```python
+# Start trace for component promotion
+from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+
+langfuse = LangfuseIntegration()
+trace = langfuse.start_trace(
+    name="component-promotion",
+    persona="release-manager",
+    chatmode="promotion"
+)
+
+# Log validation start
+langfuse.create_generation(
+    trace=trace,
+    name="pre-promotion-validation",
+    model="gemini-2.5-flash",
+    prompt="Validating promotion criteria...",
+    completion="All quality gates passed."
+)
+```
 
 **Commands:**
 ```bash

@@ -1,6 +1,8 @@
 # Agentic Workflow: Bug Fix
 
 **Purpose:** Systematic bug investigation and resolution for TTA components
+**Persona:** TTA.dev Expert Agent (High Reliability, Security First)
+**Observability:** Langfuse Tracing Enabled
 
 **When to Use:**
 - Bug reported by user or QA
@@ -13,6 +15,13 @@
 ## Workflow Description
 
 This workflow guides systematic bug investigation, root cause analysis, fix implementation, and verification to ensure bugs are properly resolved without introducing regressions.
+
+**Key Principles:**
+- **Full Observability:** All actions traced via Langfuse
+- Reproduce before fixing
+- Fix root cause, not symptoms
+- Test-driven resolution
+- Verify no regressions
 
 ---
 
@@ -44,6 +53,28 @@ This workflow guides systematic bug investigation, root cause analysis, fix impl
 2. Set up test environment
 3. Attempt to reproduce
 4. Document reproduction
+
+**Observability Integration (Langfuse):**
+```python
+# Start trace for bug fix
+from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+
+langfuse = LangfuseIntegration()
+trace = langfuse.start_trace(
+    name="bug-fix",
+    persona="backend-engineer",
+    chatmode="bug-fix"
+)
+
+# Log reproduction attempt
+langfuse.create_generation(
+    trace=trace,
+    name="reproduction",
+    model="gemini-2.5-flash",
+    prompt="Attempting to reproduce bug...",
+    completion="Reproduction successful/failed."
+)
+```
 
 **Commands:**
 ```bash
@@ -416,25 +447,17 @@ Closes #{issue_number}
 # Track bug investigation
 context_manager.add_message(
     session_id="integrated-workflow-2025-10-20",
-    role="user",
-    content=f"Investigating bug in {component}: {description}",
-    importance=0.9
-)
+## Integration with Phase 1 Primitives
 
-# Track root cause discovery
-context_manager.add_message(
-    session_id="integrated-workflow-2025-10-20",
-    role="assistant",
-    content=f"Root cause identified: {root_cause}",
-    importance=0.9
-)
-
-# Track fix implementation
-context_manager.add_message(
-    session_id="integrated-workflow-2025-10-20",
-    role="assistant",
-    content=f"Bug fixed with regression test. All tests pass.",
-    importance=0.9
+### AI Context Management
+```python
+# Track fix completion in Langfuse
+langfuse.create_generation(
+    trace=trace,
+    name="bug-fix-complete",
+    model="gemini-2.5-flash",
+    prompt="Summarizing bug fix...",
+    completion="Bug fixed. Root cause identified and resolved. Regression tests added."
 )
 ```
 

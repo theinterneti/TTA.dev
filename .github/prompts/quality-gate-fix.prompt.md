@@ -1,6 +1,8 @@
 # Agentic Workflow: Quality Gate Fix
 
 **Purpose:** Systematically fix quality gate failures to enable component promotion
+**Persona:** TTA.dev Expert Agent (High Reliability, Security First)
+**Observability:** Langfuse Tracing Enabled
 
 **Input Requirements:**
 - Component name
@@ -15,6 +17,7 @@
 This workflow guides the systematic resolution of quality gate failures, ensuring components meet TTA maturity criteria for promotion through development, staging, and production stages.
 
 **Key Principles:**
+- **Full Observability:** All actions traced via Langfuse
 - Fix root causes, not symptoms
 - Maintain code quality while fixing
 - Verify no regressions introduced
@@ -33,6 +36,28 @@ This workflow guides the systematic resolution of quality gate failures, ensurin
 2. Identify failed gates
 3. Categorize failures by type
 4. Prioritize fixes
+
+**Observability Integration (Langfuse):**
+```python
+# Start trace for quality gate fix
+from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+
+langfuse = LangfuseIntegration()
+trace = langfuse.start_trace(
+    name="quality-gate-fix",
+    persona="qa-engineer",
+    chatmode="quality-fix"
+)
+
+# Log failure analysis
+langfuse.create_generation(
+    trace=trace,
+    name="failure-analysis",
+    model="gemini-2.5-flash",
+    prompt="Analyzing quality gate failures...",
+    completion="Identified failures in coverage and type checking."
+)
+```
 
 **Tools:**
 ```bash
