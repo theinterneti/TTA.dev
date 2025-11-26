@@ -177,7 +177,11 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
                 for key, value in env_vars.items():
                     await self._sandbox.run_code(f'import os; os.environ["{key}"] = "{value}"')
 
-            # Execute code with timeout using E2B's run_code method
+            # Execute code with timeout using E2B's run_code method.
+            #
+            # We enforce the user-provided timeout at the code execution
+            # level, but still allow a small additional window for sandbox
+            # startup / transient connection retries.
             start_time = time.time()
             execution = await asyncio.wait_for(
                 self._run_code_with_retries(code, timeout=timeout),
@@ -201,7 +205,14 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
             # Check for errors in execution
             error_obj = getattr(execution, "error", None)
             if error_obj:
-                error_text = str(error_obj)
+                # E2B error objects may expose the human readable message
+                # via either their string representation or a ``value``
+                # attribute. Support both for compatibility with different
+                # SDK versions and our test doubles.
+                if hasattr(error_obj, "value"):
+                    error_text = str(getattr(error_obj, "value"))
+                else:
+                    error_text = str(error_obj)
 
             # Collect logs (stdout is already the main output)
             execution_logs = getattr(execution, "logs", None)
@@ -297,7 +308,14 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
             try:
                 if not self._sandbox:
                     raise RuntimeError("Sandbox not initialized")
-                return await self._sandbox.run_code(code)
+
+                # Enforce the user timeout at the code execution level so
+                # callers reliably see TimeoutError when their code runs
+                # longer than requested, while still allowing this helper to
+                # perform short transient retries.
+                return await asyncio.wait_for(
+                    self._sandbox.run_code(code), timeout=timeout
+                )
 
             except Exception as e:
                 last_exc = e
@@ -358,13 +376,32 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
 
         Should be called when done with execution to free resources.
         Automatically called by context manager or on session rotation.
+
+        We prefer the graceful ``aclose``/``close`` methods when available,
+        but fall back to ``kill`` for older SDK versions that only expose a
+        hard kill operation.
         """
         if self._sandbox:
             try:
-                await self._sandbox.kill()
-                logger.info("Sandbox killed successfully")
+                close_coro = None
+
+                if hasattr(self._sandbox, "aclose"):
+                    close_coro = self._sandbox.aclose()
+                elif hasattr(self._sandbox, "close"):
+                    maybe_close = self._sandbox.close()
+                    # ``close`` may be sync or async depending on SDK.
+                    if asyncio.iscoroutine(maybe_close) or isinstance(
+                        maybe_close, asyncio.Future
+                    ):
+                        close_coro = maybe_close
+                elif hasattr(self._sandbox, "kill"):
+                    close_coro = self._sandbox.kill()
+
+                if close_coro is not None:
+                    await close_coro
+                logger.info("Sandbox closed successfully")
             except Exception as e:
-                logger.warning(f"Error killing sandbox: {e}")
+                logger.warning(f"Error closing sandbox: {e}")
             finally:
                 self._sandbox = None
                 self._session_created_at = 0

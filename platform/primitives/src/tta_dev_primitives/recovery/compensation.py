@@ -322,3 +322,14 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
 
             # Always re-raise the original error
             raise forward_error
+
+
+class CompensationPrimitive(SagaPrimitive):
+	"""Public alias for :class:`SagaPrimitive` matching documentation.
+
+	This keeps backward compatibility for existing usages of
+	``CompensationPrimitive`` as the saga/compensation primitive while
+	delegating all behavior to :class:`SagaPrimitive`.
+	"""
+
+	pass

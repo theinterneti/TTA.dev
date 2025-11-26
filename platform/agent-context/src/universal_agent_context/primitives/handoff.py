@@ -7,10 +7,11 @@ multi-agent workflows.
 
 from typing import Any
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.observability import InstrumentedPrimitive
 
 
-class AgentHandoffPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
+class AgentHandoffPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """Hand off task execution from one agent to another.
 
     This primitive manages the transfer of context, state, and execution
@@ -65,13 +66,17 @@ class AgentHandoffPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
             handoff_callback: Optional callback for custom handoff logic
             name: Optional name for the primitive (defaults to "AgentHandoff")
         """
-        self.name = name or f"AgentHandoff->{target_agent}"
+        resolved_name = name or f"AgentHandoff->{target_agent}"
+        super().__init__(name=resolved_name)
+
         self.target_agent = target_agent
         self.handoff_strategy = handoff_strategy
         self.preserve_context = preserve_context
         self.handoff_callback = handoff_callback
 
-    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
+    async def _execute_impl(
+        self, input_data: dict[str, Any], context: WorkflowContext
+    ) -> dict[str, Any]:
         """Execute agent handoff.
 
         Args:

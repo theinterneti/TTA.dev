@@ -138,22 +138,15 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         if target_criteria:
             checks.extend(target_criteria.entry_criteria)
 
-        if not checks:
-            # No criteria defined - assume ready
-            return StageReadiness(
-                current_stage=current_stage,
-                target_stage=target_stage,
-                ready=True,
-                info=[],
-                recommended_actions=[],
-                next_steps=["No validation criteria defined for this transition"],
+        # Run validation checks if any are defined, otherwise assume "ready"
+        # but still allow KB recommendations to be collected.
+        if checks:
+            readiness_primitive = ReadinessCheckPrimitive(checks)
+            check_result: ReadinessCheckResult = await readiness_primitive.execute(
+                context, project_path
             )
-
-        # Run all validation checks in parallel
-        readiness_primitive = ReadinessCheckPrimitive(checks)
-        check_result: ReadinessCheckResult = await readiness_primitive.execute(
-            context, project_path
-        )
+        else:
+            check_result = ReadinessCheckResult(ready=True)
 
         # Build recommended actions
         recommended_actions = []
@@ -173,7 +166,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
                 next_steps.append(f"{critical.check_name}: {critical.fix_command}")
 
         # Query KB for contextual guidance if available
-        kb_recommendations = []
+        kb_recommendations: list[dict[str, object]] = []
         if kb:
             try:
                 # Query for target stage best practices
@@ -198,11 +191,27 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
                 )
                 mistakes_result = await kb.execute(mistakes_query, context)
 
-                # Add best practices pages to recommendations
-                kb_recommendations.extend(best_practices_result.pages)
+                # Normalize KB pages into a simple dict structure expected by
+                # StageReadiness.get_summary() and downstream tests.
+                for page in best_practices_result.pages:
+                    kb_recommendations.append(
+                        {
+                            "title": page.title,
+                            "type": "best_practice",
+                            "tags": list(page.tags),
+                            "url": page.url or "",
+                        }
+                    )
 
-                # Add common mistakes pages to recommendations
-                kb_recommendations.extend(mistakes_result.pages)
+                for page in mistakes_result.pages:
+                    kb_recommendations.append(
+                        {
+                            "title": page.title,
+                            "type": "common_mistake",
+                            "tags": list(page.tags),
+                            "url": page.url or "",
+                        }
+                    )
 
             except Exception:
                 # Gracefully ignore KB errors - don't fail validation

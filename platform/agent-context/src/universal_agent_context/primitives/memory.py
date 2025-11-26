@@ -6,10 +6,11 @@ architectural decisions and important context across agent interactions.
 
 from typing import Any
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.observability import InstrumentedPrimitive
 
 
-class AgentMemoryPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
+class AgentMemoryPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """Store and retrieve architectural decisions in agent memory.
 
     This primitive manages a persistent memory system for tracking architectural
@@ -75,13 +76,17 @@ class AgentMemoryPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
             memory_scope: "workflow", "session", or "global"
             name: Optional name for the primitive
         """
-        self.name = name or f"AgentMemory-{operation}"
+        resolved_name = name or f"AgentMemory-{operation}"
+        super().__init__(name=resolved_name)
+
         self.operation = operation
         self.memory_key = memory_key
         self.memory_store = memory_store
         self.memory_scope = memory_scope
 
-    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
+    async def _execute_impl(
+        self, input_data: dict[str, Any], context: WorkflowContext
+    ) -> dict[str, Any]:
         """Execute memory operation.
 
         Args:

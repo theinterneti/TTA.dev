@@ -16,6 +16,7 @@ NOTE: All tests in this module require Docker containers and should run as integ
 
 from __future__ import annotations
 
+import os
 import time
 from typing import Any
 
@@ -37,6 +38,11 @@ try:
     BACKENDS_AVAILABLE = response.status_code == 200
 except Exception:
     BACKENDS_AVAILABLE = False
+
+# Whether to run the full OTEL/Prometheus integration suite. By default these
+# tests are skipped unless explicitly enabled, since they require a running
+# OTEL collector and specific scrape job configuration.
+OTEL_TESTS_ENABLED = os.getenv("TTA_ENABLE_PROMETHEUS_OTEL_TESTS") == "1"
 
 
 # ============================================================================
@@ -126,7 +132,10 @@ def test_prometheus_api_accessible() -> None:
     assert data.get("status") == "success", "Prometheus API returned error"
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE or not OTEL_TESTS_ENABLED,
+    reason="Prometheus/OTEL backend not available or OTEL tests disabled",
+)
 def test_prometheus_configuration() -> None:
     """Test that Prometheus is configured with expected scrape jobs."""
     config = get_prometheus_config()
@@ -143,7 +152,10 @@ def test_prometheus_configuration() -> None:
     assert "job_name: tta-primitives" in yaml_config, "Missing tta-primitives job"
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE or not OTEL_TESTS_ENABLED,
+    reason="Prometheus/OTEL backend not available or OTEL tests disabled",
+)
 def test_prometheus_scrape_targets() -> None:
     """Test that Prometheus has configured scrape targets."""
     targets = get_prometheus_targets()
@@ -164,7 +176,10 @@ def test_prometheus_scrape_targets() -> None:
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE or not OTEL_TESTS_ENABLED,
+    reason="Prometheus/OTEL backend not available or OTEL tests disabled",
+)
 def test_otel_collector_up() -> None:
     """Test that OpenTelemetry Collector is being scraped by Prometheus."""
     # Wait a bit for initial scrape
@@ -185,7 +200,10 @@ def test_otel_collector_up() -> None:
     assert any(v == 1.0 for v in up_values), "OTEL Collector is not up"
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE or not OTEL_TESTS_ENABLED,
+    reason="Prometheus/OTEL backend not available or OTEL tests disabled",
+)
 def test_otel_collector_metrics_exported() -> None:
     """Test that OpenTelemetry Collector exports its own metrics."""
     # Wait for metrics to be scraped
@@ -207,7 +225,10 @@ def test_otel_collector_metrics_exported() -> None:
     assert all(v > 0 for v in uptime_values), "OTEL Collector uptime should be positive"
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE or not OTEL_TESTS_ENABLED,
+    reason="Prometheus/OTEL backend not available or OTEL tests disabled",
+)
 def test_otel_collector_span_export_metrics() -> None:
     """Test that OpenTelemetry Collector exports span processing metrics."""
     # Wait for metrics to be scraped
@@ -228,7 +249,10 @@ def test_otel_collector_span_export_metrics() -> None:
     assert len(results) >= 0, "Span export metrics query failed"
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE or not OTEL_TESTS_ENABLED,
+    reason="Prometheus/OTEL backend not available or OTEL tests disabled",
+)
 def test_otel_collector_metric_export_metrics() -> None:
     """Test that OpenTelemetry Collector exports metric processing metrics."""
     # Wait for metrics to be scraped

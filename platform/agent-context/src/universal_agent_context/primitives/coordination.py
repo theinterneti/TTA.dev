@@ -7,9 +7,10 @@ managing their outputs and ensuring proper synchronization.
 from typing import Any
 
 from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from tta_dev_primitives.observability import InstrumentedPrimitive
 
 
-class AgentCoordinationPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
+class AgentCoordinationPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     """Coordinate multiple agents executing tasks in parallel.
 
     This primitive manages parallel execution of multiple agents, handling their
@@ -62,6 +63,7 @@ class AgentCoordinationPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any
         coordination_strategy: str = "aggregate",
         timeout_seconds: float | None = None,
         require_all_success: bool = True,
+        name: str | None = None,
     ) -> None:
         """Initialize agent coordination primitive.
 
@@ -70,13 +72,18 @@ class AgentCoordinationPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any
             coordination_strategy: "aggregate", "first", or "consensus"
             timeout_seconds: Optional timeout for all agents
             require_all_success: Whether all agents must succeed
+            name: Optional name for the primitive (used for observability)
         """
+        super().__init__(name=name or "AgentCoordination")
+
         self.agent_primitives = agent_primitives
         self.coordination_strategy = coordination_strategy
         self.timeout_seconds = timeout_seconds
         self.require_all_success = require_all_success
 
-    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
+    async def _execute_impl(
+        self, input_data: dict[str, Any], context: WorkflowContext
+    ) -> dict[str, Any]:
         """Execute agent coordination.
 
         Args:
