@@ -1,4 +1,4 @@
-name: PR Validation v2
+name: PR Validation v2 (Parallel Execution)
 
 on:
   pull_request:

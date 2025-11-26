@@ -34,6 +34,7 @@ def mock_sandbox():
     sandbox = AsyncMock()
     sandbox.sandbox_id = "test-sandbox-123"
     sandbox.close = AsyncMock()
+    sandbox.aclose = AsyncMock()
 
     # Mock execution result for run_code method
     mock_result = Mock()
@@ -118,7 +119,7 @@ class TestCodeExecution:
         error_result.error = Mock(value="NameError: name 'undefined_var' is not defined")
         error_result.logs = Mock(stdout=[], stderr=["error log"])
 
-        mock_sandbox.notebook.exec_cell = AsyncMock(return_value=error_result)
+        mock_sandbox.run_code = AsyncMock(return_value=error_result)
 
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -142,7 +143,7 @@ class TestCodeExecution:
             await asyncio.sleep(10)
             return Mock(results=[], error=None, logs=Mock(stdout=[], stderr=[]))
 
-        mock_sandbox.notebook.exec_cell = slow_exec
+        mock_sandbox.run_code = slow_exec
 
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -179,8 +180,10 @@ class TestCodeExecution:
 
             await primitive.execute(input_data, workflow_context)
 
-            # Verify filesystem write was called for env vars
-            mock_sandbox.sandbox.filesystem.write.assert_called_once()
+            # Verify environment variables were set via run_code helper
+            run_calls = [call.args[0] for call in mock_sandbox.run_code.call_args_list]
+            assert any("TEST_VAR" in c for c in run_calls)
+            assert any("os.environ.get('TEST_VAR')" in c for c in run_calls)
 
 
 class TestSessionManagement:
@@ -292,7 +295,7 @@ class TestEdgeCases:
         empty_result.error = None
         empty_result.logs = Mock(stdout=[], stderr=[])
 
-        mock_sandbox.notebook.exec_cell = AsyncMock(return_value=empty_result)
+        mock_sandbox.run_code = AsyncMock(return_value=empty_result)
 
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -337,7 +340,7 @@ class TestIntegrationScenarios:
         fib_result.error = None
         fib_result.logs = Mock(stdout=["55"], stderr=[])
 
-        mock_sandbox.notebook.exec_cell = AsyncMock(return_value=fib_result)
+        mock_sandbox.run_code = AsyncMock(return_value=fib_result)
 
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",

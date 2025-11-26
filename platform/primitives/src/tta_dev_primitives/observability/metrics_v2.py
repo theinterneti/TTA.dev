@@ -111,9 +111,7 @@ class PrimitiveMetrics:
         else:
             logger.warning(
                 "primitive_metrics_disabled",
-                extra={
-                    "reason": "OpenTelemetry not available - metrics will not be recorded"
-                },
+                extra={"reason": "OpenTelemetry not available - metrics will not be recorded"},
             )
 
     def record_execution(

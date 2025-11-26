@@ -196,9 +196,7 @@ async def run_simulation():
             print(f"❌ FAILED: {e!s}")
             print("Full traceback:")
             traceback.print_exc()
-            results.append(
-                {"name": scenario["name"], "success": False, "error": str(e)}
-            )
+            results.append({"name": scenario["name"], "success": False, "error": str(e)})
 
         # Rate limiting
         if i < len(SCENARIOS):

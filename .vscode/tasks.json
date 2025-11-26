@@ -40,7 +40,7 @@
         {
             "label": "Type Check",
             "type": "shell",
-            "command": "uvx pyright packages/",
+            "command": "uvx pyright platform/ apps/",
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -51,7 +51,7 @@
         {
             "label": "Quality Check (All)",
             "type": "shell",
-            "command": "uv run ruff format . && uv run ruff check . --fix && uvx pyright packages/ && uv run pytest -v",
+            "command": "uv run ruff format . && uv run ruff check . --fix && uvx pyright platform/ apps/ && uv run pytest -v",
             "group": "build",
             "presentation": {
                 "reveal": "always",

@@ -24,27 +24,43 @@ dependencies:
 
 # Workflow Scripts
 # Define reusable agent workflows that can be triggered via APM
+# Uses scripts/run_agent.py wrapper to support multiple runtimes (Gemini, Cline, etc.)
 scripts:
-  # Custom prompt mode - accepts dynamic input
+  # Custom prompt mode - accepts dynamic input (Direct gemini call for now as it's interactive/custom)
   custom: "gemini --yolo --model gemini-2.5-flash --output-format json"
 
   # Automated PR Review
-  pr-review: "gemini --yolo -p .github/prompts/pr-review.prompt.md"
+  pr-review: "python scripts/run_agent.py --prompt .github/prompts/pr-review.prompt.md"
+
+  # CI PR Review (with diff context)
+  ci-pr-review: "python scripts/ci_pr_review.py"
 
   # Test Generation
-  generate-tests: "gemini --yolo -p .github/prompts/generate-tests.prompt.md"
-
-  # Documentation Sync
-  sync-docs: "gemini --yolo -p .github/prompts/sync-docs.prompt.md"
+  generate-tests: "python scripts/run_agent.py --prompt .github/prompts/generate-tests.prompt.md"
 
   # Issue Triage
-  triage-issue: "gemini --yolo -p .github/prompts/triage-issue.prompt.md"
+  triage-issue: "python scripts/run_agent.py --prompt .github/prompts/triage-issue.prompt.md"
 
-  # Code Review with Context
-  code-review: "gemini --yolo -p .github/prompts/code-review.prompt.md"
+  # Feature Implementation
+  feature-implementation: "python scripts/run_agent.py --prompt .github/prompts/feature-implementation.prompt.md"
 
-  # Architecture Analysis
-  analyze-architecture: "gemini --yolo -p .github/prompts/architecture-analysis.prompt.md"
+  # Bug Fix
+  bug-fix: "python scripts/run_agent.py --prompt .github/prompts/bug-fix.prompt.md"
+
+  # Test Coverage Improvement
+  test-coverage: "python scripts/run_agent.py --prompt .github/prompts/test-coverage-improvement.prompt.md"
+
+  # Component Promotion
+  component-promotion: "python scripts/run_agent.py --prompt .github/prompts/component-promotion.prompt.md"
+
+  # CI Smoke Test
+  ci-smoke-test: "python scripts/run_agent.py --prompt .github/prompts/ci-smoke-test.prompt.md"
+
+  # Quality Gate Fix
+  quality-gate-fix: "python scripts/run_agent.py --prompt .github/prompts/quality-gate-fix.prompt.md"
+
+  # Augster Axiomatic Workflow
+  augster-axiomatic: "python scripts/run_agent.py --prompt .github/prompts/augster-axiomatic-workflow.prompt.md"
 
 # Configuration
 config:
@@ -93,10 +109,10 @@ quality:
 # Additional context provided to the agent
 context:
   files:
-    - GEMINI.md           # Primary project context
-    - AGENTS.md           # Agent-specific instructions
-    - README.md           # Project overview
-    - PRIMITIVES_CATALOG.md  # Primitive reference
+    - GEMINI.md # Primary project context
+    - AGENTS.md # Agent-specific instructions
+    - README.md # Project overview
+    - PRIMITIVES_CATALOG.md # Primitive reference
 
   # Directories to exclude from context
   exclude:
@@ -119,15 +135,15 @@ permissions:
 
   # Write permissions (for automated changes)
   write:
-    - docs/**/*.md        # Can update documentation
-    - tests/**/*.py       # Can generate tests
+    - docs/**/*.md # Can update documentation
+    - tests/**/*.py # Can generate tests
     # NOTE: Code changes require PR review
 
   # Restricted (agent cannot modify)
   restricted:
-    - .github/workflows/**/*.yml  # Workflows require human review
-    - pyproject.toml              # Dependencies require review
-    - apm.yml                     # Self-modification restricted
+    - .github/workflows/**/*.yml # Workflows require human review
+    - pyproject.toml # Dependencies require review
+    - apm.yml # Self-modification restricted
 
 # Telemetry
 # Track agent performance and usage

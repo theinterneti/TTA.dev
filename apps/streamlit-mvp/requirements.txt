@@ -1,9 +1,0 @@
-# Streamlit dependencies
-streamlit>=1.31.0
-watchdog>=3.0.0  # For auto-reload
-
-# Optional: Real Google OAuth (for production)
-# streamlit-oauth>=0.1.0
-# google-auth>=2.25.0
-# google-auth-oauthlib>=1.2.0
-# google-auth-httplib2>=0.2.0

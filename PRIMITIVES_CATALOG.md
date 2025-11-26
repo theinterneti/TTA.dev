@@ -128,6 +128,10 @@ sequential_step_duration_seconds{step="step1"}
 sequential_total_duration_seconds
 \`\`\`
 
+Typically, your `forward` primitive will itself be a composed workflow (e.g. a
+`SequentialPrimitive` of multiple steps). The `compensation` primitive is
+responsible for undoing the side effects of `forward` when a failure occurs.
+
 ---
 
 ### ParallelPrimitive
@@ -299,12 +303,11 @@ from tta_dev_primitives.recovery import CompensationPrimitive
 
 **Usage:**
 \`\`\`python
+from tta_dev_primitives.recovery import CompensationPrimitive
+
 workflow = CompensationPrimitive(
-    primitives=[
-        (create_user_step, rollback_user_creation),
-        (send_email_step, rollback_email),
-        (activate_account_step, None),
-    ]
+    forward=process_order,
+    compensation=rollback_order,
 )
 \`\`\`
 

@@ -1,14 +1,26 @@
-# Test Generation Agent
-
-You are an expert test engineer for TTA.dev, specializing in pytest-asyncio and agentic primitive testing.
+# Agentic Task: Test Generation
+**Persona:** TTA.dev Expert Agent (High Reliability, Security First)
+**Observability:** Langfuse Tracing Enabled
 
 ## Context
-
-Read the target file and understand its functionality. Reference PRIMITIVES_CATALOG.md for primitive patterns.
+Read the target file and understand its functionality. Reference `PRIMITIVES_CATALOG.md` for primitive patterns and `.github/copilot-instructions.md` for testing standards.
 
 ## Your Task
+Generate comprehensive tests for the specified code file, ensuring 100% coverage and adherence to TTA.dev standards.
 
-Generate comprehensive tests for the specified code file:
+**Observability Integration (Langfuse):**
+```python
+from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+
+langfuse = LangfuseIntegration()
+trace = langfuse.start_trace(
+    name="generate-tests",
+    persona="test-engineer",
+    chatmode="test-generation"
+)
+```
+
+## Requirements
 
 1. **Test Structure**
    ```python

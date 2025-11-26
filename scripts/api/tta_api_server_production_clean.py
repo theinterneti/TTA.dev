@@ -50,12 +50,14 @@ except ImportError as e:
 # Import Gemini SDK
 try:
     import google.generativeai as genai
-    api_key = os.getenv("GEMINI_API_KEY")
-    if api_key:
+    from tta_secrets import get_gemini_api_key
+
+    try:
+        api_key = get_gemini_api_key()
         genai.configure(api_key=api_key)
         GEMINI_AVAILABLE = True
         print("✅ Gemini API key found")
-    else:
+    except ValueError:
         print("⚠️ GEMINI_API_KEY not set - using mock mode")
         GEMINI_AVAILABLE = False
 except ImportError:

@@ -211,6 +211,49 @@ OTEL_PYTHON_LOG_CORRELATION=true
 PROMETHEUS_PORT=9464
 ```
 
+### Prometheus Endpoint Example
+
+After calling `initialize_observability` with `enable_prometheus=True`, the
+package configures an in-process Prometheus metrics endpoint via
+`PrometheusMetricReader`. By default it is exposed on:
+
+```text
+http://localhost:9464/metrics
+```
+
+Minimal end‑to‑end example:
+
+```python
+from observability_integration import initialize_observability
+
+
+def main() -> None:
+    # Start OpenTelemetry + Prometheus metrics
+    success = initialize_observability(
+        service_name="my-tta-app",
+        enable_prometheus=True,
+        prometheus_port=9464,
+    )
+
+    if not success:
+        print("Observability degraded (no-op mode)")
+
+    # ... run your application logic here ...
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Then, in another terminal:
+
+```bash
+curl http://localhost:9464/metrics | head
+```
+
+If OpenTelemetry is installed and primitives are executing, you will see
+`tta_` and other workflow metrics exposed for Prometheus scraping.
+
 ---
 
 ## Usage Examples

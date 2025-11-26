@@ -320,9 +320,7 @@ class TimelineManagerPrimitive(TTAPrimitive[TimelineUpdate, TimelineState]):
 
         for issue in inconsistencies:
             if "non-existent event" in issue:
-                fixes.append(
-                    "Remove invalid causal link or add missing prerequisite event"
-                )
+                fixes.append("Remove invalid causal link or add missing prerequisite event")
             elif "cause must come before effect" in issue:
                 fixes.append("Adjust event timestamp to respect causal ordering")
 

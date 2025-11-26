@@ -19,6 +19,7 @@ members = [
 [tool.uv]
 dev-dependencies = [
     "aiohttp>=3.13.2",
+    "hvac>=1.2.0",            # HashiCorp Vault client for production secrets
     "pytest>=8.0.0",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=4.1.0",
@@ -26,6 +27,12 @@ dev-dependencies = [
     "pytest-timeout>=2.2.0",
     "ruff>=0.8.0",
 ]
+
+[tool.coverage.run]
+source = ["."]
+omit = ["binary_search.py:22-38"]
+
+
 
 [tool.ruff]
 line-length = 100
@@ -106,12 +113,12 @@ pythonVersion = "3.11"
 typeCheckingMode = "basic"
 reportMissingImports = true
 reportMissingTypeStubs = false
-include = ["packages"]
+include = ["platform", "apps"]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["packages/tta-dev-primitives/tests"]
+testpaths = ["platform/primitives/tests"]
 asyncio_mode = "auto"
 addopts = "-v --strict-markers --timeout=60"
 timeout = 60

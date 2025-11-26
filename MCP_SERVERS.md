@@ -198,37 +198,82 @@ Show me the schema for the users table
 
 ---
 
-### 6. GitHub Pull Request - Code Review
+### 6. GitHub - Repository Operations
 
-**Purpose:** PR information and coding agent coordination
+**Purpose:** Comprehensive GitHub repository operations via official GitHub MCP server
 
 **Tools Provided:**
 
-| Tool | Description | Usage |
-|------|-------------|-------|
-| `github-pull-request_activePullRequest` | Get current PR details | PR context |
-| `github-pull-request_openPullRequest` | Get visible PR details | Review workflow |
-| `github-pull-request_copilot-coding-agent` | Async agent task execution | Complex implementations |
+The GitHub MCP server provides extensive repository management capabilities through multiple toolset categories:
+
+- **Default Tools**: Core repository operations (issues, PRs, commits, branches)
+- **Projects Tools**: Project management and planning
+- **Labels Tools**: Repository labeling and categorization  
+- **Orgs Tools**: Organization and team management
+
+*Note: Specific tool names follow the pattern `mcp_github_[category]_[operation]` (e.g., `mcp_github_default_create_issue`)*
 
 **Example Usage:**
 
 ```
-@workspace #tta-pr-review
+# Repository operations
+@workspace #tta-mcp-integration
+Create a new issue in the TTA.dev repository about enhancing error handling
 
-Summarize the changes in this PR
+# Project management  
+@workspace #tta-pr-review
+List all open pull requests and their status
+
+# Organization operations
+@workspace #tta-agent-dev
+Show repository statistics for the TTA.dev org
 ```
 
 **Configuration:**
 
-- Available in `#tta-pr-review` toolset
-- Automatically discovers PRs
+- **Access Method**: Via Hypertool (primary) and standalone MCP server
+- **Authentication**: GitHub Personal Access Token via `GITHUB_TOKEN` environment variable
+- **Toolsets**: `"default,projects,labels,orgs"` (comprehensive coverage)
+- **Location**: `.hypertool/mcp_servers.json` and `.mcp.json` (Hypertool loader)
+
+**Authentication Setup:**
+
+1. **Create GitHub Personal Access Token:**
+   - Go to GitHub → Settings → Developer settings → Personal access tokens
+   - Generate new token with required scopes (repo, org, project access)
+   - Copy token value
+
+2. **Set Environment Variable:**
+   ```bash
+   export GITHUB_TOKEN="your-personal-access-token-here"
+   ```
+
+3. **Verify Access:**
+   ```bash
+   # Test via Hypertool
+   @workspace #tta-mcp-integration
+   List repositories in the TTA.dev organization
+   ```
 
 **Use Cases:**
 
-- PR reviews
-- Change analysis
-- Async agent tasks
-- Context gathering
+- Repository management (create issues, PRs, manage branches)
+- Project coordination (project boards, milestones, labels)
+- Organization administration (teams, permissions, settings)
+- Development workflows (code review automation, CI/CD integration)
+- Documentation generation (repository stats, contribution analysis)
+- Issue tracking and triage automation
+
+**TTA.dev Integration:**
+
+- Automate project management workflows
+- Generate project reports and statistics
+- Coordinate cross-repository development
+- Create systematic documentation from repository data
+- Monitor development metrics and trends
+
+**Repository**: Official GitHub MCP Server (Docker: `ghcr.io/github/github-mcp-server`)
+
 
 ---
 

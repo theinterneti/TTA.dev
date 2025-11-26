@@ -22,6 +22,7 @@ members = [
 [manifest.dependency-groups]
 dev = [
     { name = "aiohttp", specifier = ">=3.13.2" },
+    { name = "hvac", specifier = ">=1.2.0" },
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "pytest-cov", specifier = ">=4.1.0" },
@@ -1187,6 +1188,18 @@ wheels = [
 [package.optional-dependencies]
 http2 = [
     { name = "h2" },
+]
+
+[[package]]
+name = "hvac"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/57/b46c397fb3842cfb02a44609aa834c887f38dd75f290c2fc5a34da4b2fee/hvac-2.4.0.tar.gz", hash = "sha256:e0056ad9064e7923e874e6769015b032580b639e29246f5ab1044f7959c1c7e0", size = 332543, upload-time = "2025-10-30T12:57:47.512Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/55/33/71e45a6bd6875f44a26f99da31c63b6840123e88bedf2c0b1ce429b8be12/hvac-2.4.0-py3-none-any.whl", hash = "sha256:008db5efd8c2f77bd37d2368ea5f713edceae1c65f11fd608393179478649e0f", size = 155921, upload-time = "2025-10-30T12:57:46.253Z" },
 ]
 
 [[package]]
@@ -2767,14 +2780,14 @@ requires-dist = [
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8.0" },
     { name = "ollama", marker = "extra == 'integrations'", specifier = ">=0.1.0" },
     { name = "openai", marker = "extra == 'integrations'", specifier = ">=1.0.0" },
-    { name = "opentelemetry-api", specifier = ">=1.24.0" },
-    { name = "opentelemetry-api", marker = "extra == 'apm'", specifier = ">=1.20.0" },
-    { name = "opentelemetry-exporter-otlp", marker = "extra == 'tracing'", specifier = ">=1.24.0" },
-    { name = "opentelemetry-exporter-prometheus", marker = "extra == 'apm'", specifier = ">=0.41b0" },
-    { name = "opentelemetry-instrumentation", marker = "extra == 'apm'", specifier = ">=0.41b0" },
-    { name = "opentelemetry-instrumentation", marker = "extra == 'tracing'", specifier = ">=0.45b0" },
-    { name = "opentelemetry-sdk", specifier = ">=1.24.0" },
-    { name = "opentelemetry-sdk", marker = "extra == 'apm'", specifier = ">=1.20.0" },
+    { name = "opentelemetry-api", specifier = ">=1.38.0" },
+    { name = "opentelemetry-api", marker = "extra == 'apm'", specifier = ">=1.38.0" },
+    { name = "opentelemetry-exporter-otlp", marker = "extra == 'tracing'", specifier = ">=1.38.0" },
+    { name = "opentelemetry-exporter-prometheus", marker = "extra == 'apm'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation", marker = "extra == 'apm'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-instrumentation", marker = "extra == 'tracing'", specifier = ">=0.59b0" },
+    { name = "opentelemetry-sdk", specifier = ">=1.38.0" },
+    { name = "opentelemetry-sdk", marker = "extra == 'apm'", specifier = ">=1.38.0" },
     { name = "pydantic", specifier = ">=2.6.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },

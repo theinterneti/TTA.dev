@@ -14,6 +14,7 @@ with language-appropriate tools:
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -31,6 +32,12 @@ async def check_tests_pass(project_path: Path, context: WorkflowContext) -> bool
     Returns:
         True if pytest runs successfully
     """
+    # Avoid spawning a nested pytest subprocess when running inside tests or
+    # when explicitly disabled via environment variable. This prevents
+    # recursion/timeouts when StageManager is exercised from within pytest.
+    if os.getenv("TTA_LIFECYCLE_SKIP_TEST_SUBPROCESS") == "1":
+        return True
+
     try:
         result = subprocess.run(
             ["uv", "run", "pytest", "-q"],

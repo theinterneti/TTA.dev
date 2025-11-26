@@ -1,8 +1,9 @@
 import pytest
 
-from tta_dev_primitives.recovery.fallback import FallbackPrimitive
 from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.recovery.fallback import FallbackPrimitive
 from tta_dev_primitives.testing import MockPrimitive
+
 
 @pytest.mark.asyncio
 async def test_fallback_primary_succeeds():
@@ -19,6 +20,7 @@ async def test_fallback_primary_succeeds():
     assert primary.call_count == 1
     assert fallback.call_count == 0
 
+
 @pytest.mark.asyncio
 async def test_fallback_uses_fallback_on_primary_failure():
     """Tests that the fallback primitive is executed when the primary fails."""
@@ -34,6 +36,7 @@ async def test_fallback_uses_fallback_on_primary_failure():
     assert primary.call_count == 1
     assert fallback.call_count == 1
 
+
 @pytest.mark.asyncio
 async def test_fallback_both_fail():
     """Tests that an exception is raised when both primary and fallback primitives fail."""
@@ -48,6 +51,7 @@ async def test_fallback_both_fail():
 
     assert primary.call_count == 1
     assert fallback.call_count == 1
+
 
 @pytest.mark.asyncio
 async def test_fallback_context_and_data_passed_correctly():

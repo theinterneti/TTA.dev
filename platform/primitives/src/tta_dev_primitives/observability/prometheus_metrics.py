@@ -111,9 +111,7 @@ class PrometheusMetrics:
         if not self._enabled:
             return
 
-        self._workflow_executions.labels(
-            workflow_name=workflow_name, status=status, job=job
-        ).inc()
+        self._workflow_executions.labels(workflow_name=workflow_name, status=status, job=job).inc()
 
     def record_primitive_execution(
         self,
@@ -190,9 +188,7 @@ class PrometheusMetrics:
         if not self._enabled:
             return
 
-        self._cache_hits.labels(
-            primitive_name=primitive_name, cache_type=cache_type, job=job
-        ).inc()
+        self._cache_hits.labels(primitive_name=primitive_name, cache_type=cache_type, job=job).inc()
 
     def record_cache_miss(
         self, primitive_name: str, cache_type: str = "lru", job: str = "tta-primitives"

@@ -88,9 +88,7 @@ class TestPhase2Examples:
 
         # Check for complete service architecture example
         service_file = examples_dir / "complete_service_architecture.md"
-        assert service_file.exists(), (
-            "Complete service architecture example should exist"
-        )
+        assert service_file.exists(), "Complete service architecture example should exist"
 
         content = service_file.read_text()
         assert "Layered approach" in content
@@ -98,9 +96,7 @@ class TestPhase2Examples:
 
         # Check for agent coordination patterns example
         coordination_file = examples_dir / "agent_coordination_patterns.md"
-        assert coordination_file.exists(), (
-            "Agent coordination patterns example should exist"
-        )
+        assert coordination_file.exists(), "Agent coordination patterns example should exist"
 
         content = coordination_file.read_text()
         assert "Research-Analysis-Writing Pipeline" in content
@@ -271,16 +267,12 @@ async def api_call():
 
     def test_template_provision(self):
         """Test that code templates are provided"""
-        result = asyncio.run(
-            self.service.get_primitive_recommendations("async def test(): pass")
-        )
+        result = asyncio.run(self.service.get_primitive_recommendations("async def test(): pass"))
 
         assert result["success"] is True
 
         for rec in result["recommendations"]:
-            assert rec["code_template"], (
-                "Each recommendation should include a code template"
-            )
+            assert rec["code_template"], "Each recommendation should include a code template"
             assert len(rec["code_template"]) > 50, "Templates should be substantial"
 
     def test_related_primitives(self):
@@ -301,9 +293,7 @@ async def api_call_with_timeout():
         for rec in result["recommendations"]:
             if rec["primitive_name"] == "TimeoutPrimitive":
                 # Should suggest related primitives
-                assert len(rec["related_primitives"]) > 0, (
-                    "Should suggest related primitives"
-                )
+                assert len(rec["related_primitives"]) > 0, "Should suggest related primitives"
                 assert (
                     "RetryPrimitive" in rec["related_primitives"]
                     or "FallbackPrimitive" in rec["related_primitives"]

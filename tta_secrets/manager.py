@@ -6,13 +6,20 @@ It follows 2024-2025 best practices including:
 - Environment variable validation
 - API key format validation
 - Secure caching
+- HashiCorp Vault integration
 - No secret logging
 """
 
 import logging
 import os
-from functools import lru_cache
 from typing import Any
+
+try:
+    from .vault_client import VaultSecretsClient
+
+    VAULT_AVAILABLE = True
+except ImportError:
+    VAULT_AVAILABLE = False
 
 
 class SecretsManager:
@@ -23,17 +30,42 @@ class SecretsManager:
     - Validation of required secrets
     - API key format validation
     - Secure caching of secrets
+    - HashiCorp Vault integration for production
     - Proper error handling
     - No secret logging (security best practice)
+
+    In production environments (ENVIRONMENT=production), this will attempt
+    to use HashiCorp Vault if available, falling back to environment variables.
     """
 
-    def __init__(self):
+    def __init__(self, enable_vault: bool | None = None):
         self._logger = logging.getLogger(__name__)
         self._secrets_cache: dict[str, str] = {}
         self._secrets_loaded = False
+        self._vault_client: VaultSecretsClient | None = None
+
+        # Determine if Vault should be enabled
+        self._vault_enabled = enable_vault if enable_vault is not None else self._should_use_vault()
+
+        # Initialize Vault client if needed
+        if self._vault_enabled and VAULT_AVAILABLE:
+            try:
+                self._vault_client = VaultSecretsClient()
+                self._logger.info("Vault client initialized for production secrets")
+            except Exception as e:
+                self._logger.warning(
+                    f"Failed to initialize Vault client, falling back to environment: {e}"
+                )
+                self._vault_enabled = False
+
+    def _should_use_vault(self) -> bool:
+        """Determine if Vault should be used based on environment and availability."""
+        # Use Vault in production if available
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        return environment == "production" and VAULT_AVAILABLE
 
     def _load_secrets(self) -> None:
-        """Load and validate all required secrets from environment"""
+        """Load and validate all required secrets from environment or Vault"""
         if self._secrets_loaded:
             return
 
@@ -48,7 +80,7 @@ class SecretsManager:
         invalid_secrets = []
 
         for secret_name in required_secrets:
-            value = os.getenv(secret_name)
+            value = self._get_secret_value(secret_name)
             if not value:
                 missing_secrets.append(secret_name)
                 continue
@@ -61,13 +93,51 @@ class SecretsManager:
             self._secrets_cache[secret_name] = value
 
         if missing_secrets:
-            raise ValueError(f"Required secrets not found: {missing_secrets}")
+            source = "Vault" if self._vault_enabled else "environment"
+            raise ValueError(f"Required secrets not found in {source}: {missing_secrets}")
 
         if invalid_secrets:
             raise ValueError(f"Invalid secret formats: {invalid_secrets}")
 
         self._secrets_loaded = True
-        self._logger.info("All required secrets validated successfully")
+        source = "Vault" if self._vault_enabled else "environment"
+        self._logger.info(f"All required secrets validated from {source}")
+
+    def _get_secret_value(self, key: str) -> str | None:
+        """
+        Get secret value from Vault first, then environment fallback.
+
+        Args:
+            key: Secret/environment variable name
+
+        Returns:
+            The secret value or None if not found
+        """
+        # Try Vault first if enabled
+        if self._vault_enabled and self._vault_client:
+            # Map environment variable names to Vault paths
+            vault_path_map = {
+                "GEMINI_API_KEY": ("api-keys/gemini", "GEMINI_API_KEY"),
+                "GITHUB_PERSONAL_ACCESS_TOKEN": (
+                    "api-keys/github",
+                    "GITHUB_PERSONAL_ACCESS_TOKEN",
+                ),
+                "E2B_API_KEY": ("api-keys/e2b", "E2B_API_KEY"),
+                "N8N_API_KEY": ("api-keys/n8n", "N8N_API_KEY"),
+            }
+
+            if key in vault_path_map:
+                vault_path, vault_key = vault_path_map[key]
+                try:
+                    value = self._vault_client.get_secret_value(vault_path, vault_key)
+                    self._logger.debug(f"Retrieved {key} from Vault")
+                    return value
+                except (ValueError, RuntimeError):
+                    # Vault failed, fall through to environment
+                    self._logger.debug(f"Vault retrieval failed for {key}, trying environment")
+
+        # Environment fallback
+        return os.getenv(key)
 
     def _validate_secret_format(self, secret_name: str, value: str) -> bool:
         """
@@ -197,9 +267,8 @@ class SecretsManager:
         self._secrets_loaded = False
         self._logger.info("Secrets cache cleared")
 
-    @lru_cache(maxsize=128)
     def _get_cached_secret(self, key: str) -> str:
-        """Get secret with LRU caching (private method)"""
+        """Get secret (caching handled at higher level)"""
         return self.get_secret(key)
 
 
