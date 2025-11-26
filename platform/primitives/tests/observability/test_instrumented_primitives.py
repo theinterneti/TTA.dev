@@ -1,6 +1,9 @@
 """Tests for instrumented workflow primitives."""
 
+from unittest.mock import patch
+
 import pytest
+from opentelemetry.trace import INVALID_SPAN
 
 from tta_dev_primitives.core.base import WorkflowContext
 from tta_dev_primitives.core.parallel import ParallelPrimitive
@@ -150,7 +153,9 @@ async def test_sequential_primitive_trace_propagation() -> None:
         span_id="0123456789abcdef",
     )
 
-    result = await workflow.execute({"input": "data"}, context)
+    # Mock get_current_span to return INVALID_SPAN so inject_trace_context doesn't overwrite our context
+    with patch("tta_dev_primitives.observability.context_propagation.trace.get_current_span", return_value=INVALID_SPAN):
+        result = await workflow.execute({"input": "data"}, context)
 
     # Trace context should be preserved
     assert context.trace_id == "0123456789abcdef0123456789abcdef"
@@ -187,7 +192,6 @@ async def test_parallel_primitive_instrumentation() -> None:
 @pytest.mark.asyncio
 async def test_parallel_primitive_child_contexts() -> None:
     """Test that ParallelPrimitive creates child contexts for branches."""
-
     class ContextCapturePrimitive(InstrumentedPrimitive[dict, dict]):
         """Primitive that captures its context."""
 
@@ -210,7 +214,9 @@ async def test_parallel_primitive_child_contexts() -> None:
         span_id="0123456789abcdef",
     )
 
-    await workflow.execute({"input": "data"}, parent_context)
+    # Mock get_current_span to return INVALID_SPAN so inject_trace_context doesn't overwrite our context
+    with patch("tta_dev_primitives.observability.context_propagation.trace.get_current_span", return_value=INVALID_SPAN):
+        await workflow.execute({"input": "data"}, parent_context)
 
     # Both branches should have captured their contexts
     assert branch1.captured_context is not None
