@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .models import Span, SpanStatus, Trace, TraceStatus
-from .storage import TraceStorage
+
+if TYPE_CHECKING:
+    from .storage import TraceStorage
 
 logger = logging.getLogger(__name__)
 

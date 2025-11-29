@@ -52,7 +52,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Run tests with coverage
+      # Primary platform test job: runs ALL production package tests via unified root pytest config
+      # This is the authoritative test pass for TTA.dev
+      - name: Run platform tests with coverage
         run: uv run pytest -v --tb=short -m "not integration and not slow and not external" --cov=packages --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
@@ -69,3 +71,5 @@ jobs:
       - name: Test package installation
         run: |
           uv pip install -e packages/tta-dev-primitives/
+          uv pip install -e packages/tta-observability-integration/
+          uv pip install -e packages/universal-agent-context/

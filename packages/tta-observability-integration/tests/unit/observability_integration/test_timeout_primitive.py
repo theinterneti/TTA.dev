@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.observability_integration.primitives.timeout import (
+from observability_integration.primitives.timeout import (
     TimeoutError,
     TimeoutPrimitive,
 )

@@ -40,26 +40,6 @@ def start_service(
 
         os.environ["TTA_UI_DB_PATH"] = db_path
 
-    print(f"""
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║            🔍 TTA Observability UI                          ║
-║                                                              ║
-║  Lightweight, LangSmith-inspired observability              ║
-║  for TTA.dev workflows                                      ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-
-📍 Service URL:    http://{host}:{port}
-📊 API Docs:       http://{host}:{port}/docs
-🔌 OTLP Endpoint:  http://{host}:{port}/v1/traces
-💬 WebSocket:      ws://{host}:{port}/ws/traces
-
-📝 Database:       {db_path or "tta_traces.db"}
-📈 Log Level:      {log_level.upper()}
-
-Press Ctrl+C to stop the service
-""")
 
     # Start uvicorn server
     uvicorn.run(
@@ -130,7 +110,7 @@ Examples:
     )
 
     # Version command
-    version_parser = subparsers.add_parser("version", help="Show version information")
+    subparsers.add_parser("version", help="Show version information")
 
     args = parser.parse_args()
 
@@ -143,9 +123,8 @@ Examples:
             reload=args.reload,
         )
     elif args.command == "version":
-        from . import __version__
+        pass
 
-        print(f"TTA Observability UI v{__version__}")
     else:
         parser.print_help()
         sys.exit(1)

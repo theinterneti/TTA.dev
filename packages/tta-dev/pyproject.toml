@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tta-dev"
+version = "0.1.0"
+description = "TTA.dev Platform - Unified API for composable AI workflow primitives"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "TTA.dev Team" }]
+keywords = [
+    "ai",
+    "agents",
+    "workflow",
+    "primitives",
+    "observability",
+    "opentelemetry",
+    "llm",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+# Core dependency: primitives are always required
+dependencies = [
+    "tta-dev-primitives",
+]
+
+[project.optional-dependencies]
+# Observability layer (OpenTelemetry, Prometheus, Redis)
+observability = [
+    "tta-observability-integration",
+]
+# Agent context management for multi-agent workflows
+context = [
+    "universal-agent-context",
+]
+# Full platform install: all production packages
+all = [
+    "tta-dev-primitives",
+    "tta-observability-integration",
+    "universal-agent-context",
+]
+
+[project.urls]
+Homepage = "https://github.com/theinterneti/TTA.dev"
+Documentation = "https://github.com/theinterneti/TTA.dev#readme"
+Repository = "https://github.com/theinterneti/TTA.dev.git"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tta_dev"]
+
+[tool.uv.sources]
+tta-dev-primitives = { workspace = true }
+tta-observability-integration = { workspace = true }
+universal-agent-context = { workspace = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+

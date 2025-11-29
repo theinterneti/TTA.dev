@@ -6,11 +6,15 @@
 # Note: keploy-framework, python-pathway, and js-dev-primitives are under review
 # and not included in workspace until architectural decisions are made
 members = [
+    # Platform façade (unified API)
+    "packages/tta-dev",
+    # Core production packages
     "packages/tta-dev-primitives",
-    "packages/tta-dev-integrations",
     "packages/tta-observability-integration",
-    "packages/tta-observability-ui",
     "packages/universal-agent-context",
+    # Additional packages
+    "packages/tta-dev-integrations",
+    "packages/tta-observability-ui",
     "packages/tta-documentation-primitives",
     "packages/tta-kb-automation",
     "packages/tta-agent-coordination",
@@ -111,15 +115,21 @@ exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["packages/tta-dev-primitives/tests"]
+# Platform-wide test discovery: all production packages
+testpaths = [
+    "packages/tta-dev/tests",
+    "packages/tta-dev-primitives/tests",
+    "packages/tta-observability-integration/tests",
+    "packages/universal-agent-context/tests",
+]
 asyncio_mode = "auto"
-addopts = "-v --strict-markers --timeout=60"
+addopts = "-v --strict-markers --timeout=60 -m 'not integration and not slow and not external'"
 timeout = 60
 timeout_method = "thread"
 markers = [
     "asyncio: mark test as async",
-    "integration: mark test as integration test",
+    "integration: mark test as integration test (skipped by default, run with -m integration)",
     "unit: mark test as unit test",
-    "slow: mark test as slow running",
-    "external: mark test as requiring external services",
+    "slow: mark test as slow running (skipped by default, run with -m slow)",
+    "external: mark test as requiring external services (skipped by default)",
 ]

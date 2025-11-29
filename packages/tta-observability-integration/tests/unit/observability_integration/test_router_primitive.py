@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.observability_integration.primitives.router import RouterPrimitive
+from observability_integration.primitives.router import RouterPrimitive
 
 
 # Mock WorkflowPrimitive for testing
@@ -168,7 +168,7 @@ class TestGracefulDegradation:
     async def test_works_without_metrics(self, fast_primitive, premium_primitive, simple_router_fn):
         """Test router works without metrics infrastructure."""
         with patch(
-            "src.observability_integration.primitives.router.get_meter",
+            "observability_integration.primitives.router.get_meter",
             return_value=None,
         ):
             routes = {"fast": fast_primitive, "premium": premium_primitive}

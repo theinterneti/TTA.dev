@@ -129,6 +129,7 @@ Each package has detailed agent instructions. **Always read the package-specific
 
 | Package | Status | AGENTS.md | Purpose |
 |---------|--------|-----------|---------|
+| **tta-dev** | ✅ Active | [`packages/tta-dev/README.md`](packages/tta-dev/README.md) | **Unified platform façade** - recommended entry point for TTA.dev |
 | **tta-dev-primitives** | ✅ Active | [`packages/tta-dev-primitives/AGENTS.md`](packages/tta-dev-primitives/AGENTS.md) | Core workflow primitives (Sequential, Parallel, Router, Retry, Fallback, Cache, etc.) |
 | **tta-observability-integration** | ✅ Active | [`packages/tta-observability-integration/README.md`](packages/tta-observability-integration/README.md) | OpenTelemetry tracing, metrics, logging |
 | **universal-agent-context** | ✅ Active | [`packages/universal-agent-context/AGENTS.md`](packages/universal-agent-context/AGENTS.md) | Agent context management and orchestration |
@@ -141,7 +142,7 @@ Each package has detailed agent instructions. **Always read the package-specific
 | **python-pathway** | ⚠️ Under Review | Minimal | No clear use case documented, not in workspace. **Decision needed by Nov 7, 2025** |
 | **js-dev-primitives** | 🚧 Placeholder | None | Directory structure only, no implementation. **Decision needed by Nov 14, 2025** |
 
-**Note:** Only the 3 production packages above are included in the uv workspace and fully supported. Packages under review require architectural decisions before use.
+**Note:** The 4 production packages above are included in the uv workspace and fully supported. Packages under review require architectural decisions before use.
 
 ---
 
@@ -504,6 +505,26 @@ open http://localhost:8765
 ---
 
 ## 🧪 Testing Patterns
+
+### Running Tests
+
+The root pytest configuration discovers tests from **all production packages**.
+Use these commands:
+
+```bash
+# Primary: Run all platform tests (all production packages)
+uv run pytest -v
+
+# Run with coverage (as in CI)
+uv run pytest --cov=packages --cov-report=html
+
+# Package-specific tests (for focused local development)
+uv run pytest -v packages/tta-dev-primitives/tests/
+uv run pytest -v packages/tta-observability-integration/tests/
+uv run pytest -v packages/universal-agent-context/tests/
+```
+
+### Using MockPrimitive
 
 Use `MockPrimitive` for testing workflows:
 

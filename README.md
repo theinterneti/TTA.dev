@@ -5,6 +5,7 @@
 [![CI](https://github.com/theinterneti/TTA.dev/workflows/CI/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
 [![Quality](https://github.com/theinterneti/TTA.dev/workflows/Quality%20Checks/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
 [![TODO Compliance](https://github.com/theinterneti/TTA.dev/workflows/TODO%20Compliance%20Validation/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
+[![Codecov](https://codecov.io/gh/theinterneti/TTA.dev/branch/main/graph/badge.svg)](https://codecov.io/gh/theinterneti/TTA.dev)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Type checked: Pyright](https://img.shields.io/badge/type%20checked-pyright-blue.svg)](https://github.com/microsoft/pyright)
@@ -26,7 +27,49 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 
 ## 📦 Production Packages
 
-TTA.dev is a Python monorepo with 3 production packages:
+TTA.dev is a Python monorepo with a **unified platform package** and 3 focused packages:
+
+### 🎯 `tta-dev` (Recommended Entry Point)
+
+**Unified API for TTA.dev** - the recommended way to use TTA.dev. Re-exports the most commonly used primitives with optional extras for observability and multi-agent context.
+
+**Installation:**
+```bash
+# Core primitives only
+uv add tta-dev
+
+# With observability (OpenTelemetry, Prometheus)
+uv add tta-dev[observability]
+
+# With agent context (multi-agent workflows)
+uv add tta-dev[context]
+
+# Full platform (all packages)
+uv add tta-dev[all]
+```
+
+**Quick Start:**
+```python
+from tta_dev import (
+    WorkflowContext,
+    SequentialPrimitive,
+    ParallelPrimitive,
+    RetryPrimitive,
+    CachePrimitive,
+)
+
+# Build composable workflows
+workflow = step1 >> step2 >> step3  # Sequential
+parallel = branch1 | branch2        # Parallel
+
+# Execute with context
+context = WorkflowContext(workflow_id="my-workflow")
+result = await workflow.execute(input_data, context)
+```
+
+[📚 Full Documentation](packages/tta-dev/README.md)
+
+---
 
 ### 1. `tta-dev-primitives`
 
@@ -130,17 +173,21 @@ For a comprehensive quick start guide, including installation and your first wor
 
 ## 🧪 Testing
 
-All packages maintain **100% test coverage** with comprehensive test suites.
+Tests and coverage are enforced in CI via `pytest` + Codecov across the
+TTA.dev workspace. The root pytest configuration discovers tests from **all
+production packages**.
 
 ```bash
-# Run all tests
+# Primary: Run all platform tests (all production packages)
 uv run pytest -v
 
-# Run with coverage
+# Run with coverage (as in CI)
 uv run pytest --cov=packages --cov-report=html
 
-# Run specific package tests
-uv run pytest packages/tta-dev-primitives/tests/ -v
+# Package-specific tests (for focused local development)
+uv run pytest -v packages/tta-dev-primitives/tests/
+uv run pytest -v packages/tta-observability-integration/tests/
+uv run pytest -v packages/universal-agent-context/tests/
 ```
 
 ---
@@ -343,11 +390,14 @@ All PRs automatically run:
 
 ### Current Release: v0.1.0 (Initial)
 
-| Package | Version | Tests | Coverage | Status |
-|---------|---------|-------|----------|--------|
-| tta-dev-primitives | 0.1.0 | 12/12 ✅ | 100% | 🟢 Stable |
-| tta-observability-integration | 0.1.0 | TBD | TBD | 🟢 Stable |
-| universal-agent-context | 0.1.0 | TBD | TBD | 🟢 Stable |
+Live test and coverage status are available via the CI and Codecov badges
+at the top of this README. At a high level:
+
+| Package | Version | Tests (CI) | Coverage (Codecov) | Status |
+|---------|---------|-----------|---------------------|--------|
+| tta-dev-primitives | 0.1.0 | ✅ (unit + integration) | See Codecov | 🟢 Stable |
+| tta-observability-integration | 0.1.0 | ✅ (unit) | See Codecov | 🟢 Stable |
+| universal-agent-context | 0.1.0 | ✅ (unit) | See Codecov | 🟢 Stable |
 
 ### Roadmap
 

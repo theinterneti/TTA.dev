@@ -5,10 +5,8 @@ These workflows provide complete automation pipelines for common tasks.
 
 from tta_kb_automation.core.code_primitives import (
     AnalyzeCodeStructure,
-    ExtractTODOs,
     ScanCodebase,
 )
-from tta_kb_automation.core.intelligence_primitives import SuggestKBLinks
 from tta_kb_automation.tools.todo_sync import TODOSync
 
 
@@ -52,12 +50,17 @@ async def build_cross_references(kb_path: str, code_path: str) -> dict:
     Returns:
         Cross-reference mappings and suggestions
     """
+    from tta_dev_primitives import WorkflowContext
+
+    # Create workflow context for primitive execution
+    context = WorkflowContext()
+
     scanner = ScanCodebase()
-    code_data = await scanner.execute({"root_path": code_path})
+    code_data = await scanner.execute({"root_path": code_path}, context)
 
     analyzer = AnalyzeCodeStructure()
     await analyzer.execute(
-        {"files": code_data["files"], "include_dependencies": True}
+        {"files": code_data["files"], "include_dependencies": True}, context
     )
 
     # TODO: Integrate SuggestKBLinks to find relevant KB pages

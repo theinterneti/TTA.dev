@@ -214,25 +214,29 @@ class BenchmarkSuite:
         start_time = time.time()
 
         try:
-            # Execute task
-            result = await learner.execute(
-                ACEInput(
-                    task=task.task,
-                    language=task.language,
-                    max_iterations=task.max_iterations,
-                    context=task.description,
-                ),
-                context,
-            )
+            # Execute task - ACEInput is a TypedDict with only 'task' required
+            # Other fields are provided via dict merge with optional fields
+            ace_input: ACEInput = {
+                "task": task.task,
+            }
+            # Add optional fields as dict (TypedDict doesn't support extra keys directly)
+            input_data: dict[str, Any] = {
+                **ace_input,
+                "language": task.language,
+                "max_iterations": task.max_iterations,
+                "context": task.description,
+            }
+            result = await learner.execute(input_data, context)  # type: ignore[arg-type]
 
             execution_time = time.time() - start_time
 
-            # Validate result
+            # Validate result - handle None case with default empty string
+            code_generated = result.get("code_generated") or ""
             patterns_found = self._check_patterns(
-                result.get("code_generated", ""), task.expected_patterns
+                code_generated, task.expected_patterns
             )
             validation_passed = self._validate_criteria(
-                result.get("code_generated", ""), task.validation_criteria
+                code_generated, task.validation_criteria
             )
 
             return BenchmarkResult(
@@ -345,7 +349,9 @@ class BenchmarkSuite:
         # By difficulty
         print("\n🎯 Performance by Difficulty:")
         for difficulty in DifficultyLevel:
-            diff_results = [r for r in results if r.metadata.get("difficulty") == difficulty.value]
+            diff_results = [
+                r for r in results if r.metadata.get("difficulty") == difficulty.value
+            ]
             if diff_results:
                 diff_success = sum(1 for r in diff_results if r.success)
                 print(

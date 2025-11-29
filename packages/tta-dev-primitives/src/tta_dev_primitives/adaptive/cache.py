@@ -17,7 +17,9 @@ TInput = TypeVar("TInput")
 TOutput = TypeVar("TOutput")
 
 
-class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput, TOutput]):
+class AdaptiveCachePrimitive(
+    AdaptivePrimitive[TInput, TOutput], Generic[TInput, TOutput]
+):
     """
     Cache primitive that learns optimal TTL and size parameters.
 
@@ -186,7 +188,9 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
                 )
 
                 # Update strategy metrics
-                strategy.metrics.update(success=True, latency=latency, context_key=context_key)
+                strategy.metrics.update(
+                    success=True, latency=latency, context_key=context_key
+                )
 
                 return cached_value
             else:
@@ -215,7 +219,9 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
         execution_latency = time.time() - start_time
 
         # Update strategy metrics (miss counts as success if execution worked)
-        strategy.metrics.update(success=True, latency=execution_latency, context_key=context_key)
+        strategy.metrics.update(
+            success=True, latency=execution_latency, context_key=context_key
+        )
 
         # Store in cache (with eviction if needed)
         if len(self._cache) >= max_cache_size:
@@ -262,7 +268,9 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
             return None
 
         hit_rate = self._get_hit_rate(context_key)
-        avg_hit_age = metrics["total_hit_age"] / metrics["hits"] if metrics["hits"] > 0 else 0.0
+        avg_hit_age = (
+            metrics["total_hit_age"] / metrics["hits"] if metrics["hits"] > 0 else 0.0
+        )
 
         # Current strategy TTL
         context_key = self.context_extractor(input_data, context)
@@ -344,14 +352,18 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
             "total_requests": total_requests,
             "total_hits": total_hits,
             "total_misses": total_misses,
-            "overall_hit_rate": total_hits / total_requests if total_requests > 0 else 0.0,
+            "overall_hit_rate": total_hits / total_requests
+            if total_requests > 0
+            else 0.0,
             "contexts": {
                 context_key: {
                     "hits": metrics["hits"],
                     "misses": metrics["misses"],
                     "hit_rate": self._get_hit_rate(context_key),
                     "avg_hit_age": (
-                        metrics["total_hit_age"] / metrics["hits"] if metrics["hits"] > 0 else 0.0
+                        metrics["total_hit_age"] / metrics["hits"]
+                        if metrics["hits"] > 0
+                        else 0.0
                     ),
                     "executions": metrics["executions"],
                 }
@@ -386,17 +398,23 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
         if strategy is None:
             strategy = self.baseline_strategy
 
+        # baseline_strategy is always set in __init__
+        assert strategy is not None, "Strategy must not be None"
         ttl_seconds = strategy.parameters.get("ttl_seconds", 3600.0)
         now = time.time()
 
         expired_keys = [
-            key for key, (_, timestamp, _) in self._cache.items() if now - timestamp >= ttl_seconds
+            key
+            for key, (_, timestamp, _) in self._cache.items()
+            if now - timestamp >= ttl_seconds
         ]
 
         for key in expired_keys:
             del self._cache[key]
 
         if expired_keys:
-            logger.info("adaptive_cache_eviction", count=len(expired_keys), ttl=ttl_seconds)
+            logger.info(
+                "adaptive_cache_eviction", count=len(expired_keys), ttl=ttl_seconds
+            )
 
         return len(expired_keys)

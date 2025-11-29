@@ -51,33 +51,43 @@ from tta_dev_integrations.llm import (
 try:
     from tta_dev_integrations.database.supabase_primitive import SupabasePrimitive
 except ImportError:
-    SupabasePrimitive = None  # type: ignore
+    SupabasePrimitive = None  # type: ignore[assignment]
 
 try:
-    from tta_dev_integrations.database.postgresql_primitive import PostgreSQLPrimitive
+    from tta_dev_integrations.database.postgresql_primitive import (
+        PostgreSQLPrimitive,  # pyright: ignore[reportAttributeAccessIssue]
+    )
 except ImportError:
-    PostgreSQLPrimitive = None  # type: ignore
+    PostgreSQLPrimitive = None  # type: ignore[assignment]
 
 try:
-    from tta_dev_integrations.database.sqlite_primitive import SQLitePrimitive
+    from tta_dev_integrations.database.sqlite_primitive import (
+        SQLitePrimitive,  # pyright: ignore[reportAttributeAccessIssue]
+    )
 except ImportError:
-    SQLitePrimitive = None  # type: ignore
+    SQLitePrimitive = None  # type: ignore[assignment]
 
 # Auth integrations
 try:
-    from tta_dev_integrations.auth.clerk_primitive import ClerkAuthPrimitive
+    from tta_dev_integrations.auth.clerk_primitive import (
+        ClerkAuthPrimitive,  # pyright: ignore[reportAttributeAccessIssue]
+    )
 except ImportError:
-    ClerkAuthPrimitive = None  # type: ignore
+    ClerkAuthPrimitive = None  # type: ignore[assignment]
 
 try:
-    from tta_dev_integrations.auth.auth0_primitive import Auth0Primitive
+    from tta_dev_integrations.auth.auth0_primitive import (
+        Auth0Primitive,  # pyright: ignore[reportAttributeAccessIssue]
+    )
 except ImportError:
-    Auth0Primitive = None  # type: ignore
+    Auth0Primitive = None  # type: ignore[assignment]
 
 try:
-    from tta_dev_integrations.auth.jwt_primitive import JWTPrimitive
+    from tta_dev_integrations.auth.jwt_primitive import (
+        JWTPrimitive,  # pyright: ignore[reportAttributeAccessIssue]
+    )
 except ImportError:
-    JWTPrimitive = None  # type: ignore
+    JWTPrimitive = None  # type: ignore[assignment]
 
 __all__ = [
     # LLM primitives

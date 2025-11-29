@@ -105,14 +105,18 @@ class SupabasePrimitive(DatabasePrimitive):
 
         super().__init__(timeout=timeout, max_retries=max_retries)
 
-        self.url = url or os.getenv("SUPABASE_URL")
-        self.key = key or os.getenv("SUPABASE_KEY")
+        supabase_url = url or os.getenv("SUPABASE_URL")
+        supabase_key = key or os.getenv("SUPABASE_KEY")
 
-        if not self.url or not self.key:
+        if not supabase_url or not supabase_key:
             raise ValueError(
                 "Supabase URL and key required. "
                 "Set SUPABASE_URL and SUPABASE_KEY env vars or pass explicitly.",
             )
+
+        # Store non-None values (validated above)
+        self.url: str = supabase_url
+        self.key: str = supabase_key
 
         # Client will be initialized on first use (async)
         self._client: AsyncClient | None = None
@@ -141,7 +145,7 @@ class SupabasePrimitive(DatabasePrimitive):
         Raises:
             Exception: On Supabase errors
         """
-        client = await self._get_client()
+        await self._get_client()
 
         # TODO: Implement actual query execution
         # This is a skeleton - full implementation needed

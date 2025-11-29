@@ -76,7 +76,9 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         ```
     """
 
-    def __init__(self, stage_criteria_map: dict[Stage, StageCriteria] | None = None) -> None:
+    def __init__(
+        self, stage_criteria_map: dict[Stage, StageCriteria] | None = None
+    ) -> None:
         """Initialize stage manager.
 
         Args:
@@ -86,7 +88,9 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         super().__init__()
         self.stage_criteria_map = stage_criteria_map or {}
 
-    async def execute(self, context: WorkflowContext, input_data: StageRequest) -> StageReadiness:
+    async def execute(
+        self, context: WorkflowContext, input_data: StageRequest
+    ) -> StageReadiness:
         """Check project readiness for target stage.
 
         Args:
@@ -166,7 +170,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
                 next_steps.append(f"{critical.check_name}: {critical.fix_command}")
 
         # Query KB for contextual guidance if available
-        kb_recommendations: list[dict[str, object]] = []
+        kb_recommendations: list[dict[str, str]] = []
         if kb:
             try:
                 # Query for target stage best practices
@@ -196,20 +200,20 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
                 for page in best_practices_result.pages:
                     kb_recommendations.append(
                         {
-                            "title": page.title,
+                            "title": str(page.title),
                             "type": "best_practice",
-                            "tags": list(page.tags),
-                            "url": page.url or "",
+                            "tags": ", ".join(str(t) for t in page.tags),
+                            "url": str(page.url) if page.url else "",
                         }
                     )
 
                 for page in mistakes_result.pages:
                     kb_recommendations.append(
                         {
-                            "title": page.title,
+                            "title": str(page.title),
                             "type": "common_mistake",
-                            "tags": list(page.tags),
-                            "url": page.url or "",
+                            "tags": ", ".join(str(t) for t in page.tags),
+                            "url": str(page.url) if page.url else "",
                         }
                     )
 
@@ -268,8 +272,9 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         if not can_proceed:
             # Transition blocked
             blocker_messages = [f"  - {b.message}" for b in readiness.blockers]
-            message = f"Cannot transition from {from_stage} to {to_stage}. Blockers:\n" + "\n".join(
-                blocker_messages
+            message = (
+                f"Cannot transition from {from_stage} to {to_stage}. Blockers:\n"
+                + "\n".join(blocker_messages)
             )
 
             result = TransitionResult(

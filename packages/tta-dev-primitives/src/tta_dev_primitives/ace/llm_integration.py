@@ -24,7 +24,9 @@ try:
     GENAI_AVAILABLE = True
 except ImportError:
     GENAI_AVAILABLE = False
-    logger.warning("google-generativeai not installed. Install with: uv add google-generativeai")
+    logger.warning(
+        "google-generativeai not installed. Install with: uv add google-generativeai"
+    )
 
 
 class LLMCodeGenerator:
@@ -48,7 +50,9 @@ class LLMCodeGenerator:
         ```
     """
 
-    def __init__(self, api_key: str | None = None, model_name: str = "gemini-2.0-flash-exp") -> None:
+    def __init__(
+        self, api_key: str | None = None, model_name: str = "gemini-2.0-flash-exp"
+    ) -> None:
         """Initialize LLM code generator.
 
         Args:
@@ -57,24 +61,30 @@ class LLMCodeGenerator:
         """
         # Check multiple environment variable names
         self.api_key = (
-            api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_AI_STUDIO_API_KEY")
+            api_key
+            or os.getenv("GEMINI_API_KEY")
+            or os.getenv("GOOGLE_AI_STUDIO_API_KEY")
         )
         self.model_name = model_name
         self.model = None
 
         if GENAI_AVAILABLE and self.api_key:
             try:
-                genai.configure(api_key=self.api_key)
-                self.model = genai.GenerativeModel(model_name)
+                genai.configure(api_key=self.api_key)  # pyright: ignore[reportPrivateImportUsage]
+                self.model = genai.GenerativeModel(model_name)  # pyright: ignore[reportPrivateImportUsage]
                 logger.info(f"LLM code generator initialized with {model_name}")
             except Exception as e:
                 logger.error(f"Failed to initialize Gemini model: {e}")
                 self.model = None
         else:
             if not GENAI_AVAILABLE:
-                logger.warning("Google AI SDK not available - using mock implementation")
+                logger.warning(
+                    "Google AI SDK not available - using mock implementation"
+                )
             elif not self.api_key:
-                logger.warning("GOOGLE_AI_STUDIO_API_KEY not set - using mock implementation")
+                logger.warning(
+                    "GOOGLE_AI_STUDIO_API_KEY not set - using mock implementation"
+                )
 
     async def generate_code(
         self,
@@ -102,7 +112,9 @@ class LLMCodeGenerator:
 
         try:
             # Build strategy-aware prompt (with optional source code)
-            prompt = self._build_prompt(task, context, language, strategies, source_code)
+            prompt = self._build_prompt(
+                task, context, language, strategies, source_code
+            )
 
             # Generate code using Gemini
             response = await self.model.generate_content_async(prompt)

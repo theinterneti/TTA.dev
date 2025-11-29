@@ -50,9 +50,9 @@ from tta_dev_primitives.integrations.e2b_primitive import (
 )
 from tta_dev_primitives.observability import InstrumentedPrimitive
 
-logger = logging.getLogger(__name__)
-
 from .code_processing import process_generated_code
+
+logger = logging.getLogger(__name__)
 
 # Import LLM integration for Phase 2
 try:
@@ -210,7 +210,9 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
         self.playbook_file = playbook_file or Path("ace_playbook.json")
         if self.playbook_file.exists():
             self.playbook.load_from_file(self.playbook_file)
-            logger.info(f"Loaded {self.playbook.size()} strategies from {self.playbook_file}")
+            logger.info(
+                f"Loaded {self.playbook.size()} strategies from {self.playbook_file}"
+            )
 
     @property
     def success_rate(self) -> float:
@@ -234,10 +236,13 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
             return 0.0
         return min(
             1.0,
-            (current_rate - self.baseline_success_rate) / (1.0 - self.baseline_success_rate),
+            (current_rate - self.baseline_success_rate)
+            / (1.0 - self.baseline_success_rate),
         )
 
-    async def _execute_impl(self, input_data: ACEInput, context: WorkflowContext) -> ACEOutput:
+    async def _execute_impl(
+        self, input_data: ACEInput, context: WorkflowContext
+    ) -> ACEOutput:
         """Execute with learning."""
 
         task = input_data["task"]
@@ -249,7 +254,9 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
         self.total_executions += 1
 
         # Get relevant strategies from playbook
-        relevant_strategies = self.playbook.get_relevant_strategies(f"{task} {task_context}")
+        relevant_strategies = self.playbook.get_relevant_strategies(
+            f"{task} {task_context}"
+        )
 
         # Generate code using learned strategies
         code = await self._generate_code_with_strategies(
@@ -314,12 +321,16 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
             self.playbook.save_to_file(self.playbook_file)
 
         # Generate learning summary
-        learning_summary = self._generate_learning_summary(strategies_learned, execution_result)
+        learning_summary = self._generate_learning_summary(
+            strategies_learned, execution_result
+        )
 
         return ACEOutput(
             result=execution_result.get("output", "") if execution_result else "",
             code_generated=code,
-            execution_success=execution_result.get("success", False) if execution_result else False,
+            execution_success=execution_result.get("success", False)
+            if execution_result
+            else False,
             strategies_learned=strategies_learned,
             playbook_size=self.playbook_size,
             improvement_score=self.improvement_score,
@@ -337,7 +348,9 @@ class SelfLearningCodePrimitive(InstrumentedPrimitive[ACEInput, ACEOutput]):
 
         # Use LLM generator if available (Phase 2)
         if self.llm_generator is not None:
-            logger.info(f"Generating code with LLM (Phase 2) - {len(strategies)} strategies")
+            logger.info(
+                f"Generating code with LLM (Phase 2) - {len(strategies)} strategies"
+            )
             generated_code = await self.llm_generator.generate_code(
                 task, context, language, strategies
             )
@@ -429,7 +442,9 @@ print("Language: {language}")'''
             strategies_learned += 1
 
         if "prime" in task.lower() and "int(n**0.5)" in code:
-            self.playbook.add_strategy("optimize prime checking with sqrt limit", "number_theory")
+            self.playbook.add_strategy(
+                "optimize prime checking with sqrt limit", "number_theory"
+            )
             strategies_learned += 1
 
         # Learn from execution performance
@@ -470,7 +485,9 @@ print("Language: {language}")'''
             strategies_learned += 1
 
         if error and "SyntaxError" in error:
-            self.playbook.add_strategy("validate syntax before execution", "syntax_error_handling")
+            self.playbook.add_strategy(
+                "validate syntax before execution", "syntax_error_handling"
+            )
             strategies_learned += 1
 
         return strategies_learned

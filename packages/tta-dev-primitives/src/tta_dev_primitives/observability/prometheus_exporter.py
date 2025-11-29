@@ -5,7 +5,13 @@ Provides HTTP metrics endpoint compatible with Prometheus scraping.
 Exports all collected metrics from the enhanced metrics collector.
 """
 
+from __future__ import annotations
+
 import threading
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    pass
 
 try:
     from prometheus_client import (
@@ -23,8 +29,13 @@ try:
     PROMETHEUS_CLIENT_AVAILABLE = True
 except ImportError:
     PROMETHEUS_CLIENT_AVAILABLE = False
-    start_http_server = None  # type: ignore
-    REGISTRY = None  # type: ignore
+    start_http_server = None  # type: ignore[assignment]
+    REGISTRY = None  # type: ignore[assignment]
+    CONTENT_TYPE_LATEST = ""  # type: ignore[assignment]
+    generate_latest = None  # type: ignore[assignment]
+    CounterMetricFamily = None  # type: ignore[assignment, misc]
+    GaugeMetricFamily = None  # type: ignore[assignment, misc]
+    HistogramMetricFamily = None  # type: ignore[assignment, misc]
 
 from .enhanced_collector import get_enhanced_metrics_collector
 
@@ -60,7 +71,8 @@ def start_prometheus_exporter(port: int = 9464, host: str = "0.0.0.0") -> bool:
 
     try:
         # Start HTTP server
-        start_http_server(port, addr=host)
+        if start_http_server is not None:
+            start_http_server(port, addr=host)
         _exporter_running = True
         _exporter_port = port
 
@@ -78,7 +90,7 @@ def start_prometheus_exporter(port: int = 9464, host: str = "0.0.0.0") -> bool:
 class TTAPrometheusExporter:
     """Exports TTA.dev metrics in Prometheus format."""
 
-    def __init__(self, port: int = 9464, host: str = "0.0.0.0"):
+    def __init__(self, port: int = 9464, host: str = "0.0.0.0") -> None:
         self.port = port
         self.host = host
         self.server_thread: threading.Thread | None = None
@@ -98,10 +110,12 @@ class TTAPrometheusExporter:
 
         try:
             # Register our custom collector
-            REGISTRY.register(self)
+            if REGISTRY is not None:
+                REGISTRY.register(self)  # type: ignore[arg-type]
 
             # Start HTTP server
-            start_http_server(self.port, addr=self.host)
+            if start_http_server is not None:
+                start_http_server(self.port, addr=self.host)
             self.running = True
 
             print(
@@ -113,17 +127,21 @@ class TTAPrometheusExporter:
             print(f"❌ Failed to start Prometheus server: {e}")
             return False
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the metrics server."""
         if self.running:
             try:
-                REGISTRY.unregister(self)
+                if REGISTRY is not None:
+                    REGISTRY.unregister(self)  # type: ignore[arg-type]
             except (KeyError, ValueError):
                 pass  # Already unregistered
             self.running = False
 
-    def collect(self):
+    def collect(self):  # type: ignore[misc]  # pyright: ignore[reportReturnType]
         """Collect metrics for Prometheus (called by prometheus_client)."""
+        if not PROMETHEUS_CLIENT_AVAILABLE:
+            return
+
         try:
             # Get all registered primitives from the collector
             primitive_names = getattr(self.collector, "primitives", {}).keys()
@@ -137,7 +155,7 @@ class TTAPrometheusExporter:
                         yield self._create_histogram_metric(primitive_name, metric_data)
 
                     # Convert counters
-                    if "total_requests" in metric_data:
+                    if "total_requests" in metric_data and CounterMetricFamily:
                         yield CounterMetricFamily(
                             f"tta_{primitive_name}_requests_total",
                             f"Total requests for {primitive_name}",
@@ -145,7 +163,7 @@ class TTAPrometheusExporter:
                         )
 
                     # Convert gauges
-                    if "active_requests" in metric_data:
+                    if "active_requests" in metric_data and GaugeMetricFamily:
                         yield GaugeMetricFamily(
                             f"tta_{primitive_name}_active_requests",
                             f"Active requests for {primitive_name}",
@@ -153,7 +171,7 @@ class TTAPrometheusExporter:
                         )
 
                     # Convert rates
-                    if "rps" in metric_data:
+                    if "rps" in metric_data and GaugeMetricFamily:
                         yield GaugeMetricFamily(
                             f"tta_{primitive_name}_requests_per_second",
                             f"Requests per second for {primitive_name}",
@@ -161,7 +179,7 @@ class TTAPrometheusExporter:
                         )
 
                     # Convert SLO metrics
-                    if "slo_status" in metric_data:
+                    if "slo_status" in metric_data and GaugeMetricFamily:
                         slo = metric_data["slo_status"]
                         yield GaugeMetricFamily(
                             f"tta_{primitive_name}_availability",
@@ -188,8 +206,15 @@ class TTAPrometheusExporter:
         except Exception as e:
             print(f"⚠️  Error collecting metrics: {e}")
 
-    def _create_histogram_metric(self, metric_name: str, metric_data: dict):
+    def _create_histogram_metric(
+        self,
+        metric_name: str,
+        metric_data: dict,  # type: ignore[type-arg]
+    ) -> object | None:
         """Create a Prometheus histogram from percentile data."""
+        if not HistogramMetricFamily:
+            return None
+
         percentiles = metric_data.get("percentiles", {})
 
         # Convert percentiles to histogram buckets
@@ -229,7 +254,7 @@ def start_prometheus_server(port: int = 9464, host: str = "0.0.0.0") -> bool:
     return exporter.start()
 
 
-def stop_prometheus_server():
+def stop_prometheus_server() -> None:
     """Stop the Prometheus metrics server (convenience function)."""
     global _exporter
     if _exporter:

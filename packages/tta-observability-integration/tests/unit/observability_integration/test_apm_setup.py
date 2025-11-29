@@ -2,7 +2,7 @@
 
 from unittest.mock import patch
 
-from src.observability_integration.apm_setup import (
+from observability_integration.apm_setup import (
     get_meter,
     get_tracer,
     initialize_observability,

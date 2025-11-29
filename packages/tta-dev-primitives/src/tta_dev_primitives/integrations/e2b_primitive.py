@@ -131,7 +131,9 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
         self._sandbox: AsyncSandbox | None = None
         self._session_created_at: float = 0
 
-    async def _execute_impl(self, input_data: CodeInput, context: WorkflowContext) -> CodeOutput:
+    async def _execute_impl(
+        self, input_data: CodeInput, context: WorkflowContext
+    ) -> CodeOutput:
         """Execute code in E2B sandbox.
 
         Args:
@@ -175,7 +177,9 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
                     "Environment variables not directly supported, setting via export commands"
                 )
                 for key, value in env_vars.items():
-                    await self._sandbox.run_code(f'import os; os.environ["{key}"] = "{value}"')
+                    await self._sandbox.run_code(
+                        f'import os; os.environ["{key}"] = "{value}"'
+                    )
 
             # Execute code with timeout using E2B's run_code method.
             #
@@ -210,7 +214,7 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
                 # attribute. Support both for compatibility with different
                 # SDK versions and our test doubles.
                 if hasattr(error_obj, "value"):
-                    error_text = str(getattr(error_obj, "value"))
+                    error_text = str(error_obj.value)
                 else:
                     error_text = str(error_obj)
 
@@ -246,7 +250,9 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
 
         except TimeoutError:
             execution_time = time.time() - start_time
-            raise TimeoutError(f"Code execution timed out after {timeout} seconds") from None
+            raise TimeoutError(
+                f"Code execution timed out after {timeout} seconds"
+            ) from None
 
         except Exception as e:
             execution_time = time.time() - start_time
@@ -332,7 +338,9 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
                     wait = min(0.5 * (2 ** (attempt - 1)), 5.0)
                     logger.info(
                         f"Sandbox interpreter not ready (attempt={attempt}), waiting {wait:.1f}s",
-                        extra={"sandbox_id": getattr(self._sandbox, "sandbox_id", None)},
+                        extra={
+                            "sandbox_id": getattr(self._sandbox, "sandbox_id", None)
+                        },
                     )
                     await asyncio.sleep(wait)
                     continue
@@ -385,17 +393,22 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
             try:
                 close_coro = None
 
-                if hasattr(self._sandbox, "aclose"):
-                    close_coro = self._sandbox.aclose()
-                elif hasattr(self._sandbox, "close"):
-                    maybe_close = self._sandbox.close()
+                # Use getattr for runtime attribute access to support multiple SDK versions
+                aclose_method = getattr(self._sandbox, "aclose", None)
+                close_method = getattr(self._sandbox, "close", None)
+                kill_method = getattr(self._sandbox, "kill", None)
+
+                if aclose_method is not None:
+                    close_coro = aclose_method()
+                elif close_method is not None:
+                    maybe_close = close_method()
                     # ``close`` may be sync or async depending on SDK.
                     if asyncio.iscoroutine(maybe_close) or isinstance(
                         maybe_close, asyncio.Future
                     ):
                         close_coro = maybe_close
-                elif hasattr(self._sandbox, "kill"):
-                    close_coro = self._sandbox.kill()
+                elif kill_method is not None:
+                    close_coro = kill_method()
 
                 if close_coro is not None:
                     await close_coro

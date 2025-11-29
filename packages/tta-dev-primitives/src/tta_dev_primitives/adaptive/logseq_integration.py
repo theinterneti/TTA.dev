@@ -34,7 +34,9 @@ async def create_logseq_page(logseq_path: str, page_title: str, content: str) ->
     pages_dir.mkdir(parents=True, exist_ok=True)
 
     # Sanitize filename - replace spaces with underscores, keep only safe characters
-    safe_filename = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in page_title)
+    safe_filename = "".join(
+        c if c.isalnum() or c in ("-", "_") else "_" for c in page_title
+    )
     page_path = pages_dir / f"Strategies____{safe_filename}.md"
 
     # Write content
@@ -81,8 +83,12 @@ class LogseqStrategyIntegration:
                          it defaults to a common location or environment variable.
         """
         self.service_name = service_name
-        self.logseq_path = logseq_path or os.environ.get("LOGSEQ_GRAPH_PATH", "./logseq")
-        logger.info(f"Initializing Logseq integration for '{service_name}' at: {self.logseq_path}")
+        self.logseq_path = logseq_path or os.environ.get(
+            "LOGSEQ_GRAPH_PATH", "./logseq"
+        )
+        logger.info(
+            f"Initializing Logseq integration for '{service_name}' at: {self.logseq_path}"
+        )
 
     async def save_learned_strategy(
         self,
@@ -113,7 +119,9 @@ class LogseqStrategyIntegration:
 
         try:
             await create_logseq_page(self.logseq_path, page_title, page_content)
-            logger.info(f"Saved strategy '{strategy.name}' for '{self.service_name}' to Logseq.")
+            logger.info(
+                f"Saved strategy '{strategy.name}' for '{self.service_name}' to Logseq."
+            )
 
             # Log the learning event to the daily journal
             journal_entry = self._format_journal_entry(
@@ -124,7 +132,9 @@ class LogseqStrategyIntegration:
                 event_type="Strategy Learned",
             )
             await create_logseq_journal_entry(self.logseq_path, journal_entry)
-            logger.info(f"Logged learning event for '{strategy.name}' to Logseq journal.")
+            logger.info(
+                f"Logged learning event for '{strategy.name}' to Logseq journal."
+            )
 
         except Exception as e:
             logger.error(f"Failed to save strategy '{strategy.name}' to Logseq: {e}")
@@ -162,7 +172,9 @@ class LogseqStrategyIntegration:
         )
         try:
             await create_logseq_journal_entry(self.logseq_path, journal_entry)
-            logger.info(f"Logged performance update for '{strategy_name}' to Logseq journal.")
+            logger.info(
+                f"Logged performance update for '{strategy_name}' to Logseq journal."
+            )
         except Exception as e:
             logger.error(f"Failed to update strategy performance in Logseq: {e}")
 
@@ -176,10 +188,12 @@ class LogseqStrategyIntegration:
     ) -> str:
         """Formats the content for a Logseq strategy page."""
         # Basic table for performance history - could be more sophisticated
+        avg_latency_ms = strategy.metrics.avg_latency * 1000  # Convert seconds to ms
+        contexts_count = len(strategy.metrics.contexts_seen)
         performance_history_table = f"""
 | Date | Success Rate | Avg Latency | Observations |
 |------|--------------|-------------|--------------|
-| {datetime.now().strftime("%Y-%m-%d")} | {strategy.metrics.success_rate:.1%} | {strategy.metrics.avg_latency_ms:.1f}ms | {strategy.metrics.contexts_seen} |
+| {datetime.now().strftime("%Y-%m-%d")} | {strategy.metrics.success_rate:.1%} | {avg_latency_ms:.1f}ms | {contexts_count} |
 """
         # Query for related strategies - adjust query as needed
         related_strategies_query = f"{{query (and [[Strategies]] [[{service_name}]])}}"
@@ -190,7 +204,7 @@ class LogseqStrategyIntegration:
 **Type:** {primitive_type}
 **Context:** {context}
 **Created:** {datetime.now().strftime("%Y-%m-%d")}
-**Performance:** {strategy.metrics.success_rate:.1%} success, {strategy.metrics.avg_latency_ms:.1f}ms avg latency
+**Performance:** {strategy.metrics.success_rate:.1%} success, {avg_latency_ms:.1f}ms avg latency
 
 ## Parameters
 
@@ -225,7 +239,9 @@ class LogseqStrategyIntegration:
         if notes:
             entry += f"  - Notes: {notes}\n"
         if metrics:
-            entry += f"  - Metrics: Success Rate={metrics.success_rate:.1%}, Avg Latency={metrics.avg_latency_ms:.1f}ms, Observations={metrics.contexts_seen}\n"
+            avg_latency_ms = metrics.avg_latency * 1000  # Convert seconds to ms
+            contexts_count = len(metrics.contexts_seen)
+            entry += f"  - Metrics: Success Rate={metrics.success_rate:.1%}, Avg Latency={avg_latency_ms:.1f}ms, Observations={contexts_count}\n"
         return entry
 
     def _format_parameters(self, parameters: dict[str, Any]) -> str:
@@ -243,14 +259,26 @@ async def _example_usage() -> None:
     # This is a placeholder to show how the class might be used.
     # In a real scenario, this would be part of an AdaptivePrimitive.
 
-    # Mock data
+    # Mock data - StrategyMetrics uses success_count/failure_count/total_latency/total_executions
+    mock_metrics_for_strategy = StrategyMetrics(
+        success_count=95,
+        failure_count=5,
+        total_latency=50.0,  # 50 seconds total for 95 successes = ~526ms avg
+        total_executions=100,
+    )
     mock_strategy = LearningStrategy(
         name="test_strategy_v1",
         description="A test strategy",
         parameters={"timeout": 10, "retries": 2},
-        metrics=StrategyMetrics(success_rate=0.95, avg_latency_ms=500, contexts_seen=5),
+        context_pattern="development",  # Pattern to match contexts
+        metrics=mock_metrics_for_strategy,
     )
-    mock_metrics = StrategyMetrics(success_rate=0.98, avg_latency_ms=450, contexts_seen=10)
+    mock_metrics = StrategyMetrics(
+        success_count=98,
+        failure_count=2,
+        total_latency=44.1,  # ~450ms avg
+        total_executions=100,
+    )
 
     # Initialize integration
     logseq_integration = LogseqStrategyIntegration("example_service")

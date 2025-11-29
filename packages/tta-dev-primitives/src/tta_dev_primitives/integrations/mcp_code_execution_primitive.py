@@ -209,8 +209,9 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
         before executing the provided code.
         """
         # Update available servers from input if provided
-        if input_data.get("available_servers"):
-            self.available_servers = input_data["available_servers"]
+        available_servers = input_data.get("available_servers")
+        if available_servers is not None:
+            self.available_servers = available_servers
 
         # Update skills setting if provided
         if "enable_skills" in input_data:
@@ -223,12 +224,8 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
             # Execute code with MCP capabilities
             result = await super()._execute_impl(input_data, context)
 
-            # Enhance result with MCP context
-            enhanced_result = dict(result)
-            enhanced_result["mcp_servers"] = self.available_servers
-            enhanced_result["skills_enabled"] = self.enable_skills
-
-            return enhanced_result
+            # Result is already a CodeOutput from parent, return as-is
+            return result
 
         finally:
             # Cleanup generated files if needed
@@ -290,7 +287,8 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
             server_base = f"servers/{server_name}"
 
             # Generate tool files
-            for tool in server_config["tools"]:
+            tools = server_config.get("tools", [])
+            for tool in tools:
                 tool_file = f"{server_base}/{tool['name']}.py"
                 filesystem[tool_file] = self._generate_tool_code(server_name, tool)
 
