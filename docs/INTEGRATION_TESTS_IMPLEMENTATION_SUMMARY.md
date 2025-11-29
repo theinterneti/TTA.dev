@@ -10,7 +10,7 @@
 
 ### 1. **test_base.py** - COMPLETE ✅
 
-**File:** `/packages/tta-dev-primitives/tests/adaptive/test_base.py`
+**File:** `/platform/primitives/tests/adaptive/test_base.py`
 **Lines:** 370+
 **Tests:** 15 comprehensive tests across 10 test classes
 
@@ -61,7 +61,7 @@
 
 ### 2. **test_retry.py** - COMPLETE ✅
 
-**File:** `/packages/tta-dev-primitives/tests/adaptive/test_retry.py`
+**File:** `/platform/primitives/tests/adaptive/test_retry.py`
 **Lines:** 360+
 **Tests:** 23 comprehensive tests across 10 test classes
 

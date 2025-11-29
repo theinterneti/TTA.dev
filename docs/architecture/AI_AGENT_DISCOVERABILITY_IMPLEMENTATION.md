@@ -200,9 +200,9 @@ Ready to work! (5 minutes total)
 
 - `/README.md` (updated)
 - `/.vscode/copilot-toolsets.jsonc`
-- `/packages/tta-dev-primitives/AGENTS.md`
-- `/packages/tta-dev-primitives/.github/copilot-instructions.md`
-- `/packages/universal-agent-context/AGENTS.md`
+- `/platform/primitives/AGENTS.md`
+- `/platform/primitives/.github/copilot-instructions.md`
+- `/platform/agent-context/AGENTS.md`
 - `/.github/instructions/*.instructions.md`
 
 ### Documentation (Existing)

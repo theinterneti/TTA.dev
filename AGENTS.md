@@ -103,20 +103,25 @@ Additionally, context-specific modular instructions are in `.github/instructions
 
 ```text
 TTA.dev/
-├── packages/
-│   ├── tta-dev-primitives/          # ✅ Core workflow primitives
-│   ├── tta-observability-integration/  # ✅ OpenTelemetry integration
-│   ├── universal-agent-context/      # ✅ Agent context management
-│   ├── keploy-framework/             # ⚠️ Under review - minimal implementation
-│   ├── python-pathway/               # ⚠️ Under review - unclear use case
-│   └── js-dev-primitives/            # 🚧 Planned - not implemented
-├── docs/                             # Comprehensive documentation
-│   ├── planning/                     # Planning documents (moved from root)
+├── platform/             # Infrastructure packages (7)
+│   ├── primitives/       # ✅ Core workflow primitives
+│   ├── observability/    # ✅ OpenTelemetry integration
+│   ├── agent-context/    # ✅ Agent context management
+│   ├── agent-coordination/  # Multi-agent orchestration
+│   ├── integrations/     # Pre-built integrations
+│   ├── documentation/    # Docs automation
+│   └── kb-automation/    # Knowledge base maintenance
+│
+├── apps/                 # User-facing applications (1)
+│   └── observability-ui/ # VS Code observability dashboard
+│
+├── docs/                 # Comprehensive documentation
+│   ├── planning/         # Planning documents (moved from root)
 │   └── ...
 ├── archive/
-│   └── status-reports/               # Historical status files
-├── scripts/                          # Automation and validation scripts
-└── tests/                            # Integration tests
+│   └── status-reports/   # Historical status files
+├── scripts/              # Automation and validation scripts
+└── tests/                # Integration tests
 ```
 
 ---
@@ -129,9 +134,9 @@ Each package has detailed agent instructions. **Always read the package-specific
 
 | Package | Status | AGENTS.md | Purpose |
 |---------|--------|-----------|---------|
-| **tta-dev-primitives** | ✅ Active | [`packages/tta-dev-primitives/AGENTS.md`](packages/tta-dev-primitives/AGENTS.md) | Core workflow primitives (Sequential, Parallel, Router, Retry, Fallback, Cache, etc.) |
-| **tta-observability-integration** | ✅ Active | [`packages/tta-observability-integration/README.md`](packages/tta-observability-integration/README.md) | OpenTelemetry tracing, metrics, logging |
-| **universal-agent-context** | ✅ Active | [`packages/universal-agent-context/AGENTS.md`](packages/universal-agent-context/AGENTS.md) | Agent context management and orchestration |
+| **tta-dev-primitives** | ✅ Active | [`platform/primitives/AGENTS.md`](platform/primitives/AGENTS.md) | Core workflow primitives (Sequential, Parallel, Router, Retry, Fallback, Cache, etc.) |
+| **tta-observability-integration** | ✅ Active | [`platform/observability/README.md`](platform/observability/README.md) | OpenTelemetry tracing, metrics, logging |
+| **universal-agent-context** | ✅ Active | [`platform/agent-context/AGENTS.md`](platform/agent-context/AGENTS.md) | Agent context management and orchestration |
 
 ### ⚠️ Packages Under Review
 
@@ -153,32 +158,32 @@ TTA.dev's core value is **composable workflow primitives**. Here are the key pri
 
 | Primitive | Purpose | Import Path | Example |
 |-----------|---------|-------------|---------|
-| `WorkflowPrimitive[T,U]` | Base class for all primitives | `from tta_dev_primitives import WorkflowPrimitive` | [base.py](packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py) |
-| `SequentialPrimitive` | Execute steps in sequence | `from tta_dev_primitives import SequentialPrimitive` | [examples/basic_sequential.py](packages/tta-dev-primitives/examples/basic_sequential.py) |
-| `ParallelPrimitive` | Execute steps in parallel | `from tta_dev_primitives import ParallelPrimitive` | [examples/parallel_execution.py](packages/tta-dev-primitives/examples/parallel_execution.py) |
-| `ConditionalPrimitive` | Conditional branching | `from tta_dev_primitives import ConditionalPrimitive` | [conditional.py](packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py) |
-| `RouterPrimitive` | Dynamic routing (LLM selection, etc.) | `from tta_dev_primitives import RouterPrimitive` | [examples/router_llm_selection.py](packages/tta-dev-primitives/examples/router_llm_selection.py) |
+| `WorkflowPrimitive[T,U]` | Base class for all primitives | `from tta_dev_primitives import WorkflowPrimitive` | [base.py](platform/primitives/src/tta_dev_primitives/core/base.py) |
+| `SequentialPrimitive` | Execute steps in sequence | `from tta_dev_primitives import SequentialPrimitive` | [examples/basic_sequential.py](platform/primitives/examples/basic_sequential.py) |
+| `ParallelPrimitive` | Execute steps in parallel | `from tta_dev_primitives import ParallelPrimitive` | [examples/parallel_execution.py](platform/primitives/examples/parallel_execution.py) |
+| `ConditionalPrimitive` | Conditional branching | `from tta_dev_primitives import ConditionalPrimitive` | [conditional.py](platform/primitives/src/tta_dev_primitives/core/conditional.py) |
+| `RouterPrimitive` | Dynamic routing (LLM selection, etc.) | `from tta_dev_primitives import RouterPrimitive` | [examples/router_llm_selection.py](platform/primitives/examples/router_llm_selection.py) |
 
 ### Recovery Primitives
 
 | Primitive | Purpose | Import Path | Example |
 |-----------|---------|-------------|---------|
-| `RetryPrimitive` | Retry with backoff strategies | `from tta_dev_primitives.recovery import RetryPrimitive` | [retry.py](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py) |
-| `FallbackPrimitive` | Graceful degradation | `from tta_dev_primitives.recovery import FallbackPrimitive` | [fallback.py](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py) |
-| `TimeoutPrimitive` | Circuit breaker pattern | `from tta_dev_primitives.recovery import TimeoutPrimitive` | [timeout.py](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py) |
-| `CompensationPrimitive` | Saga pattern for rollback | `from tta_dev_primitives.recovery import CompensationPrimitive` | [compensation.py](packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py) |
+| `RetryPrimitive` | Retry with backoff strategies | `from tta_dev_primitives.recovery import RetryPrimitive` | [retry.py](platform/primitives/src/tta_dev_primitives/recovery/retry.py) |
+| `FallbackPrimitive` | Graceful degradation | `from tta_dev_primitives.recovery import FallbackPrimitive` | [fallback.py](platform/primitives/src/tta_dev_primitives/recovery/fallback.py) |
+| `TimeoutPrimitive` | Circuit breaker pattern | `from tta_dev_primitives.recovery import TimeoutPrimitive` | [timeout.py](platform/primitives/src/tta_dev_primitives/recovery/timeout.py) |
+| `CompensationPrimitive` | Saga pattern for rollback | `from tta_dev_primitives.recovery import CompensationPrimitive` | [compensation.py](platform/primitives/src/tta_dev_primitives/recovery/compensation.py) |
 
 ### Performance Primitives
 
 | Primitive | Purpose | Import Path | Example |
 |-----------|---------|-------------|---------|
-| `CachePrimitive` | LRU + TTL caching | `from tta_dev_primitives.performance import CachePrimitive` | [cache.py](packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py) |
+| `CachePrimitive` | LRU + TTL caching | `from tta_dev_primitives.performance import CachePrimitive` | [cache.py](platform/primitives/src/tta_dev_primitives/performance/cache.py) |
 
 ### Testing Primitives
 
 | Primitive | Purpose | Import Path | Example |
 |-----------|---------|-------------|---------|
-| `MockPrimitive` | Testing and mocking | `from tta_dev_primitives.testing import MockPrimitive` | [mock_primitive.py](packages/tta-dev-primitives/src/tta_dev_primitives/testing/mock_primitive.py) |
+| `MockPrimitive` | Testing and mocking | `from tta_dev_primitives.testing import MockPrimitive` | [mock_primitive.py](platform/primitives/src/tta_dev_primitives/testing/mock_primitive.py) |
 
 ### Adaptive/Self-Improving Primitives ⭐ NEW
 
@@ -186,9 +191,9 @@ TTA.dev's core value is **composable workflow primitives**. Here are the key pri
 
 | Primitive | Purpose | Import Path | Example |
 |-----------|---------|-------------|---------|
-| `AdaptivePrimitive[T,U]` | Base class for self-improving primitives | `from tta_dev_primitives.adaptive import AdaptivePrimitive` | [base.py](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/base.py) |
-| `AdaptiveRetryPrimitive` | Retry that learns optimal strategies | `from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive` | [retry.py](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/retry.py) |
-| `LogseqStrategyIntegration` | Persist learned strategies to KB | `from tta_dev_primitives.adaptive import LogseqStrategyIntegration` | [logseq_integration.py](packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py) |
+| `AdaptivePrimitive[T,U]` | Base class for self-improving primitives | `from tta_dev_primitives.adaptive import AdaptivePrimitive` | [base.py](platform/primitives/src/tta_dev_primitives/adaptive/base.py) |
+| `AdaptiveRetryPrimitive` | Retry that learns optimal strategies | `from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive` | [retry.py](platform/primitives/src/tta_dev_primitives/adaptive/retry.py) |
+| `LogseqStrategyIntegration` | Persist learned strategies to KB | `from tta_dev_primitives.adaptive import LogseqStrategyIntegration` | [logseq_integration.py](platform/primitives/src/tta_dev_primitives/adaptive/logseq_integration.py) |
 
 **Quick Start:**
 
@@ -282,7 +287,7 @@ workflow = (
 )
 ```
 
-**More patterns:** See [`packages/tta-dev-primitives/examples/`](packages/tta-dev-primitives/examples/)
+**More patterns:** See [`platform/primitives/examples/`](platform/primitives/examples/)
 
 ---
 
@@ -393,9 +398,9 @@ class IterativeCodeGenerator:
 - $0 cost (E2B FREE tier) + ~$0.01/iteration (LLM)
 - Typically 1-3 iterations = working code
 
-**Full example:** [`examples/e2b_iterative_code_refinement.py`](packages/tta-dev-primitives/examples/e2b_iterative_code_refinement.py)
+**Full example:** [`examples/e2b_iterative_code_refinement.py`](platform/primitives/examples/e2b_iterative_code_refinement.py)
 
-**More examples:** [`packages/tta-dev-primitives/examples/`](packages/tta-dev-primitives/examples/)
+**More examples:** [`platform/primitives/examples/`](platform/primitives/examples/)
 
 ---
 
@@ -498,7 +503,7 @@ open http://localhost:8765
 
 **See:** 
 - Integration: [`docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md`](docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md#1-tta-observability-integration)
-- TTA UI: [`packages/tta-observability-ui/QUICKSTART.md`](packages/tta-observability-ui/QUICKSTART.md)
+- TTA UI: [`apps/observability-ui/QUICKSTART.md`](apps/observability-ui/QUICKSTART.md)
 - Design: [`docs/architecture/OBSERVABILITY_UI_DESIGN.md`](docs/architecture/OBSERVABILITY_UI_DESIGN.md)
 
 ---
@@ -526,7 +531,7 @@ async def test_workflow():
     assert mock_llm.call_count == 1
 ```
 
-**Testing guide:** [`packages/tta-dev-primitives/AGENTS.md#testing`](packages/tta-dev-primitives/AGENTS.md)
+**Testing guide:** [`platform/primitives/AGENTS.md#testing`](platform/primitives/AGENTS.md)
 
 ---
 
@@ -660,6 +665,7 @@ Tradeoff: Slightly more memory, but better reliability
 | [`MCP_SERVERS.md`](MCP_SERVERS.md) | MCP server integrations |
 | [`docs/architecture/`](docs/architecture/) | Architecture decisions and patterns |
 | [`docs/guides/`](docs/guides/) | Usage guides and tutorials |
+| [`docs/guides/git_overseer_checklist.md`](docs/guides/git_overseer_checklist.md) | Daily/weekly git, PR, and worktree coordination |
 
 ### Per-Package Documentation
 
@@ -675,7 +681,7 @@ Each package has:
 
 ### For Agent Development
 
-1. **Start with examples:** [`packages/tta-dev-primitives/examples/`](packages/tta-dev-primitives/examples/)
+1. **Start with examples:** [`platform/primitives/examples/`](platform/primitives/examples/)
 2. **Review Phase 3 patterns:** See [`PHASE3_EXAMPLES_COMPLETE.md`](PHASE3_EXAMPLES_COMPLETE.md) for production patterns
 3. **Use composition:** Chain primitives with `>>` and `|`
 4. **Add observability:** Use `WorkflowContext` for all workflows
@@ -759,7 +765,8 @@ For a detailed guide, see [`CLINE_INTEGRATION_GUIDE.md`](CLINE_INTEGRATION_GUIDE
 2. **Review examples** - Working code in `examples/`
 3. **Search documentation** - `docs/` directory
 4. **Check Copilot toolsets** - `.vscode/copilot-toolsets.jsonc`
-5. **Open an issue** - For bugs or feature requests
+5. **Git/PR Management** - See [`docs/guides/git_overseer_checklist.md`](docs/guides/git_overseer_checklist.md)
+6. **Open an issue** - For bugs or feature requests
 
 ---
 

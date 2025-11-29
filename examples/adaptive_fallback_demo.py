@@ -54,7 +54,9 @@ async def scenario_1_unreliable_primary():
     print("=" * 80)
 
     # Create services with different characteristics
-    primary = UnreliableService("Primary", failure_rate=0.8, latency_ms=50)  # Fails often
+    primary = UnreliableService(
+        "Primary", failure_rate=0.8, latency_ms=50
+    )  # Fails often
     fallback_slow = UnreliableService("SlowBackup", failure_rate=0.3, latency_ms=200)
     fallback_fast = UnreliableService("FastBackup", failure_rate=0.2, latency_ms=50)
     fallback_local = UnreliableService("LocalCache", failure_rate=0.1, latency_ms=10)
@@ -130,7 +132,9 @@ async def scenario_1_unreliable_primary():
 async def scenario_2_context_specific():
     """Scenario 2: Different optimal orders for production vs development."""
     print("\n" + "=" * 80)
-    print("SCENARIO 2: Context-Specific Learning - Different Strategies per Environment")
+    print(
+        "SCENARIO 2: Context-Specific Learning - Different Strategies per Environment"
+    )
     print("=" * 80)
 
     # Production: Cloud services work better
@@ -138,7 +142,9 @@ async def scenario_2_context_specific():
     cloud_backup = UnreliableService(
         "CloudBackup", failure_rate=0.2, latency_ms=100
     )  # Good in prod
-    local_backup = UnreliableService("LocalBackup", failure_rate=0.6, latency_ms=50)  # Bad in prod
+    local_backup = UnreliableService(
+        "LocalBackup", failure_rate=0.6, latency_ms=50
+    )  # Bad in prod
 
     adaptive_fallback = AdaptiveFallbackPrimitive(
         primary=primary,
@@ -161,10 +167,12 @@ async def scenario_2_context_specific():
             )
             await adaptive_fallback.execute({"query": f"prod-{i}"}, context)
             prod_successes += 1
-        except:
+        except Exception:
             pass
 
-    print(f"  Production success: {prod_successes}/15 ({prod_successes / 15 * 100:.1f}%)")
+    print(
+        f"  Production success: {prod_successes}/15 ({prod_successes / 15 * 100:.1f}%)"
+    )
 
     # Switch: In development, local works better
     cloud_backup.failure_rate = 0.6  # Cloud worse in dev
@@ -181,10 +189,12 @@ async def scenario_2_context_specific():
             )
             await adaptive_fallback.execute({"query": f"dev-{i}"}, context)
             dev_successes += 1
-        except:
+        except Exception:
             pass
 
-    print(f"  Development success: {dev_successes}/15 ({dev_successes / 15 * 100:.1f}%)")
+    print(
+        f"  Development success: {dev_successes}/15 ({dev_successes / 15 * 100:.1f}%)"
+    )
 
     # Show context-specific learning
     stats = adaptive_fallback.get_fallback_stats()
@@ -198,7 +208,9 @@ async def scenario_2_context_specific():
         for fb_name, usage in ctx_stats["fallback_usage"].items():
             successes = ctx_stats["fallback_successes"][fb_name]
             success_rate = successes / usage if usage > 0 else 0
-            print(f"      {fb_name}: {successes}/{usage} ({success_rate * 100:.1f}% success)")
+            print(
+                f"      {fb_name}: {successes}/{usage} ({success_rate * 100:.1f}% success)"
+            )
 
     print("\n🎯 Learned Strategies:")
     for strategy_name, strategy_info in stats["strategies"].items():
@@ -212,10 +224,18 @@ async def scenario_3_progressive_learning():
     print("=" * 80)
 
     # Create services with clear quality differences
-    primary = UnreliableService("Primary", failure_rate=0.9, latency_ms=50)  # Fails almost always
-    fallback_a = UnreliableService("FallbackA", failure_rate=0.5, latency_ms=100)  # Medium
-    fallback_b = UnreliableService("FallbackB", failure_rate=0.2, latency_ms=80)  # Best success
-    fallback_c = UnreliableService("FallbackC", failure_rate=0.4, latency_ms=150)  # Slow
+    primary = UnreliableService(
+        "Primary", failure_rate=0.9, latency_ms=50
+    )  # Fails almost always
+    fallback_a = UnreliableService(
+        "FallbackA", failure_rate=0.5, latency_ms=100
+    )  # Medium
+    fallback_b = UnreliableService(
+        "FallbackB", failure_rate=0.2, latency_ms=80
+    )  # Best success
+    fallback_c = UnreliableService(
+        "FallbackC", failure_rate=0.4, latency_ms=150
+    )  # Slow
 
     adaptive_fallback = AdaptiveFallbackPrimitive(
         primary=primary,
@@ -230,7 +250,9 @@ async def scenario_3_progressive_learning():
 
     print("\n📊 Initial state:")
     stats = adaptive_fallback.get_fallback_stats()
-    print(f"Baseline order: {adaptive_fallback.baseline_strategy.parameters['fallback_order']}")
+    print(
+        f"Baseline order: {adaptive_fallback.baseline_strategy.parameters['fallback_order']}"
+    )
 
     # Run in batches to see progression
     for batch in range(1, 4):
@@ -245,7 +267,7 @@ async def scenario_3_progressive_learning():
                 )
                 await adaptive_fallback.execute({"query": f"req-{i}"}, context)
                 batch_successes += 1
-            except:
+            except Exception:
                 pass
 
         stats = adaptive_fallback.get_fallback_stats()

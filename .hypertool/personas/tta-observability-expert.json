@@ -1,0 +1,70 @@
+{
+  "name": "tta-observability-expert",
+  "displayName": "TTA Observability Expert",
+  "description": "Specialized in monitoring, tracing, metrics, and system observability",
+  "icon": "📊",
+  "tokenBudget": 1500,
+  "allowedServers": [
+    "grafana",
+    "github",
+    "gitmcp",
+    "sequential-thinking",
+    "mcp-logseq"
+  ],
+  "allowedTools": {
+    "grafana": [
+      "query_prometheus",
+      "query_loki_logs",
+      "list_alert_rules",
+      "get_alert_rule_by_uid",
+      "get_dashboard_by_uid",
+      "list_contact_points"
+    ],
+    "github": [
+      "github_create_or_update_file",
+      "github_get_file_contents",
+      "github_search_code"
+    ],
+    "gitmcp": ["list_files", "read_file", "get_diff"],
+    "sequential-thinking": ["think", "reflect"],
+    "mcp-logseq": ["list_pages", "get_page_content", "search"]
+  },
+  "restrictedPaths": [
+    "apps/**/frontend/**",
+    "**/tests/**"
+  ],
+  "context": {
+    "primaryLanguage": "Python",
+    "frameworks": ["OpenTelemetry", "Prometheus", "Grafana"],
+    "focusAreas": [
+      "Distributed tracing",
+      "Metrics collection",
+      "Log aggregation",
+      "Dashboard creation",
+      "Alert configuration"
+    ],
+    "keyFiles": [
+      "packages/tta-observability-integration/**/*.py",
+      "monitoring/**/*",
+      "docker-compose*.yml"
+    ]
+  },
+  "security": {
+    "allowEnvironmentAccess": [
+      "GRAFANA_URL",
+      "PROMETHEUS_URL",
+      "LOKI_URL"
+    ],
+    "blockList": ["DATABASE_*", "AWS_*"],
+    "requireApprovalFor": ["file_delete", "system_command"]
+  },
+  "workflows": {
+    "default": "observability-development",
+    "available": [
+      "observability-development",
+      "metrics-integration",
+      "dashboard-creation",
+      "alert-configuration"
+    ]
+  }
+}

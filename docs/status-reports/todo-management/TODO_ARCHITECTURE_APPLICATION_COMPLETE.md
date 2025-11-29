@@ -220,7 +220,7 @@ Successfully applied the new 4-category TODO architecture (Development, Learning
     - Usage examples in examples/
     - Documentation complete
   notes:: Google AI Studio provides free access to Gemini Pro (not just Flash). User has API key ready.
-  source:: packages/tta-dev-primitives/src/tta_dev_primitives/research/free_tier_research.py:654
+  source:: platform/primitives/src/tta_dev_primitives/research/free_tier_research.py:654
 ```
 
 **Improvements:**

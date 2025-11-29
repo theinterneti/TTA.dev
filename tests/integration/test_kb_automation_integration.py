@@ -55,7 +55,7 @@ class TestRealCodebaseScanning:
         sync = TODOSync()
 
         # Scan the actual primitives package
-        paths = [str(workspace_root / "packages" / "tta-dev-primitives" / "src")]
+        paths = [str(workspace_root / "platform" / "primitives" / "src")]
 
         result = await sync.scan_and_create(
             paths=paths,
@@ -97,16 +97,16 @@ class TestRealCodebaseScanning:
         """Scan multiple packages and compare TODO patterns."""
         sync = TODOSync()
 
-        packages_to_scan = [
-            "tta-dev-primitives",
-            "tta-observability-integration",
-            "universal-agent-context",
-        ]
+        packages_to_scan = {
+            "tta-dev-primitives": "platform/primitives",
+            "tta-observability-integration": "platform/observability",
+            "universal-agent-context": "platform/agent-context",
+        }
 
         all_todos = {}
 
-        for package in packages_to_scan:
-            package_path = workspace_root / "packages" / package / "src"
+        for package, rel_path in packages_to_scan.items():
+            package_path = workspace_root / rel_path / "src"
             if not package_path.exists():
                 continue
 
@@ -158,7 +158,7 @@ class TestRealCodebaseScanning:
         sync = TODOSync()
 
         # Scan for actual TODOs
-        paths = [str(workspace_root / "packages")]
+        paths = [str(workspace_root / "platform")]
         result = await sync.scan_and_create(
             paths=paths,
             journal_date=None,
@@ -203,7 +203,7 @@ class TestJournalEntryGeneration:
         sync = TODOSync()
 
         # Scan a package
-        paths = [str(workspace_root / "packages" / "tta-dev-primitives" / "src")]
+        paths = [str(workspace_root / "platform" / "primitives" / "src")]
         today = datetime.now().strftime("%Y_%m_%d")
 
         result = await sync.scan_and_create(
@@ -244,7 +244,7 @@ class TestJournalEntryGeneration:
         """Validate that KB links are suggested in journal entries."""
         sync = TODOSync()
 
-        paths = [str(workspace_root / "packages")]
+        paths = [str(workspace_root / "platform")]
         today = datetime.now().strftime("%Y_%m_%d")
 
         result = await sync.scan_and_create(
@@ -342,7 +342,7 @@ class TestEndToEndWorkflow:
 
         # Phase 1: Scan
         print("\n=== Phase 1: Scanning Codebase ===")
-        paths = [str(workspace_root / "packages")]
+        paths = [str(workspace_root / "platform")]
         today = datetime.now().strftime("%Y_%m_%d")
 
         result = await sync.scan_and_create(
@@ -400,7 +400,7 @@ class TestEndToEndWorkflow:
 
         sync = TODOSync()
 
-        paths = [str(workspace_root / "packages")]
+        paths = [str(workspace_root / "platform")]
 
         start_time = time.time()
 

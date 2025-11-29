@@ -47,13 +47,13 @@ This document summarizes the complete implementation of multi-model orchestratio
 ### Implementation
 
 **Files Created:**
-- `packages/tta-dev-primitives/src/tta_dev_primitives/config/__init__.py`
-- `packages/tta-dev-primitives/src/tta_dev_primitives/config/orchestration_config.py`
+- `platform/primitives/src/tta_dev_primitives/config/__init__.py`
+- `platform/primitives/src/tta_dev_primitives/config/orchestration_config.py`
 - `.tta/orchestration-config.yaml`
 - `docs/guides/orchestration-configuration-guide.md`
 
 **Files Modified:**
-- `packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py`
+- `platform/primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py`
 
 ### Key Features
 
@@ -118,8 +118,8 @@ This document summarizes the complete implementation of multi-model orchestratio
 ### Implementation
 
 **Files Created:**
-- `packages/tta-dev-primitives/examples/orchestration_pr_review.py`
-- `packages/tta-dev-primitives/examples/PR_REVIEW_GUIDE.md`
+- `platform/primitives/examples/orchestration_pr_review.py`
+- `platform/primitives/examples/PR_REVIEW_GUIDE.md`
 - `.github/workflows/orchestration-pr-review.yml`
 
 ### Key Features
@@ -191,8 +191,8 @@ This document summarizes the complete implementation of multi-model orchestratio
 ### Implementation
 
 **Files Created:**
-- `packages/tta-dev-primitives/examples/orchestration_doc_generation.py`
-- `packages/tta-dev-primitives/examples/DOC_GENERATION_GUIDE.md`
+- `platform/primitives/examples/orchestration_doc_generation.py`
+- `platform/primitives/examples/DOC_GENERATION_GUIDE.md`
 
 ### Key Features
 
@@ -298,7 +298,7 @@ All workflows maintain **85%+ quality scores** while achieving cost savings:
 ### 1. Install Dependencies
 
 ```bash
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv sync --extra integrations
 ```
 
@@ -352,19 +352,19 @@ uv run python examples/orchestration_doc_generation.py \
    - Common scenarios (cost-optimized, quality-optimized, balanced)
    - Troubleshooting
 
-2. **Test Generation Guide** (`packages/tta-dev-primitives/examples/ORCHESTRATION_DEMO_GUIDE.md`)
+2. **Test Generation Guide** (`platform/primitives/examples/ORCHESTRATION_DEMO_GUIDE.md`)
    - Quick start (5 minutes)
    - 3 trigger methods
    - Grafana dashboard setup
    - Cost analysis
 
-3. **PR Review Guide** (`packages/tta-dev-primitives/examples/PR_REVIEW_GUIDE.md`)
+3. **PR Review Guide** (`platform/primitives/examples/PR_REVIEW_GUIDE.md`)
    - GitHub Actions setup
    - Webhook configuration
    - Customization examples
    - Troubleshooting
 
-4. **Documentation Generation Guide** (`packages/tta-dev-primitives/examples/DOC_GENERATION_GUIDE.md`)
+4. **Documentation Generation Guide** (`platform/primitives/examples/DOC_GENERATION_GUIDE.md`)
    - Logseq format requirements
    - Git hook integration
    - Customization examples

@@ -227,7 +227,7 @@ Use these MCP tools to gather information:
 
 **Trigger:**
 ```
-@gemini-cli-advanced generate tests for packages/tta-dev-primitives/src/tta_dev_primitives/core/router.py
+@gemini-cli-advanced generate tests for platform/primitives/src/tta_dev_primitives/core/router.py
 ```
 
 **What Happens:**

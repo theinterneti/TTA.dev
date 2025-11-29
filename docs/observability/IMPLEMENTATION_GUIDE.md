@@ -10,7 +10,7 @@
 
 ### 1.1 Enhanced WorkflowContext
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py`
+**File:** `platform/primitives/src/tta_dev_primitives/core/base.py`
 
 ```python
 from __future__ import annotations
@@ -416,7 +416,7 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
 
 ### 2.1 Instrumented SequentialPrimitive
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py`
+**File:** `platform/primitives/src/tta_dev_primitives/core/sequential.py`
 
 Add instrumentation to existing SequentialPrimitive:
 
@@ -464,7 +464,7 @@ async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
 
 ### 2.2 Instrumented ParallelPrimitive
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py`
+**File:** `platform/primitives/src/tta_dev_primitives/core/parallel.py`
 
 ```python
 import asyncio  # Required for parallel execution
@@ -522,7 +522,7 @@ async def execute(self, input_data: Any, context: WorkflowContext) -> list[Any]:
 
 ### 3.1 Test Trace Context Propagation
 
-**File:** `packages/tta-dev-primitives/tests/observability/test_context_propagation.py`
+**File:** `platform/primitives/tests/observability/test_context_propagation.py`
 
 ```python
 """Tests for trace context propagation."""

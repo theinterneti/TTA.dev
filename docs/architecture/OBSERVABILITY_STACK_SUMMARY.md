@@ -385,7 +385,7 @@ initialize_observability(
 
 - **Design:** `docs/architecture/OBSERVABILITY_UI_DESIGN.md`
 - **Existing Stack:** `docs/integration/observability-integration.md`
-- **Integration Tests:** `packages/tta-dev-primitives/tests/integration/README_INTEGRATION_TESTS.md`
+- **Integration Tests:** `platform/primitives/tests/integration/README_INTEGRATION_TESTS.md`
 - **Package README:** `packages/tta-observability-ui/README.md`
 
 ---

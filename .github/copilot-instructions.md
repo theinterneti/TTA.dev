@@ -14,6 +14,18 @@ This document provides specific guidance for GitHub Copilot users working on the
 
 ---
 
+## 🤖 Agent Persona & Behavior
+
+**You are an expert AI developer working on TTA.dev.**
+
+- **Think Step-by-Step:** Always break down complex problems into smaller, manageable steps before writing code.
+- **Ask Clarifying Questions:** If a request is ambiguous, ask for clarification instead of making assumptions.
+- **Proactive Improvement:** Suggest improvements to code or workflows when you see them, aligning with the "Inner Loop" philosophy of high reliability.
+- **Tone:** Be professional, concise, and helpful. Focus on delivering value efficiently.
+- **Safety First:** Always prioritize security and reliability. Do not execute destructive commands without confirmation.
+
+---
+
 ## 📦 Package Manager (CRITICAL)
 
 **ALWAYS use `uv`, NEVER `pip` or `poetry`**
@@ -31,7 +43,7 @@ uv run ruff format .
 uv run python script.py
 
 # Install local package for development
-uv pip install -e packages/tta-dev-primitives
+uv pip install -e platform/primitives
 ```
 
 ❌ **NEVER use:** `pip install`, `poetry add`, `python -m pip`
@@ -43,7 +55,7 @@ uv pip install -e packages/tta-dev-primitives
 - **Python:** 3.11+ required
 - **Type hints:** Use `str | None` NOT `Optional[str]`
 - **Dicts:** Use `dict[str, Any]` NOT `Dict[str, Any]`
-- **Type checking:** Run `uvx pyright packages/` before committing
+- **Type checking:** Run `uvx pyright platform/ apps/` before committing
 
 **Example:**
 ```python
@@ -72,10 +84,10 @@ def process(data: Dict[str, Any]) -> Optional[str]:
 uv run pytest -v
 
 # With coverage
-uv run pytest --cov=packages --cov-report=html
+uv run pytest --cov=platform --cov=apps --cov-report=html
 
 # Specific package
-uv run pytest packages/tta-dev-primitives/tests/ -v
+uv run pytest platform/primitives/tests/ -v
 ```
 
 **Test structure:**
@@ -116,10 +128,10 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # Type check
-uvx pyright packages/
+uvx pyright platform/ apps/
 
 # All checks (before commit)
-uv run ruff format . && uv run ruff check . --fix && uvx pyright packages/
+uv run ruff format . && uv run ruff check . --fix && uvx pyright platform/ apps/
 ```
 
 ---
@@ -241,7 +253,7 @@ workflow = input_processor >> (fast_path | slow_path) >> aggregator
 
 ```text
 TTA.dev/
-├── packages/                          # All production packages
+├── platform/              # Infrastructure packages
 │   ├── tta-dev-primitives/           # Core workflow primitives ✅
 │   ├── tta-observability-integration/ # OpenTelemetry integration ✅
 │   └── universal-agent-context/      # Agent context management ✅
@@ -316,7 +328,7 @@ These files use YAML frontmatter to target specific file patterns and provide de
    ```bash
    uv run ruff format .
    uv run ruff check . --fix
-   uvx pyright packages/
+   uvx pyright platform/ apps/
    uv run pytest -v
    ```
 
@@ -355,7 +367,7 @@ Before committing code, ensure:
 
 - [ ] Code formatted with `uv run ruff format .`
 - [ ] Linter passes with `uv run ruff check . --fix`
-- [ ] Type checks pass with `uvx pyright packages/`
+- [ ] Type checks pass with `uvx pyright platform/ apps/`
 - [ ] Tests pass with `uv run pytest -v`
 - [ ] Test coverage >80% for new code
 - [ ] Documentation updated (docstrings, README)

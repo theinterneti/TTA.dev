@@ -340,7 +340,7 @@ Add tasks to today's journal: `logseq/journals/YYYY_MM_DD.md`
 - 📚 [Architecture Overview](docs/architecture/Overview.md) - Understand the design
 - 🎯 [Coding Standards](docs/development/CodingStandards.md) - Best practices
 - 🔧 [MCP Integration](MCP_SERVERS.md) - Model Context Protocol
-- 📦 [Package README](packages/tta-dev-primitives/README.md) - Detailed docs
+- 📦 [Package README](platform/primitives/README.md) - Detailed docs
 
 ### Production Examples
 
@@ -348,24 +348,24 @@ Add tasks to today's journal: `logseq/journals/YYYY_MM_DD.md`
 
 | Example | What It Shows | Use When |
 |---------|---------------|----------|
-| [**RAG Workflow**](packages/tta-dev-primitives/examples/rag_workflow.py) | Caching + Fallback + Retry | Building document retrieval systems |
-| [**Agentic RAG**](packages/tta-dev-primitives/examples/agentic_rag_workflow.py) | Router + Grading + Validation | Production RAG with quality controls |
-| [**Cost Tracking**](packages/tta-dev-primitives/examples/cost_tracking_workflow.py) | Budget Enforcement + Metrics | Managing LLM API costs |
-| [**Streaming**](packages/tta-dev-primitives/examples/streaming_workflow.py) | AsyncIterator + Buffering | Real-time response streaming |
-| [**Multi-Agent**](packages/tta-dev-primitives/examples/multi_agent_workflow.py) | Coordinator + Parallel Execution | Complex agent orchestration |
-| [**Memory Workflow**](packages/tta-dev-primitives/examples/memory_workflow.py) | Conversational Memory + Search | Multi-turn conversations with context |
+| [**RAG Workflow**](platform/primitives/examples/rag_workflow.py) | Caching + Fallback + Retry | Building document retrieval systems |
+| [**Agentic RAG**](platform/primitives/examples/agentic_rag_workflow.py) | Router + Grading + Validation | Production RAG with quality controls |
+| [**Cost Tracking**](platform/primitives/examples/cost_tracking_workflow.py) | Budget Enforcement + Metrics | Managing LLM API costs |
+| [**Streaming**](platform/primitives/examples/streaming_workflow.py) | AsyncIterator + Buffering | Real-time response streaming |
+| [**Multi-Agent**](platform/primitives/examples/multi_agent_workflow.py) | Coordinator + Parallel Execution | Complex agent orchestration |
+| [**Memory Workflow**](platform/primitives/examples/memory_workflow.py) | Conversational Memory + Search | Multi-turn conversations with context |
 
 **Quick Start:**
 
 ```bash
 # Run any example
-uv run python packages/tta-dev-primitives/examples/rag_workflow.py
+uv run python platform/primitives/examples/rag_workflow.py
 
 # Or explore all examples
-ls packages/tta-dev-primitives/examples/
+ls platform/primitives/examples/
 ```
 
-**Implementation Guide:** [`packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
+**Implementation Guide:** [`platform/primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](platform/primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
 - Complete implementation details for all examples
 - InstrumentedPrimitive pattern guide
 - Test results and validation
@@ -374,15 +374,15 @@ ls packages/tta-dev-primitives/examples/
 ### Additional Examples
 
 More patterns in the examples directory:
-- [Basic workflows](packages/tta-dev-primitives/examples/basic_workflow.py) - Foundation patterns
-- [Composition patterns](packages/tta-dev-primitives/examples/composition.py) - Combining primitives
-- [Error handling](packages/tta-dev-primitives/examples/error_handling.py) - Recovery patterns
-- [Observability](packages/tta-dev-primitives/examples/observability.py) - Tracing and metrics
+- [Basic workflows](platform/primitives/examples/basic_workflow.py) - Foundation patterns
+- [Composition patterns](platform/primitives/examples/composition.py) - Combining primitives
+- [Error handling](platform/primitives/examples/error_handling.py) - Recovery patterns
+- [Observability](platform/primitives/examples/observability.py) - Tracing and metrics
 
 ### Get Help
 
 - 📖 Documentation: See `docs/` directory
-- 💻 Examples: See `packages/tta-dev-primitives/examples/`
+- 💻 Examples: See `platform/primitives/examples/`
 - 🐛 Issues: Open an issue on GitHub
 - 💬 Discussions: GitHub Discussions
 
@@ -468,7 +468,7 @@ Interested in contributing? Check out:
 
 ---
 
-**Ready to build?** Start with the [quick start](#quick-start-5-minutes) above or explore the [examples](packages/tta-dev-primitives/examples/).
+**Ready to build?** Start with the [quick start](#quick-start-5-minutes) above or explore the [examples](platform/primitives/examples/).
 
 ---
 

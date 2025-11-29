@@ -765,8 +765,8 @@ production_llm = (
 ## Related Documentation
 
 - **Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)
-- **Package README:** [`packages/tta-dev-primitives/README.md`](../../packages/tta-dev-primitives/README.md)
-- **Examples:** [`packages/tta-dev-primitives/examples/`](../../packages/tta-dev-primitives/examples/)
+- **Package README:** [`platform/primitives/README.md`](../../platform/primitives/README.md)
+- **Examples:** [`platform/primitives/examples/`](../../platform/primitives/examples/)
 - **Decision Records:** [`DECISION_RECORDS.md`](DECISION_RECORDS.md)
 
 ---

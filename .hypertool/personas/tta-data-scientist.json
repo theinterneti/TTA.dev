@@ -1,0 +1,59 @@
+{
+  "name": "tta-data-scientist",
+  "displayName": "TTA Data Scientist",
+  "description": "Specialized in data analysis, ML workflows, and research",
+  "icon": "🔬",
+  "tokenBudget": 2000,
+  "allowedServers": [
+    "context7",
+    "github",
+    "gitmcp",
+    "sequential-thinking",
+    "mcp-logseq"
+  ],
+  "allowedTools": {
+    "context7": ["resolve-library-id", "get-library-docs"],
+    "github": [
+      "github_create_or_update_file",
+      "github_get_file_contents",
+      "github_search_code"
+    ],
+    "gitmcp": ["list_files", "read_file", "get_diff"],
+    "sequential-thinking": ["think", "reflect"],
+    "mcp-logseq": ["list_pages", "get_page_content", "search", "create_page"]
+  },
+  "restrictedPaths": [
+    ".github/workflows/**",
+    "monitoring/**"
+  ],
+  "context": {
+    "primaryLanguage": "Python",
+    "frameworks": ["NumPy", "Pandas", "Scikit-learn", "PyTorch"],
+    "focusAreas": [
+      "Data analysis workflows",
+      "ML model development",
+      "Research and experimentation",
+      "Jupyter notebooks",
+      "Statistical analysis"
+    ],
+    "keyFiles": [
+      "experiments/**/*.ipynb",
+      "datasets/**/*",
+      "scripts/analysis/**/*.py"
+    ]
+  },
+  "security": {
+    "allowEnvironmentAccess": ["OPENAI_API_KEY", "HF_TOKEN"],
+    "blockList": ["DATABASE_*", "AWS_SECRET_*"],
+    "requireApprovalFor": ["file_delete", "system_command"]
+  },
+  "workflows": {
+    "default": "data-science-research",
+    "available": [
+      "data-science-research",
+      "experiment-tracking",
+      "model-development",
+      "data-analysis"
+    ]
+  }
+}

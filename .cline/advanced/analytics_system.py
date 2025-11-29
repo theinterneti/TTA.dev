@@ -187,9 +187,7 @@ class UsageAnalytics:
                 and (interaction.timestamp - i.timestamp).days <= 7
             ]
             successful_interactions = [
-                i
-                for i in recent_interactions
-                if i.outcome in ["success", "partial_success"]
+                i for i in recent_interactions if i.outcome in ["success", "partial_success"]
             ]
             profile["success_rate"] = len(successful_interactions) / max(
                 len(recent_interactions), 1
@@ -204,14 +202,10 @@ class UsageAnalytics:
             self.metrics.append(metric)
             await self._clean_old_data()
 
-    async def calculate_success_rates(
-        self, time_window_days: int = 30
-    ) -> dict[str, float]:
+    async def calculate_success_rates(self, time_window_days: int = 30) -> dict[str, float]:
         """Calculate success rates for different primitives and contexts."""
         cutoff_date = datetime.now() - timedelta(days=time_window_days)
-        recent_interactions = [
-            i for i in self.interactions if i.timestamp >= cutoff_date
-        ]
+        recent_interactions = [i for i in self.interactions if i.timestamp >= cutoff_date]
 
         success_rates = {}
 
@@ -224,9 +218,7 @@ class UsageAnalytics:
                     primitive_stats[interaction.primitive_used]["successful"] += 1
 
         for primitive, stats in primitive_stats.items():
-            success_rates[f"primitive_{primitive}"] = stats["successful"] / max(
-                stats["total"], 1
-            )
+            success_rates[f"primitive_{primitive}"] = stats["successful"] / max(stats["total"], 1)
 
         # Calculate by suggestion type
         suggestion_stats = defaultdict(lambda: {"total": 0, "successful": 0})
@@ -272,14 +264,10 @@ class UsageAnalytics:
             "high_satisfaction_contexts": self._get_high_satisfaction_contexts(),
         }
 
-    async def track_satisfaction_trends(
-        self, time_window_days: int = 30
-    ) -> dict[str, Any]:
+    async def track_satisfaction_trends(self, time_window_days: int = 30) -> dict[str, Any]:
         """Track satisfaction trends over time."""
         cutoff_date = datetime.now() - timedelta(days=time_window_days)
-        recent_interactions = [
-            i for i in self.interactions if i.timestamp >= cutoff_date
-        ]
+        recent_interactions = [i for i in self.interactions if i.timestamp >= cutoff_date]
 
         # Group by week
         weekly_satisfaction = defaultdict(list)
@@ -294,21 +282,16 @@ class UsageAnalytics:
 
         # Calculate trends
         weekly_trends = {
-            week: statistics.mean(scores)
-            for week, scores in weekly_satisfaction.items()
+            week: statistics.mean(scores) for week, scores in weekly_satisfaction.items()
         }
 
-        daily_trends = {
-            day: statistics.mean(scores) for day, scores in daily_satisfaction.items()
-        }
+        daily_trends = {day: statistics.mean(scores) for day, scores in daily_satisfaction.items()}
 
         return {
             "weekly_trends": weekly_trends,
             "daily_trends": daily_trends,
             "overall_trend": self._calculate_trend(list(daily_trends.values())),
-            "satisfaction_distribution": self._get_satisfaction_distribution(
-                recent_interactions
-            ),
+            "satisfaction_distribution": self._get_satisfaction_distribution(recent_interactions),
         }
 
     def _get_most_used_primitives(self, limit: int = 10) -> list[tuple[str, int]]:
@@ -320,13 +303,9 @@ class UsageAnalytics:
 
         return sorted(usage_count.items(), key=lambda x: x[1], reverse=True)[:limit]
 
-    def _get_high_satisfaction_contexts(
-        self, threshold: float = 0.8
-    ) -> list[dict[str, Any]]:
+    def _get_high_satisfaction_contexts(self, threshold: float = 0.8) -> list[dict[str, Any]]:
         """Get contexts that lead to high satisfaction."""
-        high_sat_interactions = [
-            i for i in self.interactions if i.satisfaction_score >= threshold
-        ]
+        high_sat_interactions = [i for i in self.interactions if i.satisfaction_score >= threshold]
 
         context_patterns = defaultdict(int)
         for interaction in high_sat_interactions:
@@ -335,9 +314,7 @@ class UsageAnalytics:
 
         return [
             {"context": ctx, "frequency": freq}
-            for ctx, freq in sorted(
-                context_patterns.items(), key=lambda x: x[1], reverse=True
-            )
+            for ctx, freq in sorted(context_patterns.items(), key=lambda x: x[1], reverse=True)
         ]
 
     def _calculate_trend(self, values: list[float]) -> str:
@@ -356,9 +333,7 @@ class UsageAnalytics:
         else:
             return "stable"
 
-    def _get_satisfaction_distribution(
-        self, interactions: list[UserInteraction]
-    ) -> dict[str, int]:
+    def _get_satisfaction_distribution(self, interactions: list[UserInteraction]) -> dict[str, int]:
         """Get satisfaction score distribution."""
         distribution = {"low": 0, "medium": 0, "high": 0, "very_high": 0}
 
@@ -441,9 +416,7 @@ class ContinuousImprovement:
 
         # Get test interactions
         test_interactions = [
-            i
-            for i in self.analytics.interactions
-            if i.context.get("test_id") == test_id
+            i for i in self.analytics.interactions if i.context.get("test_id") == test_id
         ]
 
         if not test_interactions:
@@ -495,17 +468,13 @@ class ContinuousImprovement:
             "recommendation": self._generate_recommendation(results),
         }
 
-    def _calculate_metric(
-        self, interactions: list[UserInteraction], metric: MetricType
-    ) -> float:
+    def _calculate_metric(self, interactions: list[UserInteraction], metric: MetricType) -> float:
         """Calculate a specific metric for interactions."""
         if not interactions:
             return 0.0
 
         if metric == MetricType.SUCCESS_RATE:
-            successful = sum(
-                1 for i in interactions if i.outcome in ["success", "partial_success"]
-            )
+            successful = sum(1 for i in interactions if i.outcome in ["success", "partial_success"])
             return successful / len(interactions)
         elif metric == MetricType.SATISFACTION_SCORE:
             return statistics.mean([i.satisfaction_score for i in interactions])
@@ -522,9 +491,7 @@ class ContinuousImprovement:
         """Get values for a specific metric."""
         return [self._get_single_metric_value(i, metric) for i in interactions]
 
-    def _get_single_metric_value(
-        self, interaction: UserInteraction, metric: MetricType
-    ) -> float:
+    def _get_single_metric_value(self, interaction: UserInteraction, metric: MetricType) -> float:
         """Get a single metric value from an interaction."""
         if metric == MetricType.SUCCESS_RATE:
             return 1.0 if interaction.outcome in ["success", "partial_success"] else 0.0
@@ -551,9 +518,7 @@ class ContinuousImprovement:
             return 0.0
 
         # Simplified confidence calculation
-        pooled_std = math.sqrt(
-            ((n_a - 1) * std_a**2 + (n_b - 1) * std_b**2) / (n_a + n_b - 2)
-        )
+        pooled_std = math.sqrt(((n_a - 1) * std_a**2 + (n_b - 1) * std_b**2) / (n_a + n_b - 2))
         if pooled_std == 0:
             return 1.0 if abs(mean_b - mean_a) > 0 else 0.0
 
@@ -657,9 +622,7 @@ class LearningAlgorithms:
         self.prediction_cache: dict[str, Any] = {}
         self._lock = asyncio.Lock()
 
-    async def create_model(
-        self, model_type: LearningMethod, features: list[str], name: str
-    ) -> str:
+    async def create_model(self, model_type: LearningMethod, features: list[str], name: str) -> str:
         """Create a new machine learning model."""
         model = LearningModel(
             model_id=str(uuid.uuid4()),
@@ -698,18 +661,14 @@ class LearningAlgorithms:
         await asyncio.sleep(1)  # Simulate training time
 
         # Calculate performance metrics
-        performance_metrics = await self._calculate_performance_metrics(
-            training_data, model
-        )
+        performance_metrics = await self._calculate_performance_metrics(training_data, model)
         model.performance_metrics = performance_metrics
         model.status = "trained"
         model.last_updated = datetime.now()
 
         return performance_metrics
 
-    async def predict(
-        self, model_id: str, input_data: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def predict(self, model_id: str, input_data: dict[str, Any]) -> dict[str, Any]:
         """Make a prediction using a trained model."""
         model = self.models.get(model_id)
         if not model or model.status != "trained":
@@ -752,15 +711,11 @@ class LearningAlgorithms:
         prediction = await self.predict(model_id, features)
 
         # Adapt suggestions based on prediction
-        adapted_suggestions = self._adapt_suggestions_from_prediction(
-            prediction, context
-        )
+        adapted_suggestions = self._adapt_suggestions_from_prediction(prediction, context)
 
         return adapted_suggestions
 
-    async def reinforcement_learning_update(
-        self, interaction: UserInteraction, reward: float
-    ):
+    async def reinforcement_learning_update(self, interaction: UserInteraction, reward: float):
         """Update model based on reinforcement learning feedback."""
         # This would implement Q-learning or similar RL algorithms
         # For now, we'll simulate the update process
@@ -775,9 +730,7 @@ class LearningAlgorithms:
             )
             model.last_updated = datetime.now()
 
-            logging.info(
-                f"RL update: interaction={interaction.interaction_id}, reward={reward}"
-            )
+            logging.info(f"RL update: interaction={interaction.interaction_id}, reward={reward}")
 
     async def federated_learning_update(self, model_updates: list[dict[str, Any]]):
         """Update model using federated learning from multiple clients."""
@@ -812,9 +765,7 @@ class LearningAlgorithms:
             "satisfaction_trend",
         ]
 
-        return await self.create_model(
-            LearningMethod.SUPERVISED, features, "adaptive_suggestions"
-        )
+        return await self.create_model(LearningMethod.SUPERVISED, features, "adaptive_suggestions")
 
     def _extract_features(
         self, context: ProjectContext, user_history: list[UserInteraction]
@@ -860,9 +811,7 @@ class LearningAlgorithms:
             i.satisfaction_score
             for i in user_history[-10:]  # Last 10 interactions
         ]
-        satisfaction_trend = (
-            statistics.mean(recent_satisfaction) if recent_satisfaction else 0.5
-        )
+        satisfaction_trend = statistics.mean(recent_satisfaction) if recent_satisfaction else 0.5
 
         return {
             "user_experience_level": experience_level,
@@ -992,9 +941,7 @@ class LearningAlgorithms:
 
         return adapted_suggestions
 
-    def _calculate_context_relevance(
-        self, primitive: str, context: ProjectContext
-    ) -> float:
+    def _calculate_context_relevance(self, primitive: str, context: ProjectContext) -> float:
         """Calculate how relevant a primitive is to the current context."""
         relevance = 0.5  # Base relevance
 
@@ -1020,10 +967,7 @@ class LearningAlgorithms:
                 "flask": {"cache_primitive": 0.8, "fallback_primitive": 0.7},
             }
 
-            if (
-                framework in framework_relevance
-                and primitive in framework_relevance[framework]
-            ):
+            if framework in framework_relevance and primitive in framework_relevance[framework]:
                 relevance = framework_relevance[framework][primitive]
 
         # Stage-specific relevance
@@ -1070,9 +1014,7 @@ class LearningAlgorithms:
 
         return metrics
 
-    async def _aggregate_federated_updates(
-        self, updates: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    async def _aggregate_federated_updates(self, updates: list[dict[str, Any]]) -> dict[str, Any]:
         """Aggregate federated learning updates."""
         # Simple average aggregation
         if not updates:
@@ -1081,9 +1023,7 @@ class LearningAlgorithms:
         # This would be more sophisticated in a real implementation
         aggregated = {
             "client_count": len(updates),
-            "avg_performance": statistics.mean(
-                [u.get("performance", 0.5) for u in updates]
-            ),
+            "avg_performance": statistics.mean([u.get("performance", 0.5) for u in updates]),
             "update_count": sum(u.get("updates", 0) for u in updates),
         }
 
@@ -1154,9 +1094,7 @@ class AnalyticsSystem:
         success_rates = await self.analytics.calculate_success_rates()
         productivity_impact = await self.analytics.analyze_productivity_impact()
         satisfaction_trends = await self.analytics.track_satisfaction_trends()
-        improvement_suggestions = (
-            await self.improvement.generate_improvement_suggestions()
-        )
+        improvement_suggestions = await self.improvement.generate_improvement_suggestions()
 
         # Get model performance
         model_status = {}
@@ -1182,8 +1120,7 @@ class AnalyticsSystem:
             "improvement_suggestions": improvement_suggestions,
             "model_status": model_status,
             "ab_test_results": {
-                test_id: test.results
-                for test_id, test in self.improvement.completed_tests.items()
+                test_id: test.results for test_id, test in self.improvement.completed_tests.items()
             },
             "generated_at": datetime.now().isoformat(),
         }
@@ -1196,9 +1133,7 @@ class AnalyticsSystem:
             description="Test the impact of enhanced productivity features",
             status=ABTestStatus.DESIGN,
             variant_a={"features": ["basic_suggestions"]},
-            variant_b={
-                "features": ["basic_suggestions", "productivity_tips", "smart_defaults"]
-            },
+            variant_b={"features": ["basic_suggestions", "productivity_tips", "smart_defaults"]},
             metrics=[
                 MetricType.SUCCESS_RATE,
                 MetricType.SATISFACTION_SCORE,

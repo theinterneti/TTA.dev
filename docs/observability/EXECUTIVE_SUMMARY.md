@@ -294,7 +294,7 @@ The current observability implementation is **not production-ready** but has a *
 
 - **[OBSERVABILITY_ASSESSMENT.md](./OBSERVABILITY_ASSESSMENT.md)** - Comprehensive technical assessment
 - **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation guide
-- **[packages/tta-dev-primitives/README.md](../../packages/tta-dev-primitives/README.md)** - Primitives documentation
+- **[platform/primitives/README.md](../../platform/primitives/README.md)** - Primitives documentation
 
 ---
 

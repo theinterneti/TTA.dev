@@ -217,7 +217,7 @@ rm tasks_github.json
 
 ### 9. SpecKit Package Structure
 
-**Location:** `packages/tta-dev-primitives/`
+**Location:** `platform/primitives/`
 
 **New Files:**
 ```
@@ -313,9 +313,9 @@ tests/speckit/
 
 **Commit 1: SpecKit Core Implementation**
 ```bash
-git add packages/tta-dev-primitives/src/tta_dev_primitives/speckit/
-git add packages/tta-dev-primitives/tests/speckit/
-git add packages/tta-dev-primitives/examples/speckit_*.py
+git add platform/primitives/src/tta_dev_primitives/speckit/
+git add platform/primitives/tests/speckit/
+git add platform/primitives/examples/speckit_*.py
 git commit -m "feat(speckit): Add TasksPrimitive with Days 8-9 implementation
 
 - Implement TasksPrimitive (1,052 lines)

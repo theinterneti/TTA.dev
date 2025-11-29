@@ -126,8 +126,8 @@ config = PathwayConfig(
 
     # Python paths
     python_paths=[
-        "packages/tta-dev-primitives/src",
-        "packages/tta-observability-integration/src",
+        "platform/primitives/src",
+        "platform/observability/src",
     ],
 
     # Exclusions
@@ -169,18 +169,18 @@ from python_pathway import PathManager
 pm = PathManager(root="/home/thein/repos/TTA.dev")
 
 # Resolve paths
-abs_path = pm.resolve("packages/tta-dev-primitives/src")
+abs_path = pm.resolve("platform/primitives/src")
 print(f"Absolute: {abs_path}")
 
 # Relative paths
 rel_path = pm.relative_to(
-    "/home/thein/repos/TTA.dev/packages/tta-dev-primitives/src/base.py",
+    "/home/thein/repos/TTA.dev/platform/primitives/src/base.py",
     "/home/thein/repos/TTA.dev"
 )
 print(f"Relative: {rel_path}")
 
 # Validate paths
-if pm.exists("packages/tta-dev-primitives"):
+if pm.exists("platform/primitives"):
     print("Path exists")
 
 # Find files
@@ -225,7 +225,7 @@ from python_pathway import ModuleAnalyzer
 analyzer = ModuleAnalyzer()
 
 # Analyze module imports
-result = analyzer.analyze_imports("packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py")
+result = analyzer.analyze_imports("platform/primitives/src/tta_dev_primitives/core/base.py")
 
 print(f"Module: {result.module_name}")
 print(f"Imports:")
@@ -245,7 +245,7 @@ from python_pathway import ComplexityAnalyzer
 analyzer = ComplexityAnalyzer()
 
 # Analyze file complexity
-result = analyzer.analyze_file("packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py")
+result = analyzer.analyze_file("platform/primitives/src/tta_dev_primitives/core/sequential.py")
 
 print(f"File: {result.file_path}")
 print(f"Lines of code: {result.loc}")
@@ -269,7 +269,7 @@ from python_pathway import StructureAnalyzer
 analyzer = StructureAnalyzer()
 
 # Analyze package structure
-result = analyzer.analyze_package("packages/tta-dev-primitives")
+result = analyzer.analyze_package("platform/primitives")
 
 print(f"Package: {result.name}")
 print(f"Version: {result.version}")
@@ -294,7 +294,7 @@ from python_pathway import DependencyAnalyzer
 analyzer = DependencyAnalyzer()
 
 # Analyze package dependencies
-graph = analyzer.analyze_package("packages/tta-dev-primitives")
+graph = analyzer.analyze_package("platform/primitives")
 
 print(f"Total modules: {len(graph.nodes)}")
 print(f"Dependencies: {len(graph.edges)}")
@@ -325,7 +325,7 @@ for dep in module_deps:
 from python_pathway import DependencyAnalyzer
 
 analyzer = DependencyAnalyzer()
-graph = analyzer.analyze_package("packages/tta-dev-primitives")
+graph = analyzer.analyze_package("platform/primitives")
 
 # Export as DOT (Graphviz)
 graph.export_dot("deps.dot")
@@ -351,7 +351,7 @@ from python_pathway import QualityAnalyzer
 analyzer = QualityAnalyzer()
 
 # Analyze code quality
-result = analyzer.analyze_package("packages/tta-dev-primitives")
+result = analyzer.analyze_package("platform/primitives")
 
 print(f"Package: {result.name}")
 print(f"Quality Score: {result.score}/100")
@@ -380,7 +380,7 @@ for issue in result.top_issues[:5]:
 from python_pathway import QualityAnalyzer
 
 analyzer = QualityAnalyzer()
-result = analyzer.analyze_package("packages/tta-dev-primitives")
+result = analyzer.analyze_package("platform/primitives")
 
 # Generate HTML report
 report = analyzer.generate_report(
@@ -446,9 +446,9 @@ def validate_dependencies():
 
     # Analyze all packages
     packages = [
-        "packages/tta-dev-primitives",
-        "packages/tta-observability-integration",
-        "packages/universal-agent-context",
+        "platform/primitives",
+        "platform/observability",
+        "platform/agent-context",
     ]
 
     all_valid = True
@@ -491,7 +491,7 @@ def generate_docs():
     mod_analyzer = ModuleAnalyzer()
 
     # Analyze package
-    package = struct_analyzer.analyze_package("packages/tta-dev-primitives")
+    package = struct_analyzer.analyze_package("platform/primitives")
 
     # Generate documentation
     docs_dir = Path("docs/api")
@@ -553,10 +553,10 @@ if __name__ == "__main__":
    ```python
    # ✅ Good - explicit
    pm = PathManager(root="/home/thein/repos/TTA.dev")
-   path = pm.resolve("packages/tta-dev-primitives/src")
+   path = pm.resolve("platform/primitives/src")
 
    # ❌ Bad - ambiguous
-   path = "packages/tta-dev-primitives/src"
+   path = "platform/primitives/src"
    ```
 
 2. **Validate Paths**
@@ -673,15 +673,15 @@ from python_pathway import PathManager
 
 pm = PathManager(root="/home/thein/repos/TTA.dev")
 pm.add_python_paths([
-    "packages/tta-dev-primitives/src",
-    "packages/tta-observability-integration/src",
+    "platform/primitives/src",
+    "platform/observability/src",
 ])
 
 # Or use environment variable
 import os
 os.environ["PYTHONPATH"] = ":".join([
-    "/home/thein/repos/TTA.dev/packages/tta-dev-primitives/src",
-    "/home/thein/repos/TTA.dev/packages/tta-observability-integration/src",
+    "/home/thein/repos/TTA.dev/platform/primitives/src",
+    "/home/thein/repos/TTA.dev/platform/observability/src",
 ])
 ```
 
@@ -702,7 +702,7 @@ analyzer = ModuleAnalyzer(python_version="3.11")
 # Or skip files with syntax errors
 analyzer = ModuleAnalyzer(skip_errors=True)
 result = analyzer.analyze_package(
-    "packages/tta-dev-primitives",
+    "platform/primitives",
     on_error="warn"  # "skip" or "raise"
 )
 ```
@@ -736,7 +736,7 @@ analyzer = ModuleAnalyzer(
 
 # Limit analysis scope
 result = analyzer.analyze_package(
-    "packages/tta-dev-primitives",
+    "platform/primitives",
     analyze_complexity=False,  # Skip complexity analysis
     analyze_types=False,  # Skip type analysis
 )

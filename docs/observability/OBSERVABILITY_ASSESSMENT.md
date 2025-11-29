@@ -34,9 +34,9 @@ The TTA.dev observability infrastructure is **partially implemented** with solid
 
 **Expected:** `packages/tta-dev-observability/`  
 **Actual:** Observability code scattered across:
-- `packages/tta-dev-primitives/src/tta_dev_primitives/observability/` (basic logging, metrics, tracing)
-- `packages/tta-dev-primitives/src/tta_dev_primitives/apm/` (APM setup, decorators, instrumented base)
-- `packages/tta-observability-integration/` (separate integration package with enhanced primitives)
+- `platform/primitives/src/tta_dev_primitives/observability/` (basic logging, metrics, tracing)
+- `platform/primitives/src/tta_dev_primitives/apm/` (APM setup, decorators, instrumented base)
+- `platform/observability/` (separate integration package with enhanced primitives)
 
 **Issue:** No centralized observability package. Observability concerns mixed with primitive implementations.
 
@@ -119,7 +119,7 @@ The TTA.dev observability infrastructure is **partially implemented** with solid
 
 ### 3.1 Current Implementation
 
-<augment_code_snippet path="packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py" mode="EXCERPT">
+<augment_code_snippet path="platform/primitives/src/tta_dev_primitives/core/base.py" mode="EXCERPT">
 ```python
 class WorkflowContext(BaseModel):
     """Context passed through workflow execution."""

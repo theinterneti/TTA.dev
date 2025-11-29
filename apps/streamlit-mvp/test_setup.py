@@ -21,12 +21,7 @@ else:
 
 # Test 2: Check Python version
 print("\n2. Checking Python version...")
-if sys.version_info >= (3, 8):
-    print(f"   ✅ Python {sys.version_info.major}.{sys.version_info.minor}")
-else:
-    print(
-        f"   ⚠️  Python {sys.version_info.major}.{sys.version_info.minor} (recommend 3.8+)"
-    )
+print(f"   ✅ Python {sys.version_info.major}.{sys.version_info.minor}")
 
 # Test 3: Check Streamlit import
 print("\n3. Checking Streamlit...")

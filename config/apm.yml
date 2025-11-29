@@ -1,0 +1,156 @@
+# Agent Package Manager Configuration for TTA.dev
+# Manages AI agent dependencies including MCP servers for automated workflows
+
+name: tta-dev
+version: 1.0.0
+description: AI Development Toolkit with production-ready agentic primitives
+
+# MCP Server Dependencies
+# These provide tool capabilities to the Gemini CLI agent
+dependencies:
+  mcp:
+    # GitHub MCP Server - Enables repository interaction
+    # Tools: create_issue, search_code, create_pull_request, etc.
+    - github/github-mcp-server
+
+    # File System MCP Server - For reading/writing files
+    # Tools: read_file, write_file, list_directory, etc.
+    # - modelcontextprotocol/server-filesystem
+
+    # Additional MCP servers can be added as needed:
+    # - microsoft/azure-devops-mcp     # Azure DevOps integration
+    # - anthropic/mcp-server-postgres  # Database operations
+    # - other custom MCP servers
+
+# Workflow Scripts
+# Define reusable agent workflows that can be triggered via APM
+# Uses scripts/run_agent.py wrapper to support multiple runtimes (Gemini, Cline, etc.)
+scripts:
+  # Custom prompt mode - accepts dynamic input (Direct gemini call for now as it's interactive/custom)
+  custom: "gemini --yolo --model gemini-2.5-flash --output-format json"
+
+  # Automated PR Review
+  pr-review: "python scripts/run_agent.py --prompt .github/prompts/pr-review.prompt.md"
+
+  # CI PR Review (with diff context)
+  ci-pr-review: "python scripts/ci_pr_review.py"
+
+  # Test Generation
+  generate-tests: "python scripts/run_agent.py --prompt .github/prompts/generate-tests.prompt.md"
+
+  # Issue Triage
+  triage-issue: "python scripts/run_agent.py --prompt .github/prompts/triage-issue.prompt.md"
+
+  # Feature Implementation
+  feature-implementation: "python scripts/run_agent.py --prompt .github/prompts/feature-implementation.prompt.md"
+
+  # Bug Fix
+  bug-fix: "python scripts/run_agent.py --prompt .github/prompts/bug-fix.prompt.md"
+
+  # Test Coverage Improvement
+  test-coverage: "python scripts/run_agent.py --prompt .github/prompts/test-coverage-improvement.prompt.md"
+
+  # Component Promotion
+  component-promotion: "python scripts/run_agent.py --prompt .github/prompts/component-promotion.prompt.md"
+
+  # CI Smoke Test
+  ci-smoke-test: "python scripts/run_agent.py --prompt .github/prompts/ci-smoke-test.prompt.md"
+
+  # Quality Gate Fix
+  quality-gate-fix: "python scripts/run_agent.py --prompt .github/prompts/quality-gate-fix.prompt.md"
+
+  # Augster Axiomatic Workflow
+  augster-axiomatic: "python scripts/run_agent.py --prompt .github/prompts/augster-axiomatic-workflow.prompt.md"
+
+# Configuration
+config:
+  # Gemini CLI settings
+  gemini:
+    model: "gemini-2.5-flash"
+    temperature: 0.7
+    max_output_tokens: 8192
+
+  # MCP Configuration
+  mcp:
+    # GitHub MCP Server settings
+    github:
+      # Authorization will be provided via GITHUB_COPILOT_PAT env var
+      # Configured in workflow using secrets
+      enable_tools:
+        - create_issue
+        - search_code
+        - create_pull_request
+        - create_or_update_file
+        - get_file_contents
+
+    # File System MCP Server settings (if enabled)
+    # filesystem:
+    #   allowed_paths:
+    #     - /workspace
+    #     - /packages
+    #     - /docs
+
+# Quality Gates
+# Define required checks before agent actions
+quality:
+  # Require tests to pass before code generation
+  require_tests: true
+
+  # Require type checking
+  require_type_check: true
+
+  # Require linting
+  require_lint: true
+
+  # Minimum test coverage
+  min_coverage: 80
+
+# Context Files
+# Additional context provided to the agent
+context:
+  files:
+    - GEMINI.md # Primary project context
+    - AGENTS.md # Agent-specific instructions
+    - README.md # Project overview
+    - PRIMITIVES_CATALOG.md # Primitive reference
+
+  # Directories to exclude from context
+  exclude:
+    - node_modules
+    - .venv
+    - __pycache__
+    - .git
+    - htmlcov
+    - .pytest_cache
+
+# Permissions
+# Define what the agent can do
+permissions:
+  # Read permissions
+  read:
+    - packages/**/*.py
+    - docs/**/*.md
+    - tests/**/*.py
+    - .github/**/*.yml
+
+  # Write permissions (for automated changes)
+  write:
+    - docs/**/*.md # Can update documentation
+    - tests/**/*.py # Can generate tests
+    # NOTE: Code changes require PR review
+
+  # Restricted (agent cannot modify)
+  restricted:
+    - .github/workflows/**/*.yml # Workflows require human review
+    - pyproject.toml # Dependencies require review
+    - apm.yml # Self-modification restricted
+
+# Telemetry
+# Track agent performance and usage
+telemetry:
+  enabled: true
+  metrics:
+    - execution_time
+    - token_usage
+    - tool_calls
+    - success_rate

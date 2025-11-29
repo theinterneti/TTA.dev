@@ -242,7 +242,7 @@ Create a workflow that:
 
 - **MCP Spec:** https://modelcontextprotocol.io
 - **FastMCP Docs:** https://github.com/jlowin/fastmcp
-- **TTA.dev Primitives:** `packages/tta-dev-primitives/`
+- **TTA.dev Primitives:** `platform/primitives/`
 - **GitHub MCP Registry:** https://code.visualstudio.com/docs/copilot/customization/mcp-servers
 
 ### 🤝 Contributing

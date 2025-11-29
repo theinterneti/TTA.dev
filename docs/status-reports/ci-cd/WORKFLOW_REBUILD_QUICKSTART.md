@@ -215,7 +215,7 @@ jobs:
 
       - name: Start Docker services
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           docker compose -f docker-compose.integration.yml up -d
           sleep 10
 
@@ -227,7 +227,7 @@ jobs:
       - name: Stop services
         if: always()
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           docker compose -f docker-compose.integration.yml down -v
 
   cross-platform:
@@ -277,7 +277,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-tta-env
       - run: uv sync --all-extras
-      - run: uv pip install -e packages/tta-dev-primitives/
+      - run: uv pip install -e platform/primitives/
 ```
 
 - [ ] Create workflow file

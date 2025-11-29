@@ -1,0 +1,66 @@
+{
+  "name": "tta-backend-engineer",
+  "displayName": "TTA Backend Engineer",
+  "description": "Specialized in Python backend development, primitives, and workflow orchestration",
+  "icon": "⚙️",
+  "tokenBudget": 2000,
+  "allowedServers": [
+    "context7",
+    "github",
+    "sequential-thinking",
+    "gitmcp",
+    "serena",
+    "mcp-logseq"
+  ],
+  "allowedTools": {
+    "context7": ["resolve-library-id", "get-library-docs"],
+    "github": [
+      "github_create_or_update_file",
+      "github_get_file_contents",
+      "github_list_commits",
+      "github_search_code",
+      "github_create_pull_request",
+      "github_pull_request_read"
+    ],
+    "sequential-thinking": ["think", "reflect"],
+    "gitmcp": ["list_files", "read_file", "get_diff"],
+    "serena": ["analyze_code", "suggest_refactoring"],
+    "mcp-logseq": ["list_pages", "get_page_content", "search"]
+  },
+  "restrictedPaths": [
+    "apps/**/frontend/**",
+    "**/node_modules/**",
+    "**/.venv/**"
+  ],
+  "context": {
+    "primaryLanguage": "Python",
+    "frameworks": ["FastAPI", "Pydantic", "asyncio"],
+    "focusAreas": [
+      "TTA.dev primitives implementation",
+      "Workflow orchestration",
+      "Backend API design",
+      "Async patterns",
+      "Type safety"
+    ],
+    "keyFiles": [
+      "packages/tta-dev-primitives/**/*.py",
+      "packages/tta-observability-integration/**/*.py",
+      "pyproject.toml",
+      "PRIMITIVES_CATALOG.md"
+    ]
+  },
+  "security": {
+    "allowEnvironmentAccess": ["GITHUB_TOKEN", "OPENAI_API_KEY"],
+    "blockList": ["AWS_*", "DATABASE_*"],
+    "requireApprovalFor": ["file_delete", "system_command"]
+  },
+  "workflows": {
+    "default": "backend-development",
+    "available": [
+      "backend-development",
+      "primitive-creation",
+      "api-design",
+      "testing-backend"
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+[project]
+name = "tta-dev-primitives"
+version = "1.0.0"
+description = "Production-ready development primitives for TTA - workflow patterns, recovery, observability, and testing utilities"
+authors = [{ name = "TTA Development Team" }]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.6.0",
+    "structlog>=24.1.0",
+    "opentelemetry-api>=1.38.0",
+    "opentelemetry-sdk>=1.38.0",
+    "tenacity>=8.2.3",
+    "e2b-code-interpreter>=2.3.0",
+    "google-generativeai>=0.8.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.3.0",
+    "mypy>=1.8.0",
+]
+tracing = [
+    "opentelemetry-instrumentation>=0.59b0",
+    "opentelemetry-exporter-otlp>=1.38.0",
+]
+apm = [
+    "opentelemetry-api>=1.38.0",
+    "opentelemetry-sdk>=1.38.0",
+    "opentelemetry-exporter-prometheus>=0.59b0",
+    "opentelemetry-instrumentation>=0.59b0",
+]
+integrations = [
+    "openai>=1.0.0",
+    "anthropic>=0.18.0",
+    "ollama>=0.1.0",
+    "supabase>=2.0.0",
+    "aiosqlite>=0.19.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tta_dev_primitives"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "B", "UP", "ANN"]
+ignore = [
+    "E501",
+    "ANN101",
+    "ANN102",
+    "ANN401",
+] # Allow typing.Any for flexibility in primitives
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ANN", "E501", "E402"]
+"examples/**/*.py" = ["ANN", "E501", "E402", "N806"]
+"src/tta_dev_primitives/apm/decorators.py" = [
+    "ANN",
+] # Decorator wrappers use complex generic types
+"src/tta_dev_primitives/integrations/*_primitive.py" = [
+    "ANN204",
+    "ANN001",
+] # Async context managers have standard __aenter__/__aexit__ signatures
+"src/tta_dev_primitives/recovery/*.py" = [
+    "B904",
+    "ANN204",
+] # Intentional exception re-raise + __post_init__ dataclass method
+"src/tta_dev_primitives/observability/context_propagation.py" = [
+    "ANN003",
+] # **kwargs forwarding in generic span creation
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true

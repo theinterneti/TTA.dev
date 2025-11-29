@@ -1,8 +1,7 @@
 {
-    "python.defaultInterpreterPath": ".venv/bin/python",
+    "python.defaultInterpreterPath": "/home/thein/repos/TTA.dev-copilot/.venv/bin/python",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "workspace",
-    
     // Ruff - New Native Server Configuration (November 2025)
     "ruff.nativeServer": true,
     "ruff.configuration": "./pyproject.toml",
@@ -15,7 +14,6 @@
     "ruff.codeAction.disableRuleComment": {
         "enable": true
     },
-    
     "pyright.disableTypeCheck": false,
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
@@ -26,6 +24,28 @@
     "terminal.integrated.profiles.linux": {
         "zsh": {
             "path": "/usr/bin/zsh"
+        }
+    },
+    // MCP Configuration - Hypertool Integration
+    "mcp.servers": {
+        "hypertool": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@toolprint/hypertool-mcp@latest",
+                "mcp",
+                "run",
+                "--mcp-config",
+                "${workspaceFolder}/.hypertool/mcp_config.json"
+            ],
+            "env": {
+                "HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/.hypertool",
+                "HYPERTOOL_SERVERS_FILE": "${workspaceFolder}/.hypertool/mcp_servers.json",
+                "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",
+                "LOGSEQ_API_TOKEN": "${env:LOGSEQ_API_TOKEN}"
+            },
+            "description": "Hypertool MCP Loader - Persona-based tool orchestration",
+            "disabled": false
         }
     }
 }

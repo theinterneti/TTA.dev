@@ -233,7 +233,9 @@ await primitive_llm_workflow(test_inputs)
 
         # Extract metrics from outputs
         control_metrics = self._extract_metrics_from_output(control_result["output"])
-        treatment_metrics = self._extract_metrics_from_output(treatment_result["output"])
+        treatment_metrics = self._extract_metrics_from_output(
+            treatment_result["output"]
+        )
 
         # Statistical analysis
         analysis = await self._perform_statistical_analysis(
@@ -483,18 +485,20 @@ results = analyze_cost_effectiveness()
         for line in lines:
             if "Execution time:" in line:
                 try:
-                    metrics["execution_time"] = float(line.split(":")[1].strip().rstrip("s"))
-                except:
+                    metrics["execution_time"] = float(
+                        line.split(":")[1].strip().rstrip("s")
+                    )
+                except Exception:
                     pass
             elif "Success rate:" in line:
                 try:
                     metrics["success_rate"] = float(line.split(":")[1].strip())
-                except:
+                except Exception:
                     pass
             elif "Lines of code:" in line:
                 try:
                     metrics["lines_of_code"] = float(line.split(":")[1].strip())
-                except:
+                except Exception:
                     pass
 
         return metrics
@@ -509,10 +513,16 @@ results = analyze_cost_effectiveness()
 
         # Calculate effect size (Cohen's d)
         if control_data and treatment_data:
-            control_mean = statistics.mean([d.get("lines_of_code", 0) for d in control_data])
-            treatment_mean = statistics.mean([d.get("lines_of_code", 0) for d in treatment_data])
+            control_mean = statistics.mean(
+                [d.get("lines_of_code", 0) for d in control_data]
+            )
+            treatment_mean = statistics.mean(
+                [d.get("lines_of_code", 0) for d in treatment_data]
+            )
 
-            effect_size = abs(treatment_mean - control_mean) / max(control_mean, treatment_mean)
+            effect_size = abs(treatment_mean - control_mean) / max(
+                control_mean, treatment_mean
+            )
         else:
             effect_size = 0.8  # Simulated large effect size
 

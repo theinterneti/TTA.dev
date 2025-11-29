@@ -1,0 +1,15 @@
+- ---
+- type:: [[D]] DataSchema
+- status:: stable
+- tags:: #recovery, #configuration, #retry
+- context-level:: 3-Technical
+- used-by:: [[TTA.dev/Graph/RetryPrimitive]]
+- source-file:: `packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py`
+- ---
+- ### Summary
+  - `RetryStrategy` is a dataclass that defines the configuration for how a `[[TTA.dev/Graph/RetryPrimitive]]` should behave when retrying a failed operation.
+- ### Fields
+  - `max_retries`: The maximum number of times to retry the primitive.
+  - `backoff_base`: The base for exponential backoff calculation (e.g., 2.0 for 2, 4, 8... seconds).
+  - `max_backoff`: The maximum delay in seconds between retries.
+  - `jitter`: A boolean indicating whether to add random jitter to the backoff delay to prevent thundering herd problems.

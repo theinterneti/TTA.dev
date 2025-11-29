@@ -1,29 +1,8 @@
 [
   {
-    "key": "create a function to calculate fibonacci numbers:current approach is performant",
-    "strategy": "current approach is performant",
-    "context": "create a function to calculate fibonacci numbers",
-    "successes": 0,
-    "failures": 0
-  },
-  {
-    "key": "number_theory:optimize prime checking with sqrt limit",
-    "strategy": "optimize prime checking with sqrt limit",
-    "context": "number_theory",
-    "successes": 0,
-    "failures": 0
-  },
-  {
-    "key": "create a function to check if a number is prime:current approach is performant",
-    "strategy": "current approach is performant",
-    "context": "create a function to check if a number is prime",
-    "successes": 0,
-    "failures": 0
-  },
-  {
-    "key": "create a function to generate prime numbers up to a limit:current approach is performant",
-    "strategy": "current approach is performant",
-    "context": "create a function to generate prime numbers up to a limit",
+    "key": "syntax_error_handling:validate syntax before execution",
+    "strategy": "validate syntax before execution",
+    "context": "syntax_error_handling",
     "successes": 0,
     "failures": 0
   }

@@ -1,0 +1,99 @@
+// Grafana Alloy Configuration for TTA.dev
+// Collects metrics, logs, and traces and ships to Grafana Cloud
+// Region: US West (prod-us-west-0)
+
+// Prometheus metrics scraping from TTA.dev application
+prometheus.scrape "tta_app" {
+  targets = [{
+    __address__ = "localhost:9464",
+    job = "tta-dev-app",
+  }]
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+  scrape_interval = "15s"
+  scrape_timeout = "10s"
+}
+
+// Remote write to Grafana Cloud Prometheus (US West)
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = "https://prometheus-prod-36-prod-us-west-0.grafana.net/api/prom/push"
+    
+    basic_auth {
+      username = "2497221"
+      password = env("GRAFANA_CLOUD_TOKEN")
+    }
+    
+    queue_config {
+      capacity = 10000
+      max_shards = 10
+    }
+  }
+}
+
+// Systemd journal logs collection
+loki.source.journal "system_logs" {
+  max_age = "24h"
+  forward_to = [loki.process.tta_filter.receiver]
+  
+  labels = {
+    job = "systemd-journal",
+    host = env("HOSTNAME"),
+  }
+}
+
+// Filter and process logs
+loki.process "tta_filter" {
+  forward_to = [loki.write.grafana_cloud.receiver]
+  
+  // Extract log level
+  stage.regex {
+    expression = "level=(?P<level>\\w+)"
+  }
+  
+  stage.labels {
+    values = {
+      level = "",
+    }
+  }
+}
+
+// Loki logs to Grafana Cloud (US West)
+loki.write "grafana_cloud" {
+  endpoint {
+    url = "https://logs-prod-36.grafana.net/loki/api/v1/push"
+    
+    basic_auth {
+      username = "2497221"
+      password = env("GRAFANA_CLOUD_TOKEN")
+    }
+  }
+}
+
+// OTLP receiver for traces (OpenTelemetry)
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+  
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+  
+  output {
+    traces = [otelcol.exporter.otlp.grafana_cloud.input]
+  }
+}
+
+// Basic auth component for Tempo
+otelcol.auth.basic "grafana_cloud" {
+  username = "2497221"
+  password = env("GRAFANA_CLOUD_TOKEN")
+}
+
+// Traces to Grafana Cloud Tempo (US West)
+otelcol.exporter.otlp "grafana_cloud" {
+  client {
+    endpoint = "tempo-prod-36-prod-us-west-0.grafana.net:443"
+    auth = otelcol.auth.basic.grafana_cloud.handler
+  }
+}

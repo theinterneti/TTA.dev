@@ -24,11 +24,38 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 
 ---
 
-## 📦 Production Packages
+## 📦 Repository Structure
 
-TTA.dev is a Python monorepo with 3 production packages:
+TTA.dev is organized into **platform** infrastructure packages and **apps** for end-user deployments:
 
-### 1. `tta-dev-primitives`
+```
+TTA.dev/
+├── platform/              # Infrastructure packages (7)
+│   ├── primitives/        # Core workflow primitives
+│   ├── observability/     # OpenTelemetry integration
+│   ├── agent-context/     # Agent context management
+│   ├── agent-coordination/# Multi-agent orchestration
+│   ├── integrations/      # Pre-built integrations
+│   ├── documentation/     # Docs automation
+│   └── kb-automation/     # Knowledge base maintenance
+│
+├── apps/                  # User-facing applications (1)
+│   └── observability-ui/  # VS Code observability dashboard
+│
+├── config/                # Configuration files
+├── docs/                  # Documentation
+├── playbooks/             # Agent playbooks
+├── scripts/               # Automation scripts
+└── tests/                 # Integration tests
+```
+
+---
+
+## 🏗️ Platform Packages
+
+### Core Infrastructure (Production-Ready)
+
+#### 1. `tta-dev-primitives` → `platform/primitives/`
 
 Core workflow primitives for building reliable, observable agent workflows.
 
@@ -48,11 +75,11 @@ uv add tta-dev-primitives
 **Quick Start:**
 See [`GETTING_STARTED.md`](GETTING_STARTED.md) for a quick start guide.
 
-[📚 Full Documentation](packages/tta-dev-primitives/README.md)
+[📚 Full Documentation](platform/primitives/README.md)
 
 ---
 
-### 2. `tta-observability-integration`
+#### 2. `tta-observability-integration` → `platform/observability/`
 
 OpenTelemetry integration for tracing, metrics, and logging across TTA.dev primitives.
 
@@ -67,11 +94,11 @@ OpenTelemetry integration for tracing, metrics, and logging across TTA.dev primi
 uv add tta-observability-integration
 ```
 
-[📚 Full Documentation](packages/tta-observability-integration/README.md)
+[📚 Full Documentation](platform/observability/README.md)
 
 ---
 
-### 3. `universal-agent-context`
+#### 3. `universal-agent-context` → `platform/agent-context/`
 
 Agent context management and orchestration for multi-agent workflows.
 
@@ -86,15 +113,50 @@ Agent context management and orchestration for multi-agent workflows.
 uv add universal-agent-context
 ```
 
-[📚 Full Documentation](packages/universal-agent-context/README.md)
+[📚 Full Documentation](platform/agent-context/README.md)
 
 ---
 
-## ⚠️ Packages Under Review
+### Extended Platform (Active Development)
 
-- **`keploy-framework`**: Minimal implementation, no `pyproject.toml`, no tests. Decision needed.
-- **`python-pathway`**: No clear use case documented. Decision needed.
-- **`js-dev-primitives`**: Placeholder, not implemented. Decision needed.
+#### 4. `tta-agent-coordination` → `platform/agent-coordination/`
+
+Atomic DevOps Architecture for multi-agent coordination.
+
+[📚 Documentation](platform/agent-coordination/README.md)
+
+#### 5. `tta-dev-integrations` → `platform/integrations/`
+
+Pre-built integration primitives (Supabase, PostgreSQL, Clerk, JWT).
+
+[📚 Documentation](platform/integrations/README.md)
+
+#### 6. `tta-documentation-primitives` → `platform/documentation/`
+
+Automated docs ↔ Logseq sync with AI metadata.
+
+[📚 Documentation](platform/documentation/README.md)
+
+#### 7. `tta-kb-automation` → `platform/kb-automation/`
+
+Automated knowledge base maintenance (links, TODOs, flashcards).
+
+[📚 Documentation](platform/kb-automation/README.md)
+
+---
+
+## 📱 Applications
+
+### `tta-observability-ui` → `apps/observability-ui/`
+
+LangSmith-inspired observability dashboard with VS Code webview integration.
+
+**Features:**
+- 📊 Real-time trace visualization
+- 🔍 Primitive-aware debugging
+- 🎯 VS Code integration (coming Phase 3)
+
+[📚 Documentation](apps/observability-ui/README.md)
 
 ---
 
@@ -113,7 +175,7 @@ For a comprehensive quick start guide, including installation and your first wor
 - **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
 - **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
 - **[MCP Integration](MCP_SERVERS.md)** - Model Context Protocol guides
-- **[Cline Integration](CLINE_INTEGRATION_GUIDE.md)** - Enhanced Cline development experience
+- **[Workspace Organization](docs/WORKSPACE_ORGANIZATION.md)** - Repository structure and navigation guide
 
 ### Additional Resources
 
@@ -121,10 +183,11 @@ For a comprehensive quick start guide, including installation and your first wor
 - [PR Management Quick Reference](docs/guides/pr-management-quickref.md) - Quick commands and best practices
 - [LLM Cost Guide](docs/guides/llm-cost-guide.md) - Free vs paid model comparison, pricing analysis
 - [Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md) - Production patterns for 50-70% cost reduction
+- [Cline Integration](docs/guides/CLINE_INTEGRATION_GUIDE.md) - Enhanced Cline development experience
 - [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
 - [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
 - [LLM Selection Guide](docs/guides/llm-selection-guide.md)
-- [Examples](packages/tta-dev-primitives/examples/)
+- [Examples](platform/primitives/examples/)
 
 ---
 
@@ -137,10 +200,10 @@ All packages maintain **100% test coverage** with comprehensive test suites.
 uv run pytest -v
 
 # Run with coverage
-uv run pytest --cov=packages --cov-report=html
+uv run pytest --cov=platform --cov=apps --cov-report=html
 
 # Run specific package tests
-uv run pytest packages/tta-dev-primitives/tests/ -v
+uv run pytest platform/primitives/tests/ -v
 ```
 
 ---
@@ -169,7 +232,7 @@ uv run pytest -v
 # Run quality checks
 uv run ruff format .
 uv run ruff check . --fix
-uvx pyright packages/
+uvx pyright platform/ apps/
 ```
 
 ### VS Code Workflow
@@ -319,7 +382,7 @@ The CI will automatically validate TODO compliance on all PRs. Non-compliant TOD
 - Google-style docstrings
 - README for each package
 - Examples for all features
-- **Phase 3 Examples:** See [`packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
+- **Phase 3 Examples:** See [`platform/primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](platform/primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
 
 ---
 

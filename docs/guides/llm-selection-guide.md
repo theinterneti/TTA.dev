@@ -339,9 +339,9 @@ def select_route(task):
 - **🎯 Cost Optimization Patterns:** [cost-optimization-patterns.md](cost-optimization-patterns.md) - Production patterns for reducing LLM costs (30-70% savings)
 
 ### Implementation
-- **OpenAIPrimitive API:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
-- **AnthropicPrimitive API:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
-- **OllamaPrimitive API:** [`packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py`](../../packages/tta-dev-primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
+- **OpenAIPrimitive API:** [`platform/primitives/src/tta_dev_primitives/integrations/openai_primitive.py`](../../platform/primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
+- **AnthropicPrimitive API:** [`platform/primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py`](../../platform/primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
+- **OllamaPrimitive API:** [`platform/primitives/src/tta_dev_primitives/integrations/ollama_primitive.py`](../../platform/primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
 - **RouterPrimitive:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md#routerprimitive)
 - **CachePrimitive:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md#cacheprimitive)
 - **FallbackPrimitive:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md#fallbackprimitive)

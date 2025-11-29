@@ -26,6 +26,43 @@ Practical guides for working with TTA.dev components.
   - Grafana dashboards
   - Time: 1-2 hours
 
+### Infrastructure & Deployment
+
+#### Observability Stack
+
+- **[Unified Observability Architecture](UNIFIED_OBSERVABILITY_ARCHITECTURE.md)** - ⭐ **START HERE** - Complete observability guide
+  - OpenTelemetry (automatic for all primitives)
+  - Grafana Cloud (metrics, logs, traces)
+  - Langfuse (LLM-specific: prompts, costs, quality)
+  - Multi-workspace setup
+  - Persona tracking integration
+  - Time: 15 minutes to understand, 30 minutes to implement
+
+- **[Linux-Native Observability Stack](LINUX_NATIVE_OBSERVABILITY.md)** - Replace Docker with native Linux services
+  - Grafana Alloy installation and configuration
+  - Grafana Cloud integration
+  - 700MB RAM savings, 2-second startup
+  - Complete migration guide
+  - Time: 30-60 minutes
+
+- **[Native Observability Quick Reference](NATIVE_OBSERVABILITY_QUICKREF.md)** - Fast-access commands and troubleshooting
+  - Service management commands
+  - Verification steps
+  - Common troubleshooting scenarios
+  - Configuration file locations
+
+- **[Multi-Workspace Observability](MULTI_WORKSPACE_OBSERVABILITY.md)** - Managing observability across multiple TTA.dev workspace clones
+  - Single port vs multi-port strategies
+  - Service name labeling
+  - Grafana Alloy configuration
+  - Querying across workspaces
+
+- **[Docker-Free Observability Migration](DOCKER_FREE_OBSERVABILITY_MIGRATION.md)** - Summary and implementation roadmap
+  - Migration phases
+  - Resource comparison
+  - Success criteria
+  - Rollback procedures
+
 - **[How to Compose Complex Workflows](how-to-compose-workflows.md)** - *(Coming soon)*
   - Sequential and parallel patterns
   - Router-based workflows
@@ -62,27 +99,27 @@ Practical guides for working with TTA.dev components.
 
 The **Phase 3 Examples** demonstrate production-ready patterns:
 
-1. **[RAG Workflow](../../packages/tta-dev-primitives/examples/rag_workflow.py)**
+1. **[RAG Workflow](../../platform/primitives/examples/rag_workflow.py)**
    - Caching + Fallback + Retry
    - Reduces costs by 40-60%
    - Use for: Document retrieval systems
 
-2. **[Agentic RAG](../../packages/tta-dev-primitives/examples/agentic_rag_workflow.py)**
+2. **[Agentic RAG](../../platform/primitives/examples/agentic_rag_workflow.py)**
    - Router + Document Grading + Hallucination Detection
    - Production RAG pattern from NVIDIA
    - Use for: High-quality RAG with quality controls
 
-3. **[Cost Tracking](../../packages/tta-dev-primitives/examples/cost_tracking_workflow.py)**
+3. **[Cost Tracking](../../platform/primitives/examples/cost_tracking_workflow.py)**
    - Budget enforcement + Per-model metrics
    - Prometheus integration
    - Use for: Managing LLM API costs
 
-4. **[Streaming](../../packages/tta-dev-primitives/examples/streaming_workflow.py)**
+4. **[Streaming](../../platform/primitives/examples/streaming_workflow.py)**
    - Token-by-token streaming + Buffering
    - Throughput metrics
    - Use for: Real-time response streaming
 
-5. **[Multi-Agent](../../packages/tta-dev-primitives/examples/multi_agent_workflow.py)**
+5. **[Multi-Agent](../../platform/primitives/examples/multi_agent_workflow.py)**
    - Coordinator + Parallel specialists + Aggregation
    - Agent coordination pattern
    - Use for: Complex multi-agent workflows

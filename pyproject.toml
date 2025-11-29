@@ -6,18 +6,20 @@
 # Note: keploy-framework, python-pathway, and js-dev-primitives are under review
 # and not included in workspace until architectural decisions are made
 members = [
-    "packages/tta-dev-primitives",
-    "packages/tta-observability-integration",
-    "packages/tta-observability-ui",
-    "packages/universal-agent-context",
-    "packages/tta-documentation-primitives",
-    "packages/tta-kb-automation",
-    "packages/tta-agent-coordination",
+    "platform/primitives",
+    "platform/integrations",
+    "platform/observability",
+    "apps/observability-ui",
+    "platform/agent-context",
+    "platform/documentation",
+    "platform/kb-automation",
+    "platform/agent-coordination",
 ]
 
 [tool.uv]
 dev-dependencies = [
     "aiohttp>=3.13.2",
+    "hvac>=1.2.0",            # HashiCorp Vault client for production secrets
     "pytest>=8.0.0",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=4.1.0",
@@ -26,12 +28,20 @@ dev-dependencies = [
     "ruff>=0.8.0",
 ]
 
+[tool.coverage.run]
+source = ["."]
+omit = ["binary_search.py:22-38"]
+
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 extend-exclude = [
     "archive/**",
+    "_archive/**",
     "scripts/**",
+    ".cline/**",
+    ".hypertool/**",
     "tests/integration/test_mcp*.py",
     "tests/mcp/conftest.py",
     "local/**",
@@ -67,6 +77,9 @@ ignore = [
     "ARG002",
     "PLC0415",
     "TRY003",
+    "S101",
+    "PLR2004",
+    "SLF001",
 ] # Allow long lines, missing annotations, import order, unused args, and test-specific patterns
 "**/examples/**/*.py" = [
     "E501",
@@ -79,6 +92,10 @@ ignore = [
     "N806",
     "PTH123",
     "B007",
+    "T201",
+    "ARG001",
+    "S311",
+    "TRY002",
 ] # Allow long lines, import order, error handling, and example-specific patterns
 "**/__init__.py" = ["F401"] # Allow unused imports in __init__.py (re-exports)
 "**/primitives.py" = [
@@ -105,12 +122,20 @@ pythonVersion = "3.11"
 typeCheckingMode = "basic"
 reportMissingImports = true
 reportMissingTypeStubs = false
-include = ["packages"]
+include = ["platform", "apps"]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
+
 pythonpath = ["."]
-testpaths = ["packages/tta-dev-primitives/tests"]
+testpaths = ["platform/primitives/tests", "tests"]
+norecursedirs = [
+    "_archive",
+    "archive",
+    "nested_copies",
+    "node_modules",
+    ".venv",
+]
 asyncio_mode = "auto"
 addopts = "-v --strict-markers --timeout=60"
 timeout = 60

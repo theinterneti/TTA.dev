@@ -1,0 +1,43 @@
+name: Agentic Checks
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/prompts/**'
+      - 'scripts/run_agent.py'
+      - 'scripts/apm.py'
+      - 'apm.yml'
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          npm install -g @google/gemini-cli
+          pip install pyyaml
+
+      - name: Run CI Smoke Test
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TTA_AGENT_RUNTIME: gemini
+          GEMINI_MODEL: gemini-2.5-flash
+        run: |
+          python scripts/apm.py run ci-smoke-test

@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "hypertool": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@toolprint/hypertool-mcp@0.0.45",
+        "mcp",
+        "run",
+        "--mcp-config",
+        ".hypertool/mcp_servers.json",
+        "--quiet"
+      ],
+      "env": {
+        "HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/.hypertool",
+        "HYPERTOOL_SERVERS_FILE": "${workspaceFolder}/.hypertool/mcp_servers.json",
+        "HYPERTOOL_ENABLE_CONFIG_TOOLS_MENU": "false",
+        "LOGSEQ_API_TOKEN": "${LOGSEQ_API_TOKEN}",
+        "LOGSEQ_API_URL": "http://127.0.0.1:12315",
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "HOME": "${HOME}"
+      }
+    }
+  }
+}

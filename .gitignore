@@ -84,6 +84,11 @@ Thumbs.db
 # Logs
 logs/
 *.log
+*_output.log
+cache_primitive_*.log
+retry_primitive_*.log
+test_results.log
+n8n.log
 
 # Temporary files
 tmp/
@@ -91,6 +96,14 @@ temp/
 .tmp/
 *.tmp
 *.temp
+
+# Demo and verification outputs
+auto_learning_demo/
+production_adaptive_demo/
+verification_test_*/
+
+# Trace databases
+tta_traces.db
 
 # Documentation builds
 site/

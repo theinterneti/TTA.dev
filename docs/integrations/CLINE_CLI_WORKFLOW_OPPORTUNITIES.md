@@ -347,9 +347,9 @@ Combine multiple validation scripts into a **comprehensive quality gate** with C
 ```bash
 # Run multiple validations manually
 ./scripts/validate-package.sh tta-dev-primitives
-uv run pytest --cov=packages/tta-dev-primitives
-uv run ruff check packages/tta-dev-primitives
-uvx pyright packages/tta-dev-primitives
+uv run pytest --cov=platform/primitives
+uv run ruff check platform/primitives
+uvx pyright platform/primitives
 # Fix issues one by one
 ```
 
@@ -544,7 +544,7 @@ Identify refactoring opportunities from code analysis.
 
 ```bash
 # Find code smells and fix
-uv run pylint packages/tta-dev-primitives/src 2>&1 | \
+uv run pylint platform/primitives/src 2>&1 | \
   cline "Analyze these code quality issues:
 
 $(cat)
@@ -746,7 +746,7 @@ Features:
 Type: Performance primitive
 
 Generate:
-1. Implementation (packages/tta-dev-primitives/src/tta_dev_primitives/performance/metrics.py)
+1. Implementation (platform/primitives/src/tta_dev_primitives/performance/metrics.py)
 2. Tests (100% coverage)
 3. Example usage
 4. PRIMITIVES_CATALOG.md entry"
@@ -762,7 +762,7 @@ git diff v1.0..v2.0 src/base.py | \
 
 $(cat)
 
-Please migrate all primitives in packages/tta-dev-primitives to the new API.
+Please migrate all primitives in platform/primitives to the new API.
 
 For each primitive:
 1. Update to new base class

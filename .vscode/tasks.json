@@ -40,7 +40,7 @@
         {
             "label": "Type Check",
             "type": "shell",
-            "command": "uvx pyright packages/",
+            "command": "uvx pyright platform/ apps/",
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -51,7 +51,7 @@
         {
             "label": "Quality Check (All)",
             "type": "shell",
-            "command": "uv run ruff format . && uv run ruff check . --fix && uvx pyright packages/ && uv run pytest -v",
+            "command": "uv run ruff format . && uv run ruff check . --fix && uvx pyright platform/ apps/ && uv run pytest -v",
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -111,6 +111,42 @@
             "label": "💡 PR Recommendations",
             "type": "shell",
             "command": "python scripts/pr_manager.py recommend",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🤖 Agent Oversight: Status",
+            "type": "shell",
+            "command": "python3 scripts/agent_oversight.py status",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🔍 Agent Oversight: Review All",
+            "type": "shell",
+            "command": "python3 scripts/agent_oversight.py review",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🔧 Install Agent Hooks",
+            "type": "shell",
+            "command": "bash scripts/install_agent_hooks.sh",
             "group": "none",
             "presentation": {
                 "echo": true,
