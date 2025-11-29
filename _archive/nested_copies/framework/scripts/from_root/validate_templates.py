@@ -99,7 +99,7 @@ def main():
         print("❌ No API key found")
         return
 
-    print(f"✅ API key loaded: {api_key[:20]}...")
+    print("✅ API key loaded successfully.")
 
     # Test both templates
     default_success, default_time = test_default_template()
