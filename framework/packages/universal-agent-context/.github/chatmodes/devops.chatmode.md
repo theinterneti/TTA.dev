@@ -1,1 +1,0 @@
-/home/thein/recovered-tta-storytelling/.augment/chatmodes/devops.chatmode.md

@@ -84,7 +84,7 @@ def process(data: Dict[str, Any]) -> Optional[str]:
 uv run pytest -v
 
 # With coverage
-uv run pytest --cov=packages --cov-report=html
+uv run pytest --cov=platform --cov=apps --cov-report=html
 
 # Specific package
 uv run pytest platform/primitives/tests/ -v

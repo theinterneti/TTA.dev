@@ -6,6 +6,15 @@ from .core.conditional import ConditionalPrimitive
 from .core.parallel import ParallelPrimitive
 from .core.sequential import SequentialPrimitive
 
+# Collaboration primitives
+from .collaboration import (
+    AgentIdentity,
+    CommitFrequencyPolicy,
+    GitCollaborationPrimitive,
+    IntegrationFrequency,
+    MergeStrategy,
+)
+
 # Performance primitives
 from .performance.cache import CachePrimitive
 
@@ -24,6 +33,12 @@ __all__ = [
     "SequentialPrimitive",
     "ParallelPrimitive",
     "ConditionalPrimitive",
+    # Collaboration primitives
+    "AgentIdentity",
+    "CommitFrequencyPolicy",
+    "GitCollaborationPrimitive",
+    "IntegrationFrequency",
+    "MergeStrategy",
     # Performance primitives
     "CachePrimitive",
     # Recovery primitives

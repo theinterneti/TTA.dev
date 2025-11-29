@@ -32,7 +32,7 @@ If you're looking for a place to start, you can check out the [open issues](http
     ```bash
     uv run ruff format .
     uv run ruff check . --fix
-    uvx pyright packages/
+    uvx pyright platform/ apps/
     uv run pytest -v
     ```
 8.  **Submit a pull request**.
@@ -43,7 +43,7 @@ Before submitting your PR, ensure:
 
 - [ ] Code formatted with `uv run ruff format .`
 - [ ] Linter passes with `uv run ruff check . --fix`
-- [ ] Type checks pass with `uvx pyright packages/`
+- [ ] Type checks pass with `uvx pyright platform/ apps/`
 - [ ] Tests pass with `uv run pytest -v`
 - [ ] Test coverage >80% for new code (aim for 100%)
 - [ ] Documentation updated (docstrings, README)

@@ -39,8 +39,14 @@ TTA.dev/
 │   ├── documentation/     # Docs automation
 │   └── kb-automation/     # Knowledge base maintenance
 │
-└── apps/                  # User-facing applications (1)
-    └── observability-ui/  # VS Code observability dashboard
+├── apps/                  # User-facing applications (1)
+│   └── observability-ui/  # VS Code observability dashboard
+│
+├── config/                # Configuration files
+├── docs/                  # Documentation
+├── playbooks/             # Agent playbooks
+├── scripts/               # Automation scripts
+└── tests/                 # Integration tests
 ```
 
 ---
