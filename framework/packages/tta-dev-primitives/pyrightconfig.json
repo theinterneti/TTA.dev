@@ -1,8 +1,0 @@
-{
-  "include": ["src", "tests"],
-  "exclude": ["examples", "**/__pycache__", "**/*.pyc"],
-  "reportMissingImports": true,
-  "reportMissingTypeStubs": false,
-  "pythonVersion": "3.11",
-  "typeCheckingMode": "basic"
-}

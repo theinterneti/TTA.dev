@@ -1,5 +1,5 @@
 {
-    "python.defaultInterpreterPath": ".venv/bin/python",
+    "python.defaultInterpreterPath": "/home/thein/repos/TTA.dev-copilot/.venv/bin/python",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "workspace",
     // Ruff - New Native Server Configuration (November 2025)

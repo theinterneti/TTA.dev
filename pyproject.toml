@@ -33,7 +33,6 @@ source = ["."]
 omit = ["binary_search.py:22-38"]
 
 
-
 [tool.ruff]
 line-length = 100
 target-version = "py311"
@@ -117,8 +116,21 @@ include = ["platform", "apps"]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+
+<<<<<<< HEAD
 testpaths = ["platform/primitives/tests"]
+=======
+
+>>>>>>> agent/copilot
+pythonpath = ["."]
+testpaths = ["platform/primitives/tests", "tests"]
+norecursedirs = [
+    "_archive",
+    "archive",
+    "nested_copies",
+    "node_modules",
+    ".venv",
+]
 asyncio_mode = "auto"
 addopts = "-v --strict-markers --timeout=60"
 timeout = 60

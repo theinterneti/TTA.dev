@@ -16,7 +16,7 @@ Real-time observability dashboard for TTA.dev workflows, integrated directly int
 
 1. Navigate to the extension directory:
    ```bash
-   cd packages/tta-observability-vscode
+   cd apps/vscode-extension
    ```
 
 2. Install dependencies:

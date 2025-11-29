@@ -18,12 +18,12 @@ class TestPrimitiveAdoption:
     @pytest.fixture
     def examples_dir(self) -> Path:
         """Get path to examples directory."""
-        return Path("packages/tta-dev-primitives/examples")
+        return Path("platform/primitives/examples")
 
     @pytest.fixture
     def src_dir(self) -> Path:
         """Get path to src directory."""
-        return Path("packages/tta-dev-primitives/src")
+        return Path("platform/primitives/src")
 
     def test_examples_import_primitives(self, examples_dir: Path):
         """Verify all examples import from tta_dev_primitives."""

@@ -432,6 +432,130 @@ This primitive demonstrates the **"Fallback first, enhancement optional"** patte
 
 ---
 
+## Collaboration Primitives
+
+### GitCollaborationPrimitive
+
+**Enforce best practices for multi-agent Git collaboration.**
+
+**Import:**
+\`\`\`python
+from tta_dev_primitives.collaboration import (
+    GitCollaborationPrimitive,
+    AgentIdentity,
+    IntegrationFrequency,
+    CommitFrequencyPolicy,
+    MergeStrategy,
+)
+\`\`\`
+
+**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/collaboration/git_integration.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/collaboration/git_integration.py)
+
+**Research Foundation:**
+- Martin Fowler's "Patterns for Managing Source Code Branches"
+- State of DevOps Report - Elite teams integrate daily or more
+- Conventional Commits specification
+
+**Key Features:**
+- ✅ **Integration Frequency Enforcement** - Continuous (< 1h), Hourly (2h), Daily (24h)
+- ✅ **Conventional Commits** - Enforced feat:/fix:/docs:/test:/refactor:/chore: format
+- ✅ **Health Monitoring** - Uncommitted files, time tracking, divergence from main
+- ✅ **Conflict Detection** - Early warning of integration issues
+- ✅ **Automated Recommendations** - Actionable advice based on health checks
+- ✅ **Flexible Enforcement** - Strict mode (raise errors) or warning mode (return dict)
+
+**Usage:**
+\`\`\`python
+# Configure agent identity
+agent = AgentIdentity(
+    name="GitHub Copilot",
+    email="copilot@tta.dev",
+    branch_prefix="agent/copilot",
+)
+
+# Create primitive with daily integration
+git_collab = GitCollaborationPrimitive(
+    agent_identity=agent,
+    integration_frequency=IntegrationFrequency.DAILY,
+    repository_path=Path.home() / "repos" / "TTA.dev",
+    enforce_hygiene=True,
+)
+
+# Check branch health
+health = await git_collab.execute({"action": "status"}, context)
+
+# Commit with validation
+await git_collab.execute(
+    {
+        "action": "commit",
+        "message": "feat: Add new feature with comprehensive tests",
+        "files": ["src/feature.py", "tests/test_feature.py"],
+    },
+    context,
+)
+
+# Sync with main
+await git_collab.execute({"action": "sync"}, context)
+
+# Create integration PR
+await git_collab.execute(
+    {
+        "action": "integrate",
+        "title": "feat: New feature implementation",
+        "body": "Complete implementation with tests",
+    },
+    context,
+)
+
+# Enforce commit frequency
+await git_collab.execute({"action": "enforce_frequency"}, context)
+\`\`\`
+
+**Integration Frequencies:**
+
+\`\`\`python
+# Elite teams (< 1 hour between integrations)
+IntegrationFrequency.CONTINUOUS
+
+# High-performance teams (max 2 hours)
+IntegrationFrequency.HOURLY
+
+# Standard practice (max 24 hours)
+IntegrationFrequency.DAILY
+
+# Anti-pattern (max 7 days) - discouraged
+IntegrationFrequency.WEEKLY
+\`\`\`
+
+**Commit Frequency Policy:**
+
+\`\`\`python
+policy = CommitFrequencyPolicy(
+    max_uncommitted_changes=50,      # Max files before must commit
+    max_uncommitted_time_minutes=60,  # Max 1 hour without commit
+    require_tests_before_commit=True, # Source changes need tests
+    min_message_length=20,            # Enforce descriptive messages
+)
+\`\`\`
+
+**Actions Supported:**
+1. `status` - Check branch health and get recommendations
+2. `commit` - Create validated commit with conventional format
+3. `sync` - Sync with main branch, detect conflicts
+4. `integrate` - Create PR for integration
+5. `enforce_frequency` - Verify integration frequency compliance
+
+**Benefits:**
+- 🎯 **Prevents Integration Hell** - Enforces frequent integration
+- 🔒 **Maintains Quality** - Requires tests for source changes
+- 📊 **Provides Visibility** - Health checks and recommendations
+- 🚀 **Improves Velocity** - Small, frequent merges reduce risk
+- 🤝 **Enables Collaboration** - Clear agent attribution and coordination
+
+**Full Guide:** [\`packages/tta-dev-primitives/docs/collaboration/GIT_COLLABORATION_GUIDE.md\`](packages/tta-dev-primitives/docs/collaboration/GIT_COLLABORATION_GUIDE.md)
+
+---
+
 ## Orchestration Primitives
 
 ### DelegationPrimitive
@@ -907,6 +1031,16 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 | AdaptivePrimitive | \`tta_dev_primitives.adaptive\` | Base class for self-improving primitives |
 | AdaptiveRetryPrimitive | \`tta_dev_primitives.adaptive\` | Retry that learns optimal strategies |
 | LogseqStrategyIntegration | \`tta_dev_primitives.adaptive\` | Persist strategies to knowledge base |
+
+### Collaboration
+
+| Primitive | Import Path | Purpose |
+|-----------|-------------|---------|
+| GitCollaborationPrimitive | \`tta_dev_primitives.collaboration\` | Enforce Git best practices for multi-agent workflows |
+| AgentIdentity | \`tta_dev_primitives.collaboration\` | Agent identity and attribution |
+| IntegrationFrequency | \`tta_dev_primitives.collaboration\` | Integration frequency policies |
+| CommitFrequencyPolicy | \`tta_dev_primitives.collaboration\` | Commit hygiene policies |
+| MergeStrategy | \`tta_dev_primitives.collaboration\` | Merge strategy options |
 
 ### Orchestration
 
