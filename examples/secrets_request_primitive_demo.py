@@ -171,9 +171,9 @@ async def demonstrate_secrets_management():
         print(f"Secrets loaded: {result['total_loaded']}/{result['total_requested']}")
 
         print("\n📊 Secret Status:")
-        for secret_name, status in result["secrets_status"].items():
-            status_icon = "✅" if status == "loaded" else "❌"
-            print(f"  {status_icon} {secret_name}: {status}")
+        print(f"  ✅ Loaded: {result['total_loaded']}")
+        print(f"  ❌ Missing: {result['total_missing']}")
+        print(f"  🔢 Total Requested: {result['total_requested']}")
 
         print("\n💡 Agent Learning Points:")
         print("  • Always use SecretsManager, never os.getenv() directly")
