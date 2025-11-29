@@ -52,7 +52,12 @@ class MCPConfigParser:
         - Docker images: docker:image-name
         """
         # GitMCP format
-        if "gitmcp.io" in repo_uri:
+        try:
+            parsed = urlparse(repo_uri)
+            host = parsed.hostname
+        except Exception:
+            host = None
+        if host and (host == "gitmcp.io" or host.endswith(".gitmcp.io")):
             # Extract owner/repo from URL
             match = re.search(r"gitmcp\.io/([^/]+/[^/]+)", repo_uri)
             if match:
