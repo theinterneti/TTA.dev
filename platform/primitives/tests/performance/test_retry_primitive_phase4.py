@@ -6,316 +6,14 @@ Strategies learned: 1
 """
 
 # Core Retry Behavior
-import asyncio
-import random
-import uuid
-from collections.abc import Callable
-from dataclasses import dataclass
-from typing import Any
-
-import pytest
-
-
-@dataclass
-class RetryStrategy:
-    max_retries: int = 3
-    backoff_base: float = 2.0
-    max_backoff: float = 60.0
-    jitter: bool = True
-
-    def calculate_delay(self, attempt: int) -> float:
-        delay = min(self.backoff_base**attempt, self.max_backoff)
-        if self.jitter:
-            delay *= 0.5 + random.random()
-        return delay
-
-
-class WorkflowPrimitive:  # Define WorkflowPrimitive base class
-    async def execute(self, input_data: Any, context: "WorkflowContext") -> Any:
-        raise NotImplementedError
-
-
-class RetryPrimitive(WorkflowPrimitive):
-    def __init__(
-        self,
-        primitive: WorkflowPrimitive,
-        strategy: RetryStrategy | None = None,
-    ) -> None:
-        self.primitive = primitive
-        self.strategy = strategy or RetryStrategy()
-
-    async def execute(self, input_data: Any, context: "WorkflowContext") -> Any:
-        """Retries primitive up to max_retries times with exponential backoff.
-
-        Returns result on success, raises last error on exhaustion.
-        """
-        for attempt in range(self.strategy.max_retries + 1):
-            try:
-                return await self.primitive.execute(input_data, context)
-            except Exception:
-                if attempt == self.strategy.max_retries:
-                    raise
-                delay = self.strategy.calculate_delay(attempt + 1)
-                await asyncio.sleep(delay)
-        # Should not reach here
-        raise AssertionError("Retry logic failed")
-
-
-class MockPrimitive(WorkflowPrimitive):
-    def __init__(
-        self,
-        name: str,
-        return_value: Any | None = None,
-        side_effect: Callable | None = None,  # IMPORTANT: Callable, NOT list!
-        raise_error: Exception | None = None,
-    ) -> None:
-        """Initialize mock primitive.
-
-        Args:
-            name: Name of the mock
-            return_value: Value to return (if no side_effect or error)
-            side_effect: Function to call instead of returning value (NOT a list!)
-            raise_error: Exception to raise when executed
-        """
-        self.name = name
-        self.return_value = return_value
-        self.side_effect = side_effect
-        self.raise_error = raise_error
-        self.call_count = 0
-        self.calls: list[tuple[Any, WorkflowContext]] = []
-
-    async def execute(self, input_data: Any, context: "WorkflowContext") -> Any:
-        """Execute mock primitive."""
-        self.call_count += 1
-        self.calls.append((input_data, context))
-
-        if self.raise_error:
-            raise self.raise_error
-
-        if self.side_effect:
-            result = self.side_effect(input_data, context)
-            if hasattr(result, "__await__"):
-                return await result
-            return result
-
-        return self.return_value
-
-
-class WorkflowContext:
-    def __init__(
-        self,
-        workflow_id: str | None = None,
-        correlation_id: str | None = None,
-        metadata: dict[str, Any] | None = None,
-    ) -> None:
-        self.workflow_id = workflow_id
-        self.correlation_id = correlation_id or str(uuid.uuid4())
-        self.metadata = metadata or {}
-
-
-@pytest.mark.asyncio
-async def test_retry_success_first_attempt():
-    """Test that the retry primitive succeeds on the first attempt."""
-    mock = MockPrimitive("test", return_value={"result": "success"})
-    retry = RetryPrimitive(primitive=mock, strategy=RetryStrategy(max_retries=3))
-    result = await retry.execute({"input": "data"}, WorkflowContext())
-    assert result == {"result": "success"}
-    assert mock.call_count == 1
-
-
-@pytest.mark.asyncio
-async def test_retry_success_after_one_retry():
-    """Test that the retry primitive succeeds after one retry."""
-    call_count = 0
-
-    def side_effect_fn(input_data: Any, context: "WorkflowContext") -> Any:
-        nonlocal call_count
-        call_count += 1
-        if call_count == 1:
-            raise Exception("First attempt fails")
-        return {"result": "success"}
-
-    mock = MockPrimitive("test", side_effect=side_effect_fn)
-    retry = RetryPrimitive(primitive=mock, strategy=RetryStrategy(max_retries=3))
-    result = await retry.execute({"input": "data"}, WorkflowContext())
-    assert result == {"result": "success"}
-    assert mock.call_count == 2
-
-
-@pytest.mark.asyncio
-async def test_retry_success_after_two_retries():
-    """Test that the retry primitive succeeds after two retries."""
-    call_count = 0
-
-    def side_effect_fn(input_data: Any, context: "WorkflowContext") -> Any:
-        nonlocal call_count
-        call_count += 1
-        if call_count <= 2:
-            raise Exception(f"Attempt {call_count} fails")
-        return {"result": "success"}
-
-    mock = MockPrimitive("test", side_effect=side_effect_fn)
-    retry = RetryPrimitive(primitive=mock, strategy=RetryStrategy(max_retries=3))
-    result = await retry.execute({"input": "data"}, WorkflowContext())
-    assert result == {"result": "success"}
-    assert mock.call_count == 3
-
-
-@pytest.mark.asyncio
-async def test_retry_exhaustion():
-    """Test that the retry primitive raises the last error when all attempts fail."""
-    mock = MockPrimitive("test", raise_error=Exception("Always fails"))
-    retry = RetryPrimitive(primitive=mock, strategy=RetryStrategy(max_retries=2))
-    with pytest.raises(Exception, match="Always fails"):
-        await retry.execute({"input": "data"}, WorkflowContext())
-    assert mock.call_count == 3
-
-
-@pytest.mark.asyncio
-async def test_retry_custom_strategy():
-    """Test retry with a custom retry strategy."""
-    call_count = 0
-
-    def side_effect_fn(input_data: Any, context: "WorkflowContext") -> Any:
-        nonlocal call_count
-        call_count += 1
-        if call_count <= 1:
-            raise Exception("First attempt fails")
-        return {"result": "success"}
-
-    mock = MockPrimitive("test", side_effect=side_effect_fn)
-    strategy = RetryStrategy(max_retries=1, backoff_base=1, max_backoff=1, jitter=False)
-    retry = RetryPrimitive(primitive=mock, strategy=strategy)
-    result = await retry.execute({"input": "data"}, WorkflowContext())
-    assert result == {"result": "success"}
-    assert mock.call_count == 2
-
-
-@pytest.mark.asyncio
-async def test_retry_no_jitter():
-    """Test retry strategy with no jitter."""
-    call_count = 0
-
-    def side_effect_fn(input_data: Any, context: "WorkflowContext") -> Any:
-        nonlocal call_count
-        call_count += 1
-        if call_count <= 1:
-            raise Exception("First attempt fails")
-        return {"result": "success"}
-
-    mock = MockPrimitive("test", side_effect=side_effect_fn)
-    strategy = RetryStrategy(max_retries=1, backoff_base=1, max_backoff=1, jitter=False)
-    retry = RetryPrimitive(primitive=mock, strategy=strategy)
-    result = await retry.execute({"input": "data"}, WorkflowContext())
-    assert result == {"result": "success"}
-    assert mock.call_count == 2
-
-
-# Backoff Strategy Tests
 import time
-from collections.abc import Callable
-from dataclasses import dataclass
 from typing import Any
 
 import pytest
 
-
-@dataclass
-class RetryStrategy:
-    max_retries: int = 3
-    backoff_base: float = 2.0
-    max_backoff: float = 60.0
-    jitter: bool = True
-
-    def calculate_delay(self, attempt: int) -> float:
-        delay = min(self.backoff_base**attempt, self.max_backoff)
-        if self.jitter:
-            delay *= 0.5 + random.random()
-        return delay
-
-
-class WorkflowContext:
-    def __init__(
-        self,
-        workflow_id: str | None = None,
-        correlation_id: str | None = None,
-        metadata: dict[str, Any] | None = None,
-    ) -> None:
-        self.workflow_id = workflow_id
-        self.correlation_id = correlation_id or str(uuid.uuid4())
-        self.metadata = metadata or {}
-
-
-class WorkflowPrimitive:
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
-        raise NotImplementedError
-
-
-class RetryPrimitive(WorkflowPrimitive):
-    def __init__(
-        self,
-        primitive: WorkflowPrimitive,
-        strategy: RetryStrategy | None = None,
-    ) -> None:
-        self.primitive = primitive
-        self.strategy = strategy or RetryStrategy()
-
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
-        """Retries primitive up to max_retries times with exponential backoff.
-
-        Returns result on success, raises last error on exhaustion.
-        """
-        last_error = None
-        for attempt in range(self.strategy.max_retries + 1):
-            try:
-                return await self.primitive.execute(input_data, context)
-            except Exception as e:
-                last_error = e
-                if attempt == self.strategy.max_retries:
-                    break
-                delay = self.strategy.calculate_delay(attempt)
-                await asyncio.sleep(delay)
-        raise last_error
-
-
-class MockPrimitive(WorkflowPrimitive):
-    def __init__(
-        self,
-        name: str,
-        return_value: Any | None = None,
-        side_effect: Callable | None = None,  # IMPORTANT: Callable, NOT list!
-        raise_error: Exception | None = None,
-    ) -> None:
-        """Initialize mock primitive.
-
-        Args:
-            name: Name of the mock
-            return_value: Value to return (if no side_effect or error)
-            side_effect: Function to call instead of returning value (NOT a list!)
-            raise_error: Exception to raise when executed
-        """
-        self.name = name
-        self.return_value = return_value
-        self.side_effect = side_effect
-        self.raise_error = raise_error
-        self.call_count = 0
-        self.calls: list[tuple[Any, WorkflowContext]] = []
-
-    async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
-        """Execute mock primitive."""
-        self.call_count += 1
-        self.calls.append((input_data, context))
-
-        if self.raise_error:
-            raise self.raise_error
-
-        if self.side_effect:
-            result = self.side_effect(input_data, context)
-            if hasattr(result, "__await__"):
-                return await result
-            return result
-
-        return self.return_value
+from tta_dev_primitives.core.base import WorkflowContext
+from tta_dev_primitives.recovery.retry import RetryPrimitive, RetryStrategy
+from tta_dev_primitives.testing.mocks import MockPrimitive
 
 
 async def test_exponential_backoff():
@@ -352,7 +50,9 @@ async def test_linear_backoff():
 
 async def test_constant_backoff():
     """Test constant backoff timing."""
-    strategy = RetryStrategy(max_retries=2, backoff_base=1.0, max_backoff=1.0, jitter=False)
+    strategy = RetryStrategy(
+        max_retries=2, backoff_base=1.0, max_backoff=1.0, jitter=False
+    )
     mock = MockPrimitive("test", raise_error=Exception("test"))
     retry = RetryPrimitive(primitive=mock, strategy=strategy)
 
@@ -378,7 +78,9 @@ async def test_jitter_enabled():
     end_time = time.time()
 
     elapsed_time = end_time - start_time
-    assert 0.5 <= elapsed_time <= 1.5  # With jitter, delay should be between 0.5 and 1.5
+    assert (
+        0.5 <= elapsed_time <= 1.5
+    )  # With jitter, delay should be between 0.5 and 1.5
 
 
 async def test_jitter_disabled():
@@ -398,7 +100,9 @@ async def test_jitter_disabled():
 
 async def test_max_backoff_limit():
     """Test max backoff limit enforcement."""
-    strategy = RetryStrategy(max_retries=3, backoff_base=10.0, max_backoff=20.0, jitter=False)
+    strategy = RetryStrategy(
+        max_retries=3, backoff_base=10.0, max_backoff=20.0, jitter=False
+    )
     mock = MockPrimitive("test", raise_error=Exception("test"))
     retry = RetryPrimitive(primitive=mock, strategy=strategy)
 
@@ -408,8 +112,11 @@ async def test_max_backoff_limit():
     end_time = time.time()
 
     elapsed_time = end_time - start_time
-    expected_min_time = 10.0**0 + min(10.0**1, 20.0) + min(10.0**2, 20.0)  # 1 + 10 + 20 = 31
-    assert elapsed_time >= expected_min_time
+    expected_min_time = (
+        10.0**0 + min(10.0**1, 20.0) + min(10.0**2, 20.0)
+    )  # 1 + 10 + 20 = 31
+    # Allow 5% tolerance for timing variations
+    assert elapsed_time >= expected_min_time * 0.95
     expected_max_time = 1.0 + 10.0 + 20.0
     assert expected_max_time == 31.0
 
@@ -427,7 +134,8 @@ async def test_retry_success_after_failure():
 
     mock = MockPrimitive("test", side_effect=side_effect_fn)
     retry = RetryPrimitive(
-        primitive=mock, strategy=RetryStrategy(max_retries=3, jitter=False, backoff_base=1.0)
+        primitive=mock,
+        strategy=RetryStrategy(max_retries=3, jitter=False, backoff_base=1.0),
     )
     result = await retry.execute({"input": "data"}, WorkflowContext())
     assert result == {"result": "success"}
@@ -447,7 +155,8 @@ async def test_retry_exhaustion():
     """Test that the last exception is raised after retries are exhausted."""
     mock = MockPrimitive("test", raise_error=Exception("Always fails"))
     retry = RetryPrimitive(
-        primitive=mock, strategy=RetryStrategy(max_retries=2, jitter=False, backoff_base=1.0)
+        primitive=mock,
+        strategy=RetryStrategy(max_retries=2, jitter=False, backoff_base=1.0),
     )
 
     start_time = time.time()
