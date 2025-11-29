@@ -144,7 +144,7 @@ async def main():
         print("\nGet your free API key at: https://aistudio.google.com/app/apikey")
         return
 
-    print(f"\n✅ API Key Found: {api_key[:10]}...{api_key[-4:]}")
+    print("\n✅ API Key Found.")
     print("🤖 Using Gemini 2.0 Flash Experimental (Free Tier)")
 
     # Run tests
