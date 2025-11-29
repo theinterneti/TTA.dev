@@ -115,10 +115,11 @@ class TestCodeExecution:
         # Mock error result
         error_result = Mock()
         error_result.results = []
-        error_result.error = Mock(value="NameError: name 'undefined_var' is not defined")
+        # Use a string for error, as e2b_primitive calls str(error_obj)
+        error_result.error = "NameError: name 'undefined_var' is not defined"
         error_result.logs = Mock(stdout=[], stderr=["error log"])
 
-        mock_sandbox.notebook.exec_cell = AsyncMock(return_value=error_result)
+        mock_sandbox.run_code = AsyncMock(return_value=error_result)
 
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -139,10 +140,11 @@ class TestCodeExecution:
 
         # Mock slow execution
         async def slow_exec(*args, **kwargs):
-            await asyncio.sleep(10)
+            # Sleep longer than timeout + 10 (1 + 10 = 11)
+            await asyncio.sleep(12)
             return Mock(results=[], error=None, logs=Mock(stdout=[], stderr=[]))
 
-        mock_sandbox.notebook.exec_cell = slow_exec
+        mock_sandbox.run_code = slow_exec
 
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -179,8 +181,19 @@ class TestCodeExecution:
 
             await primitive.execute(input_data, workflow_context)
 
-            # Verify filesystem write was called for env vars
-            mock_sandbox.sandbox.filesystem.write.assert_called_once()
+            # Verify run_code was called to set env vars
+            # First call sets env var, second call runs the code
+            assert mock_sandbox.run_code.call_count >= 2
+            
+            # Check that one of the calls set the env var
+            env_var_call_found = False
+            for call in mock_sandbox.run_code.call_args_list:
+                args, _ = call
+                if 'os.environ["TEST_VAR"] = "test_value"' in args[0]:
+                    env_var_call_found = True
+                    break
+            
+            assert env_var_call_found
 
 
 class TestSessionManagement:
@@ -207,7 +220,7 @@ class TestSessionManagement:
             await primitive.execute(input_data, workflow_context)
 
             # Verify old sandbox was closed
-            mock_sandbox.aclose.assert_called()
+            mock_sandbox.kill.assert_called()
 
     @pytest.mark.asyncio
     async def test_manual_cleanup(self, mock_e2b_api_key, mock_sandbox, workflow_context):
@@ -226,7 +239,7 @@ class TestSessionManagement:
             await primitive.cleanup()
 
             # Verify sandbox closed
-            mock_sandbox.aclose.assert_called_once()
+            mock_sandbox.kill.assert_called_once()
             assert primitive._sandbox is None
 
     @pytest.mark.asyncio
@@ -242,7 +255,7 @@ class TestSessionManagement:
                 assert result["success"] is True
 
             # Verify cleanup happened
-            mock_sandbox.aclose.assert_called_once()
+            mock_sandbox.kill.assert_called_once()
 
 
 class TestObservability:
@@ -292,7 +305,7 @@ class TestEdgeCases:
         empty_result.error = None
         empty_result.logs = Mock(stdout=[], stderr=[])
 
-        mock_sandbox.notebook.exec_cell = AsyncMock(return_value=empty_result)
+        mock_sandbox.run_code = AsyncMock(return_value=empty_result)
 
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -337,7 +350,7 @@ class TestIntegrationScenarios:
         fib_result.error = None
         fib_result.logs = Mock(stdout=["55"], stderr=[])
 
-        mock_sandbox.notebook.exec_cell = AsyncMock(return_value=fib_result)
+        mock_sandbox.run_code = AsyncMock(return_value=fib_result)
 
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",

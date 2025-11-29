@@ -69,7 +69,7 @@ class AgentIdentity(BaseModel):
     )
 
 
-class GitCollaborationPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
+class GitCollaborationPrimitive(BaseModel, WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
     """
     Primitive for multi-agent Git collaboration with enforced best practices.
 

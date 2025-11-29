@@ -138,40 +138,6 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         if target_criteria:
             checks.extend(target_criteria.entry_criteria)
 
-        if not checks:
-            # No criteria defined - assume ready
-            return StageReadiness(
-                current_stage=current_stage,
-                target_stage=target_stage,
-                ready=True,
-                info=[],
-                recommended_actions=[],
-                next_steps=["No validation criteria defined for this transition"],
-            )
-
-        # Run all validation checks in parallel
-        readiness_primitive = ReadinessCheckPrimitive(checks)
-        check_result: ReadinessCheckResult = await readiness_primitive.execute(
-            context, project_path
-        )
-
-        # Build recommended actions
-        recommended_actions = []
-        if target_criteria:
-            recommended_actions.extend(target_criteria.recommended_actions)
-
-        # Build next steps from failed checks
-        next_steps = []
-        for blocker in check_result.blockers:
-            if blocker.fix_command:
-                next_steps.append(f"{blocker.check_name}: {blocker.fix_command}")
-            else:
-                next_steps.append(f"Fix: {blocker.message}")
-
-        for critical in check_result.critical:
-            if critical.fix_command:
-                next_steps.append(f"{critical.check_name}: {critical.fix_command}")
-
         # Query KB for contextual guidance if available
         kb_recommendations = []
         if kb:
@@ -199,14 +165,63 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
                 mistakes_result = await kb.execute(mistakes_query, context)
 
                 # Add best practices pages to recommendations
-                kb_recommendations.extend(best_practices_result.pages)
+                for page in best_practices_result.pages:
+                    kb_recommendations.append({
+                        "title": page.title,
+                        "type": "best_practice",
+                        "content": page.content or "",
+                        "url": page.url or "",
+                        "tags": page.tags
+                    })
 
                 # Add common mistakes pages to recommendations
-                kb_recommendations.extend(mistakes_result.pages)
+                for page in mistakes_result.pages:
+                    kb_recommendations.append({
+                        "title": page.title,
+                        "type": "common_mistake",
+                        "content": page.content or "",
+                        "url": page.url or "",
+                        "tags": page.tags
+                    })
 
             except Exception:
                 # Gracefully ignore KB errors - don't fail validation
                 pass
+
+        if not checks:
+            # No criteria defined - assume ready
+            return StageReadiness(
+                current_stage=current_stage,
+                target_stage=target_stage,
+                ready=True,
+                info=[],
+                recommended_actions=[],
+                next_steps=["No validation criteria defined for this transition"],
+                kb_recommendations=kb_recommendations,
+            )
+
+        # Run all validation checks in parallel
+        readiness_primitive = ReadinessCheckPrimitive(checks)
+        check_result: ReadinessCheckResult = await readiness_primitive.execute(
+            context, project_path
+        )
+
+        # Build recommended actions
+        recommended_actions = []
+        if target_criteria:
+            recommended_actions.extend(target_criteria.recommended_actions)
+
+        # Build next steps from failed checks
+        next_steps = []
+        for blocker in check_result.blockers:
+            if blocker.fix_command:
+                next_steps.append(f"{blocker.check_name}: {blocker.fix_command}")
+            else:
+                next_steps.append(f"Fix: {blocker.message}")
+
+        for critical in check_result.critical:
+            if critical.fix_command:
+                next_steps.append(f"{critical.check_name}: {critical.fix_command}")
 
         return StageReadiness(
             current_stage=current_stage,

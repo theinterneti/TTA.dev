@@ -7,10 +7,12 @@ NOTE: Tests that execute stage validations spawn subprocesses and should be mark
 """
 
 from pathlib import Path
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives.lifecycle.validation import ReadinessCheckResult
 
 # Mark ALL tests in this module as integration since they execute stage validations that spawn subprocesses
 pytestmark = pytest.mark.integration
@@ -39,7 +41,7 @@ class MockKBPrimitive(KnowledgeBasePrimitive):
         self.mock_pages = mock_pages or []
         self.query_count = 0
 
-    async def _execute_impl(self, context: WorkflowContext, input_data: KBQuery) -> KBResult:
+    async def _execute_impl(self, input_data: KBQuery, context: WorkflowContext) -> KBResult:
         """Return mock KB results."""
         self.query_count += 1
 
@@ -59,8 +61,23 @@ class MockKBPrimitive(KnowledgeBasePrimitive):
         )
 
 
+@pytest.fixture
+def mock_readiness_check():
+    """Mock ReadinessCheckPrimitive to avoid running real subprocesses."""
+    with patch("tta_dev_primitives.lifecycle.stage_manager.ReadinessCheckPrimitive") as mock_class:
+        mock_instance = mock_class.return_value
+        mock_instance.execute = AsyncMock(return_value=ReadinessCheckResult(
+            ready=True,
+            blockers=[],
+            critical=[],
+            warnings=[],
+            info=[]
+        ))
+        yield mock_class
+
+
 @pytest.mark.asyncio
-async def test_stage_manager_without_kb() -> None:
+async def test_stage_manager_without_kb(mock_readiness_check) -> None:
     """Test StageManager works without KB (backward compatibility)."""
     manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
     context = WorkflowContext(correlation_id="test-001")
@@ -80,7 +97,7 @@ async def test_stage_manager_without_kb() -> None:
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_no_results() -> None:
+async def test_stage_manager_with_kb_no_results(mock_readiness_check) -> None:
     """Test StageManager with KB that returns no results."""
     mock_kb = MockKBPrimitive(mock_pages=[])
     manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
@@ -100,7 +117,7 @@ async def test_stage_manager_with_kb_no_results() -> None:
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_best_practices() -> None:
+async def test_stage_manager_with_kb_best_practices(mock_readiness_check) -> None:
     """Test StageManager with KB returning best practices."""
     mock_pages = [
         KBPage(
@@ -143,7 +160,7 @@ async def test_stage_manager_with_kb_best_practices() -> None:
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_common_mistakes() -> None:
+async def test_stage_manager_with_kb_common_mistakes(mock_readiness_check) -> None:
     """Test StageManager with KB returning common mistakes."""
     mock_pages = [
         KBPage(
@@ -180,7 +197,7 @@ async def test_stage_manager_with_kb_common_mistakes() -> None:
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_mixed_recommendations() -> None:
+async def test_stage_manager_with_kb_mixed_recommendations(mock_readiness_check) -> None:
     """Test StageManager with KB returning both best practices and mistakes."""
     mock_pages = [
         KBPage(
@@ -219,7 +236,7 @@ async def test_stage_manager_with_kb_mixed_recommendations() -> None:
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_kb_error_handling() -> None:
+async def test_stage_manager_kb_error_handling(mock_readiness_check) -> None:
     """Test StageManager handles KB errors gracefully."""
 
     class ErrorKB(KnowledgeBasePrimitive):
@@ -248,7 +265,7 @@ async def test_stage_manager_kb_error_handling() -> None:
 
 
 @pytest.mark.asyncio
-async def test_stage_readiness_summary_with_kb() -> None:
+async def test_stage_readiness_summary_with_kb(mock_readiness_check) -> None:
     """Test StageReadiness.get_summary() includes KB recommendations."""
     mock_pages = [
         KBPage(
@@ -282,7 +299,7 @@ async def test_stage_readiness_summary_with_kb() -> None:
 
 @pytest.mark.integration  # Spawns subprocess to run pytest
 @pytest.mark.asyncio
-async def test_stage_manager_execute_without_kb() -> None:
+async def test_stage_manager_execute_without_kb(mock_readiness_check) -> None:
     """Test StageManager.execute() still works (backward compatibility)."""
     manager = StageManager(stage_criteria_map=STAGE_CRITERIA_MAP)
     context = WorkflowContext(correlation_id="test-008")

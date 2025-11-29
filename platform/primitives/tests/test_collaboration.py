@@ -1,8 +1,9 @@
 """Tests for Git collaboration primitives."""
 
-import pytest
-from pathlib import Path
 from datetime import datetime, timedelta
+
+import pytest
+
 from tta_dev_primitives.collaboration import (
     AgentIdentity,
     CommitFrequencyPolicy,
@@ -120,9 +121,7 @@ class TestHealthChecks:
     @pytest.mark.asyncio
     async def test_health_check_returns_status(self, git_primitive, workflow_context):
         """Test that health check returns comprehensive status."""
-        result = await git_primitive.execute(
-            {"action": "status"}, workflow_context
-        )
+        result = await git_primitive.execute({"action": "status"}, workflow_context)
 
         assert "healthy" in result
         assert "uncommitted_files" in result
@@ -304,9 +303,7 @@ class TestBestPracticesEnforcement:
     """Test enforcement of Martin Fowler's best practices."""
 
     @pytest.mark.asyncio
-    async def test_frequent_integration_warning(
-        self, git_primitive, workflow_context
-    ):
+    async def test_frequent_integration_warning(self, git_primitive, workflow_context):
         """Test warning for infrequent integration."""
         # Set last integration to 2 days ago
         workflow_context.metadata["last_integration"] = (

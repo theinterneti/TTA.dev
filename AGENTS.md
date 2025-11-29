@@ -112,8 +112,9 @@ TTA.dev/
 │   ├── documentation/    # Docs automation
 │   └── kb-automation/    # Knowledge base maintenance
 │
-├── apps/                 # User-facing applications (1)
-│   └── observability-ui/ # VS Code observability dashboard
+├── apps/                 # User-facing applications (2)
+│   ├── observability-ui/ # Observability dashboard UI
+│   └── vscode-extension/ # VS Code extension
 │
 ├── docs/                 # Comprehensive documentation
 │   ├── planning/         # Planning documents (moved from root)

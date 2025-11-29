@@ -95,7 +95,7 @@ class TestStageManagerKBIntegration:
             ),
         ]
 
-        async def mock_execute(context, query):
+        async def mock_execute(query, context):
             if query.query_type == "best_practices":
                 return KBResult(
                     pages=[mock_pages[0]],
@@ -127,8 +127,10 @@ class TestStageManagerKBIntegration:
 
         # Should have 2 recommendations (1 from best practices, 1 from common mistakes)
         assert len(readiness.kb_recommendations) == 2
-        assert readiness.kb_recommendations[0].title == "Staging Best Practices"
-        assert readiness.kb_recommendations[1].title == "Common Staging Mistakes"
+        assert readiness.kb_recommendations[0]["title"] == "Staging Best Practices"
+        assert readiness.kb_recommendations[0]["type"] == "best_practice"
+        assert readiness.kb_recommendations[1]["title"] == "Common Staging Mistakes"
+        assert readiness.kb_recommendations[1]["type"] == "common_mistake"
 
     @pytest.mark.asyncio
     async def test_check_readiness_kb_queries_correct_stages(self) -> None:
@@ -138,7 +140,7 @@ class TestStageManagerKBIntegration:
         # Track what was queried
         queries = []
 
-        async def mock_execute(context, query):
+        async def mock_execute(query, context):
             queries.append((query.query_type, query.topic, query.stage))
             return KBResult(pages=[], total_found=0, query_time_ms=0.0, source="fallback")
 
@@ -178,7 +180,7 @@ class TestStageManagerKBIntegration:
             relevance_score=1.0,
         )
 
-        async def mock_execute(context, query):
+        async def mock_execute(query, context):
             if query.query_type == "best_practices":
                 return KBResult(
                     pages=[mock_page],
@@ -206,5 +208,6 @@ class TestStageManagerKBIntegration:
         summary = readiness.get_summary()
 
         # Summary should include KB recommendations section
-        assert "KB Recommendations:" in summary
+        assert "KNOWLEDGE BASE RECOMMENDATIONS:" in summary
+        assert "[BEST_PRACTICE] Test Best Practice" in summary
         assert "Test Best Practice" in summary
