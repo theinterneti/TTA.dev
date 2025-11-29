@@ -331,6 +331,69 @@ class IssueManager:
         print(f"ℹ️ Could not determine milestone for issue #{issue_number}")
         return True
 
+    def generate_logseq_todo(self, issue_number: int) -> str | None:
+        """
+        Generate a Logseq-formatted TODO string for a GitHub issue.
+
+        Follows the convention defined in .github/instructions/logseq-knowledge-base.instructions.md
+        """
+        issue = self.get_issue(issue_number)
+        if not issue:
+            print(f"Issue #{issue_number} not found")
+            return None
+
+        # Map GitHub labels to Logseq priorities
+        priority_map = {
+            "P0": "high",
+            "P1": "high",
+            "P2": "medium",
+            "P3": "low",
+            "critical": "high",
+            "urgent": "high",
+        }
+
+        # Determine priority
+        priority = "medium"
+        for label in issue.labels:
+            if label in priority_map:
+                priority = priority_map[label]
+                break
+
+        # Determine type based on labels
+        todo_type = "implementation"
+        if "documentation" in issue.labels:
+            todo_type = "documentation"
+        elif "bug" in issue.labels:
+            todo_type = "bugfix"
+        elif "testing" in issue.labels:
+            todo_type = "testing"
+        elif "observability" in issue.labels:
+            todo_type = "observability"
+
+        # Build the Logseq block
+        # Format: - TODO Title #tags
+        # Filter out P-labels for tags to avoid redundancy with priority property
+        tags = [f"#{l}" for l in issue.labels if not l.startswith("P")]
+        tags_str = " ".join(tags)
+
+        lines = [
+            f"- TODO {issue.title} {tags_str} #dev-todo",
+            f"  issue:: #{issue.number}",
+            f"  type:: {todo_type}",
+            f"  priority:: {priority}",
+            f"  status:: {issue.state.lower()}",
+            f"  url:: https://github.com/{self.repo}/issues/{issue.number}",
+        ]
+
+        if issue.milestone:
+            lines.append(f"  milestone:: [[{issue.milestone}]]")
+
+        if issue.assignees:
+            assignees_str = ", ".join([f"[[@{a}]]" for a in issue.assignees])
+            lines.append(f"  assigned:: {assignees_str}")
+
+        return "\n".join(lines)
+
     def show_progress(self) -> None:
         """Show milestone progress dashboard."""
         try:
@@ -412,6 +475,18 @@ def main():
         issue_number = int(sys.argv[2])
         success = manager.assign_milestone(issue_number)
         sys.exit(0 if success else 1)
+
+    elif command == "logseq-todo":
+        if len(sys.argv) < 3:
+            print("Usage: ./scripts/issue_manager.py logseq-todo <issue-number>")
+            sys.exit(1)
+        issue_number = int(sys.argv[2])
+        todo_block = manager.generate_logseq_todo(issue_number)
+        if todo_block:
+            print(todo_block)
+            sys.exit(0)
+        else:
+            sys.exit(1)
 
     elif command == "progress":
         manager.show_progress()

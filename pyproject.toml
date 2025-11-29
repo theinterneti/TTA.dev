@@ -117,11 +117,6 @@ exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
 
-<<<<<<< HEAD
-testpaths = ["platform/primitives/tests"]
-=======
-
->>>>>>> agent/copilot
 pythonpath = ["."]
 testpaths = ["platform/primitives/tests", "tests"]
 norecursedirs = [
