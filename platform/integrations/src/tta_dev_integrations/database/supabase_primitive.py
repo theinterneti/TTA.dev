@@ -1,4 +1,4 @@
-# Logseq: [[TTA.dev/Platform/Integrations/Src/Tta_dev_integrations/Database/Supabase_primitive]]  # noqa: E501, ERA001
+"""Supabase integration primitive."""
 
 import os
 from typing import Any
@@ -105,14 +105,18 @@ class SupabasePrimitive(DatabasePrimitive):
 
         super().__init__(timeout=timeout, max_retries=max_retries)
 
-        self.url = url or os.getenv("SUPABASE_URL")
-        self.key = key or os.getenv("SUPABASE_KEY")
+        supabase_url = url or os.getenv("SUPABASE_URL")
+        supabase_key = key or os.getenv("SUPABASE_KEY")
 
-        if not self.url or not self.key:
+        if not supabase_url or not supabase_key:
             raise ValueError(
                 "Supabase URL and key required. "
                 "Set SUPABASE_URL and SUPABASE_KEY env vars or pass explicitly.",
             )
+
+        # Store non-None values (validated above)
+        self.url: str = supabase_url
+        self.key: str = supabase_key
 
         # Client will be initialized on first use (async)
         self._client: AsyncClient | None = None
@@ -141,7 +145,7 @@ class SupabasePrimitive(DatabasePrimitive):
         Raises:
             Exception: On Supabase errors
         """
-        _ = await self._get_client()
+        await self._get_client()
 
         # TODO: Implement actual query execution
         # This is a skeleton - full implementation needed
@@ -154,15 +158,13 @@ class SupabasePrimitive(DatabasePrimitive):
         )
 
     @property
-    async def auth(self) -> Any:  # noqa: ANN401
+    async def auth(self) -> Any:
         """Access Supabase auth."""
-        _ = await self._get_client()
-        # TODO: Return actual auth client
-        return None
+        client = await self._get_client()
+        return client.auth
 
     @property
-    async def storage(self) -> Any:  # noqa: ANN401
+    async def storage(self) -> Any:
         """Access Supabase storage."""
-        _ = await self._get_client()
-        # TODO: Return actual storage client
-        return None
+        client = await self._get_client()
+        return client.storage

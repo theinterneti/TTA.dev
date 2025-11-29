@@ -6,47 +6,37 @@
 # Note: keploy-framework, python-pathway, and js-dev-primitives are under review
 # and not included in workspace until architectural decisions are made
 members = [
-    "platform/primitives",
-    "platform/integrations",
-    "platform/observability",
-    "apps/observability-ui",
-    "platform/agent-context",
-    "platform/documentation",
-    "platform/kb-automation",
-    "platform/agent-coordination",
+    # Platform façade (unified API)
+    "packages/tta-dev",
+    # Core production packages
+    "packages/tta-dev-primitives",
+    "packages/tta-observability-integration",
+    "packages/universal-agent-context",
+    # Additional packages
+    "packages/tta-dev-integrations",
+    "packages/tta-observability-ui",
+    "packages/tta-documentation-primitives",
+    "packages/tta-kb-automation",
+    "packages/tta-agent-coordination",
 ]
 
 [tool.uv]
 dev-dependencies = [
     "aiohttp>=3.13.2",
-    "hvac>=1.2.0", # HashiCorp Vault client for production secrets
     "pytest>=8.0.0",
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.14.0",
     "pytest-timeout>=2.2.0",
     "ruff>=0.8.0",
-    # Security scanning (local CodeQL-equivalent)
-    # Note: semgrep installed via uvx/pipx due to opentelemetry version conflict
-    "pre-commit>=4.0.0", # Git hooks framework
-    "bandit>=1.7.10", # Python security linter
-    "detect-secrets>=1.5.0", # Prevents secrets in code
 ]
-
-[tool.coverage.run]
-source = ["."]
-omit = ["binary_search.py:22-38"]
-
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 extend-exclude = [
     "archive/**",
-    "_archive/**",
     "scripts/**",
-    ".cline/**",
-    ".hypertool/**",
     "tests/integration/test_mcp*.py",
     "tests/mcp/conftest.py",
     "local/**",
@@ -82,9 +72,6 @@ ignore = [
     "ARG002",
     "PLC0415",
     "TRY003",
-    "S101",
-    "PLR2004",
-    "SLF001",
 ] # Allow long lines, missing annotations, import order, unused args, and test-specific patterns
 "**/examples/**/*.py" = [
     "E501",
@@ -97,10 +84,6 @@ ignore = [
     "N806",
     "PTH123",
     "B007",
-    "T201",
-    "ARG001",
-    "S311",
-    "TRY002",
 ] # Allow long lines, import order, error handling, and example-specific patterns
 "**/__init__.py" = ["F401"] # Allow unused imports in __init__.py (re-exports)
 "**/primitives.py" = [
@@ -110,9 +93,6 @@ ignore = [
 "**/src/tta_dev_primitives/apm/decorators.py" = [
     "ANN",
 ] # Decorators use complex generic types
-"**/src/tta_dev_primitives/analysis/transformer.py" = [
-    "N802",
-] # AST visitors require CamelCase method names
 "**/src/tta_dev_primitives/integrations/*_primitive.py" = [
     "ANN204",
     "ANN001",
@@ -130,28 +110,26 @@ pythonVersion = "3.11"
 typeCheckingMode = "basic"
 reportMissingImports = true
 reportMissingTypeStubs = false
-include = ["platform", "apps"]
+include = ["packages"]
 exclude = ["**/__pycache__", "**/.pytest_cache", "**/node_modules", "archive"]
 
 [tool.pytest.ini_options]
-
 pythonpath = ["."]
-testpaths = ["platform/primitives/tests", "tests"]
-norecursedirs = [
-    "_archive",
-    "archive",
-    "nested_copies",
-    "node_modules",
-    ".venv",
+# Platform-wide test discovery: all production packages
+testpaths = [
+    "packages/tta-dev/tests",
+    "packages/tta-dev-primitives/tests",
+    "packages/tta-observability-integration/tests",
+    "packages/universal-agent-context/tests",
 ]
 asyncio_mode = "auto"
-addopts = "-v --strict-markers --timeout=60"
+addopts = "-v --strict-markers --timeout=60 -m 'not integration and not slow and not external'"
 timeout = 60
 timeout_method = "thread"
 markers = [
     "asyncio: mark test as async",
-    "integration: mark test as integration test",
+    "integration: mark test as integration test (skipped by default, run with -m integration)",
     "unit: mark test as unit test",
-    "slow: mark test as slow running",
-    "external: mark test as requiring external services",
+    "slow: mark test as slow running (skipped by default, run with -m slow)",
+    "external: mark test as requiring external services (skipped by default)",
 ]

@@ -5,6 +5,7 @@
 [![CI](https://github.com/theinterneti/TTA.dev/workflows/CI/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
 [![Quality](https://github.com/theinterneti/TTA.dev/workflows/Quality%20Checks/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
 [![TODO Compliance](https://github.com/theinterneti/TTA.dev/workflows/TODO%20Compliance%20Validation/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
+[![Codecov](https://codecov.io/gh/theinterneti/TTA.dev/branch/main/graph/badge.svg)](https://codecov.io/gh/theinterneti/TTA.dev)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Type checked: Pyright](https://img.shields.io/badge/type%20checked-pyright-blue.svg)](https://github.com/microsoft/pyright)
@@ -24,52 +25,53 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 
 ---
 
-## 🤝 Relationship to TTA (The Game)
+## 📦 Production Packages
 
-TTA.dev was originally extracted from the **Therapeutic Text Adventure (TTA)** project.
+TTA.dev is a Python monorepo with a **unified platform package** and 3 focused packages:
 
-- **TTA.dev (This Repo):** The reusable DevOps, infrastructure, and agentic primitives.
-- **TTA (Game Repo):** The narrative storytelling game built on top of this platform.
+### 🎯 `tta-dev` (Recommended Entry Point)
+
+**Unified API for TTA.dev** - the recommended way to use TTA.dev. Re-exports the most commonly used primitives with optional extras for observability and multi-agent context.
+
+**Installation:**
+```bash
+# Core primitives only
+uv add tta-dev
+
+# With observability (OpenTelemetry, Prometheus)
+uv add tta-dev[observability]
+
+# With agent context (multi-agent workflows)
+uv add tta-dev[context]
+
+# Full platform (all packages)
+uv add tta-dev[all]
+```
+
+**Quick Start:**
+```python
+from tta_dev import (
+    WorkflowContext,
+    SequentialPrimitive,
+    ParallelPrimitive,
+    RetryPrimitive,
+    CachePrimitive,
+)
+
+# Build composable workflows
+workflow = step1 >> step2 >> step3  # Sequential
+parallel = branch1 | branch2        # Parallel
+
+# Execute with context
+context = WorkflowContext(workflow_id="my-workflow")
+result = await workflow.execute(input_data, context)
+```
+
+[📚 Full Documentation](packages/tta-dev/README.md)
 
 ---
 
-## 📦 Repository Structure
-
-TTA.dev is organized into **platform** infrastructure packages and **apps** for end-user deployments:
-
-```
-TTA.dev/
-├── platform/              # Infrastructure packages (7)
-│   ├── primitives/        # Core workflow primitives
-│   ├── observability/     # OpenTelemetry integration
-│   ├── agent-context/     # Agent context management
-│   ├── agent-coordination/# Multi-agent orchestration
-│   ├── integrations/      # Pre-built integrations
-│   ├── documentation/     # Docs automation
-│   └── kb-automation/     # Knowledge base maintenance
-│
-├── templates/             # 🚀 Vibe Coding Templates (Start Here)
-│   ├── basic-agent/       # Simple agent with cache/retry
-│   └── workflow/          # Multi-step workflow
-│
-├── apps/                  # User-facing applications (1)
-│   └── observability-ui/  # VS Code observability dashboard
-│
-├── config/                # Configuration files
-├── data/                  # Data artifacts
-│   └── ace_playbooks/     # ACE Agent Playbooks
-├── docs/                  # Documentation
-├── scripts/               # Automation scripts
-└── tests/                 # Integration tests
-```
-
----
-
-## 🏗️ Platform Packages
-
-### Core Infrastructure (Production-Ready)
-
-#### 1. `tta-dev-primitives` → `platform/primitives/`
+### 1. `tta-dev-primitives`
 
 Core workflow primitives for building reliable, observable agent workflows.
 
@@ -89,11 +91,11 @@ uv add tta-dev-primitives
 **Quick Start:**
 See [`GETTING_STARTED.md`](GETTING_STARTED.md) for a quick start guide.
 
-[📚 Full Documentation](platform/primitives/README.md)
+[📚 Full Documentation](packages/tta-dev-primitives/README.md)
 
 ---
 
-#### 2. `tta-observability-integration` → `platform/observability/`
+### 2. `tta-observability-integration`
 
 OpenTelemetry integration for tracing, metrics, and logging across TTA.dev primitives.
 
@@ -108,11 +110,11 @@ OpenTelemetry integration for tracing, metrics, and logging across TTA.dev primi
 uv add tta-observability-integration
 ```
 
-[📚 Full Documentation](platform/observability/README.md)
+[📚 Full Documentation](packages/tta-observability-integration/README.md)
 
 ---
 
-#### 3. `universal-agent-context` → `platform/agent-context/`
+### 3. `universal-agent-context`
 
 Agent context management and orchestration for multi-agent workflows.
 
@@ -127,50 +129,15 @@ Agent context management and orchestration for multi-agent workflows.
 uv add universal-agent-context
 ```
 
-[📚 Full Documentation](platform/agent-context/README.md)
+[📚 Full Documentation](packages/universal-agent-context/README.md)
 
 ---
 
-### Extended Platform (Active Development)
+## ⚠️ Packages Under Review
 
-#### 4. `tta-agent-coordination` → `platform/agent-coordination/`
-
-Atomic DevOps Architecture for multi-agent coordination.
-
-[📚 Documentation](platform/agent-coordination/README.md)
-
-#### 5. `tta-dev-integrations` → `platform/integrations/`
-
-Pre-built integration primitives (Supabase, PostgreSQL, Clerk, JWT).
-
-[📚 Documentation](platform/integrations/README.md)
-
-#### 6. `tta-documentation-primitives` → `platform/documentation/`
-
-Automated docs ↔ Logseq sync with AI metadata.
-
-[📚 Documentation](platform/documentation/README.md)
-
-#### 7. `tta-kb-automation` → `platform/kb-automation/`
-
-Automated knowledge base maintenance (links, TODOs, flashcards).
-
-[📚 Documentation](platform/kb-automation/README.md)
-
----
-
-## 📱 Applications
-
-### `tta-observability-ui` → `apps/observability-ui/`
-
-LangSmith-inspired observability dashboard with VS Code webview integration.
-
-**Features:**
-- 📊 Real-time trace visualization
-- 🔍 Primitive-aware debugging
-- 🎯 VS Code integration (coming Phase 3)
-
-[📚 Documentation](apps/observability-ui/README.md)
+- **`keploy-framework`**: Minimal implementation, no `pyproject.toml`, no tests. Decision needed.
+- **`python-pathway`**: No clear use case documented. Decision needed.
+- **`js-dev-primitives`**: Placeholder, not implemented. Decision needed.
 
 ---
 
@@ -189,7 +156,7 @@ For a comprehensive quick start guide, including installation and your first wor
 - **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
 - **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
 - **[MCP Integration](MCP_SERVERS.md)** - Model Context Protocol guides
-- **[Workspace Organization](docs/WORKSPACE_ORGANIZATION.md)** - Repository structure and navigation guide
+- **[Cline Integration](CLINE_INTEGRATION_GUIDE.md)** - Enhanced Cline development experience
 
 ### Additional Resources
 
@@ -197,27 +164,30 @@ For a comprehensive quick start guide, including installation and your first wor
 - [PR Management Quick Reference](docs/guides/pr-management-quickref.md) - Quick commands and best practices
 - [LLM Cost Guide](docs/guides/llm-cost-guide.md) - Free vs paid model comparison, pricing analysis
 - [Cost Optimization Patterns](docs/guides/cost-optimization-patterns.md) - Production patterns for 50-70% cost reduction
-- [Cline Integration](docs/guides/CLINE_INTEGRATION_GUIDE.md) - Enhanced Cline development experience
 - [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
 - [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
 - [LLM Selection Guide](docs/guides/llm-selection-guide.md)
-- [Examples](platform/primitives/examples/)
+- [Examples](packages/tta-dev-primitives/examples/)
 
 ---
 
 ## 🧪 Testing
 
-All packages maintain **100% test coverage** with comprehensive test suites.
+Tests and coverage are enforced in CI via `pytest` + Codecov across the
+TTA.dev workspace. The root pytest configuration discovers tests from **all
+production packages**.
 
 ```bash
-# Run all tests
+# Primary: Run all platform tests (all production packages)
 uv run pytest -v
 
-# Run with coverage
-uv run pytest --cov=platform --cov=apps --cov-report=html
+# Run with coverage (as in CI)
+uv run pytest --cov=packages --cov-report=html
 
-# Run specific package tests
-uv run pytest platform/primitives/tests/ -v
+# Package-specific tests (for focused local development)
+uv run pytest -v packages/tta-dev-primitives/tests/
+uv run pytest -v packages/tta-observability-integration/tests/
+uv run pytest -v packages/universal-agent-context/tests/
 ```
 
 ---
@@ -246,7 +216,7 @@ uv run pytest -v
 # Run quality checks
 uv run ruff format .
 uv run ruff check . --fix
-uvx pyright platform/ apps/
+uvx pyright packages/
 ```
 
 ### VS Code Workflow
@@ -396,7 +366,7 @@ The CI will automatically validate TODO compliance on all PRs. Non-compliant TOD
 - Google-style docstrings
 - README for each package
 - Examples for all features
-- **Phase 3 Examples:** See [`platform/primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](platform/primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
+- **Phase 3 Examples:** See [`packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](packages/tta-dev-primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) for InstrumentedPrimitive pattern guide
 
 ---
 
@@ -420,11 +390,14 @@ All PRs automatically run:
 
 ### Current Release: v0.1.0 (Initial)
 
-| Package | Version | Tests | Coverage | Status |
-|---------|---------|-------|----------|--------|
-| tta-dev-primitives | 0.1.0 | 12/12 ✅ | 100% | 🟢 Stable |
-| tta-observability-integration | 0.1.0 | TBD | TBD | 🟢 Stable |
-| universal-agent-context | 0.1.0 | TBD | TBD | 🟢 Stable |
+Live test and coverage status are available via the CI and Codecov badges
+at the top of this README. At a high level:
+
+| Package | Version | Tests (CI) | Coverage (Codecov) | Status |
+|---------|---------|-----------|---------------------|--------|
+| tta-dev-primitives | 0.1.0 | ✅ (unit + integration) | See Codecov | 🟢 Stable |
+| tta-observability-integration | 0.1.0 | ✅ (unit) | See Codecov | 🟢 Stable |
+| universal-agent-context | 0.1.0 | ✅ (unit) | See Codecov | 🟢 Stable |
 
 ### Roadmap
 
@@ -476,7 +449,3 @@ If you find TTA.dev useful, please consider giving it a star! ⭐
 ---
 
 **Last Updated:** 2025-11-10
-
-
----
-**Logseq:** [[TTA.dev/Readme]]

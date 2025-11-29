@@ -13,6 +13,7 @@ prerelease-mode = "if-necessary"
 [manifest]
 members = [
     "tta-agent-coordination",
+    "tta-dev",
     "tta-dev-integrations",
     "tta-dev-primitives",
     "tta-documentation-primitives",
@@ -2978,6 +2979,38 @@ requires-dist = [
     { name = "tta-dev-primitives", editable = "platform/primitives" },
 ]
 provides-extras = ["dev"]
+
+[[package]]
+name = "tta-dev"
+version = "0.1.0"
+source = { editable = "packages/tta-dev" }
+dependencies = [
+    { name = "tta-dev-primitives" },
+]
+
+[package.optional-dependencies]
+all = [
+    { name = "tta-dev-primitives" },
+    { name = "tta-observability-integration" },
+    { name = "universal-agent-context" },
+]
+context = [
+    { name = "universal-agent-context" },
+]
+observability = [
+    { name = "tta-observability-integration" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "tta-dev-primitives", editable = "packages/tta-dev-primitives" },
+    { name = "tta-dev-primitives", marker = "extra == 'all'", editable = "packages/tta-dev-primitives" },
+    { name = "tta-observability-integration", marker = "extra == 'all'", editable = "packages/tta-observability-integration" },
+    { name = "tta-observability-integration", marker = "extra == 'observability'", editable = "packages/tta-observability-integration" },
+    { name = "universal-agent-context", marker = "extra == 'all'", editable = "packages/universal-agent-context" },
+    { name = "universal-agent-context", marker = "extra == 'context'", editable = "packages/universal-agent-context" },
+]
+provides-extras = ["observability", "context", "all"]
 
 [[package]]
 name = "tta-dev-integrations"

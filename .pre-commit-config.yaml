@@ -1,78 +1,64 @@
 # Pre-commit hooks for TTA.dev
-# These run automatically before each commit to catch security issues BEFORE GitHub
-#
-# Install: uv run pre-commit install
-# Run manually: uv run pre-commit run --all-files
-# Skip (emergency): git commit --no-verify
+# Install: pre-commit install
+# Run manually: pre-commit run --all-files
+# See: https://pre-commit.com/
 
 repos:
-  # Semgrep - CodeQL-equivalent security scanning (via uvx to avoid deps conflict)
-  # Catches: SQL injection, XSS, command injection, secrets in code, etc.
-  - repo: local
-    hooks:
-      - id: semgrep
-        name: "🔒 Semgrep Security Scan"
-        entry: uvx semgrep --config=auto --config=p/python --config=p/security-audit --config=p/secrets --error --quiet
-        language: system
-        types: [python]
-        pass_filenames: true
-
-  # Bandit - Python-specific security linter
-  # Catches: Hardcoded passwords, SQL injection, shell injection, etc.
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.10
-    hooks:
-      - id: bandit
-        name: "🛡️ Bandit Security Scan"
-        args:
-          - -c
-          - .bandit.yaml
-          - -ll  # Medium+ severity only
-          - -r
-        types: [python]
-
-  # Ruff - Fast Python linter (already in your workflow)
+  # Ruff - Fast Python linter and formatter (replaces flake8, isort, black)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.0
+    rev: v0.8.2
     hooks:
       - id: ruff
-        name: "⚡ Ruff Lint"
+        name: ruff lint
         args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]
       - id: ruff-format
-        name: "✨ Ruff Format"
+        name: ruff format
+        types_or: [python, pyi]
 
-  # Detect secrets before they hit the repo
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]  # Allow custom YAML tags
+      - id: check-json
+      - id: check-toml
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: debug-statements
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # Check for common security issues
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        name: "🔐 Detect Secrets"
-        args: ['--baseline', '.secrets.baseline']
-        exclude: package-lock\.json|\.secrets\.baseline
+        args: [--baseline, .secrets.baseline]
+        exclude: package-lock\.json|uv\.lock
 
-  # General file checks
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+  # Validate pyproject.toml
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.21
     hooks:
-      - id: check-yaml
-        name: "📄 Check YAML"
-      - id: check-json
-        name: "📄 Check JSON"
-      - id: check-toml
-        name: "📄 Check TOML"
-      - id: end-of-file-fixer
-        name: "📝 Fix EOF"
-      - id: trailing-whitespace
-        name: "📝 Trim Whitespace"
-      - id: check-added-large-files
-        name: "📦 Check Large Files"
-        args: ['--maxkb=1000']
-      - id: check-merge-conflict
-        name: "🔀 Check Merge Conflicts"
-      - id: debug-statements
-        name: "🐛 Check Debug Statements"
+      - id: validate-pyproject
+        files: pyproject\.toml$
 
-# CI configuration
+# Configuration
+default_language_version:
+  python: python3.11
+
+# Only run on staged files by default
+default_stages: [pre-commit]
+
+# Skip CI-only checks in local development
 ci:
   autofix_commit_msg: "style: auto-fix by pre-commit hooks"
-  autoupdate_commit_msg: "chore: update pre-commit hooks"
+  autoupdate_schedule: quarterly
+

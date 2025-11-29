@@ -1,11 +1,26 @@
-# Integration Tests Status - Current State
+# Integration Tests Status (Archived)
 
-**Date:** 2025-11-07
-**Status:** Phase 2 - Integration Tests - BLOCKED
+> **Note – 2025-11-26:**
+>
+> This document captures a **historical snapshot** from early in the
+> adaptive primitives development, when integration tests were still
+> blocked on API alignment.
+>
+> Since then, the adaptive primitives and their integration tests have
+> been **fully implemented and verified**. For the up‑to‑date status and
+> verification details, see:
+>
+> - `archive/reports/ADAPTIVE_PRIMITIVES_VERIFICATION_COMPLETE.md`
+> - `packages/tta-dev-primitives/tests/adaptive/` (now green in CI)
+>
+> This file is kept for **context and design history only**.
+
+**Original Date:** 2025-11-07  
+**Original Status:** Phase 2 - Integration Tests - BLOCKED
 
 ---
 
-## ⚠️ Current Situation
+## ⚠️ Historical Situation (Superseded)
 
 ### Test Files Created
 
