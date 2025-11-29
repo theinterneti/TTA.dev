@@ -155,9 +155,9 @@ async def demonstrate_secrets_management():
         correlation_id="demo-secrets-request", data={"demo_purpose": "agent_education"}
     )
 
-    print("📋 Requesting the following secrets:")
-    for secret in common_secrets:
-        print(f"  - {secret}")
+    print(f"📋 Requesting {len(common_secrets)} secrets.")
+
+
 
     print("\n🔍 Executing secrets request...")
 
