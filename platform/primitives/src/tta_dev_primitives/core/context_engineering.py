@@ -242,9 +242,9 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
 
             # Add WorkflowContext
             try:
-                from .base import WorkflowContext as WC
+                from .base import WorkflowContext as Context
 
-                context_source = self._extract_source_code(WC)
+                context_source = self._extract_source_code(Context)
                 components.append(
                     ContextComponent(
                         name="WorkflowContext",
@@ -287,7 +287,9 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
 
         # Layer 6: Related files (priority 3, optional)
         if request.get("target_class"):
-            related_files = await self._discover_related_files(request["target_class"], context)
+            related_files = await self._discover_related_files(
+                request["target_class"], context
+            )
             if related_files:
                 components.append(
                     ContextComponent(
@@ -366,7 +368,9 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
         if cls.__doc__:
             docstring_examples = self._extract_code_from_docstring(cls.__doc__)
             if docstring_examples:
-                examples.append(f"## From {cls.__name__} Docstring\n{docstring_examples}")
+                examples.append(
+                    f"## From {cls.__name__} Docstring\n{docstring_examples}"
+                )
 
         # 2. Search examples/ directory
         examples_dir = Path("examples")
@@ -393,7 +397,9 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
                     try:
                         content = file.read_text()
                         if cls.__name__ in content:
-                            example = self._extract_examples_from_file(file, cls.__name__)
+                            example = self._extract_examples_from_file(
+                                file, cls.__name__
+                            )
                             if example:
                                 examples.append(f"## From {file.name}\n{example}")
                     except (OSError, UnicodeDecodeError):
@@ -506,7 +512,9 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
             # 3. Search .github/copilot-instructions.md (alternative to AGENTS.md)
             copilot_instructions = package_dir / ".github" / "copilot-instructions.md"
             if copilot_instructions.exists():
-                relevant = self._extract_relevant_sections(copilot_instructions, class_name)
+                relevant = self._extract_relevant_sections(
+                    copilot_instructions, class_name
+                )
                 if relevant:
                     docs.append(f"## From copilot-instructions.md\n{relevant}")
 
@@ -635,7 +643,11 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
             # Find import statement
             import_line = -1
             for i, line in enumerate(lines):
-                if f"import {class_name}" in line or "from " in line and class_name in line:
+                if (
+                    f"import {class_name}" in line
+                    or "from " in line
+                    and class_name in line
+                ):
                     import_line = i
                     break
 
@@ -840,7 +852,9 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
         checks["within_budget"] = token_count <= self.max_tokens
 
         if not checks["within_budget"]:
-            recommendations.append(f"Context exceeds budget ({token_count} > {self.max_tokens})")
+            recommendations.append(
+                f"Context exceeds budget ({token_count} > {self.max_tokens})"
+            )
 
         # Calculate quality score
         quality_score = sum(checks.values()) / len(checks)

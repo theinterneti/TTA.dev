@@ -16,7 +16,6 @@ members = [
     "tta-kb-automation",
     "tta-observability-integration",
     "tta-observability-ui",
-    "tta-secrets",
     "universal-agent-context",
 ]
 
@@ -2968,17 +2967,6 @@ requires-dist = [
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.24.0" },
 ]
 provides-extras = ["dev"]
-
-[[package]]
-name = "tta-secrets"
-version = "0.1.0"
-source = { editable = "platform/secrets" }
-dependencies = [
-    { name = "python-dotenv" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "python-dotenv", specifier = ">=1.0.0" }]
 
 [[package]]
 name = "typing-extensions"

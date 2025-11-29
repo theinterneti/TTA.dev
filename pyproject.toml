@@ -38,7 +38,10 @@ line-length = 100
 target-version = "py311"
 extend-exclude = [
     "archive/**",
+    "_archive/**",
     "scripts/**",
+    ".cline/**",
+    ".hypertool/**",
     "tests/integration/test_mcp*.py",
     "tests/mcp/conftest.py",
     "local/**",
@@ -74,6 +77,9 @@ ignore = [
     "ARG002",
     "PLC0415",
     "TRY003",
+    "S101",
+    "PLR2004",
+    "SLF001",
 ] # Allow long lines, missing annotations, import order, unused args, and test-specific patterns
 "**/examples/**/*.py" = [
     "E501",
@@ -86,6 +92,10 @@ ignore = [
     "N806",
     "PTH123",
     "B007",
+    "T201",
+    "ARG001",
+    "S311",
+    "TRY002",
 ] # Allow long lines, import order, error handling, and example-specific patterns
 "**/__init__.py" = ["F401"] # Allow unused imports in __init__.py (re-exports)
 "**/primitives.py" = [

@@ -11,6 +11,14 @@ from tta_kb_automation.core.code_primitives import (
 from tta_kb_automation.core.intelligence_primitives import SuggestKBLinks
 from tta_kb_automation.tools.todo_sync import TODOSync
 
+__all__ = [
+    "AnalyzeCodeStructure",
+    "ExtractTODOs",
+    "ScanCodebase",
+    "SuggestKBLinks",
+    "TODOSync",
+]
+
 
 async def validate_kb_links(kb_path: str) -> dict:
     """Validate all links in KB.

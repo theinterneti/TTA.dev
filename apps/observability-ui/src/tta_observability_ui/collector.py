@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
-from typing import Any
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 
 from .models import Span, SpanStatus, Trace, TraceStatus
-from .storage import TraceStorage
+
+if TYPE_CHECKING:
+    from .storage import TraceStorage
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +47,10 @@ class TraceCollector:
                     for span_data in spans_data:
                         await self._process_span(span_data)
 
-        except Exception as e:
-            logger.exception("Error processing OTLP trace: %s", e)
+        except Exception:
+            logger.exception("Error processing OTLP trace")
 
-    async def _process_span(self, span_data: dict[str, Any]) -> None:
+    async def _process_span(self, span_data: dict[str, Any]) -> None:  # noqa: PLR0912, PLR0915
         """Process a single OTLP span."""
         # Extract span fields
         span_id = span_data.get("spanId", "")
@@ -59,9 +61,11 @@ class TraceCollector:
         start_time_nano = span_data.get("startTimeUnixNano", 0)
         end_time_nano = span_data.get("endTimeUnixNano", 0)
 
-        start_time = datetime.fromtimestamp(start_time_nano / 1e9)
+        start_time = datetime.fromtimestamp(start_time_nano / 1e9, tz=UTC)
         end_time = (
-            datetime.fromtimestamp(end_time_nano / 1e9) if end_time_nano else None
+            datetime.fromtimestamp(end_time_nano / 1e9, tz=UTC)
+            if end_time_nano
+            else None
         )
 
         # Calculate duration
@@ -91,8 +95,11 @@ class TraceCollector:
 
         # Determine status
         status_code = span_data.get("status", {}).get("code", 0)
+        error_code_val = 2
         span_status = (
-            SpanStatus.ERROR if status_code == 2 else SpanStatus.SUCCESS  # ERROR
+            SpanStatus.ERROR
+            if status_code == error_code_val
+            else SpanStatus.SUCCESS  # ERROR
         )  # OK/UNSET
 
         # Extract error information

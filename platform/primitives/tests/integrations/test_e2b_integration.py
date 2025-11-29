@@ -7,16 +7,20 @@ They are marked as integration tests and skipped if E2B_API_KEY is not set.
 from __future__ import annotations
 
 import os
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.integrations.e2b_primitive import CodeExecutionPrimitive, CodeInput
+from tta_dev_primitives.integrations.e2b_primitive import (
+    CodeExecutionPrimitive,
+    CodeInput,
+)
 
 # Mock E2B API key if not present to allow tests to run with mocks
 if not os.getenv("E2B_API_KEY"):
     os.environ["E2B_API_KEY"] = "mock_key"
+
 
 class TestE2BIntegration:
     """Integration tests with mocked E2B sandboxes."""
@@ -24,17 +28,18 @@ class TestE2BIntegration:
     @pytest.fixture(autouse=True)
     def mock_sandbox(self):
         """Mock AsyncSandbox to avoid real API calls and event loop issues."""
-        with patch("tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox") as MockSandbox:
+        with patch(
+            "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox"
+        ) as mock_sandbox_cls:
             # Setup the mock sandbox instance
             sandbox_instance = AsyncMock()
             sandbox_instance.sandbox_id = "mock-sandbox-id"
-            
-            # Ensure create is an AsyncMock that returns the instance
-            MockSandbox.create = AsyncMock(return_value=sandbox_instance)
-            
-            yield sandbox_instance
 
-    @pytest.mark.asyncio
+            # Ensure create is an AsyncMock that returns the instance
+            mock_sandbox_cls.create = AsyncMock(return_value=sandbox_instance)
+
+            yield sandbox_instance @ pytest.mark.asyncio
+
     @pytest.mark.integration
     async def test_basic_python_execution(self, mock_sandbox):
         """Test basic Python code execution in real E2B sandbox."""
@@ -125,7 +130,9 @@ print(fibonacci(10))
         """Test code that uses standard library imports."""
         # Setup mock execution result
         mock_execution = MagicMock()
-        mock_execution.logs.stdout = ['{"pi": 3.141592653589793, "sqrt2": 1.4142135623730951}']
+        mock_execution.logs.stdout = [
+            '{"pi": 3.141592653589793, "sqrt2": 1.4142135623730951}'
+        ]
         mock_execution.logs.stderr = []
         mock_execution.error = None
         mock_sandbox.run_code.return_value = mock_execution
@@ -157,9 +164,13 @@ print(json.dumps(data))
         # Setup mock execution result
         mock_execution = MagicMock()
         mock_execution.logs.stdout = []
-        mock_execution.logs.stderr = ["NameError: name 'undefined_variable' is not defined"]
+        mock_execution.logs.stderr = [
+            "NameError: name 'undefined_variable' is not defined"
+        ]
         mock_execution.error = MagicMock()
-        mock_execution.error.value = "NameError: name 'undefined_variable' is not defined"
+        mock_execution.error.value = (
+            "NameError: name 'undefined_variable' is not defined"
+        )
         mock_sandbox.run_code.return_value = mock_execution
 
         primitive = CodeExecutionPrimitive()

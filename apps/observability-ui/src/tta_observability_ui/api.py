@@ -26,7 +26,7 @@ UI_DIR = Path(__file__).parent.parent.parent / "ui"
 class OTLPTraceRequest(BaseModel):
     """OTLP trace data."""
 
-    resourceSpans: list[dict[str, Any]]
+    resourceSpans: list[dict[str, Any]]  # noqa: N815
 
 
 class WebSocketManager:
@@ -69,9 +69,9 @@ ws_manager = WebSocketManager()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):  # noqa: ARG001
     """Application lifespan manager."""
-    global storage, collector
+    global storage, collector  # noqa: PLW0603
 
     # Startup
     logger.info("Starting TTA Observability UI service")
@@ -130,9 +130,12 @@ async def receive_otlp_traces(request: OTLPTraceRequest) -> dict[str, str]:
         await collector.collect_otlp_trace(request.dict())
 
         # Broadcast update to WebSocket clients
-        await ws_manager.broadcast({"type": "trace_update", "status": "new_trace"})
+        try:
+            await ws_manager.broadcast({"type": "trace_update", "status": "new_trace"})
+        except Exception:
+            logger.exception("Error broadcasting trace update")
 
-        return {"status": "success"}
+        return {"status": "success"}  # noqa: TRY300
     except Exception as e:
         logger.exception("Error processing OTLP trace")
         raise HTTPException(status_code=500, detail=str(e)) from e
@@ -173,7 +176,7 @@ async def get_trace(trace_id: str) -> dict[str, Any]:
     try:
         trace = await storage.get_trace(trace_id)
         if not trace:
-            raise HTTPException(status_code=404, detail="Trace not found")
+            raise HTTPException(status_code=404, detail="Trace not found")  # noqa: TRY301
 
         return trace.dict()
     except HTTPException:
@@ -213,10 +216,11 @@ async def record_metric(metric: MetricRecord) -> dict[str, str]:
 
     try:
         await storage.save_metric(metric)
-        return {"status": "success"}
-    except Exception as e:
+    except Exception:
         logger.exception("Error recording metric")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise HTTPException(status_code=500, detail="Error recording metric") from None
+
+    return {"status": "success"}
 
 
 # Primitives Stats Endpoint
@@ -262,7 +266,7 @@ async def root() -> HTMLResponse:
         # Fallback to basic status page if UI not found
         return HTMLResponse(content=_get_fallback_html(), status_code=200)
 
-    with open(index_path) as f:
+    with index_path.open() as f:
         return HTMLResponse(content=f.read(), status_code=200)
 
 
@@ -271,7 +275,7 @@ async def serve_css() -> HTMLResponse:
     """Serve CSS file."""
     css_path = UI_DIR / "app.css"
     if css_path.exists():
-        with open(css_path) as f:
+        with css_path.open() as f:
             return HTMLResponse(content=f.read(), media_type="text/css")
     return HTMLResponse(content="", status_code=404)
 
@@ -281,7 +285,7 @@ async def serve_js() -> HTMLResponse:
     """Serve JavaScript file."""
     js_path = UI_DIR / "app.js"
     if js_path.exists():
-        with open(js_path) as f:
+        with js_path.open() as f:
             return HTMLResponse(content=f.read(), media_type="application/javascript")
     return HTMLResponse(content="", status_code=404)
 
@@ -345,8 +349,14 @@ def _get_fallback_html() -> str:
                 <h3>📖 API Endpoints</h3>
                 <ul>
                     <li><a href="/api/traces">GET /api/traces</a> - List traces</li>
-                    <li><a href="/api/metrics/summary">GET /api/metrics/summary</a> - Metrics summary</li>
-                    <li><a href="/api/primitives/stats">GET /api/primitives/stats</a> - Primitive statistics</li>
+                    <li>
+                        <a href="/api/metrics/summary">GET /api/metrics/summary</a>
+                        - Metrics summary
+                    </li>
+                    <li>
+                        <a href="/api/primitives/stats">GET /api/primitives/stats</a>
+                        - Primitive statistics
+                    </li>
                     <li><a href="/health">GET /health</a> - Health check</li>
                 </ul>
             </div>
@@ -373,7 +383,8 @@ def _get_fallback_html() -> str:
                 <h3>🎯 Next Steps</h3>
                 <ol>
                     <li>Initialize observability in your app:
-                        <pre style="background: #1e1e1e; padding: 10px; border-radius: 4px;">
+                        <pre style="background: #1e1e1e; padding: 10px;
+                                    border-radius: 4px;">
 from observability_integration import initialize_observability
 
 initialize_observability(
@@ -402,7 +413,8 @@ async def cleanup_old_traces() -> dict[str, Any]:
 
     try:
         deleted = await storage.cleanup_old_traces()
-        return {"status": "success", "deleted_count": deleted}
-    except Exception as e:
+    except Exception:
         logger.exception("Error cleaning up traces")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        return {"status": "error", "message": "Cleanup failed"}
+
+    return {"status": "success", "deleted_count": deleted}

@@ -1,11 +1,6 @@
 """TTA Dev Primitives - Production-quality workflow primitives for AI applications."""
 
 # Core primitives
-from .core.base import WorkflowContext, WorkflowPrimitive
-from .core.conditional import ConditionalPrimitive
-from .core.parallel import ParallelPrimitive
-from .core.sequential import SequentialPrimitive
-
 # Collaboration primitives
 from .collaboration import (
     AgentIdentity,
@@ -14,6 +9,10 @@ from .collaboration import (
     IntegrationFrequency,
     MergeStrategy,
 )
+from .core.base import WorkflowContext, WorkflowPrimitive
+from .core.conditional import ConditionalPrimitive
+from .core.parallel import ParallelPrimitive
+from .core.sequential import SequentialPrimitive
 
 # Performance primitives
 from .performance.cache import CachePrimitive

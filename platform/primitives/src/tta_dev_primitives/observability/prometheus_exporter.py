@@ -6,12 +6,12 @@ Exports all collected metrics from the enhanced metrics collector.
 """
 
 import threading
+from collections.abc import Iterator
+from typing import Any
 
 try:
     from prometheus_client import (
-        CONTENT_TYPE_LATEST,
         REGISTRY,
-        generate_latest,
         start_http_server,
     )
     from prometheus_client.core import (
@@ -49,7 +49,9 @@ def start_prometheus_exporter(port: int = 9464, host: str = "0.0.0.0") -> bool:
     global _exporter_running, _exporter_port
 
     if not PROMETHEUS_CLIENT_AVAILABLE:
-        print("⚠️  prometheus-client not available. Install with: uv pip install prometheus-client")
+        print(
+            "⚠️  prometheus-client not available. Install with: uv pip install prometheus-client"
+        )
         return False
 
     if _exporter_running:
@@ -76,7 +78,7 @@ def start_prometheus_exporter(port: int = 9464, host: str = "0.0.0.0") -> bool:
 class TTAPrometheusExporter:
     """Exports TTA.dev metrics in Prometheus format."""
 
-    def __init__(self, port: int = 9464, host: str = "0.0.0.0"):
+    def __init__(self, port: int = 9464, host: str = "0.0.0.0") -> None:
         self.port = port
         self.host = host
         self.server_thread: threading.Thread | None = None
@@ -102,14 +104,16 @@ class TTAPrometheusExporter:
             start_http_server(self.port, addr=self.host)
             self.running = True
 
-            print(f"✅ Prometheus metrics server started on http://{self.host}:{self.port}/metrics")
+            print(
+                f"✅ Prometheus metrics server started on http://{self.host}:{self.port}/metrics"
+            )
             return True
 
         except Exception as e:
             print(f"❌ Failed to start Prometheus server: {e}")
             return False
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the metrics server."""
         if self.running:
             try:
@@ -118,7 +122,7 @@ class TTAPrometheusExporter:
                 pass  # Already unregistered
             self.running = False
 
-    def collect(self):
+    def collect(self) -> Iterator[Any]:
         """Collect metrics for Prometheus (called by prometheus_client)."""
         try:
             # Get all registered primitives from the collector
@@ -176,13 +180,15 @@ class TTAPrometheusExporter:
                         )
 
                 except Exception as metric_error:
-                    print(f"⚠️  Error collecting metrics for {primitive_name}: {metric_error}")
+                    print(
+                        f"⚠️  Error collecting metrics for {primitive_name}: {metric_error}"
+                    )
                     continue
 
         except Exception as e:
             print(f"⚠️  Error collecting metrics: {e}")
 
-    def _create_histogram_metric(self, metric_name: str, metric_data: dict):
+    def _create_histogram_metric(self, metric_name: str, metric_data: dict) -> Any:
         """Create a Prometheus histogram from percentile data."""
         percentiles = metric_data.get("percentiles", {})
 
@@ -205,7 +211,9 @@ class TTAPrometheusExporter:
 _exporter: TTAPrometheusExporter | None = None
 
 
-def get_prometheus_exporter(port: int = 9464, host: str = "0.0.0.0") -> TTAPrometheusExporter:
+def get_prometheus_exporter(
+    port: int = 9464, host: str = "0.0.0.0"
+) -> TTAPrometheusExporter:
     """Get or create the global Prometheus exporter instance."""
     global _exporter
 
@@ -221,7 +229,7 @@ def start_prometheus_server(port: int = 9464, host: str = "0.0.0.0") -> bool:
     return exporter.start()
 
 
-def stop_prometheus_server():
+def stop_prometheus_server() -> None:
     """Stop the Prometheus metrics server (convenience function)."""
     global _exporter
     if _exporter:

@@ -37,12 +37,11 @@ from __future__ import annotations
 
 import asyncio
 import json
-import statistics
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, Tuple
+from typing import Any, Protocol
 
 import numpy as np
 from scipy import stats
@@ -110,7 +109,9 @@ class BenchmarkFramework(Protocol):
         """Setup framework for benchmarking."""
         ...
 
-    async def execute_benchmark(self, task: str, input_data: dict[str, Any]) -> dict[str, Any]:
+    async def execute_benchmark(
+        self, task: str, input_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute benchmark task with given input."""
         ...
 
@@ -122,7 +123,9 @@ class BenchmarkFramework(Protocol):
 class Benchmark(ABC):
     """Abstract base class for individual benchmarks."""
 
-    def __init__(self, name: str, description: str, category: BenchmarkCategory) -> None:
+    def __init__(
+        self, name: str, description: str, category: BenchmarkCategory
+    ) -> None:
         self.name = name
         self.description = description
         self.category = category
@@ -138,7 +141,9 @@ class Benchmark(ABC):
         """Calculate metrics from benchmark results."""
         return []
 
-    def _statistical_analysis(self, frameworks: list[FrameworkResult]) -> dict[str, Any]:
+    def _statistical_analysis(
+        self, frameworks: list[FrameworkResult]
+    ) -> dict[str, Any]:
         """Perform statistical analysis on framework results."""
         if len(frameworks) < 2:
             return {"error": "Need at least 2 frameworks for comparison"}
@@ -168,7 +173,8 @@ class Benchmark(ABC):
                     # Effect size (Cohen's d)
                     mean_diff = abs(framework_values[0] - framework_values[1])
                     pooled_std = np.sqrt(
-                        (np.var([framework_values[0]]) + np.var([framework_values[1]])) / 2
+                        (np.var([framework_values[0]]) + np.var([framework_values[1]]))
+                        / 2
                     )
                     cohens_d = mean_diff / pooled_std if pooled_std > 0 else 0
 
@@ -178,20 +184,28 @@ class Benchmark(ABC):
                         "p_value": float(p_value),
                         "significant": p_value < 0.05,
                         "effect_size": float(cohens_d),
-                        "effect_size_interpretation": self._interpret_effect_size(cohens_d),
-                        "frameworks": dict(zip(framework_names, framework_values, strict=False)),
+                        "effect_size_interpretation": self._interpret_effect_size(
+                            cohens_d
+                        ),
+                        "frameworks": dict(
+                            zip(framework_names, framework_values, strict=False)
+                        ),
                     }
 
                 # ANOVA for multiple samples
                 elif len(framework_values) > 2:
-                    f_stat, p_value = stats.f_oneway(*[[val] for val in framework_values])
+                    f_stat, p_value = stats.f_oneway(
+                        *[[val] for val in framework_values]
+                    )
 
                     analysis[metric_name] = {
                         "test": "anova",
                         "f_statistic": float(f_stat),
                         "p_value": float(p_value),
                         "significant": p_value < 0.05,
-                        "frameworks": dict(zip(framework_names, framework_values, strict=False)),
+                        "frameworks": dict(
+                            zip(framework_names, framework_values, strict=False)
+                        ),
                     }
 
         return analysis
@@ -614,7 +628,9 @@ class TTAPrimitivesFramework:
         """Setup TTA.dev framework."""
         pass
 
-    async def execute_benchmark(self, task: str, input_data: dict[str, Any]) -> dict[str, Any]:
+    async def execute_benchmark(
+        self, task: str, input_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute benchmark with TTA.dev primitives."""
         return {"framework": "tta_primitives", "task": task}
 
@@ -634,7 +650,9 @@ class VanillaPythonFramework:
         """Setup vanilla Python."""
         pass
 
-    async def execute_benchmark(self, task: str, input_data: dict[str, Any]) -> dict[str, Any]:
+    async def execute_benchmark(
+        self, task: str, input_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute benchmark with vanilla Python."""
         return {"framework": "vanilla_python", "task": task}
 
@@ -654,7 +672,9 @@ class LangChainFramework:
         """Setup LangChain."""
         pass
 
-    async def execute_benchmark(self, task: str, input_data: dict[str, Any]) -> dict[str, Any]:
+    async def execute_benchmark(
+        self, task: str, input_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Execute benchmark with LangChain."""
         return {"framework": "langchain", "task": task}
 
@@ -765,7 +785,9 @@ class BenchmarkReport:
                                 total_comparisons += 1
                                 # Check if TTA.dev performed better
                                 frameworks_data = analysis.get("frameworks", {})
-                                tta_value = frameworks_data.get(tta_framework.framework_name, 0)
+                                tta_value = frameworks_data.get(
+                                    tta_framework.framework_name, 0
+                                )
                                 other_values = [
                                     v
                                     for k, v in frameworks_data.items()
@@ -779,7 +801,9 @@ class BenchmarkReport:
                                     if all(tta_value < v for v in other_values):
                                         tta_wins += 1
 
-        summary["tta_win_rate"] = tta_wins / total_comparisons if total_comparisons > 0 else 0
+        summary["tta_win_rate"] = (
+            tta_wins / total_comparisons if total_comparisons > 0 else 0
+        )
         summary["statistical_comparisons"] = total_comparisons
 
         return summary

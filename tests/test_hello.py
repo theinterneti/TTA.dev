@@ -1,6 +1,7 @@
 import subprocess
 import sys
 
+
 def test_hello_world():
     """Verify that hello.py prints 'Hello World' to stdout."""
     # Run the hello.py script as a subprocess

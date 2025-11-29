@@ -29,7 +29,7 @@ class TestCacheHitMiss:
         """
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "initial_value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
@@ -48,7 +48,7 @@ class TestCacheHitMiss:
         """
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "initial_value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
@@ -71,7 +71,7 @@ class TestCacheHitMiss:
         """
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "initial_value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
@@ -100,7 +100,7 @@ class TestCacheHitMiss:
         """
         mock_primitive = AsyncMock()
         mock_primitive.execute.side_effect = ["value1", "value2", "value3"]
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
@@ -140,12 +140,9 @@ class TestCacheHitMiss:
 
 
 # TTL Expiration Tests
-import time
-from collections.abc import Callable
-from typing import Any
 
 import pytest
-from cachetools import Cache
+
 
 @pytest.mark.asyncio
 class TestCacheTTLExpiration:
@@ -160,7 +157,7 @@ class TestCacheTTLExpiration:
         ttl = 0.1
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "expensive value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"],
@@ -186,7 +183,7 @@ class TestCacheTTLExpiration:
         ttl = 0.1
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "expensive value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"],
@@ -214,7 +211,7 @@ class TestCacheTTLExpiration:
         ttl = 0.1
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "expensive value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"],
@@ -224,7 +221,7 @@ class TestCacheTTLExpiration:
         input_data = {"key": "test_key"}
 
         await cache.execute(input_data, context)
-        
+
         # Verify it's in cache (implementation detail check)
         assert "test_key" in cache._cache
 
@@ -242,7 +239,7 @@ class TestCacheTTLExpiration:
         ttl = 0.1
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "expensive value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"],
@@ -266,7 +263,7 @@ class TestCacheTTLExpiration:
         ttl = 0.1
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "expensive value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"],
@@ -277,15 +274,15 @@ class TestCacheTTLExpiration:
 
         await cache.execute(input_data, context)
         # Note: expirations are only counted when we try to access an expired key
-        # or when a cleanup task runs (if implemented). 
+        # or when a cleanup task runs (if implemented).
         # In the current implementation, it seems to check on access.
-        
+
         assert cache._stats["hits"] == 0
 
         await asyncio.sleep(ttl * 2)  # Wait for TTL to expire
 
         await cache.execute(input_data, context)
-        # The implementation might not explicitly count "expirations" in the same way 
+        # The implementation might not explicitly count "expirations" in the same way
         # as the mock class did, but let's check if it re-executed.
         assert mock_primitive.execute.call_count == 2
 
@@ -294,7 +291,7 @@ class TestCacheTTLExpiration:
         """Test with longer TTL values."""
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "expensive value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"],
@@ -318,6 +315,7 @@ class TestCacheTTLExpiration:
 # Statistics Tracking Tests
 import pytest
 
+
 @pytest.mark.asyncio
 class TestCacheStatistics:
     """
@@ -333,7 +331,7 @@ class TestCacheStatistics:
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
         )
-        
+
         assert isinstance(cache._stats, dict)
         assert "hits" in cache._stats
         assert "misses" in cache._stats
@@ -345,7 +343,7 @@ class TestCacheStatistics:
         """
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
@@ -355,12 +353,12 @@ class TestCacheStatistics:
 
         # Miss
         await cache.execute(input_data, context)
-        
+
         # Hits
         await cache.execute(input_data, context)
         await cache.execute(input_data, context)
         await cache.execute(input_data, context)
-        
+
         assert cache._stats["hits"] == 3
 
     async def test_miss_count_increments(self):
@@ -369,7 +367,7 @@ class TestCacheStatistics:
         """
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
@@ -378,7 +376,7 @@ class TestCacheStatistics:
 
         await cache.execute({"key": "key1"}, context)
         await cache.execute({"key": "key2"}, context)
-        
+
         assert cache._stats["misses"] == 2
 
     async def test_expiration_count_increments(self):
@@ -387,14 +385,14 @@ class TestCacheStatistics:
         """
         # Note: The current implementation of CachePrimitive doesn't explicitly count expirations
         # in the _stats dict in the same way the mock did (it might, let's check implementation).
-        # Checking implementation: 
+        # Checking implementation:
         # if age < self.ttl_seconds: ... else: del self._cache[cache_key]; self._stats["expirations"] += 1
         # So it DOES count expirations.
-        
+
         ttl = 0.1
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"],
@@ -404,12 +402,12 @@ class TestCacheStatistics:
         input_data = {"key": "test_key"}
 
         await cache.execute(input_data, context)
-        
+
         await asyncio.sleep(ttl * 2)
-        
+
         # Trigger expiration
         await cache.execute(input_data, context)
-        
+
         assert cache._stats["expirations"] == 1
 
     async def test_hit_rate_calculation(self):
@@ -418,7 +416,7 @@ class TestCacheStatistics:
         """
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = "value"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
@@ -430,12 +428,12 @@ class TestCacheStatistics:
         await cache.execute(input_data, context)
         # Hit
         await cache.execute(input_data, context)
-        
+
         hits = cache._stats["hits"]
         misses = cache._stats["misses"]
         total = hits + misses
         hit_rate = (hits / total) * 100 if total > 0 else 0.0
-        
+
         assert hits == 1
         assert misses == 1
         assert hit_rate == 50.0
@@ -443,9 +441,6 @@ class TestCacheStatistics:
 
 # Edge Cases and Error Handling
 import logging
-from collections.abc import Callable
-from functools import wraps
-from typing import Any
 
 import pytest
 
@@ -454,9 +449,6 @@ logging.basicConfig(level=logging.INFO)
 
 # Edge Cases and Error Handling
 import logging
-from collections.abc import Callable
-from functools import wraps
-from typing import Any
 
 import pytest
 
@@ -464,14 +456,14 @@ logging.basicConfig(level=logging.INFO)
 
 @pytest.mark.asyncio
 class TestCacheEdgeCases:
-    
+
     async def test_empty_cache_stats(self):
         mock_primitive = AsyncMock()
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: d["key"]
         )
-        
+
         assert cache._stats["hits"] == 0
         assert cache._stats["misses"] == 0
         assert cache._stats["expirations"] == 0
@@ -479,7 +471,7 @@ class TestCacheEdgeCases:
     async def test_cache_key_function_various_types(self):
         mock_primitive = AsyncMock()
         mock_primitive.execute.side_effect = lambda d, c: f"value_{d['val']}"
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: str(d["val"])
@@ -488,10 +480,10 @@ class TestCacheEdgeCases:
 
         # Dict input (converted to str by key_fn)
         await cache.execute({"val": {"a": 1}}, context)
-        
+
         # String input
         await cache.execute({"val": "test_string"}, context)
-        
+
         # Int input
         await cache.execute({"val": 123}, context)
 
@@ -502,23 +494,23 @@ class TestCacheEdgeCases:
         await cache.execute({"val": {"a": 1}}, context)
         await cache.execute({"val": "test_string"}, context)
         await cache.execute({"val": 123}, context)
-        
+
         assert cache._stats["hits"] == 3
 
     async def test_cache_none_input(self):
         # The real CachePrimitive stores whatever the primitive returns
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = None
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: "none_key"
         )
         context = WorkflowContext()
-        
+
         val1 = await cache.execute({}, context)
         assert val1 is None
-        
+
         val2 = await cache.execute({}, context)
         assert val2 is None
         assert cache._stats["hits"] == 1
@@ -526,16 +518,16 @@ class TestCacheEdgeCases:
     async def test_cache_empty_dict_input(self):
         mock_primitive = AsyncMock()
         mock_primitive.execute.return_value = {}
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: "empty_dict_key"
         )
         context = WorkflowContext()
-        
+
         val1 = await cache.execute({}, context)
         assert val1 == {}
-        
+
         val2 = await cache.execute({}, context)
         assert val2 == {}
         assert cache._stats["hits"] == 1
@@ -543,29 +535,29 @@ class TestCacheEdgeCases:
     async def test_concurrent_access(self):
         # The real CachePrimitive does not currently implement request coalescing (thundering herd protection)
         # So concurrent requests for the same missing key will both execute the primitive.
-        
+
         mock_primitive = AsyncMock()
         # Simulate slow execution
         async def slow_execute(data, context):
             await asyncio.sleep(0.05)
             return "value"
         mock_primitive.execute.side_effect = slow_execute
-        
+
         cache = CachePrimitive(
             primitive=mock_primitive,
             cache_key_fn=lambda d, c: "concurrent_key"
         )
         context = WorkflowContext()
-        
+
         # Launch 5 concurrent requests
         tasks = [cache.execute({}, context) for _ in range(5)]
         results = await asyncio.gather(*tasks)
-        
+
         for res in results:
             assert res == "value"
-            
+
         # Since there is no locking/coalescing, we expect multiple executions
         # But subsequent requests should hit the cache
-        
+
         await cache.execute({}, context)
         assert cache._stats["hits"] >= 1

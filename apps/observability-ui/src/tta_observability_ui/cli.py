@@ -18,7 +18,7 @@ def setup_logging(level: str = "INFO") -> None:
 
 
 def start_service(
-    host: str = "0.0.0.0",
+    host: str = "0.0.0.0",  # noqa: S104
     port: int = 8765,
     db_path: str | None = None,
     log_level: str = "info",
@@ -36,11 +36,12 @@ def start_service(
     """
     # Set environment variables for configuration
     if db_path:
-        import os
+        import os  # noqa: PLC0415
 
         os.environ["TTA_UI_DB_PATH"] = db_path
 
-    print(f"""
+    print(  # noqa: T201
+        f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
 ║            🔍 TTA Observability UI                          ║
@@ -59,7 +60,8 @@ def start_service(
 📈 Log Level:      {log_level.upper()}
 
 Press Ctrl+C to stop the service
-""")
+"""
+    )
 
     # Start uvicorn server
     uvicorn.run(
@@ -101,7 +103,7 @@ Examples:
     start_parser.add_argument(
         "--host",
         type=str,
-        default="0.0.0.0",
+        default="0.0.0.0",  # noqa: S104
         help="Host to bind to (default: 0.0.0.0)",
     )
     start_parser.add_argument(
@@ -130,7 +132,7 @@ Examples:
     )
 
     # Version command
-    version_parser = subparsers.add_parser("version", help="Show version information")
+    subparsers.add_parser("version", help="Show version information")
 
     args = parser.parse_args()
 
@@ -143,9 +145,9 @@ Examples:
             reload=args.reload,
         )
     elif args.command == "version":
-        from . import __version__
+        from . import __version__  # noqa: PLC0415
 
-        print(f"TTA Observability UI v{__version__}")
+        print(f"TTA Observability UI v{__version__}")  # noqa: T201
     else:
         parser.print_help()
         sys.exit(1)

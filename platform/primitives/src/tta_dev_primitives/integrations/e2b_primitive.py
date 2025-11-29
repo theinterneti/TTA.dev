@@ -210,7 +210,7 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
                 # attribute. Support both for compatibility with different
                 # SDK versions and our test doubles.
                 if hasattr(error_obj, "value"):
-                    error_text = str(getattr(error_obj, "value"))
+                    error_text = str(error_obj.value)
                 else:
                     error_text = str(error_obj)
 

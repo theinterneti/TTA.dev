@@ -9,18 +9,20 @@ from tta_observability_ui.storage import TraceStorage
 
 
 @pytest.mark.asyncio
-async def test_storage_initialization():
+async def test_storage_initialization(tmp_path):
     """Test storage initialization."""
-    storage = TraceStorage(db_path=":memory:")
+    db_path = tmp_path / "test.db"
+    storage = TraceStorage(db_path=db_path)
     await storage.initialize()
 
     assert storage._initialized
 
 
 @pytest.mark.asyncio
-async def test_save_and_get_trace():
+async def test_save_and_get_trace(tmp_path):
     """Test saving and retrieving a trace."""
-    storage = TraceStorage(db_path=":memory:")
+    db_path = tmp_path / "test.db"
+    storage = TraceStorage(db_path=db_path)
     await storage.initialize()
 
     # Create test trace
@@ -61,9 +63,10 @@ async def test_save_and_get_trace():
 
 
 @pytest.mark.asyncio
-async def test_list_traces():
+async def test_list_traces(tmp_path):
     """Test listing traces."""
-    storage = TraceStorage(db_path=":memory:")
+    db_path = tmp_path / "test.db"
+    storage = TraceStorage(db_path=db_path)
     await storage.initialize()
 
     from datetime import datetime
@@ -89,9 +92,10 @@ async def test_list_traces():
 
 
 @pytest.mark.asyncio
-async def test_get_stats():
+async def test_get_stats(tmp_path):
     """Test getting storage statistics."""
-    storage = TraceStorage(db_path=":memory:")
+    db_path = tmp_path / "test.db"
+    storage = TraceStorage(db_path=db_path)
     await storage.initialize()
 
     stats = await storage.get_stats()

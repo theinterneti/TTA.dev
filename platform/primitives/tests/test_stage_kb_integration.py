@@ -35,7 +35,6 @@ from tta_dev_primitives.lifecycle import (
     StageRequest,
 )
 
-
 # Ensure we don't spawn a nested pytest subprocess when these tests exercise
 # StageManager validations.
 os.environ.setdefault("TTA_LIFECYCLE_SKIP_TEST_SUBPROCESS", "1")

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -42,7 +42,7 @@ class TraceStorage:
         if self._initialized:
             return
 
-        logger.info(f"Initializing trace storage at {self.db_path}")
+        logger.info("Initializing trace storage at %s", self.db_path)
 
         async with aiosqlite.connect(self.db_path) as db:
             # Traces table
@@ -100,13 +100,15 @@ class TraceStorage:
 
             # Indexes for performance
             await db.execute(
-                "CREATE INDEX IF NOT EXISTS idx_traces_created_at ON traces(created_at DESC)"
+                "CREATE INDEX IF NOT EXISTS idx_traces_created_at "
+                "ON traces(created_at DESC)"
             )
             await db.execute(
                 "CREATE INDEX IF NOT EXISTS idx_spans_trace_id ON spans(trace_id)"
             )
             await db.execute(
-                "CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON metrics(timestamp DESC)"
+                "CREATE INDEX IF NOT EXISTS idx_metrics_timestamp "
+                "ON metrics(timestamp DESC)"
             )
 
             await db.commit()
@@ -121,7 +123,8 @@ class TraceStorage:
             await db.execute(
                 """
                 INSERT OR REPLACE INTO traces
-                (trace_id, workflow_name, start_time, end_time, duration_ms, status, error_message, context_data)
+                (trace_id, workflow_name, start_time, end_time, duration_ms, status,
+                 error_message, context_data)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
@@ -164,7 +167,9 @@ class TraceStorage:
                 )
 
             await db.commit()
-            logger.debug(f"Saved trace {trace.trace_id} with {len(trace.spans)} spans")
+            logger.debug(
+                "Saved trace %s with %d spans", trace.trace_id, len(trace.spans)
+            )
 
     async def get_trace(self, trace_id: str) -> Trace | None:
         """Retrieve a trace by ID."""
@@ -272,7 +277,7 @@ class TraceStorage:
 
     async def cleanup_old_traces(self) -> int:
         """Remove traces older than retention period."""
-        cutoff = datetime.utcnow() - timedelta(hours=self.retention_hours)
+        cutoff = datetime.now(tz=UTC) - timedelta(hours=self.retention_hours)
 
         async with aiosqlite.connect(self.db_path) as db:
             # Delete old spans first (foreign key constraint)
@@ -294,7 +299,7 @@ class TraceStorage:
             await db.commit()
 
         if deleted > 0:
-            logger.info(f"Cleaned up {deleted} old traces")
+            logger.info("Cleaned up %d old traces", deleted)
 
         return deleted
 
@@ -329,7 +334,8 @@ class TraceStorage:
 
             # Primitive usage
             async with db.execute(
-                "SELECT primitive_type, COUNT(*) as count FROM spans GROUP BY primitive_type"
+                "SELECT primitive_type, COUNT(*) as count "
+                "FROM spans GROUP BY primitive_type"
             ) as cursor:
                 primitive_usage = {}
                 async for row in cursor:

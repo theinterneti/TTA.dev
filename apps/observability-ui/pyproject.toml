@@ -2,12 +2,10 @@
 name = "tta-observability-ui"
 version = "0.1.0"
 description = "Lightweight observability UI for TTA.dev workflows - inspired by LangSmith"
-authors = [
-    {name = "TTA.dev Team", email = "team@tta.dev"}
-]
+authors = [{ name = "TTA.dev Team", email = "team@tta.dev" }]
 requires-python = ">=3.11"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 
 dependencies = [
     "fastapi>=0.104.0",
@@ -44,7 +42,59 @@ line-length = 88
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "UP", "S", "B", "A", "C4", "DTZ", "FA", "ISC", "ICN", "G", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "PERF", "RUF"]
+select = [
+    "E",
+    "F",
+    "I",
+    "N",
+    "UP",
+    "S",
+    "B",
+    "A",
+    "C4",
+    "DTZ",
+    "FA",
+    "ISC",
+    "ICN",
+    "G",
+    "PIE",
+    "T20",
+    "PYI",
+    "PT",
+    "Q",
+    "RSE",
+    "RET",
+    "SLF",
+    "SLOT",
+    "SIM",
+    "TID",
+    "TCH",
+    "ARG",
+    "PTH",
+    "ERA",
+    "PD",
+    "PGH",
+    "PL",
+    "TRY",
+    "FLY",
+    "NPY",
+    "PERF",
+    "RUF",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"examples/**" = [
+    "T201",
+    "PLC0415",
+    "ARG001",
+    "ARG002",
+    "S311",
+    "TRY002",
+    "TRY003",
+    "PLR2004",
+    "PLR0915",
+]
+"tests/**" = ["S101", "PLC0415", "PLR2004", "SLF001"]
 
 [tool.pyright]
 typeCheckingMode = "basic"

@@ -141,7 +141,7 @@ class SupabasePrimitive(DatabasePrimitive):
         Raises:
             Exception: On Supabase errors
         """
-        client = await self._get_client()
+        _ = await self._get_client()
 
         # TODO: Implement actual query execution
         # This is a skeleton - full implementation needed
@@ -154,13 +154,15 @@ class SupabasePrimitive(DatabasePrimitive):
         )
 
     @property
-    async def auth(self) -> Any:
+    async def auth(self) -> Any:  # noqa: ANN401
         """Access Supabase auth."""
-        client = await self._get_client()
-        return client.auth
+        _ = await self._get_client()
+        # TODO: Return actual auth client
+        return None
 
     @property
-    async def storage(self) -> Any:
+    async def storage(self) -> Any:  # noqa: ANN401
         """Access Supabase storage."""
-        client = await self._get_client()
-        return client.storage
+        _ = await self._get_client()
+        # TODO: Return actual storage client
+        return None

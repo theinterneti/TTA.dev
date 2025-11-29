@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, Field
 
@@ -46,7 +46,7 @@ class Span(BaseModel):
     class Config:
         """Pydantic config."""
 
-        json_encoders = {datetime: lambda v: v.isoformat()}
+        json_encoders: ClassVar[dict[Any, Any]] = {datetime: lambda v: v.isoformat()}
 
 
 class Trace(BaseModel):
@@ -70,7 +70,7 @@ class Trace(BaseModel):
     class Config:
         """Pydantic config."""
 
-        json_encoders = {datetime: lambda v: v.isoformat()}
+        json_encoders: ClassVar[dict[Any, Any]] = {datetime: lambda v: v.isoformat()}
 
     def compute_stats(self) -> None:
         """Compute derived statistics from spans."""
@@ -91,7 +91,7 @@ class MetricRecord(BaseModel):
     class Config:
         """Pydantic config."""
 
-        json_encoders = {datetime: lambda v: v.isoformat()}
+        json_encoders: ClassVar[dict[Any, Any]] = {datetime: lambda v: v.isoformat()}
 
 
 class MetricsSummary(BaseModel):

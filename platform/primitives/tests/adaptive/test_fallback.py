@@ -74,7 +74,9 @@ def fallback_services():
 @pytest.fixture
 def context():
     """Workflow context."""
-    return WorkflowContext(correlation_id="test-fallback", metadata={"environment": "test"})
+    return WorkflowContext(
+        correlation_id="test-fallback", metadata={"environment": "test"}
+    )
 
 
 class TestAdaptiveFallbackInitialization:
@@ -82,7 +84,9 @@ class TestAdaptiveFallbackInitialization:
 
     def test_initialization_with_defaults(self, primary_service, fallback_services):
         """Test default initialization."""
-        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=fallback_services)
+        adaptive = AdaptiveFallbackPrimitive(
+            primary=primary_service, fallbacks=fallback_services
+        )
 
         assert adaptive.primary == primary_service
         assert adaptive.fallbacks == fallback_services
@@ -102,7 +106,9 @@ class TestAdaptiveFallbackInitialization:
 
     def test_baseline_strategy_parameters(self, primary_service, fallback_services):
         """Test baseline strategy has fallback order."""
-        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=fallback_services)
+        adaptive = AdaptiveFallbackPrimitive(
+            primary=primary_service, fallbacks=fallback_services
+        )
 
         baseline = adaptive.strategies["baseline"]
         assert "fallback_order" in baseline.parameters
@@ -139,7 +145,9 @@ class TestBasicFallbackBehavior:
         self, primary_service, fallback_services, context
     ):
         """Test that when primary succeeds, no fallbacks are used."""
-        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=fallback_services)
+        adaptive = AdaptiveFallbackPrimitive(
+            primary=primary_service, fallbacks=fallback_services
+        )
 
         result = await adaptive.execute({"id": "test1"}, context)
 
@@ -264,7 +272,9 @@ class TestFallbackLearning:
         assert len(adaptive.strategies) >= 1
 
     @pytest.mark.asyncio
-    async def test_context_specific_strategies(self, primary_service, fallback_services):
+    async def test_context_specific_strategies(
+        self, primary_service, fallback_services
+    ):
         """Test that different contexts learn different strategies."""
         adaptive = AdaptiveFallbackPrimitive(
             primary=primary_service,
@@ -306,7 +316,9 @@ class TestStrategyParameters:
     """Test strategy parameter learning."""
 
     @pytest.mark.asyncio
-    async def test_fallback_order_learning(self, primary_service, fallback_services, context):
+    async def test_fallback_order_learning(
+        self, primary_service, fallback_services, context
+    ):
         """Test that fallback order is learned from success patterns."""
         adaptive = AdaptiveFallbackPrimitive(
             primary=primary_service,
@@ -330,7 +342,9 @@ class TestStrategyParameters:
         assert stats["fallbacks"]["local_cache"]["successes"] > 0
 
     @pytest.mark.asyncio
-    async def test_latency_consideration(self, primary_service, fallback_services, context):
+    async def test_latency_consideration(
+        self, primary_service, fallback_services, context
+    ):
         """Test that latency is considered in strategy scoring."""
         # Create fallbacks with different latencies
         fast_service = UnreliableService("Fast", latency_ms=10)
@@ -368,7 +382,9 @@ class TestStrategyManagement:
     """Test strategy selection and management."""
 
     @pytest.mark.asyncio
-    async def test_strategy_selection_by_context(self, primary_service, fallback_services):
+    async def test_strategy_selection_by_context(
+        self, primary_service, fallback_services
+    ):
         """Test that strategy is selected based on context."""
         adaptive = AdaptiveFallbackPrimitive(
             primary=primary_service,
@@ -392,7 +408,9 @@ class TestStrategyManagement:
         assert result2["service"] == "Primary"
 
     @pytest.mark.asyncio
-    async def test_max_strategies_enforcement(self, primary_service, fallback_services, context):
+    async def test_max_strategies_enforcement(
+        self, primary_service, fallback_services, context
+    ):
         """Test that max strategies limit is enforced."""
         adaptive = AdaptiveFallbackPrimitive(
             primary=primary_service,
@@ -411,9 +429,13 @@ class TestMetrics:
     """Test metrics collection."""
 
     @pytest.mark.asyncio
-    async def test_statistics_tracking(self, primary_service, fallback_services, context):
+    async def test_statistics_tracking(
+        self, primary_service, fallback_services, context
+    ):
         """Test that statistics are tracked correctly."""
-        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=fallback_services)
+        adaptive = AdaptiveFallbackPrimitive(
+            primary=primary_service, fallbacks=fallback_services
+        )
 
         # Run some requests
         await adaptive.execute({"id": "test1"}, context)
@@ -431,7 +453,9 @@ class TestMetrics:
     @pytest.mark.asyncio
     async def test_per_context_statistics(self, primary_service, fallback_services):
         """Test that per-context statistics are tracked."""
-        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=fallback_services)
+        adaptive = AdaptiveFallbackPrimitive(
+            primary=primary_service, fallbacks=fallback_services
+        )
 
         # Run with different contexts
         prod_context = WorkflowContext(
@@ -465,7 +489,7 @@ class TestEdgeCases:
 
         # Should fail when primary fails (no fallbacks)
         primary_service.fail_next(1)
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             await adaptive.execute({"id": "test2"}, context)
 
     @pytest.mark.asyncio
@@ -473,7 +497,9 @@ class TestEdgeCases:
         """Test with only one fallback."""
         single_fallback = {"only_backup": UnreliableService("OnlyBackup")}
 
-        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=single_fallback)
+        adaptive = AdaptiveFallbackPrimitive(
+            primary=primary_service, fallbacks=single_fallback
+        )
 
         primary_service.fail_next(1)
         result = await adaptive.execute({"id": "test1"}, context)
@@ -481,9 +507,13 @@ class TestEdgeCases:
         assert result["service"] == "OnlyBackup"
 
     @pytest.mark.asyncio
-    async def test_rapid_successive_failures(self, primary_service, fallback_services, context):
+    async def test_rapid_successive_failures(
+        self, primary_service, fallback_services, context
+    ):
         """Test handling of rapid successive failures."""
-        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=fallback_services)
+        adaptive = AdaptiveFallbackPrimitive(
+            primary=primary_service, fallbacks=fallback_services
+        )
 
         # Make primary fail repeatedly
         for i in range(10):
