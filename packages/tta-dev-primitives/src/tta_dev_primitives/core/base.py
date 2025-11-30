@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -15,14 +15,13 @@ V = TypeVar("V")
 class WorkflowContext(BaseModel):
     """Context passed through workflow execution."""
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     workflow_id: str | None = None
     session_id: str | None = None
     player_id: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     state: dict[str, Any] = Field(default_factory=dict)
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class WorkflowPrimitive(Generic[T, U], ABC):

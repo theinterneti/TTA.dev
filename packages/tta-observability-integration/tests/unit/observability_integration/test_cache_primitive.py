@@ -135,7 +135,8 @@ class TestCacheHitBehavior:
         """Test cache hit returns cached value without calling primitive."""
         # Pre-populate cache with serialized JSON (as real implementation does)
         # Cache key format: cache:{operation_name}:{user_key}
-        cache_key = "cache:TestPrimitive:cache:query:test_query"
+        # Note: operation_name defaults to primitive.__class__.__name__ = "MockPrimitive"
+        cache_key = "cache:MockPrimitive:cache:query:test_query"
         cached_data = json.dumps("cached_result").encode("utf-8")
         mock_redis.store[cache_key] = cached_data
 
@@ -201,8 +202,9 @@ class TestCacheKeyGeneration:
 
         # Should create different cache entries with operation name prefix
         # Format: cache:{operation_name}:{user_key}
-        assert "cache:TestPrimitive:user:alice:query:test" in mock_redis.store
-        assert "cache:TestPrimitive:user:bob:query:test" in mock_redis.store
+        # Note: operation_name defaults to primitive.__class__.__name__ = "MockPrimitive"
+        assert "cache:MockPrimitive:user:alice:query:test" in mock_redis.store
+        assert "cache:MockPrimitive:user:bob:query:test" in mock_redis.store
 
     @pytest.mark.asyncio
     async def test_different_queries_different_keys(self, cache_primitive, mock_redis):
@@ -213,8 +215,9 @@ class TestCacheKeyGeneration:
         await cache_primitive.execute({"query": "query2"}, mock_context)
 
         # Format: cache:{operation_name}:{user_key}
-        assert "cache:TestPrimitive:cache:query:query1" in mock_redis.store
-        assert "cache:TestPrimitive:cache:query:query2" in mock_redis.store
+        # Note: operation_name defaults to primitive.__class__.__name__ = "MockPrimitive"
+        assert "cache:MockPrimitive:cache:query:query1" in mock_redis.store
+        assert "cache:MockPrimitive:cache:query:query2" in mock_redis.store
 
 
 class TestGracefulDegradation:
@@ -337,7 +340,8 @@ class TestCostSavings:
         """Test cost savings tracked on cache hits."""
         # Pre-populate cache with serialized JSON
         # Format: cache:{operation_name}:{user_key}
-        cache_key = "cache:TestPrimitive:cache:query:test"
+        # Note: operation_name defaults to primitive.__class__.__name__ = "MockPrimitive"
+        cache_key = "cache:MockPrimitive:cache:query:test"
         cached_data = json.dumps("cached_result").encode("utf-8")
         mock_redis.store[cache_key] = cached_data
 
