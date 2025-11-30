@@ -26,6 +26,11 @@ dev-dependencies = [
     "pytest-mock>=3.14.0",
     "pytest-timeout>=2.2.0",
     "ruff>=0.8.0",
+    # Security scanning (local CodeQL-equivalent)
+    # Note: semgrep installed via uvx/pipx due to opentelemetry version conflict
+    "pre-commit>=4.0.0",     # Git hooks framework
+    "bandit>=1.7.10",        # Python security linter
+    "detect-secrets>=1.5.0", # Prevents secrets in code
 ]
 
 [tool.coverage.run]

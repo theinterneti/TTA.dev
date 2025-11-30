@@ -102,10 +102,10 @@ async def test_workflow_success():
     # Arrange
     mock1 = MockPrimitive("step1", return_value="result1")
     context = WorkflowContext(workflow_id="test")
-    
+
     # Act
     result = await mock1.execute("input", context)
-    
+
     # Assert
     assert mock1.call_count == 1
     assert result == "result1"
@@ -137,6 +137,61 @@ uv run ruff format . && uv run ruff check . --fix && uvx pyright platform/ apps/
 ---
 
 ## 🔒 Security Practices
+
+**CRITICAL: Run security scans BEFORE committing!**
+
+TTA.dev has local security scanning equivalent to GitHub's CodeQL. Agents MUST produce code that passes these checks on the first try.
+
+### Security Scanning (Required Before Commit)
+
+```bash
+# Run security scan on staged files
+uv run python scripts/security_scan.py
+
+# Run on all files
+uv run python scripts/security_scan.py --all
+
+# Or use pre-commit hooks (recommended)
+uv run pre-commit run --all-files
+```
+
+### Security Anti-Patterns to AVOID
+
+**1. Never log secrets (even partially):**
+```python
+# ❌ BAD: Logging partial API keys is still a vulnerability
+logger.info(f"Using API key: {api_key[:20]}...")
+logger.debug(f"Key: {api_key[:10]}...{api_key[-4:]}")
+
+# ✅ GOOD: Just confirm the key exists
+logger.info("API key loaded successfully")
+if api_key:
+    logger.debug("API key is configured")
+```
+
+**2. Use proper URL validation:**
+```python
+# ❌ BAD: Substring checks can be bypassed (e.g., evil.com/github.com/...)
+if "github.com" in url:
+    # This is exploitable!
+
+# ✅ GOOD: Use urlparse for proper host validation
+from urllib.parse import urlparse
+if urlparse(url).netloc in ("github.com", "api.github.com"):
+    # Safe host check
+```
+
+**3. Never expose environment details:**
+```python
+# ❌ BAD: Reveals system configuration
+logger.info(f"Environment vars: {list(os.environ.keys())}")
+logger.debug(f"Vault status: {vault_config}")
+
+# ✅ GOOD: Generic status only
+logger.info("Environment configured successfully")
+```
+
+### General Security Rules
 
 - **Never commit secrets** - Use environment variables or `.env` files (add to `.gitignore`)
 - **Validate inputs** - Always validate external data
@@ -365,6 +420,7 @@ These files use YAML frontmatter to target specific file patterns and provide de
 
 Before committing code, ensure:
 
+- [ ] **Security scan passes** with `uv run python scripts/security_scan.py`
 - [ ] Code formatted with `uv run ruff format .`
 - [ ] Linter passes with `uv run ruff check . --fix`
 - [ ] Type checks pass with `uvx pyright platform/ apps/`
@@ -373,6 +429,8 @@ Before committing code, ensure:
 - [ ] Documentation updated (docstrings, README)
 - [ ] TODOs added to Logseq (if applicable)
 - [ ] No secrets committed
+- [ ] No partial API key logging (use existence checks only)
+- [ ] URL validation uses `urlparse()` not substring checks
 - [ ] Using `uv` (not pip/poetry)
 - [ ] Using primitives for workflows
 - [ ] Python 3.11+ type hints (no `Optional`, `Dict`)

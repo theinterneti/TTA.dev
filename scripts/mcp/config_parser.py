@@ -15,9 +15,6 @@ Output formats:
 """
 
 import json
-import os
-import re
-import subprocess
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -41,6 +38,14 @@ class MCPConfigParser:
 
         return config.get("mcpServers", {})
 
+    def _is_host(self, url: str, hostname: str) -> bool:
+        """Safely check if URL has the specified hostname."""
+        try:
+            parsed = urlparse(url)
+            return parsed.netloc == hostname or parsed.netloc.endswith(f".{hostname}")
+        except Exception:
+            return False
+
     def parse_repo_uri(self, repo_uri: str) -> dict[str, Any] | None:
         """
         Parse repository URI and extract MCP configuration.
@@ -51,19 +56,21 @@ class MCPConfigParser:
         - NPM packages: npm:package-name
         - Docker images: docker:image-name
         """
-        # GitMCP format
-        if "gitmcp.io" in repo_uri:
+        # GitMCP format - use proper URL parsing to prevent substring attacks
+        if self._is_host(repo_uri, "gitmcp.io"):
             # Extract owner/repo from URL
-            match = re.search(r"gitmcp\.io/([^/]+/[^/]+)", repo_uri)
-            if match:
+            parsed = urlparse(repo_uri)
+            path_parts = parsed.path.strip("/").split("/")
+            if len(path_parts) >= 2:
+                owner_repo = f"{path_parts[0]}/{path_parts[1]}"
                 return {
                     "url": repo_uri,
-                    "description": f"GitMCP repository: {match.group(1)}",
+                    "description": f"GitMCP repository: {owner_repo}",
                     "tags": ["vcs", "repository"],
                 }
 
-        # GitHub repository
-        if "github.com" in repo_uri:
+        # GitHub repository - use proper URL parsing to prevent substring attacks
+        if self._is_host(repo_uri, "github.com"):
             parsed = urlparse(repo_uri)
             path_parts = parsed.path.strip("/").split("/")
             if len(path_parts) >= 2:
@@ -165,9 +172,7 @@ class MCPConfigParser:
 
         return preferred[:3]  # Top 3 preferred servers
 
-    def generate_configs(
-        self, output_vscode: bool = True, output_cline: bool = True
-    ) -> None:
+    def generate_configs(self, output_vscode: bool = True, output_cline: bool = True) -> None:
         """Generate configuration files for agents."""
         # Parse Hypertool configuration
         servers = self.parse_hypertool_config()
@@ -221,10 +226,10 @@ class MCPConfigParser:
 
         # Generate name if not provided
         if not name:
-            if "gitmcp.io" in repo_uri:
-                name = repo_uri.split("/")[-1]
-            elif "github.com" in repo_uri:
-                name = repo_uri.split("/")[-1]
+            if self._is_host(repo_uri, "gitmcp.io"):
+                name = urlparse(repo_uri).path.strip("/").split("/")[-1]
+            elif self._is_host(repo_uri, "github.com"):
+                name = urlparse(repo_uri).path.strip("/").split("/")[-1]
             elif repo_uri.startswith("npm:"):
                 name = repo_uri[4:].replace("@", "").replace("/", "-")
             elif repo_uri.startswith("docker:"):
@@ -250,9 +255,7 @@ def main():
     """CLI interface for MCP configuration parser."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Parse and convert MCP server configurations"
-    )
+    parser = argparse.ArgumentParser(description="Parse and convert MCP server configurations")
     parser.add_argument(
         "--workspace",
         type=Path,
@@ -294,9 +297,7 @@ def main():
     elif args.generate:
         output_vscode = not args.cline_only
         output_cline = not args.vscode_only
-        config_parser.generate_configs(
-            output_vscode=output_vscode, output_cline=output_cline
-        )
+        config_parser.generate_configs(output_vscode=output_vscode, output_cline=output_cline)
     else:
         # Default: parse and display current configuration
         servers = config_parser.parse_hypertool_config()

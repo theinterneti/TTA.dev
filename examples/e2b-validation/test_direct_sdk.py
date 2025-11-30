@@ -18,10 +18,11 @@ async def test_template_directly():
     api_key = os.getenv("E2B_API_KEY") or os.getenv("E2B_KEY")
     if api_key:
         os.environ["E2B_API_KEY"] = api_key
-        print(f"✅ API key set: {api_key[:20]}...")
+        # Security: Never log API keys, even partially
+        print("✅ API key set successfully")
     else:
         print("❌ No API key found in E2B_API_KEY or E2B_KEY")
-        print(f"Environment keys: {list(os.environ.keys())[:5]}...")
+        print("   Set one of these environment variables to continue.")
         return
 
     # Test 1: Default template

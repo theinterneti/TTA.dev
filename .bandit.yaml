@@ -1,0 +1,36 @@
+# Bandit configuration for TTA.dev
+# Python security linter configuration
+
+# Directories to exclude
+exclude_dirs:
+  - _archive
+  - archive
+  - .venv
+  - .git
+  - __pycache__
+  - node_modules
+  - htmlcov
+  - .pytest_cache
+  - tests  # Test files may have intentional security patterns for testing
+
+# Tests to skip globally
+skips:
+  # B101: assert used - we use assert in tests and type checking
+  - B101
+  # B311: random not for crypto - we use random for non-security purposes
+  - B311
+  # B404: import subprocess - we need subprocess in scripts
+  - B404
+  # B603: subprocess without shell=True - this is actually safe
+  - B603
+
+# Severity levels to report (LOW, MEDIUM, HIGH)
+# We want MEDIUM and above
+severity: MEDIUM
+
+# Confidence levels to report (LOW, MEDIUM, HIGH)
+confidence: MEDIUM
+
+# Output format
+format: custom
+msg_template: "{abspath}:{line}: {severity}: {test_id}: {msg}"

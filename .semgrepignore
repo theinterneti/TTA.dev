@@ -1,0 +1,46 @@
+# Semgrep ignore patterns for TTA.dev
+# These paths are excluded from security scanning
+
+# Archive and legacy code
+_archive/
+archive/
+_DEPRECATED/
+
+# Dependencies and build artifacts
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# Generated files
+*.lock
+package-lock.json
+
+# Test files (may contain intentional security patterns)
+# Comment out if you want to scan tests too
+# tests/
+
+# Documentation
+docs/
+*.md
+
+# Configuration
+.git/
+.vscode/
+.idea/
+
+# Data files
+data/
+datasets/
+logs/
+output/
+
+# Logseq knowledge base
+logseq/

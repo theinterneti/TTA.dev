@@ -99,7 +99,8 @@ def main():
         print("❌ No API key found")
         return
 
-    print(f"✅ API key loaded: {api_key[:20]}...")
+    # Security: Never log API keys, even partially
+    print("✅ API key loaded successfully")
 
     # Test both templates
     default_success, default_time = test_default_template()

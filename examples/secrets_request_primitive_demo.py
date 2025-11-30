@@ -166,14 +166,12 @@ async def demonstrate_secrets_management():
         result = await secrets_request.execute({"action": "request_secrets"}, context)
 
         print("\n✅ Secrets request completed!")
-        print(f"Environment: {result['environment']}")
-        print(f"Vault enabled: {result['vault_enabled']}")
+        # Security: Only show aggregate status, not individual secret details
         print(f"Secrets loaded: {result['total_loaded']}/{result['total_requested']}")
 
-        print("\n📊 Secret Status:")
-        for secret_name, status in result["secrets_status"].items():
-            status_icon = "✅" if status == "loaded" else "❌"
-            print(f"  {status_icon} {secret_name}: {status}")
+        # Note: In production, avoid logging which specific secrets are loaded/missing
+        # as this could reveal security configuration to attackers.
+        # For educational purposes, we show only the count.
 
         print("\n💡 Agent Learning Points:")
         print("  • Always use SecretsManager, never os.getenv() directly")
