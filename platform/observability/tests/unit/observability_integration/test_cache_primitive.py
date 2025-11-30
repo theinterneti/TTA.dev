@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.observability_integration.primitives.cache import CachePrimitive
+from observability_integration.primitives.cache import CachePrimitive
 
 
 # Mock WorkflowPrimitive for testing
