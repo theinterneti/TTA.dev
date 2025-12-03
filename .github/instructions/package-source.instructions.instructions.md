@@ -1,5 +1,5 @@
 ---
-applyTo: "packages/**/src/**/*.py"
+applyTo: "platform/**/src/**/*.py"
 description: "Python package source code - production quality standards"
 ---
 

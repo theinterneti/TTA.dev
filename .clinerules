@@ -148,7 +148,7 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # 3. Type check
-uvx pyright packages/
+uvx pyright platform/ apps/
 
 # 4. Run tests
 uv run pytest -v
@@ -235,8 +235,8 @@ See: `.github/instructions/logseq-knowledge-base.instructions.md`
 TTA.dev uses path-based instruction files:
 
 | File Pattern | Instruction File | Key Rules |
-|--------------|-----------------|-----------|
-| `packages/**/src/**/*.py` | `package-source.instructions.md` | Production quality, full types |
+|--------------|-----------------|-----------||
+| `platform/**/src/**/*.py` | `package-source.instructions.md` | Production quality, full types |
 | `**/tests/**/*.py` | `tests.instructions.md` | 100% coverage, pytest-asyncio |
 | `scripts/**/*.py` | `scripts.instructions.md` | Use primitives for orchestration |
 | `**/*.md` | `documentation.instructions.md` | Clear, actionable, with examples |
@@ -259,26 +259,26 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # Type check
-uvx pyright packages/
+uvx pyright platform/ apps/
 
 # Quality check (all)
-uv run ruff format . && uv run ruff check . --fix && uvx pyright packages/ && uv run pytest -v
+uv run ruff format . && uv run ruff check . --fix && uvx pyright platform/ apps/ && uv run pytest -v
 ```
 
 ### File Locations
 
-- **Core primitives:** `packages/tta-dev-primitives/src/tta_dev_primitives/`
-- **Observability:** `packages/tta-observability-integration/src/observability_integration/`
-- **Agent context:** `packages/universal-agent-context/src/universal_agent_context/`
-- **Examples:** `packages/tta-dev-primitives/examples/`
-- **Tests:** `packages/*/tests/`
+- **Core primitives:** `platform/primitives/src/tta_dev_primitives/`
+- **Observability:** `platform/observability/src/observability_integration/`
+- **Agent context:** `platform/agent-context/src/universal_agent_context/`
+- **Examples:** `platform/primitives/examples/`
+- **Tests:** `platform/*/tests/`
 
 ### Documentation
 
 - **Main instructions:** `AGENTS.md`
 - **Primitives catalog:** `PRIMITIVES_CATALOG.md`
 - **Getting started:** `GETTING_STARTED.md`
-- **MCP servers:** `MCP_SERVERS.md`
+- **MCP servers:** `docs/mcp/MCP_Servers.md`
 
 ---
 

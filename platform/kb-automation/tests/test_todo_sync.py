@@ -626,12 +626,17 @@ class TestScanAndCreate:
         """Test that scan_and_create uses today's date by default."""
         mock_primitives["extract"]().execute.return_value = {"todos": []}
 
+        # Make the journal mock return a path based on the date passed to it
+        today = datetime.now().strftime("%Y_%m_%d")
+        mock_primitives["journal"]().execute.return_value = {
+            "path": f"logseq/journals/{today}.md"
+        }
+
         sync = TODOSync()
 
         result = await sync.scan_and_create(paths=["src"])
 
         # Should use today's date
-        today = datetime.now().strftime("%Y_%m_%d")
         assert today in result["journal_path"]
 
     @pytest.mark.asyncio
@@ -728,7 +733,9 @@ class TestWorkflowContext:
     """Test WorkflowContext propagation through workflow."""
 
     @pytest.mark.asyncio
-    async def test_context_passed_to_all_primitives(self, mock_primitives, sample_todos):
+    async def test_context_passed_to_all_primitives(
+        self, mock_primitives, sample_todos
+    ):
         """Test that context is passed to all primitive executions."""
         mock_primitives["extract"]().execute.return_value = {"todos": sample_todos}
 

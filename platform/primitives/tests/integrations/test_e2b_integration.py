@@ -38,8 +38,9 @@ class TestE2BIntegration:
             # Ensure create is an AsyncMock that returns the instance
             mock_sandbox_cls.create = AsyncMock(return_value=sandbox_instance)
 
-            yield sandbox_instance @ pytest.mark.asyncio
+            yield sandbox_instance
 
+    @pytest.mark.asyncio
     @pytest.mark.integration
     async def test_basic_python_execution(self, mock_sandbox):
         """Test basic Python code execution in real E2B sandbox."""

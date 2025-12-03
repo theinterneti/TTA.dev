@@ -23,7 +23,10 @@ TTA.dev is an **AI development toolkit following production-quality standards** 
 ## Repository Structure
 
 This is a **monorepo** with:
-- `packages/tta-dev-primitives/` - Core primitives package
+- `platform/primitives/` - Core workflow primitives (tta-dev-primitives)
+- `platform/observability/` - OpenTelemetry integration (tta-observability-integration)
+- `platform/agent-context/` - Agent context management (universal-agent-context)
+- `platform/integrations/` - Pre-built integrations (LLM, database, auth)
 - `scripts/` - Automation scripts (should use primitives)
 - `tests/` - Integration tests
 - `docs/` - Architecture and development guides
@@ -77,16 +80,16 @@ workflow = input_processor >> (fast_path | slow_path) >> aggregator
 ## Package Structure
 
 ```
-packages/<package-name>/
+platform/<package-name>/
 ├── src/<package_name>/
 │   ├── core/          # Base abstractions
 │   ├── recovery/      # Retry, fallback, timeout, compensation
 │   ├── performance/   # Cache, optimization
 │   ├── observability/ # Logging, metrics, tracing
-│   ├── apm/          # Agent Package Manager integration
+│   ├── adaptive/      # Self-improving primitives
 │   └── testing/       # Test utilities (MockPrimitive)
 ├── tests/             # Mirror src/ structure
-├── pyproject.toml     # Uses hatchling, pytest, ruff, mypy
+├── pyproject.toml     # Uses hatchling, pytest, ruff
 └── README.md
 ```
 
@@ -134,7 +137,7 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # Type check
-uvx pyright packages/
+uvx pyright platform/ apps/
 ```
 
 ## Testing Requirements
@@ -143,7 +146,7 @@ uvx pyright packages/
 - Use `pytest-asyncio` with `@pytest.mark.asyncio` for async tests
 - Use `MockPrimitive` from `testing/` for workflow testing
 - Test files mirror source structure: `src/core/cache.py` → `tests/test_cache.py`
-- Coverage command: `uv run pytest --cov=packages --cov-report=html`
+- Coverage command: `uv run pytest --cov=platform --cov-report=html`
 
 Example test pattern:
 ```python
@@ -168,7 +171,7 @@ Before any commit/PR, run:
 ```bash
 uv run ruff format .
 uv run ruff check . --fix
-uvx pyright packages/
+uvx pyright platform/ apps/
 uv run pytest -v
 ```
 

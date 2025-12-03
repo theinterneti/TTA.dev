@@ -4,7 +4,8 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'packages/**'
+      - 'platform/**'
+      - 'apps/**'
       - 'tests/**'
       - '*.py'
       - 'pyproject.toml'
@@ -12,7 +13,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/**'
+      - 'platform/**'
+      - 'apps/**'
       - 'tests/**'
       - '*.py'
       - 'pyproject.toml'
@@ -53,7 +55,7 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run tests with coverage
-        run: uv run pytest -v --tb=short -m "not integration and not slow and not external" --cov=packages --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing
+        run: uv run pytest -v --tb=short -m "not integration and not slow and not external" --cov=platform --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: always()  # Upload coverage even if tests fail
@@ -68,4 +70,4 @@ jobs:
 
       - name: Test package installation
         run: |
-          uv pip install -e packages/tta-dev-primitives/
+          uv pip install -e platform/primitives/
