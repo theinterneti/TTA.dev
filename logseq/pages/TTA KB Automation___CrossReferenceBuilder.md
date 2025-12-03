@@ -132,19 +132,19 @@ Path("reports/cross-references.md").write_text(report)
 {
     "kb_to_code": {
         "TTA Primitives/RetryPrimitive.md": [
-            "packages/tta-dev-primitives/src/retry.py",
-            "packages/tta-dev-primitives/tests/test_retry.py"
+            "platform/primitives/src/retry.py",
+            "platform/primitives/tests/test_retry.py"
         ],
         "Architecture Overview.md": [
-            "packages/tta-dev-primitives/src/base.py"
+            "platform/primitives/src/base.py"
         ]
     },
     "code_to_kb": {
-        "packages/tta-dev-primitives/src/retry.py": [
+        "platform/primitives/src/retry.py": [
             "TTA Primitives/RetryPrimitive",
             "Best Practices/Error Handling"
         ],
-        "packages/tta-dev-primitives/README.md": [
+        "platform/primitives/README.md": [
             "Getting Started",
             "Architecture Overview"
         ]
@@ -184,20 +184,20 @@ Path("reports/cross-references.md").write_text(report)
 
 ### TTA Primitives/RetryPrimitive.md
 **Code files mentioned:**
-- `packages/tta-dev-primitives/src/retry.py`
-- `packages/tta-dev-primitives/tests/test_retry.py`
+- `platform/primitives/src/retry.py`
+- `platform/primitives/tests/test_retry.py`
 
 **Bidirectional:** ✅ Code links back to KB
 
 ### Architecture Overview.md
 **Code files mentioned:**
-- `packages/tta-dev-primitives/src/base.py`
+- `platform/primitives/src/base.py`
 
 **Bidirectional:** ❌ Code does NOT link back
 
 ## Code → KB References (14 files)
 
-### packages/tta-dev-primitives/src/retry.py
+### platform/primitives/src/retry.py
 **KB pages mentioned:**
 - [[TTA Primitives/RetryPrimitive]]
 - [[Best Practices/Error Handling]]
@@ -400,7 +400,7 @@ builder = CrossReferenceBuilder(..., use_cache=True)
 # Scan fewer files
 builder = CrossReferenceBuilder(
     kb_path=Path("logseq/"),
-    code_path=Path("packages/tta-kb-automation"),  # Just one package
+    code_path=Path("platform/kb-automation"),  # Just one package
     code_patterns=["**/*.py"]  # Skip .md files
 )
 
@@ -414,7 +414,7 @@ builder = CrossReferenceBuilder(
 **Example**: KB mentions `base.py` but there are 3 files named `base.py`
 
 **Mitigation**:
-- Use full paths in KB: `` `packages/tta-dev-primitives/src/base.py` ``
+- Use full paths in KB: `` `platform/primitives/src/base.py` ``
 - Review report manually
 - Future enhancement: Smarter disambiguation
 
@@ -571,9 +571,9 @@ Architecture: [[TTA.dev/Architecture/Recovery Patterns]]
 ```markdown
 ## RetryPrimitive
 
-Implementation: `packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py`
+Implementation: `platform/primitives/src/tta_dev_primitives/recovery/retry.py`
 
-Tests: `packages/tta-dev-primitives/tests/test_retry.py`
+Tests: `platform/primitives/tests/test_retry.py`
 ```
 
 ---

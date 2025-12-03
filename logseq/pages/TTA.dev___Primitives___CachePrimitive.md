@@ -267,8 +267,8 @@ workflow_execution
 
 ## Metadata
 
-**Source Code:** [cache.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py)
-**Tests:** [test_cache.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/test_cache.py)
+**Source Code:** [cache.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/performance/cache.py)
+**Tests:** [test_cache.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_cache.py)
 
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]

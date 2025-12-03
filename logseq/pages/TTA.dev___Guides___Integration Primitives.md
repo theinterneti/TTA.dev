@@ -34,7 +34,7 @@ related-primitives:: [[OpenAIPrimitive]], [[AnthropicPrimitive]], [[OllamaPrimit
 
 ```bash
 # Install with integration extras
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv sync --extra integrations
 ```
 

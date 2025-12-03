@@ -41,7 +41,7 @@ id:: observability-implementation-phase1-overview
 ### 1.1 Enhanced WorkflowContext
 id:: observability-implementation-workflowcontext
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py`
+**File:** `platform/primitives/src/tta_dev_primitives/core/base.py`
 
 **Current Implementation Problem:**
 ```python
@@ -549,7 +549,7 @@ id:: observability-implementation-phase2-overview
 ### 2.1 Instrumented SequentialPrimitive
 id:: observability-implementation-sequential
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py`
+**File:** `platform/primitives/src/tta_dev_primitives/core/sequential.py`
 
 **Add instrumentation to existing SequentialPrimitive:**
 
@@ -613,7 +613,7 @@ async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
 ### 2.2 Instrumented ParallelPrimitive
 id:: observability-implementation-parallel
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py`
+**File:** `platform/primitives/src/tta_dev_primitives/core/parallel.py`
 
 ```python
 import asyncio
@@ -701,7 +701,7 @@ id:: observability-implementation-phase3-overview
 ### 3.1 Test Trace Context Propagation
 id:: observability-implementation-test-propagation
 
-**File:** `packages/tta-dev-primitives/tests/observability/test_context_propagation.py`
+**File:** `platform/primitives/tests/observability/test_context_propagation.py`
 
 ```python
 """Tests for trace context propagation."""
@@ -841,7 +841,7 @@ async def test_instrumented_primitive_error():
 ### 3.3 Test End-to-End Tracing
 id:: observability-implementation-test-e2e
 
-**File:** `packages/tta-dev-primitives/tests/integration/test_distributed_tracing.py`
+**File:** `platform/primitives/tests/integration/test_distributed_tracing.py`
 
 ```python
 """Integration tests for distributed tracing."""

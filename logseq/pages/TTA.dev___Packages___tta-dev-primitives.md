@@ -3,7 +3,7 @@
 type:: Package
 status:: Active
 owner:: @team
-package-path:: packages/tta-dev-primitives
+package-path:: platform/primitives
 last-updated:: [[2025-10-31]]
 
 ---
@@ -16,13 +16,13 @@ Core workflow primitives and composition patterns used across TTA.dev. Contains 
 
 - ✅ Production-ready
 - ✅ Included in workspace
-- ✅ Tests present in `packages/tta-dev-primitives/tests/`
+- ✅ Tests present in `platform/primitives/tests/`
 
 ## Links
 
-- Source: `packages/tta-dev-primitives/`
-- Examples: `packages/tta-dev-primitives/examples/`
-- Docs: [[TTA.dev/Primitives]] , `packages/tta-dev-primitives/README.md`
+- Source: `platform/primitives/`
+- Examples: `platform/primitives/examples/`
+- Docs: [[TTA.dev/Primitives]] , `platform/primitives/README.md`
 
 ## Next Actions (Architecture)
 

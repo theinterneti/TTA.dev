@@ -6,7 +6,7 @@
 
 Basic workflow examples show fundamental patterns for composing primitives into reliable AI workflows.
 
-**Source:** `packages/tta-dev-primitives/examples/basic_workflow.py`
+**Source:** `platform/primitives/examples/basic_workflow.py`
 
 ## Example 1: Simple Sequential Workflow
 
@@ -260,7 +260,7 @@ result = await workflow.execute(data, context)
 
 ```bash
 # Run from repository root
-cd packages/tta-dev-primitives/examples
+cd platform/primitives/examples
 uv run python basic_workflow.py
 
 # Run specific example function
@@ -288,7 +288,7 @@ asyncio.run(example_1_simple_sequential())
 
 ## Source Code
 
-**File:** `packages/tta-dev-primitives/examples/basic_workflow.py`
+**File:** `platform/primitives/examples/basic_workflow.py`
 
 ## Tags
 

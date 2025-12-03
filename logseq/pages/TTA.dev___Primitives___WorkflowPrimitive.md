@@ -451,8 +451,8 @@ async def test_custom_primitive():
 
 ## References
 
-- **GitHub Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py`](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py)
-- **Tests:** [`packages/tta-dev-primitives/tests/test_base.py`](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/test_base.py)
+- **GitHub Source:** [`platform/primitives/src/tta_dev_primitives/core/base.py`](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/core/base.py)
+- **Tests:** [`platform/primitives/tests/test_base.py`](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_base.py)
 
 ---
 

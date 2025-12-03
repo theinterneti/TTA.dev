@@ -3,7 +3,7 @@
 type:: Package
 status:: Active
 owner:: @agent-team
-package-path:: packages/universal-agent-context
+package-path:: platform/agent-context
 last-updated:: [[2025-10-31]]
 
 ---
@@ -19,7 +19,7 @@ Agent context management and orchestration utilities. Provides WorkflowContext p
 
 ## Links
 
-- Source: `packages/universal-agent-context/`
+- Source: `platform/agent-context/`
 - Docs: [[TTA.dev/Guides/Context Management]]
 
 ## Next Actions (Architecture)

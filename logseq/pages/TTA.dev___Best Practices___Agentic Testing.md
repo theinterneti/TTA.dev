@@ -357,7 +357,7 @@ async def test_retry_backoff_timing(mock_sleep):
 
 ```bash
 # Run tests with coverage
-uv run pytest --cov=packages/tta-dev-primitives/src \
+uv run pytest --cov=platform/primitives/src \
               --cov-report=html \
               --cov-report=term-missing
 
@@ -416,7 +416,7 @@ class TestCachePrimitive:
     """Test suite for CachePrimitive.
 
     **KB:** [[TTA Primitives/CachePrimitive]]
-    **Implementation:** packages/tta-dev-primitives/src/.../cache.py
+    **Implementation:** platform/primitives/src/.../cache.py
     **Examples:** examples/cache_usage.py
     """
 
@@ -606,7 +606,7 @@ test_quality_score = (
 """Test suite for CachePrimitive.
 
 **KB:** [[TTA Primitives/CachePrimitive]]
-**Implementation:** packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py
+**Implementation:** platform/primitives/src/tta_dev_primitives/performance/cache.py
 **Coverage Target:** 100%
 """
 

@@ -6,7 +6,7 @@
 
 RAG workflow demonstrates building a reliable document retrieval and generation pipeline using TTA.dev primitives for 40-60% cost reduction and high availability.
 
-**Source:** `packages/tta-dev-primitives/examples/rag_workflow.py`
+**Source:** `platform/primitives/examples/rag_workflow.py`
 
 ## Complete Example
 
@@ -450,7 +450,7 @@ rate(rag_errors_total[5m])
 
 ```bash
 # From repository root
-cd packages/tta-dev-primitives/examples
+cd platform/primitives/examples
 uv run python rag_workflow.py
 
 # Expected output:
@@ -477,7 +477,7 @@ uv run python rag_workflow.py
 
 ## Source Code
 
-**File:** `packages/tta-dev-primitives/examples/rag_workflow.py`
+**File:** `platform/primitives/examples/rag_workflow.py`
 
 ## Tags
 

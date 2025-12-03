@@ -359,9 +359,9 @@ result = await workflow.execute(input_data, context)
 
 ## Metadata
 
-**Source Code:** [sequential.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py)
-**Tests:** [test_sequential.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/test_sequential.py)
-**Examples:** [basic_sequential.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/examples/basic_sequential.py)
+**Source Code:** [sequential.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/core/sequential.py)
+**Tests:** [test_sequential.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_sequential.py)
+**Examples:** [basic_sequential.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/examples/basic_sequential.py)
 
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]

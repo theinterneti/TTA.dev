@@ -287,14 +287,14 @@ result = await primitive.{{cloze execute}}(data, context)
 ## 📦 Implementation
 
 **Source Code:**
-- \`packages/tta-dev-primitives/src/tta_dev_primitives/[category]/[filename].py\`
+- \`platform/primitives/src/tta_dev_primitives/[category]/[filename].py\`
 
 **Tests:**
-- \`packages/tta-dev-primitives/tests/unit/[category]/test_[filename].py\`
-- \`packages/tta-dev-primitives/tests/integration/test_[filename]_integration.py\`
+- \`platform/primitives/tests/unit/[category]/test_[filename].py\`
+- \`platform/primitives/tests/integration/test_[filename]_integration.py\`
 
 **Examples:**
-- \`packages/tta-dev-primitives/examples/[filename]_example.py\`
+- \`platform/primitives/examples/[filename]_example.py\`
 
 **Coverage:** 100% ✅
 
@@ -388,8 +388,8 @@ class CachePrimitive(InstrumentedPrimitive[T, T]):
 ```markdown
 ## Implementation
 
-**Source:** `packages/tta-dev-primitives/src/tta_dev_primitives/performance/cache.py`
-**Tests:** `packages/tta-dev-primitives/tests/unit/performance/test_cache_primitive.py`
+**Source:** `platform/primitives/src/tta_dev_primitives/performance/cache.py`
+**Tests:** `platform/primitives/tests/unit/performance/test_cache_primitive.py`
 
 ## Visual Guide
 
@@ -570,7 +570,7 @@ Every entity should have at least:
 **Step 3: Implement**
 
 ```python
-# packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py
+# platform/primitives/src/tta_dev_primitives/recovery/timeout.py
 
 class TimeoutPrimitive(InstrumentedPrimitive[T, T]):
     """Circuit breaker with configurable timeout.

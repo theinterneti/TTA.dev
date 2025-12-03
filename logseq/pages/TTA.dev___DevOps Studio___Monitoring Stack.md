@@ -87,7 +87,7 @@ The TTA.dev monitoring stack provides **comprehensive observability** across all
 
 ```bash
 # Quick start for development
-cd packages/tta-dev-primitives
+cd platform/primitives
 docker-compose -f docker-compose.integration.yml up -d
 
 # Access services

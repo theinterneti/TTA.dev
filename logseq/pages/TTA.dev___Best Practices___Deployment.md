@@ -130,4 +130,4 @@ Can't fix what you can't see
 ## References
 
 - Blue-Green Deployments: <https://martinfowler.com/bliki/BlueGreenDeployment.html>
-- Observability integration: `packages/tta-observability-integration/README.md`
+- Observability integration: `platform/observability/README.md`

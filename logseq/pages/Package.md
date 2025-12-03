@@ -12,9 +12,9 @@ TTA.dev is organized as a monorepo with multiple focused packages. This page hel
 
 **Core workflow primitives and composition patterns.**
 
-- **Location:** `packages/tta-dev-primitives/`
+- **Location:** `platform/primitives/`
 - **Page:** [[tta-dev-primitives]]
-- **Documentation:** `packages/tta-dev-primitives/README.md`
+- **Documentation:** `platform/primitives/README.md`
 - **Status:** ✅ Active, Production-Ready
 
 **Key primitives:**
@@ -28,9 +28,9 @@ TTA.dev is organized as a monorepo with multiple focused packages. This page hel
 
 **OpenTelemetry and Prometheus integration.**
 
-- **Location:** `packages/tta-observability-integration/`
+- **Location:** `platform/observability/`
 - **Page:** [[tta-observability-integration]]
-- **Documentation:** `packages/tta-observability-integration/README.md`
+- **Documentation:** `platform/observability/README.md`
 - **Status:** ✅ Active, Production-Ready
 
 **Features:**
@@ -43,8 +43,8 @@ TTA.dev is organized as a monorepo with multiple focused packages. This page hel
 
 **Agent context management and coordination.**
 
-- **Location:** `packages/universal-agent-context/`
-- **Documentation:** `packages/universal-agent-context/README.md`
+- **Location:** `platform/agent-context/`
+- **Documentation:** `platform/agent-context/README.md`
 - **Status:** ✅ Active
 
 **Features:**
@@ -86,9 +86,9 @@ TTA.dev is organized as a monorepo with multiple focused packages. This page hel
 uv sync --all-extras
 
 # Using pip
-pip install -e packages/tta-dev-primitives
-pip install -e packages/tta-observability-integration
-pip install -e packages/universal-agent-context
+pip install -e platform/primitives
+pip install -e platform/observability
+pip install -e platform/agent-context
 ```
 
 ### Install Specific Package
@@ -98,7 +98,7 @@ pip install -e packages/universal-agent-context
 pip install tta-dev-primitives
 
 # From source
-pip install -e packages/tta-dev-primitives
+pip install -e platform/primitives
 ```
 
 ## Package Structure

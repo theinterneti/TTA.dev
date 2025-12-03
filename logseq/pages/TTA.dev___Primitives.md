@@ -46,7 +46,7 @@ This namespace contains documentation for all TTA.dev workflow primitives - the 
 
 ## Package Location
 
-**Source:** `packages/tta-dev-primitives/src/tta_dev_primitives/`
+**Source:** `platform/primitives/src/tta_dev_primitives/`
 
 ## Related Pages
 

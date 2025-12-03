@@ -337,8 +337,8 @@ id:: database-summary
 ## Related Documentation
 
 - [[TTA.dev/Guides/Integration Primitives]] - Quick reference for both database primitives
-- [[SQLitePrimitive]] API - `packages/tta-dev-primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py`
-- [[SupabasePrimitive]] API - `packages/tta-dev-primitives/src/tta_dev_primitives/integrations/supabase_primitive.py`
+- [[SQLitePrimitive]] API - `platform/primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py`
+- [[SupabasePrimitive]] API - `platform/primitives/src/tta_dev_primitives/integrations/supabase_primitive.py`
 - [[TTA.dev/Examples/Overview]] - See database examples in action
 - [[TTA.dev/Primitives Catalog]] - Complete primitive reference
 

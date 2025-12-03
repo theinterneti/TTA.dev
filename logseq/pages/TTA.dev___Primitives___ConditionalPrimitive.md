@@ -464,8 +464,8 @@ result3 = await moderation_pipeline.execute({"text": "Clearly harmful content"},
 
 ## References
 
-- **GitHub Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py`](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py)
-- **Tests:** [`packages/tta-dev-primitives/tests/test_conditional.py`](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/test_conditional.py)
+- **GitHub Source:** [`platform/primitives/src/tta_dev_primitives/core/conditional.py`](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/core/conditional.py)
+- **Tests:** [`platform/primitives/tests/test_conditional.py`](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_conditional.py)
 
 ---
 

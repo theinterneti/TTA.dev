@@ -158,7 +158,7 @@ Each code file includes:
 
 \`\`\`python
 {
-    "path": "packages/tta-dev-primitives/src/.../cache.py",
+    "path": "platform/primitives/src/.../cache.py",
     "content": "Full source code...",
     "summary": "Docstring summary from ParseDocstrings primitive",
     "relevance_score": 0.85
@@ -185,7 +185,7 @@ Each test file includes:
 
 \`\`\`python
 {
-    "path": "packages/tta-dev-primitives/tests/test_cache.py",
+    "path": "platform/primitives/tests/test_cache.py",
     "test_count": 15,
     "test_names": ["test_cache_hit", "test_cache_miss", ...],
     "relevance_score": 0.90
@@ -396,7 +396,7 @@ SessionContextBuilder has comprehensive test coverage (17 tests, 100%):
 **Run tests:**
 
 \`\`\`bash
-uv run pytest packages/tta-kb-automation/tests/test_session_context_builder.py -v
+uv run pytest platform/kb-automation/tests/test_session_context_builder.py -v
 \`\`\`
 
 ---
@@ -463,7 +463,7 @@ Returns dict with:
 
 ## 📝 Implementation Details
 
-**Source:** \`packages/tta-kb-automation/src/tta_kb_automation/tools/session_context_builder.py\`
+**Source:** \`platform/kb-automation/src/tta_kb_automation/tools/session_context_builder.py\`
 
 **Lines of Code:**
 - Implementation: 411 lines
@@ -496,9 +496,9 @@ Returns dict with:
 
 ---
 
-**Last Updated:** November 3, 2025  
-**Status:** ✅ Production Ready  
-**Version:** 1.0.0  
-**Test Coverage:** 100%  
-**Implemented By:** GitHub Copilot Agent  
+**Last Updated:** November 3, 2025
+**Status:** ✅ Production Ready
+**Version:** 1.0.0
+**Test Coverage:** 100%
+**Implemented By:** GitHub Copilot Agent
 **Session:** KB Automation Phase 3 Implementation

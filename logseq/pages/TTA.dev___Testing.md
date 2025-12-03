@@ -31,7 +31,7 @@ TTA.dev emphasizes 100% test coverage with comprehensive testing strategies incl
 See testing documentation in:
 - `docs/TESTING_GUIDE.md`
 - `docs/TESTING_QUICKREF.md`
-- `packages/tta-dev-primitives/tests/`
+- `platform/primitives/tests/`
 
 ## Tags
 

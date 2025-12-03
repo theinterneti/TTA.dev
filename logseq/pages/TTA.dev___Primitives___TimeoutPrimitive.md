@@ -449,8 +449,8 @@ async def test_timeout_with_fallback():
 
 ## References
 
-- **GitHub Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py`](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/recovery/timeout.py)
-- **Tests:** [`packages/tta-dev-primitives/tests/recovery/test_timeout.py`](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/recovery/test_timeout.py)
+- **GitHub Source:** [`platform/primitives/src/tta_dev_primitives/recovery/timeout.py`](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/recovery/timeout.py)
+- **Tests:** [`platform/primitives/tests/recovery/test_timeout.py`](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/recovery/test_timeout.py)
 
 ---
 

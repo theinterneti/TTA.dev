@@ -261,7 +261,7 @@ id:: llm-cost-quick-start
 id:: llm-cost-quickstart-install
 
 ```bash
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv sync --extra integrations
 ```
 
@@ -303,7 +303,7 @@ GROQ_API_KEY=gsk_...your-key
 id:: llm-cost-quickstart-test
 
 ```bash
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv run python examples/free_flagship_models.py
 ```
 

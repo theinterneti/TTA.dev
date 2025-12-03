@@ -21,7 +21,7 @@ This page is a disambiguation page for "Core" references. See specific topics be
 
 ### Core Package
 - [[TTA.dev/Packages/tta-dev-primitives]] - Core primitives package
-- `packages/tta-dev-primitives/src/tta_dev_primitives/core/` - Core module
+- `platform/primitives/src/tta_dev_primitives/core/` - Core module
 
 ## Related Pages
 

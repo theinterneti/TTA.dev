@@ -328,9 +328,9 @@ workflow_execution (parent span)
 
 ## Metadata
 
-**Source Code:** [parallel.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py)
-**Tests:** [test_parallel.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/test_parallel.py)
-**Examples:** [parallel_execution.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/examples/parallel_execution.py)
+**Source Code:** [parallel.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/core/parallel.py)
+**Tests:** [test_parallel.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_parallel.py)
+**Examples:** [parallel_execution.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/examples/parallel_execution.py)
 
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]

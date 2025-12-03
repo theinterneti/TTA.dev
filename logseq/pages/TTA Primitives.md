@@ -18,7 +18,7 @@ Core workflow primitives providing composable, type-safe building blocks for AI 
 ## 📂 Package Structure
 
 ```text
-packages/tta-dev-primitives/
+platform/primitives/
 ├── src/tta_dev_primitives/
 │   ├── core/              # Base primitives
 │   ├── recovery/          # Error handling patterns
@@ -320,7 +320,7 @@ workflow = TimeoutPrimitive(
 
 ## 📖 Examples
 
-All examples are in `packages/tta-dev-primitives/examples/`:
+All examples are in `platform/primitives/examples/`:
 
 - `basic_sequential.py` - Sequential composition
 - `parallel_execution.py` - Parallel patterns
@@ -343,13 +343,13 @@ All examples are in `packages/tta-dev-primitives/examples/`:
 
 ```bash
 # All tests
-uv run pytest packages/tta-dev-primitives/tests/ -v
+uv run pytest platform/primitives/tests/ -v
 
 # Specific primitive
-uv run pytest packages/tta-dev-primitives/tests/core/test_sequential.py
+uv run pytest platform/primitives/tests/core/test_sequential.py
 
 # With coverage
-uv run pytest --cov=packages/tta-dev-primitives --cov-report=html
+uv run pytest --cov=platform/primitives --cov-report=html
 ```
 
 ---
@@ -400,8 +400,8 @@ uv run pytest --cov=packages/tta-dev-primitives --cov-report=html
 
 ## 🔗 Resources
 
-- **Package README:** `packages/tta-dev-primitives/README.md`
-- **Agent Instructions:** `packages/tta-dev-primitives/AGENTS.md`
+- **Package README:** `platform/primitives/README.md`
+- **Agent Instructions:** `platform/primitives/AGENTS.md`
 - **Catalog:** [[PRIMITIVES CATALOG]]
 - **Architecture:** `docs/architecture/primitives-design.md`
 

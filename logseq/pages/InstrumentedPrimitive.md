@@ -258,9 +258,9 @@ All TTA.dev primitives inherit from InstrumentedPrimitive:
 
 ## Implementation
 
-**Source:** `packages/tta-dev-primitives/src/tta_dev_primitives/observability/instrumented_primitive.py`
+**Source:** `platform/primitives/src/tta_dev_primitives/observability/instrumented_primitive.py`
 
-**Tests:** `packages/tta-dev-primitives/tests/test_instrumented_primitive.py`
+**Tests:** `platform/primitives/tests/test_instrumented_primitive.py`
 
 ## Related Documentation
 

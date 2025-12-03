@@ -1,7 +1,18 @@
 # TTA Primitives/KnowledgeBasePrimitive
 
-> **Note:** This page has moved to [[TTA.dev/Primitives/KnowledgeBasePrimitive]]
+---
 
-**New location:** [[TTA.dev/Primitives/KnowledgeBasePrimitive]]
+> **⚠️ This primitive is under development.**
 
-All documentation and examples are now at the new location. Please update your links to use the new namespace structure.
+The KnowledgeBasePrimitive is planned for the `tta-kb-automation` package.
+
+## Related
+
+- [[TTA.dev/Packages/tta-kb-automation]] - KB automation package
+- [[TTA KB Automation/SessionContextBuilder]] - Current KB tooling
+
+## Status
+
+- **Package:** Not yet implemented
+- **Priority:** Medium
+- **Tracking:** See `platform/kb-automation/` for current progress

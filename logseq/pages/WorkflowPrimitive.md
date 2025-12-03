@@ -6,7 +6,7 @@
 
 `WorkflowPrimitive[TInput, TOutput]` is the foundation of TTA.dev's composable workflow system. All primitives inherit from this base class to gain type safety, operator overloading, and built-in observability.
 
-**Source:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py`
+**Source:** `platform/primitives/src/tta_dev_primitives/core/base.py`
 
 ## Basic Usage
 
@@ -500,7 +500,7 @@ class FetchAndProcessPrimitive(WorkflowPrimitive[dict, dict]):
 
 ## Source Code
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py`
+**File:** `platform/primitives/src/tta_dev_primitives/core/base.py`
 
 ## Tags
 

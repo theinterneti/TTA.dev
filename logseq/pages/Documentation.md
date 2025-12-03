@@ -144,7 +144,7 @@ TTA.dev/
 
 **Each package includes:**
 ```
-packages/tta-dev-primitives/
+platform/primitives/
 ├── README.md                    # Package overview
 ├── AGENTS.md                    # Agent guidance
 ├── docs/
@@ -370,7 +370,7 @@ input data and returns output. Use primitives to build workflows.
 **API Documentation:**
 ```bash
 # Generate API docs from docstrings
-uv run pdoc packages/tta-dev-primitives/src
+uv run pdoc platform/primitives/src
 
 # Sphinx documentation
 uv run sphinx-build docs/ docs/_build

@@ -402,7 +402,7 @@ uv run pytest -v
 uv run pytest --cov=packages --cov-report=html
 
 # Run specific tests
-uv run pytest packages/tta-dev-primitives/tests/
+uv run pytest platform/primitives/tests/
 
 # Run integration tests
 RUN_INTEGRATION=true uv run pytest tests/integration/

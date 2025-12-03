@@ -422,9 +422,9 @@ workflow_execution (parent span)
 
 ## Metadata
 
-**Source Code:** [router.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/core/router.py)
-**Tests:** [test_router.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/test_router.py)
-**Examples:** [router_llm_selection.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/examples/router_llm_selection.py)
+**Source Code:** [router.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/core/router.py)
+**Tests:** [test_router.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_router.py)
+**Examples:** [router_llm_selection.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/examples/router_llm_selection.py)
 
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]

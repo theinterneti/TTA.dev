@@ -54,7 +54,7 @@ async def basic_parallel():
     return results  # [result1, result2, result3]
 ```
 
-**See:** `packages/tta-dev-primitives/examples/basic_workflow.py`
+**See:** `platform/primitives/examples/basic_workflow.py`
 
 ---
 
@@ -95,7 +95,7 @@ async def fallback_example():
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/error_handling_patterns.py`
+**See:** `platform/primitives/examples/error_handling_patterns.py`
 
 ---
 
@@ -135,7 +135,7 @@ async def memory_example():
     return history
 ```
 
-**See:** `packages/tta-dev-primitives/examples/performance_patterns.py`
+**See:** `platform/primitives/examples/performance_patterns.py`
 
 ---
 
@@ -181,7 +181,7 @@ async def rag_workflow(query: str):
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/rag_workflow.py`
+**See:** `platform/primitives/examples/rag_workflow.py`
 
 ---
 
@@ -205,7 +205,7 @@ async def cost_tracking_example():
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/cost_tracking_workflow.py`
+**See:** `platform/primitives/examples/cost_tracking_workflow.py`
 
 ---
 
@@ -224,7 +224,7 @@ async def multi_agent_example():
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/multi_agent_workflow.py`
+**See:** `platform/primitives/examples/multi_agent_workflow.py`
 
 ---
 
@@ -263,7 +263,7 @@ async def github_integration_example():
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/integration_examples.py`
+**See:** `platform/primitives/examples/integration_examples.py`
 
 ---
 
@@ -297,7 +297,7 @@ async def observability_example():
         return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/observability.py`
+**See:** `platform/primitives/examples/observability.py`
 
 ---
 
@@ -364,7 +364,7 @@ if __name__ == "__main__":
 ### Package Examples
 
 ```
-packages/tta-dev-primitives/
+platform/primitives/
 └── examples/
     ├── basic_workflow.py          # Foundation
     ├── composition.py              # Operators
@@ -411,17 +411,17 @@ docs/
 
 ```bash
 # Run specific example
-uv run python packages/tta-dev-primitives/examples/rag_workflow.py
+uv run python platform/primitives/examples/rag_workflow.py
 
 # Run all examples
-for file in packages/tta-dev-primitives/examples/*.py; do
+for file in platform/primitives/examples/*.py; do
     echo "Running $file"
     uv run python "$file"
 done
 
 # Run with observability
 docker-compose -f docker-compose.test.yml up -d
-uv run python packages/tta-dev-primitives/examples/observability.py
+uv run python platform/primitives/examples/observability.py
 ```
 
 ---
@@ -430,10 +430,10 @@ uv run python packages/tta-dev-primitives/examples/observability.py
 
 ```bash
 # Test examples as doctests
-uv run pytest packages/tta-dev-primitives/examples/ --doctest-modules
+uv run pytest platform/primitives/examples/ --doctest-modules
 
 # Run example tests
-uv run pytest packages/tta-dev-primitives/tests/examples/
+uv run pytest platform/primitives/tests/examples/
 
 # Validate examples run
 ./scripts/validate_examples.sh
@@ -661,7 +661,7 @@ async def production_llm_service():
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/real_world_workflows.py`
+**See:** `platform/primitives/examples/real_world_workflows.py`
 
 ---
 

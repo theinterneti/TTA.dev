@@ -1,7 +1,11 @@
 # TTA Primitives/WorkflowPrimitive
 
-> **Note:** This page has moved to [[TTA.dev/Primitives/WorkflowPrimitive]]
+alias:: [[TTA.dev/Primitives/WorkflowPrimitive]]
 
-**New location:** [[TTA.dev/Primitives/WorkflowPrimitive]]
+---
 
-All documentation and examples are now at the new location. Please update your links to use the new namespace structure.
+> **📍 This namespace is deprecated.**
+>
+> Canonical location: [[TTA.dev/Primitives/WorkflowPrimitive]]
+
+This is a legacy alias. All primitives are now documented under `TTA.dev/Primitives/`.

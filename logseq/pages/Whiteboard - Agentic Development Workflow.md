@@ -173,7 +173,7 @@ related:: [[TTA.dev/Guides/Agentic Primitives]], [[TODO Management System]]
   related:: [[TTA Primitives/CachePrimitive]]
   completed:: [[2025-11-03]]
   deliverables::
-    - packages/tta-dev-primitives/src/.../cache.py
+    - platform/primitives/src/.../cache.py
     - tests/unit/performance/test_cache_primitive.py
     - logseq/pages/TTA Primitives___CachePrimitive.md
     - examples/cache_usage.py
@@ -373,7 +373,7 @@ class CachePrimitive(InstrumentedPrimitive[T, T]):
 # TTA Primitives/CachePrimitive
 
 **Implementation:**
-- Source: `packages/tta-dev-primitives/src/.../cache.py`
+- Source: `platform/primitives/src/.../cache.py`
 - Tests: `tests/unit/performance/test_cache_primitive.py`
 
 **Related Pages:**

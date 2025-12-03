@@ -6,7 +6,7 @@
 
 `CompensationPrimitive` implements the saga pattern, executing a sequence of operations where each operation has a compensation (rollback) function. If any operation fails, all previously completed operations are automatically compensated in reverse order.
 
-**Source:** `packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py`
+**Source:** `platform/primitives/src/tta_dev_primitives/recovery/compensation.py`
 
 ## Basic Usage
 
@@ -446,7 +446,7 @@ async def test_compensation_on_failure():
 
 ## Source Code
 
-**File:** `packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py`
+**File:** `platform/primitives/src/tta_dev_primitives/recovery/compensation.py`
 
 ## Tags
 

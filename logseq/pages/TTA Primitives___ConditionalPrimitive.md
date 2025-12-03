@@ -1,7 +1,11 @@
 # TTA Primitives/ConditionalPrimitive
 
-> **Note:** This page has moved to [[TTA.dev/Primitives/ConditionalPrimitive]]
+alias:: [[TTA.dev/Primitives/ConditionalPrimitive]]
 
-**New location:** [[TTA.dev/Primitives/ConditionalPrimitive]]
+---
 
-All documentation and examples are now at the new location. Please update your links to use the new namespace structure.
+> **📍 This namespace is deprecated.**
+>
+> Canonical location: [[TTA.dev/Primitives/ConditionalPrimitive]]
+
+This is a legacy alias. All primitives are now documented under `TTA.dev/Primitives/`.

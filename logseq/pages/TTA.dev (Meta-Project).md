@@ -99,7 +99,7 @@ Performance:
 
 ### Adding a New Primitive
 
-1. Create primitive class in `packages/tta-dev-primitives/src/`
+1. Create primitive class in `platform/primitives/src/`
 2. Implement `WorkflowPrimitive[InputType, OutputType]`
 3. Add comprehensive tests (100% coverage required)
 4. Create example in `examples/`
@@ -207,7 +207,7 @@ python --version  # Should be 3.11+
 
 ```bash
 # Run type checker on specific package
-uvx pyright packages/tta-dev-primitives/
+uvx pyright platform/primitives/
 ```
 
 ## Test Failures
@@ -217,7 +217,7 @@ uvx pyright packages/tta-dev-primitives/
 uv run pytest -v -s
 
 # Run specific test file
-uv run pytest packages/tta-dev-primitives/tests/test_sequential.py
+uv run pytest platform/primitives/tests/test_sequential.py
 ```
 
 ---

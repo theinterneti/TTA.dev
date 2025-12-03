@@ -16,7 +16,7 @@ This page is a disambiguation page for "Example" references. If you're looking f
 - [[TTA.dev/Examples/Cost Tracking Workflow]] - Budget enforcement
 
 ### Example Directories
-- `packages/tta-dev-primitives/examples/` - Primitive examples
+- `platform/primitives/examples/` - Primitive examples
 - `docs/examples/` - Documentation examples
 
 ### By Pattern

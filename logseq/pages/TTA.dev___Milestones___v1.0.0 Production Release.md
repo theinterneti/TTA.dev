@@ -76,7 +76,7 @@ related:: [[TTA.dev (Meta-Project)]], [[Production]]
 ### ✅ Development Lifecycle Meta-Framework
 
 **Status:** COMPLETE ✅
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/lifecycle/`
+**Location:** `platform/primitives/src/tta_dev_primitives/lifecycle/`
 
 **Implemented:**
 - 5-stage lifecycle (EXPERIMENTATION → PRODUCTION)
@@ -147,7 +147,7 @@ related:: [[TTA.dev (Meta-Project)]], [[Production]]
   package:: tta-dev-primitives
   status:: not-started
   blocking:: Release
-  file:: packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/__init__.py
+  file:: platform/primitives/src/tta_dev_primitives/adaptive/__init__.py
   line:: 97
   related:: [[ADAPTIVE_PRIMITIVES_AUDIT.md]]
 
@@ -157,7 +157,7 @@ related:: [[TTA.dev (Meta-Project)]], [[Production]]
   package:: tta-dev-primitives
   status:: not-started
   blocking:: Release
-  file:: packages/tta-dev-primitives/src/tta_dev_primitives/adaptive/logseq_integration.py
+  file:: platform/primitives/src/tta_dev_primitives/adaptive/logseq_integration.py
   line:: 19
 
 ### 3. Integration Tests
@@ -249,7 +249,7 @@ related:: [[TTA.dev (Meta-Project)]], [[Production]]
   priority:: high
   package:: tta-dev-primitives
   status:: not-started
-  file:: packages/tta-dev-primitives/examples/adaptive_primitives_demo.py
+  file:: platform/primitives/examples/adaptive_primitives_demo.py
   related:: [[ADAPTIVE_PRIMITIVES_IMPROVEMENTS.md]]
 
 - TODO Standardize imports in all examples #dev-todo

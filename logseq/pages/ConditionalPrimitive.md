@@ -249,9 +249,9 @@ logger.info(
 
 ## Implementation
 
-**Source:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/conditional.py`
+**Source:** `platform/primitives/src/tta_dev_primitives/core/conditional.py`
 
-**Tests:** `packages/tta-dev-primitives/tests/test_conditional.py`
+**Tests:** `platform/primitives/tests/test_conditional.py`
 
 ## Related Documentation
 

@@ -3,7 +3,7 @@
 type:: [[Examples]]
 category:: [[Code Examples]], [[Workflow Patterns]]
 difficulty:: [[Beginner]] to [[Advanced]]
-location:: `packages/tta-dev-primitives/examples/`
+location:: `platform/primitives/examples/`
 
 ---
 
@@ -31,7 +31,7 @@ location:: `packages/tta-dev-primitives/examples/`
 
   **Run it:**
   ```bash
-  cd packages/tta-dev-primitives
+  cd platform/primitives
   uv run python examples/quick_wins_demo.py
   ```
 
@@ -71,7 +71,7 @@ location:: `packages/tta-dev-primitives/examples/`
 
   **Run it:**
   ```bash
-  cd packages/tta-dev-primitives
+  cd platform/primitives
   uv run python examples/real_world_workflows.py
   ```
 
@@ -115,7 +115,7 @@ location:: `packages/tta-dev-primitives/examples/`
 
   **Run it:**
   ```bash
-  cd packages/tta-dev-primitives
+  cd platform/primitives
   uv run python examples/error_handling_patterns.py
   ```
 
@@ -175,7 +175,7 @@ location:: `packages/tta-dev-primitives/examples/`
 
   **Run it:**
   ```bash
-  cd packages/tta-dev-primitives
+  cd platform/primitives
   uv run python examples/observability_demo.py
   ```
 
@@ -203,7 +203,7 @@ location:: `packages/tta-dev-primitives/examples/`
 
   **Run it:**
   ```bash
-  cd packages/tta-dev-primitives
+  cd platform/primitives
   uv run python examples/apm_example.py
   ```
 
@@ -484,7 +484,7 @@ All examples include inline assertions and output for verification.
 
 **Run with pytest:**
 ```bash
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv run pytest examples/ -v
 ```
 
@@ -529,4 +529,4 @@ Have a useful pattern to share? We welcome contributions!
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]
 **Example Count:** 13+ working examples
-**Location:** `packages/tta-dev-primitives/examples/`
+**Location:** `platform/primitives/examples/`

@@ -446,7 +446,7 @@ id:: orchestration-summary
 - [[TTA.dev/Guides/LLM Selection]] - Choose between OpenAI, Anthropic, Ollama
 - [[TTA.dev/Examples/Overview]] - See `cost_optimization.py` and `multi_model_orchestration.py` examples
 - [[TTA.dev/Primitives Catalog]] - All available primitives
-- Configuration API - `packages/tta-dev-primitives/src/tta_dev_primitives/config/orchestration_config.py`
+- Configuration API - `platform/primitives/src/tta_dev_primitives/config/orchestration_config.py`
 
 ---
 

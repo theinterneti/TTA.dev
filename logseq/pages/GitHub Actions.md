@@ -490,13 +490,13 @@ jobs:
 
 ```yaml
 - name: Test primitives
-  run: uv run pytest packages/tta-dev-primitives/tests/ -v
+  run: uv run pytest platform/primitives/tests/ -v
 
 - name: Test observability integration
-  run: uv run pytest packages/tta-observability-integration/tests/ -v
+  run: uv run pytest platform/observability/tests/ -v
 
 - name: Test universal agent context
-  run: uv run pytest packages/universal-agent-context/tests/ -v
+  run: uv run pytest platform/agent-context/tests/ -v
 ```
 
 ### Observability in CI

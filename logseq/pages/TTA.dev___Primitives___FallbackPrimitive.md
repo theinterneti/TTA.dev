@@ -210,8 +210,8 @@ workflow_execution
 
 ## Metadata
 
-**Source Code:** [fallback.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/recovery/fallback.py)
-**Tests:** [test_fallback.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/test_fallback.py)
+**Source Code:** [fallback.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/recovery/fallback.py)
+**Tests:** [test_fallback.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_fallback.py)
 
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]

@@ -6,13 +6,13 @@
 
 The tta-observability-integration package provides automatic observability for TTA.dev workflows through OpenTelemetry tracing and Prometheus metrics.
 
-**Package:** `packages/tta-observability-integration/`
+**Package:** `platform/observability/`
 
 ## Installation
 
 ```bash
 # From source (current)
-cd packages/tta-observability-integration
+cd platform/observability
 uv sync
 
 # From PyPI (when published)
@@ -265,7 +265,7 @@ spec:
    - Eviction rate
    - Size over time
 
-**Import from:** `packages/tta-observability-integration/dashboards/`
+**Import from:** `platform/observability/dashboards/`
 
 ## Troubleshooting
 
@@ -367,7 +367,7 @@ observability_integration.initialize_observability()
 - [[TTA.dev/Primitives]] - All primitives
 - [[InstrumentedPrimitive]] - Base observability
 - [[TTA.dev/Guides/Observability]] - Observability guide
-- Package README: `packages/tta-observability-integration/README.md`
+- Package README: `platform/observability/README.md`
 
 ## External Resources
 

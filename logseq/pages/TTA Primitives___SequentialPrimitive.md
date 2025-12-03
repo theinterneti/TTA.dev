@@ -1,7 +1,11 @@
 # TTA Primitives/SequentialPrimitive
 
-> **Note:** This page has moved to [[TTA.dev/Primitives/SequentialPrimitive]]
+alias:: [[TTA.dev/Primitives/SequentialPrimitive]]
 
-**New location:** [[TTA.dev/Primitives/SequentialPrimitive]]
+---
 
-All documentation and examples are now at the new location. Please update your links to use the new namespace structure.
+> **📍 This namespace is deprecated.**
+>
+> Canonical location: [[TTA.dev/Primitives/SequentialPrimitive]]
+
+This is a legacy alias. All primitives are now documented under `TTA.dev/Primitives/`.

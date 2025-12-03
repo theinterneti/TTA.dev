@@ -168,7 +168,7 @@ TTA.dev/
 **Package pyproject.toml:**
 
 ```toml
-# packages/tta-dev-primitives/pyproject.toml
+# platform/primitives/pyproject.toml
 [project]
 name = "tta-dev-primitives"
 version = "0.1.0"
@@ -441,7 +441,7 @@ reportUnknownArgumentType = false
 uvx pyright packages/
 
 # Type check specific package
-uvx pyright packages/tta-dev-primitives/
+uvx pyright platform/primitives/
 
 # Type check with config
 uvx pyright --project pyproject.toml

@@ -6,7 +6,7 @@
 
 Cost tracking workflow demonstrates comprehensive cost management: caching for 30-40% reduction, smart routing for 20-30% reduction, real-time budget enforcement, and detailed cost metrics.
 
-**Source:** `packages/tta-dev-primitives/examples/cost_tracking_workflow.py`
+**Source:** `platform/primitives/examples/cost_tracking_workflow.py`
 
 ## Complete Example
 
@@ -324,7 +324,7 @@ workflow = build_cost_workflow(user_tracker, budget=1.00)  # $1/day
 
 ```bash
 # From repository root
-cd packages/tta-dev-primitives/examples
+cd platform/primitives/examples
 uv run python cost_tracking_workflow.py
 
 # Expected output:
@@ -392,7 +392,7 @@ sum(rate(llm_cache_hits_total[5m])) / sum(rate(llm_requests_total[5m]))
 
 ## Source Code
 
-**File:** `packages/tta-dev-primitives/examples/cost_tracking_workflow.py`
+**File:** `platform/primitives/examples/cost_tracking_workflow.py`
 
 ## Tags
 

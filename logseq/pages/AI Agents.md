@@ -566,7 +566,7 @@ async def basic_agent(task: str) -> str:
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/basic_agent.py`
+**See:** `platform/primitives/examples/basic_agent.py`
 
 ---
 
@@ -600,7 +600,7 @@ async def multi_agent_system(query: str) -> dict:
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/multi_agent_workflow.py`
+**See:** `platform/primitives/examples/multi_agent_workflow.py`
 
 ---
 
@@ -625,7 +625,7 @@ async def rag_agent(query: str) -> str:
     return result
 ```
 
-**See:** `packages/tta-dev-primitives/examples/agentic_rag_workflow.py`
+**See:** `platform/primitives/examples/agentic_rag_workflow.py`
 
 ---
 

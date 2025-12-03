@@ -40,7 +40,7 @@ result = await workflow.execute(input_data, context)
 
 ## Documentation
 
-See: `packages/tta-dev-primitives/src/tta_dev_primitives/core/base.py`
+See: `platform/primitives/src/tta_dev_primitives/core/base.py`
 
 ## Tags
 

@@ -180,9 +180,9 @@ workflow = (
 
 ## Implementation
 
-**Source:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/sequential.py`
+**Source:** `platform/primitives/src/tta_dev_primitives/core/sequential.py`
 
-**Tests:** `packages/tta-dev-primitives/tests/test_sequential.py`
+**Tests:** `platform/primitives/tests/test_sequential.py`
 
 ## Related Documentation
 

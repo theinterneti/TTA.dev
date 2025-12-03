@@ -165,7 +165,7 @@ git commit -m "test: Add comprehensive tests for MyPrimitive"
 
 - [[TTA.dev/Examples/Unit Test Example]]
 - [[TTA.dev/Examples/Integration Test Example]]
-- See: `packages/tta-dev-primitives/tests/` for real examples
+- See: `platform/primitives/tests/` for real examples
 
 ## Checklist
 

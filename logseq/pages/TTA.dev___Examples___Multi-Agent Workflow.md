@@ -6,7 +6,7 @@
 
 Multi-agent workflow demonstrates coordinating multiple specialized agents using TTA.dev primitives for intelligent task routing and parallel execution.
 
-**Source:** `packages/tta-dev-primitives/examples/multi_agent_workflow.py`
+**Source:** `platform/primitives/examples/multi_agent_workflow.py`
 
 ## Complete Example
 
@@ -565,7 +565,7 @@ sum(rate(agent_success_total[5m])) / sum(rate(agent_executions_total[5m]))
 
 ```bash
 # From repository root
-cd packages/tta-dev-primitives/examples
+cd platform/primitives/examples
 uv run python multi_agent_workflow.py
 
 # Expected output:
@@ -594,7 +594,7 @@ uv run python multi_agent_workflow.py
 
 ## Source Code
 
-**File:** `packages/tta-dev-primitives/examples/multi_agent_workflow.py`
+**File:** `platform/primitives/examples/multi_agent_workflow.py`
 
 ## Tags
 

@@ -28,7 +28,7 @@
 ### Package Structure
 
 ```
-packages/tta-kb-automation/
+platform/kb-automation/
 ├── src/tta_kb_automation/
 │   ├── core/
 │   │   ├── kb_primitives.py         # KB operations (parse, extract, validate)
@@ -125,7 +125,7 @@ from tta_kb_automation import TODOSync
 
 sync = TODOSync()
 todos = await sync.scan_and_create(
-    paths=["packages/tta-dev-primitives"],
+    paths=["platform/primitives"],
     create_journal_entries=True
 )
 ```

@@ -464,9 +464,9 @@ logger.warning(
 
 ## Metadata
 
-**Source Code:** [retry.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/recovery/retry.py)
-**Tests:** [test_retry.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/test_retry.py)
-**Examples:** [error_handling_patterns.py](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/examples/error_handling_patterns.py)
+**Source Code:** [retry.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/recovery/retry.py)
+**Tests:** [test_retry.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_retry.py)
+**Examples:** [error_handling_patterns.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/examples/error_handling_patterns.py)
 
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]

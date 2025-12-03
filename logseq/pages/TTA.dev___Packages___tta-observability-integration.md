@@ -3,7 +3,7 @@
 type:: Package
 status:: Active
 owner:: @observability-team
-package-path:: packages/tta-observability-integration
+package-path:: platform/observability
 last-updated:: [[2025-10-31]]
 
 ---
@@ -20,7 +20,7 @@ Observability primitives and integrations (OpenTelemetry, Prometheus exporters, 
 
 ## Links
 
-- Source: `packages/tta-observability-integration/`
+- Source: `platform/observability/`
 - Docs: `docs/observability/`, [[TTA.dev/Guides/Observability]]
 
 ## Next Actions (Architecture)

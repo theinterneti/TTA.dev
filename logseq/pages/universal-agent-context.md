@@ -10,7 +10,7 @@
 
 **Status:** Production-ready
 **License:** MIT
-**Repository:** `packages/universal-agent-context/`
+**Repository:** `platform/agent-context/`
 
 ---
 
@@ -55,7 +55,7 @@ pip install universal-agent-context
 ```bash
 # Clone repository
 git clone https://github.com/theinterneti/TTA.dev.git
-cd TTA.dev/packages/universal-agent-context
+cd TTA.dev/platform/agent-context
 
 # Install with dev dependencies
 uv sync --all-extras
@@ -656,13 +656,13 @@ async def test_tool_caching():
 
 ## External Resources
 
-- [Package README](../packages/universal-agent-context/README.md)
-- [API Documentation](../packages/universal-agent-context/docs/)
+- [Package README](../platform/agent-context/README.md)
+- [API Documentation](../platform/agent-context/docs/)
 - [GitHub Repository](https://github.com/theinterneti/TTA.dev)
 
 ---
 
 **Status:** Production-ready
 **License:** MIT
-**Source:** `packages/universal-agent-context/`
-**Tests:** `packages/universal-agent-context/tests/`
+**Source:** `platform/agent-context/`
+**Tests:** `platform/agent-context/tests/`

@@ -84,7 +84,7 @@ sync = TODOSync()
 
 # Sync TODOs from specific package
 result = await sync.sync(
-    paths=[Path("packages/tta-kb-automation")],
+    paths=[Path("platform/kb-automation")],
     create_journal_entries=True,  # Actually write to journal
     journal_date="2025-11-03"     # Or None for today
 )
@@ -101,7 +101,7 @@ print(f"Journal entries: {len(result['journal_entries'])}")
 ```python
 # Scan without creating journal entries
 result = await sync.sync(
-    paths=[Path("packages/tta-dev-primitives")],
+    paths=[Path("platform/primitives")],
     create_journal_entries=False
 )
 
@@ -235,7 +235,7 @@ async def sprint_planning_prep():
 
     # Scan with dry run first
     result = await sync.sync(
-        paths=[Path("packages/tta-dev-primitives")],
+        paths=[Path("platform/primitives")],
         create_journal_entries=False  # Review first
     )
 
@@ -248,7 +248,7 @@ async def sprint_planning_prep():
     # Now create journal entries
     if confirm_todos(high_priority):
         await sync.sync(
-            paths=[Path("packages/tta-dev-primitives")],
+            paths=[Path("platform/primitives")],
             create_journal_entries=True
         )
 ```

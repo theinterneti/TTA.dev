@@ -64,7 +64,7 @@ workflow = (
 
 ## Documentation
 
-- `packages/universal-agent-context/` - Agent context package
+- `platform/agent-context/` - Agent context package
 - [[TTA.dev/Guides/Multi-Agent Systems]] - Design guide
 - [[TTA.dev/Patterns]] - Pattern catalog
 

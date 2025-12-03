@@ -229,9 +229,9 @@ robust_parallel = (
 
 ## Implementation
 
-**Source:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/parallel.py`
+**Source:** `platform/primitives/src/tta_dev_primitives/core/parallel.py`
 
-**Tests:** `packages/tta-dev-primitives/tests/test_parallel.py`
+**Tests:** `platform/primitives/tests/test_parallel.py`
 
 ## Related Documentation
 

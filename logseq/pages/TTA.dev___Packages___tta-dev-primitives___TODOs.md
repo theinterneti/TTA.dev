@@ -11,7 +11,7 @@
 
 Core workflow primitives for building reliable AI applications.
 
-**Location:** `packages/tta-dev-primitives/`
+**Location:** `platform/primitives/`
 **Related:** [[TTA.dev/Packages/tta-dev-primitives]]
 
 ---

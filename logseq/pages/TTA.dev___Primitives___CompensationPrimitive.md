@@ -541,8 +541,8 @@ workflow = FallbackPrimitive(
 
 ## References
 
-- **GitHub Source:** [`packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py`](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/src/tta_dev_primitives/recovery/compensation.py)
-- **Tests:** [`packages/tta-dev-primitives/tests/recovery/test_compensation.py`](https://github.com/theinterneti/TTA.dev/blob/main/packages/tta-dev-primitives/tests/recovery/test_compensation.py)
+- **GitHub Source:** [`platform/primitives/src/tta_dev_primitives/recovery/compensation.py`](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/recovery/compensation.py)
+- **Tests:** [`platform/primitives/tests/recovery/test_compensation.py`](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/recovery/test_compensation.py)
 - **Saga Pattern:** [Microservices.io - Saga Pattern](https://microservices.io/patterns/data/saga.html)
 
 ---

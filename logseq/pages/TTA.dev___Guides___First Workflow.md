@@ -484,9 +484,9 @@ Input → Validate → Cache Check
 
 ### Explore Examples
 
-- `packages/tta-dev-primitives/examples/rag_workflow.py`
-- `packages/tta-dev-primitives/examples/agentic_rag_workflow.py`
-- `packages/tta-dev-primitives/examples/cost_tracking_workflow.py`
+- `platform/primitives/examples/rag_workflow.py`
+- `platform/primitives/examples/agentic_rag_workflow.py`
+- `platform/primitives/examples/cost_tracking_workflow.py`
 
 ---
 

@@ -6,13 +6,13 @@
 
 The tta-dev-primitives package is the foundation of TTA.dev, providing composable primitives for building reliable AI workflows.
 
-**Package:** `packages/tta-dev-primitives/`
+**Package:** `platform/primitives/`
 
 ## Installation
 
 ```bash
 # From source (current)
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv sync
 
 # From PyPI (when published)
@@ -137,7 +137,7 @@ reliable_workflow = (
 ## Package Structure
 
 ```
-packages/tta-dev-primitives/
+platform/primitives/
 ├── src/tta_dev_primitives/
 │   ├── core/              # Core composition primitives
 │   │   ├── base.py       # WorkflowPrimitive
@@ -239,7 +239,7 @@ async def test_workflow():
 
 ```bash
 # All tests
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv run pytest -v
 
 # With coverage
@@ -257,8 +257,8 @@ uv run pytest tests/test_sequential.py -v
 - [[TTA.dev/Examples]] - Working examples
 
 ### Package Documentation
-- Package README: `packages/tta-dev-primitives/README.md`
-- Agent Instructions: `packages/tta-dev-primitives/AGENTS.md`
+- Package README: `platform/primitives/README.md`
+- Agent Instructions: `platform/primitives/AGENTS.md`
 - API Docs: Generated from docstrings
 
 ## Development
@@ -288,8 +288,8 @@ uv run pytest tests/test_sequential.py -v
 ## External Resources
 
 - Repository: <https://github.com/theinterneti/TTA.dev>
-- Examples: `packages/tta-dev-primitives/examples/`
-- Tests: `packages/tta-dev-primitives/tests/`
+- Examples: `platform/primitives/examples/`
+- Tests: `platform/primitives/tests/`
 
 ## Tags
 

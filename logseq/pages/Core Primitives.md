@@ -49,7 +49,7 @@ workflow = input >> (fast | slow | cached) >> aggregator
 
 - [[PRIMITIVES CATALOG]] - Complete primitive reference
 - [[TTA.dev/Guides/Workflow Composition]] - Composition guide
-- `packages/tta-dev-primitives/examples/` - Code examples
+- `platform/primitives/examples/` - Code examples
 
 ## Tags
 

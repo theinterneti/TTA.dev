@@ -22,7 +22,7 @@ TTA.dev provides comprehensive observability through OpenTelemetry integration, 
 ## Documentation
 
 See the main observability documentation in:
-- `packages/tta-observability-integration/README.md`
+- `platform/observability/README.md`
 - `docs/observability/`
 - [[PRIMITIVES CATALOG]] - Observability section
 

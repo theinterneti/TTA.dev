@@ -28,7 +28,7 @@ This namespace contains practical, runnable examples showing how to use TTA.dev 
 
 ## Example Location
 
-**Source:** `packages/tta-dev-primitives/examples/`
+**Source:** `platform/primitives/examples/`
 
 ### Available Examples
 - `basic_workflow.py` - Foundation patterns
@@ -43,7 +43,7 @@ This namespace contains practical, runnable examples showing how to use TTA.dev 
 
 ```bash
 # Run any example
-cd packages/tta-dev-primitives
+cd platform/primitives
 uv run python examples/rag_workflow.py
 
 # Run all examples
