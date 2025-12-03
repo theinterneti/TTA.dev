@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.observability_integration.primitives.router import RouterPrimitive
+from observability_integration.primitives.router import RouterPrimitive
 
 
 # Mock WorkflowPrimitive for testing
@@ -36,7 +36,11 @@ def simple_router_fn():
     """Simple router function for tests."""
 
     def router(data, context):
-        query_len = len(str(data.get("query", ""))) if isinstance(data, dict) else len(str(data))
+        query_len = (
+            len(str(data.get("query", "")))
+            if isinstance(data, dict)
+            else len(str(data))
+        )
         return "fast" if query_len < 20 else "premium"
 
     return router
@@ -61,7 +65,9 @@ def router_primitive(fast_primitive, premium_primitive, simple_router_fn):
 class TestRouterPrimitiveInit:
     """Test RouterPrimitive initialization."""
 
-    def test_initialization_with_routes(self, fast_primitive, premium_primitive, simple_router_fn):
+    def test_initialization_with_routes(
+        self, fast_primitive, premium_primitive, simple_router_fn
+    ):
         """Test initialization with valid routes."""
         routes = {"fast": fast_primitive, "premium": premium_primitive}
 
@@ -122,7 +128,9 @@ class TestRoutingDecisions:
         assert "PremiumPrimitive" in result or "premium" in result.lower()
 
     @pytest.mark.asyncio
-    async def test_uses_default_route_on_router_error(self, fast_primitive, premium_primitive):
+    async def test_uses_default_route_on_router_error(
+        self, fast_primitive, premium_primitive
+    ):
         """Test falls back to default route when router function fails."""
         routes = {"fast": fast_primitive, "premium": premium_primitive}
 
@@ -165,10 +173,12 @@ class TestGracefulDegradation:
     """Test graceful degradation when OpenTelemetry unavailable."""
 
     @pytest.mark.asyncio
-    async def test_works_without_metrics(self, fast_primitive, premium_primitive, simple_router_fn):
+    async def test_works_without_metrics(
+        self, fast_primitive, premium_primitive, simple_router_fn
+    ):
         """Test router works without metrics infrastructure."""
         with patch(
-            "src.observability_integration.primitives.router.get_meter",
+            "observability_integration.primitives.router.get_meter",
             return_value=None,
         ):
             routes = {"fast": fast_primitive, "premium": premium_primitive}
@@ -203,7 +213,9 @@ class TestEdgeCases:
         assert result is not None
 
     @pytest.mark.asyncio
-    async def test_router_returns_invalid_route(self, fast_primitive, premium_primitive):
+    async def test_router_returns_invalid_route(
+        self, fast_primitive, premium_primitive
+    ):
         """Test behavior when router returns invalid route name."""
         routes = {"fast": fast_primitive, "premium": premium_primitive}
 

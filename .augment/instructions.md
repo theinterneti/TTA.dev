@@ -23,7 +23,9 @@ TTA.dev is an **AI development toolkit following production-quality standards** 
 ## Repository Structure
 
 This is a **monorepo** with:
-- `packages/tta-dev-primitives/` - Core primitives package
+- `platform/primitives/` - Core primitives package
+- `platform/observability/` - Observability integration
+- `platform/agent-context/` - Agent context management
 - `scripts/` - Automation scripts (should use primitives)
 - `tests/` - Integration tests
 - `docs/` - Architecture and development guides
@@ -77,7 +79,7 @@ workflow = input_processor >> (fast_path | slow_path) >> aggregator
 ## Package Structure
 
 ```
-packages/<package-name>/
+platform/<package-name>/
 ├── src/<package_name>/
 │   ├── core/          # Base abstractions
 │   ├── recovery/      # Retry, fallback, timeout, compensation
@@ -134,7 +136,7 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # Type check
-uvx pyright packages/
+uvx pyright platform/ apps/
 ```
 
 ## Testing Requirements
@@ -143,7 +145,7 @@ uvx pyright packages/
 - Use `pytest-asyncio` with `@pytest.mark.asyncio` for async tests
 - Use `MockPrimitive` from `testing/` for workflow testing
 - Test files mirror source structure: `src/core/cache.py` → `tests/test_cache.py`
-- Coverage command: `uv run pytest --cov=packages --cov-report=html`
+- Coverage command: `uv run pytest --cov=platform --cov-report=html`
 
 Example test pattern:
 ```python

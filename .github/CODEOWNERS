@@ -7,7 +7,7 @@
 * @Copilot
 
 # Package-specific ownership (can be extended later)
-# /packages/tta-dev-primitives/ @theinterneti
-# /packages/tta-observability-integration/ @theinterneti
-# /packages/universal-agent-context/ @theinterneti
+# /platform/primitives/ @theinterneti
+# /platform/observability/ @theinterneti
+# /platform/agent-context/ @theinterneti
 

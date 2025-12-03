@@ -123,6 +123,7 @@ class UpdateKBPage(InstrumentedPrimitive[dict, dict]):
             "page_name": str,         # Page name (with or without .md)
             "content": str,           # New content or section to add
             "mode": str,              # "append" | "prepend" | "replace"
+            "kb_path": str,           # KB root path (optional, default: "logseq")
         }
 
     Output:
@@ -133,18 +134,58 @@ class UpdateKBPage(InstrumentedPrimitive[dict, dict]):
         }
     """
 
-    def __init__(self):
+    def __init__(self, kb_path: str | Path = "logseq"):
         """Initialize UpdateKBPage primitive."""
         super().__init__(name="update_kb_page")
+        self.kb_path = Path(kb_path)
 
     async def _execute_impl(
         self,
         input_data: dict,
         context: WorkflowContext,
     ) -> dict:
-        """Update KB page (stub implementation)."""
-        # TODO: Implement KB page updates
-        raise NotImplementedError("UpdateKBPage not yet implemented")
+        """Update KB page with content."""
+        page_name = input_data["page_name"]
+        content = input_data["content"]
+        mode = input_data.get("mode", "append")
+        kb_path = Path(input_data.get("kb_path", self.kb_path))
+
+        # Ensure page name has .md extension
+        if not page_name.endswith(".md"):
+            page_name = page_name + ".md"
+
+        # Handle hierarchical page names (TTA.dev/Feature -> TTA.dev___Feature.md)
+        safe_name = page_name.replace("/", "___")
+        page_path = kb_path / "pages" / safe_name
+
+        # Ensure directory exists
+        page_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Check if page exists
+        created = not page_path.exists()
+
+        if created or mode == "replace":
+            # Create new or replace entirely
+            page_path.write_text(content, encoding="utf-8")
+        elif mode == "append":
+            # Append to existing
+            existing = page_path.read_text(encoding="utf-8")
+            page_path.write_text(existing + "\n" + content, encoding="utf-8")
+        elif mode == "prepend":
+            # Prepend to existing
+            existing = page_path.read_text(encoding="utf-8")
+            page_path.write_text(content + "\n" + existing, encoding="utf-8")
+        else:
+            raise ValueError(
+                f"Invalid mode: {mode}. Use 'append', 'prepend', or 'replace'"
+            )
+
+        return {
+            "success": True,
+            "file_path": str(page_path),
+            "created": created,
+            "mode": mode,
+        }
 
 
 class GenerateReport(InstrumentedPrimitive[dict, dict]):
@@ -153,8 +194,9 @@ class GenerateReport(InstrumentedPrimitive[dict, dict]):
     Input:
         {
             "data": dict,             # Report data
-            "template": str,          # Template name or custom template
+            "template": str,          # Template name: "validation", "todos", "cross_refs", "custom"
             "output_path": str,       # Output file path (optional)
+            "title": str,             # Report title (optional)
         }
 
     Output:
@@ -174,6 +216,150 @@ class GenerateReport(InstrumentedPrimitive[dict, dict]):
         input_data: dict,
         context: WorkflowContext,
     ) -> dict:
-        """Generate report (stub implementation)."""
-        # TODO: Implement report generation
-        raise NotImplementedError("GenerateReport not yet implemented")
+        """Generate markdown report from data."""
+        from datetime import datetime
+
+        data = input_data["data"]
+        template = input_data.get("template", "custom")
+        output_path = input_data.get("output_path")
+        title = input_data.get("title", "Report")
+
+        # Generate report based on template
+        if template == "validation":
+            report = self._generate_validation_report(data, title)
+        elif template == "todos":
+            report = self._generate_todos_report(data, title)
+        elif template == "cross_refs":
+            report = self._generate_cross_refs_report(data, title)
+        else:
+            report = self._generate_custom_report(data, title)
+
+        # Add timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        report = f"<!-- Generated: {timestamp} -->\n\n{report}"
+
+        # Write to file if output path provided
+        file_path = None
+        if output_path:
+            file_path = Path(output_path)
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            file_path.write_text(report, encoding="utf-8")
+
+        return {
+            "success": True,
+            "report": report,
+            "file_path": str(file_path) if file_path else None,
+        }
+
+    def _generate_validation_report(self, data: dict, title: str) -> str:
+        """Generate link validation report."""
+        lines = [
+            f"# {title}",
+            "",
+            "## Summary",
+            "",
+            f"- **Total Pages**: {data.get('total_pages', 0)}",
+            f"- **Valid Links**: {data.get('total_valid', 0)}",
+            f"- **Broken Links**: {data.get('total_broken', 0)}",
+            f"- **Orphaned Pages**: {data.get('total_orphaned', 0)}",
+            "",
+        ]
+
+        # Broken links section
+        broken = data.get("broken_links", [])
+        if broken:
+            lines.extend(["## Broken Links", ""])
+            for link in broken[:50]:  # Limit to 50
+                lines.append(
+                    f"- `{link.get('source', '?')}` → [[{link.get('target', '?')}]]"
+                )
+            lines.append("")
+
+        # Orphaned pages section
+        orphaned = data.get("orphaned_pages", [])
+        if orphaned:
+            lines.extend(["## Orphaned Pages", ""])
+            for page in orphaned[:50]:
+                lines.append(f"- {page}")
+            lines.append("")
+
+        return "\n".join(lines)
+
+    def _generate_todos_report(self, data: dict, title: str) -> str:
+        """Generate TODOs report."""
+        lines = [
+            f"# {title}",
+            "",
+            "## Summary",
+            "",
+            f"- **Total TODOs**: {data.get('total_todos', 0)}",
+            f"- **Files with TODOs**: {data.get('files_with_todos', 0)}",
+            "",
+            "## TODOs by File",
+            "",
+        ]
+
+        todos = data.get("todos", [])
+        by_file: dict[str, list] = {}
+        for todo in todos:
+            f = todo.get("file", "unknown")
+            by_file.setdefault(f, []).append(todo)
+
+        for file, file_todos in by_file.items():
+            lines.append(f"### `{file}`")
+            lines.append("")
+            for t in file_todos:
+                lines.append(
+                    f"- Line {t.get('line_number', '?')}: {t.get('todo_text', '?')}"
+                )
+            lines.append("")
+
+        return "\n".join(lines)
+
+    def _generate_cross_refs_report(self, data: dict, title: str) -> str:
+        """Generate cross-references report."""
+        lines = [
+            f"# {title}",
+            "",
+            "## Statistics",
+            "",
+        ]
+
+        stats = data.get("stats", {})
+        lines.extend(
+            [
+                f"- **KB Pages**: {stats.get('total_kb_pages', 0)}",
+                f"- **Code Files**: {stats.get('total_code_files', 0)}",
+                f"- **KB → Code References**: {stats.get('kb_pages_with_code_refs', 0)}",
+                f"- **Code → KB References**: {stats.get('code_files_with_kb_refs', 0)}",
+                "",
+            ]
+        )
+
+        # Missing references
+        missing = data.get("missing_references", [])
+        if missing:
+            lines.extend(["## Missing References", ""])
+            for ref in missing[:30]:
+                lines.append(f"- {ref.get('type', '?')}: `{ref.get('reference', '?')}`")
+                if ref.get("suggestion"):
+                    lines.append(f"  - {ref['suggestion']}")
+            lines.append("")
+
+        return "\n".join(lines)
+
+    def _generate_custom_report(self, data: dict, title: str) -> str:
+        """Generate generic report from dict data."""
+        import json
+
+        lines = [
+            f"# {title}",
+            "",
+            "## Data",
+            "",
+            "```json",
+            json.dumps(data, indent=2, default=str),
+            "```",
+        ]
+
+        return "\n".join(lines)
