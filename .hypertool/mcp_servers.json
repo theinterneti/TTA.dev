@@ -48,7 +48,7 @@
       "tags": ["vcs", "repository", "history"]
     },
     "serena": {
-      "command": "/usr/bin/uvx",
+      "command": "/home/thein/.local/bin/uvx",
       "args": [
         "--from", "git+https://github.com/oraios/serena",
         "serena", "start-mcp-server",
@@ -344,8 +344,12 @@
       "tags": ["layer:L3", "splunk", "logs", "search", "enterprise"]
     },
     "mcp-logseq": {
-      "command": "/usr/bin/uvx",
+      "command": "/home/thein/.local/bin/uvx",
       "args": ["mcp-logseq"],
+      "env": {
+        "LOGSEQ_API_TOKEN": "${LOGSEQ_API_TOKEN}",
+        "LOGSEQ_API_URL": "http://172.31.16.1:12315"
+      },
       "description": "Logseq knowledge base integration and graph operations",
       "tags": ["knowledge-base", "logseq", "notes", "graph"]
     }

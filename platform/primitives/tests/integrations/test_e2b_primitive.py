@@ -91,7 +91,9 @@ class TestCodeExecution:
     """Test code execution functionality."""
 
     @pytest.mark.asyncio
-    async def test_basic_python_execution(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_basic_python_execution(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test basic Python code execution."""
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -110,7 +112,9 @@ class TestCodeExecution:
             assert len(result["logs"]) > 0
 
     @pytest.mark.asyncio
-    async def test_code_with_error(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_code_with_error(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test code execution with errors."""
         # Mock error result
         error_result = Mock()
@@ -135,7 +139,9 @@ class TestCodeExecution:
             assert len(result["logs"]) > 0
 
     @pytest.mark.asyncio
-    async def test_execution_timeout(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_execution_timeout(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test code execution timeout."""
 
         # Mock slow execution
@@ -166,7 +172,9 @@ class TestCodeExecution:
             await primitive.execute({}, workflow_context)
 
     @pytest.mark.asyncio
-    async def test_environment_variables(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_environment_variables(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test setting environment variables."""
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -184,7 +192,7 @@ class TestCodeExecution:
             # Verify run_code was called to set env vars
             # First call sets env var, second call runs the code
             assert mock_sandbox.run_code.call_count >= 2
-            
+
             # Check that one of the calls set the env var
             env_var_call_found = False
             for call in mock_sandbox.run_code.call_args_list:
@@ -192,7 +200,7 @@ class TestCodeExecution:
                 if 'os.environ["TEST_VAR"] = "test_value"' in args[0]:
                     env_var_call_found = True
                     break
-            
+
             assert env_var_call_found
 
 
@@ -200,14 +208,18 @@ class TestSessionManagement:
     """Test sandbox session management."""
 
     @pytest.mark.asyncio
-    async def test_session_rotation(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_session_rotation(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test automatic session rotation before 1-hour limit."""
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
             new=AsyncMock(return_value=mock_sandbox),
         ):
             # Set session_max_age to 1 second for testing
-            primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key, session_max_age=1)
+            primitive = CodeExecutionPrimitive(
+                api_key=mock_e2b_api_key, session_max_age=1
+            )
 
             # First execution creates sandbox
             input_data = {"code": "print('first')"}
@@ -223,7 +235,9 @@ class TestSessionManagement:
             mock_sandbox.kill.assert_called()
 
     @pytest.mark.asyncio
-    async def test_manual_cleanup(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_manual_cleanup(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test manual sandbox cleanup."""
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -243,7 +257,9 @@ class TestSessionManagement:
             assert primitive._sandbox is None
 
     @pytest.mark.asyncio
-    async def test_context_manager(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_context_manager(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test using primitive as async context manager."""
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -279,7 +295,9 @@ class TestObservability:
             assert result["success"] is True
 
     @pytest.mark.asyncio
-    async def test_execution_metrics(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_execution_metrics(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test execution time metrics are recorded."""
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",
@@ -321,7 +339,9 @@ class TestEdgeCases:
             assert result["error"] is None
 
     @pytest.mark.asyncio
-    async def test_cleanup_error_handling(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_cleanup_error_handling(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test cleanup handles errors gracefully."""
         mock_sandbox.aclose = AsyncMock(side_effect=Exception("Cleanup error"))
 
@@ -343,7 +363,9 @@ class TestIntegrationScenarios:
     """Test real-world integration scenarios."""
 
     @pytest.mark.asyncio
-    async def test_fibonacci_calculation(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_fibonacci_calculation(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test fibonacci calculation scenario from docs."""
         fib_result = Mock()
         fib_result.results = [Mock(text="55")]
@@ -374,7 +396,9 @@ print(fibonacci(10))
             assert "55" in result["output"]
 
     @pytest.mark.asyncio
-    async def test_sequential_executions(self, mock_e2b_api_key, mock_sandbox, workflow_context):
+    async def test_sequential_executions(
+        self, mock_e2b_api_key, mock_sandbox, workflow_context
+    ):
         """Test multiple sequential code executions."""
         with patch(
             "tta_dev_primitives.integrations.e2b_primitive.AsyncSandbox.create",

@@ -142,7 +142,9 @@ class TestStageManagerKBIntegration:
 
         async def mock_execute(query, context):
             queries.append((query.query_type, query.topic, query.stage))
-            return KBResult(pages=[], total_found=0, query_time_ms=0.0, source="fallback")
+            return KBResult(
+                pages=[], total_found=0, query_time_ms=0.0, source="fallback"
+            )
 
         kb.execute = mock_execute
 
@@ -189,7 +191,9 @@ class TestStageManagerKBIntegration:
                     source="logseq",
                 )
             else:  # common_mistakes
-                return KBResult(pages=[], total_found=0, query_time_ms=0.0, source="fallback")
+                return KBResult(
+                    pages=[], total_found=0, query_time_ms=0.0, source="fallback"
+                )
 
         kb.execute = mock_execute
 

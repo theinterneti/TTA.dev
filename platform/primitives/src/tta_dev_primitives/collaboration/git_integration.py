@@ -61,15 +61,15 @@ class AgentIdentity(BaseModel):
 
     name: str = Field(description="Agent name (e.g., 'GitHub Copilot')")
     email: str = Field(description="Agent email (e.g., 'copilot@tta.dev')")
-    branch_prefix: str = Field(
-        default="agent", description="Prefix for agent branches"
-    )
+    branch_prefix: str = Field(default="agent", description="Prefix for agent branches")
     worktree_path: Path | None = Field(
         default=None, description="Path to agent's worktree"
     )
 
 
-class GitCollaborationPrimitive(BaseModel, WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
+class GitCollaborationPrimitive(
+    BaseModel, WorkflowPrimitive[dict[str, Any], dict[str, Any]]
+):
     """
     Primitive for multi-agent Git collaboration with enforced best practices.
 
@@ -111,15 +111,11 @@ class GitCollaborationPrimitive(BaseModel, WorkflowPrimitive[dict[str, Any], dic
 
     agent_identity: AgentIdentity
     integration_frequency: IntegrationFrequency = IntegrationFrequency.DAILY
-    commit_policy: CommitFrequencyPolicy = Field(
-        default_factory=CommitFrequencyPolicy
-    )
+    commit_policy: CommitFrequencyPolicy = Field(default_factory=CommitFrequencyPolicy)
     merge_strategy: MergeStrategy = MergeStrategy.FAST_FORWARD
     repository_path: Path
     main_branch: str = "main"
-    enforce_hygiene: bool = Field(
-        default=True, description="Enforce git hygiene rules"
-    )
+    enforce_hygiene: bool = Field(default=True, description="Enforce git hygiene rules")
 
     class Config:
         arbitrary_types_allowed = True
@@ -203,20 +199,14 @@ class GitCollaborationPrimitive(BaseModel, WorkflowPrimitive[dict[str, Any], dic
                     )
 
         # Execute git commit
-        result = await self._run_git_command(
-            ["add"] + [str(f) for f in files], context
-        )
+        result = await self._run_git_command(["add"] + [str(f) for f in files], context)
 
         if result["success"]:
-            result = await self._run_git_command(
-                ["commit", "-m", message], context
-            )
+            result = await self._run_git_command(["commit", "-m", message], context)
 
         # Record commit in context
         context.metadata["last_commit"] = datetime.now().isoformat()
-        context.metadata["commits_today"] = (
-            context.metadata.get("commits_today", 0) + 1
-        )
+        context.metadata["commits_today"] = context.metadata.get("commits_today", 0) + 1
 
         return {
             "success": result["success"],
@@ -309,9 +299,7 @@ class GitCollaborationPrimitive(BaseModel, WorkflowPrimitive[dict[str, Any], dic
         )
 
         # Check last commit time
-        log_result = await self._run_git_command(
-            ["log", "-1", "--format=%ct"], context
-        )
+        log_result = await self._run_git_command(["log", "-1", "--format=%ct"], context)
         last_commit_timestamp = (
             int(log_result["output"].strip())
             if log_result["success"] and log_result["output"].strip()
@@ -367,9 +355,8 @@ class GitCollaborationPrimitive(BaseModel, WorkflowPrimitive[dict[str, Any], dic
         if not health["healthy"]:
             warning_message = (
                 "⚠️ GIT HYGIENE WARNING ⚠️\n\n"
-                "Your branch health needs attention:\n" + "\n".join(
-                    f"  • {issue}" for issue in health["health_issues"]
-                )
+                "Your branch health needs attention:\n"
+                + "\n".join(f"  • {issue}" for issue in health["health_issues"])
                 + f"\n\nRecommendation: {health['recommendation']}"
             )
 

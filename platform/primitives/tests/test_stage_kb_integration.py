@@ -41,16 +41,24 @@ class MockKBPrimitive(KnowledgeBasePrimitive):
         self.mock_pages = mock_pages or []
         self.query_count = 0
 
-    async def _execute_impl(self, input_data: KBQuery, context: WorkflowContext) -> KBResult:
+    async def _execute_impl(
+        self, input_data: KBQuery, context: WorkflowContext
+    ) -> KBResult:
         """Return mock KB results."""
         self.query_count += 1
 
         # Filter mock pages by query type
         filtered_pages = []
         for page in self.mock_pages:
-            if input_data.query_type == "best_practices" and "best-practices" in page.tags:
+            if (
+                input_data.query_type == "best_practices"
+                and "best-practices" in page.tags
+            ):
                 filtered_pages.append(page)
-            elif input_data.query_type == "common_mistakes" and "common-mistakes" in page.tags:
+            elif (
+                input_data.query_type == "common_mistakes"
+                and "common-mistakes" in page.tags
+            ):
                 filtered_pages.append(page)
 
         return KBResult(
@@ -64,15 +72,15 @@ class MockKBPrimitive(KnowledgeBasePrimitive):
 @pytest.fixture
 def mock_readiness_check():
     """Mock ReadinessCheckPrimitive to avoid running real subprocesses."""
-    with patch("tta_dev_primitives.lifecycle.stage_manager.ReadinessCheckPrimitive") as mock_class:
+    with patch(
+        "tta_dev_primitives.lifecycle.stage_manager.ReadinessCheckPrimitive"
+    ) as mock_class:
         mock_instance = mock_class.return_value
-        mock_instance.execute = AsyncMock(return_value=ReadinessCheckResult(
-            ready=True,
-            blockers=[],
-            critical=[],
-            warnings=[],
-            info=[]
-        ))
+        mock_instance.execute = AsyncMock(
+            return_value=ReadinessCheckResult(
+                ready=True, blockers=[], critical=[], warnings=[], info=[]
+            )
+        )
         yield mock_class
 
 
@@ -197,7 +205,9 @@ async def test_stage_manager_with_kb_common_mistakes(mock_readiness_check) -> No
 
 
 @pytest.mark.asyncio
-async def test_stage_manager_with_kb_mixed_recommendations(mock_readiness_check) -> None:
+async def test_stage_manager_with_kb_mixed_recommendations(
+    mock_readiness_check,
+) -> None:
     """Test StageManager with KB returning both best practices and mistakes."""
     mock_pages = [
         KBPage(

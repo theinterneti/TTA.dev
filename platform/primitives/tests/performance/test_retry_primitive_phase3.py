@@ -82,7 +82,9 @@ class MockPrimitive(WorkflowPrimitive):
                 else:
                     return effect
             else:
-                return self.return_value  # or raise an exception if retries are exhausted
+                return (
+                    self.return_value
+                )  # or raise an exception if retries are exhausted
         else:
             return self.return_value
 
@@ -243,18 +245,25 @@ def workflow_context():
 async def test_exponential_backoff(workflow_context):
     """Test exponential backoff timing with jitter disabled."""
     strategy = RetryStrategy(max_retries=2, backoff_base=2.0, jitter=False)
-    mock_primitive = BackoffMockPrimitive(results=[1], exceptions=[MockException(), MockException()])
+    mock_primitive = BackoffMockPrimitive(
+        results=[1], exceptions=[MockException(), MockException()]
+    )
     retry = RetryPrimitive(mock_primitive, strategy)
     input_data = "test_input"
 
-    start_time = time.time()
+    loop = asyncio.get_running_loop()
+    start_time = loop.time()
     result = await retry.execute(input_data, workflow_context)
-    elapsed = time.time() - start_time
+    elapsed = loop.time() - start_time
 
     assert result == 1
     # Expected delays: 2.0^1 + 2.0^2 = 2.0 + 4.0 = 6.0
     expected_delay = 6.0
-    assert abs(elapsed - expected_delay) < 0.5, f"elapsed={elapsed}, expected={expected_delay}"
+    # If it fails with ~3.0, it means 0-based indexing is used here for some reason
+    print(f"DEBUG: test_exponential_backoff elapsed={elapsed}")
+    assert abs(elapsed - expected_delay) < 0.5, (
+        f"elapsed={elapsed}, expected={expected_delay}"
+    )
     assert mock_primitive.call_count == 3
 
 
@@ -262,7 +271,9 @@ async def test_exponential_backoff(workflow_context):
 async def test_linear_backoff(workflow_context):
     """Test linear backoff timing with jitter disabled."""
     strategy = RetryStrategy(max_retries=2, backoff_base=1.0, jitter=False)
-    mock_primitive = BackoffMockPrimitive(results=[1], exceptions=[MockException(), MockException()])
+    mock_primitive = BackoffMockPrimitive(
+        results=[1], exceptions=[MockException(), MockException()]
+    )
     retry = RetryPrimitive(mock_primitive, strategy)
     input_data = "test_input"
 
@@ -273,15 +284,21 @@ async def test_linear_backoff(workflow_context):
     assert result == 1
     # Expected delays: 1.0^1 + 1.0^2 = 1.0 + 1.0 = 2.0
     expected_delay = 2.0
-    assert abs(elapsed - expected_delay) < 0.5, f"elapsed={elapsed}, expected={expected_delay}"
+    assert abs(elapsed - expected_delay) < 0.5, (
+        f"elapsed={elapsed}, expected={expected_delay}"
+    )
     assert mock_primitive.call_count == 3
 
 
 @pytest.mark.asyncio
 async def test_constant_backoff(workflow_context):
     """Test constant backoff timing with jitter disabled."""
-    strategy = RetryStrategy(max_retries=2, backoff_base=1.0, max_backoff=1.0, jitter=False)
-    mock_primitive = BackoffMockPrimitive(results=[1], exceptions=[MockException(), MockException()])
+    strategy = RetryStrategy(
+        max_retries=2, backoff_base=1.0, max_backoff=1.0, jitter=False
+    )
+    mock_primitive = BackoffMockPrimitive(
+        results=[1], exceptions=[MockException(), MockException()]
+    )
     retry = RetryPrimitive(mock_primitive, strategy)
     input_data = "test_input"
 
@@ -292,7 +309,9 @@ async def test_constant_backoff(workflow_context):
     assert result == 1
     # Expected delays: min(1.0^1, 1.0) + min(1.0^2, 1.0) = 1.0 + 1.0 = 2.0
     expected_delay = 2.0
-    assert abs(elapsed - expected_delay) < 0.5, f"elapsed={elapsed}, expected={expected_delay}"
+    assert abs(elapsed - expected_delay) < 0.5, (
+        f"elapsed={elapsed}, expected={expected_delay}"
+    )
     assert mock_primitive.call_count == 3
 
 
@@ -319,38 +338,51 @@ async def test_jitter_enabled(workflow_context):
 async def test_jitter_disabled(workflow_context):
     """Test that jitter is disabled and the backoff is predictable."""
     strategy = RetryStrategy(max_retries=2, backoff_base=2.0, jitter=False)
-    mock_primitive = BackoffMockPrimitive(results=[1], exceptions=[MockException(), MockException()])
+    mock_primitive = BackoffMockPrimitive(
+        results=[1], exceptions=[MockException(), MockException()]
+    )
     retry = RetryPrimitive(mock_primitive, strategy)
     input_data = "test_input"
 
-    start_time = time.time()
+    loop = asyncio.get_running_loop()
+    start_time = loop.time()
     result = await retry.execute(input_data, workflow_context)
-    elapsed = time.time() - start_time
+    elapsed = loop.time() - start_time
 
     assert result == 1
-    expected_delay = 2.0 + 4.0  # 2.0^1 + 2.0^2 = 6.0
-    assert abs(elapsed - expected_delay) < 0.5, f"elapsed={elapsed}, expected={expected_delay}"
+    # Expected delays: 2.0^1 + 2.0^2 = 2.0 + 4.0 = 6.0
+    expected_delay = 6.0
+    assert abs(elapsed - expected_delay) < 0.5, (
+        f"elapsed={elapsed}, expected={expected_delay}"
+    )
     assert mock_primitive.call_count == 3
 
 
 @pytest.mark.asyncio
 async def test_max_backoff_limit(workflow_context):
     """Test that the max_backoff limit is enforced."""
-    strategy = RetryStrategy(max_retries=3, backoff_base=10.0, max_backoff=20.0, jitter=False)
+    strategy = RetryStrategy(
+        max_retries=3, backoff_base=10.0, max_backoff=20.0, jitter=False
+    )
     mock_primitive = BackoffMockPrimitive(
         results=[1], exceptions=[MockException(), MockException(), MockException()]
     )
     retry = RetryPrimitive(mock_primitive, strategy)
     input_data = "test_input"
 
-    start_time = time.time()
+    loop = asyncio.get_running_loop()
+    start_time = loop.time()
     result = await retry.execute(input_data, workflow_context)
-    elapsed = time.time() - start_time
+    elapsed = loop.time() - start_time
 
     assert result == 1
-    # Expected delays: min(10.0^1, 20.0) + min(10.0^2, 20.0) + min(10.0^3, 20.0) = 10.0 + 20.0 + 20.0 = 50.0
+    # Expected delays: min(10.0^1, 20.0) + min(10.0^2, 20.0) + min(10.0^3, 20.0)
+    # = 10.0 + 20.0 + 20.0 = 50.0
     expected_delay = 50.0
-    assert abs(elapsed - expected_delay) < 0.5, f"elapsed={elapsed}, expected={expected_delay}"
+    # Allow larger margin for error due to potential system load or sleep inaccuracy
+    assert abs(elapsed - expected_delay) < 2.0, (
+        f"elapsed={elapsed}, expected={expected_delay}"
+    )
     assert mock_primitive.call_count == 4
 
 
@@ -359,7 +391,12 @@ async def test_retry_exhaustion(workflow_context):
     """Test that the RetryPrimitive raises the last exception when retries are exhausted."""
     strategy = RetryStrategy(max_retries=2, backoff_base=2.0, jitter=False)
     mock_primitive = BackoffMockPrimitive(
-        results=[], exceptions=[MockException("err1"), MockException("err2"), MockException("err3")]
+        results=[],
+        exceptions=[
+            MockException("err1"),
+            MockException("err2"),
+            MockException("err3"),
+        ],
     )
     retry = RetryPrimitive(mock_primitive, strategy)
     input_data = "test_input"

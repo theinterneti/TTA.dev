@@ -49,13 +49,19 @@ class ClassifyTODO(InstrumentedPrimitive[dict, dict]):
             category = "documentation"
         elif any(kw in todo_text for kw in ["fix", "bug", "issue", "error", "debug"]):
             category = "bugfix"
-        elif any(kw in todo_text for kw in ["refactor", "cleanup", "optimize", "restructure"]):
+        elif any(
+            kw in todo_text for kw in ["refactor", "cleanup", "optimize", "restructure"]
+        ):
             category = "refactoring"
-        elif any(kw in todo_text for kw in ["infra", "infrastructure", "deploy", "ci/cd"]):
+        elif any(
+            kw in todo_text for kw in ["infra", "infrastructure", "deploy", "ci/cd"]
+        ):
             category = "infrastructure"
         elif any(kw in todo_text for kw in ["learn", "tutorial", "example", "onboard"]):
             category = "learning"  # Moved this higher
-        elif any(kw in todo_text for kw in ["feature", "implement", "add", "create", "build"]):
+        elif any(
+            kw in todo_text for kw in ["feature", "implement", "add", "create", "build"]
+        ):
             category = "implementation"
         elif any(kw in todo_text for kw in ["template", "pattern"]):
             category = "template"
@@ -65,7 +71,10 @@ class ClassifyTODO(InstrumentedPrimitive[dict, dict]):
         # Rule-based classification for priority
         if any(kw in todo_text for kw in ["urgent", "critical", "asap", "blocker"]):
             priority = "high"
-        elif any(kw in todo_text for kw in ["later", "someday", "low priority", "nice to have"]):
+        elif any(
+            kw in todo_text
+            for kw in ["later", "someday", "low priority", "nice to have"]
+        ):
             priority = "low"
 
         return {
@@ -106,9 +115,7 @@ class SuggestKBLinks(InstrumentedPrimitive[dict, dict]):
     ) -> dict:
         """Suggest KB links (stub implementation)."""
         # Return empty suggestions for now to unblock tests
-        return {
-            "suggestions": []
-        }
+        return {"suggestions": []}
 
 
 class GenerateFlashcards(InstrumentedPrimitive[dict, dict]):

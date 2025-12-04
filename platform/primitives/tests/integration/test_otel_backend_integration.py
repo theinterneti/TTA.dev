@@ -59,17 +59,27 @@ BACKENDS_AVAILABLE = False
 
 
 def check_backends_available() -> bool:
-    """Check if Jaeger and Prometheus are available."""
+    """Check if Jaeger, Prometheus, and OTLP Collector are available."""
     try:
         # Check Jaeger
-        jaeger_response = requests.get(f"{JAEGER_QUERY_ENDPOINT}/api/services", timeout=2)
+        jaeger_response = requests.get(
+            f"{JAEGER_QUERY_ENDPOINT}/api/services", timeout=2
+        )
         jaeger_ok = jaeger_response.status_code == 200
 
         # Check Prometheus
         prom_response = requests.get(f"{PROMETHEUS_ENDPOINT}/-/healthy", timeout=2)
         prom_ok = prom_response.status_code == 200
 
-        return jaeger_ok and prom_ok
+        # Check OTLP (just connectivity)
+        # Note: GET /v1/traces usually returns 405 Method Not Allowed, which means it's up
+        try:
+            requests.get(f"{OTEL_ENDPOINT}/v1/traces", timeout=2)
+            otel_ok = True
+        except requests.exceptions.ConnectionError:
+            otel_ok = False
+
+        return jaeger_ok and prom_ok and otel_ok
     except Exception:
         return False
 
@@ -187,7 +197,9 @@ def query_jaeger_traces(
     if operation_name:
         params["operation"] = operation_name
 
-    response = requests.get(f"{JAEGER_QUERY_ENDPOINT}/api/traces", params=params, timeout=5)
+    response = requests.get(
+        f"{JAEGER_QUERY_ENDPOINT}/api/traces", params=params, timeout=5
+    )
     response.raise_for_status()
 
     data = response.json()
@@ -211,9 +223,13 @@ def query_prometheus_metrics(metric_name: str) -> dict[str, Any]:
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available"
+)
 @pytest.mark.asyncio
-async def test_sequential_primitive_creates_spans(otel_tracer_provider, test_context) -> None:
+async def test_sequential_primitive_creates_spans(
+    otel_tracer_provider, test_context
+) -> None:
     """Test that SequentialPrimitive creates spans in Jaeger."""
     # Create workflow
     workflow = SequentialPrimitive(
@@ -251,7 +267,9 @@ async def test_sequential_primitive_creates_spans(otel_tracer_provider, test_con
             if tags.get("workflow.correlation_id") == test_context.correlation_id:
                 all_spans.append(span)
 
-    assert len(all_spans) > 0, f"No spans found with correlation_id {test_context.correlation_id}"
+    assert len(all_spans) > 0, (
+        f"No spans found with correlation_id {test_context.correlation_id}"
+    )
 
     # Verify we have spans for the sequential workflow
     # Note: Only primitive.X spans have correlation_id tags, not internal sequential.step_X spans
@@ -274,7 +292,9 @@ async def test_sequential_primitive_creates_spans(otel_tracer_provider, test_con
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available"
+)
 @pytest.mark.asyncio
 async def test_parallel_primitive_creates_concurrent_spans(
     otel_tracer_provider, test_context
@@ -316,7 +336,9 @@ async def test_parallel_primitive_creates_concurrent_spans(
             if tags.get("workflow.correlation_id") == test_context.correlation_id:
                 all_spans.append(span)
 
-    assert len(all_spans) > 0, f"No spans found with correlation_id {test_context.correlation_id}"
+    assert len(all_spans) > 0, (
+        f"No spans found with correlation_id {test_context.correlation_id}"
+    )
 
     # Verify parallel branch spans
     # Note: Only primitive.X spans have correlation_id tags
@@ -328,7 +350,9 @@ async def test_parallel_primitive_creates_concurrent_spans(
     )
 
     # Check for child primitive spans (3 MultiplyPrimitive)
-    multiply_spans = [name for name in span_names if name == "primitive.MultiplyPrimitive"]
+    multiply_spans = [
+        name for name in span_names if name == "primitive.MultiplyPrimitive"
+    ]
     assert len(multiply_spans) >= 3, (
         f"Expected at least 3 primitive.MultiplyPrimitive spans, got {len(multiply_spans)}: {multiply_spans}"
     )
@@ -339,7 +363,9 @@ async def test_parallel_primitive_creates_concurrent_spans(
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available"
+)
 @pytest.mark.asyncio
 async def test_conditional_primitive_creates_branch_spans(
     otel_tracer_provider, test_context
@@ -374,7 +400,9 @@ async def test_conditional_primitive_creates_branch_spans(
             if tags.get("workflow.correlation_id") == test_context.correlation_id:
                 all_spans.append(span)
 
-    assert len(all_spans) > 0, f"No spans found with correlation_id {test_context.correlation_id}"
+    assert len(all_spans) > 0, (
+        f"No spans found with correlation_id {test_context.correlation_id}"
+    )
 
     # Verify conditional branch spans
     # Note: ConditionalPrimitive doesn't extend InstrumentedPrimitive, so it doesn't have correlation_id tags
@@ -392,9 +420,13 @@ async def test_conditional_primitive_creates_branch_spans(
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available"
+)
 @pytest.mark.asyncio
-async def test_switch_primitive_creates_case_spans(otel_tracer_provider, test_context) -> None:
+async def test_switch_primitive_creates_case_spans(
+    otel_tracer_provider, test_context
+) -> None:
     """Test that SwitchPrimitive creates case spans in Jaeger."""
     # Create workflow with switch
     workflow = SwitchPrimitive(
@@ -428,7 +460,9 @@ async def test_switch_primitive_creates_case_spans(otel_tracer_provider, test_co
             if tags.get("workflow.correlation_id") == test_context.correlation_id:
                 all_spans.append(span)
 
-    assert len(all_spans) > 0, f"No spans found with correlation_id {test_context.correlation_id}"
+    assert len(all_spans) > 0, (
+        f"No spans found with correlation_id {test_context.correlation_id}"
+    )
 
     # Verify switch case spans
     # Note: SwitchPrimitive doesn't extend InstrumentedPrimitive, so it doesn't have correlation_id tags
@@ -446,9 +480,13 @@ async def test_switch_primitive_creates_case_spans(otel_tracer_provider, test_co
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available"
+)
 @pytest.mark.asyncio
-async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_context) -> None:
+async def test_retry_primitive_creates_attempt_spans(
+    otel_tracer_provider, test_context
+) -> None:
     """Test that RetryPrimitive creates attempt spans in Jaeger."""
 
     class FlakeyPrimitive(InstrumentedPrimitive[dict, dict]):
@@ -458,7 +496,9 @@ async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_
             super().__init__()
             self.attempt_count = 0
 
-        async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
+        async def _execute_impl(
+            self, input_data: dict, context: WorkflowContext
+        ) -> dict:
             """Fail first time, succeed second time."""
             self.attempt_count += 1
             if self.attempt_count == 1:
@@ -495,7 +535,9 @@ async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_
             if tags.get("workflow.correlation_id") == test_context.correlation_id:
                 all_spans.append(span)
 
-    assert len(all_spans) > 0, f"No spans found with correlation_id {test_context.correlation_id}"
+    assert len(all_spans) > 0, (
+        f"No spans found with correlation_id {test_context.correlation_id}"
+    )
 
     # Verify retry attempt spans
     # Note: RetryPrimitive doesn't extend InstrumentedPrimitive, so it doesn't have correlation_id tags
@@ -514,7 +556,9 @@ async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available"
+)
 @pytest.mark.asyncio
 async def test_fallback_primitive_creates_execution_spans(
     otel_tracer_provider, test_context
@@ -548,7 +592,9 @@ async def test_fallback_primitive_creates_execution_spans(
             if tags.get("workflow.correlation_id") == test_context.correlation_id:
                 all_spans.append(span)
 
-    assert len(all_spans) > 0, f"No spans found with correlation_id {test_context.correlation_id}"
+    assert len(all_spans) > 0, (
+        f"No spans found with correlation_id {test_context.correlation_id}"
+    )
 
     # Verify fallback execution spans
     # Note: FallbackPrimitive doesn't extend InstrumentedPrimitive, so it doesn't have correlation_id tags
@@ -569,7 +615,9 @@ async def test_fallback_primitive_creates_execution_spans(
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available"
+)
 @pytest.mark.asyncio
 async def test_saga_primitive_creates_compensation_spans(
     otel_tracer_provider, test_context
@@ -603,7 +651,9 @@ async def test_saga_primitive_creates_compensation_spans(
             if tags.get("workflow.correlation_id") == test_context.correlation_id:
                 all_spans.append(span)
 
-    assert len(all_spans) > 0, f"No spans found with correlation_id {test_context.correlation_id}"
+    assert len(all_spans) > 0, (
+        f"No spans found with correlation_id {test_context.correlation_id}"
+    )
 
     # Verify saga compensation spans
     # Note: SagaPrimitive doesn't extend InstrumentedPrimitive, so it doesn't have correlation_id tags
@@ -624,9 +674,13 @@ async def test_saga_primitive_creates_compensation_spans(
 # ============================================================================
 
 
-@pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available")
+@pytest.mark.skipif(
+    not BACKENDS_AVAILABLE, reason="OpenTelemetry backends not available"
+)
 @pytest.mark.asyncio
-async def test_composed_workflow_trace_propagation(otel_tracer_provider, test_context) -> None:
+async def test_composed_workflow_trace_propagation(
+    otel_tracer_provider, test_context
+) -> None:
     """Test that trace context propagates across composed primitives."""
     # Create complex composed workflow
     workflow = (
@@ -671,7 +725,9 @@ async def test_composed_workflow_trace_propagation(otel_tracer_provider, test_co
             if tags.get("workflow.correlation_id") == test_context.correlation_id:
                 all_spans.append(span)
 
-    assert len(all_spans) > 0, f"No spans found with correlation_id {test_context.correlation_id}"
+    assert len(all_spans) > 0, (
+        f"No spans found with correlation_id {test_context.correlation_id}"
+    )
 
     # Verify trace propagation across primitives
     # Note: Only InstrumentedPrimitive subclasses have correlation_id tags

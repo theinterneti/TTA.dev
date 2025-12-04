@@ -138,12 +138,16 @@ def test_prometheus_configuration() -> None:
     assert yaml_config, "No configuration found"
 
     # Check for expected job names (without quotes - Prometheus config format)
-    assert "job_name: prometheus" in yaml_config, "Missing prometheus self-monitoring job"
-    
+    assert "job_name: prometheus" in yaml_config, (
+        "Missing prometheus self-monitoring job"
+    )
+
     # Check for metrics job (otel-collector OR hypertool-metrics)
     has_otel = "job_name: otel-collector" in yaml_config
     has_hypertool = "job_name: hypertool-metrics" in yaml_config
-    assert has_otel or has_hypertool, "Missing metrics job (otel-collector or hypertool-metrics)"
+    assert has_otel or has_hypertool, (
+        "Missing metrics job (otel-collector or hypertool-metrics)"
+    )
 
 
 @pytest.mark.skipif(not BACKENDS_AVAILABLE, reason="Prometheus backend not available")
@@ -159,11 +163,13 @@ def test_prometheus_scrape_targets() -> None:
     # Check for expected jobs
     job_names = {target.get("labels", {}).get("job") for target in active_targets}
     assert "prometheus" in job_names, "Missing prometheus self-monitoring target"
-    
+
     # Check for metrics target
     has_otel = "otel-collector" in job_names
     has_hypertool = "hypertool-metrics" in job_names
-    assert has_otel or has_hypertool, "Missing metrics target (otel-collector or hypertool-metrics)"
+    assert has_otel or has_hypertool, (
+        "Missing metrics target (otel-collector or hypertool-metrics)"
+    )
 
 
 # ============================================================================

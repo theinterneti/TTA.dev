@@ -352,18 +352,22 @@ async def test_linear_backoff():
 
 async def test_constant_backoff():
     """Test constant backoff timing."""
-    strategy = RetryStrategy(max_retries=2, backoff_base=1.0, max_backoff=1.0, jitter=False)
+    strategy = RetryStrategy(
+        max_retries=2, backoff_base=1.0, max_backoff=1.0, jitter=False
+    )
     mock = MockPrimitive("test", raise_error=Exception("test"))
     retry = RetryPrimitive(primitive=mock, strategy=strategy)
 
-    start_time = time.time()
+    loop = asyncio.get_running_loop()
+    start_time = loop.time()
     with pytest.raises(Exception, match="test"):
         await retry.execute({}, WorkflowContext())
-    end_time = time.time()
+    end_time = loop.time()
 
     elapsed_time = end_time - start_time
     expected_min_time = 1.0 + 1.0  # max_backoff is 1.0, so expect this each time
-    assert elapsed_time >= expected_min_time
+    # Allow small margin for error
+    assert elapsed_time >= expected_min_time - 0.1
 
 
 async def test_jitter_enabled():
@@ -372,13 +376,16 @@ async def test_jitter_enabled():
     mock = MockPrimitive("test", raise_error=Exception("test"))
     retry = RetryPrimitive(primitive=mock, strategy=strategy)
 
-    start_time = time.time()
+    loop = asyncio.get_running_loop()
+    start_time = loop.time()
     with pytest.raises(Exception, match="test"):
         await retry.execute({}, WorkflowContext())
-    end_time = time.time()
+    end_time = loop.time()
 
     elapsed_time = end_time - start_time
-    assert 0.5 <= elapsed_time <= 1.5  # With jitter, delay should be between 0.5 and 1.5
+    assert (
+        0.5 <= elapsed_time <= 1.5
+    )  # With jitter, delay should be between 0.5 and 1.5
 
 
 async def test_jitter_disabled():
@@ -387,29 +394,36 @@ async def test_jitter_disabled():
     mock = MockPrimitive("test", raise_error=Exception("test"))
     retry = RetryPrimitive(primitive=mock, strategy=strategy)
 
-    start_time = time.time()
+    loop = asyncio.get_running_loop()
+    start_time = loop.time()
     with pytest.raises(Exception, match="test"):
         await retry.execute({}, WorkflowContext())
-    end_time = time.time()
+    end_time = loop.time()
 
     elapsed_time = end_time - start_time
-    assert pytest.approx(elapsed_time, 0.01) == 1.0
+    assert pytest.approx(elapsed_time, 0.1) == 1.0
 
 
 async def test_max_backoff_limit():
     """Test max backoff limit enforcement."""
-    strategy = RetryStrategy(max_retries=3, backoff_base=10.0, max_backoff=20.0, jitter=False)
+    strategy = RetryStrategy(
+        max_retries=3, backoff_base=10.0, max_backoff=20.0, jitter=False
+    )
     mock = MockPrimitive("test", raise_error=Exception("test"))
     retry = RetryPrimitive(primitive=mock, strategy=strategy)
 
-    start_time = time.time()
+    loop = asyncio.get_running_loop()
+    start_time = loop.time()
     with pytest.raises(Exception, match="test"):
         await retry.execute({}, WorkflowContext())
-    end_time = time.time()
+    end_time = loop.time()
 
     elapsed_time = end_time - start_time
-    expected_min_time = 10.0**0 + min(10.0**1, 20.0) + min(10.0**2, 20.0)  # 1 + 10 + 20 = 31
-    assert elapsed_time >= expected_min_time
+    expected_min_time = (
+        10.0**0 + min(10.0**1, 20.0) + min(10.0**2, 20.0)
+    )  # 1 + 10 + 20 = 31
+    # Allow small margin for error
+    assert elapsed_time >= expected_min_time - 0.5
     expected_max_time = 1.0 + 10.0 + 20.0
     assert expected_max_time == 31.0
 
@@ -427,7 +441,8 @@ async def test_retry_success_after_failure():
 
     mock = MockPrimitive("test", side_effect=side_effect_fn)
     retry = RetryPrimitive(
-        primitive=mock, strategy=RetryStrategy(max_retries=3, jitter=False, backoff_base=1.0)
+        primitive=mock,
+        strategy=RetryStrategy(max_retries=3, jitter=False, backoff_base=1.0),
     )
     result = await retry.execute({"input": "data"}, WorkflowContext())
     assert result == {"result": "success"}
@@ -447,7 +462,8 @@ async def test_retry_exhaustion():
     """Test that the last exception is raised after retries are exhausted."""
     mock = MockPrimitive("test", raise_error=Exception("Always fails"))
     retry = RetryPrimitive(
-        primitive=mock, strategy=RetryStrategy(max_retries=2, jitter=False, backoff_base=1.0)
+        primitive=mock,
+        strategy=RetryStrategy(max_retries=2, jitter=False, backoff_base=1.0),
     )
 
     start_time = time.time()

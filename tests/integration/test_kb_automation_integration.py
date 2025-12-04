@@ -134,8 +134,12 @@ class TestRealCodebaseScanning:
                     todo_type = todo["type"]
                     priority = todo["priority"]
 
-                    type_distribution[todo_type] = type_distribution.get(todo_type, 0) + 1
-                    priority_distribution[priority] = priority_distribution.get(priority, 0) + 1
+                    type_distribution[todo_type] = (
+                        type_distribution.get(todo_type, 0) + 1
+                    )
+                    priority_distribution[priority] = (
+                        priority_distribution.get(priority, 0) + 1
+                    )
 
             # Report findings
             print("\n=== TODO Analysis Across Packages ===")
@@ -175,13 +179,17 @@ class TestRealCodebaseScanning:
             message = todo["message"].lower()
 
             # Check classification rules
-            if any(word in message for word in ["test", "pytest", "coverage", "unittest"]):
+            if any(
+                word in message for word in ["test", "pytest", "coverage", "unittest"]
+            ):
                 # Should be classified as testing
                 assert todo["type"] == "testing", (
                     f"TODO about testing not classified correctly: {todo['message']}"
                 )
 
-            if any(word in message for word in ["urgent", "asap", "critical", "blocker"]):
+            if any(
+                word in message for word in ["urgent", "asap", "critical", "blocker"]
+            ):
                 # Should have high priority
                 assert todo["priority"] == "high", (
                     f"Urgent TODO not prioritized high: {todo['message']}"
@@ -198,7 +206,9 @@ class TestJournalEntryGeneration:
     """Test generation of actual journal entries."""
 
     @pytest.mark.asyncio
-    async def test_generate_journal_entry_format(self, workspace_root, temp_journal_dir):
+    async def test_generate_journal_entry_format(
+        self, workspace_root, temp_journal_dir
+    ):
         """Generate a journal entry and validate format."""
         sync = TODOSync()
 
@@ -222,7 +232,10 @@ class TestJournalEntryGeneration:
             content = journal_file.read_text()
 
             # Should have proper header
-            assert f"## {today}" in content or f"# {datetime.now().strftime('%B %d')}" in content
+            assert (
+                f"## {today}" in content
+                or f"# {datetime.now().strftime('%B %d')}" in content
+            )
 
             # Should have TODO section
             assert "TODO" in content or "DOING" in content
@@ -391,7 +404,9 @@ class TestEndToEndWorkflow:
 
         else:
             print("No TODOs found in codebase - this is good!")
-            print("Test validates that workflow completes successfully even with no TODOs.")
+            print(
+                "Test validates that workflow completes successfully even with no TODOs."
+            )
 
     @pytest.mark.asyncio
     async def test_performance_on_large_codebase(self, workspace_root):
@@ -417,7 +432,9 @@ class TestEndToEndWorkflow:
         print(f"TODOs found: {result['todos_found']}")
 
         if result["todos_found"] > 0:
-            print(f"Processing rate: {result['todos_found'] / elapsed:.1f} TODOs/second")
+            print(
+                f"Processing rate: {result['todos_found'] / elapsed:.1f} TODOs/second"
+            )
 
         # Performance should be reasonable
         assert elapsed < 30, "Scanning should complete within 30 seconds"
