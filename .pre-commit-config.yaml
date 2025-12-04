@@ -50,6 +50,17 @@ repos:
       - id: validate-pyproject
         files: pyproject\.toml$
 
+  # KB validation (local hook)
+  - repo: local
+    hooks:
+      - id: kb-validation
+        name: KB validation
+        entry: python3 framework/scripts/kb_precommit_check.py
+        language: system
+        files: logseq/pages/.*\.md$
+        pass_filenames: true
+        verbose: true
+
 # Configuration
 default_language_version:
   python: python3.11
@@ -61,4 +72,3 @@ default_stages: [pre-commit]
 ci:
   autofix_commit_msg: "style: auto-fix by pre-commit hooks"
   autoupdate_schedule: quarterly
-
