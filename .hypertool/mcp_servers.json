@@ -49,12 +49,16 @@
       "type": "sse"
     },
     "serena": {
-      "command": "/usr/bin/uvx",
+      "command": "uvx",
       "args": [
-        "--from", "git+https://github.com/oraios/serena",
-        "serena", "start-mcp-server",
-        "--context", "ide-assistant",
-        "--project", "/home/thein/repos/TTA.dev-cline"
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide-assistant",
+        "--project",
+        "/home/thein/repos/TTA.dev-cline"
       ],
       "description": "IDE integration and code assistance",
       "tags": ["ide", "code-analysis", "refactoring"]
@@ -107,7 +111,7 @@
       "tags": ["layer:L0", "errors", "alerting", "monitoring"]
     },
     "mcp-logseq": {
-      "command": "/usr/bin/uvx",
+      "command": "uvx",
       "args": ["mcp-logseq"],
       "description": "Logseq knowledge base integration and graph operations",
       "tags": ["knowledge-base", "logseq", "notes", "graph"]
