@@ -45,20 +45,15 @@
     "gitmcp": {
       "url": "https://gitmcp.io/theinterneti/TTA.dev",
       "description": "Repository-specific Git operations",
-      "tags": ["vcs", "repository", "history"],
-      "type": "sse"
+      "tags": ["vcs", "repository", "history"]
     },
     "serena": {
-      "command": "uvx",
+      "command": "/home/thein/.local/bin/uvx",
       "args": [
-        "--from",
-        "git+https://github.com/oraios/serena",
-        "serena",
-        "start-mcp-server",
-        "--context",
-        "ide-assistant",
-        "--project",
-        "/home/thein/repos/TTA.dev-cline"
+        "--from", "git+https://github.com/oraios/serena",
+        "serena", "start-mcp-server",
+        "--context", "ide-assistant",
+        "--project", "/home/thein/repos/TTA.dev-cline"
       ],
       "description": "IDE integration and code assistance",
       "tags": ["ide", "code-analysis", "refactoring"]
@@ -90,6 +85,7 @@
       "description": "Complete TTA.dev primitives ecosystem as MCP tools",
       "tags": ["tta-dev", "primitives", "workflow", "orchestration", "context"]
     },
+
     "mcp-agent-monitor": {
       "command": "/usr/bin/docker",
       "args": ["run", "--rm", "-i", "--network=host", "mcp-agent-monitor"],
@@ -100,6 +96,18 @@
       "description": "Agent health monitoring and metrics collection (L0)",
       "tags": ["layer:L0", "monitoring", "health", "metrics"]
     },
+
+    "mcp-openai-cost": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-openai-cost-tracker@latest"],
+      "env": {
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "COST_REPORT_INTERVAL": "daily"
+      },
+      "description": "OpenAI API cost monitoring and optimization (L0)",
+      "tags": ["layer:L0", "cost", "optimization", "monitoring"]
+    },
+
     "mcp-sentry": {
       "command": "/usr/bin/docker",
       "args": ["run", "--rm", "-i", "mcp-sentry-integration"],
@@ -110,9 +118,238 @@
       "description": "Sentry error monitoring and alerting integration (L0)",
       "tags": ["layer:L0", "errors", "alerting", "monitoring"]
     },
+
+    "mcp-cloudwatch": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-aws-cloudwatch@latest"],
+      "env": {
+        "AWS_REGION": "${AWS_REGION}",
+        "AWS_ACCESS_KEY_ID": "${AWS_ACCESS_KEY_ID}",
+        "AWS_SECRET_ACCESS_KEY": "${AWS_SECRET_ACCESS_KEY}"
+      },
+      "description": "AWS CloudWatch logs and metrics integration (L0)",
+      "tags": ["layer:L0", "aws", "logs", "metrics", "monitoring"]
+    },
+
+    "mcp-github-actions": {
+      "command": "/usr/bin/docker",
+      "args": ["run", "--rm", "-i", "-v", "/var/run/docker.sock:/var/run/docker.sock", "mcp-github-actions-runner"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "GITHUB_REPOSITORY": "${GITHUB_REPOSITORY}"
+      },
+      "description": "GitHub Actions workflow execution and management (L2)",
+      "tags": ["layer:L2", "ci/cd", "github", "automation", "workflow"]
+    },
+
+    "mcp-terraform-cloud": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-terraform-cloud@latest"],
+      "env": {
+        "TF_CLOUD_ORGANIZATION": "${TF_CLOUD_ORGANIZATION}",
+        "TF_CLOUD_TOKEN": "${TF_CLOUD_TOKEN}"
+      },
+      "description": "Terraform Cloud workspace management and deployment (L2)",
+      "tags": ["layer:L2", "terraform", "infrastructure", "cloud", "deployment"]
+    },
+
+    "mcp-snyk": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-snyk-integration@latest"],
+      "env": {
+        "SNYK_TOKEN": "${SNYK_TOKEN}",
+        "SNYK_ORG": "${SNYK_ORG}"
+      },
+      "description": "Snyk vulnerability scanning and security assessment (L2)",
+      "tags": ["layer:L2", "security", "vulnerabilities", "scanning", "assessment"]
+    },
+
+    "mcp-sonarqube": {
+      "command": "/usr/bin/docker",
+      "args": ["run", "--rm", "-i", "--network=host", "mcp-sonarqube-client"],
+      "env": {
+        "SONARQUBE_URL": "http://localhost:9000",
+        "SONARQUBE_TOKEN": "${SONARQUBE_TOKEN}"
+      },
+      "description": "SonarQube code quality analysis and reporting (L2)",
+      "tags": ["layer:L2", "quality", "analysis", "code", "metrics"]
+    },
+
+    "mcp-kubernetes": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-k8s-admin@latest"],
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG}",
+        "K8S_CONTEXT": "${K8S_CONTEXT}"
+      },
+      "description": "Kubernetes cluster management and resource operations (L3)",
+      "tags": ["layer:L3", "kubernetes", "k8s", "cluster", "management"]
+    },
+
+    "mcp-helm": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-helm-manager@latest"],
+      "env": {
+        "HELM_HOME": "${HELM_HOME}",
+        "KUBECONFIG": "${KUBECONFIG}"
+      },
+      "description": "Helm chart management and release operations (L3)",
+      "tags": ["layer:L3", "helm", "kubernetes", "charts", "releases"]
+    },
+
+    "mcp-postgres": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-postgres-client@latest"],
+      "env": {
+        "POSTGRES_HOST": "${POSTGRES_HOST}",
+        "POSTGRES_PORT": "${POSTGRES_PORT}",
+        "POSTGRES_USER": "${POSTGRES_USER}",
+        "POSTGRES_PASSWORD": "${POSTGRES_PASSWORD}",
+        "POSTGRES_DB": "${POSTGRES_DB}"
+      },
+      "description": "PostgreSQL database administration and query execution (L3)",
+      "tags": ["layer:L3", "postgres", "database", "sql", "administration"]
+    },
+
+    "mcp-prometheus": {
+      "command": "/usr/bin/docker",
+      "args": ["run", "--rm", "-i", "--network=host", "mcp-prometheus-client"],
+      "env": {
+        "PROMETHEUS_URL": "http://localhost:9090",
+        "PROMETHEUS_USERNAME": "${PROMETHEUS_USERNAME}",
+        "PROMETHEUS_PASSWORD": "${PROMETHEUS_PASSWORD}"
+      },
+      "description": "Prometheus metrics collection and alerting management (L3)",
+      "tags": ["layer:L3", "prometheus", "metrics", "alerting", "monitoring"]
+    },
+
+    "mcp-mongodb": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-mongodb-client@latest"],
+      "env": {
+        "MONGODB_URI": "${MONGODB_URI}",
+        "MONGODB_DB": "${MONGODB_DB}"
+      },
+      "description": "MongoDB database operations and management (L3)",
+      "tags": ["layer:L3", "mongodb", "nosql", "database", "operations"]
+    },
+
+    "mcp-elasticsearch": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-elasticsearch-client@latest"],
+      "env": {
+        "ELASTICSEARCH_HOST": "${ELASTICSEARCH_HOST}",
+        "ELASTICSEARCH_PORT": "${ELASTICSEARCH_PORT}",
+        "ELASTICSEARCH_USERNAME": "${ELASTICSEARCH_USERNAME}",
+        "ELASTICSEARCH_PASSWORD": "${ELASTICSEARCH_PASSWORD}"
+      },
+      "description": "Elasticsearch search operations and index management (L3)",
+      "tags": ["layer:L3", "elasticsearch", "search", "indexing", "logs"]
+    },
+
+    "mcp-redis": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-redis-client@latest"],
+      "env": {
+        "REDIS_HOST": "${REDIS_HOST}",
+        "REDIS_PORT": "${REDIS_PORT}",
+        "REDIS_PASSWORD": "${REDIS_PASSWORD}"
+      },
+      "description": "Redis cache and data structure operations (L3)",
+      "tags": ["layer:L3", "redis", "cache", "data-structures", "performance"]
+    },
+
+    "mcp-aws-sdk-python": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-aws-sdk@latest"],
+      "env": {
+        "AWS_REGION": "${AWS_REGION}",
+        "AWS_ACCESS_KEY_ID": "${AWS_ACCESS_KEY_ID}",
+        "AWS_SECRET_ACCESS_KEY": "${AWS_SECRET_ACCESS_KEY}"
+      },
+      "description": "AWS SDK execution and resource management (L4)",
+      "tags": ["layer:L4", "aws", "sdk", "cloud", "execution"]
+    },
+
+    "mcp-kubectl-cli": {
+      "command": "/usr/bin/docker",
+      "args": ["run", "--rm", "-i", "-v", "/var/run/docker.sock:/var/run/docker.sock", "mcp-kubectl-wrapper"],
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG}",
+        "K8S_CONTEXT": "${K8S_CONTEXT}"
+      },
+      "description": "Kubernetes kubectl command execution wrapper (L4)",
+      "tags": ["layer:L4", "kubectl", "kubernetes", "cli", "execution"]
+    },
+
+    "mcp-trivy-cli": {
+      "command": "/usr/bin/docker",
+      "args": ["run", "--rm", "-i", "-v", "/var/run/docker.sock:/var/run/docker.sock", "mcp-trivy-wrapper"],
+      "description": "Trivy security scanning CLI wrapper (L4)",
+      "tags": ["layer:L4", "trivy", "security", "scanning", "cli"]
+    },
+
+    "mcp-zap-cli": {
+      "command": "/usr/bin/docker",
+      "args": ["run", "--rm", "-i", "-v", "/var/run/docker.sock:/var/run/docker.sock", "mcp-zaproxy-wrapper"],
+      "env": {
+        "ZAP_PORT": "8080",
+        "ZAP_API_KEY": "${ZAP_API_KEY}"
+      },
+      "description": "OWASP ZAP security testing CLI wrapper (L4)",
+      "tags": ["layer:L4", "zap", "owasp", "security", "testing"]
+    },
+
+    "mcp-burpsuite-api": {
+      "command": "/usr/bin/docker",
+      "args": ["run", "--rm", "-i", "--network=host", "mcp-burpsuite-wrapper"],
+      "env": {
+        "BURP_SUITE_URL": "http://localhost:8080",
+        "BURP_API_KEY": "${BURP_API_KEY}"
+      },
+      "description": "Burp Suite security testing API integration (L4)",
+      "tags": ["layer:L4", "burp", "security", "testing", "api"]
+    },
+
+    "mcp-argocd": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-argocd-client@latest"],
+      "env": {
+        "ARGOCD_SERVER": "${ARGOCD_SERVER}",
+        "ARGOCD_AUTH_TOKEN": "${ARGOCD_AUTH_TOKEN}"
+      },
+      "description": "ArgoCD GitOps deployment management (L3)",
+      "tags": ["layer:L3", "argocd", "gitops", "deployments", "kubernetes"]
+    },
+
+    "mcp-datadog-logs": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-datadog-integration@latest"],
+      "env": {
+        "DD_API_KEY": "${DD_API_KEY}",
+        "DD_APP_KEY": "${DD_APP_KEY}"
+      },
+      "description": "Datadog log aggregation and analysis (L3)",
+      "tags": ["layer:L3", "datadog", "logs", "monitoring", "analysis"]
+    },
+
+    "mcp-splunk": {
+      "command": "/usr/bin/npx",
+      "args": ["-y", "mcp-splunk-client@latest"],
+      "env": {
+        "SPLUNK_HOST": "${SPLUNK_HOST}",
+        "SPLUNK_TOKEN": "${SPLUNK_TOKEN}"
+      },
+      "description": "Splunk enterprise log processing and searching (L3)",
+      "tags": ["layer:L3", "splunk", "logs", "search", "enterprise"]
+    },
     "mcp-logseq": {
-      "command": "uvx",
+      "command": "/home/thein/.local/bin/uvx",
       "args": ["mcp-logseq"],
+      "env": {
+        "LOGSEQ_API_TOKEN": "${LOGSEQ_API_TOKEN}",
+        "LOGSEQ_API_URL": "http://172.31.16.1:12315"
+      },
       "description": "Logseq knowledge base integration and graph operations",
       "tags": ["knowledge-base", "logseq", "notes", "graph"]
     }

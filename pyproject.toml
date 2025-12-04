@@ -145,6 +145,7 @@ norecursedirs = [
     ".venv",
 ]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
 addopts = "-v --strict-markers --timeout=60"
 timeout = 60
 timeout_method = "thread"
