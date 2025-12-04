@@ -1,6 +1,7 @@
 """Base workflow primitive abstractions.
 
 # See: [[TTA.dev/Primitives/WorkflowPrimitive]]
+# See: [[TTA.dev/Primitives/LambdaPrimitive]]
 """
 
 from __future__ import annotations

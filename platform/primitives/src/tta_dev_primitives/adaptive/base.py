@@ -16,6 +16,8 @@ Critical Safeguards:
 - Strategy performance validation before adoption
 - Context drift detection and adaptation
 - Resource limits on learning overhead
+
+# See: [[TTA.dev/Primitives/AdaptivePrimitive]]
 """
 
 from __future__ import annotations

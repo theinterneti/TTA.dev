@@ -1,6 +1,7 @@
 """Compensation patterns for workflow primitives (Saga pattern).
 
 # See: [[TTA.dev/Primitives/CompensationPrimitive]]
+# See: [[TTA.dev/Primitives/SagaPrimitive]]
 """
 
 from __future__ import annotations

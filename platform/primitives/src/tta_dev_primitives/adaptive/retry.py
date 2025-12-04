@@ -8,6 +8,8 @@ This primitive demonstrates the self-improving pattern by:
 
 The key insight: Instead of static retry logic, this primitive learns from
 real execution patterns to optimize retry behavior over time.
+
+# See: [[TTA.dev/Primitives/AdaptiveRetryPrimitive]]
 """
 
 from __future__ import annotations

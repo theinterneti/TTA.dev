@@ -1,4 +1,7 @@
-"""Knowledge base primitive for querying Logseq graph."""
+"""Knowledge base primitive for querying Logseq graph.
+
+# See: [[TTA.dev/Primitives/KnowledgeBasePrimitive]]
+"""
 
 import time
 from typing import Literal

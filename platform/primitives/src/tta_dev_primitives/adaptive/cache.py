@@ -1,4 +1,7 @@
-"""Adaptive cache primitive that learns optimal caching parameters."""
+"""Adaptive cache primitive that learns optimal caching parameters.
+
+# See: [[TTA.dev/Primitives/AdaptiveCachePrimitive]]
+"""
 
 from __future__ import annotations
 

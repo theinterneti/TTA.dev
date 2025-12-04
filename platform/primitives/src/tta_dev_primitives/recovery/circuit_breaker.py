@@ -12,6 +12,8 @@ Features:
 - Fallback strategies
 - Circuit breaker pattern
 - Comprehensive error logging
+
+# See: [[TTA.dev/Primitives/CircuitBreaker]]
 """
 
 import asyncio
