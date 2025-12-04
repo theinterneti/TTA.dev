@@ -6,7 +6,7 @@
 
 Basic workflow examples show fundamental patterns for composing primitives into reliable AI workflows.
 
-**Source:** `platform/primitives/examples/basic_workflow.py`
+**Note:** This page contains inline examples. See `platform/primitives/examples/` for runnable examples like `agent_patterns_simple.py`, `error_handling_patterns.py`.
 
 ## Example 1: Simple Sequential Workflow
 
@@ -256,19 +256,17 @@ result = await workflow.execute(data, context)
 - Multiple primitive types
 - Complex workflows
 
-## Running the Examples
+## Running Examples
 
 ```bash
 # Run from repository root
 cd platform/primitives/examples
-uv run python basic_workflow.py
 
-# Run specific example function
-uv run python -c "
-from basic_workflow import example_1_simple_sequential
-import asyncio
-asyncio.run(example_1_simple_sequential())
-"
+# Run agent patterns example
+uv run python agent_patterns_simple.py
+
+# Run error handling patterns
+uv run python error_handling_patterns.py
 ```
 
 ## Related Examples
@@ -288,7 +286,12 @@ asyncio.run(example_1_simple_sequential())
 
 ## Source Code
 
-**File:** `platform/primitives/examples/basic_workflow.py`
+**Examples Directory:** `platform/primitives/examples/`
+
+**Related Files:**
+- `agent_patterns_simple.py` - Agent workflow patterns
+- `error_handling_patterns.py` - Error handling examples
+- `multi_agent_workflow.py` - Multi-agent coordination
 
 ## Tags
 

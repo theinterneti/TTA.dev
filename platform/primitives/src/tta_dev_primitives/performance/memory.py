@@ -1,5 +1,7 @@
 """In-memory storage for MemoryPrimitive fallback.
 
+# See: [[TTA.dev/Primitives/MemoryPrimitive]]
+
 Simple LRU cache with keyword search. Works immediately without any setup.
 No Redis, no Docker, no dependencies beyond stdlib.
 """
@@ -150,9 +152,11 @@ def create_memory_key(
     base = f"{user_id}:{session_id}"
 
     if context:
-        # Hash context for deterministic key
+        # Hash context for deterministic key (not for security, just for uniqueness)
         context_str = json.dumps(context, sort_keys=True, default=str)
-        context_hash = hashlib.md5(context_str.encode()).hexdigest()[:8]
+        context_hash = hashlib.md5(  # noqa: S324
+            context_str.encode(), usedforsecurity=False
+        ).hexdigest()[:8]
         return f"{base}:{context_hash}"
 
     return base

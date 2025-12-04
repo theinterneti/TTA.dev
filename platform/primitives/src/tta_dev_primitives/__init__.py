@@ -9,9 +9,10 @@ from .collaboration import (
     IntegrationFrequency,
     MergeStrategy,
 )
-from .core.base import WorkflowContext, WorkflowPrimitive
+from .core.base import LambdaPrimitive, WorkflowContext, WorkflowPrimitive
 from .core.conditional import ConditionalPrimitive
 from .core.parallel import ParallelPrimitive
+from .core.routing import RouterPrimitive
 from .core.sequential import SequentialPrimitive
 
 # Performance primitives
@@ -19,6 +20,7 @@ from .performance.cache import CachePrimitive
 
 # Recovery primitives
 from .recovery.compensation import CompensationPrimitive, CompensationStrategy
+from .recovery.fallback import FallbackPrimitive
 from .recovery.retry import RetryPrimitive, RetryStrategy
 from .recovery.timeout import TimeoutPrimitive
 
@@ -29,9 +31,11 @@ __all__ = [
     # Core primitives
     "WorkflowPrimitive",
     "WorkflowContext",
+    "LambdaPrimitive",
     "SequentialPrimitive",
     "ParallelPrimitive",
     "ConditionalPrimitive",
+    "RouterPrimitive",
     # Collaboration primitives
     "AgentIdentity",
     "CommitFrequencyPolicy",
@@ -43,6 +47,7 @@ __all__ = [
     # Recovery primitives
     "CompensationPrimitive",
     "CompensationStrategy",
+    "FallbackPrimitive",
     "RetryPrimitive",
     "RetryStrategy",
     "TimeoutPrimitive",

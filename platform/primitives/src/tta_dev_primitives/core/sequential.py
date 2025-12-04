@@ -1,4 +1,7 @@
-"""Sequential workflow primitive composition."""
+"""Sequential workflow primitive composition.
+
+# See: [[TTA.dev/Primitives/SequentialPrimitive]]
+"""
 
 from __future__ import annotations
 

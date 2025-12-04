@@ -1,4 +1,7 @@
-"""Instrumented workflow primitive with automatic OpenTelemetry tracing."""
+"""Instrumented workflow primitive with automatic OpenTelemetry tracing.
+
+# See: [[TTA.dev/Primitives/InstrumentedPrimitive]]
+"""
 
 from __future__ import annotations
 

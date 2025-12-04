@@ -1,4 +1,7 @@
-"""Mock primitives for testing."""
+"""Mock primitives for testing.
+
+# See: [[TTA.dev/Primitives/MockPrimitive]]
+"""
 
 from __future__ import annotations
 
@@ -166,9 +169,9 @@ class WorkflowTestCase:
             times: Optional expected call count
         """
         if times is not None:
-            assert mock.call_count == times, (
-                f"Expected {times} calls to {mock.name}, got {mock.call_count}"
-            )
+            assert (
+                mock.call_count == times
+            ), f"Expected {times} calls to {mock.name}, got {mock.call_count}"
         else:
             assert mock.call_count > 0, f"Expected {mock.name} to be called"
 

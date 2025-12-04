@@ -11,7 +11,7 @@ from typing import Any
 from tta_dev_primitives.core.base import LambdaPrimitive, WorkflowContext
 from tta_dev_primitives.core.sequential import SequentialPrimitive
 from tta_dev_primitives.recovery.fallback import FallbackPrimitive
-from tta_dev_primitives.recovery.retry import RetryPrimitive
+from tta_dev_primitives.recovery.retry import RetryPrimitive, RetryStrategy
 from tta_dev_primitives.recovery.timeout import TimeoutPrimitive
 
 
@@ -31,9 +31,7 @@ async def retry_example() -> dict[str, Any]:
     # Retry up to 5 times with exponential backoff
     retry_primitive = RetryPrimitive(
         primitive=LambdaPrimitive(flaky_operation),
-        max_attempts=5,
-        backoff_factor=2.0,
-        initial_delay=0.1,
+        strategy=RetryStrategy(max_retries=5, backoff_base=2.0, jitter=False),
     )
 
     context = WorkflowContext(workflow_id="retry-demo", session_id="test-1")
@@ -118,7 +116,7 @@ async def combined_recovery_example() -> dict[str, Any]:
             primitive=LambdaPrimitive(
                 lambda x, ctx: {**x, "result": "primary succeeded", "source": "primary"}
             ),
-            max_attempts=2,
+            strategy=RetryStrategy(max_retries=2, backoff_base=2.0, jitter=False),
         ),
         timeout_seconds=5.0,
     )
@@ -175,9 +173,7 @@ async def api_integration_example() -> dict[str, Any]:
         primary=TimeoutPrimitive(
             primitive=RetryPrimitive(
                 primitive=LambdaPrimitive(call_api),
-                max_attempts=3,
-                backoff_factor=1.5,
-                initial_delay=0.1,
+                strategy=RetryStrategy(max_retries=3, backoff_base=1.5, jitter=False),
             ),
             timeout_seconds=2.0,
         ),

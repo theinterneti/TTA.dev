@@ -1,4 +1,7 @@
-"""Caching primitive for workflow results."""
+"""Caching primitive for workflow results.
+
+# See: [[TTA.dev/Primitives/CachePrimitive]]
+"""
 
 from __future__ import annotations
 

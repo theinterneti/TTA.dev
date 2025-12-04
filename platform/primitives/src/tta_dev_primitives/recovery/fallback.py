@@ -1,4 +1,7 @@
-"""Fallback strategies for workflow primitives."""
+"""Fallback strategies for workflow primitives.
+
+# See: [[TTA.dev/Primitives/FallbackPrimitive]]
+"""
 
 from __future__ import annotations
 

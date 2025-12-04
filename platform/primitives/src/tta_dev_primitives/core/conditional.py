@@ -1,4 +1,7 @@
-"""Conditional workflow primitive composition."""
+"""Conditional workflow primitive composition.
+
+# See: [[TTA.dev/Primitives/ConditionalPrimitive]]
+"""
 
 from __future__ import annotations
 

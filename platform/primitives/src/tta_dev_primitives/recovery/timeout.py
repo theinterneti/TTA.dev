@@ -1,4 +1,7 @@
-"""Timeout enforcement for primitives."""
+"""Timeout enforcement for primitives.
+
+# See: [[TTA.dev/Primitives/TimeoutPrimitive]]
+"""
 
 from __future__ import annotations
 
@@ -87,7 +90,8 @@ class TimeoutPrimitive(WorkflowPrimitive[Any, Any]):
         """
         try:
             result = await asyncio.wait_for(
-                self.primitive.execute(input_data, context), timeout=self.timeout_seconds
+                self.primitive.execute(input_data, context),
+                timeout=self.timeout_seconds,
             )
 
             logger.info(

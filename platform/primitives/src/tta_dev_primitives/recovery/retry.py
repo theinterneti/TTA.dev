@@ -1,4 +1,7 @@
-"""Retry strategies for workflow primitives."""
+"""Retry strategies for workflow primitives.
+
+# See: [[TTA.dev/Primitives/RetryPrimitive]]
+"""
 
 from __future__ import annotations
 

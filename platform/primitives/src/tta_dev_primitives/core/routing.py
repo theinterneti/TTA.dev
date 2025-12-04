@@ -1,4 +1,7 @@
-"""Routing primitive for intelligent workflow branching."""
+"""Routing primitive for intelligent workflow branching.
+
+# See: [[TTA.dev/Primitives/RouterPrimitive]]
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,7 @@
-"""Parallel workflow primitive composition."""
+"""Parallel workflow primitive composition.
+
+# See: [[TTA.dev/Primitives/ParallelPrimitive]]
+"""
 
 from __future__ import annotations
 

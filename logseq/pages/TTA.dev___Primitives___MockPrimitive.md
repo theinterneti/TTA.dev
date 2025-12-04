@@ -313,8 +313,8 @@ workflow_execution
 
 ## Metadata
 
-**Source Code:** [mock_primitive.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/testing/mock_primitive.py)
-**Tests:** [test_mock_primitive.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/test_mock_primitive.py)
+**Source Code:** [mocks.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/src/tta_dev_primitives/testing/mocks.py)
+**Tests:** [test_mocks.py](https://github.com/theinterneti/TTA.dev/blob/main/platform/primitives/tests/testing/test_mocks.py)
 
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]
