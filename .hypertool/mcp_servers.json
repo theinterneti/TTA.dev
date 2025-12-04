@@ -48,7 +48,7 @@
       "tags": ["vcs", "repository", "history"]
     },
     "serena": {
-      "command": "/usr/bin/uvx",
+      "command": "uvx",
       "args": [
         "--from", "git+https://github.com/oraios/serena",
         "serena", "start-mcp-server",

@@ -24,10 +24,33 @@ from tta_dev_primitives.integrations.e2b_primitive import (
     CodeExecutionPrimitive,
     E2BPrimitive,
 )
+from tta_dev_primitives.integrations.e2b_template_config import (
+    E2BTemplateConfig,
+    SandboxFile,
+    create_mcp_sandbox_files,
+)
 from tta_dev_primitives.integrations.google_ai_studio_primitive import (
     GoogleAIStudioPrimitive,
 )
 from tta_dev_primitives.integrations.huggingface_primitive import HuggingFacePrimitive
+from tta_dev_primitives.integrations.hypertool_bridge import (
+    HypertoolLoader,
+    HypertoolMCPConfig,
+    HypertoolMCPExecutor,
+    HypertoolPersona,
+)
+from tta_dev_primitives.integrations.mcp_code_execution_primitive import (
+    MCPCodeExecutionInput,
+    MCPCodeExecutionPrimitive,
+    MCPServerConfig,
+)
+from tta_dev_primitives.integrations.mcp_schema_generator import (
+    MCPSchemaFetcher,
+    MCPToolParameter,
+    MCPToolSchema,
+    PythonModuleGenerator,
+    TypeMapper,
+)
 from tta_dev_primitives.integrations.openrouter_primitive import OpenRouterPrimitive
 
 try:  # Optional dependency: OpenAI SDK
@@ -71,6 +94,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK 
 from tta_dev_primitives.integrations.together_ai_primitive import TogetherAIPrimitive
 
 __all__ = [
+    # LLM Providers
     "OpenAIPrimitive",
     "AnthropicPrimitive",
     "OllamaPrimitive",
@@ -79,8 +103,29 @@ __all__ = [
     "OpenRouterPrimitive",
     "HuggingFacePrimitive",
     "TogetherAIPrimitive",
+    # Databases
     "SupabasePrimitive",
     "SQLitePrimitive",
+    # Code Execution (E2B)
     "CodeExecutionPrimitive",
     "E2BPrimitive",
+    # E2B Template Configuration
+    "E2BTemplateConfig",
+    "SandboxFile",
+    "create_mcp_sandbox_files",
+    # MCP Code Execution (PTC)
+    "MCPCodeExecutionPrimitive",
+    "MCPCodeExecutionInput",
+    "MCPServerConfig",
+    # MCP Schema Generator
+    "MCPSchemaFetcher",
+    "MCPToolSchema",
+    "MCPToolParameter",
+    "PythonModuleGenerator",
+    "TypeMapper",
+    # Hypertool Bridge
+    "HypertoolLoader",
+    "HypertoolPersona",
+    "HypertoolMCPConfig",
+    "HypertoolMCPExecutor",
 ]
