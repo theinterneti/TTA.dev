@@ -11,9 +11,7 @@ generated:: 2025-12-04
 
 Saga pattern: Execute with compensation on failure.
 
-Useful for maintaining consistency across distributed operations.
-
-## Usage Example
+## Usage Examples
 
 ```python
 workflow = SagaPrimitive(

@@ -11,13 +11,7 @@ generated:: 2025-12-04
 
 Adaptive fallback that learns which fallback chains work best.
 
-Learns from execution patterns:
-- Which services fail most often
-- Which fallbacks succeed for different failure types
-- Optimal fallback order based on success rates
-- Context-specific fallback strategies
-
-## Usage Example
+## Usage Examples
 
 ```python
 from tta_dev_primitives.adaptive import AdaptiveFallbackPrimitive, LearningMode

@@ -11,7 +11,7 @@ generated:: 2025-12-04
 
 Try a primitive with fallback to alternative.
 
-## Usage Example
+## Usage Examples
 
 ```python
 workflow = FallbackPrimitive(

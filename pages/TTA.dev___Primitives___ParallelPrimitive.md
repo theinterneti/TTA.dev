@@ -11,10 +11,7 @@ generated:: 2025-12-04
 
 Execute primitives in parallel.
 
-All primitives receive the same input and execute concurrently.
-Results are collected in a list.
-
-## Usage Example
+## Usage Examples
 
 ```python
 workflow = ParallelPrimitive([
@@ -25,6 +22,12 @@ workflow = ParallelPrimitive([
     # Or use | operator:
     workflow = world_building | character_analysis | theme_analysis
 ```
+
+## Tips & Gotchas
+
+- ⚠️ Errors in one branch don't cancel others by default
+- 💡 Set `max_concurrency` to limit resource usage
+- 📝 Results maintain order of input primitives
 
 ## Related
 

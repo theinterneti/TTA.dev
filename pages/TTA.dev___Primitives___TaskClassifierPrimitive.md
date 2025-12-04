@@ -11,21 +11,7 @@ generated:: 2025-12-04
 
 Classifies tasks to determine the best model for execution.
 
-This primitive analyzes task characteristics and recommends the most appropriate
-model based on complexity, requirements, and cost optimization goals.
-
-**Classification Logic:**
-- Simple tasks → Groq (ultra-fast, free)
-- Moderate tasks → Gemini Pro (flagship quality, free)
-- Complex reasoning → DeepSeek R1 (on par with o1, free)
-- Expert tasks → Claude Sonnet 4.5 (paid, highest quality)
-
-
-
-Attributes:
-    prefer_free: If True, prefer free models when quality is sufficient
-
-## Usage Example
+## Usage Examples
 
 ```python
 from tta_dev_primitives.orchestration import TaskClassifierPrimitive

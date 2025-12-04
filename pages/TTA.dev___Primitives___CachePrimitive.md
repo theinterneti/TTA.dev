@@ -11,11 +11,7 @@ generated:: 2025-12-04
 
 Cache primitive execution results.
 
-Dramatically reduces costs and latency by caching expensive operations
-like LLM calls. Typical cache hit rates of 60-80% translate to 40%+ cost
-reduction in production.
-
-## Usage Example
+## Usage Examples
 
 ```python
 # Cache expensive LLM calls
@@ -41,6 +37,12 @@ reduction in production.
         ttl_seconds=60.0  # 1 minute
     )
 ```
+
+## Tips & Gotchas
+
+- ⚠️ Cache invalidation is hard - set appropriate TTL
+- 💡 Use with MemoryPrimitive for bounded caching
+- 📝 Consider cache key uniqueness carefully
 
 ## Related
 

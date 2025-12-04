@@ -11,28 +11,7 @@ generated:: 2025-12-04
 
 Delegates tasks from orchestrator to executor models.
 
-This primitive enables the orchestrator-executor pattern where a high-quality
-orchestrator model (e.g., Claude Sonnet 4.5) delegates execution to appropriate
-executor models (e.g., free flagship models) for cost optimization.
-
-**Orchestrator-Executor Pattern:**
-1. Orchestrator analyzes task and determines best executor
-2. Orchestrator creates detailed instructions for executor
-3. DelegationPrimitive routes task to executor model
-4. Executor executes task and returns result
-5. Orchestrator validates/refines result if needed
-
-**Cost Optimization:**
-- Orchestrator handles planning/validation (small token usage)
-- Executor handles bulk execution (large token usage, free models)
-- Result: 80%+ cost reduction while maintaining quality
-
-
-
-Attributes:
-    executor_primitives: Map of model names to executor primitives
-
-## Usage Example
+## Usage Examples
 
 ```python
 from tta_dev_primitives.orchestration import DelegationPrimitive

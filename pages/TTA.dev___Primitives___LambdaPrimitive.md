@@ -11,9 +11,7 @@ generated:: 2025-12-04
 
 Primitive that wraps a simple function or lambda.
 
-Useful for simple transformations or adapters.
-
-## Usage Example
+## Usage Examples
 
 ```python
 transform = LambdaPrimitive(lambda x, ctx: x.upper())

@@ -11,7 +11,7 @@ generated:: 2025-12-04
 
 Retry a primitive with exponential backoff.
 
-## Usage Example
+## Usage Examples
 
 ```python
 workflow = RetryPrimitive(
@@ -19,6 +19,12 @@ workflow = RetryPrimitive(
         strategy=RetryStrategy(max_retries=3, backoff_base=2.0)
     )
 ```
+
+## Tips & Gotchas
+
+- ⚠️ Set appropriate `max_retries` to avoid infinite loops
+- 💡 Use `jitter=True` to prevent thundering herd
+- 📝 Only retries on transient errors by default
 
 ## Related
 

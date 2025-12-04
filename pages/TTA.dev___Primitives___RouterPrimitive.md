@@ -11,13 +11,7 @@ generated:: 2025-12-04
 
 Route input to appropriate primitive based on routing function.
 
-Enables intelligent routing decisions based on:
-- Cost optimization (route to cheaper providers)
-- Latency optimization (route to faster providers)
-- Load balancing (distribute across providers)
-- Feature requirements (route to capable providers)
-
-## Usage Example
+## Usage Examples
 
 ```python
 # Route based on user tier

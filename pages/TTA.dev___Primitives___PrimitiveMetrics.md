@@ -11,9 +11,6 @@ generated:: 2025-12-04
 
 Core OpenTelemetry metrics for TTA.dev primitives.
 
-Implements the 7 core metrics following the observability strategy.
-Gracefully degrades when OpenTelemetry is unavailable.
-
 ## Related
 
 - [[TTA.dev/Primitives]] - Primitives index

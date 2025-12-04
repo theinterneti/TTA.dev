@@ -11,10 +11,7 @@ generated:: 2025-12-04
 
 Engineer optimal context for AI agent tasks.
 
-This is TTA.dev's SECRET SAUCE - the primitive that makes other primitives
-work by delivering perfect context.
-
-## Usage Example
+## Usage Examples
 
 ```python
 from tta_dev_primitives.core.context_engineering import (

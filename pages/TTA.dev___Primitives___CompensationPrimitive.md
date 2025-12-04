@@ -11,10 +11,6 @@ generated:: 2025-12-04
 
 Public alias for :class:`SagaPrimitive` matching documentation.
 
-This keeps backward compatibility for existing usages of
-``CompensationPrimitive`` as the saga/compensation primitive while
-delegating all behavior to :class:`SagaPrimitive`.
-
 ## Related
 
 - [[TTA.dev/Primitives]] - Primitives index

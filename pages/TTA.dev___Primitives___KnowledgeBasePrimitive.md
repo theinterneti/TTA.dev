@@ -11,15 +11,7 @@ generated:: 2025-12-04
 
 Query Logseq knowledge base for contextual guidance.
 
-This primitive wraps LogSeq MCP integration to provide:
-- Best practices queries
-- Common mistakes warnings
-- Related examples
-- Stage-specific recommendations
-
-Gracefully degrades when LogSeq MCP is unavailable (returns empty results).
-
-## Usage Example
+## Usage Examples
 
 ```python
 from tta_dev_primitives.knowledge import (

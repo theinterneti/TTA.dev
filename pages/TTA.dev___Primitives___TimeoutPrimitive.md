@@ -11,10 +11,7 @@ generated:: 2025-12-04
 
 Enforce execution timeout with optional fallback.
 
-Prevents workflows from hanging indefinitely by enforcing time limits.
-Essential for maintaining good UX and resource efficiency.
-
-## Usage Example
+## Usage Examples
 
 ```python
 # Simple timeout
@@ -38,6 +35,12 @@ Essential for maintaining good UX and resource efficiency.
         track_timeouts=True
     )
 ```
+
+## Tips & Gotchas
+
+- ⚠️ Cancelled tasks may leave side effects
+- 💡 Combine with RetryPrimitive for resilience
+- 📝 Use shorter timeouts for user-facing operations
 
 ## Related
 

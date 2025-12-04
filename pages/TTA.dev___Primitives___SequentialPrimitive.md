@@ -11,9 +11,7 @@ generated:: 2025-12-04
 
 Execute primitives in sequence.
 
-Each primitive's output becomes the next primitive's input.
-
-## Usage Example
+## Usage Examples
 
 ```python
 workflow = SequentialPrimitive([

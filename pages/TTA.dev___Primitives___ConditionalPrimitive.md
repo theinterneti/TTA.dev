@@ -11,9 +11,7 @@ generated:: 2025-12-04
 
 Conditional branching primitive.
 
-Executes different primitives based on a condition function.
-
-## Usage Example
+## Usage Examples
 
 ```python
 workflow = ConditionalPrimitive(

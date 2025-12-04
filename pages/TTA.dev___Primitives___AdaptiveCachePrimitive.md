@@ -11,24 +11,7 @@ generated:: 2025-12-04
 
 Cache primitive that learns optimal TTL and size parameters.
 
-Learns from execution patterns to optimize:
-- TTL (time-to-live) for different contexts
-- Maximum cache size to balance memory vs hit rate
-- Eviction strategies
-
-
-
-The primitive tracks:
-- Cache hit rate per context
-- Average age of cache hits
-- Memory usage vs performance trade-off
-
-And learns:
-- Optimal TTL values (queries that benefit from longer/shorter TTL)
-- Optimal cache size limits
-- Context-specific caching strategies
-
-## Usage Example
+## Usage Examples
 
 ```python
 from tta_dev_primitives.adaptive import (

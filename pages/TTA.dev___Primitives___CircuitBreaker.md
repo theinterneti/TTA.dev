@@ -11,10 +11,11 @@ generated:: 2025-12-04
 
 Circuit breaker pattern for preventing cascading failures.
 
-States:
-- CLOSED: Normal operation, requests pass through
-- OPEN: Too many failures, requests fail immediately
-- HALF_OPEN: Testing if service recovered
+## Tips & Gotchas
+
+- ⚠️ Circuit stays open for `reset_timeout` seconds
+- 💡 Monitor circuit state via metrics
+- 📝 Half-open state allows one test request
 
 ## Related
 

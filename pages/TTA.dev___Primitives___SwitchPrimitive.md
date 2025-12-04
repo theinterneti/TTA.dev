@@ -11,9 +11,7 @@ generated:: 2025-12-04
 
 Multi-way conditional branching primitive.
 
-Like a switch/case statement for workflows.
-
-## Usage Example
+## Usage Examples
 
 ```python
 workflow = SwitchPrimitive(

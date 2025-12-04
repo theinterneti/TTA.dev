@@ -11,12 +11,7 @@ generated:: 2025-12-04
 
 Wrapper adding observability to any primitive.
 
-Provides:
-- Distributed tracing with OpenTelemetry
-- Structured logging with correlation IDs
-- Metrics collection
-
-## Usage Example
+## Usage Examples
 
 ```python
 workflow = (

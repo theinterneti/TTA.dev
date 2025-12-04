@@ -11,13 +11,6 @@ generated:: 2025-12-04
 
 Base class for primitives that learn from observability data.
 
-This abstract base class provides:
-- Strategy learning and management
-- Observability data collection
-- Context-aware strategy selection
-- Performance validation and circuit breaking
-- Meta-observability of learning process
-
 ## Related
 
 - [[TTA.dev/Primitives]] - Primitives index

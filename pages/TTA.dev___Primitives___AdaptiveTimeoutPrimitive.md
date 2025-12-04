@@ -11,24 +11,7 @@ generated:: 2025-12-04
 
 Adaptive timeout primitive that learns optimal timeout values from execution patterns.
 
-Learns from:
-- Latency percentiles (p50, p95, p99)
-- Success/failure patterns
-- Context-specific execution times
-- Timeout occurrences
-
-Parameters learned:
-- timeout_ms: Optimal timeout value
-- buffer_factor: Multiplier for percentile (e.g., 1.5x p95)
-- percentile_target: Which percentile to target (50, 95, 99)
-
-
-
-Scoring formula:
-- 60% success rate (minimize timeouts)
-- 40% headroom (balance between tight and loose timeouts)
-
-## Usage Example
+## Usage Examples
 
 ```python
 from tta_dev_primitives.adaptive import (

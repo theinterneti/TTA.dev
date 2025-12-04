@@ -11,7 +11,7 @@ generated:: 2025-12-04
 
 Mock primitive for testing.
 
-## Usage Example
+## Usage Examples
 
 ```python
 mock = MockPrimitive(

@@ -65,15 +65,23 @@ def generate_kb_page(cls: dict, category: str) -> str:
     docstring = cls["docstring"]
     source_file = cls["file"]
 
-    # Extract example from docstring if present
-    example_match = re.search(
-        r"Example:\s*```python\s*(.*?)```", docstring, re.DOTALL
+    # Extract examples (may have multiple)
+    examples = re.findall(
+        r"(?:Example|Usage)s?:\s*```python\s*(.*?)```", docstring, re.DOTALL | re.IGNORECASE
     )
-    example = example_match.group(1).strip() if example_match else ""
 
-    # Clean docstring (remove example block for description)
-    description = re.sub(r"Example:\s*```python.*?```", "", docstring, flags=re.DOTALL)
-    description = description.strip()
+    # Extract Args section
+    args_match = re.search(r"Args:\s*(.*?)(?:Returns:|Raises:|Example|$)", docstring, re.DOTALL)
+    args_section = args_match.group(1).strip() if args_match else ""
+
+    # Extract Returns section
+    returns_match = re.search(r"Returns:\s*(.*?)(?:Raises:|Example|Args:|$)", docstring, re.DOTALL)
+    returns_section = returns_match.group(1).strip() if returns_match else ""
+
+    # Clean docstring for description (first paragraph only)
+    description = docstring.split("\n\n")[0].strip() if docstring else ""
+    # Remove any leftover section headers
+    description = re.sub(r"(Args|Returns|Raises|Example)s?:.*", "", description, flags=re.DOTALL).strip()
 
     # Generate page content
     lines = [
@@ -92,29 +100,94 @@ def generate_kb_page(cls: dict, category: str) -> str:
         "",
     ]
 
-    if example:
-        lines.extend(
-            [
-                "## Usage Example",
-                "",
+    # Add parameters section if available
+    if args_section:
+        lines.extend([
+            "## Parameters",
+            "",
+        ])
+        for line in args_section.split("\n"):
+            if line.strip():
+                lines.append(f"- {line.strip()}")
+        lines.append("")
+
+    # Add returns section if available
+    if returns_section:
+        lines.extend([
+            "## Returns",
+            "",
+            returns_section,
+            "",
+        ])
+
+    # Add examples
+    if examples:
+        lines.extend([
+            "## Usage Examples",
+            "",
+        ])
+        for i, example in enumerate(examples):
+            if len(examples) > 1:
+                lines.append(f"### Example {i + 1}")
+                lines.append("")
+            lines.extend([
                 "```python",
-                example,
+                example.strip(),
                 "```",
                 "",
-            ]
-        )
+            ])
 
-    lines.extend(
-        [
-            "## Related",
+    # Add gotchas/tips section for key primitives
+    gotchas = get_gotchas(name)
+    if gotchas:
+        lines.extend([
+            "## Tips & Gotchas",
             "",
-            f"- [[TTA.dev/Primitives]] - Primitives index",
-            f"- [[TTA.dev/Primitives/{category}]] - {category} primitives",
-            "",
-        ]
-    )
+        ])
+        lines.extend(gotchas)
+        lines.append("")
+
+    lines.extend([
+        "## Related",
+        "",
+        f"- [[TTA.dev/Primitives]] - Primitives index",
+        f"- [[TTA.dev/Primitives/{category}]] - {category} primitives",
+        "",
+    ])
 
     return "\n".join(lines)
+
+
+def get_gotchas(name: str) -> list[str]:
+    """Return tips and gotchas for specific primitives."""
+    gotchas = {
+        "RetryPrimitive": [
+            "- ⚠️ Set appropriate `max_retries` to avoid infinite loops",
+            "- 💡 Use `jitter=True` to prevent thundering herd",
+            "- 📝 Only retries on transient errors by default",
+        ],
+        "CircuitBreaker": [
+            "- ⚠️ Circuit stays open for `reset_timeout` seconds",
+            "- 💡 Monitor circuit state via metrics",
+            "- 📝 Half-open state allows one test request",
+        ],
+        "TimeoutPrimitive": [
+            "- ⚠️ Cancelled tasks may leave side effects",
+            "- 💡 Combine with RetryPrimitive for resilience",
+            "- 📝 Use shorter timeouts for user-facing operations",
+        ],
+        "CachePrimitive": [
+            "- ⚠️ Cache invalidation is hard - set appropriate TTL",
+            "- 💡 Use with MemoryPrimitive for bounded caching",
+            "- 📝 Consider cache key uniqueness carefully",
+        ],
+        "ParallelPrimitive": [
+            "- ⚠️ Errors in one branch don't cancel others by default",
+            "- 💡 Set `max_concurrency` to limit resource usage",
+            "- 📝 Results maintain order of input primitives",
+        ],
+    }
+    return gotchas.get(name, [])
 
 
 def main():
