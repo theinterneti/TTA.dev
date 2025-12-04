@@ -82,19 +82,33 @@ def normalize_date_filename(filename: str) -> str | None:
 
 
 def compute_content_hash(content: str) -> str:
-    """Compute a hash of the content for change detection (not for security)."""
-    return hashlib.md5(content.encode(), usedforsecurity=False).hexdigest()[:12]
+    """Compute a hash of the content for change detection (not for security).
+
+    Excludes the 'synced::' line from hash computation to avoid false updates.
+    """
+    # Remove synced:: line before hashing to avoid timestamp-based differences
+    lines = [line for line in content.split("\n") if not line.startswith("synced::")]
+    normalized = "\n".join(lines)
+    return hashlib.md5(normalized.encode(), usedforsecurity=False).hexdigest()[:12]
 
 
 def add_agent_frontmatter(content: str, agent: str, date: str) -> str:
-    """Add or update agent frontmatter in journal content."""
+    """Add or update agent frontmatter in journal content.
+
+    Only updates synced:: timestamp if content actually changed.
+    """
     lines = content.split("\n")
 
-    # Check if frontmatter already exists
+    # Check if frontmatter already exists (starts with agent::)
     if lines and lines[0].startswith("agent::"):
-        # Update existing frontmatter
-        lines[0] = f"agent:: {agent}"
-        return "\n".join(lines)
+        # Already has frontmatter, update synced timestamp only
+        new_lines = []
+        for line in lines:
+            if line.startswith("synced::"):
+                new_lines.append(f"synced:: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+            else:
+                new_lines.append(line)
+        return "\n".join(new_lines)
 
     # Check for other frontmatter patterns
     frontmatter_added = False
@@ -260,6 +274,51 @@ def sync_to_destination(
     return created, updated, skipped
 
 
+def sync_primary_to_notes(
+    dry_run: bool = False,
+    verbose: bool = False,
+) -> tuple[int, int, int]:
+    """Sync any files in PRIMARY_DEST to SECONDARY_DEST that aren't from logseq sources.
+
+    This handles files created directly in TTA.dev/journals/ (like manual entries).
+    """
+    created = 0
+    updated = 0
+    skipped = 0
+
+    SECONDARY_DEST.mkdir(parents=True, exist_ok=True)
+
+    for src_file in PRIMARY_DEST.glob("*.md"):
+        dest_file = SECONDARY_DEST / src_file.name
+
+        src_content = src_file.read_text(encoding="utf-8")
+        src_hash = compute_content_hash(src_content)
+
+        if dest_file.exists():
+            dest_content = dest_file.read_text(encoding="utf-8")
+            dest_hash = compute_content_hash(dest_content)
+
+            if src_hash == dest_hash:
+                skipped += 1
+                if verbose:
+                    print(f"  [skip] {src_file.name} - unchanged")
+                continue
+
+            if not dry_run:
+                shutil.copy2(src_file, dest_file)
+            updated += 1
+            if verbose:
+                print(f"  [update] {src_file.name}")
+        else:
+            if not dry_run:
+                shutil.copy2(src_file, dest_file)
+            created += 1
+            if verbose:
+                print(f"  [create] {src_file.name}")
+
+    return created, updated, skipped
+
+
 def main():
     """Main entry point for journal sync."""
     parser = argparse.ArgumentParser(
@@ -287,13 +346,13 @@ def main():
     if args.dry_run:
         print("🔍 DRY RUN - No changes will be made\n")
 
-    # Step 1: Scan all sources
+    # Step 1: Scan all logseq sources
     print("\n📂 Scanning journal sources...")
     entries = scan_journal_sources(verbose=args.verbose)
     total_entries = sum(len(e) for e in entries.values())
     print(f"   Found {total_entries} entries across {len(entries)} dates")
 
-    # Step 2: Sync to primary destination
+    # Step 2: Sync to primary destination (from logseq sources)
     print(f"\n📥 Syncing to primary: {PRIMARY_DEST}")
     c1, u1, s1 = sync_to_destination(
         entries, PRIMARY_DEST, dry_run=args.dry_run, verbose=args.verbose
@@ -302,11 +361,19 @@ def main():
 
     # Step 3: Optionally sync to TTA-notes
     if args.sync_to_notes:
-        print(f"\n📥 Syncing to TTA-notes: {SECONDARY_DEST}")
+        # First sync logseq sources to TTA-notes
+        print(f"\n📥 Syncing logseq sources to TTA-notes: {SECONDARY_DEST}")
         c2, u2, s2 = sync_to_destination(
             entries, SECONDARY_DEST, dry_run=args.dry_run, verbose=args.verbose
         )
         print(f"   Created: {c2}, Updated: {u2}, Skipped: {s2}")
+
+        # Then sync any files in primary that aren't in TTA-notes yet
+        print(f"\n📥 Syncing primary to TTA-notes (catch-up):")
+        c3, u3, s3 = sync_primary_to_notes(
+            dry_run=args.dry_run, verbose=args.verbose
+        )
+        print(f"   Created: {c3}, Updated: {u3}, Skipped: {s3}")
 
     print("\n" + "=" * 60)
     print("✅ Journal sync complete!")
