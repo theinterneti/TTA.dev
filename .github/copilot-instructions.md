@@ -260,16 +260,13 @@ TTA.dev/
 
 TTA.dev leverages Copilot toolsets for specialized development tasks.
 
-**Available toolsets:**
-- Use `#tta-package-dev` for primitive development
-- Use `#tta-testing` for test development
-- Use `#tta-observability` for tracing/metrics work
-- Use `#tta-agent-dev` for general agent development (includes Context7, AI Toolkit)
-- Use `#tta-mcp-integration` for all available MCP tools
-- Use `#tta-docs` for documentation-related tasks (includes Context7)
-- Use `#tta-pr-review` for GitHub PR reviews (includes GitHub PR tools)
-- Use `#tta-troubleshoot` for investigation and analysis (includes Sift, Grafana)
-- Use `#tta-full-stack` for database operations (includes Database, Grafana, Context7)
+**Available toolsets** (use with `@workspace @toolset-name`):
+- `@tta-backend` - Python backend, primitives, and orchestration
+- `@tta-frontend` - React, TypeScript, and UI development
+- `@tta-devops` - Infrastructure, CI/CD, and automation
+- `@tta-testing` - QA, validation, and test automation
+- `@tta-observability` - Monitoring, tracing, and metrics
+- `@tta-data-scientist` - Data analysis, ML, and research
 
 **Using MCP Tools in Copilot Chat:**
 ```

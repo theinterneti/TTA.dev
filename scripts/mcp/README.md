@@ -14,7 +14,7 @@ bash setup_auto_integration.sh
 # Command Palette → 'Developer: Reload Window'
 
 # Test
-# Copilot: @workspace #tta-agent-dev Show me docs for RetryPrimitive
+# Copilot: @workspace @tta-backend Show me docs for RetryPrimitive
 ```
 
 ---

@@ -572,9 +572,13 @@ uv run pytest -v
 
 **Copilot Toolsets:** See [`.vscode/copilot-toolsets.jsonc`](.vscode/copilot-toolsets.jsonc)
 
-- Use `#tta-package-dev` for primitive development
-- Use `#tta-testing` for test development
-- Use `#tta-observability` for tracing/metrics work
+Available toolsets (use with `@workspace @toolset-name`):
+- `@tta-backend` - Python backend, primitives, and orchestration
+- `@tta-frontend` - React, TypeScript, and UI development
+- `@tta-devops` - Infrastructure, CI/CD, and automation
+- `@tta-testing` - QA, validation, and test automation
+- `@tta-observability` - Monitoring, tracing, and metrics
+- `@tta-data-scientist` - Data analysis, ML, and research
 
 **Full setup guide:** [`GETTING_STARTED.md`](GETTING_STARTED.md)
 
@@ -686,7 +690,7 @@ Each package has:
 3. **Use composition:** Chain primitives with `>>` and `|`
 4. **Add observability:** Use `WorkflowContext` for all workflows
 5. **Test with mocks:** Use `MockPrimitive` for unit tests
-6. **Check toolsets:** Use `#tta-agent-dev` in Copilot for agent-specific tools
+6. **Check toolsets:** Use `@tta-backend`, `@tta-testing`, or `@tta-observability` in Copilot for role-specific tools
 7. **Try adaptive primitives:** Use `AdaptiveRetryPrimitive` for self-improving workflows
 
 ### For Self-Improving Workflows
