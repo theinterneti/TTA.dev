@@ -635,28 +635,78 @@ def _variant_to_primitive(variant: str) -> str:
 
 
 def _generate_wrapper(code: str, variant: str, template_info: dict | None) -> str:
-    """Generate wrapper code for A/B testing."""
-    # Simple wrapper that times execution
+    """Generate wrapper code for A/B testing.
+
+    Creates a test harness that:
+    1. Includes the original code
+    2. Detects callable main/test functions
+    3. Wraps execution with timing and error handling
+    """
+    import re
+
+    # Find potential entry points in the code
+    main_patterns = [
+        r"def\s+(main)\s*\(",
+        r"def\s+(run)\s*\(",
+        r"def\s+(execute)\s*\(",
+        r"def\s+(test_\w+)\s*\(",
+        r"if\s+__name__\s*==\s*['\"]__main__['\"]\s*:",
+    ]
+
+    entry_points = []
+    for pattern in main_patterns:
+        matches = re.findall(pattern, code)
+        entry_points.extend(matches)
+
+    # Generate appropriate call
+    if "main" in entry_points:
+        call_code = "main()"
+    elif "run" in entry_points:
+        call_code = "run()"
+    elif "execute" in entry_points:
+        call_code = "execute()"
+    elif any(ep.startswith("test_") for ep in entry_points):
+        test_fn = next(ep for ep in entry_points if ep.startswith("test_"))
+        call_code = f"{test_fn}()"
+    else:
+        # No entry point found - just import and measure module load time
+        call_code = "pass  # No entry point found - measuring import time"
+
+    # Simple test code that demonstrates the concept
+    # Note: Don't use sys.exit() as E2B treats exit codes as errors
     wrapper = f"""
 import time
 
-# Original code
-{code}
+# Variant being tested: {variant}
+# Primitive: {_variant_to_primitive(variant)}
 
-# Test harness
-if __name__ == "__main__":
-    start = time.time()
-    try:
-        # Variant: {variant}
-        # Run the main code
-        pass  # Replace with actual function calls
-    except Exception as e:
-        print(f"Error: {{e}}")
-    finally:
-        elapsed = time.time() - start
-        print(f"Execution time: {{elapsed:.4f}}s")
+# Measure total execution time
+_start = time.perf_counter()
+
+try:
+    # Original code
+{_indent_code(code, 4)}
+
+    # Try to call entry point
+    {call_code}
+
+    _elapsed = time.perf_counter() - _start
+    print(f"SUCCESS: Execution completed in {{_elapsed:.4f}}s")
+
+except Exception as e:
+    _elapsed = time.perf_counter() - _start
+    print(f"ERROR: {{type(e).__name__}}: {{e}}")
+    print(f"Execution time before error: {{_elapsed:.4f}}s")
+    raise  # Re-raise to mark as error in E2B
 """
     return wrapper
+
+
+def _indent_code(code: str, spaces: int) -> str:
+    """Indent code by specified number of spaces."""
+    indent = " " * spaces
+    lines = code.split("\n")
+    return "\n".join(indent + line if line.strip() else line for line in lines)
 
 
 @app.command()
