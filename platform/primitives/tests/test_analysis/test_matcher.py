@@ -159,8 +159,12 @@ class TestPrimitiveMatcher:
             detected_patterns=["async_operations"],
         )
         # High threshold should filter more
-        high_threshold_matches = matcher.find_matches(analysis, basic_context, min_confidence=0.8)
-        low_threshold_matches = matcher.find_matches(analysis, basic_context, min_confidence=0.1)
+        high_threshold_matches = matcher.find_matches(
+            analysis, basic_context, min_confidence=0.8
+        )
+        low_threshold_matches = matcher.find_matches(
+            analysis, basic_context, min_confidence=0.1
+        )
         assert len(high_threshold_matches) <= len(low_threshold_matches)
 
     def test_matches_sorted_by_confidence(
@@ -213,7 +217,9 @@ class TestPrimitiveMatcher:
         assert "description" in info
         assert "import_path" in info
 
-    def test_get_primitive_info_unknown_returns_none(self, matcher: PrimitiveMatcher) -> None:
+    def test_get_primitive_info_unknown_returns_none(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
         """Verify get_primitive_info returns None for unknown primitive."""
         info = matcher.get_primitive_info("UnknownPrimitive")
         assert info is None
@@ -231,7 +237,9 @@ class TestPrimitiveMatcher:
         )
         analysis = CodeAnalysisResult(
             detected_patterns=["async_operations"],
-            inferred_requirements=["timeout_handling"],  # Add requirement to trigger match
+            inferred_requirements=[
+                "timeout_handling"
+            ],  # Add requirement to trigger match
         )
 
         with_issues = matcher.find_matches(analysis, context_with_issues)
@@ -249,7 +257,9 @@ class TestNewPrimitives:
         """Create a PrimitiveMatcher instance."""
         return PrimitiveMatcher()
 
-    def test_conditional_primitive_matches_routing(self, matcher: PrimitiveMatcher) -> None:
+    def test_conditional_primitive_matches_routing(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
         """Verify ConditionalPrimitive matches routing patterns."""
         analysis = CodeAnalysisResult(
             detected_patterns=["routing_patterns", "validation_patterns"],
@@ -259,7 +269,9 @@ class TestNewPrimitives:
         matched_names = [name for name, _ in matches]
         assert "ConditionalPrimitive" in matched_names
 
-    def test_compensation_primitive_matches_workflow(self, matcher: PrimitiveMatcher) -> None:
+    def test_compensation_primitive_matches_workflow(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
         """Verify CompensationPrimitive matches transaction workflows."""
         analysis = CodeAnalysisResult(
             detected_patterns=["error_handling", "workflow_patterns"],
@@ -269,7 +281,9 @@ class TestNewPrimitives:
         matched_names = [name for name, _ in matches]
         assert "CompensationPrimitive" in matched_names
 
-    def test_delegation_primitive_matches_multi_agent(self, matcher: PrimitiveMatcher) -> None:
+    def test_delegation_primitive_matches_multi_agent(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
         """Verify DelegationPrimitive matches multi-agent patterns."""
         analysis = CodeAnalysisResult(
             detected_patterns=["llm_patterns", "workflow_patterns", "routing_patterns"],
@@ -292,7 +306,11 @@ class TestNewPrimitives:
     def test_task_classifier_matches_routing(self, matcher: PrimitiveMatcher) -> None:
         """Verify TaskClassifierPrimitive matches intent routing."""
         analysis = CodeAnalysisResult(
-            detected_patterns=["routing_patterns", "llm_patterns", "validation_patterns"],
+            detected_patterns=[
+                "routing_patterns",
+                "llm_patterns",
+                "validation_patterns",
+            ],
             inferred_requirements=["intelligent_routing"],
         )
         matches = matcher.find_matches(analysis)
@@ -333,7 +351,9 @@ class TestNewPrimitives:
         matched_names = [name for name, _ in matches]
         assert "AdaptivePrimitive" in matched_names
 
-    def test_adaptive_retry_matches_retry_learning(self, matcher: PrimitiveMatcher) -> None:
+    def test_adaptive_retry_matches_retry_learning(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
         """Verify AdaptiveRetryPrimitive matches adaptive retry patterns."""
         analysis = CodeAnalysisResult(
             detected_patterns=["retry_patterns", "error_handling", "api_calls"],
@@ -343,7 +363,9 @@ class TestNewPrimitives:
         matched_names = [name for name, _ in matches]
         assert "AdaptiveRetryPrimitive" in matched_names
 
-    def test_git_collaboration_matches_workflow(self, matcher: PrimitiveMatcher) -> None:
+    def test_git_collaboration_matches_workflow(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
         """Verify GitCollaborationPrimitive matches multi-agent workflows."""
         analysis = CodeAnalysisResult(
             detected_patterns=["workflow_patterns"],
@@ -353,7 +375,9 @@ class TestNewPrimitives:
         matched_names = [name for name, _ in matches]
         assert "GitCollaborationPrimitive" in matched_names
 
-    def test_all_new_primitives_have_required_fields(self, matcher: PrimitiveMatcher) -> None:
+    def test_all_new_primitives_have_required_fields(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
         """Verify all new primitives have required catalog fields."""
         new_primitives = [
             "ConditionalPrimitive",
@@ -414,7 +438,9 @@ class TestPrimitiveConfidenceScoring:
             inferred_requirements=["error_recovery"],
         )
         single_matches = matcher.find_matches(single_analysis)
-        single_retry = next((m for m in single_matches if m[0] == "RetryPrimitive"), None)
+        single_retry = next(
+            (m for m in single_matches if m[0] == "RetryPrimitive"), None
+        )
 
         # Multiple requirements
         multi_analysis = CodeAnalysisResult(
