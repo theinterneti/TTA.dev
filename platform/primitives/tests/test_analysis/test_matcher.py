@@ -37,6 +37,17 @@ class TestPrimitiveMatcher:
             "RouterPrimitive",
             "CircuitBreakerPrimitive",
             "MemoryPrimitive",
+            # New primitives
+            "ConditionalPrimitive",
+            "CompensationPrimitive",
+            "DelegationPrimitive",
+            "MultiModelWorkflow",
+            "TaskClassifierPrimitive",
+            "MockPrimitive",
+            "InstrumentedPrimitive",
+            "AdaptivePrimitive",
+            "AdaptiveRetryPrimitive",
+            "GitCollaborationPrimitive",
         ]
         for primitive in expected_primitives:
             assert primitive in matcher.primitive_catalog, f"Missing: {primitive}"
@@ -228,3 +239,144 @@ class TestPrimitiveMatcher:
 
         # Both should return matches (issue detection is a bonus)
         assert len(with_issues) > 0 or len(without_issues) > 0
+
+
+class TestNewPrimitives:
+    """Tests for newly added primitives in the catalog."""
+
+    @pytest.fixture
+    def matcher(self) -> PrimitiveMatcher:
+        """Create a PrimitiveMatcher instance."""
+        return PrimitiveMatcher()
+
+    def test_conditional_primitive_matches_routing(self, matcher: PrimitiveMatcher) -> None:
+        """Verify ConditionalPrimitive matches routing patterns."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["routing_patterns", "validation_patterns"],
+            inferred_requirements=["intelligent_routing"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "ConditionalPrimitive" in matched_names
+
+    def test_compensation_primitive_matches_workflow(self, matcher: PrimitiveMatcher) -> None:
+        """Verify CompensationPrimitive matches transaction workflows."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["error_handling", "workflow_patterns"],
+            inferred_requirements=["error_recovery", "transaction_management"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "CompensationPrimitive" in matched_names
+
+    def test_delegation_primitive_matches_multi_agent(self, matcher: PrimitiveMatcher) -> None:
+        """Verify DelegationPrimitive matches multi-agent patterns."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["llm_patterns", "workflow_patterns", "routing_patterns"],
+            inferred_requirements=["multi_agent", "intelligent_routing"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "DelegationPrimitive" in matched_names
+
+    def test_multi_model_workflow_matches_llm(self, matcher: PrimitiveMatcher) -> None:
+        """Verify MultiModelWorkflow matches LLM orchestration."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["llm_patterns", "routing_patterns"],
+            inferred_requirements=["multi_agent", "llm_reliability"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "MultiModelWorkflow" in matched_names
+
+    def test_task_classifier_matches_routing(self, matcher: PrimitiveMatcher) -> None:
+        """Verify TaskClassifierPrimitive matches intent routing."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["routing_patterns", "llm_patterns", "validation_patterns"],
+            inferred_requirements=["intelligent_routing"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "TaskClassifierPrimitive" in matched_names
+
+    def test_mock_primitive_matches_testing(self, matcher: PrimitiveMatcher) -> None:
+        """Verify MockPrimitive matches testing patterns."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["testing_patterns"],
+            inferred_requirements=["testing_support"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "MockPrimitive" in matched_names
+
+    def test_instrumented_primitive_matches_observability(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
+        """Verify InstrumentedPrimitive matches observability patterns."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["logging_patterns"],
+            inferred_requirements=["observability"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "InstrumentedPrimitive" in matched_names
+
+    def test_adaptive_primitive_matches_self_improvement(
+        self, matcher: PrimitiveMatcher
+    ) -> None:
+        """Verify AdaptivePrimitive matches self-improvement patterns."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["llm_patterns", "workflow_patterns"],
+            inferred_requirements=["self_improvement", "llm_reliability"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "AdaptivePrimitive" in matched_names
+
+    def test_adaptive_retry_matches_retry_learning(self, matcher: PrimitiveMatcher) -> None:
+        """Verify AdaptiveRetryPrimitive matches adaptive retry patterns."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["retry_patterns", "error_handling", "api_calls"],
+            inferred_requirements=["retry_logic", "self_improvement"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "AdaptiveRetryPrimitive" in matched_names
+
+    def test_git_collaboration_matches_workflow(self, matcher: PrimitiveMatcher) -> None:
+        """Verify GitCollaborationPrimitive matches multi-agent workflows."""
+        analysis = CodeAnalysisResult(
+            detected_patterns=["workflow_patterns"],
+            inferred_requirements=["multi_agent"],
+        )
+        matches = matcher.find_matches(analysis)
+        matched_names = [name for name, _ in matches]
+        assert "GitCollaborationPrimitive" in matched_names
+
+    def test_all_new_primitives_have_required_fields(self, matcher: PrimitiveMatcher) -> None:
+        """Verify all new primitives have required catalog fields."""
+        new_primitives = [
+            "ConditionalPrimitive",
+            "CompensationPrimitive",
+            "DelegationPrimitive",
+            "MultiModelWorkflow",
+            "TaskClassifierPrimitive",
+            "MockPrimitive",
+            "InstrumentedPrimitive",
+            "AdaptivePrimitive",
+            "AdaptiveRetryPrimitive",
+            "GitCollaborationPrimitive",
+        ]
+        required_fields = [
+            "description",
+            "import_path",
+            "patterns",
+            "use_cases",
+            "confidence_factors",
+            "related_primitives",
+        ]
+        for primitive in new_primitives:
+            info = matcher.primitive_catalog.get(primitive)
+            assert info is not None, f"Missing primitive: {primitive}"
+            for field in required_fields:
+                assert field in info, f"{primitive} missing field: {field}"

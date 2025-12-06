@@ -249,6 +249,19 @@ class PatternDetector:
             "testing_patterns": "testing_support",
         }
 
+        # Additional requirement inference rules (pattern combinations)
+        self._combination_requirements: list[tuple[set[str], str]] = [
+            # Multi-agent detected from LLM + workflow + routing
+            ({"llm_patterns", "workflow_patterns", "routing_patterns"}, "multi_agent"),
+            # Self-improvement detected from LLM + retry + logging
+            (
+                {"llm_patterns", "retry_patterns", "logging_patterns"},
+                "self_improvement",
+            ),
+            # Transaction management from error handling + workflow
+            ({"error_handling", "workflow_patterns"}, "transaction_management"),
+        ]
+
     def analyze(self, code: str, file_path: str = "") -> CodeAnalysisResult:
         """Analyze code and detect patterns.
 
@@ -288,11 +301,19 @@ class PatternDetector:
         """Infer requirements from detected patterns."""
         requirements = []
 
+        # First, map individual patterns to requirements
         for pattern in detected_patterns:
             if pattern in self._requirement_map:
                 req = self._requirement_map[pattern]
                 if req not in requirements:
                     requirements.append(req)
+
+        # Then, check for combination requirements
+        pattern_set = set(detected_patterns)
+        for required_patterns, requirement in self._combination_requirements:
+            if required_patterns.issubset(pattern_set):
+                if requirement not in requirements:
+                    requirements.append(requirement)
 
         return requirements
 
@@ -342,7 +363,9 @@ class PatternDetector:
                 max_indent = max(max_indent, level)
         return max_indent
 
-    def add_pattern(self, name: str, regexes: list[str], requirement: str | None = None) -> None:
+    def add_pattern(
+        self, name: str, regexes: list[str], requirement: str | None = None
+    ) -> None:
         """Add a custom pattern for detection.
 
         Args:

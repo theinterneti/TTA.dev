@@ -378,3 +378,96 @@ def test_fetch_data(mock_client):
         ]
         for pattern in new_patterns:
             assert pattern in detector._requirement_map, f"Missing requirement for: {pattern}"
+
+
+class TestCombinationRequirements:
+    """Tests for combination-based requirement inference."""
+
+    @pytest.fixture
+    def detector(self) -> PatternDetector:
+        """Create a PatternDetector instance."""
+        return PatternDetector()
+
+    def test_multi_agent_inferred_from_llm_workflow_routing(
+        self, detector: PatternDetector
+    ) -> None:
+        """Verify multi_agent requirement inferred from pattern combination."""
+        code = """
+import openai
+from router import select_model
+
+class AgentOrchestrator:
+    def __init__(self):
+        self.pipeline = []
+
+    def route_task(self, task):
+        if task.type == 'code':
+            return self.code_agent
+        return self.default_agent
+
+    async def orchestrate(self, task):
+        response = openai.chat.completions.create(
+            model=select_model(task),
+            messages=self.pipeline
+        )
+        return response
+"""
+        result = detector.analyze(code)
+        assert "llm_patterns" in result.detected_patterns
+        assert "workflow_patterns" in result.detected_patterns
+        assert "routing_patterns" in result.detected_patterns
+        assert "multi_agent" in result.inferred_requirements
+
+    def test_self_improvement_inferred_from_llm_retry_logging(
+        self, detector: PatternDetector
+    ) -> None:
+        """Verify self_improvement requirement inferred from pattern combination."""
+        code = """
+import openai
+import logging
+from tenacity import retry, exponential_backoff
+
+logger = logging.getLogger(__name__)
+
+@retry(backoff=exponential_backoff())
+async def adaptive_call(prompt):
+    logger.info("Attempting call with prompt")
+    response = await openai.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    logger.debug("Response received")
+    return response
+"""
+        result = detector.analyze(code)
+        assert "llm_patterns" in result.detected_patterns
+        assert "retry_patterns" in result.detected_patterns
+        assert "logging_patterns" in result.detected_patterns
+        assert "self_improvement" in result.inferred_requirements
+
+    def test_transaction_management_inferred_from_error_workflow(
+        self, detector: PatternDetector
+    ) -> None:
+        """Verify transaction_management requirement inferred from pattern combination."""
+        code = """
+class OrderPipeline:
+    def __init__(self):
+        self.steps = []
+
+    async def execute(self, order):
+        try:
+            for step in self.steps:
+                await step.execute(order)
+        except Exception as e:
+            await self.rollback(order)
+            raise
+"""
+        result = detector.analyze(code)
+        assert "error_handling" in result.detected_patterns
+        assert "workflow_patterns" in result.detected_patterns
+        assert "transaction_management" in result.inferred_requirements
+
+    def test_combination_requirements_list_populated(self, detector: PatternDetector) -> None:
+        """Verify combination requirements are defined."""
+        assert hasattr(detector, "_combination_requirements")
+        assert len(detector._combination_requirements) >= 3
