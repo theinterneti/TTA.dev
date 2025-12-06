@@ -1,5 +1,15 @@
 # TTA.dev Copilot Instructions
 
+> **For Vibe Coders:** TTA.dev helps you build fast AND scale when your app goes viral.
+> While awesome-copilot customizes GitHub Copilot, TTA.dev provides foundational patterns 
+> and primitives that make ANY AI coding agent reliable and scale-ready.
+
+## Philosophy
+
+1. **Vibe first** - Build fast, ship fast
+2. **Scale when needed** - Add primitives incrementally  
+3. **Don't over-engineer** - Simple code that works > complex code that doesn't
+
 ## Package Manager
 
 **Use `uv`, never `pip` or `poetry`**

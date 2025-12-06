@@ -1,6 +1,17 @@
 # Getting Started with TTA.dev
 
-**Build reliable AI applications with production-ready primitives and patterns.**
+> **For Vibe Coders:** Build fast, scale when needed. TTA.dev is here when your app starts getting real traffic.
+
+**Build fast with AI. Scale with confidence when you go viral.**
+
+## The Vibe Coder's Journey
+
+```
+1. VIBE        → You + AI = App exists 🎉
+2. SHIP        → It works! Push it live
+3. TRACTION    → Users arriving... add CachePrimitive (save 💰)
+4. SCALING     → Going viral! Full primitives + observability
+```
 
 ## Quick Start (5 minutes)
 

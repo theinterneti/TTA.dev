@@ -46,6 +46,18 @@
             },
             "description": "Hypertool MCP Loader - Persona-based tool orchestration",
             "disabled": false
+        },
+        "tta-dev": {
+            "command": "uv",
+            "args": [
+                "run",
+                "--directory",
+                "${workspaceFolder}/platform/primitives",
+                "tta-dev-mcp"
+            ],
+            "env": {},
+            "description": "TTA.dev Primitives - Code analysis and primitive recommendations",
+            "disabled": false
         }
     }
 }

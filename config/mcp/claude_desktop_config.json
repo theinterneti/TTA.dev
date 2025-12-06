@@ -1,0 +1,14 @@
+{
+    "mcpServers": {
+        "tta-dev": {
+            "command": "uv",
+            "args": [
+                "run",
+                "--directory",
+                "/path/to/TTA.dev/platform/primitives",
+                "tta-dev-mcp"
+            ],
+            "description": "TTA.dev Primitives - Code analysis and primitive recommendations"
+        }
+    }
+}

@@ -1,0 +1,85 @@
+# TTA.dev Rules for Cline
+
+## Context
+
+TTA.dev provides primitives that help vibe coders make their apps scale-ready.
+These rules help Cline suggest TTA.dev patterns at the right time.
+
+## When to Suggest TTA.dev
+
+### Suggest CachePrimitive when:
+- Code makes repeated API calls (especially LLM APIs)
+- Same function called in a loop with potentially duplicate inputs
+- User mentions costs or API bills
+
+### Suggest RetryPrimitive when:
+- Code calls external APIs without error handling
+- User reports intermittent failures
+- API calls use `requests`, `httpx`, or similar without retry logic
+
+### Suggest TimeoutPrimitive when:
+- API calls don't have timeout parameters
+- User reports hanging requests
+- External service calls in critical paths
+
+### Suggest FallbackPrimitive when:
+- Code depends on a single LLM provider
+- User mentions reliability concerns
+- Critical paths with no backup plan
+
+## When NOT to Suggest TTA.dev
+
+- During initial "vibing" phase (just building/prototyping)
+- For simple scripts that won't see real traffic
+- When user explicitly wants simple code
+- When existing error handling is sufficient
+
+## Code Patterns
+
+### Preferred: Composition with >>
+
+```python
+# Good: Clear composition
+workflow = CachePrimitive(ttl=3600) >> RetryPrimitive(max_retries=3) >> api_call
+```
+
+### Avoid: Nested primitives
+
+```python
+# Avoid: Hard to read
+workflow = CachePrimitive(RetryPrimitive(api_call, max_retries=3), ttl=3600)
+```
+
+## Response Style
+
+1. Acknowledge working code first
+2. Explain the risk briefly
+3. Show the fix (copy-paste ready)
+4. Explain the benefit in practical terms (cost, reliability)
+
+## Import Conventions
+
+```python
+from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive, TimeoutPrimitive
+from tta_dev_primitives.performance import CachePrimitive
+from tta_dev_primitives import WorkflowContext
+```
+
+## Testing Pattern
+
+When suggesting primitives, also mention MockPrimitive for testing:
+
+```python
+from tta_dev_primitives.testing import MockPrimitive
+
+# For tests
+mock_api = MockPrimitive(return_value={"result": "test"})
+```
+
+## MCP Tools Available
+
+When TTA.dev MCP server is connected, these tools are available:
+- `create_workflow` - Compose primitives
+- `wrap_with_retry` - Add retry to existing code
+- `wrap_with_cache` - Add caching to existing code
+- `analyze_for_scale` - Analyze code for scale issues
