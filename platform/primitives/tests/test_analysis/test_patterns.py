@@ -42,7 +42,9 @@ class TestPatternDetector:
         for pattern in expected_patterns:
             assert pattern in detector.patterns, f"Missing pattern: {pattern}"
 
-    def test_analyze_returns_code_analysis_result(self, detector: PatternDetector) -> None:
+    def test_analyze_returns_code_analysis_result(
+        self, detector: PatternDetector
+    ) -> None:
         """Verify analyze returns CodeAnalysisResult."""
         code = "def hello(): pass"
         result = detector.analyze(code)
@@ -377,7 +379,9 @@ def test_fetch_data(mock_client):
             "testing_patterns",
         ]
         for pattern in new_patterns:
-            assert pattern in detector._requirement_map, f"Missing requirement for: {pattern}"
+            assert pattern in detector._requirement_map, (
+                f"Missing requirement for: {pattern}"
+            )
 
 
 class TestCombinationRequirements:
@@ -467,7 +471,9 @@ class OrderPipeline:
         assert "workflow_patterns" in result.detected_patterns
         assert "transaction_management" in result.inferred_requirements
 
-    def test_combination_requirements_list_populated(self, detector: PatternDetector) -> None:
+    def test_combination_requirements_list_populated(
+        self, detector: PatternDetector
+    ) -> None:
         """Verify combination requirements are defined."""
         assert hasattr(detector, "_combination_requirements")
         assert len(detector._combination_requirements) >= 3
@@ -515,7 +521,9 @@ def simple():
         # This is expected behavior for simple pattern matching
         assert isinstance(result, CodeAnalysisResult)
 
-    def test_string_literals_may_trigger_patterns(self, detector: PatternDetector) -> None:
+    def test_string_literals_may_trigger_patterns(
+        self, detector: PatternDetector
+    ) -> None:
         """Verify string literals behavior."""
         code = '''
 docs = """
@@ -624,27 +632,23 @@ class TestCustomPatterns:
         detector.add_pattern(
             "custom_pattern",
             [r"custom_function\s*\("],
-            requirement="custom_requirement"
+            requirement="custom_requirement",
         )
         assert "custom_pattern" in detector.patterns
         assert "custom_pattern" in detector._requirement_map
 
     def test_custom_pattern_detected(self, detector: PatternDetector) -> None:
         """Verify custom patterns are detected."""
-        detector.add_pattern(
-            "my_pattern",
-            [r"do_special_thing\s*\("]
-        )
+        detector.add_pattern("my_pattern", [r"do_special_thing\s*\("])
         code = "result = do_special_thing(data)"
         result = detector.analyze(code)
         assert "my_pattern" in result.detected_patterns
 
-    def test_custom_pattern_without_requirement(self, detector: PatternDetector) -> None:
+    def test_custom_pattern_without_requirement(
+        self, detector: PatternDetector
+    ) -> None:
         """Verify custom patterns work without requirements."""
-        detector.add_pattern(
-            "no_req_pattern",
-            [r"special_call\s*\("]
-        )
+        detector.add_pattern("no_req_pattern", [r"special_call\s*\("])
         code = "special_call()"
         result = detector.analyze(code)
         assert "no_req_pattern" in result.detected_patterns
@@ -675,7 +679,9 @@ def add(a, b):
         result = detector.analyze(code)
         assert result.complexity_level == "low"
 
-    def test_many_functions_increases_complexity(self, detector: PatternDetector) -> None:
+    def test_many_functions_increases_complexity(
+        self, detector: PatternDetector
+    ) -> None:
         """Verify many functions increase complexity."""
         # Need many lines AND functions to trigger higher complexity
         code = "\n".join([f"def func_{i}():\n    return {i}" for i in range(15)])
@@ -689,18 +695,22 @@ def add(a, b):
     def test_many_classes_increases_complexity(self, detector: PatternDetector) -> None:
         """Verify many classes with methods increase complexity."""
         # Need substantial code to trigger higher complexity
-        code = "\n".join([
-            f"""class Class_{i}:
+        code = "\n".join(
+            [
+                f"""class Class_{i}:
     def method_a(self): pass
     def method_b(self): pass"""
-            for i in range(5)
-        ])
+                for i in range(5)
+            ]
+        )
         result = detector.analyze(code)
         # Complexity is based on multiple factors
         assert isinstance(result.complexity_level, str)
         assert result.complexity_level in ["low", "medium", "high"]
 
-    def test_many_patterns_increases_complexity(self, detector: PatternDetector) -> None:
+    def test_many_patterns_increases_complexity(
+        self, detector: PatternDetector
+    ) -> None:
         """Verify many patterns increase complexity."""
         code = """
 import logging

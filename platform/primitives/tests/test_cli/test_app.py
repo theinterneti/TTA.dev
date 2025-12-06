@@ -110,7 +110,9 @@ class TestAnalyzeCommand:
         # Should show analysis results
         assert "Analysis" in result.stdout or "Recommendations" in result.stdout
 
-    def test_analyze_detects_patterns(self, runner: CliRunner, sample_code_file: Path) -> None:
+    def test_analyze_detects_patterns(
+        self, runner: CliRunner, sample_code_file: Path
+    ) -> None:
         """Verify analyze detects patterns."""
         result = runner.invoke(app, ["analyze", str(sample_code_file)])
         assert result.exit_code == 0
@@ -118,9 +120,13 @@ class TestAnalyzeCommand:
         output = result.stdout.lower()
         assert "async" in output or "pattern" in output
 
-    def test_analyze_json_output(self, runner: CliRunner, sample_code_file: Path) -> None:
+    def test_analyze_json_output(
+        self, runner: CliRunner, sample_code_file: Path
+    ) -> None:
         """Verify analyze --output json works."""
-        result = runner.invoke(app, ["analyze", str(sample_code_file), "--output", "json"])
+        result = runner.invoke(
+            app, ["analyze", str(sample_code_file), "--output", "json"]
+        )
         assert result.exit_code == 0
         # Extract JSON from output (may have log lines before it)
         output = result.stdout
@@ -130,12 +136,18 @@ class TestAnalyzeCommand:
         assert "analysis" in data
         assert "recommendations" in data
 
-    def test_analyze_brief_output(self, runner: CliRunner, sample_code_file: Path) -> None:
+    def test_analyze_brief_output(
+        self, runner: CliRunner, sample_code_file: Path
+    ) -> None:
         """Verify analyze --output brief works."""
-        result = runner.invoke(app, ["analyze", str(sample_code_file), "--output", "brief"])
+        result = runner.invoke(
+            app, ["analyze", str(sample_code_file), "--output", "brief"]
+        )
         assert result.exit_code == 0
 
-    def test_analyze_with_templates(self, runner: CliRunner, sample_code_file: Path) -> None:
+    def test_analyze_with_templates(
+        self, runner: CliRunner, sample_code_file: Path
+    ) -> None:
         """Verify analyze --templates shows code templates."""
         result = runner.invoke(app, ["analyze", str(sample_code_file), "--templates"])
         assert result.exit_code == 0
@@ -143,7 +155,9 @@ class TestAnalyzeCommand:
         output = result.stdout
         assert "from tta_dev_primitives" in output or "Template" in output
 
-    def test_analyze_min_confidence(self, runner: CliRunner, sample_code_file: Path) -> None:
+    def test_analyze_min_confidence(
+        self, runner: CliRunner, sample_code_file: Path
+    ) -> None:
         """Verify analyze --min-confidence works."""
         result = runner.invoke(
             app,
@@ -156,7 +170,9 @@ class TestAnalyzeCommand:
         result = runner.invoke(app, ["analyze", "/nonexistent/file.py"])
         assert result.exit_code != 0
 
-    def test_analyze_complex_file(self, runner: CliRunner, complex_code_file: Path) -> None:
+    def test_analyze_complex_file(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
         """Verify analyze works on complex code."""
         result = runner.invoke(app, ["analyze", str(complex_code_file)])
         assert result.exit_code == 0
@@ -281,7 +297,9 @@ class TestCLIIntegration:
     def test_analyze_then_docs(self, runner: CliRunner, sample_code_file: Path) -> None:
         """Verify workflow: analyze -> docs."""
         # First analyze
-        analyze_result = runner.invoke(app, ["analyze", str(sample_code_file), "--output", "json"])
+        analyze_result = runner.invoke(
+            app, ["analyze", str(sample_code_file), "--output", "json"]
+        )
         assert analyze_result.exit_code == 0
 
         # Parse recommendations
@@ -293,9 +311,13 @@ class TestCLIIntegration:
             assert docs_result.exit_code == 0
             assert primitive in docs_result.stdout
 
-    def test_json_output_is_parseable(self, runner: CliRunner, complex_code_file: Path) -> None:
+    def test_json_output_is_parseable(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
         """Verify JSON output is always valid."""
-        result = runner.invoke(app, ["analyze", str(complex_code_file), "--output", "json"])
+        result = runner.invoke(
+            app, ["analyze", str(complex_code_file), "--output", "json"]
+        )
         assert result.exit_code == 0
 
         # Should parse without error
@@ -308,7 +330,9 @@ class TestCLIIntegration:
         self, runner: CliRunner, complex_code_file: Path
     ) -> None:
         """Verify recommendations have required fields."""
-        result = runner.invoke(app, ["analyze", str(complex_code_file), "--output", "json"])
+        result = runner.invoke(
+            app, ["analyze", str(complex_code_file), "--output", "json"]
+        )
         assert result.exit_code == 0
 
         data = self._extract_json(result.stdout)
@@ -316,3 +340,77 @@ class TestCLIIntegration:
             assert "primitive_name" in rec
             assert "confidence_score" in rec
             assert "reasoning" in rec
+
+
+class TestBenchmarkCommand:
+    """Tests for the benchmark command."""
+
+    def test_benchmark_help(self, runner: CliRunner) -> None:
+        """Verify benchmark --help works."""
+        result = runner.invoke(app, ["benchmark", "--help"])
+        assert result.exit_code == 0
+        assert "benchmark" in result.stdout.lower()
+        assert "ACE" in result.stdout or "learning" in result.stdout.lower()
+
+    def test_benchmark_shows_options(self, runner: CliRunner) -> None:
+        """Verify benchmark command shows all options."""
+        result = runner.invoke(app, ["benchmark", "--help"])
+        assert result.exit_code == 0
+        assert "--difficulty" in result.stdout
+        assert "--output" in result.stdout
+        assert "--iterations" in result.stdout
+
+    def test_benchmark_without_e2b_key_fails_gracefully(
+        self, runner: CliRunner, monkeypatch
+    ) -> None:
+        """Verify benchmark handles missing E2B key gracefully."""
+        # Remove E2B keys from environment
+        monkeypatch.delenv("E2B_API_KEY", raising=False)
+        monkeypatch.delenv("E2B_KEY", raising=False)
+
+        result = runner.invoke(app, ["benchmark", "--difficulty", "easy"])
+        # Should fail but not crash
+        assert result.exit_code == 1
+        assert "E2B" in result.stdout or "API key" in result.stdout.lower()
+
+
+class TestABTestCommand:
+    """Tests for the ab-test command."""
+
+    def test_ab_test_help(self, runner: CliRunner) -> None:
+        """Verify ab-test --help works."""
+        result = runner.invoke(app, ["ab-test", "--help"])
+        assert result.exit_code == 0
+        assert "A/B" in result.stdout or "test" in result.stdout.lower()
+
+    def test_ab_test_shows_options(self, runner: CliRunner) -> None:
+        """Verify ab-test command shows all options."""
+        result = runner.invoke(app, ["ab-test", "--help"])
+        assert result.exit_code == 0
+        assert "--variants" in result.stdout
+        assert "--runs" in result.stdout
+        assert "--output" in result.stdout
+
+    def test_ab_test_requires_file(self, runner: CliRunner) -> None:
+        """Verify ab-test requires a file argument."""
+        result = runner.invoke(app, ["ab-test"])
+        # Should show error about missing file
+        assert result.exit_code != 0
+
+    def test_ab_test_without_e2b_key_fails_gracefully(
+        self, runner: CliRunner, sample_code_file: Path, monkeypatch
+    ) -> None:
+        """Verify ab-test handles missing E2B key gracefully."""
+        # Remove E2B keys from environment
+        monkeypatch.delenv("E2B_API_KEY", raising=False)
+        monkeypatch.delenv("E2B_KEY", raising=False)
+
+        result = runner.invoke(app, ["ab-test", str(sample_code_file)])
+        # Should fail but not crash
+        assert result.exit_code == 1
+        assert "E2B" in result.stdout or "API key" in result.stdout.lower()
+
+    def test_ab_test_file_not_found(self, runner: CliRunner) -> None:
+        """Verify ab-test handles non-existent file."""
+        result = runner.invoke(app, ["ab-test", "nonexistent_file.py"])
+        assert result.exit_code != 0
