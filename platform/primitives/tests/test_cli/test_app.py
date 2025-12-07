@@ -238,6 +238,59 @@ class TestAnalyzeCommand:
         # Should have line_info
         assert "line_info" in data
 
+    def test_analyze_apply_flag(self, runner: CliRunner, tmp_path: Path) -> None:
+        """Verify --apply modifies file with top recommendation."""
+        # Create a file with API call patterns
+        test_code = '''
+import httpx
+
+async def fetch_api(url: str):
+    """Fetch data from API."""
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        return response.json()
+'''
+        test_file = tmp_path / "apply_test.py"
+        test_file.write_text(test_code)
+
+        result = runner.invoke(app, ["analyze", str(test_file), "--apply"])
+        assert result.exit_code == 0
+
+        # File should be modified with TTA.dev imports
+        modified = test_file.read_text()
+        assert "from tta_dev_primitives" in modified
+
+    def test_analyze_apply_primitive_flag(
+        self, runner: CliRunner, complex_code_file: Path, tmp_path: Path
+    ) -> None:
+        """Verify --apply-primitive applies specific primitive."""
+        # Copy file to temp location
+        test_file = tmp_path / "apply_primitive_test.py"
+        test_file.write_text(complex_code_file.read_text())
+
+        result = runner.invoke(
+            app,
+            ["analyze", str(test_file), "--apply-primitive", "RetryPrimitive"],
+        )
+        assert result.exit_code == 0
+
+        # File should have RetryPrimitive
+        modified = test_file.read_text()
+        assert "RetryPrimitive" in modified
+
+    def test_analyze_apply_unknown_primitive(
+        self, runner: CliRunner, sample_code_file: Path
+    ) -> None:
+        """Verify --apply-primitive fails for unknown primitive."""
+        result = runner.invoke(
+            app,
+            ["analyze", str(sample_code_file), "--apply-primitive", "UnknownPrimitive"],
+        )
+        assert result.exit_code == 1
+        assert (
+            "Unknown primitive" in result.stdout or "unknown" in result.stdout.lower()
+        )
+
 
 class TestPrimitivesCommand:
     """Tests for the primitives command."""

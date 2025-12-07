@@ -82,6 +82,18 @@ def analyze(
         "-d",
         help="Show suggested code transformations as diffs",
     ),
+    apply: bool = typer.Option(
+        False,
+        "--apply",
+        "-a",
+        help="Auto-apply top recommendation (modifies file in place)",
+    ),
+    apply_primitive: str = typer.Option(
+        None,
+        "--apply-primitive",
+        "-p",
+        help="Apply specific primitive instead of top recommendation",
+    ),
 ) -> None:
     """Analyze code and suggest TTA.dev primitives.
 
@@ -93,6 +105,8 @@ def analyze(
         tta-dev analyze app.py --output json
         tta-dev analyze workflow.py --min-confidence 0.5 --templates
         tta-dev analyze api.py --quiet --suggest-diff  # Agent-friendly
+        tta-dev analyze api.py --apply                 # Auto-fix with top rec
+        tta-dev analyze api.py --apply-primitive RetryPrimitive  # Apply specific
     """
     # Suppress logs if --quiet
     if quiet:
@@ -115,6 +129,46 @@ def analyze(
         file_path=str(file),
         min_confidence=min_confidence,
     )
+
+    # Handle --apply or --apply-primitive
+    if apply or apply_primitive:
+        if not report.recommendations:
+            if not quiet:
+                console.print("[yellow]No recommendations to apply.[/yellow]")
+            raise typer.Exit(0) from None
+
+        # Determine which primitive to apply
+        primitive_to_apply = apply_primitive
+        if not primitive_to_apply:
+            primitive_to_apply = report.recommendations[0].primitive_name
+
+        # Verify the primitive exists
+        info = analyzer.get_primitive_info(primitive_to_apply)
+        if "error" in info:
+            console.print(f"[red]Unknown primitive: {primitive_to_apply}[/red]")
+            raise typer.Exit(1) from None
+
+        # Find targets and generate transformation
+        targets = _find_transform_targets(code, primitive_to_apply, None)
+        if not targets:
+            if not quiet:
+                console.print(
+                    f"[yellow]No suitable functions found for {primitive_to_apply}[/yellow]"
+                )
+            raise typer.Exit(0) from None
+
+        transformed = _generate_transformation(code, primitive_to_apply, targets, info)
+
+        # Write back to file
+        file.write_text(transformed)
+
+        if not quiet:
+            console.print(f"[green]✓ Applied {primitive_to_apply} to {file}[/green]")
+            console.print(
+                f"  Wrapped functions: {', '.join(t['name'] for t in targets)}"
+            )
+
+        return  # Exit after applying
 
     # Output based on format
     if output == "json":
@@ -641,9 +695,15 @@ def _is_suitable_for_primitive(func_code: str, primitive: str) -> bool:
         "CircuitBreakerPrimitive": ["request", "api", "external", "service"],
         "ParallelPrimitive": ["for ", "requests", "multiple", "batch"],
         "FallbackPrimitive": ["llm", "openai", "api", "provider"],
+        "SequentialPrimitive": ["async def", "await", "step", "pipeline", "process"],
+        "AdaptivePrimitive": ["llm", "openai", "claude", "retry", "adaptive"],
+        "AdaptiveRetryPrimitive": ["request", "api", "retry", "fetch"],
     }
 
     keywords = patterns.get(primitive, [])
+    # If no specific patterns defined, match any async function
+    if not keywords:
+        return "async def" in code_lower or "await" in code_lower
     return any(kw in code_lower for kw in keywords)
 
 
