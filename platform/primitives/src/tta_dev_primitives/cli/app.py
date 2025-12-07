@@ -515,6 +515,247 @@ def serve(
 
 
 @app.command()
+def transform(
+    file: Path = typer.Argument(
+        ...,
+        help="File to transform",
+        exists=True,
+        readable=True,
+    ),
+    primitive: str = typer.Argument(
+        ...,
+        help="Primitive to wrap code with (e.g., RetryPrimitive, CachePrimitive)",
+    ),
+    function: str = typer.Option(
+        None,
+        "--function",
+        "-f",
+        help="Specific function to wrap (default: auto-detect)",
+    ),
+    output: str = typer.Option(
+        "stdout",
+        "--output",
+        "-o",
+        help="Output: stdout, file, or diff",
+    ),
+    quiet: bool = typer.Option(
+        False,
+        "--quiet",
+        "-q",
+        help="Suppress informational output",
+    ),
+) -> None:
+    """Transform code by wrapping with a TTA.dev primitive.
+
+    Automatically detects functions that match the primitive's use case
+    and generates transformed code.
+
+    Examples:
+        tta-dev transform api.py RetryPrimitive           # Wrap API calls with retry
+        tta-dev transform api.py CachePrimitive -f fetch  # Cache specific function
+        tta-dev transform api.py ParallelPrimitive -o diff  # Show as diff
+    """
+    try:
+        code = file.read_text()
+    except Exception as e:
+        console.print(f"[red]Error reading file: {e}[/red]")
+        raise typer.Exit(1) from e
+
+    # Get primitive info
+    info = analyzer.get_primitive_info(primitive)
+    if "error" in info:
+        console.print(f"[red]Unknown primitive: {primitive}[/red]")
+        console.print("[dim]Use 'tta-dev primitives' to see available primitives[/dim]")
+        raise typer.Exit(1) from None
+
+    # Find target functions
+    targets = _find_transform_targets(code, primitive, function)
+
+    if not targets:
+        if not quiet:
+            console.print(
+                f"[yellow]No suitable functions found for {primitive}[/yellow]"
+            )
+        raise typer.Exit(0) from None
+
+    # Generate transformed code
+    transformed = _generate_transformation(code, primitive, targets, info)
+
+    if output == "diff":
+        _print_diff(code, transformed, str(file))
+    elif output == "file":
+        file.write_text(transformed)
+        if not quiet:
+            console.print(f"[green]✓ Transformed {file}[/green]")
+    else:
+        if not quiet:
+            console.print(f"[bold]Transformed code ({primitive}):[/bold]\n")
+        print(transformed)
+
+
+def _find_transform_targets(
+    code: str, primitive: str, specific_function: str | None
+) -> list[dict]:
+    """Find functions suitable for transformation."""
+    import ast
+
+    targets = []
+
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return targets
+
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            # If specific function requested, only match that
+            if specific_function and node.name != specific_function:
+                continue
+
+            # Determine if function is suitable for the primitive
+            func_code = ast.get_source_segment(code, node) or ""
+            suitable = _is_suitable_for_primitive(func_code, primitive)
+
+            if suitable or specific_function:
+                targets.append(
+                    {
+                        "name": node.name,
+                        "lineno": node.lineno,
+                        "end_lineno": getattr(node, "end_lineno", node.lineno + 10),
+                        "is_async": isinstance(node, ast.AsyncFunctionDef),
+                        "code": func_code,
+                    }
+                )
+
+    return targets
+
+
+def _is_suitable_for_primitive(func_code: str, primitive: str) -> bool:
+    """Check if a function is suitable for a specific primitive."""
+    code_lower = func_code.lower()
+
+    patterns = {
+        "RetryPrimitive": ["request", "fetch", "get(", "post(", "api", "http"],
+        "CachePrimitive": ["llm", "openai", "claude", "gpt", "query", "fetch"],
+        "TimeoutPrimitive": ["await", "async", "request", "api", "external"],
+        "CircuitBreakerPrimitive": ["request", "api", "external", "service"],
+        "ParallelPrimitive": ["for ", "requests", "multiple", "batch"],
+        "FallbackPrimitive": ["llm", "openai", "api", "provider"],
+    }
+
+    keywords = patterns.get(primitive, [])
+    return any(kw in code_lower for kw in keywords)
+
+
+def _generate_transformation(
+    code: str, primitive: str, targets: list[dict], info: dict
+) -> str:
+    """Generate transformed code."""
+    import_path = info.get("import_path", f"from tta_dev_primitives import {primitive}")
+    lines = code.split("\n")
+
+    # Add import at the top (after existing imports)
+    import_idx = 0
+    for i, line in enumerate(lines):
+        if line.startswith("import ") or line.startswith("from "):
+            import_idx = i + 1
+        elif line.strip() and not line.startswith("#") and import_idx > 0:
+            break
+
+    # Check if import already exists
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Add wrapper usage comment at the end
+    wrapper_code = _generate_wrapper_code(primitive, targets, info)
+    lines.append("")
+    lines.append("# --- TTA.dev Transformation ---")
+    lines.append(wrapper_code)
+
+    return "\n".join(lines)
+
+
+def _generate_wrapper_code(primitive: str, targets: list[dict], info: dict) -> str:
+    """Generate the wrapper code for the primitive."""
+    func_names = [t["name"] for t in targets]
+    is_async = any(t["is_async"] for t in targets)
+
+    templates = {
+        "RetryPrimitive": f"""
+# Wrap {func_names[0]} with retry logic
+{func_names[0]}_with_retry = RetryPrimitive(
+    primitive={func_names[0]},
+    max_retries=3,
+    backoff_strategy="exponential",
+    initial_delay=1.0,
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="retry-workflow")
+# result = {"await " if is_async else ""}await {func_names[0]}_with_retry.execute(data, context)
+""",
+        "CachePrimitive": f"""
+# Cache results from {func_names[0]}
+cached_{func_names[0]} = CachePrimitive(
+    primitive={func_names[0]},
+    ttl_seconds=3600,  # 1 hour
+    max_size=1000,
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="cached-workflow")
+# result = await cached_{func_names[0]}.execute(data, context)
+""",
+        "TimeoutPrimitive": f"""
+# Add timeout protection to {func_names[0]}
+protected_{func_names[0]} = TimeoutPrimitive(
+    primitive={func_names[0]},
+    timeout_seconds=30.0,
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="timeout-workflow")
+# result = await protected_{func_names[0]}.execute(data, context)
+""",
+        "ParallelPrimitive": f"""
+# Execute multiple functions in parallel
+parallel_workflow = ParallelPrimitive([
+    {", ".join(func_names)}
+])
+
+# Usage:
+# context = WorkflowContext(workflow_id="parallel-workflow")
+# results = await parallel_workflow.execute(data, context)
+""",
+    }
+
+    return templates.get(primitive, f"# TODO: Wrap with {primitive}")
+
+
+def _print_diff(original: str, transformed: str, filename: str) -> None:
+    """Print a unified diff between original and transformed code."""
+    import difflib
+
+    original_lines = original.splitlines(keepends=True)
+    transformed_lines = transformed.splitlines(keepends=True)
+
+    diff = difflib.unified_diff(
+        original_lines,
+        transformed_lines,
+        fromfile=f"a/{filename}",
+        tofile=f"b/{filename}",
+    )
+
+    diff_text = "".join(diff)
+    if diff_text:
+        console.print(Syntax(diff_text, "diff", theme="monokai"))
+    else:
+        console.print("[yellow]No changes needed[/yellow]")
+
+
+@app.command()
 def benchmark(
     difficulty: str = typer.Option(
         "all",

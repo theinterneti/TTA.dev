@@ -472,3 +472,104 @@ class TestABTestCommand:
         """Verify ab-test handles non-existent file."""
         result = runner.invoke(app, ["ab-test", "nonexistent_file.py"])
         assert result.exit_code != 0
+
+
+class TestTransformCommand:
+    """Tests for the transform command."""
+
+    def test_transform_help(self, runner: CliRunner) -> None:
+        """Verify transform --help works."""
+        result = runner.invoke(app, ["transform", "--help"])
+        assert result.exit_code == 0
+        assert "transform" in result.stdout.lower()
+        assert "primitive" in result.stdout.lower()
+
+    def test_transform_shows_options(self, runner: CliRunner) -> None:
+        """Verify transform command shows all options."""
+        result = runner.invoke(app, ["transform", "--help"])
+        assert result.exit_code == 0
+        assert "--function" in result.stdout
+        assert "--output" in result.stdout
+        assert "--quiet" in result.stdout
+
+    def test_transform_retry_primitive(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
+        """Verify transform with RetryPrimitive works."""
+        result = runner.invoke(
+            app, ["transform", str(complex_code_file), "RetryPrimitive", "--quiet"]
+        )
+        assert result.exit_code == 0
+        # Should contain the transformed code
+        output = result.stdout
+        assert "from tta_dev_primitives" in output
+        assert "RetryPrimitive" in output
+
+    def test_transform_cache_primitive(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
+        """Verify transform with CachePrimitive works."""
+        result = runner.invoke(
+            app, ["transform", str(complex_code_file), "CachePrimitive", "--quiet"]
+        )
+        assert result.exit_code == 0
+        output = result.stdout
+        assert "CachePrimitive" in output
+
+    def test_transform_specific_function(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
+        """Verify transform with specific function works."""
+        result = runner.invoke(
+            app,
+            [
+                "transform",
+                str(complex_code_file),
+                "TimeoutPrimitive",
+                "-f",
+                "robust_fetch",
+                "--quiet",
+            ],
+        )
+        assert result.exit_code == 0
+        output = result.stdout
+        assert "TimeoutPrimitive" in output
+
+    def test_transform_diff_output(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
+        """Verify transform with diff output works."""
+        result = runner.invoke(
+            app,
+            [
+                "transform",
+                str(complex_code_file),
+                "RetryPrimitive",
+                "-o",
+                "diff",
+                "--quiet",
+            ],
+        )
+        assert result.exit_code == 0
+        output = result.stdout
+        # Diff should have +/- markers
+        assert "+" in output or "---" in output
+
+    def test_transform_unknown_primitive(
+        self, runner: CliRunner, sample_code_file: Path
+    ) -> None:
+        """Verify transform handles unknown primitive."""
+        result = runner.invoke(
+            app, ["transform", str(sample_code_file), "UnknownPrimitive"]
+        )
+        assert result.exit_code == 1
+        assert (
+            "Unknown primitive" in result.stdout or "unknown" in result.stdout.lower()
+        )
+
+    def test_transform_file_not_found(self, runner: CliRunner) -> None:
+        """Verify transform handles non-existent file."""
+        result = runner.invoke(
+            app, ["transform", "nonexistent_file.py", "RetryPrimitive"]
+        )
+        assert result.exit_code != 0
