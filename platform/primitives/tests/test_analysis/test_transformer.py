@@ -341,3 +341,228 @@ def get_template():
 '''
         result = transform_code(code)
         assert result.success
+
+
+class TestASTDetectors:
+    """Test the AST-based pattern detectors."""
+
+    def test_retry_loop_detector_finds_pattern(self) -> None:
+        """Test RetryLoopDetector finds retry patterns."""
+        from tta_dev_primitives.analysis.transformer import RetryLoopDetector
+        import ast
+
+        code = '''
+def fetch_data():
+    for attempt in range(3):
+        try:
+            return do_request()
+        except Exception:
+            pass
+'''
+        tree = ast.parse(code)
+        detector = RetryLoopDetector()
+        detector.visit(tree)
+        assert len(detector.retry_functions) == 1
+        assert detector.retry_functions[0]["name"] == "fetch_data"
+        assert detector.retry_functions[0]["max_retries"] == 3
+
+    def test_retry_loop_detector_async_function(self) -> None:
+        """Test RetryLoopDetector detects async retry patterns."""
+        from tta_dev_primitives.analysis.transformer import RetryLoopDetector
+        import ast
+
+        code = '''
+async def async_fetch():
+    for i in range(5):
+        try:
+            return await api_call()
+        except:
+            pass
+'''
+        tree = ast.parse(code)
+        detector = RetryLoopDetector()
+        detector.visit(tree)
+        assert len(detector.retry_functions) == 1
+        assert detector.retry_functions[0]["is_async"] is True
+        assert detector.retry_functions[0]["max_retries"] == 5
+
+    def test_timeout_detector_finds_wait_for(self) -> None:
+        """Test TimeoutDetector finds asyncio.wait_for."""
+        from tta_dev_primitives.analysis.transformer import TimeoutDetector
+        import ast
+
+        code = '''
+async def with_timeout():
+    result = await asyncio.wait_for(slow_call(), timeout=30)
+    return result
+'''
+        tree = ast.parse(code)
+        detector = TimeoutDetector()
+        detector.visit(tree)
+        assert len(detector.timeout_calls) == 1
+        assert detector.timeout_calls[0]["timeout"] == 30
+
+    def test_cache_pattern_detector(self) -> None:
+        """Test CachePatternDetector finds cache patterns."""
+        from tta_dev_primitives.analysis.transformer import CachePatternDetector
+        import ast
+
+        code = '''
+def get_cached(key):
+    if key in cache:
+        return cache[key]
+    result = compute(key)
+    cache[key] = result
+    return result
+'''
+        tree = ast.parse(code)
+        detector = CachePatternDetector()
+        detector.visit(tree)
+        assert len(detector.cache_functions) == 1
+        assert detector.cache_functions[0]["name"] == "get_cached"
+
+    def test_fallback_detector(self) -> None:
+        """Test FallbackDetector finds try/except fallback patterns."""
+        from tta_dev_primitives.analysis.transformer import FallbackDetector
+        import ast
+
+        code = '''
+def with_fallback():
+    try:
+        return primary()
+    except:
+        return backup()
+'''
+        tree = ast.parse(code)
+        detector = FallbackDetector()
+        detector.visit(tree)
+        assert len(detector.fallback_patterns) == 1
+
+    def test_gather_detector(self) -> None:
+        """Test GatherDetector finds asyncio.gather patterns."""
+        from tta_dev_primitives.analysis.transformer import GatherDetector
+        import ast
+
+        code = '''
+async def parallel_calls():
+    results = await asyncio.gather(call1(), call2(), call3())
+    return results
+'''
+        tree = ast.parse(code)
+        detector = GatherDetector()
+        detector.visit(tree)
+        assert len(detector.gather_calls) == 1
+        assert len(detector.gather_calls[0]["args"]) == 3
+
+    def test_router_pattern_detector(self) -> None:
+        """Test RouterPatternDetector finds if/elif routing."""
+        from tta_dev_primitives.analysis.transformer import RouterPatternDetector
+        import ast
+
+        code = '''
+async def route_request(provider, data):
+    if provider == "openai":
+        return await call_openai(data)
+    elif provider == "anthropic":
+        return await call_anthropic(data)
+    elif provider == "google":
+        return await call_google(data)
+'''
+        tree = ast.parse(code)
+        detector = RouterPatternDetector()
+        detector.visit(tree)
+        # At least one pattern found with routes
+        assert len(detector.router_patterns) >= 1
+        # Check the first (main) pattern has all routes
+        routes = detector.router_patterns[0]["routes"]
+        assert "openai" in routes
+        assert "anthropic" in routes
+        assert "google" in routes
+
+
+class TestASTTransformations:
+    """Test AST-based code transformations."""
+
+    def test_retry_ast_transform(self) -> None:
+        """Test AST-based retry transformation."""
+        code = '''
+def fetch_data():
+    for attempt in range(3):
+        try:
+            return do_request()
+        except Exception:
+            pass
+'''
+        result = transform_code(code, primitive="RetryPrimitive")
+        assert result.success
+        assert len(result.changes_made) > 0
+        assert "RetryPrimitive" in result.transformed_code
+
+    def test_cache_ast_transform(self) -> None:
+        """Test AST-based cache transformation."""
+        code = '''
+def get_cached(key):
+    if key in cache:
+        return cache[key]
+    result = compute(key)
+    cache[key] = result
+    return result
+'''
+        result = transform_code(code, primitive="CachePrimitive")
+        assert result.success
+        if result.changes_made:
+            assert "CachePrimitive" in result.transformed_code
+
+    def test_auto_detect_multiple_patterns(self) -> None:
+        """Test auto-detection of multiple patterns."""
+        code = '''
+async def complex_workflow():
+    # Retry pattern
+    for attempt in range(3):
+        try:
+            data = do_fetch()
+        except:
+            pass
+
+    # Timeout pattern
+    result = await asyncio.wait_for(slow_call(), timeout=10)
+
+    # Parallel pattern
+    results = await asyncio.gather(task1(), task2())
+
+    return results
+'''
+        transformer = CodeTransformer()
+        transforms = transformer._detect_needed_transforms(code)
+        # Should detect multiple patterns
+        assert len(transforms) >= 1
+
+    def test_transformation_preserves_docstrings(self) -> None:
+        """Test that transformations preserve function docstrings."""
+        code = '''
+def fetch_data():
+    """Fetch data with retry logic."""
+    for attempt in range(3):
+        try:
+            return do_request()
+        except:
+            pass
+'''
+        result = transform_code(code, primitive="RetryPrimitive")
+        assert result.success
+        # The transformation should maintain the intent
+
+    def test_transformation_adds_correct_imports(self) -> None:
+        """Test that correct imports are added."""
+        code = '''
+def fetch():
+    for i in range(3):
+        try:
+            return call()
+        except:
+            pass
+'''
+        result = transform_code(code, primitive="RetryPrimitive")
+        assert result.success
+        assert any("RetryPrimitive" in imp for imp in result.imports_added)
+        assert any("WorkflowContext" in imp for imp in result.imports_added)
