@@ -1003,6 +1003,10 @@ def _generate_transformation(
         return _generate_router_transformation(code, targets, info)
     if primitive == "CircuitBreakerPrimitive":
         return _generate_circuit_breaker_transformation(code, targets, info)
+    if primitive == "MemoryPrimitive":
+        return _generate_memory_transformation(code, targets, info)
+    if primitive == "DelegationPrimitive":
+        return _generate_delegation_transformation(code, targets, info)
 
     import_path = info.get("import_path", f"from tta_dev_primitives import {primitive}")
     lines = code.split("\n")
@@ -1546,6 +1550,255 @@ def _generate_circuit_breaker_transformation(
     # Fallback to template
     return _fallback_template_transformation(
         code, lines, targets, info, "CircuitBreakerPrimitive"
+    )
+
+
+def _generate_memory_transformation(code: str, targets: list[dict], info: dict) -> str:
+    """Generate smart MemoryPrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import MemoryDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = _find_import_index(lines)
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives.performance import MemoryPrimitive"
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Parse code to extract memory patterns
+    try:
+        tree = ast.parse(code)
+        detector = MemoryDetector()
+        detector.visit(tree)
+
+        if detector.memory_patterns:
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            # Group by pattern type
+            message_appends = [
+                p for p in detector.memory_patterns if p["type"] == "message_append"
+            ]
+            deque_patterns = [
+                p for p in detector.memory_patterns if p["type"] == "deque_history"
+            ]
+            dict_patterns = [
+                p for p in detector.memory_patterns if p["type"] == "dict_storage"
+            ]
+
+            if message_appends:
+                var = message_appends[0]["variable"]
+                wrapper_parts.append(f"""
+# Extracted conversation history pattern from '{var}'
+# Replace manual list with MemoryPrimitive for:
+# - Automatic LRU eviction (prevent memory bloat)
+# - Keyword search across history
+# - Optional Redis persistence for scaling
+
+# Create memory store (works immediately, no setup required)
+conversation_memory = MemoryPrimitive(max_size=100)
+
+async def add_message(role: str, content: str, session_id: str):
+    \"\"\"Add a message to conversation memory.\"\"\"
+    key = f"{{session_id}}:{{role}}:{{content[:20]}}"
+    await conversation_memory.add(key, {{"role": role, "content": content}})
+
+async def get_history(query: str = None) -> list:
+    \"\"\"Retrieve conversation history, optionally filtered by keyword.\"\"\"
+    if query:
+        return await conversation_memory.search(query)
+    return await conversation_memory.get_all()
+
+# Usage:
+# await add_message("user", "What is TTA.dev?", "session-123")
+# await add_message("assistant", "TTA.dev provides...", "session-123")
+# history = await get_history("TTA.dev")
+""")
+
+            if deque_patterns:
+                pattern = deque_patterns[0]
+                var = pattern["variable"]
+                maxlen = pattern.get("maxlen", 100)
+                wrapper_parts.append(f"""
+# Extracted bounded history from deque '{var}' (maxlen={maxlen})
+# Replace with MemoryPrimitive for same behavior + search + persistence
+
+{var}_memory = MemoryPrimitive(max_size={maxlen})
+
+# Usage (same API, enhanced capabilities):
+# await {var}_memory.add(key, value)
+# result = await {var}_memory.get(key)
+# results = await {var}_memory.search("keyword")
+""")
+
+            if dict_patterns:
+                var = dict_patterns[0]["variable"]
+                wrapper_parts.append(f"""
+# Extracted context storage from dict '{var}'
+# Replace with MemoryPrimitive for:
+# - LRU eviction (bounded memory)
+# - Async-safe operations
+# - Optional persistence
+
+{var} = MemoryPrimitive(max_size=1000)
+
+# Usage:
+# await {var}.add("key", {{"context": "data"}})
+# data = await {var}.get("key")
+""")
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template
+    return _fallback_template_transformation(
+        code, lines, targets, info, "MemoryPrimitive"
+    )
+
+
+def _generate_delegation_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
+    """Generate smart DelegationPrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import DelegationDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = _find_import_index(lines)
+    import_path = info.get(
+        "import_path",
+        "from tta_dev_primitives.orchestration import DelegationPrimitive",
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Parse code to extract delegation patterns
+    try:
+        tree = ast.parse(code)
+        detector = DelegationDetector()
+        detector.visit(tree)
+
+        if detector.delegation_patterns:
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            # Group by pattern type
+            model_routing = [
+                p for p in detector.delegation_patterns if p["type"] == "model_routing"
+            ]
+            agent_dispatch = [
+                p for p in detector.delegation_patterns if p["type"] == "agent_dispatch"
+            ]
+            executor_dispatch = [
+                p
+                for p in detector.delegation_patterns
+                if p["type"] == "executor_dispatch"
+            ]
+
+            if model_routing:
+                pattern = model_routing[0]
+                var = pattern["variable"]
+                models = pattern["models"]
+                func_name = pattern.get("parent_function", "route_task")
+                models_str = ", ".join(f'"{m}"' for m in models)
+
+                wrapper_parts.append(f"""
+# Extracted model routing from if/elif chain on '{var}'
+# Detected models: {models_str}
+#
+# DelegationPrimitive enables orchestrator→executor pattern:
+# - High-quality model plans/validates (small token usage)
+# - Cost-effective models execute (bulk work)
+# - 80%+ cost reduction while maintaining quality
+
+from tta_dev_primitives.orchestration import DelegationPrimitive, DelegationRequest
+
+# Register executor models
+delegation = DelegationPrimitive()
+# delegation.register_executor("gpt-4", gpt4_primitive)
+# delegation.register_executor("claude", claude_primitive)
+# delegation.register_executor("gemini", gemini_primitive)
+
+async def {func_name}_delegated(task: str, model: str):
+    \"\"\"Delegate task to appropriate model.\"\"\"
+    request = DelegationRequest(
+        task_description=task,
+        executor_model=model,
+        messages=[{{"role": "user", "content": task}}],
+    )
+    context = WorkflowContext(workflow_id="delegation-{func_name}")
+    return await delegation.execute(request, context)
+
+# Usage:
+# result = await {func_name}_delegated("Summarize document", "{models[0] if models else "gpt-4"}")
+""")
+
+            if agent_dispatch:
+                pattern = agent_dispatch[0]
+                container = pattern["container"]
+                method = pattern["method"]
+                func_name = pattern.get("parent_function", "dispatch")
+
+                wrapper_parts.append(f"""
+# Extracted agent dispatch pattern: {container}[role].{method}()
+# DelegationPrimitive provides structured orchestrator→executor flow
+
+# Create delegation with registered executors
+delegation = DelegationPrimitive()
+
+# Register agents as executors
+# for role, agent in {container}.items():
+#     delegation.register_executor(role, agent)
+
+async def {func_name}_to_agent(task: str, role: str):
+    \"\"\"Delegate task to specific agent role.\"\"\"
+    request = DelegationRequest(
+        task_description=task,
+        executor_model=role,
+        messages=[{{"role": "user", "content": task}}],
+    )
+    context = WorkflowContext(workflow_id="agent-delegation")
+    return await delegation.execute(request, context)
+""")
+
+            if executor_dispatch:
+                pattern = executor_dispatch[0]
+                executor = pattern["executor"]
+                method = pattern["method"]
+
+                wrapper_parts.append(f"""
+# Extracted executor pattern: {executor}.{method}()
+# Wrap with DelegationPrimitive for observability and cost tracking
+
+delegation = DelegationPrimitive()
+# delegation.register_executor("default", {executor})
+
+# Usage with full observability:
+# request = DelegationRequest(task_description="...", executor_model="default", ...)
+# result = await delegation.execute(request, context)
+""")
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template
+    return _fallback_template_transformation(
+        code, lines, targets, info, "DelegationPrimitive"
     )
 
 

@@ -1120,3 +1120,235 @@ async def index_with_rollback(document):
 
         assert "CircuitBreakerPrimitive" in transforms
         assert "CompensationPrimitive" in transforms
+
+
+class TestMemoryDetector:
+    """Test detection of conversation history/memory patterns."""
+
+    def test_detect_message_append_pattern(self) -> None:
+        """Test detection of messages.append() for chat history."""
+        from tta_dev_primitives.analysis.transformer import MemoryDetector
+
+        code = """
+async def chat(user_input):
+    messages.append({"role": "user", "content": user_input})
+    response = await llm.generate(messages)
+    messages.append({"role": "assistant", "content": response})
+    return response
+"""
+        tree = ast.parse(code)
+        detector = MemoryDetector()
+        detector.visit(tree)
+
+        assert len(detector.memory_patterns) >= 1
+        assert detector.memory_patterns[0]["type"] == "message_append"
+        assert detector.memory_patterns[0]["variable"] == "messages"
+
+    def test_detect_deque_history_pattern(self) -> None:
+        """Test detection of deque-based bounded history."""
+        from tta_dev_primitives.analysis.transformer import MemoryDetector
+
+        code = """
+from collections import deque
+
+history = deque(maxlen=100)
+
+async def remember(item):
+    history.append(item)
+"""
+        tree = ast.parse(code)
+        detector = MemoryDetector()
+        detector.visit(tree)
+
+        deque_patterns = [
+            p for p in detector.memory_patterns if p["type"] == "deque_history"
+        ]
+        assert len(deque_patterns) >= 1
+        assert deque_patterns[0]["variable"] == "history"
+        assert deque_patterns[0]["maxlen"] == 100
+
+    def test_detect_context_dict_storage(self) -> None:
+        """Test detection of dict-based context storage."""
+        from tta_dev_primitives.analysis.transformer import MemoryDetector
+
+        code = """
+context_store = {}
+
+async def save_context(key, value):
+    context_store[key] = value
+"""
+        tree = ast.parse(code)
+        detector = MemoryDetector()
+        detector.visit(tree)
+
+        dict_patterns = [
+            p for p in detector.memory_patterns if p["type"] == "dict_storage"
+        ]
+        assert len(dict_patterns) >= 1
+        assert dict_patterns[0]["variable"] == "context_store"
+
+    def test_auto_detect_memory_pattern(self) -> None:
+        """Test auto-detection finds memory patterns."""
+        code = """
+conversation_history = []
+
+async def chat(user_message):
+    conversation_history.append({"role": "user", "content": user_message})
+    response = await gpt4.complete(conversation_history)
+    conversation_history.append({"role": "assistant", "content": response})
+    return response
+"""
+        transformer = CodeTransformer()
+        transforms = transformer._detect_needed_transforms(code)
+
+        assert "MemoryPrimitive" in transforms
+
+
+class TestDelegationDetector:
+    """Test detection of task delegation/orchestration patterns."""
+
+    def test_detect_model_routing_pattern(self) -> None:
+        """Test detection of if/elif model selection."""
+        from tta_dev_primitives.analysis.transformer import DelegationDetector
+
+        code = """
+async def route_to_model(prompt, model_name):
+    if model_name == "gpt-4":
+        return await openai_gpt4.complete(prompt)
+    elif model_name == "claude":
+        return await anthropic_claude.complete(prompt)
+    elif model_name == "gemini":
+        return await google_gemini.complete(prompt)
+"""
+        tree = ast.parse(code)
+        detector = DelegationDetector()
+        detector.visit(tree)
+
+        model_routing = [
+            p for p in detector.delegation_patterns if p["type"] == "model_routing"
+        ]
+        assert len(model_routing) >= 1
+        assert model_routing[0]["variable"] == "model_name"
+        assert "gpt-4" in model_routing[0]["models"]
+        assert "claude" in model_routing[0]["models"]
+
+    def test_detect_agent_dispatch_pattern(self) -> None:
+        """Test detection of agents[role].execute() pattern."""
+        from tta_dev_primitives.analysis.transformer import DelegationDetector
+
+        code = """
+async def dispatch_to_agent(task, role):
+    result = await agents[role].execute(task)
+    return result
+"""
+        tree = ast.parse(code)
+        detector = DelegationDetector()
+        detector.visit(tree)
+
+        agent_dispatch = [
+            p for p in detector.delegation_patterns if p["type"] == "agent_dispatch"
+        ]
+        assert len(agent_dispatch) >= 1
+        assert agent_dispatch[0]["container"] == "agents"
+        assert agent_dispatch[0]["method"] == "execute"
+
+    def test_detect_executor_dispatch_pattern(self) -> None:
+        """Test detection of executor.run(task) pattern."""
+        from tta_dev_primitives.analysis.transformer import DelegationDetector
+
+        code = """
+async def run_task(task):
+    result = await executor.run(task)
+    return result
+"""
+        tree = ast.parse(code)
+        detector = DelegationDetector()
+        detector.visit(tree)
+
+        executor_dispatch = [
+            p for p in detector.delegation_patterns if p["type"] == "executor_dispatch"
+        ]
+        assert len(executor_dispatch) >= 1
+        assert executor_dispatch[0]["executor"] == "executor"
+        assert executor_dispatch[0]["method"] == "run"
+
+    def test_auto_detect_delegation_pattern(self) -> None:
+        """Test auto-detection finds delegation patterns."""
+        code = """
+async def orchestrate(task, model):
+    if model == "fast":
+        return await gpt4_mini.generate(task)
+    elif model == "quality":
+        return await claude_opus.generate(task)
+    elif model == "code":
+        return await deepseek.generate(task)
+"""
+        transformer = CodeTransformer()
+        transforms = transformer._detect_needed_transforms(code)
+
+        assert "DelegationPrimitive" in transforms
+
+
+class TestMemoryTransformation:
+    """Test transformation of memory patterns to MemoryPrimitive."""
+
+    def test_transform_memory_pattern(self) -> None:
+        """Test basic memory pattern transformation."""
+        code = """
+messages = []
+
+async def chat(user_input):
+    messages.append({"role": "user", "content": user_input})
+    return messages
+"""
+        result = transform_code(code, primitive="MemoryPrimitive")
+        assert result.success
+        # Should detect the pattern
+        assert len(result.changes_made) >= 1
+
+    def test_memory_transform_adds_import(self) -> None:
+        """Test that transformation adds MemoryPrimitive import."""
+        code = """
+history = []
+
+async def remember(item):
+    history.append({"role": "user", "message": item})
+"""
+        result = transform_code(code, primitive="MemoryPrimitive")
+        imports = result.imports_added
+
+        memory_import = any("MemoryPrimitive" in imp for imp in imports)
+        assert memory_import
+
+
+class TestDelegationTransformation:
+    """Test transformation of delegation patterns to DelegationPrimitive."""
+
+    def test_transform_delegation_pattern(self) -> None:
+        """Test basic delegation pattern transformation."""
+        code = """
+async def route_request(prompt, model):
+    if model == "gpt-4":
+        return await gpt4.complete(prompt)
+    elif model == "claude":
+        return await claude.complete(prompt)
+"""
+        result = transform_code(code, primitive="DelegationPrimitive")
+        assert result.success
+        # Should detect the pattern
+        assert len(result.changes_made) >= 1
+
+    def test_delegation_transform_adds_import(self) -> None:
+        """Test that transformation adds DelegationPrimitive import."""
+        code = """
+async def dispatch(task, model):
+    if model == "fast":
+        return await fast_model.run(task)
+    elif model == "quality":
+        return await quality_model.run(task)
+"""
+        result = transform_code(code, primitive="DelegationPrimitive")
+        imports = result.imports_added
+
+        delegation_import = any("DelegationPrimitive" in imp for imp in imports)
+        assert delegation_import

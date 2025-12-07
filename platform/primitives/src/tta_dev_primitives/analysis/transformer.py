@@ -1468,6 +1468,237 @@ class CompensationDetector(ast.NodeVisitor):
         return "unknown"
 
 
+class MemoryDetector(ast.NodeVisitor):
+    """Detect conversation history/context management patterns.
+
+    Detects:
+    - Message list accumulation (messages.append({...}))
+    - Dict-based context storage (context[key] = value)
+    - Deque-based history (deque(maxlen=...))
+    """
+
+    def __init__(self) -> None:
+        self.memory_patterns: list[dict[str, Any]] = []
+        self._current_function: str | None = None
+        self._current_is_async: bool = False
+        self._current_lineno: int = 0
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._current_function = node.name
+        self._current_is_async = False
+        self._current_lineno = node.lineno
+        self.generic_visit(node)
+        self._current_function = None
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._current_function = node.name
+        self._current_is_async = True
+        self._current_lineno = node.lineno
+        self.generic_visit(node)
+        self._current_function = None
+
+    def visit_Call(self, node: ast.Call) -> None:
+        """Detect .append() calls for message lists."""
+        # Pattern: messages.append({"role": ..., "content": ...})
+        if isinstance(node.func, ast.Attribute) and node.func.attr == "append":
+            if isinstance(node.func.value, ast.Name):
+                var_name = node.func.value.id
+                # Check if appending dict with role/content (chat history pattern)
+                if node.args and isinstance(node.args[0], ast.Dict):
+                    keys = [
+                        k.value if isinstance(k, ast.Constant) else None
+                        for k in node.args[0].keys
+                    ]
+                    if "role" in keys or "content" in keys or "message" in keys:
+                        self.memory_patterns.append(
+                            {
+                                "type": "message_append",
+                                "variable": var_name,
+                                "parent_function": self._current_function,
+                                "is_async": self._current_is_async,
+                                "lineno": node.lineno,
+                            }
+                        )
+        self.generic_visit(node)
+
+    def visit_Subscript(self, node: ast.Subscript) -> None:
+        """Detect dict-based context storage."""
+        # Pattern: context[key] = value (in Assign context)
+        if isinstance(node.ctx, ast.Store):
+            if isinstance(node.value, ast.Name):
+                var_name = node.value.id
+                if any(
+                    kw in var_name.lower()
+                    for kw in ["context", "history", "memory", "store"]
+                ):
+                    self.memory_patterns.append(
+                        {
+                            "type": "dict_storage",
+                            "variable": var_name,
+                            "parent_function": self._current_function,
+                            "is_async": self._current_is_async,
+                            "lineno": node.lineno,
+                        }
+                    )
+        self.generic_visit(node)
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        """Detect deque initialization for bounded history."""
+        # Pattern: history = deque(maxlen=...)
+        if isinstance(node.value, ast.Call):
+            if isinstance(node.value.func, ast.Name) and node.value.func.id == "deque":
+                for keyword in node.value.keywords:
+                    if keyword.arg == "maxlen":
+                        for target in node.targets:
+                            if isinstance(target, ast.Name):
+                                maxlen = None
+                                if isinstance(keyword.value, ast.Constant):
+                                    maxlen = keyword.value.value
+                                self.memory_patterns.append(
+                                    {
+                                        "type": "deque_history",
+                                        "variable": target.id,
+                                        "maxlen": maxlen,
+                                        "parent_function": self._current_function,
+                                        "is_async": self._current_is_async,
+                                        "lineno": node.lineno,
+                                    }
+                                )
+        self.generic_visit(node)
+
+
+class DelegationDetector(ast.NodeVisitor):
+    """Detect task delegation/orchestration patterns.
+
+    Detects:
+    - Agent routing (agents[role].execute())
+    - Model selection routing (if model == "gpt-4": ...)
+    - Task dispatching (executor.run(task))
+    """
+
+    def __init__(self) -> None:
+        self.delegation_patterns: list[dict[str, Any]] = []
+        self._current_function: str | None = None
+        self._current_is_async: bool = False
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._current_function = node.name
+        self._current_is_async = False
+        self._check_function_for_delegation(node)
+        self.generic_visit(node)
+        self._current_function = None
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._current_function = node.name
+        self._current_is_async = True
+        self._check_function_for_delegation(node)
+        self.generic_visit(node)
+        self._current_function = None
+
+    def _check_function_for_delegation(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> None:
+        """Check function for delegation patterns."""
+        # Look for if/elif chains with model/agent selection
+        for stmt in ast.walk(node):
+            if isinstance(stmt, ast.If):
+                self._check_model_routing(stmt, node)
+
+    def _check_model_routing(
+        self,
+        if_node: ast.If,
+        func_node: ast.FunctionDef | ast.AsyncFunctionDef,
+    ) -> None:
+        """Check if/elif chain for model/agent routing."""
+        # Pattern: if model == "gpt-4": ... elif model == "claude": ...
+        models: list[str] = []
+        variable: str | None = None
+
+        def extract_model(test: ast.expr) -> tuple[str | None, str | None]:
+            """Extract model name and variable from comparison."""
+            if isinstance(test, ast.Compare):
+                if len(test.ops) == 1 and isinstance(test.ops[0], ast.Eq):
+                    left = test.left
+                    right = test.comparators[0]
+                    if isinstance(left, ast.Name) and isinstance(right, ast.Constant):
+                        return left.id, str(right.value)
+                    if isinstance(right, ast.Name) and isinstance(left, ast.Constant):
+                        return right.id, str(left.value)
+            return None, None
+
+        # Check main if
+        var, model = extract_model(if_node.test)
+        if model and var:
+            variable = var
+            if any(
+                kw in var.lower() for kw in ["model", "agent", "executor", "handler"]
+            ):
+                models.append(model)
+
+        # Check elif branches
+        current = if_node
+        while current.orelse:
+            if len(current.orelse) == 1 and isinstance(current.orelse[0], ast.If):
+                current = current.orelse[0]
+                var, model = extract_model(current.test)
+                if model:
+                    models.append(model)
+            else:
+                break
+
+        if len(models) >= 2 and variable:
+            self.delegation_patterns.append(
+                {
+                    "type": "model_routing",
+                    "variable": variable,
+                    "models": models,
+                    "parent_function": func_node.name,
+                    "is_async": self._current_is_async,
+                    "lineno": if_node.lineno,
+                }
+            )
+
+    def visit_Call(self, node: ast.Call) -> None:
+        """Detect executor dispatch patterns."""
+        # Pattern: agents[role].execute(...) or executor.run(task)
+        if isinstance(node.func, ast.Attribute):
+            attr = node.func.attr
+            if attr in ["execute", "run", "invoke", "dispatch", "delegate"]:
+                # Get the variable being called
+                if isinstance(node.func.value, ast.Subscript):
+                    # agents[role].execute()
+                    if isinstance(node.func.value.value, ast.Name):
+                        container = node.func.value.value.id
+                        self.delegation_patterns.append(
+                            {
+                                "type": "agent_dispatch",
+                                "container": container,
+                                "method": attr,
+                                "parent_function": self._current_function,
+                                "is_async": self._current_is_async,
+                                "lineno": node.lineno,
+                            }
+                        )
+                elif isinstance(node.func.value, ast.Name):
+                    # executor.run(task)
+                    executor = node.func.value.id
+                    if any(
+                        kw in executor.lower()
+                        for kw in ["executor", "agent", "worker", "handler"]
+                    ):
+                        self.delegation_patterns.append(
+                            {
+                                "type": "executor_dispatch",
+                                "executor": executor,
+                                "method": attr,
+                                "parent_function": self._current_function,
+                                "is_async": self._current_is_async,
+                                "lineno": node.lineno,
+                            }
+                        )
+        self.generic_visit(node)
+
+
 class CodeTransformer:
     """AST-based code transformer for TTA.dev primitives.
 
@@ -1490,6 +1721,8 @@ class CodeTransformer:
             "RouterPrimitive": "from tta_dev_primitives.core import RouterPrimitive",
             "CircuitBreakerPrimitive": "from tta_dev_primitives.recovery import CircuitBreakerPrimitive",
             "CompensationPrimitive": "from tta_dev_primitives.recovery import CompensationPrimitive",
+            "MemoryPrimitive": "from tta_dev_primitives.performance import MemoryPrimitive",
+            "DelegationPrimitive": "from tta_dev_primitives.orchestration import DelegationPrimitive",
         }
 
     def transform(
@@ -1606,6 +1839,16 @@ class CodeTransformer:
         if compensation_detector.compensation_patterns:
             transforms.append("CompensationPrimitive")
 
+        memory_detector = MemoryDetector()
+        memory_detector.visit(tree)
+        if memory_detector.memory_patterns:
+            transforms.append("MemoryPrimitive")
+
+        delegation_detector = DelegationDetector()
+        delegation_detector.visit(tree)
+        if delegation_detector.delegation_patterns:
+            transforms.append("DelegationPrimitive")
+
         return transforms
 
     def _detect_needed_transforms_regex(self, code: str) -> list[str]:
@@ -1659,6 +1902,10 @@ class CodeTransformer:
             return self._transform_circuit_breaker_ast(code, tree)
         elif transform_type == "CompensationPrimitive":
             return self._transform_compensation_ast(code, tree)
+        elif transform_type == "MemoryPrimitive":
+            return self._transform_memory_ast(code, tree)
+        elif transform_type == "DelegationPrimitive":
+            return self._transform_delegation_ast(code, tree)
         else:
             return {"changed": False, "code": code, "changes": []}
 
@@ -2324,6 +2571,102 @@ class CodeTransformer:
 # Example usage:
 # result = {await_kw}{func_name}.execute(data, context)
 '''
+
+    def _transform_memory_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
+        """Transform conversation history patterns into MemoryPrimitive."""
+        changes = []
+        detector = MemoryDetector()
+        detector.visit(tree)
+
+        if not detector.memory_patterns:
+            return {"changed": False, "code": code, "changes": []}
+
+        # Group patterns by type
+        message_appends = [
+            p for p in detector.memory_patterns if p["type"] == "message_append"
+        ]
+        dict_storages = [
+            p for p in detector.memory_patterns if p["type"] == "dict_storage"
+        ]
+        deque_histories = [
+            p for p in detector.memory_patterns if p["type"] == "deque_history"
+        ]
+
+        lines = code.split("\n")
+        transformed_lines = lines.copy()
+
+        # Generate MemoryPrimitive setup at the top of relevant functions
+        if message_appends or dict_storages or deque_histories:
+            # Find first pattern
+            first_pattern = detector.memory_patterns[0]
+            var_name = first_pattern.get("variable", "memory")
+            max_size = first_pattern.get("maxlen", 100)
+
+            changes.append(
+                {
+                    "type": "memory_transform",
+                    "original_variable": var_name,
+                    "pattern_type": first_pattern["type"],
+                    "lineno": first_pattern["lineno"],
+                    "max_size": max_size,
+                }
+            )
+
+        return {
+            "changed": bool(changes),
+            "code": "\n".join(transformed_lines),
+            "changes": changes,
+        }
+
+    def _transform_delegation_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
+        """Transform task delegation patterns into DelegationPrimitive."""
+        changes = []
+        detector = DelegationDetector()
+        detector.visit(tree)
+
+        if not detector.delegation_patterns:
+            return {"changed": False, "code": code, "changes": []}
+
+        lines = code.split("\n")
+        transformed_lines = lines.copy()
+
+        for pattern in detector.delegation_patterns:
+            if pattern["type"] == "model_routing":
+                changes.append(
+                    {
+                        "type": "delegation_transform",
+                        "pattern_type": "model_routing",
+                        "variable": pattern["variable"],
+                        "models": pattern["models"],
+                        "lineno": pattern["lineno"],
+                    }
+                )
+            elif pattern["type"] == "agent_dispatch":
+                changes.append(
+                    {
+                        "type": "delegation_transform",
+                        "pattern_type": "agent_dispatch",
+                        "container": pattern["container"],
+                        "method": pattern["method"],
+                        "lineno": pattern["lineno"],
+                    }
+                )
+            elif pattern["type"] == "executor_dispatch":
+                changes.append(
+                    {
+                        "type": "delegation_transform",
+                        "pattern_type": "executor_dispatch",
+                        "executor": pattern["executor"],
+                        "method": pattern["method"],
+                        "lineno": pattern["lineno"],
+                    }
+                )
+
+        return {
+            "changed": bool(changes),
+            "code": "\n".join(transformed_lines),
+            "changes": changes,
+        }
 
     def _transform_retry_regex(self, code: str) -> dict[str, Any]:
         """Transform manual retry loops into RetryPrimitive."""
