@@ -431,6 +431,52 @@ result = await workflow.execute(data, context)
             "patterns_found": report.analysis.detected_patterns,
         }
 
+    @mcp.tool()
+    async def detect_anti_patterns(
+        code: str,
+        file_path: str = "",
+    ) -> dict[str, Any]:
+        """Detect anti-patterns that should use TTA.dev primitives.
+
+        Finds manual implementations of retry loops, timeout handling,
+        fallback logic, caching, and other patterns that have dedicated
+        TTA.dev primitives.
+
+        Args:
+            code: Source code to analyze
+            file_path: Optional file path for context
+
+        Returns:
+            Anti-pattern analysis including:
+            - total_issues: Number of anti-patterns found
+            - primitives_needed: List of primitives that should be used
+            - issues: Detailed list with line numbers and suggested fixes
+            - anti_patterns: Categorized anti-patterns with code context
+        """
+        from tta_dev_primitives.analysis.patterns import PatternDetector
+
+        logger.info(
+            "mcp_tool_called",
+            tool="detect_anti_patterns",
+            file_path=file_path,
+            code_length=len(code),
+        )
+
+        detector = PatternDetector()
+
+        # Get summary (flat list of issues)
+        summary = detector.get_anti_pattern_summary(code)
+
+        # Get detailed anti-patterns (categorized)
+        detailed = detector.detect_anti_patterns(code)
+
+        return {
+            "total_issues": summary["total_issues"],
+            "primitives_needed": summary["primitives_needed"],
+            "issues": summary["issues"],
+            "anti_patterns": detailed,
+        }
+
     # ========== RESOURCES ==========
 
     @mcp.resource("tta://catalog")

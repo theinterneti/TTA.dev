@@ -596,6 +596,115 @@ async def fetch():
         assert len(result["top_fixes"]) <= 2
 
 
+class TestDetectAntiPatternsTool:
+    """Tests for the detect_anti_patterns MCP tool."""
+
+    @pytest.fixture
+    def detect_tool(self):
+        """Get the detect_anti_patterns tool."""
+        server = create_server()
+        return server._tool_manager._tools["detect_anti_patterns"]
+
+    @pytest.mark.asyncio
+    async def test_detect_returns_dict(self, detect_tool) -> None:
+        """Verify detect_anti_patterns returns a dict."""
+        code = """
+async def fetch_data():
+    for attempt in range(3):
+        try:
+            return await httpx.get("url")
+        except:
+            pass
+"""
+        result = await detect_tool.fn(code=code)
+        assert isinstance(result, dict)
+
+    @pytest.mark.asyncio
+    async def test_detect_has_total_issues(self, detect_tool) -> None:
+        """Verify result has total_issues count."""
+        code = """
+async def fetch_data():
+    for attempt in range(3):
+        try:
+            return await httpx.get("url")
+        except:
+            pass
+"""
+        result = await detect_tool.fn(code=code)
+        assert "total_issues" in result
+        assert isinstance(result["total_issues"], int)
+
+    @pytest.mark.asyncio
+    async def test_detect_has_primitives_needed(self, detect_tool) -> None:
+        """Verify result has primitives_needed list."""
+        code = """
+async def fetch_data():
+    for attempt in range(3):
+        try:
+            return await httpx.get("url")
+        except:
+            pass
+"""
+        result = await detect_tool.fn(code=code)
+        assert "primitives_needed" in result
+        assert isinstance(result["primitives_needed"], list)
+
+    @pytest.mark.asyncio
+    async def test_detect_finds_manual_retry(self, detect_tool) -> None:
+        """Verify detects manual retry pattern."""
+        code = """
+async def fetch_data():
+    for attempt in range(3):
+        try:
+            return await httpx.get("url")
+        except:
+            if attempt == 2:
+                raise
+"""
+        result = await detect_tool.fn(code=code)
+        assert result["total_issues"] > 0
+        assert "RetryPrimitive" in result["primitives_needed"]
+
+    @pytest.mark.asyncio
+    async def test_detect_finds_manual_timeout(self, detect_tool) -> None:
+        """Verify detects manual timeout pattern."""
+        code = """
+import asyncio
+
+async def fetch_with_timeout():
+    result = await asyncio.wait_for(api_call(), timeout=30)
+    return result
+"""
+        result = await detect_tool.fn(code=code)
+        assert result["total_issues"] > 0
+        assert "TimeoutPrimitive" in result["primitives_needed"]
+
+    @pytest.mark.asyncio
+    async def test_detect_finds_manual_fallback(self, detect_tool) -> None:
+        """Verify detects manual fallback pattern."""
+        code = """
+async def get_value():
+    result = maybe_none() or default_value
+    if result is None:
+        result = fallback_value
+    return result
+"""
+        result = await detect_tool.fn(code=code)
+        assert result["total_issues"] > 0
+        assert "FallbackPrimitive" in result["primitives_needed"]
+
+    @pytest.mark.asyncio
+    async def test_detect_clean_code_returns_no_issues(self, detect_tool) -> None:
+        """Verify clean code returns no issues."""
+        code = """
+def simple_function():
+    return 42
+"""
+        result = await detect_tool.fn(code=code)
+        assert result["total_issues"] == 0
+        assert len(result["primitives_needed"]) == 0
+
+
 class TestMCPResources:
     """Tests for MCP resources."""
 

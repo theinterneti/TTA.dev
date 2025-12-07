@@ -294,6 +294,8 @@ def _find_pattern_lines(code: str) -> dict[str, list[int]]:
         "error_handling": [],
         "llm_patterns": [],
         "for_loops": [],
+        "timeout_patterns": [],
+        "fallback_patterns": [],
     }
 
     api_patterns = re.compile(r"(requests\.|httpx\.|aiohttp|\.get\(|\.post\(|fetch\()")
@@ -303,6 +305,12 @@ def _find_pattern_lines(code: str) -> dict[str, list[int]]:
         r"(openai|anthropic|chat.*completion|llm|gpt|claude)", re.IGNORECASE
     )
     for_patterns = re.compile(r"^\s*for\s+\w+\s+in\s+")
+    timeout_patterns = re.compile(
+        r"(asyncio\.wait_for|asyncio\.timeout|signal\.alarm|timeout\s*=|TimeoutError)"
+    )
+    fallback_patterns = re.compile(
+        r"(except\s*:?\s*\n?\s*return|or\s+default|fallback|backup|if\s+\w+\s+is\s+None)"
+    )
 
     for i, line in enumerate(lines, 1):
         if api_patterns.search(line):
@@ -315,8 +323,20 @@ def _find_pattern_lines(code: str) -> dict[str, list[int]]:
             result["llm_patterns"].append(i)
         if for_patterns.search(line):
             result["for_loops"].append(i)
+        if timeout_patterns.search(line):
+            result["timeout_patterns"].append(i)
+        if fallback_patterns.search(line):
+            result["fallback_patterns"].append(i)
 
     return {k: v for k, v in result.items() if v}  # Only return non-empty
+
+
+def _detect_anti_patterns(code: str) -> dict[str, Any]:
+    """Detect anti-patterns that should be converted to TTA.dev primitives."""
+    from tta_dev_primitives.analysis.patterns import PatternDetector
+
+    detector = PatternDetector()
+    return detector.get_anti_pattern_summary(code)
 
 
 def _print_suggested_diffs(
@@ -328,10 +348,82 @@ def _print_suggested_diffs(
     """Print suggested code transformations."""
     console.print("\n[bold blue]📝 Suggested Transformations:[/bold blue]")
 
+    # First, detect anti-patterns using the detector
+    anti_pattern_summary = _detect_anti_patterns(code)
+    if anti_pattern_summary["total_issues"] > 0:
+        console.print(
+            f"\n[bold red]⚠️ Found {anti_pattern_summary['total_issues']} anti-patterns:[/bold red]"
+        )
+        for issue in anti_pattern_summary["issues"][:5]:  # Show top 5
+            console.print(f"  Line {issue['line']}: [yellow]{issue['issue']}[/yellow]")
+            console.print(f"    → {issue['fix']}")
+            console.print(
+                f"    [dim]{issue['code'][:60]}...[/dim]"
+                if len(issue["code"]) > 60
+                else f"    [dim]{issue['code']}[/dim]"
+            )
+
     # Get top recommendation
     top_rec = report.recommendations[0] if report.recommendations else None
     if not top_rec:
         return
+
+    # For timeout suggestions
+    if "timeout_patterns" in line_info:
+        if any("Timeout" in rec.primitive_name for rec in report.recommendations):
+            console.print("\n[cyan]Timeout wrapper suggestion:[/cyan]")
+            console.print(
+                f"  Lines {line_info['timeout_patterns'][:3]} have manual timeout handling."
+            )
+            console.print(
+                "\n[dim]Replace asyncio.wait_for with TimeoutPrimitive:[/dim]"
+            )
+            timeout_code = """from tta_dev_primitives.recovery import TimeoutPrimitive
+from tta_dev_primitives import WorkflowContext
+
+# Wrap your operation with timeout protection
+protected_operation = TimeoutPrimitive(
+    primitive=your_async_function,
+    timeout_seconds=30.0,
+    raise_on_timeout=True,
+)
+
+# Usage:
+context = WorkflowContext(workflow_id="timeout-workflow")
+result = await protected_operation.execute(input_data, context)"""
+            console.print(
+                Syntax(timeout_code, "python", theme="monokai", line_numbers=False)
+            )
+
+    # For fallback suggestions
+    if "fallback_patterns" in line_info or "error_handling" in line_info:
+        if any("Fallback" in rec.primitive_name for rec in report.recommendations):
+            console.print("\n[cyan]Fallback cascade suggestion:[/cyan]")
+            lines_to_show = line_info.get(
+                "fallback_patterns", line_info.get("error_handling", [])
+            )
+            console.print(
+                f"  Lines {lines_to_show[:3]} have manual fallback/error handling."
+            )
+            console.print("\n[dim]Replace with FallbackPrimitive:[/dim]")
+            fallback_code = """from tta_dev_primitives.recovery import FallbackPrimitive
+from tta_dev_primitives import WorkflowContext
+
+# Define your primary and fallback operations
+resilient_workflow = FallbackPrimitive(
+    primary=primary_api_call,
+    fallbacks=[
+        backup_api_call,
+        local_fallback,
+    ]
+)
+
+# Usage - automatically tries fallbacks on failure:
+context = WorkflowContext(workflow_id="fallback-workflow")
+result = await resilient_workflow.execute(input_data, context)"""
+            console.print(
+                Syntax(fallback_code, "python", theme="monokai", line_numbers=False)
+            )
 
     # For parallelization suggestions
     if "api_calls" in line_info and len(line_info["api_calls"]) >= 2:
@@ -788,6 +880,33 @@ parallel_workflow = ParallelPrimitive([
 # Usage:
 # context = WorkflowContext(workflow_id="parallel-workflow")
 # results = await parallel_workflow.execute(data, context)
+""",
+        "FallbackPrimitive": f"""
+# Add fallback cascade to {func_names[0]}
+resilient_{func_names[0]} = FallbackPrimitive(
+    primary={func_names[0]},
+    fallbacks=[
+        backup_{func_names[0]},  # First fallback
+        local_{func_names[0]},   # Second fallback
+    ]
+)
+
+# Usage - automatically tries fallbacks on failure:
+# context = WorkflowContext(workflow_id="fallback-workflow")
+# result = await resilient_{func_names[0]}.execute(data, context)
+""",
+        "CircuitBreakerPrimitive": f"""
+# Protect {func_names[0]} with circuit breaker
+protected_{func_names[0]} = CircuitBreakerPrimitive(
+    primitive={func_names[0]},
+    failure_threshold=5,      # Open circuit after 5 failures
+    recovery_timeout=60,      # Wait 60 seconds before half-open
+    expected_successes=2,     # 2 successes to close circuit
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="circuit-breaker-workflow")
+# result = await protected_{func_names[0]}.execute(data, context)
 """,
     }
 

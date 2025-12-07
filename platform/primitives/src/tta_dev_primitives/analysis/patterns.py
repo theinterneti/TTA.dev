@@ -225,6 +225,78 @@ class PatternDetector:
             ],
         }
 
+        # Anti-patterns: Manual implementations that should use TTA.dev primitives
+        # These are specific code patterns that indicate opportunity for transformation
+        self.anti_patterns: dict[str, dict[str, list[str] | str]] = {
+            "manual_retry": {
+                "description": "Manual retry loop - use RetryPrimitive instead",
+                "patterns": [
+                    r"for\s+\w+\s+in\s+range\s*\(\s*\d+\s*\)",  # for i in range(3)
+                    r"while\s+\w+\s*<\s*\d+",  # while attempts < 3
+                    r"for\s+attempt\s+in\s+range",  # for attempt in range
+                    r"max_retries\s*=",  # max_retries = 3
+                    r"retry_count\s*[=<>]",  # retry_count = 0
+                ],
+                "transform_to": "RetryPrimitive",
+            },
+            "manual_timeout": {
+                "description": "Manual timeout handling - use TimeoutPrimitive instead",
+                "patterns": [
+                    r"asyncio\.wait_for\s*\(",  # asyncio.wait_for(coro, timeout=)
+                    r"asyncio\.timeout\s*\(",  # asyncio.timeout(seconds)
+                    r"signal\.alarm\s*\(",  # signal.alarm(seconds)
+                    r"time\.time\(\)\s*\+\s*\d+",  # deadline = time.time() + 30
+                    r"timeout\s*=\s*\d+",  # timeout=30
+                    r"TimeoutError",  # except TimeoutError
+                ],
+                "transform_to": "TimeoutPrimitive",
+            },
+            "manual_fallback": {
+                "description": "Manual fallback logic - use FallbackPrimitive instead",
+                "patterns": [
+                    r"except\s*:?\s*\n\s*return\s+",  # except: return default
+                    r"except\s+\w+\s*:\s*\n\s*return\s+",  # except Error: return default
+                    r"or\s+default_",  # result or default_value
+                    r"if\s+\w+\s+is\s+None\s*:",  # if result is None:
+                    r"try:\s*\n.*\n\s*except.*:\s*\n\s*try:",  # nested try/except fallback
+                    r"primary.*=.*\n.*fallback.*=",  # primary = ..., fallback = ...
+                ],
+                "transform_to": "FallbackPrimitive",
+            },
+            "manual_cache": {
+                "description": "Manual caching - use CachePrimitive instead",
+                "patterns": [
+                    r"_cache\s*=\s*\{\}",  # _cache = {}
+                    r"cache\s*=\s*dict\(\)",  # cache = dict()
+                    r"if\s+\w+\s+in\s+\w*cache",  # if key in cache
+                    r"\@lru_cache",  # @lru_cache (consider CachePrimitive for TTL)
+                    r"\@cache",  # @cache decorator
+                ],
+                "transform_to": "CachePrimitive",
+            },
+            "manual_parallel": {
+                "description": "Manual parallel execution - use ParallelPrimitive instead",
+                "patterns": [
+                    r"asyncio\.gather\s*\(",  # asyncio.gather(...)
+                    r"asyncio\.create_task\s*\(",  # asyncio.create_task(...)
+                    r"concurrent\.futures",  # concurrent.futures usage
+                    r"ThreadPoolExecutor",  # ThreadPoolExecutor
+                    r"ProcessPoolExecutor",  # ProcessPoolExecutor
+                ],
+                "transform_to": "ParallelPrimitive",
+            },
+            "manual_circuit_breaker": {
+                "description": "Manual circuit breaker - use CircuitBreakerPrimitive instead",
+                "patterns": [
+                    r"failure_count\s*[=><]",  # failure_count tracking
+                    r"circuit_open\s*=",  # circuit_open = True/False
+                    r"is_healthy\s*=",  # is_healthy = True/False
+                    r"consecutive_failures",  # consecutive failure tracking
+                ],
+                "transform_to": "CircuitBreakerPrimitive",
+            },
+        }
+
         # Pattern to requirement mapping
         self._requirement_map: dict[str, str] = {
             "async_operations": "asynchronous_processing",
@@ -383,4 +455,94 @@ class PatternDetector:
             "pattern_count": len(self.patterns),
             "patterns": list(self.patterns.keys()),
             "requirements": list(set(self._requirement_map.values())),
+        }
+
+    def detect_anti_patterns(self, code: str) -> list[dict[str, Any]]:
+        """Detect anti-patterns with line numbers and transformation suggestions.
+
+        Args:
+            code: Source code to analyze
+
+        Returns:
+            List of detected anti-patterns with:
+            - name: Anti-pattern name (e.g., "manual_retry")
+            - description: What the pattern is
+            - transform_to: Recommended primitive
+            - matches: List of {line, code, pattern} dicts
+        """
+        results = []
+        lines = code.split("\n")
+
+        for anti_pattern_name, info in self.anti_patterns.items():
+            matches = []
+            patterns = info.get("patterns", [])
+
+            for regex_pattern in patterns:
+                compiled = re.compile(regex_pattern, re.IGNORECASE | re.MULTILINE)
+
+                for i, line in enumerate(lines, 1):
+                    if compiled.search(line):
+                        matches.append(
+                            {
+                                "line": i,
+                                "code": line.strip(),
+                                "pattern": regex_pattern,
+                            }
+                        )
+
+            if matches:
+                # Deduplicate by line number
+                seen_lines = set()
+                unique_matches = []
+                for m in matches:
+                    if m["line"] not in seen_lines:
+                        unique_matches.append(m)
+                        seen_lines.add(m["line"])
+
+                results.append(
+                    {
+                        "name": anti_pattern_name,
+                        "description": info.get("description", ""),
+                        "transform_to": info.get("transform_to", ""),
+                        "matches": unique_matches,
+                    }
+                )
+
+        return results
+
+    def get_anti_pattern_summary(self, code: str) -> dict[str, Any]:
+        """Get a summary of anti-patterns for agent consumption.
+
+        Args:
+            code: Source code to analyze
+
+        Returns:
+            Dict with:
+            - total_issues: Number of anti-patterns detected
+            - primitives_needed: List of primitives that should be used
+            - issues: List of issues with line numbers
+        """
+        detected = self.detect_anti_patterns(code)
+
+        primitives_needed = list({ap["transform_to"] for ap in detected})
+        issues = []
+
+        for ap in detected:
+            for match in ap["matches"]:
+                issues.append(
+                    {
+                        "line": match["line"],
+                        "issue": ap["description"],
+                        "fix": f"Use {ap['transform_to']}",
+                        "code": match["code"],
+                    }
+                )
+
+        # Sort by line number
+        issues.sort(key=lambda x: x["line"])
+
+        return {
+            "total_issues": len(issues),
+            "primitives_needed": primitives_needed,
+            "issues": issues,
         }
