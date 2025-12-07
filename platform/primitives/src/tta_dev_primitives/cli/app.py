@@ -29,7 +29,6 @@ from tta_dev_primitives.config import (
     TTAConfig,
     find_config_file,
     generate_default_config,
-    get_config,
     load_config,
     save_config,
 )
@@ -184,11 +183,19 @@ def analyze(
 
     # Resolve options: CLI > config > hardcoded default
     output = output if output is not None else config.analysis.output_format
-    min_confidence = min_confidence if min_confidence is not None else config.analysis.min_confidence
-    show_templates = show_templates if show_templates is not None else config.analysis.show_templates
+    min_confidence = (
+        min_confidence if min_confidence is not None else config.analysis.min_confidence
+    )
+    show_templates = (
+        show_templates if show_templates is not None else config.analysis.show_templates
+    )
     quiet = quiet if quiet is not None else config.analysis.quiet
-    show_lines = show_lines if show_lines is not None else config.analysis.show_line_numbers
-    suggest_diff = suggest_diff if suggest_diff is not None else config.transform.suggest_diff
+    show_lines = (
+        show_lines if show_lines is not None else config.analysis.show_line_numbers
+    )
+    suggest_diff = (
+        suggest_diff if suggest_diff is not None else config.transform.suggest_diff
+    )
     apply = apply if apply is not None else config.transform.auto_fix
 
     # Suppress logs if --quiet
@@ -613,21 +620,32 @@ def _print_code_context(code: str, line_numbers: list[int], context: int = 2) ->
 
 @app.command()
 def primitives(
+    ctx: typer.Context,
     output: str = typer.Option(
-        "table",
+        None,
         "--output",
         "-o",
-        help="Output format: table, json",
+        help="Output format: table, json (default from config)",
     ),
 ) -> None:
     """List all available TTA.dev primitives.
 
     Shows all primitives with their descriptions and use cases.
 
+    Configuration values from .ttadevrc.yaml are used as defaults.
+
     Examples:
         tta-dev primitives
         tta-dev primitives --output json
     """
+    # Get config
+    config = ctx.obj.get("config") if ctx.obj else None
+    if config is None:
+        config = _get_config()
+
+    # Resolve options from config
+    output = output if output is not None else config.analysis.output_format
+
     prims = analyzer.list_primitives()
 
     if output == "json":
@@ -655,15 +673,16 @@ def primitives(
 
 @app.command()
 def docs(
+    ctx: typer.Context,
     primitive: str = typer.Argument(
         ...,
         help="Name of the primitive to get documentation for",
     ),
     show_all_templates: bool = typer.Option(
-        False,
+        None,
         "--all",
         "-a",
-        help="Show all available templates",
+        help="Show all available templates (default from config)",
     ),
 ) -> None:
     """Show documentation for a specific primitive.
@@ -671,10 +690,20 @@ def docs(
     Displays detailed information including description, use cases,
     related primitives, and code templates.
 
+    Configuration values from .ttadevrc.yaml are used as defaults.
+
     Examples:
         tta-dev docs RetryPrimitive
         tta-dev docs CachePrimitive --all
     """
+    # Get config
+    config = ctx.obj.get("config") if ctx.obj else None
+    if config is None:
+        config = _get_config()
+
+    # Resolve options from config
+    show_all_templates = show_all_templates if show_all_templates is not None else config.analysis.show_templates
+
     info = analyzer.get_primitive_info(primitive)
 
     if "error" in info:
@@ -1253,6 +1282,7 @@ def benchmark(
 
 @app.command(name="ab-test")
 def ab_test(
+    ctx: typer.Context,
     code_file: Path = typer.Argument(
         ...,
         help="Python file to A/B test with different primitives",
@@ -1266,22 +1296,24 @@ def ab_test(
         help="Comma-separated primitive variants to test",
     ),
     runs: int = typer.Option(
-        5,
+        None,
         "--runs",
         "-r",
-        help="Number of runs per variant",
+        help="Number of runs per variant (default from config)",
     ),
     output: str = typer.Option(
-        "table",
+        None,
         "--output",
         "-o",
-        help="Output format: table, json",
+        help="Output format: table, json (default from config)",
     ),
 ) -> None:
     """A/B test code with different TTA.dev primitives.
 
     Executes the given code with different primitive wrappers using
     E2B sandboxes and compares performance metrics.
+
+    Configuration values from .ttadevrc.yaml are used as defaults.
 
     Examples:
         tta-dev ab-test api_client.py
@@ -1290,6 +1322,15 @@ def ab_test(
     """
     import asyncio
     import statistics
+
+    # Get config
+    config = ctx.obj.get("config") if ctx.obj else None
+    if config is None:
+        config = _get_config()
+
+    # Resolve options from config
+    runs = runs if runs is not None else config.benchmark.iterations
+    output = output if output is not None else config.analysis.output_format
 
     console.print("[bold]🔬 A/B Testing with E2B Execution[/bold]\n")
 

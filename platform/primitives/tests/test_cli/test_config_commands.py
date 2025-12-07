@@ -277,7 +277,14 @@ class TestConfigIntegration:
             # Run with explicit --output table (should override config)
             result = runner.invoke(
                 app,
-                ["--config", str(config_path), "analyze", str(test_file), "--output", "table"],
+                [
+                    "--config",
+                    str(config_path),
+                    "analyze",
+                    str(test_file),
+                    "--output",
+                    "table",
+                ],
             )
             assert result.exit_code == 0
             # Table output has rich formatting, not raw JSON
