@@ -19,6 +19,13 @@ from rich.syntax import Syntax
 from rich.table import Table
 
 from tta_dev_primitives.analysis import TTAAnalyzer
+from tta_dev_primitives.config import (
+    TTAConfig,
+    find_config_file,
+    generate_default_config,
+    load_config,
+    save_config,
+)
 
 if TYPE_CHECKING:
     from tta_dev_primitives.analysis import AnalysisReport
@@ -36,6 +43,17 @@ console = Console()
 
 # Shared analyzer instance
 analyzer = TTAAnalyzer()
+
+# Global config (loaded once)
+_config: TTAConfig | None = None
+
+
+def _get_config(config_path: Path | None = None) -> TTAConfig:
+    """Get configuration, loading from file if available."""
+    global _config
+    if _config is None or config_path is not None:
+        _config = load_config(config_path)
+    return _config
 
 
 @app.command()
@@ -1371,6 +1389,185 @@ def _indent_code(code: str, spaces: int) -> str:
     indent = " " * spaces
     lines = code.split("\n")
     return "\n".join(indent + line if line.strip() else line for line in lines)
+
+
+# Config subcommand group
+config_app = typer.Typer(
+    name="config",
+    help="Manage TTA.dev configuration files.",
+    no_args_is_help=True,
+)
+app.add_typer(config_app, name="config")
+
+
+@config_app.command(name="init")
+def config_init(
+    path: Path = typer.Option(
+        None,
+        "--path",
+        "-p",
+        help="Path to create config file (default: .ttadevrc.yaml)",
+    ),
+    format: str = typer.Option(
+        "yaml",
+        "--format",
+        "-f",
+        help="Output format: yaml, json, toml",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Overwrite existing config file",
+    ),
+) -> None:
+    """Initialize a new configuration file.
+
+    Creates a .ttadevrc.yaml file with default settings.
+
+    Examples:
+        tta-dev config init
+        tta-dev config init --format json
+        tta-dev config init --path ./my-config.yaml
+    """
+    # Determine output path
+    if path is None:
+        ext_map = {"yaml": ".yaml", "json": ".json", "toml": ".toml"}
+        ext = ext_map.get(format, ".yaml")
+        path = Path(f".ttadevrc{ext}")
+
+    # Check if file exists
+    if path.exists() and not force:
+        console.print(f"[yellow]Config file already exists: {path}[/yellow]")
+        console.print("Use --force to overwrite.")
+        raise typer.Exit(1)
+
+    # Generate and save config
+    try:
+        config = TTAConfig()
+        save_config(config, path, format=format)
+        console.print(f"[green]✓ Created config file: {path}[/green]")
+        console.print("\nYou can now customize the settings in this file.")
+        console.print("The CLI will automatically load it when running commands.")
+    except Exception as e:
+        console.print(f"[red]Error creating config: {e}[/red]")
+        raise typer.Exit(1) from e
+
+
+@config_app.command(name="show")
+def config_show(
+    config_path: Path = typer.Option(
+        None,
+        "--config",
+        "-c",
+        help="Path to config file (auto-detected if not specified)",
+    ),
+    format: str = typer.Option(
+        "yaml",
+        "--format",
+        "-f",
+        help="Output format: yaml, json",
+    ),
+) -> None:
+    """Show current configuration.
+
+    Displays the merged configuration from config file and defaults.
+
+    Examples:
+        tta-dev config show
+        tta-dev config show --format json
+        tta-dev config show --config ./my-config.yaml
+    """
+    try:
+        config = load_config(config_path)
+        config_file = find_config_file()
+
+        if config_file:
+            console.print(f"[dim]Config loaded from: {config_file}[/dim]\n")
+        else:
+            console.print("[dim]No config file found, showing defaults[/dim]\n")
+
+        output = generate_default_config(format=format)
+
+        if format == "json":
+            console.print(output)
+        else:
+            syntax = Syntax(output, "yaml", theme="monokai", line_numbers=False)
+            console.print(syntax)
+
+    except Exception as e:
+        console.print(f"[red]Error loading config: {e}[/red]")
+        raise typer.Exit(1) from e
+
+
+@config_app.command(name="path")
+def config_path() -> None:
+    """Show path to current configuration file.
+
+    Examples:
+        tta-dev config path
+    """
+    config_file = find_config_file()
+
+    if config_file:
+        console.print(f"[green]{config_file}[/green]")
+    else:
+        console.print("[yellow]No configuration file found.[/yellow]")
+        console.print("\nSearched locations:")
+        console.print(
+            "  • .ttadevrc.yaml / .ttadevrc.yml / .ttadevrc.toml / .ttadevrc.json"
+        )
+        console.print("  • pyproject.toml [tool.tta-dev]")
+        console.print("  • Parent directories (up to root)")
+        console.print("  • Home directory")
+        console.print("\nRun 'tta-dev config init' to create a config file.")
+
+
+@config_app.command(name="validate")
+def config_validate(
+    config_path: Path = typer.Option(
+        None,
+        "--config",
+        "-c",
+        help="Path to config file to validate",
+    ),
+) -> None:
+    """Validate a configuration file.
+
+    Checks for syntax errors and invalid values.
+
+    Examples:
+        tta-dev config validate
+        tta-dev config validate --config ./my-config.yaml
+    """
+    try:
+        if config_path:
+            if not config_path.exists():
+                console.print(f"[red]Config file not found: {config_path}[/red]")
+                raise typer.Exit(1)
+            config_file = config_path
+        else:
+            config_file = find_config_file()
+            if not config_file:
+                console.print("[yellow]No config file found to validate.[/yellow]")
+                raise typer.Exit(0)
+
+        # Try to load and validate
+        config = load_config(config_file)
+
+        console.print(f"[green]✓ Configuration is valid: {config_file}[/green]")
+        console.print(f"\n  Version: {config.version}")
+        console.print(f"  Min confidence: {config.analysis.min_confidence}")
+        console.print(f"  Output format: {config.analysis.output_format}")
+        console.print(f"  Auto-fix: {config.transform.auto_fix}")
+        console.print(f"  Ignored patterns: {len(config.patterns.ignore)}")
+
+    except ValueError as e:
+        console.print("[red]✗ Invalid configuration:[/red]")
+        console.print(f"  {e}")
+        raise typer.Exit(1) from e
+    except Exception as e:
+        console.print(f"[red]Error validating config: {e}[/red]")
+        raise typer.Exit(1) from e
 
 
 @app.command()

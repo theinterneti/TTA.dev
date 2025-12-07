@@ -1,0 +1,110 @@
+# TTA.dev Configuration File
+# 
+# This is an example configuration file for TTA.dev CLI and MCP Server.
+# Copy this file to .ttadevrc.yaml in your project root.
+#
+# Configuration Search Order:
+# 1. Command-line arguments (highest priority)
+# 2. .ttadevrc.yaml / .ttadevrc.yml / .ttadevrc.toml / .ttadevrc.json
+# 3. pyproject.toml [tool.tta-dev] section
+# 4. Default values (lowest priority)
+
+version: "1.0"
+
+# Code Analysis Settings
+analysis:
+  # Minimum confidence threshold for recommendations (0.0 to 1.0)
+  # Lower values show more recommendations, higher values show fewer but more confident
+  min_confidence: 0.3
+  
+  # Output format: table, json, brief, markdown
+  output_format: table
+  
+  # Show code templates for recommendations
+  show_templates: false
+  
+  # Show line numbers for detected patterns
+  show_line_numbers: false
+  
+  # Suppress debug logs (cleaner output for agents)
+  quiet: false
+  
+  # Maximum number of recommendations to show
+  max_recommendations: 10
+
+# Code Transformation Settings
+transform:
+  # Automatically apply recommended transformations
+  auto_fix: false
+  
+  # Show suggested code transformations as diffs
+  suggest_diff: false
+  
+  # Create .bak backup before modifying files
+  backup_files: true
+  
+  # Require confirmation before applying changes
+  confirm_changes: true
+  
+  # Preferred primitive to apply when auto-fixing
+  # preferred_primitive: RetryPrimitive
+
+# Pattern Detection Settings
+patterns:
+  # Glob patterns for files to ignore
+  ignore:
+    - "test_*.py"
+    - "*_test.py"
+    - "conftest.py"
+    - "__pycache__/**"
+    - ".git/**"
+    - ".venv/**"
+    - "*.pyc"
+  
+  # Custom detection rules (advanced)
+  custom_rules: []
+  
+  # List of enabled AST detectors
+  enabled_detectors:
+    - retry_loop
+    - timeout
+    - cache_pattern
+    - fallback
+    - gather
+    - router_pattern
+
+# Primitive Recommendation Settings
+primitives:
+  # Preferred primitives (ranked higher in suggestions)
+  preferred: []
+  
+  # Primitives to exclude from recommendations
+  disabled: []
+  
+  # Import style: 'specific' (from x import Y) or 'module' (import x)
+  import_style: specific
+
+# MCP Server Settings
+mcp:
+  # Host to bind the MCP server to
+  host: "127.0.0.1"
+  
+  # Port for the MCP server
+  port: 5000
+  
+  # Enable tools that modify files (security risk)
+  enable_unsafe_tools: false
+  
+  # Log all MCP requests (verbose)
+  log_requests: false
+
+# Benchmarking Settings
+benchmark:
+  # Number of iterations for benchmarks
+  iterations: 100
+  
+  # Number of warmup iterations
+  warmup: 5
+  
+  # Directory for benchmark output files
+  output_dir: benchmark_results

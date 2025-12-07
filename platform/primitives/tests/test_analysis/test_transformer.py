@@ -582,17 +582,18 @@ class TestASTNodeTransformers:
 
     def test_retry_loop_transformer(self) -> None:
         """Test RetryLoopTransformer produces valid code."""
-        from tta_dev_primitives.analysis.transformer import RetryLoopTransformer
         import ast
 
-        code = '''
+        from tta_dev_primitives.analysis.transformer import RetryLoopTransformer
+
+        code = """
 def fetch_data():
     for attempt in range(3):
         try:
             return do_request()
         except Exception:
             pass
-'''
+"""
         tree = ast.parse(code)
         transformer = RetryLoopTransformer()
         new_tree = transformer.visit(tree)
@@ -604,14 +605,15 @@ def fetch_data():
 
     def test_timeout_transformer(self) -> None:
         """Test TimeoutTransformer produces valid code."""
-        from tta_dev_primitives.analysis.transformer import TimeoutTransformer
         import ast
 
-        code = '''
+        from tta_dev_primitives.analysis.transformer import TimeoutTransformer
+
+        code = """
 async def slow_op():
     result = await asyncio.wait_for(api_call(), timeout=30)
     return result
-'''
+"""
         tree = ast.parse(code)
         transformer = TimeoutTransformer()
         new_tree = transformer.visit(tree)
@@ -626,16 +628,17 @@ async def slow_op():
 
     def test_fallback_transformer(self) -> None:
         """Test FallbackTransformer produces valid code."""
-        from tta_dev_primitives.analysis.transformer import FallbackTransformer
         import ast
 
-        code = '''
+        from tta_dev_primitives.analysis.transformer import FallbackTransformer
+
+        code = """
 async def with_fallback():
     try:
         return await primary()
     except:
         return await backup()
-'''
+"""
         tree = ast.parse(code)
         transformer = FallbackTransformer()
         new_tree = transformer.visit(tree)
@@ -651,20 +654,25 @@ async def with_fallback():
 
     def test_gather_transformer(self) -> None:
         """Test GatherTransformer produces valid code."""
-        from tta_dev_primitives.analysis.transformer import GatherTransformer
         import ast
 
-        code = '''
+        from tta_dev_primitives.analysis.transformer import GatherTransformer
+
+        code = """
 async def parallel_tasks():
     results = await asyncio.gather(task1(), task2(), task3())
     return results
-'''
+"""
         tree = ast.parse(code)
         transformer = GatherTransformer()
         new_tree = transformer.visit(tree)
 
         assert len(transformer.transformations) == 1
-        assert transformer.transformations[0]["functions"] == ["task1", "task2", "task3"]
+        assert transformer.transformations[0]["functions"] == [
+            "task1",
+            "task2",
+            "task3",
+        ]
 
         # Should produce valid Python
         ast.fix_missing_locations(new_tree)
@@ -673,16 +681,17 @@ async def parallel_tasks():
 
     def test_router_transformer(self) -> None:
         """Test RouterTransformer produces valid code."""
-        from tta_dev_primitives.analysis.transformer import RouterTransformer
         import ast
 
-        code = '''
+        from tta_dev_primitives.analysis.transformer import RouterTransformer
+
+        code = """
 async def route_request(provider, data):
     if provider == "openai":
         return await call_openai(data)
     elif provider == "anthropic":
         return await call_anthropic(data)
-'''
+"""
         tree = ast.parse(code)
         transformer = RouterTransformer()
         new_tree = transformer.visit(tree)
@@ -702,11 +711,11 @@ class TestFullTransformationPipeline:
 
     def test_timeout_full_transform(self) -> None:
         """Test full timeout transformation produces runnable code."""
-        code = '''
+        code = """
 async def slow_operation():
     result = await asyncio.wait_for(api_call(), timeout=30)
     return result
-'''
+"""
         result = transform_code(code, primitive="TimeoutPrimitive")
         assert result.success
         assert "TimeoutPrimitive" in result.transformed_code
@@ -715,13 +724,13 @@ async def slow_operation():
 
     def test_fallback_full_transform(self) -> None:
         """Test full fallback transformation produces runnable code."""
-        code = '''
+        code = """
 async def with_fallback():
     try:
         return await primary_service()
     except:
         return await backup_service()
-'''
+"""
         result = transform_code(code, primitive="FallbackPrimitive")
         assert result.success
         assert "FallbackPrimitive" in result.transformed_code
@@ -730,11 +739,11 @@ async def with_fallback():
 
     def test_parallel_full_transform(self) -> None:
         """Test full parallel transformation produces runnable code."""
-        code = '''
+        code = """
 async def parallel_fetch():
     results = await asyncio.gather(fetch_users(), fetch_orders(), fetch_products())
     return results
-'''
+"""
         result = transform_code(code, primitive="ParallelPrimitive")
         assert result.success
         assert "ParallelPrimitive" in result.transformed_code
@@ -743,7 +752,7 @@ async def parallel_fetch():
 
     def test_router_full_transform(self) -> None:
         """Test full router transformation produces runnable code."""
-        code = '''
+        code = """
 async def route_request(provider, data):
     if provider == "openai":
         return await call_openai(data)
@@ -751,7 +760,7 @@ async def route_request(provider, data):
         return await call_anthropic(data)
     elif provider == "google":
         return await call_google(data)
-'''
+"""
         result = transform_code(code, primitive="RouterPrimitive")
         assert result.success
         assert "RouterPrimitive" in result.transformed_code
@@ -760,7 +769,7 @@ async def route_request(provider, data):
 
     def test_multiple_patterns_in_one_file(self) -> None:
         """Test transforming file with multiple patterns."""
-        code = '''
+        code = """
 async def complex_service():
     # This has a timeout pattern
     data = await asyncio.wait_for(slow_fetch(), timeout=10)
@@ -769,7 +778,7 @@ async def complex_service():
     results = await asyncio.gather(process_a(data), process_b(data))
 
     return results
-'''
+"""
         # Should detect both patterns
         transformer = CodeTransformer()
         transforms = transformer._detect_needed_transforms(code)
@@ -778,7 +787,7 @@ async def complex_service():
 
     def test_nested_class_methods(self) -> None:
         """Test transforming methods inside classes."""
-        code = '''
+        code = """
 class DataService:
     async def fetch_with_retry(self):
         for attempt in range(3):
@@ -786,7 +795,7 @@ class DataService:
                 return await self.api_call()
             except:
                 pass
-'''
+"""
         result = transform_code(code, primitive="RetryPrimitive")
         assert result.success
         # Should detect the pattern in class method
@@ -794,7 +803,7 @@ class DataService:
 
     def test_preserves_unrelated_code(self) -> None:
         """Test that unrelated code is preserved."""
-        code = '''
+        code = """
 import os
 
 CONSTANT = 42
@@ -808,7 +817,7 @@ async def with_timeout():
 
 def another_simple():
     return CONSTANT
-'''
+"""
         result = transform_code(code, primitive="TimeoutPrimitive")
         assert result.success
         # Check unrelated code is preserved

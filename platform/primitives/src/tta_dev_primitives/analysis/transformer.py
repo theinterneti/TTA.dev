@@ -266,7 +266,10 @@ class TimeoutTransformer(ast.NodeTransformer):
                     func=ast.Name(id="TimeoutPrimitive", ctx=ast.Load()),
                     args=[],
                     keywords=[
-                        ast.keyword(arg="primitive", value=coro.func if isinstance(coro, ast.Call) else coro),
+                        ast.keyword(
+                            arg="primitive",
+                            value=coro.func if isinstance(coro, ast.Call) else coro,
+                        ),
                         ast.keyword(
                             arg="timeout_seconds", value=ast.Constant(value=timeout)
                         ),
