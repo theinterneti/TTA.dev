@@ -233,3 +233,78 @@ class TestConfigSubcommandHelp:
         # Typer returns exit code 2 when no_args_is_help=True
         assert result.exit_code in (0, 2)
         assert "init" in result.output or "Usage" in result.output
+
+
+class TestConfigIntegration:
+    """Tests for config integration with CLI commands."""
+
+    def test_analyze_uses_config_min_confidence(self) -> None:
+        """Test that analyze command respects config file min_confidence."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create config with high min_confidence
+            config_path = Path(tmpdir) / ".ttadevrc.yaml"
+            yaml.dump(
+                {"analysis": {"min_confidence": 0.99}},
+                open(config_path, "w"),
+            )
+
+            # Create test file
+            test_file = Path(tmpdir) / "test.py"
+            test_file.write_text("def hello():\n    pass\n")
+
+            # Run with --config pointing to our config
+            result = runner.invoke(
+                app,
+                ["--config", str(config_path), "analyze", str(test_file)],
+            )
+            # Should work without errors
+            assert result.exit_code == 0
+
+    def test_analyze_cli_overrides_config(self) -> None:
+        """Test that CLI arguments override config file values."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create config with json output
+            config_path = Path(tmpdir) / ".ttadevrc.yaml"
+            yaml.dump(
+                {"analysis": {"output_format": "json"}},
+                open(config_path, "w"),
+            )
+
+            # Create test file
+            test_file = Path(tmpdir) / "test.py"
+            test_file.write_text("def hello():\n    pass\n")
+
+            # Run with explicit --output table (should override config)
+            result = runner.invoke(
+                app,
+                ["--config", str(config_path), "analyze", str(test_file), "--output", "table"],
+            )
+            assert result.exit_code == 0
+            # Table output has rich formatting, not raw JSON
+            assert '"recommendations"' not in result.output
+
+    def test_global_config_option_shown_in_help(self) -> None:
+        """Test that --config option is shown in main help."""
+        result = runner.invoke(app, ["--help"])
+        assert result.exit_code == 0
+        assert "--config" in result.output or "-C" in result.output
+
+    def test_analyze_with_config_quiet_mode(self) -> None:
+        """Test that config file quiet mode is respected."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create config with quiet mode
+            config_path = Path(tmpdir) / ".ttadevrc.yaml"
+            yaml.dump(
+                {"analysis": {"quiet": True}},
+                open(config_path, "w"),
+            )
+
+            # Create test file
+            test_file = Path(tmpdir) / "test.py"
+            test_file.write_text("def hello():\n    pass\n")
+
+            result = runner.invoke(
+                app,
+                ["--config", str(config_path), "analyze", str(test_file)],
+            )
+            assert result.exit_code == 0

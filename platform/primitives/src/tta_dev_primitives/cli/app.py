@@ -1,6 +1,12 @@
 """TTA.dev CLI Application.
 
 Main Typer application with all CLI commands.
+
+Configuration is loaded from (in priority order):
+1. Command-line arguments (highest priority)
+2. .ttadevrc.yaml / .ttadevrc.yml / .ttadevrc.toml / .ttadevrc.json
+3. pyproject.toml [tool.tta-dev] section
+4. Default values (lowest priority)
 """
 
 from __future__ import annotations
@@ -9,7 +15,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
 
 import structlog
 import typer
@@ -23,6 +29,7 @@ from tta_dev_primitives.config import (
     TTAConfig,
     find_config_file,
     generate_default_config,
+    get_config,
     load_config,
     save_config,
 )
@@ -44,7 +51,7 @@ console = Console()
 # Shared analyzer instance
 analyzer = TTAAnalyzer()
 
-# Global config (loaded once)
+# Global config (loaded once per invocation)
 _config: TTAConfig | None = None
 
 
@@ -56,8 +63,49 @@ def _get_config(config_path: Path | None = None) -> TTAConfig:
     return _config
 
 
+def _resolve_option(cli_value, config_value, default):
+    """Resolve option value: CLI > config > default.
+
+    Returns config value if CLI value equals the default (wasn't set by user).
+    """
+    if cli_value != default:
+        return cli_value  # User explicitly set via CLI
+    return config_value  # Use config file value
+
+
+@app.callback()
+def main_callback(
+    ctx: typer.Context,
+    config_file: Annotated[
+        Path | None,
+        typer.Option(
+            "--config",
+            "-C",
+            help="Path to configuration file",
+            exists=True,
+            readable=True,
+        ),
+    ] = None,
+) -> None:
+    """TTA.dev CLI - Load configuration before running commands."""
+    # Load config file (explicit path or auto-detect)
+    global _config
+    _config = load_config(config_file)
+
+    # Store in context for commands to access
+    ctx.ensure_object(dict)
+    ctx.obj["config"] = _config
+
+    # Show config info if verbose
+    config_path = find_config_file() if config_file is None else config_file
+    if config_path:
+        # Only log if not in quiet mode (will be checked by commands)
+        pass  # Config loaded silently
+
+
 @app.command()
 def analyze(
+    ctx: typer.Context,
     file: Path = typer.Argument(
         ...,
         help="File to analyze for primitive recommendations",
@@ -65,43 +113,43 @@ def analyze(
         readable=True,
     ),
     output: str = typer.Option(
-        "table",
+        None,
         "--output",
         "-o",
-        help="Output format: table, json, brief",
+        help="Output format: table, json, brief (default from config)",
     ),
     min_confidence: float = typer.Option(
-        0.3,
+        None,
         "--min-confidence",
         "-c",
-        help="Minimum confidence threshold (0.0 to 1.0)",
+        help="Minimum confidence threshold (0.0 to 1.0, default from config)",
     ),
     show_templates: bool = typer.Option(
-        False,
+        None,
         "--templates",
         "-t",
         help="Show code templates for recommendations",
     ),
     quiet: bool = typer.Option(
-        False,
+        None,
         "--quiet",
         "-q",
         help="Suppress debug logs (cleaner output for agents)",
     ),
     show_lines: bool = typer.Option(
-        False,
+        None,
         "--lines",
         "-l",
         help="Show line numbers for detected patterns",
     ),
     suggest_diff: bool = typer.Option(
-        False,
+        None,
         "--suggest-diff",
         "-d",
         help="Show suggested code transformations as diffs",
     ),
     apply: bool = typer.Option(
-        False,
+        None,
         "--apply",
         "-a",
         help="Auto-apply top recommendation (modifies file in place)",
@@ -118,6 +166,9 @@ def analyze(
     Analyzes the given file for patterns and recommends appropriate
     TTA.dev primitives with confidence scores and code templates.
 
+    Configuration values from .ttadevrc.yaml are used as defaults.
+    CLI arguments override config file values.
+
     Examples:
         tta-dev analyze api_client.py
         tta-dev analyze app.py --output json
@@ -126,6 +177,20 @@ def analyze(
         tta-dev analyze api.py --apply                 # Auto-fix with top rec
         tta-dev analyze api.py --apply-primitive RetryPrimitive  # Apply specific
     """
+    # Get config (loaded by callback)
+    config = ctx.obj.get("config") if ctx.obj else None
+    if config is None:
+        config = _get_config()
+
+    # Resolve options: CLI > config > hardcoded default
+    output = output if output is not None else config.analysis.output_format
+    min_confidence = min_confidence if min_confidence is not None else config.analysis.min_confidence
+    show_templates = show_templates if show_templates is not None else config.analysis.show_templates
+    quiet = quiet if quiet is not None else config.analysis.quiet
+    show_lines = show_lines if show_lines is not None else config.analysis.show_line_numbers
+    suggest_diff = suggest_diff if suggest_diff is not None else config.transform.suggest_diff
+    apply = apply if apply is not None else config.transform.auto_fix
+
     # Suppress logs if --quiet
     if quiet:
         structlog.configure(
@@ -669,6 +734,7 @@ def docs(
 
 @app.command()
 def serve(
+    ctx: typer.Context,
     transport: str = typer.Option(
         "stdio",
         "--transport",
@@ -676,10 +742,10 @@ def serve(
         help="Transport type: stdio, sse, http",
     ),
     port: int = typer.Option(
-        8000,
+        None,
         "--port",
         "-p",
-        help="Port for HTTP/SSE transport",
+        help="Port for HTTP/SSE transport (default from config)",
     ),
 ) -> None:
     """Start the TTA.dev MCP server.
@@ -687,11 +753,21 @@ def serve(
     Starts a Model Context Protocol server that exposes TTA.dev
     primitives as tools for AI agents like Claude, Copilot, and Cline.
 
+    Configuration values from .ttadevrc.yaml are used as defaults.
+
     Examples:
         tta-dev serve                    # stdio (default for Claude Desktop)
         tta-dev serve --transport sse    # SSE transport
         tta-dev serve --transport http --port 3000
     """
+    # Get config
+    config = ctx.obj.get("config") if ctx.obj else None
+    if config is None:
+        config = _get_config()
+
+    # Resolve options from config
+    port = port if port is not None else config.mcp.port
+
     console.print("[bold]Starting TTA.dev MCP Server[/bold]")
     console.print(f"Transport: {transport}")
     if transport != "stdio":
@@ -710,6 +786,7 @@ def serve(
 
 @app.command()
 def transform(
+    ctx: typer.Context,
     file: Path = typer.Argument(
         ...,
         help="File to transform",
@@ -733,10 +810,10 @@ def transform(
         help="Output: stdout, file, or diff",
     ),
     quiet: bool = typer.Option(
-        False,
+        None,
         "--quiet",
         "-q",
-        help="Suppress informational output",
+        help="Suppress informational output (default from config)",
     ),
 ) -> None:
     """Transform code by wrapping with a TTA.dev primitive.
@@ -744,11 +821,21 @@ def transform(
     Automatically detects functions that match the primitive's use case
     and generates transformed code.
 
+    Configuration values from .ttadevrc.yaml are used as defaults.
+
     Examples:
         tta-dev transform api.py RetryPrimitive           # Wrap API calls with retry
         tta-dev transform api.py CachePrimitive -f fetch  # Cache specific function
         tta-dev transform api.py ParallelPrimitive -o diff  # Show as diff
     """
+    # Get config
+    config = ctx.obj.get("config") if ctx.obj else None
+    if config is None:
+        config = _get_config()
+
+    # Resolve options from config
+    quiet = quiet if quiet is not None else config.analysis.quiet
+
     try:
         code = file.read_text()
     except Exception as e:
@@ -1022,6 +1109,7 @@ def _print_diff(original: str, transformed: str, filename: str) -> None:
 
 @app.command()
 def benchmark(
+    ctx: typer.Context,
     difficulty: str = typer.Option(
         "all",
         "--difficulty",
@@ -1035,10 +1123,10 @@ def benchmark(
         help="Output format: table, json",
     ),
     iterations: int = typer.Option(
-        3,
+        None,
         "--iterations",
         "-i",
-        help="Max iterations per task",
+        help="Max iterations per task (default from config)",
     ),
 ) -> None:
     """Run ACE learning benchmarks.
@@ -1046,12 +1134,22 @@ def benchmark(
     Executes benchmark tasks to test self-learning code generation
     using ACE + E2B execution environments.
 
+    Configuration values from .ttadevrc.yaml are used as defaults.
+
     Examples:
         tta-dev benchmark                       # Run all benchmarks
         tta-dev benchmark --difficulty easy     # Run only easy tasks
         tta-dev benchmark --output json         # Output as JSON
     """
     import asyncio
+
+    # Get config
+    config = ctx.obj.get("config") if ctx.obj else None
+    if config is None:
+        config = _get_config()
+
+    # Resolve options from config
+    iterations = iterations if iterations is not None else config.benchmark.iterations
 
     try:
         from tta_dev_primitives.ace import BenchmarkSuite, SelfLearningCodePrimitive
