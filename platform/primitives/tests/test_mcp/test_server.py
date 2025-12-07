@@ -393,6 +393,191 @@ async def fetch():
             assert "code" in compose_result
 
 
+class TestTransformCodeTool:
+    """Tests for the transform_code MCP tool."""
+
+    @pytest.fixture
+    def transform_tool(self):
+        """Get the transform_code tool."""
+        server = create_server()
+        return server._tool_manager._tools["transform_code"]
+
+    @pytest.mark.asyncio
+    async def test_transform_returns_dict(self, transform_tool) -> None:
+        """Verify transform_code returns a dict."""
+        code = """
+import httpx
+
+async def fetch_data(url: str):
+    async with httpx.AsyncClient() as client:
+        return await client.get(url)
+"""
+        result = await transform_tool.fn(code=code, primitive="RetryPrimitive")
+        assert isinstance(result, dict)
+
+    @pytest.mark.asyncio
+    async def test_transform_has_transformed_code(self, transform_tool) -> None:
+        """Verify transform result has transformed code."""
+        code = """
+import httpx
+
+async def fetch_data(url: str):
+    async with httpx.AsyncClient() as client:
+        return await client.get(url)
+"""
+        result = await transform_tool.fn(code=code, primitive="RetryPrimitive")
+        assert "transformed_code" in result
+        assert "RetryPrimitive" in result["transformed_code"]
+
+    @pytest.mark.asyncio
+    async def test_transform_has_diff(self, transform_tool) -> None:
+        """Verify transform result has diff."""
+        code = """
+import httpx
+
+async def fetch_data(url: str):
+    async with httpx.AsyncClient() as client:
+        return await client.get(url)
+"""
+        result = await transform_tool.fn(code=code, primitive="RetryPrimitive")
+        assert "diff" in result
+        assert "+" in result["diff"]  # Diff should show additions
+
+    @pytest.mark.asyncio
+    async def test_transform_unknown_primitive(self, transform_tool) -> None:
+        """Verify transform handles unknown primitive."""
+        result = await transform_tool.fn(code="def test(): pass", primitive="UnknownPrimitive")
+        assert "error" in result
+
+    @pytest.mark.asyncio
+    async def test_transform_specific_function(self, transform_tool) -> None:
+        """Verify transform can target specific function."""
+        code = """
+async def fetch_user(): pass
+async def fetch_orders(): pass
+"""
+        result = await transform_tool.fn(
+            code=code, primitive="TimeoutPrimitive", function_name="fetch_user"
+        )
+        assert "wrapped_functions" in result
+        # Should only wrap specified function
+        assert "fetch_user" in result.get("wrapped_functions", [])
+
+
+class TestAnalyzeAndFixTool:
+    """Tests for the analyze_and_fix MCP tool."""
+
+    @pytest.fixture
+    def analyze_fix_tool(self):
+        """Get the analyze_and_fix tool."""
+        server = create_server()
+        return server._tool_manager._tools["analyze_and_fix"]
+
+    @pytest.mark.asyncio
+    async def test_analyze_fix_returns_dict(self, analyze_fix_tool) -> None:
+        """Verify analyze_and_fix returns a dict."""
+        code = """
+import httpx
+
+async def fetch_api(url: str):
+    return await httpx.get(url)
+"""
+        result = await analyze_fix_tool.fn(code=code)
+        assert isinstance(result, dict)
+
+    @pytest.mark.asyncio
+    async def test_analyze_fix_has_analysis(self, analyze_fix_tool) -> None:
+        """Verify result has analysis."""
+        code = """
+async def fetch_api(): pass
+"""
+        result = await analyze_fix_tool.fn(code=code)
+        assert "analysis" in result
+
+    @pytest.mark.asyncio
+    async def test_analyze_fix_applies_specific_primitive(self, analyze_fix_tool) -> None:
+        """Verify can apply specific primitive."""
+        code = """
+import httpx
+
+async def fetch_data(url: str):
+    return await httpx.get(url)
+"""
+        result = await analyze_fix_tool.fn(code=code, primitive="CachePrimitive")
+        if result.get("transformation"):
+            assert "CachePrimitive" in result["transformation"]["code"]
+
+
+class TestSuggestFixesTool:
+    """Tests for the suggest_fixes MCP tool."""
+
+    @pytest.fixture
+    def suggest_tool(self):
+        """Get the suggest_fixes tool."""
+        server = create_server()
+        return server._tool_manager._tools["suggest_fixes"]
+
+    @pytest.mark.asyncio
+    async def test_suggest_returns_dict(self, suggest_tool) -> None:
+        """Verify suggest_fixes returns a dict."""
+        code = """
+import httpx
+
+async def fetch_api():
+    return await httpx.get("https://api.example.com")
+"""
+        result = await suggest_tool.fn(code=code)
+        assert isinstance(result, dict)
+
+    @pytest.mark.asyncio
+    async def test_suggest_has_issues(self, suggest_tool) -> None:
+        """Verify result has issues list."""
+        code = """
+async def test(): pass
+"""
+        result = await suggest_tool.fn(code=code)
+        assert "issues" in result
+        assert isinstance(result["issues"], list)
+
+    @pytest.mark.asyncio
+    async def test_suggest_has_opportunities(self, suggest_tool) -> None:
+        """Verify result has opportunities list."""
+        code = """
+async def test(): pass
+"""
+        result = await suggest_tool.fn(code=code)
+        assert "opportunities" in result
+        assert isinstance(result["opportunities"], list)
+
+    @pytest.mark.asyncio
+    async def test_suggest_has_top_fixes(self, suggest_tool) -> None:
+        """Verify result has top_fixes list."""
+        code = """
+import httpx
+
+async def fetch():
+    return await httpx.get("url")
+"""
+        result = await suggest_tool.fn(code=code)
+        assert "top_fixes" in result
+        assert isinstance(result["top_fixes"], list)
+
+    @pytest.mark.asyncio
+    async def test_suggest_respects_max_suggestions(self, suggest_tool) -> None:
+        """Verify max_suggestions is respected."""
+        code = """
+import httpx
+
+async def fetch():
+    try:
+        return await httpx.get("url")
+    except:
+        pass
+"""
+        result = await suggest_tool.fn(code=code, max_suggestions=2)
+        assert len(result["top_fixes"]) <= 2
+
+
 class TestMCPResources:
     """Tests for MCP resources."""
 
