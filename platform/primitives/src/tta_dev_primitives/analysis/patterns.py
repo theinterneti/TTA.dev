@@ -295,6 +295,28 @@ class PatternDetector:
                 ],
                 "transform_to": "CircuitBreakerPrimitive",
             },
+            "manual_sequential": {
+                "description": "Chained awaits - use SequentialPrimitive for cleaner composition",
+                "patterns": [
+                    r"result\d?\s*=\s*await\s+\w+\([^)]*\)\s*\n\s*result\d?\s*=\s*await",  # chained awaits
+                    r"await\s+step\d+\s*\(",  # await step1(), await step2()
+                    r"await\s+\w+_step\s*\(",  # await first_step(), await second_step()
+                    r"output\s*=\s*await.*\n.*input\s*=\s*output",  # output becomes next input
+                ],
+                "transform_to": "SequentialPrimitive",
+            },
+            "manual_routing": {
+                "description": "If/elif routing - use RouterPrimitive for dynamic dispatch",
+                "patterns": [
+                    r"if\s+\w+\s*==\s*['\"].*['\"]\s*:\s*\n.*elif\s+\w+\s*==",  # if x == "a": ... elif x == "b"
+                    r"if\s+provider\s*==",  # if provider == "openai"
+                    r"if\s+model\s*==",  # if model == "gpt-4"
+                    r"if\s+tier\s*==",  # if tier == "fast"
+                    r"match\s+\w+:\s*\n\s*case\s+",  # match/case routing
+                    r"handlers\s*\[\s*\w+\s*\]",  # handlers[key] dispatch
+                ],
+                "transform_to": "RouterPrimitive",
+            },
         }
 
         # Pattern to requirement mapping

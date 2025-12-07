@@ -788,6 +788,7 @@ def _is_suitable_for_primitive(func_code: str, primitive: str) -> bool:
         "ParallelPrimitive": ["for ", "requests", "multiple", "batch"],
         "FallbackPrimitive": ["llm", "openai", "api", "provider"],
         "SequentialPrimitive": ["async def", "await", "step", "pipeline", "process"],
+        "RouterPrimitive": ["if ", "elif ", "match", "provider", "model", "tier", "handler"],
         "AdaptivePrimitive": ["llm", "openai", "claude", "retry", "adaptive"],
         "AdaptiveRetryPrimitive": ["request", "api", "retry", "fetch"],
     }
@@ -907,6 +908,35 @@ protected_{func_names[0]} = CircuitBreakerPrimitive(
 # Usage:
 # context = WorkflowContext(workflow_id="circuit-breaker-workflow")
 # result = await protected_{func_names[0]}.execute(data, context)
+""",
+        "SequentialPrimitive": f"""
+# Compose {", ".join(func_names)} into a sequential workflow
+sequential_workflow = SequentialPrimitive([
+    {",\n    ".join(func_names)}
+])
+
+# Or use the >> operator for cleaner composition:
+# workflow = {" >> ".join(func_names)}
+
+# Usage:
+# context = WorkflowContext(workflow_id="sequential-workflow")
+# result = await sequential_workflow.execute(initial_data, context)
+""",
+        "RouterPrimitive": f"""
+# Dynamic routing based on input conditions
+router = RouterPrimitive(
+    routes={{
+        "fast": fast_handler,
+        "balanced": balanced_handler,
+        "quality": quality_handler,
+    }},
+    router_fn=lambda data, ctx: data.get("tier", "balanced"),
+    default="balanced"
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="router-workflow")
+# result = await router.execute({{"tier": "fast", "data": input_data}}, context)
 """,
     }
 
