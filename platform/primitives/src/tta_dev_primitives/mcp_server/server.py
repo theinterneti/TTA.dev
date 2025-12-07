@@ -477,6 +477,68 @@ result = await workflow.execute(data, context)
             "anti_patterns": detailed,
         }
 
+    @mcp.tool()
+    async def rewrite_code(
+        code: str,
+        primitive: str | None = None,
+        auto_detect: bool = True,
+    ) -> dict[str, Any]:
+        """Rewrite code using AST-based transformation to use TTA.dev primitives.
+
+        Uses intelligent AST analysis to transform manual implementations
+        into proper TTA.dev primitive usage. More sophisticated than
+        simple wrapping - actually rewrites the code structure.
+
+        Args:
+            code: Source code to rewrite
+            primitive: Specific primitive to apply (optional)
+            auto_detect: Auto-detect anti-patterns if no primitive specified
+
+        Returns:
+            Rewrite result including:
+            - transformed_code: The rewritten code
+            - changes_made: List of changes applied
+            - imports_added: Required imports
+            - success: Whether rewrite succeeded
+            - diff: Unified diff of changes
+        """
+        import difflib
+
+        from tta_dev_primitives.analysis.transformer import transform_code
+
+        logger.info(
+            "mcp_tool_called",
+            tool="rewrite_code",
+            primitive=primitive,
+            auto_detect=auto_detect,
+            code_length=len(code),
+        )
+
+        result = transform_code(
+            code,
+            primitive=primitive,
+            auto_detect=auto_detect,
+        )
+
+        # Generate diff
+        diff = list(
+            difflib.unified_diff(
+                result.original_code.splitlines(keepends=True),
+                result.transformed_code.splitlines(keepends=True),
+                fromfile="original",
+                tofile="rewritten",
+            )
+        )
+
+        return {
+            "transformed_code": result.transformed_code,
+            "changes_made": result.changes_made,
+            "imports_added": result.imports_added,
+            "success": result.success,
+            "error": result.error,
+            "diff": "".join(diff),
+        }
+
     # ========== RESOURCES ==========
 
     @mcp.resource("tta://catalog")

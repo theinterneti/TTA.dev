@@ -132,41 +132,71 @@ def analyze(
 
     # Handle --apply or --apply-primitive
     if apply or apply_primitive:
-        if not report.recommendations:
-            if not quiet:
-                console.print("[yellow]No recommendations to apply.[/yellow]")
-            raise typer.Exit(0) from None
+        from tta_dev_primitives.analysis.transformer import transform_code
 
-        # Determine which primitive to apply
-        primitive_to_apply = apply_primitive
-        if not primitive_to_apply:
-            primitive_to_apply = report.recommendations[0].primitive_name
+        # Use AST-based transformer for smarter rewrites
+        if apply_primitive:
+            result = transform_code(code, primitive=apply_primitive, auto_detect=False)
+        else:
+            # Auto-detect anti-patterns and transform
+            result = transform_code(code, auto_detect=True)
 
-        # Verify the primitive exists
-        info = analyzer.get_primitive_info(primitive_to_apply)
-        if "error" in info:
-            console.print(f"[red]Unknown primitive: {primitive_to_apply}[/red]")
+        if not result.success:
+            console.print(f"[red]Transformation failed: {result.error}[/red]")
             raise typer.Exit(1) from None
 
-        # Find targets and generate transformation
-        targets = _find_transform_targets(code, primitive_to_apply, None)
-        if not targets:
+        if not result.changes_made:
+            # Fall back to old method if AST transform didn't work
+            if not report.recommendations:
+                if not quiet:
+                    console.print("[yellow]No recommendations to apply.[/yellow]")
+                raise typer.Exit(0) from None
+
+            # Determine which primitive to apply
+            primitive_to_apply = apply_primitive
+            if not primitive_to_apply:
+                primitive_to_apply = report.recommendations[0].primitive_name
+
+            # Verify the primitive exists
+            info = analyzer.get_primitive_info(primitive_to_apply)
+            if "error" in info:
+                console.print(f"[red]Unknown primitive: {primitive_to_apply}[/red]")
+                raise typer.Exit(1) from None
+
+            # Find targets and generate transformation (old method)
+            targets = _find_transform_targets(code, primitive_to_apply, None)
+            if not targets:
+                if not quiet:
+                    console.print(
+                        f"[yellow]No suitable functions found for {primitive_to_apply}[/yellow]"
+                    )
+                raise typer.Exit(0) from None
+
+            transformed = _generate_transformation(
+                code, primitive_to_apply, targets, info
+            )
+
+            # Write back to file
+            file.write_text(transformed)
+
             if not quiet:
                 console.print(
-                    f"[yellow]No suitable functions found for {primitive_to_apply}[/yellow]"
+                    f"[green]✓ Applied {primitive_to_apply} to {file}[/green]"
                 )
-            raise typer.Exit(0) from None
+                console.print(
+                    f"  Wrapped functions: {', '.join(t['name'] for t in targets)}"
+                )
+        else:
+            # AST transform succeeded
+            file.write_text(result.transformed_code)
 
-        transformed = _generate_transformation(code, primitive_to_apply, targets, info)
-
-        # Write back to file
-        file.write_text(transformed)
-
-        if not quiet:
-            console.print(f"[green]✓ Applied {primitive_to_apply} to {file}[/green]")
-            console.print(
-                f"  Wrapped functions: {', '.join(t['name'] for t in targets)}"
-            )
+            if not quiet:
+                console.print(f"[green]✓ Transformed {file}[/green]")
+                console.print(f"  Changes made: {len(result.changes_made)}")
+                for change in result.changes_made:
+                    change_type = change.get("type", "unknown")
+                    console.print(f"    • {change_type}: {change}")
+                console.print(f"  Imports added: {len(result.imports_added)}")
 
         return  # Exit after applying
 
@@ -788,7 +818,15 @@ def _is_suitable_for_primitive(func_code: str, primitive: str) -> bool:
         "ParallelPrimitive": ["for ", "requests", "multiple", "batch"],
         "FallbackPrimitive": ["llm", "openai", "api", "provider"],
         "SequentialPrimitive": ["async def", "await", "step", "pipeline", "process"],
-        "RouterPrimitive": ["if ", "elif ", "match", "provider", "model", "tier", "handler"],
+        "RouterPrimitive": [
+            "if ",
+            "elif ",
+            "match",
+            "provider",
+            "model",
+            "tier",
+            "handler",
+        ],
         "AdaptivePrimitive": ["llm", "openai", "claude", "retry", "adaptive"],
         "AdaptiveRetryPrimitive": ["request", "api", "retry", "fetch"],
     }
@@ -922,21 +960,21 @@ sequential_workflow = SequentialPrimitive([
 # context = WorkflowContext(workflow_id="sequential-workflow")
 # result = await sequential_workflow.execute(initial_data, context)
 """,
-        "RouterPrimitive": f"""
+        "RouterPrimitive": """
 # Dynamic routing based on input conditions
 router = RouterPrimitive(
-    routes={{
+    routes={
         "fast": fast_handler,
         "balanced": balanced_handler,
         "quality": quality_handler,
-    }},
+    },
     router_fn=lambda data, ctx: data.get("tier", "balanced"),
     default="balanced"
 )
 
 # Usage:
 # context = WorkflowContext(workflow_id="router-workflow")
-# result = await router.execute({{"tier": "fast", "data": input_data}}, context)
+# result = await router.execute({"tier": "fast", "data": input_data}, context)
 """,
     }
 

@@ -738,6 +738,99 @@ async def route_request(provider: str, data: dict):
         assert "RouterPrimitive" in result["primitives_needed"]
 
 
+class TestRewriteCodeTool:
+    """Tests for the rewrite_code MCP tool."""
+
+    @pytest.fixture
+    def rewrite_tool(self):
+        """Get the rewrite_code tool."""
+        server = create_server()
+        return server._tool_manager._tools["rewrite_code"]
+
+    @pytest.mark.asyncio
+    async def test_rewrite_returns_dict(self, rewrite_tool) -> None:
+        """Verify rewrite_code returns a dict."""
+        code = """
+def fetch_data():
+    return call_api()
+"""
+        result = await rewrite_tool.fn(code=code)
+        assert isinstance(result, dict)
+
+    @pytest.mark.asyncio
+    async def test_rewrite_has_required_fields(self, rewrite_tool) -> None:
+        """Verify result has all required fields."""
+        code = """
+def fetch_data():
+    return call_api()
+"""
+        result = await rewrite_tool.fn(code=code)
+        assert "transformed_code" in result
+        assert "changes_made" in result
+        assert "imports_added" in result
+        assert "success" in result
+
+    @pytest.mark.asyncio
+    async def test_rewrite_with_specific_primitive(self, rewrite_tool) -> None:
+        """Verify rewrite with specific primitive."""
+        code = """
+async def fetch_data():
+    for attempt in range(3):
+        try:
+            return await api_call()
+        except:
+            pass
+"""
+        result = await rewrite_tool.fn(code=code, primitive="RetryPrimitive")
+        assert result["success"]
+
+    @pytest.mark.asyncio
+    async def test_rewrite_auto_detect(self, rewrite_tool) -> None:
+        """Verify rewrite with auto detection."""
+        code = """
+async def fetch_data():
+    for attempt in range(3):
+        try:
+            return await api_call()
+        except:
+            pass
+"""
+        result = await rewrite_tool.fn(code=code, auto_detect=True)
+        assert result["success"]
+
+    @pytest.mark.asyncio
+    async def test_rewrite_handles_syntax_error(self, rewrite_tool) -> None:
+        """Verify rewrite handles syntax errors gracefully."""
+        code = "def broken("
+        result = await rewrite_tool.fn(code=code)
+        assert not result["success"]
+        assert result["error"] is not None
+        assert "Syntax error" in result["error"]
+
+    @pytest.mark.asyncio
+    async def test_rewrite_generates_diff(self, rewrite_tool) -> None:
+        """Verify rewrite generates a diff."""
+        code = """
+def fetch_data():
+    return call_api()
+"""
+        result = await rewrite_tool.fn(code=code, primitive="RetryPrimitive")
+        assert "diff" in result
+        assert isinstance(result["diff"], str)
+
+    @pytest.mark.asyncio
+    async def test_rewrite_preserves_code_on_no_changes(self, rewrite_tool) -> None:
+        """Verify code is preserved when no changes are made."""
+        code = """
+def simple():
+    return 42
+"""
+        result = await rewrite_tool.fn(code=code, auto_detect=True)
+        assert result["success"]
+        # Code should be preserved (possibly with added imports)
+        assert "def simple():" in result["transformed_code"]
+
+
 class TestMCPResources:
     """Tests for MCP resources."""
 

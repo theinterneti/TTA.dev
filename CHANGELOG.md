@@ -5,6 +5,69 @@ All notable changes to TTA.dev will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-12-06
+
+### Added
+
+#### 🛠️ AST-Based Code Transformer
+
+**Intelligent code rewriting using Abstract Syntax Tree analysis:**
+
+- **`transformer.py`** - New module for AST-based code transformation
+  - `CodeTransformer` class with intelligent pattern detection
+  - `TransformResult` dataclass with transformation metadata
+  - Preserves code structure while applying primitive wrappers
+  - Handles imports automatically
+
+- **Supported transformations:**
+  - `RetryPrimitive` - Transforms manual retry loops
+  - `TimeoutPrimitive` - Transforms asyncio.wait_for patterns
+  - `FallbackPrimitive` - Transforms try/except fallback chains
+  - `CachePrimitive` - Transforms manual caching dictionaries
+  - `ParallelPrimitive` - Transforms gather/create_task patterns
+  - `SequentialPrimitive` - Transforms chained await patterns
+  - `RouterPrimitive` - Transforms if/elif routing chains
+  - `CircuitBreakerPrimitive` - Transforms manual circuit breaker patterns
+
+#### 🔍 Enhanced Anti-Pattern Detection
+
+**8 anti-patterns now detected with line numbers:**
+
+- `manual_retry` - Retry loops with `for` + `range()` + `try/except`
+- `manual_timeout` - `asyncio.wait_for()` usage
+- `manual_fallback` - `or default_value` / `if x is None` patterns
+- `manual_cache` - Dictionary-based caching with `if key in cache`
+- `manual_parallel` - `asyncio.gather()` / `create_task()` usage
+- `manual_circuit_breaker` - `failure_count` / `circuit_open` patterns
+- `manual_sequential` - Chained `await` calls like `result = await step(await step(data))`
+- `manual_routing` - `if provider == X` routing chains
+
+#### 🔧 New MCP Tool: `rewrite_code`
+
+**AST-based code rewriting via MCP:**
+
+```python
+# Example usage in MCP client
+result = await mcp.call_tool("rewrite_code", {
+    "code": code_with_anti_patterns,
+    "primitive": "RetryPrimitive",  # Optional: specific primitive
+    "auto_detect": True  # Auto-detect all anti-patterns
+})
+# Returns: transformed_code, changes_made, imports_added, diff
+```
+
+### Changed
+
+- **`--apply` flag** now uses AST transformer for smarter rewrites
+- Pattern detection now includes line numbers for all matches
+- MCP server now has 10 tools (added `rewrite_code`)
+
+### Testing
+
+- **283 tests passing** (52 CLI + 81 MCP + 150 analysis)
+- 23 new tests for AST transformer
+- 7 new tests for `rewrite_code` MCP tool
+
 ## [1.2.0] - 2025-12-06
 
 ### Added
