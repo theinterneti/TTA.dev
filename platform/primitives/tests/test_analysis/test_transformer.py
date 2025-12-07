@@ -912,13 +912,13 @@ class TestCompensationDetector:
         from tta_dev_primitives.analysis.transformer import CompensationDetector
 
         code = """
-async def create_order(order_data):
+async def index_document(doc):
     try:
-        await db.insert(order_data)
-        await payment.charge(order_data.amount)
-        return order_data.id
+        embedding_id = await vector_store.add(doc.embedding)
+        await knowledge_base.update(doc)
+        return embedding_id
     except Exception:
-        await db.delete(order_data.id)
+        await vector_store.delete(embedding_id)
         raise
 """
         tree = ast.parse(code)
@@ -927,9 +927,9 @@ async def create_order(order_data):
 
         assert len(detector.compensation_patterns) == 1
         candidate = detector.compensation_patterns[0]
-        assert candidate["name"] == "create_order"
+        assert candidate["name"] == "index_document"
         assert candidate["is_async"] is True
-        assert "db.delete" in candidate["cleanup_actions"]
+        assert "vector_store.delete" in candidate["cleanup_actions"]
 
     def test_ignore_simple_error_handling(self) -> None:
         """Test that simple error handling without cleanup is ignored."""
@@ -938,9 +938,9 @@ async def create_order(order_data):
         from tta_dev_primitives.analysis.transformer import CompensationDetector
 
         code = """
-def simple_function():
+async def simple_llm_call():
     try:
-        return do_work()
+        return await llm.generate(prompt)
     except Exception:
         raise
 """
@@ -958,14 +958,14 @@ def simple_function():
         from tta_dev_primitives.analysis.transformer import CompensationDetector
 
         code = """
-async def complex_transaction(data):
+async def multi_agent_task(task):
     try:
-        await service1.create(data)
-        await service2.notify(data)
-        return data.id
+        await coordinator.assign_agents(task)
+        await memory.store_context(task)
+        return await agents.execute(task)
     except Exception:
-        await service1.rollback(data.id)
-        await service2.cancel_notification(data.id)
+        await coordinator.release_agents(task.id)
+        await memory.clear_context(task.id)
         raise
 """
         tree = ast.parse(code)
@@ -1026,13 +1026,13 @@ class TestCompensationTransformation:
     def test_transform_compensation_pattern(self) -> None:
         """Test transformation of compensation/saga patterns."""
         code = """
-async def distributed_transaction(data):
+async def index_document(doc):
     try:
-        await db.create_record(data)
-        await notify_service(data)
-        return data.id
+        embedding_id = await vector_store.add(doc.embedding)
+        await knowledge_base.update(doc)
+        return embedding_id
     except Exception:
-        await db.delete_record(data.id)
+        await vector_store.delete(embedding_id)
         raise
 """
         transformer = CodeTransformer()
@@ -1044,12 +1044,12 @@ async def distributed_transaction(data):
     def test_compensation_adds_import(self) -> None:
         """Test that compensation transformation adds the right import."""
         code = """
-def saga_operation(order):
+async def assign_agent_task(task):
     try:
-        reserve_inventory(order)
-        return process_payment(order)
+        agent_id = await coordinator.assign(task)
+        return await agent.execute(task)
     except:
-        release_inventory(order)
+        await coordinator.release(agent_id)
         raise
 """
         transformer = CodeTransformer()
@@ -1067,13 +1067,13 @@ class TestAutoDetectNewPatterns:
     def test_auto_detect_circuit_breaker(self) -> None:
         """Test auto-detection finds circuit breaker patterns."""
         code = """
-async def unreliable_call(data):
+async def llm_with_fallbacks(prompt):
     try:
-        return await api.request(data)
-    except ConnectionError:
-        return fallback_response()
+        return await openai.complete(prompt)
+    except RateLimitError:
+        return await anthropic.complete(prompt)
     except TimeoutError:
-        return cached_response()
+        return cached_response(prompt)
 """
         transformer = CodeTransformer()
         transforms = transformer._detect_needed_transforms(code)
@@ -1083,12 +1083,12 @@ async def unreliable_call(data):
     def test_auto_detect_compensation(self) -> None:
         """Test auto-detection finds compensation/saga patterns."""
         code = """
-async def create_with_rollback(item):
+async def store_embedding(doc):
     try:
-        await db.insert(item)
-        return item.id
+        embedding_id = await vector_store.add(doc)
+        return embedding_id
     except:
-        await db.delete(item.id)
+        await vector_store.delete(embedding_id)
         raise
 """
         transformer = CodeTransformer()
@@ -1099,20 +1099,20 @@ async def create_with_rollback(item):
     def test_auto_detect_multiple_new_patterns(self) -> None:
         """Test auto-detection finds multiple patterns in one file."""
         code = """
-async def circuit_breaker_candidate():
+async def llm_provider_call(request):
     try:
-        return await external.call()
-    except ConnectionError:
-        return None
+        return await provider.generate(request)
+    except RateLimitError:
+        return await fallback_provider.generate(request)
     except TimeoutError:
         return None
 
-async def compensation_candidate():
+async def index_with_rollback(document):
     try:
-        await db.create(data)
-        return data.id
+        await embeddings.store(document)
+        return document.id
     except:
-        await db.delete(data.id)
+        await embeddings.remove(document.id)
         raise
 """
         transformer = CodeTransformer()

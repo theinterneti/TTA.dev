@@ -891,19 +891,19 @@ class CircuitBreakerTransformer(ast.NodeTransformer):
 class CompensationTransformer(ast.NodeTransformer):
     """Transform paired do/undo operations into CompensationPrimitive.
 
-    Transforms:
-        async def process_order():
-            order_id = await create_order()
+    Transforms AI-native patterns like:
+        async def index_document(doc):
+            embedding_id = await vector_store.add(doc.embedding)
             try:
-                await process_payment()
+                await knowledge_base.update(doc)
             except:
-                await cancel_order(order_id)
+                await vector_store.delete(embedding_id)
                 raise
 
     Into:
-        forward = create_order >> process_payment
-        compensation = cancel_order
-        process_order = CompensationPrimitive(forward=forward, compensation=compensation)
+        forward = vector_store.add >> knowledge_base.update
+        compensation = vector_store.delete
+        index_document = CompensationPrimitive(forward=forward, compensation=compensation)
     """
 
     def __init__(self) -> None:
