@@ -6,7 +6,7 @@ by analyzing and rewriting the Abstract Syntax Tree.
 
 import ast
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 
@@ -34,6 +34,568 @@ class FunctionInfo:
     returns: ast.expr | None
     lineno: int
     col_offset: int
+
+
+# =============================================================================
+# AST Node Transformers - Actually rewrite function bodies
+# =============================================================================
+
+
+class RetryLoopTransformer(ast.NodeTransformer):
+    """Transform retry loops into RetryPrimitive-wrapped functions.
+
+    Transforms:
+        def fetch():
+            for i in range(3):
+                try:
+                    return api_call()
+                except:
+                    pass
+
+    Into:
+        async def fetch_core(data: dict, context: WorkflowContext):
+            return api_call()
+
+        fetch = RetryPrimitive(primitive=fetch_core, max_retries=3)
+    """
+
+    def __init__(self) -> None:
+        self.transformations: list[dict[str, Any]] = []
+        self.new_functions: list[ast.stmt] = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.AST:
+        return self._transform_function(node, is_async=False)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AST:
+        return self._transform_function(node, is_async=True)
+
+    def _transform_function(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef, is_async: bool
+    ) -> ast.AST:
+        """Transform a function with retry loop into RetryPrimitive."""
+        retry_info = self._find_retry_pattern(node)
+        if not retry_info:
+            return node
+
+        func_name = node.name
+        max_retries = retry_info["max_retries"]
+        try_body = retry_info["try_body"]
+
+        # Create the core function with extracted body
+        core_func = self._create_core_function(
+            func_name, try_body, is_async, node.lineno
+        )
+
+        # Create the RetryPrimitive assignment
+        primitive_assign = self._create_primitive_assignment(
+            func_name, max_retries, is_async
+        )
+
+        self.transformations.append(
+            {
+                "type": "retry_transform",
+                "function": func_name,
+                "max_retries": max_retries,
+                "line": node.lineno,
+                "transformation": "Full AST rewrite",
+            }
+        )
+
+        # Store new functions to add
+        self.new_functions.append(core_func)
+        self.new_functions.append(primitive_assign)
+
+        # Return None to remove the original function (we'll add new ones)
+        return None  # type: ignore
+
+    def _find_retry_pattern(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> dict[str, Any] | None:
+        """Find retry loop pattern in function body."""
+        for stmt in node.body:
+            if isinstance(stmt, ast.For):
+                if isinstance(stmt.iter, ast.Call):
+                    if isinstance(stmt.iter.func, ast.Name):
+                        if stmt.iter.func.id == "range":
+                            for for_stmt in stmt.body:
+                                if isinstance(for_stmt, ast.Try):
+                                    max_retries = 3
+                                    if stmt.iter.args:
+                                        if isinstance(stmt.iter.args[0], ast.Constant):
+                                            max_retries = stmt.iter.args[0].value
+                                    return {
+                                        "max_retries": max_retries,
+                                        "try_body": for_stmt.body,
+                                        "for_node": stmt,
+                                        "try_node": for_stmt,
+                                    }
+        return None
+
+    def _create_core_function(
+        self,
+        func_name: str,
+        body: list[ast.stmt],
+        is_async: bool,
+        lineno: int,
+    ) -> ast.FunctionDef | ast.AsyncFunctionDef:
+        """Create the core function with the extracted body."""
+        # Create arguments: data: dict, context: WorkflowContext
+        args = ast.arguments(
+            posonlyargs=[],
+            args=[
+                ast.arg(arg="data", annotation=ast.Name(id="dict", ctx=ast.Load())),
+                ast.arg(
+                    arg="context",
+                    annotation=ast.Name(id="WorkflowContext", ctx=ast.Load()),
+                ),
+            ],
+            kwonlyargs=[],
+            kw_defaults=[],
+            defaults=[],
+        )
+
+        # Create docstring
+        docstring = ast.Expr(
+            value=ast.Constant(value=f"Core operation for {func_name}.")
+        )
+
+        func_class = ast.AsyncFunctionDef if is_async else ast.FunctionDef
+        core_func = func_class(
+            name=f"{func_name}_core",
+            args=args,
+            body=[docstring] + body,
+            decorator_list=[],
+            returns=None,
+            lineno=lineno,
+            col_offset=0,
+        )
+
+        return ast.fix_missing_locations(core_func)
+
+    def _create_primitive_assignment(
+        self, func_name: str, max_retries: int, is_async: bool
+    ) -> ast.Assign:
+        """Create the RetryPrimitive assignment."""
+        # func_name = RetryPrimitive(primitive=func_name_core, max_retries=N, ...)
+        call = ast.Call(
+            func=ast.Name(id="RetryPrimitive", ctx=ast.Load()),
+            args=[],
+            keywords=[
+                ast.keyword(
+                    arg="primitive",
+                    value=ast.Name(id=f"{func_name}_core", ctx=ast.Load()),
+                ),
+                ast.keyword(arg="max_retries", value=ast.Constant(value=max_retries)),
+                ast.keyword(
+                    arg="backoff_strategy", value=ast.Constant(value="exponential")
+                ),
+                ast.keyword(arg="initial_delay", value=ast.Constant(value=1.0)),
+            ],
+        )
+
+        assign = ast.Assign(
+            targets=[ast.Name(id=func_name, ctx=ast.Store())],
+            value=call,
+            lineno=0,
+            col_offset=0,
+        )
+
+        return ast.fix_missing_locations(assign)
+
+
+class TimeoutTransformer(ast.NodeTransformer):
+    """Transform asyncio.wait_for into TimeoutPrimitive.
+
+    Transforms:
+        result = await asyncio.wait_for(slow_call(), timeout=30)
+
+    Into:
+        timeout_wrapper = TimeoutPrimitive(primitive=slow_call, timeout_seconds=30)
+        result = await timeout_wrapper.execute(data, context)
+    """
+
+    def __init__(self) -> None:
+        self.transformations: list[dict[str, Any]] = []
+
+    def visit_Await(self, node: ast.Await) -> ast.AST:
+        if isinstance(node.value, ast.Call):
+            call = node.value
+            if isinstance(call.func, ast.Attribute):
+                if call.func.attr == "wait_for":
+                    if isinstance(call.func.value, ast.Name):
+                        if call.func.value.id == "asyncio":
+                            return self._transform_wait_for(node, call)
+        return node
+
+    def _transform_wait_for(self, node: ast.Await, call: ast.Call) -> ast.Await:
+        """Transform asyncio.wait_for to TimeoutPrimitive."""
+        # Extract the coroutine and timeout
+        if not call.args:
+            return node
+
+        coro = call.args[0]
+        timeout = None
+
+        for kw in call.keywords:
+            if kw.arg == "timeout":
+                if isinstance(kw.value, ast.Constant):
+                    timeout = kw.value.value
+
+        if timeout is None:
+            return node
+
+        # Get function name from coroutine
+        func_name = "operation"
+        if isinstance(coro, ast.Call):
+            if isinstance(coro.func, ast.Name):
+                func_name = coro.func.id
+
+        self.transformations.append(
+            {
+                "type": "timeout_transform",
+                "function": func_name,
+                "timeout": timeout,
+                "line": node.lineno,
+            }
+        )
+
+        # Create: await TimeoutPrimitive(primitive=func, timeout_seconds=N).execute(data, context)
+        new_call = ast.Call(
+            func=ast.Attribute(
+                value=ast.Call(
+                    func=ast.Name(id="TimeoutPrimitive", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        ast.keyword(arg="primitive", value=coro.func if isinstance(coro, ast.Call) else coro),
+                        ast.keyword(
+                            arg="timeout_seconds", value=ast.Constant(value=timeout)
+                        ),
+                    ],
+                ),
+                attr="execute",
+                ctx=ast.Load(),
+            ),
+            args=[
+                ast.Name(id="data", ctx=ast.Load()),
+                ast.Name(id="context", ctx=ast.Load()),
+            ],
+            keywords=[],
+        )
+
+        return ast.fix_missing_locations(ast.Await(value=new_call))
+
+
+class FallbackTransformer(ast.NodeTransformer):
+    """Transform try/except fallback patterns into FallbackPrimitive.
+
+    Transforms:
+        try:
+            return await primary()
+        except:
+            return await backup()
+
+    Into:
+        fallback = FallbackPrimitive(primary=primary, fallbacks=[backup])
+        return await fallback.execute(data, context)
+    """
+
+    def __init__(self) -> None:
+        self.transformations: list[dict[str, Any]] = []
+
+    def visit_Try(self, node: ast.Try) -> ast.AST:
+        # Check for simple try/except with returns
+        primary_func = self._extract_return_func(node.body)
+        fallback_func = None
+
+        if node.handlers and len(node.handlers) == 1:
+            fallback_func = self._extract_return_func(node.handlers[0].body)
+
+        if primary_func and fallback_func:
+            self.transformations.append(
+                {
+                    "type": "fallback_transform",
+                    "primary": primary_func,
+                    "fallback": fallback_func,
+                    "line": node.lineno,
+                }
+            )
+
+            # Create FallbackPrimitive call
+            return self._create_fallback_call(primary_func, fallback_func, node.lineno)
+
+        return node
+
+    def _extract_return_func(self, body: list[ast.stmt]) -> str | None:
+        """Extract function name from return statement."""
+        for stmt in body:
+            if isinstance(stmt, ast.Return):
+                if isinstance(stmt.value, ast.Await):
+                    if isinstance(stmt.value.value, ast.Call):
+                        if isinstance(stmt.value.value.func, ast.Name):
+                            return stmt.value.value.func.id
+                elif isinstance(stmt.value, ast.Call):
+                    if isinstance(stmt.value.func, ast.Name):
+                        return stmt.value.func.id
+        return None
+
+    def _create_fallback_call(
+        self, primary: str, fallback: str, lineno: int
+    ) -> ast.Expr:
+        """Create FallbackPrimitive expression."""
+        # fallback_workflow = FallbackPrimitive(primary=primary, fallbacks=[fallback])
+        # return await fallback_workflow.execute(data, context)
+        call = ast.Call(
+            func=ast.Attribute(
+                value=ast.Call(
+                    func=ast.Name(id="FallbackPrimitive", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        ast.keyword(
+                            arg="primary",
+                            value=ast.Name(id=primary, ctx=ast.Load()),
+                        ),
+                        ast.keyword(
+                            arg="fallbacks",
+                            value=ast.List(
+                                elts=[ast.Name(id=fallback, ctx=ast.Load())],
+                                ctx=ast.Load(),
+                            ),
+                        ),
+                    ],
+                ),
+                attr="execute",
+                ctx=ast.Load(),
+            ),
+            args=[
+                ast.Name(id="data", ctx=ast.Load()),
+                ast.Name(id="context", ctx=ast.Load()),
+            ],
+            keywords=[],
+        )
+
+        return ast.fix_missing_locations(
+            ast.Return(value=ast.Await(value=call), lineno=lineno, col_offset=0)
+        )
+
+
+class GatherTransformer(ast.NodeTransformer):
+    """Transform asyncio.gather into ParallelPrimitive.
+
+    Transforms:
+        results = await asyncio.gather(task1(), task2(), task3())
+
+    Into:
+        parallel = ParallelPrimitive([task1, task2, task3])
+        results = await parallel.execute(data, context)
+    """
+
+    def __init__(self) -> None:
+        self.transformations: list[dict[str, Any]] = []
+
+    def visit_Await(self, node: ast.Await) -> ast.AST:
+        if isinstance(node.value, ast.Call):
+            call = node.value
+            if isinstance(call.func, ast.Attribute):
+                if call.func.attr == "gather":
+                    if isinstance(call.func.value, ast.Name):
+                        if call.func.value.id == "asyncio":
+                            return self._transform_gather(node, call)
+        return node
+
+    def _transform_gather(self, node: ast.Await, call: ast.Call) -> ast.Await:
+        """Transform asyncio.gather to ParallelPrimitive."""
+        # Extract function references from gather args
+        funcs = []
+        for arg in call.args:
+            if isinstance(arg, ast.Call):
+                if isinstance(arg.func, ast.Name):
+                    funcs.append(arg.func.id)
+
+        self.transformations.append(
+            {
+                "type": "parallel_transform",
+                "functions": funcs,
+                "line": node.lineno,
+            }
+        )
+
+        # Create: await ParallelPrimitive([f1, f2, f3]).execute(data, context)
+        func_list = ast.List(
+            elts=[ast.Name(id=f, ctx=ast.Load()) for f in funcs],
+            ctx=ast.Load(),
+        )
+
+        new_call = ast.Call(
+            func=ast.Attribute(
+                value=ast.Call(
+                    func=ast.Name(id="ParallelPrimitive", ctx=ast.Load()),
+                    args=[func_list],
+                    keywords=[],
+                ),
+                attr="execute",
+                ctx=ast.Load(),
+            ),
+            args=[
+                ast.Name(id="data", ctx=ast.Load()),
+                ast.Name(id="context", ctx=ast.Load()),
+            ],
+            keywords=[],
+        )
+
+        return ast.fix_missing_locations(ast.Await(value=new_call))
+
+
+class RouterTransformer(ast.NodeTransformer):
+    """Transform if/elif routing chains into RouterPrimitive.
+
+    Transforms:
+        if provider == "openai":
+            return await call_openai(data)
+        elif provider == "anthropic":
+            return await call_anthropic(data)
+
+    Into:
+        router = RouterPrimitive(
+            routes={"openai": call_openai, "anthropic": call_anthropic},
+            router_fn=lambda data, ctx: data.get("provider"),
+        )
+        return await router.execute(data, context)
+    """
+
+    def __init__(self) -> None:
+        self.transformations: list[dict[str, Any]] = []
+
+    def visit_If(self, node: ast.If) -> ast.AST:
+        routes = self._extract_all_routes(node)
+        if len(routes) >= 2:
+            var_name = self._get_comparison_var(node)
+
+            self.transformations.append(
+                {
+                    "type": "router_transform",
+                    "routes": list(routes.keys()),
+                    "variable": var_name,
+                    "line": node.lineno,
+                }
+            )
+
+            return self._create_router_call(routes, var_name, node.lineno)
+
+        return node
+
+    def _extract_all_routes(self, node: ast.If) -> dict[str, str]:
+        """Extract all routes from if/elif chain."""
+        routes = {}
+
+        # Extract from this if
+        route = self._extract_route(node)
+        if route:
+            routes[route[0]] = route[1]
+
+        # Extract from elif/else chain
+        for else_stmt in node.orelse:
+            if isinstance(else_stmt, ast.If):
+                routes.update(self._extract_all_routes(else_stmt))
+
+        return routes
+
+    def _extract_route(self, node: ast.If) -> tuple[str, str] | None:
+        """Extract a single route from an if statement."""
+        if not isinstance(node.test, ast.Compare):
+            return None
+
+        if len(node.test.ops) != 1:
+            return None
+
+        if not isinstance(node.test.ops[0], ast.Eq):
+            return None
+
+        if not isinstance(node.test.comparators[0], ast.Constant):
+            return None
+
+        key = str(node.test.comparators[0].value)
+
+        # Get function from body
+        for stmt in node.body:
+            if isinstance(stmt, ast.Return):
+                if isinstance(stmt.value, ast.Await):
+                    if isinstance(stmt.value.value, ast.Call):
+                        if isinstance(stmt.value.value.func, ast.Name):
+                            return (key, stmt.value.value.func.id)
+
+        return None
+
+    def _get_comparison_var(self, node: ast.If) -> str:
+        """Get the variable being compared."""
+        if isinstance(node.test, ast.Compare):
+            if isinstance(node.test.left, ast.Name):
+                return node.test.left.id
+        return "provider"
+
+    def _create_router_call(
+        self, routes: dict[str, str], var_name: str, lineno: int
+    ) -> ast.Return:
+        """Create RouterPrimitive call."""
+        # Build routes dict
+        routes_dict = ast.Dict(
+            keys=[ast.Constant(value=k) for k in routes.keys()],
+            values=[ast.Name(id=v, ctx=ast.Load()) for v in routes.values()],
+        )
+
+        # router_fn lambda
+        router_fn = ast.Lambda(
+            args=ast.arguments(
+                posonlyargs=[],
+                args=[ast.arg(arg="data"), ast.arg(arg="ctx")],
+                kwonlyargs=[],
+                kw_defaults=[],
+                defaults=[],
+            ),
+            body=ast.Call(
+                func=ast.Attribute(
+                    value=ast.Name(id="data", ctx=ast.Load()),
+                    attr="get",
+                    ctx=ast.Load(),
+                ),
+                args=[ast.Constant(value=var_name)],
+                keywords=[],
+            ),
+        )
+
+        default_key = list(routes.keys())[0]
+
+        # Create: await RouterPrimitive(...).execute(data, context)
+        new_call = ast.Call(
+            func=ast.Attribute(
+                value=ast.Call(
+                    func=ast.Name(id="RouterPrimitive", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        ast.keyword(arg="routes", value=routes_dict),
+                        ast.keyword(arg="router_fn", value=router_fn),
+                        ast.keyword(
+                            arg="default", value=ast.Constant(value=default_key)
+                        ),
+                    ],
+                ),
+                attr="execute",
+                ctx=ast.Load(),
+            ),
+            args=[
+                ast.Name(id="data", ctx=ast.Load()),
+                ast.Name(id="context", ctx=ast.Load()),
+            ],
+            keywords=[],
+        )
+
+        return ast.fix_missing_locations(
+            ast.Return(value=ast.Await(value=new_call), lineno=lineno, col_offset=0)
+        )
+
+
+# =============================================================================
+# AST Detectors - Find patterns without transforming
+# =============================================================================
 
 
 class RetryLoopDetector(ast.NodeVisitor):
@@ -239,16 +801,12 @@ class RouterPatternDetector(ast.NodeVisitor):
                             if isinstance(stmt, ast.Return):
                                 if isinstance(stmt.value, ast.Await):
                                     if isinstance(stmt.value.value, ast.Call):
-                                        if isinstance(
-                                            stmt.value.value.func, ast.Name
-                                        ):
+                                        if isinstance(stmt.value.value.func, ast.Name):
                                             routes[key] = stmt.value.value.func.id
                             elif isinstance(stmt, ast.Expr):
                                 if isinstance(stmt.value, ast.Await):
                                     if isinstance(stmt.value.value, ast.Call):
-                                        if isinstance(
-                                            stmt.value.value.func, ast.Name
-                                        ):
+                                        if isinstance(stmt.value.value.func, ast.Name):
                                             routes[key] = stmt.value.value.func.id
 
         # Check elif chains
@@ -453,7 +1011,37 @@ class CodeTransformer:
             return {"changed": False, "code": code, "changes": []}
 
     def _transform_retry_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
-        """Transform retry loops using AST analysis."""
+        """Transform retry loops using full AST rewriting."""
+        # Use the new RetryLoopTransformer for full AST rewrite
+        transformer = RetryLoopTransformer()
+        new_tree = transformer.visit(tree)
+
+        if not transformer.transformations:
+            return {"changed": False, "code": code, "changes": []}
+
+        # Filter out None values (removed functions) and add new ones
+        new_tree.body = [
+            node for node in new_tree.body if node is not None
+        ] + transformer.new_functions
+
+        ast.fix_missing_locations(new_tree)
+
+        try:
+            new_code = ast.unparse(new_tree)
+        except Exception:
+            # Fall back to line-based replacement if unparse fails
+            return self._transform_retry_ast_fallback(code, tree)
+
+        return {
+            "changed": True,
+            "code": new_code,
+            "changes": transformer.transformations,
+        }
+
+    def _transform_retry_ast_fallback(
+        self, code: str, tree: ast.Module
+    ) -> dict[str, Any]:
+        """Fallback retry transformation using line-based replacement."""
         changes = []
         detector = RetryLoopDetector()
         detector.visit(tree)
@@ -511,43 +1099,94 @@ class CodeTransformer:
         }
 
     def _transform_timeout_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
-        """Transform timeout patterns using AST analysis."""
-        changes = []
-        detector = TimeoutDetector()
-        detector.visit(tree)
+        """Transform timeout patterns using full AST rewriting."""
+        transformer = TimeoutTransformer()
+        new_tree = transformer.visit(tree)
 
-        if not detector.timeout_calls:
+        if not transformer.transformations:
             return {"changed": False, "code": code, "changes": []}
 
-        # Use regex replacement for now - AST unparse can be complex
-        return self._transform_timeout_regex(code)
+        ast.fix_missing_locations(new_tree)
+
+        try:
+            new_code = ast.unparse(new_tree)
+        except Exception:
+            # Fall back to regex
+            return self._transform_timeout_regex(code)
+
+        return {
+            "changed": True,
+            "code": new_code,
+            "changes": transformer.transformations,
+        }
 
     def _transform_fallback_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
-        """Transform fallback patterns using AST analysis."""
-        changes = []
-        detector = FallbackDetector()
-        detector.visit(tree)
+        """Transform fallback patterns using full AST rewriting."""
+        transformer = FallbackTransformer()
+        new_tree = transformer.visit(tree)
 
-        if not detector.fallback_patterns:
+        if not transformer.transformations:
             return {"changed": False, "code": code, "changes": []}
 
-        # Use regex replacement for now
-        return self._transform_fallback_regex(code)
+        ast.fix_missing_locations(new_tree)
+
+        try:
+            new_code = ast.unparse(new_tree)
+        except Exception:
+            return self._transform_fallback_regex(code)
+
+        return {
+            "changed": True,
+            "code": new_code,
+            "changes": transformer.transformations,
+        }
 
     def _transform_parallel_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
-        """Transform parallel patterns using AST analysis."""
-        changes = []
-        detector = GatherDetector()
-        detector.visit(tree)
+        """Transform parallel patterns using full AST rewriting."""
+        transformer = GatherTransformer()
+        new_tree = transformer.visit(tree)
 
-        if not detector.gather_calls:
+        if not transformer.transformations:
             return {"changed": False, "code": code, "changes": []}
 
-        # Use regex replacement for now
-        return self._transform_parallel_regex(code)
+        ast.fix_missing_locations(new_tree)
+
+        try:
+            new_code = ast.unparse(new_tree)
+        except Exception:
+            return self._transform_parallel_regex(code)
+
+        return {
+            "changed": True,
+            "code": new_code,
+            "changes": transformer.transformations,
+        }
 
     def _transform_router_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
-        """Transform router patterns using AST analysis."""
+        """Transform router patterns using full AST rewriting."""
+        transformer = RouterTransformer()
+        new_tree = transformer.visit(tree)
+
+        if not transformer.transformations:
+            return {"changed": False, "code": code, "changes": []}
+
+        ast.fix_missing_locations(new_tree)
+
+        try:
+            new_code = ast.unparse(new_tree)
+        except Exception:
+            return self._transform_router_regex(code)
+
+        return {
+            "changed": True,
+            "code": new_code,
+            "changes": transformer.transformations,
+        }
+
+    def _transform_router_ast_fallback(
+        self, code: str, tree: ast.Module
+    ) -> dict[str, Any]:
+        """Fallback router transformation using line-based replacement."""
         changes = []
         detector = RouterPatternDetector()
         detector.visit(tree)
