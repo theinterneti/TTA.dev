@@ -967,6 +967,18 @@ def _is_suitable_for_primitive(func_code: str, primitive: str) -> bool:
         ],
         "AdaptivePrimitive": ["llm", "openai", "claude", "retry", "adaptive"],
         "AdaptiveRetryPrimitive": ["request", "api", "retry", "fetch"],
+        "CompensationPrimitive": [
+            "try",
+            "except",
+            "rollback",
+            "cleanup",
+            "undo",
+            "delete",
+            "cancel",
+            "revert",
+            "saga",
+            "transaction",
+        ],
     }
 
     keywords = patterns.get(primitive, [])
@@ -980,6 +992,10 @@ def _generate_transformation(
     code: str, primitive: str, targets: list[dict], info: dict
 ) -> str:
     """Generate transformed code."""
+    # For CompensationPrimitive, use AST transformer for smarter extraction
+    if primitive == "CompensationPrimitive":
+        return _generate_compensation_transformation(code, targets, info)
+
     import_path = info.get("import_path", f"from tta_dev_primitives import {primitive}")
     lines = code.split("\n")
 
@@ -1114,9 +1130,169 @@ router = RouterPrimitive(
 # context = WorkflowContext(workflow_id="router-workflow")
 # result = await router.execute({"tier": "fast", "data": input_data}, context)
 """,
+        "CompensationPrimitive": f"""
+# Wrap {func_names[0]} with saga/compensation pattern
+# Forward operation performs the main action
+# Compensation operation undoes it on failure
+
+async def {func_names[0]}_forward(data: dict, context: WorkflowContext):
+    \"\"\"Forward operation - main business logic.\"\"\"
+    # Extract the main operation from {func_names[0]}
+    # This runs first and produces a result
+    pass
+
+
+async def {func_names[0]}_compensation(data: dict, context: WorkflowContext):
+    \"\"\"Compensation operation - rollback/cleanup on failure.\"\"\"
+    # Extract the cleanup/rollback logic from {func_names[0]}
+    # This runs if forward fails or if later steps fail
+    pass
+
+
+# Create the saga workflow
+{func_names[0]}_saga = CompensationPrimitive(
+    forward={func_names[0]}_forward,
+    compensation={func_names[0]}_compensation,
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="saga-workflow")
+# result = await {func_names[0]}_saga.execute(data, context)
+# On failure, compensation is automatically called
+""",
     }
 
     return templates.get(primitive, f"# TODO: Wrap with {primitive}")
+
+
+def _generate_compensation_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
+    """Generate smart CompensationPrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import CompensationDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = 0
+    for i, line in enumerate(lines):
+        if line.startswith("import ") or line.startswith("from "):
+            import_idx = i + 1
+        elif line.strip() and not line.startswith("#") and import_idx > 0:
+            break
+
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives.recovery import CompensationPrimitive"
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Parse code to extract actual compensation patterns
+    try:
+        tree = ast.parse(code)
+        detector = CompensationDetector()
+        detector.visit(tree)
+
+        if detector.compensation_patterns:
+            # Generate smart transformation based on detected patterns
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            for pattern in detector.compensation_patterns:
+                func_name = pattern["name"]
+                cleanup_actions = pattern.get("cleanup_actions", [])
+                is_async = pattern.get("is_async", True)
+
+                # Find the original function to extract its body
+                func_node = pattern.get("node")
+                forward_body = ""
+                compensation_body = ""
+
+                if func_node:
+                    # Extract forward operations (try body)
+                    for stmt in func_node.body:
+                        if isinstance(stmt, ast.Try):
+                            # Get try body as forward operations
+                            forward_stmts = []
+                            for try_stmt in stmt.body:
+                                try:
+                                    forward_stmts.append("    " + ast.unparse(try_stmt))
+                                except Exception:
+                                    pass
+                            forward_body = (
+                                "\n".join(forward_stmts)
+                                if forward_stmts
+                                else "    pass"
+                            )
+
+                            # Get except body (excluding raise) as compensation
+                            for handler in stmt.handlers:
+                                comp_stmts = []
+                                for h_stmt in handler.body:
+                                    if not isinstance(h_stmt, ast.Raise):
+                                        try:
+                                            comp_stmts.append(
+                                                "    " + ast.unparse(h_stmt)
+                                            )
+                                        except Exception:
+                                            pass
+                                compensation_body = (
+                                    "\n".join(comp_stmts) if comp_stmts else "    pass"
+                                )
+                                break
+
+                if not forward_body:
+                    forward_body = "    # Extract forward operations from original function\n    pass"
+                if not compensation_body:
+                    compensation_body = (
+                        f"    # Cleanup actions: {', '.join(cleanup_actions)}\n    pass"
+                    )
+
+                async_kw = "async " if is_async else ""
+
+                wrapper_parts.append(f'''
+# Saga pattern for {func_name}
+# Forward: executes the main business logic
+# Compensation: automatically called on failure to rollback
+
+{async_kw}def {func_name}_forward(data: dict, context: WorkflowContext):
+    """Forward operation - extracted from {func_name}."""
+{forward_body}
+
+
+{async_kw}def {func_name}_compensation(data: dict, context: WorkflowContext):
+    """Compensation operation - rollback logic from {func_name}."""
+{compensation_body}
+
+
+# Create CompensationPrimitive workflow
+{func_name}_saga = CompensationPrimitive(
+    forward={func_name}_forward,
+    compensation={func_name}_compensation,
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="saga-{func_name}")
+# result = await {func_name}_saga.execute(data, context)
+''')
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template approach
+    func_names = [t["name"] for t in targets]
+    lines.append("")
+    lines.append("# --- TTA.dev Transformation ---")
+    lines.append(f"# TODO: Extract forward and compensation logic from {func_names[0]}")
+    lines.append("# See CompensationPrimitive documentation for saga pattern")
+
+    return "\n".join(lines)
 
 
 def _print_diff(original: str, transformed: str, filename: str) -> None:
