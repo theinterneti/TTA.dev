@@ -824,3 +824,299 @@ def another_simple():
         assert "CONSTANT = 42" in result.transformed_code
         assert "simple_function" in result.transformed_code
         assert "another_simple" in result.transformed_code
+
+
+class TestCircuitBreakerDetector:
+    """Test CircuitBreakerDetector for finding circuit breaker candidates."""
+
+    def test_detect_multiple_exception_handlers(self) -> None:
+        """Test detection of functions with multiple exception handlers."""
+        import ast
+
+        from tta_dev_primitives.analysis.transformer import CircuitBreakerDetector
+
+        code = """
+async def unreliable_service(data):
+    try:
+        return await external_api.call(data)
+    except ConnectionError:
+        log.error("Connection failed")
+        return None
+    except TimeoutError:
+        log.error("Timeout occurred")
+        return None
+    except ValueError as e:
+        log.error(f"Invalid data: {e}")
+        raise
+"""
+        tree = ast.parse(code)
+        detector = CircuitBreakerDetector()
+        detector.visit(tree)
+
+        assert len(detector.circuit_patterns) == 1
+        candidate = detector.circuit_patterns[0]
+        assert candidate["name"] == "unreliable_service"
+        assert candidate["exception_count"] == 3
+        assert candidate["is_async"] is True
+
+    def test_ignore_single_exception_handler(self) -> None:
+        """Test that single exception handlers are not flagged."""
+        import ast
+
+        from tta_dev_primitives.analysis.transformer import CircuitBreakerDetector
+
+        code = """
+def simple_error_handling():
+    try:
+        return do_work()
+    except Exception:
+        return None
+"""
+        tree = ast.parse(code)
+        detector = CircuitBreakerDetector()
+        detector.visit(tree)
+
+        # Should not detect - only 1 exception handler
+        assert len(detector.circuit_patterns) == 0
+
+    def test_detect_sync_function(self) -> None:
+        """Test detection works for sync functions too."""
+        import ast
+
+        from tta_dev_primitives.analysis.transformer import CircuitBreakerDetector
+
+        code = """
+def multi_error_handler(data):
+    try:
+        return process(data)
+    except TypeError:
+        return default_value
+    except ValueError:
+        return alternative_value
+"""
+        tree = ast.parse(code)
+        detector = CircuitBreakerDetector()
+        detector.visit(tree)
+
+        assert len(detector.circuit_patterns) == 1
+        assert detector.circuit_patterns[0]["is_async"] is False
+
+
+class TestCompensationDetector:
+    """Test CompensationDetector for finding saga/compensation patterns."""
+
+    def test_detect_cleanup_and_raise_pattern(self) -> None:
+        """Test detection of try/except with cleanup followed by raise."""
+        import ast
+
+        from tta_dev_primitives.analysis.transformer import CompensationDetector
+
+        code = """
+async def create_order(order_data):
+    try:
+        await db.insert(order_data)
+        await payment.charge(order_data.amount)
+        return order_data.id
+    except Exception:
+        await db.delete(order_data.id)
+        raise
+"""
+        tree = ast.parse(code)
+        detector = CompensationDetector()
+        detector.visit(tree)
+
+        assert len(detector.compensation_patterns) == 1
+        candidate = detector.compensation_patterns[0]
+        assert candidate["name"] == "create_order"
+        assert candidate["is_async"] is True
+        assert "db.delete" in candidate["cleanup_actions"]
+
+    def test_ignore_simple_error_handling(self) -> None:
+        """Test that simple error handling without cleanup is ignored."""
+        import ast
+
+        from tta_dev_primitives.analysis.transformer import CompensationDetector
+
+        code = """
+def simple_function():
+    try:
+        return do_work()
+    except Exception:
+        raise
+"""
+        tree = ast.parse(code)
+        detector = CompensationDetector()
+        detector.visit(tree)
+
+        # Should not detect - no cleanup before raise
+        assert len(detector.compensation_patterns) == 0
+
+    def test_detect_multiple_cleanup_actions(self) -> None:
+        """Test detection captures multiple cleanup actions."""
+        import ast
+
+        from tta_dev_primitives.analysis.transformer import CompensationDetector
+
+        code = """
+async def complex_transaction(data):
+    try:
+        await service1.create(data)
+        await service2.notify(data)
+        return data.id
+    except Exception:
+        await service1.rollback(data.id)
+        await service2.cancel_notification(data.id)
+        raise
+"""
+        tree = ast.parse(code)
+        detector = CompensationDetector()
+        detector.visit(tree)
+
+        assert len(detector.compensation_patterns) == 1
+        cleanup_actions = detector.compensation_patterns[0]["cleanup_actions"]
+        assert len(cleanup_actions) >= 2
+
+
+class TestCircuitBreakerTransformation:
+    """Test CircuitBreakerPrimitive transformations."""
+
+    def test_transform_circuit_breaker_pattern(self) -> None:
+        """Test transformation of circuit breaker candidates."""
+        code = """
+async def flaky_api_call(request):
+    try:
+        return await external_service.call(request)
+    except ConnectionError:
+        return {"error": "connection_failed"}
+    except TimeoutError:
+        return {"error": "timeout"}
+"""
+        transformer = CodeTransformer()
+        result = transformer.transform(code, primitive="CircuitBreakerPrimitive")
+
+        assert result.success
+        assert "CircuitBreakerPrimitive" in result.transformed_code
+
+    def test_circuit_breaker_adds_import(self) -> None:
+        """Test that circuit breaker transformation adds the right import."""
+        code = """
+def multi_exception_handler():
+    try:
+        return call_service()
+    except ValueError:
+        return None
+    except RuntimeError:
+        return None
+"""
+        transformer = CodeTransformer()
+        result = transformer.transform(code, primitive="CircuitBreakerPrimitive")
+
+        assert result.success
+        # Import should be added
+        imports = result.imports_added
+        circuit_breaker_import = any(
+            "CircuitBreakerPrimitive" in imp for imp in imports
+        )
+        assert circuit_breaker_import
+
+
+class TestCompensationTransformation:
+    """Test CompensationPrimitive transformations."""
+
+    def test_transform_compensation_pattern(self) -> None:
+        """Test transformation of compensation/saga patterns."""
+        code = """
+async def distributed_transaction(data):
+    try:
+        await db.create_record(data)
+        await notify_service(data)
+        return data.id
+    except Exception:
+        await db.delete_record(data.id)
+        raise
+"""
+        transformer = CodeTransformer()
+        result = transformer.transform(code, primitive="CompensationPrimitive")
+
+        assert result.success
+        assert "CompensationPrimitive" in result.transformed_code
+
+    def test_compensation_adds_import(self) -> None:
+        """Test that compensation transformation adds the right import."""
+        code = """
+def saga_operation(order):
+    try:
+        reserve_inventory(order)
+        return process_payment(order)
+    except:
+        release_inventory(order)
+        raise
+"""
+        transformer = CodeTransformer()
+        result = transformer.transform(code, primitive="CompensationPrimitive")
+
+        assert result.success
+        imports = result.imports_added
+        compensation_import = any("CompensationPrimitive" in imp for imp in imports)
+        assert compensation_import
+
+
+class TestAutoDetectNewPatterns:
+    """Test auto-detection of new circuit breaker and compensation patterns."""
+
+    def test_auto_detect_circuit_breaker(self) -> None:
+        """Test auto-detection finds circuit breaker patterns."""
+        code = """
+async def unreliable_call(data):
+    try:
+        return await api.request(data)
+    except ConnectionError:
+        return fallback_response()
+    except TimeoutError:
+        return cached_response()
+"""
+        transformer = CodeTransformer()
+        transforms = transformer._detect_needed_transforms(code)
+
+        assert "CircuitBreakerPrimitive" in transforms
+
+    def test_auto_detect_compensation(self) -> None:
+        """Test auto-detection finds compensation/saga patterns."""
+        code = """
+async def create_with_rollback(item):
+    try:
+        await db.insert(item)
+        return item.id
+    except:
+        await db.delete(item.id)
+        raise
+"""
+        transformer = CodeTransformer()
+        transforms = transformer._detect_needed_transforms(code)
+
+        assert "CompensationPrimitive" in transforms
+
+    def test_auto_detect_multiple_new_patterns(self) -> None:
+        """Test auto-detection finds multiple patterns in one file."""
+        code = """
+async def circuit_breaker_candidate():
+    try:
+        return await external.call()
+    except ConnectionError:
+        return None
+    except TimeoutError:
+        return None
+
+async def compensation_candidate():
+    try:
+        await db.create(data)
+        return data.id
+    except:
+        await db.delete(data.id)
+        raise
+"""
+        transformer = CodeTransformer()
+        transforms = transformer._detect_needed_transforms(code)
+
+        assert "CircuitBreakerPrimitive" in transforms
+        assert "CompensationPrimitive" in transforms

@@ -702,7 +702,11 @@ def docs(
         config = _get_config()
 
     # Resolve options from config
-    show_all_templates = show_all_templates if show_all_templates is not None else config.analysis.show_templates
+    show_all_templates = (
+        show_all_templates
+        if show_all_templates is not None
+        else config.analysis.show_templates
+    )
 
     info = analyzer.get_primitive_info(primitive)
 

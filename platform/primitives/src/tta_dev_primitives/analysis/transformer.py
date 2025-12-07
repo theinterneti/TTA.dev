@@ -596,6 +596,476 @@ class RouterTransformer(ast.NodeTransformer):
         )
 
 
+class CacheTransformer(ast.NodeTransformer):
+    """Transform manual cache patterns into CachePrimitive.
+
+    Transforms:
+        cache = {}
+        def get_data(key):
+            if key in cache:
+                return cache[key]
+            result = fetch_data(key)
+            cache[key] = result
+            return result
+
+    Into:
+        async def get_data_core(data: dict, context: WorkflowContext):
+            return fetch_data(data["key"])
+
+        get_data = CachePrimitive(primitive=get_data_core, ttl_seconds=3600)
+    """
+
+    def __init__(self) -> None:
+        self.transformations: list[dict[str, Any]] = []
+        self.new_functions: list[ast.stmt] = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.AST:
+        return self._transform_function(node, is_async=False)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AST:
+        return self._transform_function(node, is_async=True)
+
+    def _transform_function(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef, is_async: bool
+    ) -> ast.AST:
+        """Transform a function with cache pattern into CachePrimitive."""
+        cache_info = self._find_cache_pattern(node)
+        if not cache_info:
+            return node
+
+        func_name = node.name
+        fetch_body = cache_info["fetch_body"]
+
+        # Create the core function with extracted body
+        core_func = self._create_core_function(
+            func_name, fetch_body, is_async, node.lineno
+        )
+
+        # Create the CachePrimitive assignment
+        primitive_assign = self._create_primitive_assignment(func_name)
+
+        self.transformations.append(
+            {
+                "type": "cache_transform",
+                "function": func_name,
+                "line": node.lineno,
+                "transformation": "Full AST rewrite to CachePrimitive",
+            }
+        )
+
+        # Store new function, return the assignment
+        self.new_functions.append(core_func)
+        return primitive_assign
+
+    def _find_cache_pattern(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> dict[str, Any] | None:
+        """Find cache pattern: if key in cache: return; result = ...; cache[key] = result."""
+        for i, stmt in enumerate(node.body):
+            if isinstance(stmt, ast.If):
+                # Check for: if key in cache
+                if isinstance(stmt.test, ast.Compare):
+                    if len(stmt.test.ops) == 1 and isinstance(stmt.test.ops[0], ast.In):
+                        # Found cache check, get the fetch body (after the if)
+                        fetch_body = (
+                            node.body[i + 1 :] if i + 1 < len(node.body) else []
+                        )
+                        # Filter out cache assignment statements
+                        fetch_body = [
+                            s for s in fetch_body if not self._is_cache_assignment(s)
+                        ]
+                        if fetch_body:
+                            return {"fetch_body": fetch_body}
+        return None
+
+    def _is_cache_assignment(self, stmt: ast.stmt) -> bool:
+        """Check if statement is a cache assignment: cache[key] = value."""
+        if isinstance(stmt, ast.Assign):
+            for target in stmt.targets:
+                if isinstance(target, ast.Subscript):
+                    return True
+        return False
+
+    def _create_core_function(
+        self, func_name: str, body: list[ast.stmt], is_async: bool, lineno: int
+    ) -> ast.AsyncFunctionDef:
+        """Create the core async function."""
+        core_name = f"{func_name}_core"
+
+        args = ast.arguments(
+            posonlyargs=[],
+            args=[
+                ast.arg(arg="data", annotation=ast.Name(id="dict", ctx=ast.Load())),
+                ast.arg(
+                    arg="context",
+                    annotation=ast.Name(id="WorkflowContext", ctx=ast.Load()),
+                ),
+            ],
+            kwonlyargs=[],
+            kw_defaults=[],
+            defaults=[],
+        )
+
+        return ast.fix_missing_locations(
+            ast.AsyncFunctionDef(
+                name=core_name,
+                args=args,
+                body=body if body else [ast.Pass()],
+                decorator_list=[],
+                returns=None,
+                lineno=lineno,
+                col_offset=0,
+            )
+        )
+
+    def _create_primitive_assignment(self, func_name: str) -> ast.Assign:
+        """Create: func_name = CachePrimitive(primitive=func_name_core, ttl_seconds=3600)."""
+        return ast.fix_missing_locations(
+            ast.Assign(
+                targets=[ast.Name(id=func_name, ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Name(id="CachePrimitive", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        ast.keyword(
+                            arg="primitive",
+                            value=ast.Name(id=f"{func_name}_core", ctx=ast.Load()),
+                        ),
+                        ast.keyword(
+                            arg="ttl_seconds",
+                            value=ast.Constant(value=3600),
+                        ),
+                        ast.keyword(
+                            arg="max_size",
+                            value=ast.Constant(value=1000),
+                        ),
+                    ],
+                ),
+                lineno=0,
+                col_offset=0,
+            )
+        )
+
+
+class CircuitBreakerTransformer(ast.NodeTransformer):
+    """Transform multiple exception handlers into CircuitBreakerPrimitive.
+
+    Transforms functions with repeated try/except for the same operations:
+        def call_service():
+            try:
+                return service.call()
+            except ConnectionError:
+                return None
+            except TimeoutError:
+                return None
+
+    Into:
+        async def call_service_core(data: dict, context: WorkflowContext):
+            return service.call()
+
+        call_service = CircuitBreakerPrimitive(
+            primitive=call_service_core,
+            failure_threshold=5,
+            recovery_timeout=60
+        )
+    """
+
+    def __init__(self) -> None:
+        self.transformations: list[dict[str, Any]] = []
+        self.new_functions: list[ast.stmt] = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.AST:
+        return self._transform_function(node, is_async=False)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AST:
+        return self._transform_function(node, is_async=True)
+
+    def _transform_function(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef, is_async: bool
+    ) -> ast.AST:
+        """Transform function with multiple exception handlers."""
+        circuit_info = self._find_circuit_pattern(node)
+        if not circuit_info:
+            return node
+
+        func_name = node.name
+        try_body = circuit_info["try_body"]
+        exception_count = circuit_info["exception_count"]
+
+        # Create the core function
+        core_func = self._create_core_function(
+            func_name, try_body, is_async, node.lineno
+        )
+
+        # Create the CircuitBreakerPrimitive assignment
+        primitive_assign = self._create_primitive_assignment(func_name)
+
+        self.transformations.append(
+            {
+                "type": "circuit_breaker_transform",
+                "function": func_name,
+                "exception_handlers": exception_count,
+                "line": node.lineno,
+                "transformation": "Full AST rewrite to CircuitBreakerPrimitive",
+            }
+        )
+
+        self.new_functions.append(core_func)
+        return primitive_assign
+
+    def _find_circuit_pattern(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> dict[str, Any] | None:
+        """Find pattern: try with multiple exception handlers."""
+        for stmt in node.body:
+            if isinstance(stmt, ast.Try):
+                # Need at least 2 exception handlers to warrant circuit breaker
+                if len(stmt.handlers) >= 2:
+                    return {
+                        "try_body": stmt.body,
+                        "exception_count": len(stmt.handlers),
+                    }
+        return None
+
+    def _create_core_function(
+        self, func_name: str, body: list[ast.stmt], is_async: bool, lineno: int
+    ) -> ast.AsyncFunctionDef:
+        """Create the core async function."""
+        core_name = f"{func_name}_core"
+
+        args = ast.arguments(
+            posonlyargs=[],
+            args=[
+                ast.arg(arg="data", annotation=ast.Name(id="dict", ctx=ast.Load())),
+                ast.arg(
+                    arg="context",
+                    annotation=ast.Name(id="WorkflowContext", ctx=ast.Load()),
+                ),
+            ],
+            kwonlyargs=[],
+            kw_defaults=[],
+            defaults=[],
+        )
+
+        return ast.fix_missing_locations(
+            ast.AsyncFunctionDef(
+                name=core_name,
+                args=args,
+                body=body if body else [ast.Pass()],
+                decorator_list=[],
+                returns=None,
+                lineno=lineno,
+                col_offset=0,
+            )
+        )
+
+    def _create_primitive_assignment(self, func_name: str) -> ast.Assign:
+        """Create: func = CircuitBreakerPrimitive(primitive=func_core, ...)."""
+        return ast.fix_missing_locations(
+            ast.Assign(
+                targets=[ast.Name(id=func_name, ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Name(id="CircuitBreakerPrimitive", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        ast.keyword(
+                            arg="primitive",
+                            value=ast.Name(id=f"{func_name}_core", ctx=ast.Load()),
+                        ),
+                        ast.keyword(
+                            arg="failure_threshold",
+                            value=ast.Constant(value=5),
+                        ),
+                        ast.keyword(
+                            arg="recovery_timeout",
+                            value=ast.Constant(value=60),
+                        ),
+                    ],
+                ),
+                lineno=0,
+                col_offset=0,
+            )
+        )
+
+
+class CompensationTransformer(ast.NodeTransformer):
+    """Transform paired do/undo operations into CompensationPrimitive.
+
+    Transforms:
+        async def process_order():
+            order_id = await create_order()
+            try:
+                await process_payment()
+            except:
+                await cancel_order(order_id)
+                raise
+
+    Into:
+        forward = create_order >> process_payment
+        compensation = cancel_order
+        process_order = CompensationPrimitive(forward=forward, compensation=compensation)
+    """
+
+    def __init__(self) -> None:
+        self.transformations: list[dict[str, Any]] = []
+        self.new_functions: list[ast.stmt] = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.AST:
+        return self._transform_function(node, is_async=False)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> ast.AST:
+        return self._transform_function(node, is_async=True)
+
+    def _transform_function(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef, is_async: bool
+    ) -> ast.AST:
+        """Transform function with compensation pattern."""
+        comp_info = self._find_compensation_pattern(node)
+        if not comp_info:
+            return node
+
+        func_name = node.name
+
+        # Create the forward function
+        forward_func = self._create_forward_function(
+            func_name, comp_info["forward_body"], node.lineno
+        )
+
+        # Create the compensation function
+        comp_func = self._create_compensation_function(
+            func_name, comp_info["compensation_body"], node.lineno
+        )
+
+        # Create the CompensationPrimitive assignment
+        primitive_assign = self._create_primitive_assignment(func_name)
+
+        self.transformations.append(
+            {
+                "type": "compensation_transform",
+                "function": func_name,
+                "line": node.lineno,
+                "transformation": "Full AST rewrite to CompensationPrimitive",
+            }
+        )
+
+        self.new_functions.extend([forward_func, comp_func])
+        return primitive_assign
+
+    def _find_compensation_pattern(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> dict[str, Any] | None:
+        """Find pattern: try with except that has cleanup + raise."""
+        forward_body = []
+
+        for stmt in node.body:
+            if isinstance(stmt, ast.Try):
+                # Check for except handler with raise at the end
+                for handler in stmt.handlers:
+                    has_raise = False
+                    cleanup_stmts = []
+                    for h_stmt in handler.body:
+                        if isinstance(h_stmt, ast.Raise):
+                            has_raise = True
+                        else:
+                            cleanup_stmts.append(h_stmt)
+
+                    if has_raise and cleanup_stmts:
+                        return {
+                            "forward_body": forward_body + stmt.body,
+                            "compensation_body": cleanup_stmts,
+                        }
+            else:
+                forward_body.append(stmt)
+
+        return None
+
+    def _create_forward_function(
+        self, func_name: str, body: list[ast.stmt], lineno: int
+    ) -> ast.AsyncFunctionDef:
+        """Create the forward async function."""
+        args = ast.arguments(
+            posonlyargs=[],
+            args=[
+                ast.arg(arg="data", annotation=ast.Name(id="dict", ctx=ast.Load())),
+                ast.arg(
+                    arg="context",
+                    annotation=ast.Name(id="WorkflowContext", ctx=ast.Load()),
+                ),
+            ],
+            kwonlyargs=[],
+            kw_defaults=[],
+            defaults=[],
+        )
+
+        return ast.fix_missing_locations(
+            ast.AsyncFunctionDef(
+                name=f"{func_name}_forward",
+                args=args,
+                body=body if body else [ast.Pass()],
+                decorator_list=[],
+                returns=None,
+                lineno=lineno,
+                col_offset=0,
+            )
+        )
+
+    def _create_compensation_function(
+        self, func_name: str, body: list[ast.stmt], lineno: int
+    ) -> ast.AsyncFunctionDef:
+        """Create the compensation async function."""
+        args = ast.arguments(
+            posonlyargs=[],
+            args=[
+                ast.arg(arg="data", annotation=ast.Name(id="dict", ctx=ast.Load())),
+                ast.arg(
+                    arg="context",
+                    annotation=ast.Name(id="WorkflowContext", ctx=ast.Load()),
+                ),
+            ],
+            kwonlyargs=[],
+            kw_defaults=[],
+            defaults=[],
+        )
+
+        return ast.fix_missing_locations(
+            ast.AsyncFunctionDef(
+                name=f"{func_name}_compensation",
+                args=args,
+                body=body if body else [ast.Pass()],
+                decorator_list=[],
+                returns=None,
+                lineno=lineno,
+                col_offset=0,
+            )
+        )
+
+    def _create_primitive_assignment(self, func_name: str) -> ast.Assign:
+        """Create: func = CompensationPrimitive(forward=..., compensation=...)."""
+        return ast.fix_missing_locations(
+            ast.Assign(
+                targets=[ast.Name(id=func_name, ctx=ast.Store())],
+                value=ast.Call(
+                    func=ast.Name(id="CompensationPrimitive", ctx=ast.Load()),
+                    args=[],
+                    keywords=[
+                        ast.keyword(
+                            arg="forward",
+                            value=ast.Name(id=f"{func_name}_forward", ctx=ast.Load()),
+                        ),
+                        ast.keyword(
+                            arg="compensation",
+                            value=ast.Name(
+                                id=f"{func_name}_compensation", ctx=ast.Load()
+                            ),
+                        ),
+                    ],
+                ),
+                lineno=0,
+                col_offset=0,
+            )
+        )
+
+
 # =============================================================================
 # AST Detectors - Find patterns without transforming
 # =============================================================================
@@ -820,6 +1290,108 @@ class RouterPatternDetector(ast.NodeVisitor):
         return routes
 
 
+class CircuitBreakerDetector(ast.NodeVisitor):
+    """Detect functions with multiple exception handlers."""
+
+    def __init__(self) -> None:
+        self.circuit_patterns: list[dict[str, Any]] = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._check_function(node, is_async=False)
+        self.generic_visit(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._check_function(node, is_async=True)
+        self.generic_visit(node)
+
+    def _check_function(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef, is_async: bool
+    ) -> None:
+        """Check if function has multiple exception handlers."""
+        for stmt in node.body:
+            if isinstance(stmt, ast.Try):
+                if len(stmt.handlers) >= 2:
+                    self.circuit_patterns.append(
+                        {
+                            "name": node.name,
+                            "is_async": is_async,
+                            "lineno": node.lineno,
+                            "node": node,
+                            "exception_count": len(stmt.handlers),
+                        }
+                    )
+                    return
+
+
+class CompensationDetector(ast.NodeVisitor):
+    """Detect saga/compensation patterns (try with cleanup on failure)."""
+
+    def __init__(self) -> None:
+        self.compensation_patterns: list[dict[str, Any]] = []
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._check_function(node, is_async=False)
+        self.generic_visit(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._check_function(node, is_async=True)
+        self.generic_visit(node)
+
+    def _check_function(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef, is_async: bool
+    ) -> None:
+        """Check for compensation pattern: try with cleanup + re-raise."""
+        for stmt in node.body:
+            if isinstance(stmt, ast.Try):
+                for handler in stmt.handlers:
+                    has_raise = False
+                    cleanup_actions: list[str] = []
+
+                    for h_stmt in handler.body:
+                        if isinstance(h_stmt, ast.Raise):
+                            has_raise = True
+                        elif isinstance(h_stmt, ast.Expr):
+                            # Extract cleanup action from expression
+                            if isinstance(h_stmt.value, ast.Await):
+                                call = h_stmt.value.value
+                                if isinstance(call, ast.Call):
+                                    cleanup_actions.append(
+                                        self._extract_call_name(call)
+                                    )
+                            elif isinstance(h_stmt.value, ast.Call):
+                                cleanup_actions.append(
+                                    self._extract_call_name(h_stmt.value)
+                                )
+
+                    if has_raise and cleanup_actions:
+                        self.compensation_patterns.append(
+                            {
+                                "name": node.name,
+                                "is_async": is_async,
+                                "lineno": node.lineno,
+                                "node": node,
+                                "cleanup_actions": cleanup_actions,
+                            }
+                        )
+                        return
+
+    def _extract_call_name(self, call: ast.Call) -> str:
+        """Extract a readable name from a Call node."""
+        if isinstance(call.func, ast.Attribute):
+            # e.g., db.delete or service.rollback
+            parts = []
+            node = call.func
+            while isinstance(node, ast.Attribute):
+                parts.append(node.attr)
+                node = node.value
+            if isinstance(node, ast.Name):
+                parts.append(node.id)
+            return ".".join(reversed(parts))
+        elif isinstance(call.func, ast.Name):
+            return call.func.id
+        return "unknown"
+
+
 class CodeTransformer:
     """AST-based code transformer for TTA.dev primitives.
 
@@ -841,6 +1413,7 @@ class CodeTransformer:
             "SequentialPrimitive": "from tta_dev_primitives import SequentialPrimitive",
             "RouterPrimitive": "from tta_dev_primitives.core import RouterPrimitive",
             "CircuitBreakerPrimitive": "from tta_dev_primitives.recovery import CircuitBreakerPrimitive",
+            "CompensationPrimitive": "from tta_dev_primitives.recovery import CompensationPrimitive",
         }
 
     def transform(
@@ -946,6 +1519,17 @@ class CodeTransformer:
         if router_detector.router_patterns:
             transforms.append("RouterPrimitive")
 
+        # New detectors
+        circuit_detector = CircuitBreakerDetector()
+        circuit_detector.visit(tree)
+        if circuit_detector.circuit_patterns:
+            transforms.append("CircuitBreakerPrimitive")
+
+        compensation_detector = CompensationDetector()
+        compensation_detector.visit(tree)
+        if compensation_detector.compensation_patterns:
+            transforms.append("CompensationPrimitive")
+
         return transforms
 
     def _detect_needed_transforms_regex(self, code: str) -> list[str]:
@@ -995,6 +1579,10 @@ class CodeTransformer:
             return self._transform_router_ast(code, tree)
         elif transform_type == "CachePrimitive":
             return self._transform_cache_ast(code, tree)
+        elif transform_type == "CircuitBreakerPrimitive":
+            return self._transform_circuit_breaker_ast(code, tree)
+        elif transform_type == "CompensationPrimitive":
+            return self._transform_compensation_ast(code, tree)
         else:
             return {"changed": False, "code": code, "changes": []}
 
@@ -1427,6 +2015,238 @@ class CodeTransformer:
 
 # Example usage:
 # result = {await_kw}{func_name}.execute({{"key": key}}, context)
+'''
+
+    def _transform_circuit_breaker_ast(
+        self, code: str, tree: ast.Module
+    ) -> dict[str, Any]:
+        """Transform functions with multiple exception handlers into CircuitBreakerPrimitive."""
+        changes = []
+        transformer = CircuitBreakerTransformer()
+        new_tree = transformer.visit(tree)
+
+        if not transformer.transformations:
+            return {"changed": False, "code": code, "changes": []}
+
+        # Add new functions generated by transformer
+        new_tree.body = [
+            node for node in new_tree.body if node is not None
+        ] + transformer.new_functions
+
+        ast.fix_missing_locations(new_tree)
+
+        try:
+            new_code = ast.unparse(new_tree)
+        except Exception:
+            # Fall back to manual line replacement
+            return self._transform_circuit_breaker_fallback(code, tree)
+
+        return {
+            "changed": True,
+            "code": new_code,
+            "changes": transformer.transformations,
+        }
+
+    def _transform_circuit_breaker_fallback(
+        self, code: str, tree: ast.Module
+    ) -> dict[str, Any]:
+        """Fallback circuit breaker transformation using line-based replacement."""
+        changes = []
+        detector = CircuitBreakerDetector()
+        detector.visit(tree)
+
+        if not detector.circuit_patterns:
+            return {"changed": False, "code": code, "changes": []}
+
+        lines = code.split("\n")
+        transformed_lines = lines.copy()
+        offset = 0
+
+        for func_info in detector.circuit_patterns:
+            func_name = func_info["name"]
+            is_async = func_info["is_async"]
+            lineno = func_info["lineno"]
+            exception_count = func_info["exception_count"]
+
+            # Find function boundaries
+            func_start = lineno - 1
+            func_end = self._find_function_end(lines, func_start)
+
+            # Generate circuit breaker wrapper
+            wrapper_code = self._generate_circuit_breaker_wrapper(
+                func_name, is_async, exception_count
+            )
+
+            # Replace function
+            new_lines = wrapper_code.split("\n")
+            transformed_lines = (
+                transformed_lines[: func_start + offset]
+                + new_lines
+                + transformed_lines[func_end + 1 + offset :]
+            )
+            offset += len(new_lines) - (func_end - func_start + 1)
+
+            changes.append(
+                {
+                    "type": "circuit_breaker_transform",
+                    "function": func_name,
+                    "line": lineno,
+                    "exception_handlers": exception_count,
+                    "transformation": "fallback line-based",
+                }
+            )
+
+        return {
+            "changed": bool(changes),
+            "code": "\n".join(transformed_lines),
+            "changes": changes,
+        }
+
+    def _generate_circuit_breaker_wrapper(
+        self, func_name: str, is_async: bool, exception_count: int
+    ) -> str:
+        """Generate a CircuitBreakerPrimitive wrapper."""
+        async_kw = "async " if is_async else ""
+        await_kw = "await " if is_async else ""
+
+        return f'''
+{async_kw}def {func_name}_core(data: dict, context: WorkflowContext):
+    """Core operation protected by CircuitBreakerPrimitive."""
+    # Your unreliable operation here
+    pass
+
+
+# Wrap with CircuitBreakerPrimitive for failure protection
+# Original had {exception_count} exception handlers - now handled by circuit breaker
+{func_name} = CircuitBreakerPrimitive(
+    primitive={func_name}_core,
+    failure_threshold=5,      # Open circuit after 5 failures
+    recovery_timeout=60,      # Try again after 60 seconds
+    expected_successes=2,     # Close after 2 successes in half-open
+)
+
+
+# Example usage:
+# result = {await_kw}{func_name}.execute(data, context)
+'''
+
+    def _transform_compensation_ast(
+        self, code: str, tree: ast.Module
+    ) -> dict[str, Any]:
+        """Transform saga/compensation patterns into CompensationPrimitive."""
+        changes = []
+        transformer = CompensationTransformer()
+        new_tree = transformer.visit(tree)
+
+        if not transformer.transformations:
+            return {"changed": False, "code": code, "changes": []}
+
+        # Add new functions generated by transformer
+        new_tree.body = [
+            node for node in new_tree.body if node is not None
+        ] + transformer.new_functions
+
+        ast.fix_missing_locations(new_tree)
+
+        try:
+            new_code = ast.unparse(new_tree)
+        except Exception:
+            # Fall back to manual line replacement
+            return self._transform_compensation_fallback(code, tree)
+
+        return {
+            "changed": True,
+            "code": new_code,
+            "changes": transformer.transformations,
+        }
+
+    def _transform_compensation_fallback(
+        self, code: str, tree: ast.Module
+    ) -> dict[str, Any]:
+        """Fallback compensation transformation using line-based replacement."""
+        changes = []
+        detector = CompensationDetector()
+        detector.visit(tree)
+
+        if not detector.compensation_patterns:
+            return {"changed": False, "code": code, "changes": []}
+
+        lines = code.split("\n")
+        transformed_lines = lines.copy()
+        offset = 0
+
+        for func_info in detector.compensation_patterns:
+            func_name = func_info["name"]
+            is_async = func_info["is_async"]
+            lineno = func_info["lineno"]
+            cleanup_actions = func_info.get("cleanup_actions", [])
+
+            # Find function boundaries
+            func_start = lineno - 1
+            func_end = self._find_function_end(lines, func_start)
+
+            # Generate compensation wrapper
+            wrapper_code = self._generate_compensation_wrapper(
+                func_name, is_async, cleanup_actions
+            )
+
+            # Replace function
+            new_lines = wrapper_code.split("\n")
+            transformed_lines = (
+                transformed_lines[: func_start + offset]
+                + new_lines
+                + transformed_lines[func_end + 1 + offset :]
+            )
+            offset += len(new_lines) - (func_end - func_start + 1)
+
+            changes.append(
+                {
+                    "type": "compensation_transform",
+                    "function": func_name,
+                    "line": lineno,
+                    "cleanup_actions": cleanup_actions,
+                    "transformation": "fallback line-based",
+                }
+            )
+
+        return {
+            "changed": bool(changes),
+            "code": "\n".join(transformed_lines),
+            "changes": changes,
+        }
+
+    def _generate_compensation_wrapper(
+        self, func_name: str, is_async: bool, cleanup_actions: list[str]
+    ) -> str:
+        """Generate a CompensationPrimitive wrapper."""
+        async_kw = "async " if is_async else ""
+        await_kw = "await " if is_async else ""
+        cleanup_str = (
+            ", ".join(cleanup_actions) if cleanup_actions else "cleanup operation"
+        )
+
+        return f'''
+{async_kw}def {func_name}_forward(data: dict, context: WorkflowContext):
+    """Forward operation - the main action."""
+    # Your forward operation here
+    pass
+
+
+{async_kw}def {func_name}_compensation(data: dict, context: WorkflowContext):
+    """Compensation operation - undo/cleanup if forward fails."""
+    # Original cleanup: {cleanup_str}
+    pass
+
+
+# Wrap with CompensationPrimitive for saga pattern
+{func_name} = CompensationPrimitive(
+    forward={func_name}_forward,
+    compensation={func_name}_compensation,
+)
+
+
+# Example usage:
+# result = {await_kw}{func_name}.execute(data, context)
 '''
 
     def _transform_retry_regex(self, code: str) -> dict[str, Any]:
