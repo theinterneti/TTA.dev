@@ -6,9 +6,12 @@ Main Typer application with all CLI commands.
 from __future__ import annotations
 
 import json
+import logging
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import structlog
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -61,6 +64,24 @@ def analyze(
         "-t",
         help="Show code templates for recommendations",
     ),
+    quiet: bool = typer.Option(
+        False,
+        "--quiet",
+        "-q",
+        help="Suppress debug logs (cleaner output for agents)",
+    ),
+    show_lines: bool = typer.Option(
+        False,
+        "--lines",
+        "-l",
+        help="Show line numbers for detected patterns",
+    ),
+    suggest_diff: bool = typer.Option(
+        False,
+        "--suggest-diff",
+        "-d",
+        help="Show suggested code transformations as diffs",
+    ),
 ) -> None:
     """Analyze code and suggest TTA.dev primitives.
 
@@ -71,12 +92,22 @@ def analyze(
         tta-dev analyze api_client.py
         tta-dev analyze app.py --output json
         tta-dev analyze workflow.py --min-confidence 0.5 --templates
+        tta-dev analyze api.py --quiet --suggest-diff  # Agent-friendly
     """
+    # Suppress logs if --quiet
+    if quiet:
+        structlog.configure(
+            wrapper_class=structlog.make_filtering_bound_logger(logging.WARNING),
+        )
+
     try:
         code = file.read_text()
     except Exception as e:
         console.print(f"[red]Error reading file: {e}[/red]")
         raise typer.Exit(1) from e
+
+    # Find line numbers for patterns if requested
+    line_info = _find_pattern_lines(code) if show_lines or suggest_diff else {}
 
     # Run analysis
     report = analyzer.analyze(
@@ -87,11 +118,19 @@ def analyze(
 
     # Output based on format
     if output == "json":
-        print(json.dumps(report.to_dict(), indent=2, default=str))
+        # Enrich with line info if available
+        result = report.to_dict()
+        if line_info:
+            result["line_info"] = line_info
+        print(json.dumps(result, indent=2, default=str))
     elif output == "brief":
         _print_brief(report)
     else:
-        _print_table(report, show_templates)
+        _print_table(report, show_templates, line_info if show_lines else None)
+
+    # Show diffs if requested
+    if suggest_diff and report.recommendations:
+        _print_suggested_diffs(code, str(file), report, line_info)
 
 
 def _print_brief(report: AnalysisReport) -> None:
@@ -111,7 +150,9 @@ def _print_brief(report: AnalysisReport) -> None:
         )
 
 
-def _print_table(report: AnalysisReport, show_templates: bool = False) -> None:
+def _print_table(
+    report: AnalysisReport, show_templates: bool = False, line_info: dict | None = None
+) -> None:
     """Print formatted table with recommendations."""
     # Header panel
     console.print(
@@ -167,13 +208,148 @@ def _print_table(report: AnalysisReport, show_templates: bool = False) -> None:
     if report.context.detected_issues:
         console.print("\n[bold yellow]⚠️  Detected Issues:[/bold yellow]")
         for issue in report.context.detected_issues:
-            console.print(f"  • {issue}")
+            lines_str = ""
+            if line_info:
+                # Find relevant lines for this issue
+                if "API calls" in issue and "api_calls" in line_info:
+                    lines_str = (
+                        f" (lines: {', '.join(map(str, line_info['api_calls'][:3]))})"
+                    )
+                elif "Async" in issue and "async_operations" in line_info:
+                    lines_str = f" (lines: {', '.join(map(str, line_info['async_operations'][:3]))})"
+            console.print(f"  • {issue}{lines_str}")
 
     # Show optimization opportunities
     if report.context.optimization_opportunities:
         console.print("\n[bold green]💡 Optimization Opportunities:[/bold green]")
         for opp in report.context.optimization_opportunities:
-            console.print(f"  • {opp}")
+            lines_str = ""
+            if line_info and "API calls" in opp and "api_calls" in line_info:
+                lines_str = (
+                    f" (lines: {', '.join(map(str, line_info['api_calls'][:5]))})"
+                )
+            console.print(f"  • {opp}{lines_str}")
+
+
+def _find_pattern_lines(code: str) -> dict[str, list[int]]:
+    """Find line numbers for different patterns in the code."""
+    lines = code.split("\n")
+    result: dict[str, list[int]] = {
+        "api_calls": [],
+        "async_operations": [],
+        "error_handling": [],
+        "llm_patterns": [],
+        "for_loops": [],
+    }
+
+    api_patterns = re.compile(r"(requests\.|httpx\.|aiohttp|\.get\(|\.post\(|fetch\()")
+    async_patterns = re.compile(r"(async def|await\s)")
+    error_patterns = re.compile(r"(try:|except\s|raise\s)")
+    llm_patterns = re.compile(
+        r"(openai|anthropic|chat.*completion|llm|gpt|claude)", re.IGNORECASE
+    )
+    for_patterns = re.compile(r"^\s*for\s+\w+\s+in\s+")
+
+    for i, line in enumerate(lines, 1):
+        if api_patterns.search(line):
+            result["api_calls"].append(i)
+        if async_patterns.search(line):
+            result["async_operations"].append(i)
+        if error_patterns.search(line):
+            result["error_handling"].append(i)
+        if llm_patterns.search(line):
+            result["llm_patterns"].append(i)
+        if for_patterns.search(line):
+            result["for_loops"].append(i)
+
+    return {k: v for k, v in result.items() if v}  # Only return non-empty
+
+
+def _print_suggested_diffs(
+    code: str,
+    file_path: str,
+    report: AnalysisReport,
+    line_info: dict[str, list[int]],
+) -> None:
+    """Print suggested code transformations."""
+    console.print("\n[bold blue]📝 Suggested Transformations:[/bold blue]")
+
+    # Get top recommendation
+    top_rec = report.recommendations[0] if report.recommendations else None
+    if not top_rec:
+        return
+
+    # For parallelization suggestions
+    if "api_calls" in line_info and len(line_info["api_calls"]) >= 2:
+        if any("Parallel" in rec.primitive_name for rec in report.recommendations):
+            console.print("\n[cyan]Parallelization suggestion:[/cyan]")
+            console.print(
+                f"  Lines {line_info['api_calls']} contain API calls that could run concurrently."
+            )
+            console.print("\n[dim]Before:[/dim]")
+            _print_code_context(code, line_info["api_calls"][:2], context=1)
+            console.print("\n[dim]After (using ParallelPrimitive):[/dim]")
+            parallel_code = """from tta_dev_primitives import ParallelPrimitive, WorkflowContext
+
+# Wrap your API calls as primitives
+workflow = ParallelPrimitive([
+    api_call_1,  # These will run concurrently
+    api_call_2,
+    api_call_3,
+])
+
+# Execute all in parallel
+context = WorkflowContext(workflow_id="parallel-api")
+results = await workflow.execute(input_data, context)"""
+            console.print(
+                Syntax(parallel_code, "python", theme="monokai", line_numbers=False)
+            )
+
+    # For retry suggestions
+    if top_rec.primitive_name == "RetryPrimitive" and "api_calls" in line_info:
+        console.print("\n[cyan]Retry wrapper suggestion:[/cyan]")
+        console.print(
+            f"  API calls at lines {line_info['api_calls'][:3]} should be wrapped with retry logic."
+        )
+        if top_rec.code_template:
+            console.print(
+                Syntax(
+                    top_rec.code_template, "python", theme="monokai", line_numbers=False
+                )
+            )
+
+    # For circuit breaker
+    if top_rec.primitive_name == "CircuitBreakerPrimitive":
+        console.print("\n[cyan]Circuit breaker suggestion:[/cyan]")
+        console.print(
+            "  Multiple error handlers detected. Consider wrapping with CircuitBreakerPrimitive."
+        )
+        if top_rec.code_template:
+            console.print(
+                Syntax(
+                    top_rec.code_template, "python", theme="monokai", line_numbers=False
+                )
+            )
+
+
+def _print_code_context(code: str, line_numbers: list[int], context: int = 2) -> None:
+    """Print code snippets around specified line numbers."""
+    lines = code.split("\n")
+    printed = set()
+
+    for line_num in line_numbers:
+        start = max(0, line_num - context - 1)
+        end = min(len(lines), line_num + context)
+
+        if start in printed:
+            continue
+
+        snippet = "\n".join(
+            f"{i + 1:3d} | {lines[i]}" for i in range(start, end) if i not in printed
+        )
+        if snippet:
+            console.print(f"[dim]{snippet}[/dim]")
+            printed.update(range(start, end))
 
 
 @app.command()

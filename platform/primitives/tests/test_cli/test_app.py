@@ -180,6 +180,64 @@ class TestAnalyzeCommand:
         output = result.stdout.lower()
         assert "primitive" in output or "recommendation" in output
 
+    def test_analyze_quiet_flag(
+        self, runner: CliRunner, sample_code_file: Path
+    ) -> None:
+        """Verify --quiet suppresses debug logs."""
+        result = runner.invoke(app, ["analyze", str(sample_code_file), "--quiet"])
+        assert result.exit_code == 0
+        # Should not have debug logs
+        assert "[debug]" not in result.stdout.lower()
+
+    def test_analyze_lines_flag(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
+        """Verify --lines shows line numbers for issues."""
+        result = runner.invoke(
+            app, ["analyze", str(complex_code_file), "--lines", "--quiet"]
+        )
+        assert result.exit_code == 0
+        # Should show line numbers in issues/opportunities
+        output = result.stdout
+        # Line numbers appear as "(lines: X, Y, Z)"
+        assert "lines:" in output.lower() or "line" in output.lower()
+
+    def test_analyze_suggest_diff_flag(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
+        """Verify --suggest-diff shows transformation suggestions."""
+        result = runner.invoke(
+            app, ["analyze", str(complex_code_file), "--suggest-diff", "--quiet"]
+        )
+        assert result.exit_code == 0
+        # Should show suggested transformations
+        output = result.stdout
+        assert "Suggested" in output or "suggestion" in output.lower()
+
+    def test_analyze_json_with_lines(
+        self, runner: CliRunner, complex_code_file: Path
+    ) -> None:
+        """Verify JSON output includes line_info when --lines is used."""
+        result = runner.invoke(
+            app,
+            [
+                "analyze",
+                str(complex_code_file),
+                "--output",
+                "json",
+                "--lines",
+                "--quiet",
+            ],
+        )
+        assert result.exit_code == 0
+        # Extract JSON
+        output = result.stdout
+        json_start = output.find("{")
+        assert json_start >= 0
+        data = json.loads(output[json_start:])
+        # Should have line_info
+        assert "line_info" in data
+
 
 class TestPrimitivesCommand:
     """Tests for the primitives command."""
