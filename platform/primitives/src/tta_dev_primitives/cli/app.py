@@ -992,9 +992,17 @@ def _generate_transformation(
     code: str, primitive: str, targets: list[dict], info: dict
 ) -> str:
     """Generate transformed code."""
-    # For CompensationPrimitive, use AST transformer for smarter extraction
+    # Use AST transformer for smarter extraction on specific primitives
     if primitive == "CompensationPrimitive":
         return _generate_compensation_transformation(code, targets, info)
+    if primitive == "TimeoutPrimitive":
+        return _generate_timeout_transformation(code, targets, info)
+    if primitive == "FallbackPrimitive":
+        return _generate_fallback_transformation(code, targets, info)
+    if primitive == "RouterPrimitive":
+        return _generate_router_transformation(code, targets, info)
+    if primitive == "CircuitBreakerPrimitive":
+        return _generate_circuit_breaker_transformation(code, targets, info)
 
     import_path = info.get("import_path", f"from tta_dev_primitives import {primitive}")
     lines = code.split("\n")
@@ -1292,6 +1300,276 @@ def _generate_compensation_transformation(
     lines.append(f"# TODO: Extract forward and compensation logic from {func_names[0]}")
     lines.append("# See CompensationPrimitive documentation for saga pattern")
 
+    return "\n".join(lines)
+
+
+def _generate_timeout_transformation(code: str, targets: list[dict], info: dict) -> str:
+    """Generate smart TimeoutPrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import TimeoutDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = _find_import_index(lines)
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives.recovery import TimeoutPrimitive"
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Parse code to extract actual timeout patterns
+    try:
+        tree = ast.parse(code)
+        detector = TimeoutDetector()
+        detector.visit(tree)
+
+        if detector.timeout_calls:
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            for call_info in detector.timeout_calls:
+                func_name = call_info.get("function", "operation")
+                timeout = call_info.get("timeout", 30)
+
+                wrapper_parts.append(f"""
+# Extracted from asyncio.wait_for - actual timeout: {timeout}s
+{func_name}_with_timeout = TimeoutPrimitive(
+    primitive={func_name},
+    timeout_seconds={timeout},
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="timeout-{func_name}")
+# result = await {func_name}_with_timeout.execute(data, context)
+""")
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template
+    return _fallback_template_transformation(
+        code, lines, targets, info, "TimeoutPrimitive"
+    )
+
+
+def _generate_fallback_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
+    """Generate smart FallbackPrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import FallbackDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = _find_import_index(lines)
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives.recovery import FallbackPrimitive"
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Parse code to extract actual fallback patterns
+    try:
+        tree = ast.parse(code)
+        detector = FallbackDetector()
+        detector.visit(tree)
+
+        if detector.fallback_patterns:
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            for pattern in detector.fallback_patterns:
+                primary = pattern.get("primary", "primary_func")
+                fallback = pattern.get("fallback", "fallback_func")
+                func_name = pattern.get(
+                    "function", targets[0]["name"] if targets else "operation"
+                )
+
+                wrapper_parts.append(f"""
+# Extracted from try/except pattern
+# Primary: {primary}, Fallback: {fallback}
+{func_name}_resilient = FallbackPrimitive(
+    primary={primary},
+    fallbacks=[{fallback}],
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="fallback-{func_name}")
+# result = await {func_name}_resilient.execute(data, context)
+""")
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template
+    return _fallback_template_transformation(
+        code, lines, targets, info, "FallbackPrimitive"
+    )
+
+
+def _generate_router_transformation(code: str, targets: list[dict], info: dict) -> str:
+    """Generate smart RouterPrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import RouterPatternDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = _find_import_index(lines)
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives.core import RouterPrimitive"
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Parse code to extract actual router patterns
+    try:
+        tree = ast.parse(code)
+        detector = RouterPatternDetector()
+        detector.visit(tree)
+
+        if detector.router_patterns:
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            for pattern in detector.router_patterns:
+                routes = pattern.get("routes", {})
+                variable = pattern.get("variable", "provider")
+                func_name = pattern.get(
+                    "function", targets[0]["name"] if targets else "router"
+                )
+
+                if routes:
+                    routes_str = ",\n        ".join(
+                        [f'"{k}": {v}' for k, v in routes.items()]
+                    )
+                    default_key = list(routes.keys())[0] if routes else "default"
+
+                    wrapper_parts.append(f'''
+# Extracted from if/elif chain - routes: {list(routes.keys())}
+{func_name}_router = RouterPrimitive(
+    routes={{
+        {routes_str}
+    }},
+    router_fn=lambda data, ctx: data.get("{variable}", "{default_key}"),
+    default="{default_key}"
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="router-{func_name}")
+# result = await {func_name}_router.execute({{"{variable}": "value", ...}}, context)
+''')
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template
+    return _fallback_template_transformation(
+        code, lines, targets, info, "RouterPrimitive"
+    )
+
+
+def _generate_circuit_breaker_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
+    """Generate smart CircuitBreakerPrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import CircuitBreakerDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = _find_import_index(lines)
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives.recovery import CircuitBreakerPrimitive"
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Parse code to extract circuit breaker patterns
+    try:
+        tree = ast.parse(code)
+        detector = CircuitBreakerDetector()
+        detector.visit(tree)
+
+        if detector.circuit_patterns:
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            for pattern in detector.circuit_patterns:
+                func_name = pattern.get("name", "operation")
+                exception_count = pattern.get("exception_count", 2)
+
+                # Calculate reasonable thresholds based on exception count
+                failure_threshold = max(3, exception_count + 2)
+
+                wrapper_parts.append(f"""
+# Extracted from function with {exception_count} exception handlers
+# Circuit breaker protects against cascading failures
+{func_name}_protected = CircuitBreakerPrimitive(
+    primitive={func_name},
+    failure_threshold={failure_threshold},      # Open after {failure_threshold} failures
+    recovery_timeout=60,       # Wait 60s before half-open
+    expected_successes=2,      # 2 successes to close
+)
+
+# Usage:
+# context = WorkflowContext(workflow_id="circuit-{func_name}")
+# result = await {func_name}_protected.execute(data, context)
+""")
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template
+    return _fallback_template_transformation(
+        code, lines, targets, info, "CircuitBreakerPrimitive"
+    )
+
+
+def _find_import_index(lines: list[str]) -> int:
+    """Find the index where imports should be inserted."""
+    import_idx = 0
+    for i, line in enumerate(lines):
+        if line.startswith("import ") or line.startswith("from "):
+            import_idx = i + 1
+        elif line.strip() and not line.startswith("#") and import_idx > 0:
+            break
+    return import_idx
+
+
+def _fallback_template_transformation(
+    code: str, lines: list[str], targets: list[dict], info: dict, primitive: str
+) -> str:
+    """Fallback to simple template-based transformation."""
+    func_names = [t["name"] for t in targets]
+    is_async = any(t["is_async"] for t in targets)
+    wrapper_code = _generate_wrapper_code(primitive, targets, info)
+    lines.append("")
+    lines.append("# --- TTA.dev Transformation ---")
+    lines.append(wrapper_code)
     return "\n".join(lines)
 
 

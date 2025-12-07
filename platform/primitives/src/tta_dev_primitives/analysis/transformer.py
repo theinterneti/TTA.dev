@@ -1123,6 +1123,19 @@ class TimeoutDetector(ast.NodeVisitor):
 
     def __init__(self) -> None:
         self.timeout_calls: list[dict[str, Any]] = []
+        self._current_function: str | None = None
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        old_func = self._current_function
+        self._current_function = node.name
+        self.generic_visit(node)
+        self._current_function = old_func
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        old_func = self._current_function
+        self._current_function = node.name
+        self.generic_visit(node)
+        self._current_function = old_func
 
     def visit_Await(self, node: ast.Await) -> None:
         if isinstance(node.value, ast.Call):
@@ -1133,15 +1146,28 @@ class TimeoutDetector(ast.NodeVisitor):
                     if isinstance(call.func.value, ast.Name):
                         if call.func.value.id == "asyncio":
                             timeout = None
+                            wrapped_func = "operation"
+
+                            # Extract timeout
                             for kw in call.keywords:
                                 if kw.arg == "timeout":
                                     if isinstance(kw.value, ast.Constant):
                                         timeout = kw.value.value
+
+                            # Extract wrapped function name
+                            if call.args and isinstance(call.args[0], ast.Call):
+                                if isinstance(call.args[0].func, ast.Name):
+                                    wrapped_func = call.args[0].func.id
+                                elif isinstance(call.args[0].func, ast.Attribute):
+                                    wrapped_func = call.args[0].func.attr
+
                             self.timeout_calls.append(
                                 {
                                     "node": node,
                                     "timeout": timeout,
                                     "lineno": node.lineno,
+                                    "function": wrapped_func,
+                                    "parent_function": self._current_function,
                                 }
                             )
         self.generic_visit(node)
@@ -1187,32 +1213,65 @@ class FallbackDetector(ast.NodeVisitor):
 
     def __init__(self) -> None:
         self.fallback_patterns: list[dict[str, Any]] = []
+        self._current_function: str | None = None
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        old_func = self._current_function
+        self._current_function = node.name
+        self.generic_visit(node)
+        self._current_function = old_func
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        old_func = self._current_function
+        self._current_function = node.name
+        self.generic_visit(node)
+        self._current_function = old_func
 
     def visit_Try(self, node: ast.Try) -> None:
         # Check for: try: return x except: return y
-        has_try_return = False
-        has_except_return = False
-
-        for stmt in node.body:
-            if isinstance(stmt, ast.Return):
-                has_try_return = True
-                break
+        primary_func = self._extract_return_func(node.body)
+        fallback_func = None
 
         for handler in node.handlers:
-            for stmt in handler.body:
-                if isinstance(stmt, ast.Return):
-                    has_except_return = True
-                    break
+            fallback_func = self._extract_return_func(handler.body)
+            if fallback_func:
+                break
 
-        if has_try_return and has_except_return:
+        if primary_func and fallback_func:
             self.fallback_patterns.append(
                 {
                     "node": node,
                     "lineno": node.lineno,
+                    "primary": primary_func,
+                    "fallback": fallback_func,
+                    "function": self._current_function,
                 }
             )
 
         self.generic_visit(node)
+
+    def _extract_return_func(self, body: list[ast.stmt]) -> str | None:
+        """Extract function name from return statement."""
+        for stmt in body:
+            if isinstance(stmt, ast.Return) and stmt.value:
+                return self._extract_func_name(stmt.value)
+        return None
+
+    def _extract_func_name(self, node: ast.expr) -> str | None:
+        """Extract function name from expression."""
+        if isinstance(node, ast.Await) and isinstance(node.value, ast.Call):
+            return self._get_call_name(node.value)
+        elif isinstance(node, ast.Call):
+            return self._get_call_name(node)
+        return None
+
+    def _get_call_name(self, call: ast.Call) -> str | None:
+        """Get the function name from a Call node."""
+        if isinstance(call.func, ast.Name):
+            return call.func.id
+        elif isinstance(call.func, ast.Attribute):
+            return call.func.attr
+        return None
 
 
 class GatherDetector(ast.NodeVisitor):
@@ -1245,28 +1304,44 @@ class RouterPatternDetector(ast.NodeVisitor):
 
     def __init__(self) -> None:
         self.router_patterns: list[dict[str, Any]] = []
+        self._current_function: str | None = None
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        old_func = self._current_function
+        self._current_function = node.name
+        self.generic_visit(node)
+        self._current_function = old_func
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        old_func = self._current_function
+        self._current_function = node.name
+        self.generic_visit(node)
+        self._current_function = old_func
 
     def visit_If(self, node: ast.If) -> None:
-        routes = self._extract_routes(node)
+        routes, variable = self._extract_routes(node)
         if len(routes) >= 2:
             self.router_patterns.append(
                 {
                     "node": node,
                     "routes": routes,
                     "lineno": node.lineno,
+                    "variable": variable,
+                    "function": self._current_function,
                 }
             )
         self.generic_visit(node)
 
-    def _extract_routes(self, node: ast.If) -> dict[str, str]:
+    def _extract_routes(self, node: ast.If) -> tuple[dict[str, str], str]:
         """Extract routes from if/elif chain."""
         routes = {}
+        variable = "key"
 
         # Check if condition is: var == "value"
         if isinstance(node.test, ast.Compare):
             if len(node.test.ops) == 1 and isinstance(node.test.ops[0], ast.Eq):
                 if isinstance(node.test.left, ast.Name):
-                    var_name = node.test.left.id
+                    variable = node.test.left.id
                     if isinstance(node.test.comparators[0], ast.Constant):
                         key = str(node.test.comparators[0].value)
                         # Get the return/call in body
@@ -1285,9 +1360,10 @@ class RouterPatternDetector(ast.NodeVisitor):
         # Check elif chains
         for elif_node in node.orelse:
             if isinstance(elif_node, ast.If):
-                routes.update(self._extract_routes(elif_node))
+                elif_routes, _ = self._extract_routes(elif_node)
+                routes.update(elif_routes)
 
-        return routes
+        return routes, variable
 
 
 class CircuitBreakerDetector(ast.NodeVisitor):
