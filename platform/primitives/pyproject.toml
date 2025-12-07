@@ -1,6 +1,6 @@
 [project]
 name = "tta-dev-primitives"
-version = "1.0.0"
+version = "1.2.0"
 description = "Production-ready development primitives for TTA - workflow patterns, recovery, observability, and testing utilities"
 authors = [{ name = "TTA Development Team" }]
 readme = "README.md"

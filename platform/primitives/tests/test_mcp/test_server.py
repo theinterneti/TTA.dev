@@ -95,7 +95,9 @@ def risky():
     @pytest.mark.asyncio
     async def test_analyze_with_file_path(self, analyze_tool) -> None:
         """Verify file_path parameter works."""
-        result = await analyze_tool.fn(code="def test(): pass", file_path="api_client.py")
+        result = await analyze_tool.fn(
+            code="def test(): pass", file_path="api_client.py"
+        )
         assert result is not None
 
     @pytest.mark.asyncio
@@ -291,20 +293,26 @@ class TestGetCompositionExampleTool:
     @pytest.mark.asyncio
     async def test_compose_returns_dict(self, compose_tool) -> None:
         """Verify get_composition_example returns a dict."""
-        result = await compose_tool.fn(primitives=["RetryPrimitive", "TimeoutPrimitive"])
+        result = await compose_tool.fn(
+            primitives=["RetryPrimitive", "TimeoutPrimitive"]
+        )
         assert isinstance(result, dict)
 
     @pytest.mark.asyncio
     async def test_compose_has_code(self, compose_tool) -> None:
         """Verify result has code."""
-        result = await compose_tool.fn(primitives=["RetryPrimitive", "TimeoutPrimitive"])
+        result = await compose_tool.fn(
+            primitives=["RetryPrimitive", "TimeoutPrimitive"]
+        )
         assert "code" in result
         assert len(result["code"]) > 0
 
     @pytest.mark.asyncio
     async def test_compose_has_explanation(self, compose_tool) -> None:
         """Verify result has explanation."""
-        result = await compose_tool.fn(primitives=["RetryPrimitive", "TimeoutPrimitive"])
+        result = await compose_tool.fn(
+            primitives=["RetryPrimitive", "TimeoutPrimitive"]
+        )
         assert "explanation" in result
 
     @pytest.mark.asyncio
@@ -366,7 +374,9 @@ async def fetch():
 
         # Get info for first primitive
         first_primitive = list_result[0]["name"]
-        info_result = await tools["get_primitive_info"].fn(primitive_name=first_primitive)
+        info_result = await tools["get_primitive_info"].fn(
+            primitive_name=first_primitive
+        )
         assert info_result["name"] == first_primitive
 
     @pytest.mark.asyncio
@@ -386,10 +396,14 @@ async def fetch():
         analyze_result = await tools["analyze_code"].fn(code=code)
 
         # Get top 2 recommendations
-        primitives = [r["primitive_name"] for r in analyze_result["recommendations"][:2]]
+        primitives = [
+            r["primitive_name"] for r in analyze_result["recommendations"][:2]
+        ]
         if len(primitives) >= 2:
             # Compose them
-            compose_result = await tools["get_composition_example"].fn(primitives=primitives)
+            compose_result = await tools["get_composition_example"].fn(
+                primitives=primitives
+            )
             assert "code" in compose_result
 
 
@@ -446,7 +460,9 @@ async def fetch_data(url: str):
     @pytest.mark.asyncio
     async def test_transform_unknown_primitive(self, transform_tool) -> None:
         """Verify transform handles unknown primitive."""
-        result = await transform_tool.fn(code="def test(): pass", primitive="UnknownPrimitive")
+        result = await transform_tool.fn(
+            code="def test(): pass", primitive="UnknownPrimitive"
+        )
         assert "error" in result
 
     @pytest.mark.asyncio
@@ -495,7 +511,9 @@ async def fetch_api(): pass
         assert "analysis" in result
 
     @pytest.mark.asyncio
-    async def test_analyze_fix_applies_specific_primitive(self, analyze_fix_tool) -> None:
+    async def test_analyze_fix_applies_specific_primitive(
+        self, analyze_fix_tool
+    ) -> None:
         """Verify can apply specific primitive."""
         code = """
 import httpx
@@ -656,6 +674,7 @@ class TestRunServer:
         """Verify run_server handles missing MCP package."""
         import sys
         from io import StringIO
+
         from tta_dev_primitives.mcp_server import server as server_module
 
         # Temporarily set MCP_AVAILABLE to False
@@ -675,6 +694,7 @@ class TestRunServer:
         """Verify run_server handles unknown transport."""
         import sys
         from io import StringIO
+
         from tta_dev_primitives.mcp_server import server as server_module
 
         # Ensure MCP is available
@@ -697,6 +717,7 @@ class TestRunServer:
     def test_main_parses_args(self, monkeypatch) -> None:
         """Verify main() parses command line arguments."""
         import sys
+
         from tta_dev_primitives.mcp_server import server as server_module
 
         # Track what run_server was called with
@@ -707,7 +728,9 @@ class TestRunServer:
             called_with["port"] = port
 
         monkeypatch.setattr(server_module, "run_server", mock_run_server)
-        monkeypatch.setattr(sys, "argv", ["tta-dev-mcp", "--transport", "sse", "--port", "9000"])
+        monkeypatch.setattr(
+            sys, "argv", ["tta-dev-mcp", "--transport", "sse", "--port", "9000"]
+        )
 
         server_module.main()
 
@@ -717,6 +740,7 @@ class TestRunServer:
     def test_main_default_args(self, monkeypatch) -> None:
         """Verify main() uses default arguments."""
         import sys
+
         from tta_dev_primitives.mcp_server import server as server_module
 
         called_with = {}

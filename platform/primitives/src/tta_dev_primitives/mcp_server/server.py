@@ -222,11 +222,12 @@ result = await workflow.execute(data, context)
             - wrapped_functions: List of functions that were wrapped
             - diff: Unified diff showing changes
         """
+        import difflib
+
         from tta_dev_primitives.cli.app import (
             _find_transform_targets,
             _generate_transformation,
         )
-        import difflib
 
         logger.info(
             "mcp_tool_called",
@@ -252,12 +253,14 @@ result = await workflow.execute(data, context)
         transformed = _generate_transformation(code, primitive, targets, info)
 
         # Generate diff
-        diff = list(difflib.unified_diff(
-            code.splitlines(keepends=True),
-            transformed.splitlines(keepends=True),
-            fromfile="original",
-            tofile="transformed",
-        ))
+        diff = list(
+            difflib.unified_diff(
+                code.splitlines(keepends=True),
+                transformed.splitlines(keepends=True),
+                fromfile="original",
+                tofile="transformed",
+            )
+        )
 
         return {
             "transformed_code": transformed,
@@ -410,13 +413,15 @@ result = await workflow.execute(data, context)
         # Top fixes
         top_fixes = []
         for rec in report.recommendations[:max_suggestions]:
-            top_fixes.append({
-                "primitive": rec.primitive_name,
-                "confidence": f"{rec.confidence_score:.0%}",
-                "reasoning": rec.reasoning,
-                "import": rec.import_path,
-                "template": rec.code_template,
-            })
+            top_fixes.append(
+                {
+                    "primitive": rec.primitive_name,
+                    "confidence": f"{rec.confidence_score:.0%}",
+                    "reasoning": rec.reasoning,
+                    "import": rec.import_path,
+                    "template": rec.code_template,
+                }
+            )
 
         return {
             "issues": issues_with_lines,

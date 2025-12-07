@@ -5,6 +5,81 @@ All notable changes to TTA.dev will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-06
+
+### Added
+
+#### 🤖 Agent-Friendly CLI
+
+**CLI optimized for AI agent workflows with machine-parseable output:**
+
+- **`--quiet` flag** - Suppresses debug logs, returns only structured JSON
+- **`--lines` flag** - Includes exact line numbers for each detected pattern
+- **`--suggest-diff` flag** - Shows actionable transformation suggestions
+- **`--apply` flag** - Automatically transforms ALL detected anti-patterns
+- **`--apply-primitive NAME` flag** - Transforms specific primitive type only
+
+**New Commands:**
+- **`tta-dev transform`** - Direct code transformation command
+  - `--code` / `--file` - Input source
+  - `--to` - Target primitive to transform to
+  - `--write` - Write transformation to file
+
+**Usage Examples:**
+```bash
+# Agent workflow: analyze with line numbers, quiet
+tta-dev analyze code.py --lines --quiet
+
+# Auto-fix all patterns
+tta-dev analyze code.py --apply --quiet
+
+# Transform specific pattern
+tta-dev transform --file code.py --to RetryPrimitive
+```
+
+#### 🔧 Enhanced MCP Server
+
+**Three new MCP tools for AI agent integration:**
+
+- **`transform_code`** - Transform code snippets to use TTA.dev primitives
+  - Input: code snippet + target primitive
+  - Output: transformed code with proper imports
+
+- **`analyze_and_fix`** - Analyze code and return fixed version
+  - Input: code snippet + optional primitive filter
+  - Output: analysis + automatically transformed code
+
+- **`suggest_fixes`** - Get actionable fix suggestions
+  - Input: code snippet
+  - Output: list of suggestions with line numbers and diffs
+
+**VS Code Integration:**
+```json
+{
+  "mcp": {
+    "servers": {
+      "tta-dev": {
+        "command": "uv",
+        "args": ["run", "tta-dev-mcp"],
+        "cwd": "/path/to/TTA.dev/platform/primitives"
+      }
+    }
+  }
+}
+```
+
+### Changed
+
+- Improved pattern detection with exact line number tracking
+- Better error messages for transformation failures
+- CLI output now JSON-parseable when using `--quiet`
+
+### Testing
+
+- **117 tests passing** (52 CLI + 65 MCP)
+- All transformations validated with real code samples
+- Agent workflow integration tests added
+
 ## [1.1.0] - 2025-11-17
 
 ### Added
