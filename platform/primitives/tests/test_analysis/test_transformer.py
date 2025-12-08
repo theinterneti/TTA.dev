@@ -1441,7 +1441,10 @@ async def adaptive_retry(func):
         assert len(detector.adaptive_patterns) >= 1
         pattern = detector.adaptive_patterns[0]
         assert pattern["type"] == "metric_based_adjustment"
-        assert "success_count" in pattern["counter_vars"] or "failure_count" in pattern["counter_vars"]
+        assert (
+            "success_count" in pattern["counter_vars"]
+            or "failure_count" in pattern["counter_vars"]
+        )
 
     def test_detect_strategy_config(self) -> None:
         """Test detection of strategy dictionaries with metrics."""

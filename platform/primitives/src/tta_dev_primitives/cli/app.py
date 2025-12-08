@@ -1007,6 +1007,10 @@ def _generate_transformation(
         return _generate_memory_transformation(code, targets, info)
     if primitive == "DelegationPrimitive":
         return _generate_delegation_transformation(code, targets, info)
+    if primitive == "SequentialPrimitive":
+        return _generate_sequential_transformation(code, targets, info)
+    if primitive == "AdaptivePrimitive":
+        return _generate_adaptive_transformation(code, targets, info)
 
     import_path = info.get("import_path", f"from tta_dev_primitives import {primitive}")
     lines = code.split("\n")
@@ -1799,6 +1803,253 @@ delegation = DelegationPrimitive()
     # Fallback to template
     return _fallback_template_transformation(
         code, lines, targets, info, "DelegationPrimitive"
+    )
+
+
+def _generate_sequential_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
+    """Generate smart SequentialPrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import SequentialDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = _find_import_index(lines)
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives import SequentialPrimitive"
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(import_idx + 2, "")
+
+    # Parse code to extract sequential patterns
+    try:
+        tree = ast.parse(code)
+        detector = SequentialDetector()
+        detector.visit(tree)
+
+        if detector.sequential_patterns:
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            for pattern in detector.sequential_patterns:
+                steps = pattern["steps"]
+                step_count = pattern["step_count"]
+                func_name = pattern.get("parent_function", "pipeline")
+                is_async = pattern.get("is_async", True)
+                pattern_type = pattern["type"]
+
+                steps_str = ", ".join(steps)
+                async_kw = "async " if is_async else ""
+                await_kw = "await " if is_async else ""
+
+                if pattern_type == "nested_calls":
+                    wrapper_parts.append(f"""
+# Extracted nested call chain: {steps_str}
+# {step_count} steps detected → Use SequentialPrimitive for:
+# - Step-level observability (traces per step)
+# - Error handling with context
+# - Easy debugging and profiling
+
+# Convert each step to a primitive
+# step1 = WrapperPrimitive({steps[0]})
+# step2 = WrapperPrimitive({steps[1] if len(steps) > 1 else "step2"})
+# ...
+
+# Compose with >> operator
+{func_name}_workflow = {" >> ".join(steps[:3])}{"..." if len(steps) > 3 else ""}
+
+# Or explicit composition:
+# {func_name}_workflow = SequentialPrimitive([{steps_str}])
+
+{async_kw}def {func_name}_sequential(data: dict):
+    \"\"\"Execute {step_count}-step pipeline with full observability.\"\"\"
+    context = WorkflowContext(workflow_id="{func_name}-pipeline")
+    return {await_kw}{func_name}_workflow.execute(data, context)
+
+# Usage:
+# result = {await_kw}{func_name}_sequential({{"input": data}})
+""")
+
+                elif pattern_type == "assignment_chain":
+                    wrapper_parts.append(f"""
+# Extracted assignment chain: {steps_str}
+# {step_count} sequential steps → Use SequentialPrimitive for:
+# - Automatic output→input chaining
+# - Step-level metrics and traces
+# - Checkpoint/resume capability
+
+# Wrap each step as a primitive
+class Step1Primitive(WorkflowPrimitive[dict, dict]):
+    {async_kw}def execute(self, data: dict, ctx: WorkflowContext) -> dict:
+        return {await_kw}{steps[0]}(data)
+
+# Compose pipeline
+{func_name}_pipeline = SequentialPrimitive([
+    # {steps[0]},
+    # {steps[1] if len(steps) > 1 else "step2"},
+    # ...add wrapped primitives
+])
+
+# Or use >> operator for cleaner syntax:
+# {func_name}_pipeline = step1 >> step2 >> step3
+
+{async_kw}def {func_name}_workflow(input_data):
+    \"\"\"Execute {step_count}-step sequential workflow.\"\"\"
+    context = WorkflowContext(workflow_id="{func_name}")
+    return {await_kw}{func_name}_pipeline.execute(input_data, context)
+
+# Usage:
+# result = {await_kw}{func_name}_workflow(initial_data)
+""")
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template
+    return _fallback_template_transformation(
+        code, lines, targets, info, "SequentialPrimitive"
+    )
+
+
+def _generate_adaptive_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
+    """Generate smart AdaptivePrimitive transformation using AST analysis."""
+    import ast
+
+    from tta_dev_primitives.analysis.transformer import AdaptiveDetector
+
+    lines = code.split("\n")
+
+    # Add imports
+    import_idx = _find_import_index(lines)
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives.adaptive import AdaptivePrimitive"
+    )
+    if import_path not in code:
+        lines.insert(import_idx, import_path)
+        lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
+        lines.insert(
+            import_idx + 2, "from tta_dev_primitives.adaptive import LearningMode"
+        )
+        lines.insert(import_idx + 3, "")
+
+    # Parse code to extract adaptive patterns
+    try:
+        tree = ast.parse(code)
+        detector = AdaptiveDetector()
+        detector.visit(tree)
+
+        if detector.adaptive_patterns:
+            wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
+
+            for pattern in detector.adaptive_patterns:
+                pattern_type = pattern["type"]
+                func_name = pattern.get("parent_function", "adaptive_operation")
+                is_async = pattern.get("is_async", True)
+                async_kw = "async " if is_async else ""
+                await_kw = "await " if is_async else ""
+
+                if pattern_type == "metric_based_adjustment":
+                    counter_vars = pattern.get("counter_vars", [])
+                    counters_str = ", ".join(counter_vars)
+
+                    wrapper_parts.append(f"""
+# Extracted metric-based adjustment pattern
+# Detected counters: {counters_str}
+#
+# AdaptivePrimitive provides:
+# - Automatic strategy learning from execution patterns
+# - Safe validation before adopting new strategies
+# - Context-aware optimization (prod vs staging)
+# - Logseq integration for strategy persistence
+
+from tta_dev_primitives.adaptive import (
+    AdaptiveRetryPrimitive,
+    LearningStrategy,
+    LogseqStrategyIntegration,
+)
+
+# Setup Logseq integration for strategy persistence (optional)
+logseq = LogseqStrategyIntegration("{func_name}")
+
+# Create adaptive retry with automatic learning
+adaptive_{func_name} = AdaptiveRetryPrimitive(
+    target_primitive=your_operation,  # Wrap your existing operation
+    logseq_integration=logseq,
+    enable_auto_persistence=True,
+    learning_mode=LearningMode.ACTIVE,  # DISABLED, OBSERVE, VALIDATE, ACTIVE
+    min_observations_before_learning=10,
+)
+
+{async_kw}def {func_name}_adaptive(data: dict):
+    \"\"\"Execute with automatic strategy optimization.\"\"\"
+    context = WorkflowContext(workflow_id="{func_name}-adaptive")
+    return {await_kw}adaptive_{func_name}.execute(data, context)
+
+# Check learned strategies:
+# for name, strategy in adaptive_{func_name}.strategies.items():
+#     print(f"{{name}}: {{strategy.metrics.success_rate:.1%}} success")
+""")
+
+                elif pattern_type == "strategy_config":
+                    var = pattern.get("variable", "strategies")
+
+                    wrapper_parts.append(f"""
+# Extracted strategy configuration: {var}
+#
+# AdaptivePrimitive can learn optimal strategy selection:
+# - Tracks success/failure per strategy
+# - Adapts selection based on context
+# - Validates improvements before adoption
+
+from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningStrategy
+
+# Define baseline strategies from your config
+baseline = LearningStrategy(
+    name="default",
+    description="Initial strategy",
+    parameters={var}.get("default", {{}})  # Extract from your config
+)
+
+# Create adaptive primitive that learns from execution
+class Adaptive{var.title()}Primitive(AdaptivePrimitive[dict, dict]):
+    {async_kw}def _execute_with_strategy(
+        self, strategy: LearningStrategy, data: dict, ctx: WorkflowContext
+    ) -> dict:
+        # Use strategy.parameters to configure execution
+        params = strategy.parameters
+        return {await_kw}your_operation(data, **params)
+
+    {async_kw}def _consider_new_strategy(
+        self, data: dict, ctx: WorkflowContext, metrics
+    ) -> LearningStrategy | None:
+        # Return new strategy if current underperforming
+        if metrics.success_rate < 0.8:
+            return LearningStrategy(name="optimized", parameters={{...}})
+        return None
+
+# Usage:
+# adaptive = Adaptive{var.title()}Primitive(baseline_strategy=baseline)
+# result = {await_kw}adaptive.execute(data, context)
+""")
+
+            lines.append("".join(wrapper_parts))
+            return "\n".join(lines)
+
+    except Exception:
+        pass
+
+    # Fallback to template
+    return _fallback_template_transformation(
+        code, lines, targets, info, "AdaptivePrimitive"
     )
 
 

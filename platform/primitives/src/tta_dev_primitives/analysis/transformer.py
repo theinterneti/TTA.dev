@@ -1752,27 +1752,31 @@ class SequentialDetector(ast.NodeVisitor):
         # Check for chains where output becomes input
         if len(assigns) >= 3:
             steps = [a[1] for a in assigns]
-            self.sequential_patterns.append({
-                "type": "assignment_chain",
-                "steps": steps,
-                "parent_function": self._current_function,
-                "is_async": self._current_is_async,
-                "lineno": assigns[0][2],
-                "step_count": len(assigns),
-            })
+            self.sequential_patterns.append(
+                {
+                    "type": "assignment_chain",
+                    "steps": steps,
+                    "parent_function": self._current_function,
+                    "is_async": self._current_is_async,
+                    "lineno": assigns[0][2],
+                    "step_count": len(assigns),
+                }
+            )
 
     def visit_Call(self, node: ast.Call) -> None:
         """Detect nested function calls: step3(step2(step1(data)))."""
         chain = self._extract_call_chain(node)
         if len(chain) >= 3:
-            self.sequential_patterns.append({
-                "type": "nested_calls",
-                "steps": list(reversed(chain)),  # Innermost first
-                "parent_function": self._current_function,
-                "is_async": self._current_is_async,
-                "lineno": node.lineno,
-                "step_count": len(chain),
-            })
+            self.sequential_patterns.append(
+                {
+                    "type": "nested_calls",
+                    "steps": list(reversed(chain)),  # Innermost first
+                    "parent_function": self._current_function,
+                    "is_async": self._current_is_async,
+                    "lineno": node.lineno,
+                    "step_count": len(chain),
+                }
+            )
         self.generic_visit(node)
 
     def _extract_call_chain(self, node: ast.expr) -> list[str]:
@@ -1845,7 +1849,10 @@ class AdaptiveDetector(ast.NodeVisitor):
             if isinstance(stmt, ast.AugAssign):
                 if isinstance(stmt.target, ast.Name):
                     var = stmt.target.id.lower()
-                    if any(kw in var for kw in ["count", "success", "fail", "error", "metric"]):
+                    if any(
+                        kw in var
+                        for kw in ["count", "success", "fail", "error", "metric"]
+                    ):
                         has_counter = True
                         counter_vars.append(stmt.target.id)
 
@@ -1853,20 +1860,25 @@ class AdaptiveDetector(ast.NodeVisitor):
             if isinstance(stmt, ast.If):
                 # Check if condition references counters/rates
                 cond_str = ast.dump(stmt.test)
-                if any(kw in cond_str.lower() for kw in ["rate", "count", "threshold", "metric"]):
+                if any(
+                    kw in cond_str.lower()
+                    for kw in ["rate", "count", "threshold", "metric"]
+                ):
                     # Check if body adjusts parameters
                     for body_stmt in stmt.body:
                         if isinstance(body_stmt, ast.Assign):
                             has_conditional_adjust = True
 
         if has_counter and has_conditional_adjust:
-            self.adaptive_patterns.append({
-                "type": "metric_based_adjustment",
-                "counter_vars": counter_vars,
-                "parent_function": self._current_function,
-                "is_async": self._current_is_async,
-                "lineno": node.lineno,
-            })
+            self.adaptive_patterns.append(
+                {
+                    "type": "metric_based_adjustment",
+                    "counter_vars": counter_vars,
+                    "parent_function": self._current_function,
+                    "is_async": self._current_is_async,
+                    "lineno": node.lineno,
+                }
+            )
 
     def visit_Assign(self, node: ast.Assign) -> None:
         """Detect strategy dictionaries with performance data."""
@@ -1875,7 +1887,9 @@ class AdaptiveDetector(ast.NodeVisitor):
             for target in node.targets:
                 if isinstance(target, ast.Name):
                     var = target.id.lower()
-                    if any(kw in var for kw in ["strateg", "config", "option", "variant"]):
+                    if any(
+                        kw in var for kw in ["strateg", "config", "option", "variant"]
+                    ):
                         # Check if dict values have metrics-like keys
                         has_metrics = False
                         for v in node.value.values:
@@ -1883,18 +1897,28 @@ class AdaptiveDetector(ast.NodeVisitor):
                                 for k in v.keys:
                                     if isinstance(k, ast.Constant):
                                         key_str = str(k.value).lower()
-                                        if any(m in key_str for m in ["rate", "latency", "score", "weight"]):
+                                        if any(
+                                            m in key_str
+                                            for m in [
+                                                "rate",
+                                                "latency",
+                                                "score",
+                                                "weight",
+                                            ]
+                                        ):
                                             has_metrics = True
                                             break
 
                         if has_metrics:
-                            self.adaptive_patterns.append({
-                                "type": "strategy_config",
-                                "variable": target.id,
-                                "parent_function": self._current_function,
-                                "is_async": self._current_is_async,
-                                "lineno": node.lineno,
-                            })
+                            self.adaptive_patterns.append(
+                                {
+                                    "type": "strategy_config",
+                                    "variable": target.id,
+                                    "parent_function": self._current_function,
+                                    "is_async": self._current_is_async,
+                                    "lineno": node.lineno,
+                                }
+                            )
         self.generic_visit(node)
 
 
@@ -2882,9 +2906,7 @@ class CodeTransformer:
             "changes": changes,
         }
 
-    def _transform_sequential_ast(
-        self, code: str, tree: ast.Module
-    ) -> dict[str, Any]:
+    def _transform_sequential_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
         """Transform sequential pipeline patterns into SequentialPrimitive."""
         changes = []
         detector = SequentialDetector()
@@ -2897,14 +2919,16 @@ class CodeTransformer:
         transformed_lines = lines.copy()
 
         for pattern in detector.sequential_patterns:
-            changes.append({
-                "type": "sequential_transform",
-                "pattern_type": pattern["type"],
-                "steps": pattern["steps"],
-                "step_count": pattern["step_count"],
-                "parent_function": pattern["parent_function"],
-                "lineno": pattern["lineno"],
-            })
+            changes.append(
+                {
+                    "type": "sequential_transform",
+                    "pattern_type": pattern["type"],
+                    "steps": pattern["steps"],
+                    "step_count": pattern["step_count"],
+                    "parent_function": pattern["parent_function"],
+                    "lineno": pattern["lineno"],
+                }
+            )
 
         return {
             "changed": bool(changes),
@@ -2912,9 +2936,7 @@ class CodeTransformer:
             "changes": changes,
         }
 
-    def _transform_adaptive_ast(
-        self, code: str, tree: ast.Module
-    ) -> dict[str, Any]:
+    def _transform_adaptive_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
         """Transform adaptive/learning patterns into AdaptivePrimitive."""
         changes = []
         detector = AdaptiveDetector()
@@ -2927,14 +2949,16 @@ class CodeTransformer:
         transformed_lines = lines.copy()
 
         for pattern in detector.adaptive_patterns:
-            changes.append({
-                "type": "adaptive_transform",
-                "pattern_type": pattern["type"],
-                "parent_function": pattern.get("parent_function"),
-                "lineno": pattern["lineno"],
-                "counter_vars": pattern.get("counter_vars", []),
-                "variable": pattern.get("variable"),
-            })
+            changes.append(
+                {
+                    "type": "adaptive_transform",
+                    "pattern_type": pattern["type"],
+                    "parent_function": pattern.get("parent_function"),
+                    "lineno": pattern["lineno"],
+                    "counter_vars": pattern.get("counter_vars", []),
+                    "variable": pattern.get("variable"),
+                }
+            )
 
         return {
             "changed": bool(changes),
