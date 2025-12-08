@@ -1352,3 +1352,207 @@ async def dispatch(task, model):
 
         delegation_import = any("DelegationPrimitive" in imp for imp in imports)
         assert delegation_import
+
+
+class TestSequentialDetector:
+    """Test detection of sequential pipeline patterns."""
+
+    def test_detect_nested_call_chain(self) -> None:
+        """Test detection of nested function calls: step3(step2(step1(data)))."""
+        from tta_dev_primitives.analysis.transformer import SequentialDetector
+
+        code = """
+def process_pipeline(data):
+    return validate(transform(parse(data)))
+"""
+        tree = ast.parse(code)
+        detector = SequentialDetector()
+        detector.visit(tree)
+
+        assert len(detector.sequential_patterns) >= 1
+        pattern = detector.sequential_patterns[0]
+        assert pattern["type"] == "nested_calls"
+        assert len(pattern["steps"]) >= 3
+
+    def test_detect_sequential_assignments(self) -> None:
+        """Test detection of sequential variable assignment chains."""
+        from tta_dev_primitives.analysis.transformer import SequentialDetector
+
+        code = """
+async def process_document(doc):
+    parsed = await parse_document(doc)
+    chunks = await chunk_text(parsed)
+    embeddings = await generate_embeddings(chunks)
+    stored = await store_vectors(embeddings)
+    return stored
+"""
+        tree = ast.parse(code)
+        detector = SequentialDetector()
+        detector.visit(tree)
+
+        assert len(detector.sequential_patterns) >= 1
+        pattern = detector.sequential_patterns[0]
+        assert pattern["type"] == "assignment_chain"
+        assert pattern["step_count"] >= 4
+
+    def test_auto_detect_sequential_pattern(self) -> None:
+        """Test auto-detection finds sequential patterns."""
+        code = """
+async def rag_pipeline(query):
+    embedded = await embed_query(query)
+    retrieved = await search_vectors(embedded)
+    context = await format_context(retrieved)
+    response = await generate_response(context)
+    return response
+"""
+        transformer = CodeTransformer()
+        transforms = transformer._detect_needed_transforms(code)
+
+        assert "SequentialPrimitive" in transforms
+
+
+class TestAdaptiveDetector:
+    """Test detection of adaptive/learning patterns."""
+
+    def test_detect_metric_based_adjustment(self) -> None:
+        """Test detection of counter-based parameter adjustment."""
+        from tta_dev_primitives.analysis.transformer import AdaptiveDetector
+
+        code = """
+async def adaptive_retry(func):
+    success_count = 0
+    failure_count = 0
+    
+    result = await func()
+    if result:
+        success_count += 1
+    else:
+        failure_count += 1
+    
+    rate = success_count / (success_count + failure_count)
+    if rate < 0.5:
+        delay = delay * 2
+    return result
+"""
+        tree = ast.parse(code)
+        detector = AdaptiveDetector()
+        detector.visit(tree)
+
+        assert len(detector.adaptive_patterns) >= 1
+        pattern = detector.adaptive_patterns[0]
+        assert pattern["type"] == "metric_based_adjustment"
+        assert "success_count" in pattern["counter_vars"] or "failure_count" in pattern["counter_vars"]
+
+    def test_detect_strategy_config(self) -> None:
+        """Test detection of strategy dictionaries with metrics."""
+        from tta_dev_primitives.analysis.transformer import AdaptiveDetector
+
+        code = """
+strategies = {
+    "fast": {"model": "gpt-4-mini", "success_rate": 0.9, "latency": 100},
+    "quality": {"model": "gpt-4", "success_rate": 0.95, "latency": 500},
+}
+"""
+        tree = ast.parse(code)
+        detector = AdaptiveDetector()
+        detector.visit(tree)
+
+        assert len(detector.adaptive_patterns) >= 1
+        pattern = detector.adaptive_patterns[0]
+        assert pattern["type"] == "strategy_config"
+        assert pattern["variable"] == "strategies"
+
+    def test_auto_detect_adaptive_pattern(self) -> None:
+        """Test auto-detection finds adaptive patterns."""
+        code = """
+async def smart_llm_call(prompt):
+    success_count = 0
+    error_count = 0
+    
+    try:
+        result = await llm.generate(prompt)
+        success_count += 1
+        return result
+    except:
+        error_count += 1
+        rate = error_count / (success_count + error_count + 1)
+        if rate > 0.3:
+            timeout = timeout * 1.5
+        raise
+"""
+        transformer = CodeTransformer()
+        transforms = transformer._detect_needed_transforms(code)
+
+        assert "AdaptivePrimitive" in transforms
+
+
+class TestSequentialTransformation:
+    """Test transformation of sequential patterns to SequentialPrimitive."""
+
+    def test_transform_sequential_pattern(self) -> None:
+        """Test basic sequential pattern transformation."""
+        code = """
+async def pipeline(data):
+    step1_result = await step1(data)
+    step2_result = await step2(step1_result)
+    step3_result = await step3(step2_result)
+    return step3_result
+"""
+        result = transform_code(code, primitive="SequentialPrimitive")
+        assert result.success
+        assert len(result.changes_made) >= 1
+
+    def test_sequential_transform_adds_import(self) -> None:
+        """Test that transformation adds SequentialPrimitive import."""
+        code = """
+async def process(data):
+    a = await parse(data)
+    b = await transform(a)
+    c = await validate(b)
+    return c
+"""
+        result = transform_code(code, primitive="SequentialPrimitive")
+        imports = result.imports_added
+
+        sequential_import = any("SequentialPrimitive" in imp for imp in imports)
+        assert sequential_import
+
+
+class TestAdaptiveTransformation:
+    """Test transformation of adaptive patterns to AdaptivePrimitive."""
+
+    def test_transform_adaptive_pattern(self) -> None:
+        """Test basic adaptive pattern transformation."""
+        code = """
+async def learning_retry(func):
+    success_count = 0
+    failure_count = 0
+    
+    result = await func()
+    if result:
+        success_count += 1
+    else:
+        failure_count += 1
+    
+    rate = success_count / (success_count + failure_count + 1)
+    if rate < 0.5:
+        max_retries = max_retries + 1
+    return result
+"""
+        result = transform_code(code, primitive="AdaptivePrimitive")
+        assert result.success
+        assert len(result.changes_made) >= 1
+
+    def test_adaptive_transform_adds_import(self) -> None:
+        """Test that transformation adds AdaptivePrimitive import."""
+        code = """
+strategies = {
+    "conservative": {"timeout": 30, "success_rate": 0.8},
+    "aggressive": {"timeout": 10, "success_rate": 0.6},
+}
+"""
+        result = transform_code(code, primitive="AdaptivePrimitive")
+        imports = result.imports_added
+
+        adaptive_import = any("AdaptivePrimitive" in imp for imp in imports)
+        assert adaptive_import

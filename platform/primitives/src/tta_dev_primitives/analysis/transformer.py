@@ -1699,6 +1699,205 @@ class DelegationDetector(ast.NodeVisitor):
         self.generic_visit(node)
 
 
+class SequentialDetector(ast.NodeVisitor):
+    """Detect sequential pipeline patterns.
+
+    Detects:
+    - Chained function calls: result = step3(step2(step1(data)))
+    - Sequential assignments: r1 = step1(data); r2 = step2(r1); r3 = step3(r2)
+    - Pipeline patterns with await chains
+    """
+
+    def __init__(self) -> None:
+        self.sequential_patterns: list[dict[str, Any]] = []
+        self._current_function: str | None = None
+        self._current_is_async: bool = False
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._current_function = node.name
+        self._current_is_async = False
+        self._check_sequential_chain(node)
+        self.generic_visit(node)
+        self._current_function = None
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._current_function = node.name
+        self._current_is_async = True
+        self._check_sequential_chain(node)
+        self.generic_visit(node)
+        self._current_function = None
+
+    def _check_sequential_chain(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> None:
+        """Check for sequential assignment chains."""
+        assigns: list[tuple[str, str, int]] = []  # (target, func_name, lineno)
+
+        for stmt in node.body:
+            if isinstance(stmt, ast.Assign):
+                # r = func(...)
+                if len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name):
+                    target = stmt.targets[0].id
+                    func_name = self._extract_func_name(stmt.value)
+                    if func_name:
+                        assigns.append((target, func_name, stmt.lineno))
+
+            elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Await):
+                # await func(...)
+                if isinstance(stmt.value.value, ast.Call):
+                    func_name = self._extract_func_name(stmt.value.value)
+                    if func_name:
+                        assigns.append(("_", func_name, stmt.lineno))
+
+        # Check for chains where output becomes input
+        if len(assigns) >= 3:
+            steps = [a[1] for a in assigns]
+            self.sequential_patterns.append({
+                "type": "assignment_chain",
+                "steps": steps,
+                "parent_function": self._current_function,
+                "is_async": self._current_is_async,
+                "lineno": assigns[0][2],
+                "step_count": len(assigns),
+            })
+
+    def visit_Call(self, node: ast.Call) -> None:
+        """Detect nested function calls: step3(step2(step1(data)))."""
+        chain = self._extract_call_chain(node)
+        if len(chain) >= 3:
+            self.sequential_patterns.append({
+                "type": "nested_calls",
+                "steps": list(reversed(chain)),  # Innermost first
+                "parent_function": self._current_function,
+                "is_async": self._current_is_async,
+                "lineno": node.lineno,
+                "step_count": len(chain),
+            })
+        self.generic_visit(node)
+
+    def _extract_call_chain(self, node: ast.expr) -> list[str]:
+        """Extract chain of nested calls."""
+        chain: list[str] = []
+
+        def walk(n: ast.expr) -> None:
+            if isinstance(n, ast.Call):
+                func_name = self._extract_func_name(n)
+                if func_name:
+                    chain.append(func_name)
+                # Check first argument for nested call
+                if n.args and isinstance(n.args[0], ast.Call):
+                    walk(n.args[0])
+
+        walk(node)
+        return chain
+
+    def _extract_func_name(self, node: ast.expr) -> str | None:
+        """Extract function name from Call or Await."""
+        if isinstance(node, ast.Await):
+            node = node.value
+
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                return node.func.id
+            elif isinstance(node.func, ast.Attribute):
+                return node.func.attr
+        return None
+
+
+class AdaptiveDetector(ast.NodeVisitor):
+    """Detect patterns that benefit from adaptive/learning behavior.
+
+    Detects:
+    - Success/failure tracking with counters
+    - Parameter adjustment based on results
+    - Strategy selection with metrics
+    """
+
+    def __init__(self) -> None:
+        self.adaptive_patterns: list[dict[str, Any]] = []
+        self._current_function: str | None = None
+        self._current_is_async: bool = False
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._current_function = node.name
+        self._current_is_async = False
+        self._check_adaptive_patterns(node)
+        self.generic_visit(node)
+        self._current_function = None
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._current_function = node.name
+        self._current_is_async = True
+        self._check_adaptive_patterns(node)
+        self.generic_visit(node)
+        self._current_function = None
+
+    def _check_adaptive_patterns(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> None:
+        """Check for adaptive/learning patterns in function."""
+        has_counter = False
+        has_conditional_adjust = False
+        counter_vars: list[str] = []
+
+        for stmt in ast.walk(node):
+            # Look for counter increments: success_count += 1, failures += 1
+            if isinstance(stmt, ast.AugAssign):
+                if isinstance(stmt.target, ast.Name):
+                    var = stmt.target.id.lower()
+                    if any(kw in var for kw in ["count", "success", "fail", "error", "metric"]):
+                        has_counter = True
+                        counter_vars.append(stmt.target.id)
+
+            # Look for conditional parameter adjustment
+            if isinstance(stmt, ast.If):
+                # Check if condition references counters/rates
+                cond_str = ast.dump(stmt.test)
+                if any(kw in cond_str.lower() for kw in ["rate", "count", "threshold", "metric"]):
+                    # Check if body adjusts parameters
+                    for body_stmt in stmt.body:
+                        if isinstance(body_stmt, ast.Assign):
+                            has_conditional_adjust = True
+
+        if has_counter and has_conditional_adjust:
+            self.adaptive_patterns.append({
+                "type": "metric_based_adjustment",
+                "counter_vars": counter_vars,
+                "parent_function": self._current_function,
+                "is_async": self._current_is_async,
+                "lineno": node.lineno,
+            })
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        """Detect strategy dictionaries with performance data."""
+        # Pattern: strategies = {"fast": {..., "success_rate": 0.9}, ...}
+        if isinstance(node.value, ast.Dict):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    var = target.id.lower()
+                    if any(kw in var for kw in ["strateg", "config", "option", "variant"]):
+                        # Check if dict values have metrics-like keys
+                        has_metrics = False
+                        for v in node.value.values:
+                            if isinstance(v, ast.Dict):
+                                for k in v.keys:
+                                    if isinstance(k, ast.Constant):
+                                        key_str = str(k.value).lower()
+                                        if any(m in key_str for m in ["rate", "latency", "score", "weight"]):
+                                            has_metrics = True
+                                            break
+
+                        if has_metrics:
+                            self.adaptive_patterns.append({
+                                "type": "strategy_config",
+                                "variable": target.id,
+                                "parent_function": self._current_function,
+                                "is_async": self._current_is_async,
+                                "lineno": node.lineno,
+                            })
+        self.generic_visit(node)
+
+
 class CodeTransformer:
     """AST-based code transformer for TTA.dev primitives.
 
@@ -1723,6 +1922,7 @@ class CodeTransformer:
             "CompensationPrimitive": "from tta_dev_primitives.recovery import CompensationPrimitive",
             "MemoryPrimitive": "from tta_dev_primitives.performance import MemoryPrimitive",
             "DelegationPrimitive": "from tta_dev_primitives.orchestration import DelegationPrimitive",
+            "AdaptivePrimitive": "from tta_dev_primitives.adaptive import AdaptivePrimitive",
         }
 
     def transform(
@@ -1849,6 +2049,16 @@ class CodeTransformer:
         if delegation_detector.delegation_patterns:
             transforms.append("DelegationPrimitive")
 
+        sequential_detector = SequentialDetector()
+        sequential_detector.visit(tree)
+        if sequential_detector.sequential_patterns:
+            transforms.append("SequentialPrimitive")
+
+        adaptive_detector = AdaptiveDetector()
+        adaptive_detector.visit(tree)
+        if adaptive_detector.adaptive_patterns:
+            transforms.append("AdaptivePrimitive")
+
         return transforms
 
     def _detect_needed_transforms_regex(self, code: str) -> list[str]:
@@ -1906,6 +2116,10 @@ class CodeTransformer:
             return self._transform_memory_ast(code, tree)
         elif transform_type == "DelegationPrimitive":
             return self._transform_delegation_ast(code, tree)
+        elif transform_type == "SequentialPrimitive":
+            return self._transform_sequential_ast(code, tree)
+        elif transform_type == "AdaptivePrimitive":
+            return self._transform_adaptive_ast(code, tree)
         else:
             return {"changed": False, "code": code, "changes": []}
 
@@ -2661,6 +2875,66 @@ class CodeTransformer:
                         "lineno": pattern["lineno"],
                     }
                 )
+
+        return {
+            "changed": bool(changes),
+            "code": "\n".join(transformed_lines),
+            "changes": changes,
+        }
+
+    def _transform_sequential_ast(
+        self, code: str, tree: ast.Module
+    ) -> dict[str, Any]:
+        """Transform sequential pipeline patterns into SequentialPrimitive."""
+        changes = []
+        detector = SequentialDetector()
+        detector.visit(tree)
+
+        if not detector.sequential_patterns:
+            return {"changed": False, "code": code, "changes": []}
+
+        lines = code.split("\n")
+        transformed_lines = lines.copy()
+
+        for pattern in detector.sequential_patterns:
+            changes.append({
+                "type": "sequential_transform",
+                "pattern_type": pattern["type"],
+                "steps": pattern["steps"],
+                "step_count": pattern["step_count"],
+                "parent_function": pattern["parent_function"],
+                "lineno": pattern["lineno"],
+            })
+
+        return {
+            "changed": bool(changes),
+            "code": "\n".join(transformed_lines),
+            "changes": changes,
+        }
+
+    def _transform_adaptive_ast(
+        self, code: str, tree: ast.Module
+    ) -> dict[str, Any]:
+        """Transform adaptive/learning patterns into AdaptivePrimitive."""
+        changes = []
+        detector = AdaptiveDetector()
+        detector.visit(tree)
+
+        if not detector.adaptive_patterns:
+            return {"changed": False, "code": code, "changes": []}
+
+        lines = code.split("\n")
+        transformed_lines = lines.copy()
+
+        for pattern in detector.adaptive_patterns:
+            changes.append({
+                "type": "adaptive_transform",
+                "pattern_type": pattern["type"],
+                "parent_function": pattern.get("parent_function"),
+                "lineno": pattern["lineno"],
+                "counter_vars": pattern.get("counter_vars", []),
+                "variable": pattern.get("variable"),
+            })
 
         return {
             "changed": bool(changes),
