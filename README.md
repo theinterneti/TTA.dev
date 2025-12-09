@@ -39,12 +39,17 @@ TTA.dev/
 │   ├── documentation/     # Docs automation
 │   └── kb-automation/     # Knowledge base maintenance
 │
+├── templates/             # 🚀 Vibe Coding Templates (Start Here)
+│   ├── basic-agent/       # Simple agent with cache/retry
+│   └── workflow/          # Multi-step workflow
+│
 ├── apps/                  # User-facing applications (1)
 │   └── observability-ui/  # VS Code observability dashboard
 │
 ├── config/                # Configuration files
+├── data/                  # Data artifacts
+│   └── ace_playbooks/     # ACE Agent Playbooks
 ├── docs/                  # Documentation
-├── playbooks/             # Agent playbooks
 ├── scripts/               # Automation scripts
 └── tests/                 # Integration tests
 ```

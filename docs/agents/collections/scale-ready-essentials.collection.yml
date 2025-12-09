@@ -1,0 +1,93 @@
+name: "Scale-Ready Essentials"
+version: "1.0.0"
+description: "Essential patterns and primitives for vibe coders preparing to scale"
+
+target_audience: "Independent creators, vibe coders, solo developers"
+
+when_to_use:
+  - "Your app is getting traction"
+  - "API costs are adding up"
+  - "You're worried about reliability"
+  - "Preparing for potential viral moment"
+
+items:
+  # Patterns (Agent-Agnostic)
+  - type: instruction
+    name: "Reliability Patterns"
+    path: "agents/universal/patterns/reliability.instructions.md"
+    description: "Retry, timeout, cache, fallback patterns"
+    priority: high
+
+  - type: instruction
+    name: "Observability Patterns"
+    path: "agents/universal/patterns/observability.instructions.md"
+    description: "See what's happening when things go wrong"
+    priority: medium
+
+  # Prompts
+  - type: prompt
+    name: "Scale-Ready Analysis"
+    path: "agents/universal/prompts/scale-ready.prompt.md"
+    description: "Analyze code and add scaling primitives"
+
+  # Core Primitives
+  - type: primitive
+    name: "CachePrimitive"
+    import: "from tta_dev_primitives.performance import CachePrimitive"
+    description: "Save 40-60% on API costs"
+    priority: critical
+    use_when: "Making repeated API calls"
+
+  - type: primitive
+    name: "RetryPrimitive"
+    import: "from tta_dev_primitives.recovery import RetryPrimitive"
+    description: "Handle random API failures"
+    priority: high
+    use_when: "External APIs fail intermittently"
+
+  - type: primitive
+    name: "TimeoutPrimitive"
+    import: "from tta_dev_primitives.recovery import TimeoutPrimitive"
+    description: "Prevent hanging requests"
+    priority: high
+    use_when: "APIs might be slow or unresponsive"
+
+  - type: primitive
+    name: "FallbackPrimitive"
+    import: "from tta_dev_primitives.recovery import FallbackPrimitive"
+    description: "Backup plan when primary fails"
+    priority: medium
+    use_when: "Need 99.9% uptime"
+
+quick_start:
+  minimal: |
+    # Just save money (most common first step)
+    from tta_dev_primitives.performance import CachePrimitive
+
+    cached_api = CachePrimitive(ttl=3600) >> your_api_call
+
+  recommended: |
+    # Full reliability stack
+    from tta_dev_primitives.recovery import RetryPrimitive, TimeoutPrimitive
+    from tta_dev_primitives.performance import CachePrimitive
+
+    reliable_api = (
+        CachePrimitive(ttl=3600) >>
+        TimeoutPrimitive(seconds=10) >>
+        RetryPrimitive(max_retries=3) >>
+        your_api_call
+    )
+
+agents:
+  - copilot
+  - cline
+  - augment
+  - roo
+  - cursor
+  - aider
+
+tags:
+  - scale-ready
+  - vibe-coding
+  - reliability
+  - cost-optimization

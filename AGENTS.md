@@ -1,18 +1,98 @@
 # TTA.dev Agent Instructions
 
-**Composable workflow primitives for building reliable AI applications.**
+**Primary Hub for AI Agent Discovery and Guidance**
 
-## Quick Start
+---
 
-```bash
-# Install
-uv sync --all-extras
+## 🎯 Quick Start for AI Agents
 
-# Test
-uv run pytest -v
+Welcome to TTA.dev! This file is your entry point for understanding and working with this codebase.
 
-# Quality checks
-uv run ruff format . && uv run ruff check . --fix
+### What is TTA.dev?
+
+TTA.dev is a production-ready **AI development toolkit** providing:
+
+- **Agentic primitives** for building reliable AI workflows
+- **Composable patterns** with type-safe operators (`>>`, `|`)
+- **Built-in observability** with OpenTelemetry integration
+- **Multi-package monorepo** with focused, reusable components
+
+### 🛠️ MCP Tool Registry
+
+For a complete list of available tools (Context7, AI Toolkit, Grafana, etc.), see:
+[`MCP_TOOL_REGISTRY.md`](MCP_TOOL_REGISTRY.md)
+
+### 📋 TODO Management & Knowledge Base
+
+**IMPORTANT:** All agents must use the Logseq TODO management system. Refer to the `.clinerules` for detailed tag conventions and properties.
+
+**🧭 Knowledge Base Hub:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - **START HERE** for intelligent navigation between documentation and knowledge base systems.
+
+- **📐 TODO Architecture:** [`logseq/pages/TTA.dev/TODO Architecture.md`](logseq/pages/TTA.dev___TODO Architecture.md) - Complete system design
+- **📊 Main Dashboard:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO Management System.md) - Active queries
+- **📋 Templates:** [`logseq/pages/TODO Templates.md`](logseq/pages/TODO Templates.md) - Copy-paste patterns
+- **🎓 Learning Paths:** [`logseq/pages/TTA.dev/Learning Paths.md`](logseq/pages/TTA.dev___Learning Paths.md) - Structured sequences
+- **📈 Metrics:** [`logseq/pages/TTA.dev/TODO Metrics Dashboard.md`](logseq/pages/TTA.dev___TODO Metrics Dashboard.md) - Analytics
+- **⚡ Quick Reference:** [`logseq/pages/TODO Architecture Quick Reference.md`](logseq/pages/TODO Architecture Quick Reference.md) - Fast lookup
+
+**Package Dashboards:**
+
+- [`TTA.dev/Packages/tta-dev-primitives/TODOs`](logseq/pages/TTA.dev___Packages___tta-dev-primitives___TODOs.md) - Core primitives ✅
+- [`TTA.dev/Packages/tta-observability-integration/TODOs`](logseq/pages/TTA.dev___Packages___tta-observability-integration___TODOs.md) - Observability ✅
+- [`TTA.dev/Packages/universal-agent-context/TODOs`](logseq/pages/TTA.dev___Packages___universal-agent-context___TODOs.md) - Agent context ✅
+
+**Daily Journal:** Add TODOs to `logseq/journals/YYYY_MM_DD.md`
+
+**Tag Convention:**
+
+- `#dev-todo` - Development work (building TTA.dev itself)
+- `#learning-todo` - User education (tutorials, flashcards, exercises)
+- `#template-todo` - Reusable patterns (for agents/users)
+- `#ops-todo` - Infrastructure (deployment, monitoring)
+
+### 🎯 Agent Context & Tooling
+
+For GitHub Copilot users, comprehensive instructions are available in [`.github/copilot-instructions.md`](.github/copilot-instructions.md), including:
+
+- Package manager requirements (uv)
+- Python version and type hints (3.11+)
+- Testing standards and examples
+- Code style and formatting rules
+- Security practices
+- Documentation standards
+- TTA.dev primitives patterns
+- TODO management with Logseq
+- Development workflow
+- Copilot toolsets (VS Code)
+
+Additionally, context-specific modular instructions are in `.github/instructions/` for tests, scripts, documentation, package source, and Logseq integration.
+
+### ⚡ Before You Code: Primitive Usage Rules
+
+**CRITICAL:** When working on TTA.dev, **ALWAYS use primitives** for workflow patterns. Refer to the `.clinerules` file for detailed guidance on primitive usage, anti-patterns, and code quality standards.
+
+## Repository Structure
+
+```text
+TTA.dev/
+├── platform/
+│   ├── primitives/          # ✅ Core workflow primitives (tta-dev-primitives)
+│   ├── observability/       # ✅ OpenTelemetry integration (tta-observability-integration)
+│   ├── agent-context/       # ✅ Agent context management (universal-agent-context)
+│   ├── agent-coordination/  # ✅ Multi-agent orchestration
+│   ├── integrations/        # ✅ Pre-built integrations
+│   ├── documentation/       # ✅ Docs automation
+│   └── kb-automation/       # ✅ Knowledge base maintenance
+├── templates/               # 🚀 Vibe Coding Templates (Start Here)
+│   ├── basic-agent/         # Simple agent with cache/retry
+│   └── workflow/            # Multi-step workflow
+├── apps/                    # User-facing applications
+│   └── observability-ui/    # VS Code observability dashboard
+├── data/
+│   └── ace_playbooks/       # 🧠 ACE Agent Playbooks (Learned Strategies)
+├── docs/                    # Comprehensive documentation
+├── scripts/                 # Automation and validation scripts
+└── tests/                   # Integration tests
 ```
 
 ## Core Concept: Primitives
@@ -36,22 +116,6 @@ context = WorkflowContext(workflow_id="demo")
 result = await workflow.execute(input_data, context)
 ```
 
-## Repository Structure
-
-```
-platform/
-├── primitives/      # Core workflow primitives ✅
-├── observability/   # OpenTelemetry integration ✅
-└── agent-context/   # Agent context management ✅
-```
-
-## Key Rules
-
-- **Package manager:** Use `uv`, never `pip`
-- **Type hints:** Use `str | None`, not `Optional[str]`
-- **Testing:** Use `MockPrimitive` from `tta_dev_primitives.testing`
-- **Workflows:** Always compose primitives, never manual try/except loops
-
 ## Available Primitives
 
 | Category | Primitives |
@@ -59,6 +123,8 @@ platform/
 | **Core** | `SequentialPrimitive`, `ParallelPrimitive`, `RouterPrimitive` |
 | **Recovery** | `RetryPrimitive`, `FallbackPrimitive`, `TimeoutPrimitive` |
 | **Performance** | `CachePrimitive`, `MemoryPrimitive` |
+| **Collaboration** | `GitCollaborationPrimitive` |
+| **Adaptive** | `AdaptiveRetryPrimitive`, `LogseqStrategyIntegration` |
 | **Testing** | `MockPrimitive` |
 
 ## Documentation

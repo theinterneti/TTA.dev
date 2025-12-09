@@ -1,9 +1,0 @@
-[
-  {
-    "key": "syntax_error_handling:validate syntax before execution",
-    "strategy": "validate syntax before execution",
-    "context": "syntax_error_handling",
-    "successes": 0,
-    "failures": 0
-  }
-]

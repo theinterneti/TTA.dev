@@ -1,9 +1,0 @@
-[
-  {
-    "key": "create a calculator class with add, subtract, multiply, divide methods:current approach is performant",
-    "strategy": "current approach is performant",
-    "context": "create a calculator class with add, subtract, multiply, divide methods",
-    "successes": 0,
-    "failures": 0
-  }
-]

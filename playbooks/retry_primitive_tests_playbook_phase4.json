@@ -1,9 +1,0 @@
-[
-  {
-    "key": "create pytest tests for retryprimitive backoff strategies:current approach is performant",
-    "strategy": "current approach is performant",
-    "context": "create pytest tests for retryprimitive backoff strategies",
-    "successes": 0,
-    "failures": 0
-  }
-]
