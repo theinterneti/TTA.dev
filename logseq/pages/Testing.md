@@ -18,6 +18,16 @@
 
 ## Testing Tools
 
+### Core Framework
+- `scripts/enhanced_model_test.py`: Advanced model testing harness.
+- `scripts/ab_testing_framework.py`: Framework for A/B testing model responses.
+- `scripts/quick_model_test.py`: Fast smoke tests for models.
+- `scripts/assess_deployment_readiness.py`: Pre-deployment checks.
+
+### Documentation
+- `scripts/MODEL_TESTING_README.md`: Guide to model testing.
+- `scripts/ASYNC_MODEL_TESTING_README.md`: Guide to async testing patterns.
+
 ### MockPrimitive
 
 **Mock primitives for testing workflows**
