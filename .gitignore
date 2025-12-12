@@ -175,6 +175,6 @@ examples/plan_output/
 examples/tasks_output/
 
 # Logseq personal content
-logseq/journals/
+# logseq/journals/
 logseq/logseq/
 logseq/pages/AI\ Research.md

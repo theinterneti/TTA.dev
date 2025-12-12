@@ -1,18 +1,32 @@
-# TTA.dev/Primitives/InstrumentedPrimitive
+type:: primitive
+category:: Observability
+status:: documented
+generated:: 2025-12-04
 
-**Redirect to main InstrumentedPrimitive page.**
+# InstrumentedPrimitive
+
+**Source:** `platform/primitives/src/tta_dev_primitives/observability/instrumented_primitive.py`
 
 ## Overview
 
-This is a redirect page. See [[InstrumentedPrimitive]] for complete documentation.
+Base class for workflow primitives with automatic OpenTelemetry instrumentation.
 
-## Quick Links
+## Usage Examples
 
-- [[InstrumentedPrimitive]] - Main documentation page
-- [[TTA.dev/Primitives]] - All primitives namespace
-- [[PRIMITIVES CATALOG]] - Complete primitive reference
+```python
+class MyPrimitive(InstrumentedPrimitive[dict, str]):
+        async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> str:
+            # Your implementation here
+            return f"Processed: {input_data}"
 
-## Tags
+    # Usage
+    primitive = MyPrimitive(name="my_processor")
+    context = WorkflowContext(workflow_id="demo")
+    result = await primitive.execute({"key": "value"}, context)
+    # Automatically creates span "primitive.my_processor" with trace context
+```
 
-type:: redirect
-target:: [[InstrumentedPrimitive]]
+## Related
+
+- [[TTA.dev/Primitives]] - Primitives index
+- [[TTA.dev/Primitives/Observability]] - Observability primitives
