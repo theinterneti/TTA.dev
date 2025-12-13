@@ -81,6 +81,7 @@ IGNORE_DIRS = {
     "temp",
     "site-packages",
     ".uv_cache",
+    ".cache",  # User cache directory
     ".archive",
     "_archive",  # Archive directories (underscore variant)
     ".venv",
