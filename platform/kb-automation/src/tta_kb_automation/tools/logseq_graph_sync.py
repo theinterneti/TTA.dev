@@ -105,6 +105,59 @@ LANGUAGE_MAP = {
     ".yml": "yaml",
 }
 
+# Type inference for pages based on path patterns
+PAGE_TYPE_RULES = [
+    # Primitives
+    (r".*/Primitives/.*", "[[Primitive]]"),
+    (r".*Primitive$", "[[Primitive]]"),
+    # Guides
+    (r".*/Guides/.*", "[[Guide]]"),
+    (r".*/How-To/.*", "[[How-To]]"),
+    (r".*/Best Practices/.*", "[[Best Practices]]"),
+    # Examples
+    (r".*/Examples/.*", "[[Example]]"),
+    # Packages
+    (r".*/Packages/.*", "[[Package]]"),
+    # Architecture
+    (r".*/Architecture/.*", "[[Architecture]]"),
+    # Integration
+    (r".*/Integrations?/.*", "[[Integration]]"),
+    # MCP
+    (r".*/MCP/.*", "[[MCP]]"),
+    # Patterns
+    (r".*/Patterns/.*", "[[Pattern]]"),
+    # Scripts - based on file type
+    (r".*/Scripts/.*\.py$", "[[Script]]"),
+    (r".*/Scripts/.*\.sh$", "[[Script]]"),
+    # Tests
+    (r".*/Tests?/.*", "[[Test]]"),
+    # Config files
+    (r".*\.(yaml|yml|json|toml)$", "[[Config]]"),
+]
+
+
+def infer_page_type(page_name: str, file_path: str = "") -> str:
+    """Infer the type for a page based on its name and source file."""
+    for pattern, page_type in PAGE_TYPE_RULES:
+        if re.search(pattern, page_name, re.IGNORECASE):
+            return page_type
+        if file_path and re.search(pattern, file_path, re.IGNORECASE):
+            return page_type
+
+    # Default based on file extension
+    if file_path:
+        ext = Path(file_path).suffix
+        if ext == ".py":
+            return "[[Python]]"
+        elif ext in [".ts", ".js"]:
+            return "[[TypeScript]]"
+        elif ext == ".md":
+            return "[[Documentation]]"
+        elif ext == ".sh":
+            return "[[Script]]"
+
+    return "[[File]]"
+
 
 def setup_paths():
     """Verify and setup paths."""
@@ -380,12 +433,15 @@ def process_files(files=None):
             print(f"⚠️ Skipping broken file/link: {file_path}")
             continue
 
+        # Infer page type from path patterns
+        page_type = infer_page_type(page_name, str(rel_path))
+
         # Update File Page
         update_logseq_page(
             page_name,
             {
                 "file_path": str(rel_path),
-                "type": "File",
+                "type": page_type,
                 "language": LANGUAGE_MAP.get(file_path.suffix, "text"),
                 "last_modified": mtime,
             },
@@ -426,11 +482,101 @@ def sync_journals():
                 journal_file.write_text(entry)
 
 
+def annotate_existing_pages(dry_run: bool = True):
+    """Add type annotations to existing pages that are missing them."""
+    print("📝 Annotating existing pages...")
+
+    if not PAGES_DIR.exists():
+        print(f"❌ Pages directory not found: {PAGES_DIR}")
+        return
+
+    pages = list(PAGES_DIR.glob("*.md"))
+    print(f"📄 Found {len(pages)} pages")
+
+    updated = 0
+    for page_path in pages:
+        try:
+            content = page_path.read_text()
+            lines = content.splitlines()
+
+            # Parse existing properties
+            properties = {}
+            body_start = 0
+            for i, line in enumerate(lines):
+                if "::" in line and not line.strip().startswith("#"):
+                    key, val = line.split("::", 1)
+                    key = key.strip()
+                    if key.replace("-", "_").replace("_", "").isalnum():
+                        properties[key] = val.strip()
+                        body_start = i + 1
+                    else:
+                        break
+                elif line.strip() and not line.strip().startswith("#"):
+                    break
+                elif line.strip().startswith("#"):
+                    body_start = i
+                    break
+
+            # Skip if already has type
+            if "type" in properties:
+                continue
+
+            # Infer type from page name
+            page_name = page_path.stem.replace("___", "/")
+            page_type = infer_page_type(page_name)
+
+            if dry_run:
+                print(f"   Would add type:: {page_type} to {page_path.name}")
+            else:
+                # Add type property
+                properties["type"] = page_type
+
+                # Rebuild content
+                new_lines = []
+                prop_order = ["title", "alias", "type", "category", "status", "tags"]
+                written = set()
+
+                for prop in prop_order:
+                    if prop in properties:
+                        new_lines.append(f"{prop}:: {properties[prop]}")
+                        written.add(prop)
+
+                for key, val in properties.items():
+                    if key not in written:
+                        new_lines.append(f"{key}:: {val}")
+
+                body = "\n".join(lines[body_start:]).strip()
+                if body:
+                    new_lines.append("")
+                    new_lines.append(body)
+
+                page_path.write_text("\n".join(new_lines) + "\n")
+                print(f"   ✅ Added type:: {page_type} to {page_path.name}")
+
+            updated += 1
+
+        except Exception as e:
+            print(f"   ⚠️ Error processing {page_path.name}: {e}")
+
+    if dry_run:
+        print(f"\n💡 Would update {updated} pages. Run without --dry-run to apply.")
+    else:
+        print(f"\n✅ Updated {updated} pages")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Logseq Graph Agent")
     parser.add_argument("--sync-coverage", action="store_true", help="Sync coverage data")
     parser.add_argument("--process-files", action="store_true", help="Process code/doc files")
     parser.add_argument("--sync-journals", action="store_true", help="Sync journals")
+    parser.add_argument(
+        "--annotate-types", action="store_true", help="Add type annotations to existing pages"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview changes without applying (for --annotate-types)",
+    )
     parser.add_argument("--all", action="store_true", help="Run all tasks")
     parser.add_argument("files", nargs="*", help="Specific files to process")
 
@@ -446,6 +592,9 @@ def main():
 
     if args.sync_journals or args.all:
         sync_journals()
+
+    if args.annotate_types:
+        annotate_existing_pages(dry_run=args.dry_run)
 
 
 if __name__ == "__main__":
