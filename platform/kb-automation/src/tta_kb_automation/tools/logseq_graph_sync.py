@@ -58,6 +58,7 @@ NAMESPACE_RULES = {
         r"devops/.*",
         r"platform/.*",
         r"apps/.*",
+        r"docs/.*",  # Top-level documentation
     ],
 }
 
@@ -81,6 +82,7 @@ IGNORE_DIRS = {
     "site-packages",
     ".uv_cache",
     ".archive",
+    "_archive",  # Archive directories (underscore variant)
     ".venv",
 }
 
