@@ -545,3 +545,7 @@ sudo systemctl status tta-api
 **Created:** November 9, 2025
 **Status:** ✅ Ready to use
 **Version:** 1.0.0
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/Tta_api_n8n_integration_guide]]

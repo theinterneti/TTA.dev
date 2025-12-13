@@ -311,3 +311,7 @@ Analyze the security implications of the contents:write permission in the Gemini
 **Ready to Begin Testing!** 🚀
 
 Let's systematically test each scenario and gather data for improvement.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Gemini-cli/Gemini-cli-testing-protocol]]

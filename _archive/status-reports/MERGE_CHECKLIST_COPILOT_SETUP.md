@@ -290,7 +290,11 @@ When dependencies change:
 
 ---
 
-**Created:** October 29, 2025  
-**Branch:** `feat/codecov-integration`  
-**Status:** Ready for merge  
+**Created:** October 29, 2025
+**Branch:** `feat/codecov-integration`
+**Status:** Ready for merge
 **Next:** Test workflow → Merge to main → Monitor
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports/Merge_checklist_copilot_setup]]

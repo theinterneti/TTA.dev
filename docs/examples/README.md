@@ -24,3 +24,7 @@ When contributing examples:
 3. Provide complete, working code snippets.
 4. Explain key concepts and patterns.
 5. Update this README to include your example.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Examples/Readme]]

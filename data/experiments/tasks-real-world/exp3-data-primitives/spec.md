@@ -24,3 +24,7 @@ Add a new family of primitives for data transformation and processing workflows.
 - Must work with ParallelPrimitive for fan-out
 - Must integrate with CachePrimitive for memoization
 - Must use InstrumentedPrimitive for observability
+
+
+---
+**Logseq:** [[TTA.dev/Data/Experiments/Tasks-real-world/Exp3-data-primitives/Spec]]

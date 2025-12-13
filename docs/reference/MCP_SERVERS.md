@@ -208,7 +208,7 @@ The GitHub MCP server provides extensive repository management capabilities thro
 
 - **Default Tools**: Core repository operations (issues, PRs, commits, branches)
 - **Projects Tools**: Project management and planning
-- **Labels Tools**: Repository labeling and categorization  
+- **Labels Tools**: Repository labeling and categorization
 - **Orgs Tools**: Organization and team management
 
 *Note: Specific tool names follow the pattern `mcp_github_[category]_[operation]` (e.g., `mcp_github_default_create_issue`)*
@@ -220,7 +220,7 @@ The GitHub MCP server provides extensive repository management capabilities thro
 @workspace #tta-mcp-integration
 Create a new issue in the TTA.dev repository about enhancing error handling
 
-# Project management  
+# Project management
 @workspace #tta-pr-review
 List all open pull requests and their status
 
@@ -744,3 +744,7 @@ Run query: [SQL query]
 **Maintained by:** TTA.dev Team
 **MCP Version:** 1.0
 **VS Code Integration:** Stable
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Reference/Mcp_servers]]

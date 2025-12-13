@@ -95,3 +95,7 @@ No overview provided
 See [`data-model.md`](./data-model.md) for complete data model definitions.
 
 **Entities:** User
+
+
+---
+**Logseq:** [[TTA.dev/Data/Experiments/Tasks-real-world/Exp1-monitoring-dashboard/Plan]]

@@ -45,3 +45,6 @@ audience:: senior-developers
 level:: advanced-to-expert
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Senior developers]]

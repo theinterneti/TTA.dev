@@ -27,3 +27,7 @@ Claude offers different chat modes for different tasks:
 - **Code Mode**: Optimized for code generation and editing
 
 Choose the appropriate mode based on task complexity and user needs.
+
+
+---
+**Logseq:** [[TTA.dev/.universal-instructions/Claude-specific/Preferences]]

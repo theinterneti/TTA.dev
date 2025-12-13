@@ -69,8 +69,8 @@ response = await llm.execute(request, context)
 print(response.content)  # "Hello! How can I help you?"
 ```
 
-**When to use:** Production apps, cost-effective, fast  
-**Cost:** $0.15-$15 per 1M tokens  
+**When to use:** Production apps, cost-effective, fast
+**Cost:** $0.15-$15 per 1M tokens
 **Docs:** [OpenAI Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
 
 ---
@@ -100,8 +100,8 @@ response = await llm.execute(request, context)
 print(response.content)
 ```
 
-**When to use:** Long context (200K tokens), safety-critical, complex reasoning  
-**Cost:** $3-$15 per 1M tokens  
+**When to use:** Long context (200K tokens), safety-critical, complex reasoning
+**Cost:** $3-$15 per 1M tokens
 **Docs:** [Anthropic Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
 
 ---
@@ -130,8 +130,8 @@ response = await llm.execute(request, context)
 print(response.content)
 ```
 
-**When to use:** Privacy-critical, offline, cost-free  
-**Cost:** $0 (free)  
+**When to use:** Privacy-critical, offline, cost-free
+**Cost:** $0 (free)
 **Docs:** [Ollama Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
 
 ---
@@ -187,8 +187,8 @@ delete_request = SupabaseRequest(
 await db.execute(delete_request, context)
 ```
 
-**When to use:** Multi-user apps, cloud deployment, real-time  
-**Cost:** Free tier → $25/month  
+**When to use:** Multi-user apps, cloud deployment, real-time
+**Cost:** Free tier → $25/month
 **Docs:** [Supabase Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/supabase_primitive.py)
 
 ---
@@ -260,8 +260,8 @@ delete_request = SQLiteRequest(
 await db.execute(delete_request, context)
 ```
 
-**When to use:** Local apps, prototyping, single-user  
-**Cost:** $0 (free)  
+**When to use:** Local apps, prototyping, single-user
+**Cost:** $0 (free)
 **Docs:** [SQLite Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py)
 
 ---
@@ -395,7 +395,11 @@ llm = CachePrimitive(
 
 ---
 
-**Last Updated:** October 30, 2025  
-**For:** Quick reference (all skill levels)  
+**Last Updated:** October 30, 2025
+**For:** Quick reference (all skill levels)
 **Maintained by:** TTA.dev Team
 
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Integration-primitives-quickref]]

@@ -523,3 +523,7 @@ agents:
 - [E2B Documentation](https://e2b.dev/docs)
 - [LiteLLM Documentation](https://docs.litellm.ai/)
 - [TTA.dev Primitives Catalog](../../PRIMITIVES_CATALOG.md)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Ace_integration_roadmap]]

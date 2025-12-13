@@ -150,3 +150,7 @@ When adding a new guide:
 ---
 
 **Last Updated:** October 30, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Readme]]

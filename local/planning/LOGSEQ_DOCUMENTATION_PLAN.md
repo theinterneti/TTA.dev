@@ -876,3 +876,7 @@ Brief description
 ---
 
 **Ready to start?** Let's begin with migrating the main hub and a few key primitives to validate the approach!
+
+
+---
+**Logseq:** [[TTA.dev/Local/Planning/Logseq_documentation_plan]]

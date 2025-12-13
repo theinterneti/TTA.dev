@@ -339,3 +339,7 @@ Status: Ready to Implement
 Effort: 2-3 days for 80% of value
 ───────────────────────────────────────────────────────────────────────────
 ```
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Auto_integration_architecture]]

@@ -569,3 +569,7 @@ MCP servers expose tools that can be included in toolsets:
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 20 minutes
 **Difficulty:** [[Intermediate]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___copilot toolsets]]

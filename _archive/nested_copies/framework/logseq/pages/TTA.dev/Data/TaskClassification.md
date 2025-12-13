@@ -15,3 +15,7 @@
   - `reasoning`: A textual explanation for why the specific model was recommended.
   - `estimated_cost`: The estimated cost in USD for using the recommended model (0.0 for free models).
   - `fallback_models`: A list of alternative models that could be used if the primary recommendation fails.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Data/Taskclassification]]

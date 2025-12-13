@@ -64,3 +64,7 @@ gemini --yolo -p .github/prompts/feature-implementation.prompt.md
 
 - Check PATH: `echo $PATH`
 - If using a Python wrapper: `pip install gemini-cli-tool` (verify package name)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Gemini_cli_setup]]

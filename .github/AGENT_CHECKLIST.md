@@ -185,3 +185,7 @@ Before opening a pull request:
 **Last Updated:** November 10, 2025
 **Version:** 1.0
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/.github/Agent_checklist]]

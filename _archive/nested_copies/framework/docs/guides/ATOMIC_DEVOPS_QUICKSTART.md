@@ -550,3 +550,7 @@ class MyExpert(InstrumentedPrimitive):
 **Last Updated:** November 4, 2025
 **Maintained by:** TTA.dev Team
 **Status:** Active Development
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Guides/Atomic_devops_quickstart]]

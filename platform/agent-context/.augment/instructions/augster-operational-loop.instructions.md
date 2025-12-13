@@ -111,6 +111,10 @@ Returns to Operational Loop
 
 ---
 
-**Last Updated**: 2025-10-26  
+**Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Augster-operational-loop.instructions]]

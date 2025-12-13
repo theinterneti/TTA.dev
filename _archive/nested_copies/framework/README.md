@@ -89,3 +89,7 @@ Within the content (the body) of each page, any mention of another framework pri
   - 1. Reads the `tool_calls` attribute from the state.
   - 2. Iterates through each request and dynamically calls the corresponding `[[TTA.dev/Tools/BaseTool]]` implementation.
   - 3. Appends the tool's output as a new `ToolMessage` to the `messages` list.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Readme]]

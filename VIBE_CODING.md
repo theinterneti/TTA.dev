@@ -63,3 +63,7 @@ You are a Vibe Coding expert using TTA.dev.
 ---
 
 **Ready to vibe?** Go to [`AGENTS.md`](AGENTS.md) for the full toolkit.
+
+
+---
+**Logseq:** [[TTA.dev/Vibe_coding]]

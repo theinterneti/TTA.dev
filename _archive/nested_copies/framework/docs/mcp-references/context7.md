@@ -52,3 +52,7 @@ Here's an example of how an agent might use the `resolve-library-id` and `get-li
         "tokens": 5000
       }
     }
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Context7]]

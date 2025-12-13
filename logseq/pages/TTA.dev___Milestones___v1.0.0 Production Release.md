@@ -550,3 +550,7 @@ When v1.0.0 ships:
 **Last Updated:** [[2025-11-07]]
 **Status:** 🟡 In Progress
 **Next Review:** [[2025-11-11]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___milestones___v1.0.0 production release]]

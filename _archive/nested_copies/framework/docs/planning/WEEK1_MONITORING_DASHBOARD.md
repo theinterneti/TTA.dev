@@ -1,7 +1,7 @@
 # Week 1 Monitoring Dashboard
 
-**Deployment Date:** October 30, 2025  
-**Monitoring Period:** Oct 30 - Nov 6, 2025  
+**Deployment Date:** October 30, 2025
+**Monitoring Period:** Oct 30 - Nov 6, 2025
 **Update Frequency:** Daily
 
 ---
@@ -46,13 +46,13 @@ gh run list --workflow=copilot-setup-steps.yml --limit 5
 **Workflow Runs:** _[To be filled]_
 
 ```
-✓ Status: 
-⏱️  Duration: 
-💾 Cache: 
-🐍 Python: 
-📦 uv: 
-🧪 Tests: 
-✅ Success Rate: 
+✓ Status:
+⏱️  Duration:
+💾 Cache:
+🐍 Python:
+📦 uv:
+🧪 Tests:
+✅ Success Rate:
 ```
 
 **Notes:**
@@ -66,13 +66,13 @@ gh run list --workflow=copilot-setup-steps.yml --limit 5
 **Workflow Runs:** _[To be filled]_
 
 ```
-✓ Status: 
-⏱️  Duration: 
-💾 Cache: 
-🐍 Python: 
-📦 uv: 
-🧪 Tests: 
-✅ Success Rate: 
+✓ Status:
+⏱️  Duration:
+💾 Cache:
+🐍 Python:
+📦 uv:
+🧪 Tests:
+✅ Success Rate:
 ```
 
 **Notes:**
@@ -86,13 +86,13 @@ gh run list --workflow=copilot-setup-steps.yml --limit 5
 **Workflow Runs:** _[To be filled]_
 
 ```
-✓ Status: 
-⏱️  Duration: 
-💾 Cache: 
-🐍 Python: 
-📦 uv: 
-🧪 Tests: 
-✅ Success Rate: 
+✓ Status:
+⏱️  Duration:
+💾 Cache:
+🐍 Python:
+📦 uv:
+🧪 Tests:
+✅ Success Rate:
 ```
 
 **Notes:**
@@ -106,13 +106,13 @@ gh run list --workflow=copilot-setup-steps.yml --limit 5
 **Workflow Runs:** _[To be filled]_
 
 ```
-✓ Status: 
-⏱️  Duration: 
-💾 Cache: 
-🐍 Python: 
-📦 uv: 
-🧪 Tests: 
-✅ Success Rate: 
+✓ Status:
+⏱️  Duration:
+💾 Cache:
+🐍 Python:
+📦 uv:
+🧪 Tests:
+✅ Success Rate:
 ```
 
 **Notes:**
@@ -126,13 +126,13 @@ gh run list --workflow=copilot-setup-steps.yml --limit 5
 **Workflow Runs:** _[To be filled]_
 
 ```
-✓ Status: 
-⏱️  Duration: 
-💾 Cache: 
-🐍 Python: 
-📦 uv: 
-🧪 Tests: 
-✅ Success Rate: 
+✓ Status:
+⏱️  Duration:
+💾 Cache:
+🐍 Python:
+📦 uv:
+🧪 Tests:
+✅ Success Rate:
 ```
 
 **Notes:**
@@ -146,13 +146,13 @@ gh run list --workflow=copilot-setup-steps.yml --limit 5
 **Workflow Runs:** _[To be filled]_
 
 ```
-✓ Status: 
-⏱️  Duration: 
-💾 Cache: 
-🐍 Python: 
-📦 uv: 
-🧪 Tests: 
-✅ Success Rate: 
+✓ Status:
+⏱️  Duration:
+💾 Cache:
+🐍 Python:
+📦 uv:
+🧪 Tests:
+✅ Success Rate:
 ```
 
 **Notes:**
@@ -166,24 +166,24 @@ gh run list --workflow=copilot-setup-steps.yml --limit 5
 ### Overall Metrics
 
 ```
-Total Runs: 
-Successful: 
-Failed: 
-Success Rate: 
-Average Duration: 
-Cache Hit Rate: 
+Total Runs:
+Successful:
+Failed:
+Success Rate:
+Average Duration:
+Cache Hit Rate:
 ```
 
 ### Performance Trend
 
 ```
 Day 1: 13s
-Day 2: 
-Day 3: 
-Day 4: 
-Day 5: 
-Day 6: 
-Day 7: 
+Day 2:
+Day 3:
+Day 4:
+Day 5:
+Day 6:
+Day 7:
 
 Trend: [Improving | Stable | Degrading]
 ```
@@ -191,8 +191,8 @@ Trend: [Improving | Stable | Degrading]
 ### Issues Encountered
 
 1. _[List any issues]_
-2. 
-3. 
+2.
+3.
 
 ### Agent Feedback
 
@@ -277,5 +277,9 @@ gh run view <run-id> --log | grep -i cache
 
 ---
 
-**Last Updated:** October 30, 2025  
+**Last Updated:** October 30, 2025
 **Next Review:** November 6, 2025
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Week1_monitoring_dashboard]]

@@ -340,3 +340,7 @@ Archived integration decision records available in `archive/status-reports/integ
 status:: dashboard
 integration:: monitoring
 category:: governance
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___integrations___status dashboard]]

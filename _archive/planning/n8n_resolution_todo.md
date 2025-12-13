@@ -64,3 +64,7 @@
 
 ---
 **Next Action:** Test robust_n8n_setup.py script
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/N8n_resolution_todo]]

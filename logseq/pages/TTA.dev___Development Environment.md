@@ -21,7 +21,7 @@ The TTA.dev development environment is optimized for AI-powered workflows with c
   - Standard aliases and functions
   - Tool integrations (fzf, zoxide, gh)
   - Performance optimizations
-  
+
 - `~/.zsh_local` - User-only settings
   - API keys and secrets
   - Personal aliases
@@ -160,3 +160,7 @@ git pull
 ## Completed
 
 {{query (and [[TTA.dev/Development Environment]] (task DONE))}}
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___development environment]]

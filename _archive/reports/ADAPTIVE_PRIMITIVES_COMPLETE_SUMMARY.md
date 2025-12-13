@@ -986,3 +986,7 @@ adaptive_retry = AdaptiveRetryPrimitive(
 ---
 
 🎉 **Congratulations on completing this comprehensive enhancement to TTA.dev!** 🎉
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Reports/Adaptive_primitives_complete_summary]]

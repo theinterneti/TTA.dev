@@ -83,3 +83,7 @@ env:
 - **Impact:** Zero on functionality
 - **Action Required:** None
 - **Script Quality:** Good (properly detects environment)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integrations/Yellow_warnings_explanation]]

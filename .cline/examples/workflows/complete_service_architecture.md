@@ -846,3 +846,7 @@ except Exception:
 ---
 
 **Next Steps:** When cline detects complex multi-agent coordination scenarios, it should automatically suggest appropriate workflow patterns, state management strategies, and coordination mechanisms based on the specific use case requirements.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Workflows/Complete_service_architecture]]

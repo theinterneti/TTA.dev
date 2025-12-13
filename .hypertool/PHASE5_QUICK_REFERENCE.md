@@ -127,14 +127,14 @@ async def my_workflow():
             persona="backend-engineer",
             func=version_bump_task
         )
-        
+
         # Stage 2: Testing
         result2 = await tracer.trace_stage(
             stage_name="validation",
             persona="testing-specialist",
             func=validation_task
         )
-        
+
         # Stage 3: DevOps
         result3 = await tracer.trace_stage(
             stage_name="deploy",
@@ -310,7 +310,7 @@ langfuse.flush()  # Forces upload of pending traces
 
 ### 1. Instrument Early
 
-✅ **DO:** Add metrics at the start of implementation  
+✅ **DO:** Add metrics at the start of implementation
 ❌ **DON'T:** Retrofit metrics after deployment
 
 ```python
@@ -328,7 +328,7 @@ async def new_feature():
 
 ### 2. Use Structured Metadata
 
-✅ **DO:** Include rich context in metadata  
+✅ **DO:** Include rich context in metadata
 ❌ **DON'T:** Rely only on metric labels
 
 ```python
@@ -349,7 +349,7 @@ await langfuse.trace_llm_call(persona="backend")
 
 ### 3. Set Quality Gates
 
-✅ **DO:** Define clear success criteria  
+✅ **DO:** Define clear success criteria
 ❌ **DON'T:** Skip validation
 
 ```python
@@ -374,7 +374,7 @@ collector.record_workflow_stage(duration_seconds=duration)
 
 ### 4. Monitor Cost
 
-✅ **DO:** Track token usage and cost per persona  
+✅ **DO:** Track token usage and cost per persona
 ❌ **DON'T:** Ignore LLM costs
 
 ```python
@@ -392,7 +392,7 @@ response = await llm.generate(prompt=prompt)
 
 ### 5. Flush on Shutdown
 
-✅ **DO:** Flush Langfuse events before exit  
+✅ **DO:** Flush Langfuse events before exit
 ❌ **DON'T:** Lose traces on shutdown
 
 ```python
@@ -446,6 +446,10 @@ atexit.register(cleanup)
 
 ---
 
-**Last Updated:** 2025-11-15  
-**Status:** Ready for Implementation  
+**Last Updated:** 2025-11-15
+**Status:** Ready for Implementation
 **Owner:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Phase5_quick_reference]]

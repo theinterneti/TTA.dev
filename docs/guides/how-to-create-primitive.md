@@ -630,3 +630,7 @@ class MyPrimitive(InstrumentedPrimitive[InputType, OutputType]):
 **Last Updated:** [[2025-10-31]]
 **Difficulty:** Intermediate
 **Time:** 2-4 hours
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/How-to-create-primitive]]

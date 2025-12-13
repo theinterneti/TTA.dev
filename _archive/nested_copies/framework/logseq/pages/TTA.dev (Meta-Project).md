@@ -285,3 +285,6 @@ uv run pytest packages/tta-dev-primitives/tests/test_sequential.py
 **Repository:** <https://github.com/theinterneti/TTA.dev>
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev (meta-project)]]

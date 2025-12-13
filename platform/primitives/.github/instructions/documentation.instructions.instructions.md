@@ -223,7 +223,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - New feature X with brief description
 
-### Changed  
+### Changed
 - Changed behavior Y with brief description
 
 ### Fixed
@@ -343,3 +343,7 @@ result = await workflow.execute(data, context)  # Complete!
 - [ ] No lorem ipsum or placeholder text
 - [ ] Formatting is consistent
 - [ ] Technical terms are explained
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/.github/Instructions/Documentation.instructions.instructions]]

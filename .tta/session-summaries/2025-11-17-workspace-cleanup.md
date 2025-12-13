@@ -1,8 +1,8 @@
 # Session Summary: TTA.dev Workspace Cleanup
 
-**Date:** 2025-11-17  
-**Branch:** agent/copilot  
-**Agent:** GitHub Copilot  
+**Date:** 2025-11-17
+**Branch:** agent/copilot
+**Agent:** GitHub Copilot
 **Status:** ✅ Complete
 
 ## Objective
@@ -101,7 +101,11 @@ The TTA.dev workspace is now:
 
 ---
 
-**Session Duration:** ~30 minutes  
-**Agent:** GitHub Copilot  
-**Branch:** agent/copilot  
+**Session Duration:** ~30 minutes
+**Agent:** GitHub Copilot
+**Branch:** agent/copilot
 **Ready for:** Commit and merge
+
+
+---
+**Logseq:** [[TTA.dev/.tta/Session-summaries/2025-11-17-workspace-cleanup]]

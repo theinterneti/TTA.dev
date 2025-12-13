@@ -323,3 +323,7 @@ export ANOTHER_VAR="another_value"
 6. **Update catalog** by adding entry to [[TTA.dev/Integrations/Catalog]]
 7. **Update status** by adding entry to [[TTA.dev/Integrations/Status Dashboard]]
 8. **Remove this instruction section** before final publication
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Integration documentation template]]

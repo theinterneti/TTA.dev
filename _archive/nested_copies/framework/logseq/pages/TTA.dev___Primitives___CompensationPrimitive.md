@@ -552,3 +552,7 @@ workflow = FallbackPrimitive(
 **Category:** [[Recovery]]
 **Complexity:** [[High]]
 **Also Known As:** SagaPrimitive
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___primitives___compensationprimitive]]

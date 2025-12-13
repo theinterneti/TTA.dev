@@ -27,3 +27,7 @@ When adding shared components:
 2. Follow TTA.dev coding standards (type hints, testing, documentation)
 3. Add appropriate unit tests
 4. Update this README as needed
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Shared/Readme]]

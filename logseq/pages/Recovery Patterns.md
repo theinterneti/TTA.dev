@@ -64,3 +64,7 @@ workflow = FallbackPrimitive(
 
 category:: recovery
 type:: patterns
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Recovery patterns]]

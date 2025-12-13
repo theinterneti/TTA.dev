@@ -341,3 +341,7 @@ packages/tta-rebuild/
 
 **Last Updated:** November 8, 2025
 **Next Review:** After Phase 2 completion
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/Week4_llm_integration_plan]]

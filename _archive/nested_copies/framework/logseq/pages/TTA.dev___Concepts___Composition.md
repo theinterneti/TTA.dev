@@ -573,3 +573,6 @@ async def good_primitive(data: dict, context: WorkflowContext) -> dict:
 **Status:** Production-ready
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___concepts___composition]]

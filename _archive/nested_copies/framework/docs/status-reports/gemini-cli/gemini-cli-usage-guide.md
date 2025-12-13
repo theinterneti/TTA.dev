@@ -453,3 +453,7 @@ Every interaction includes a link to detailed logs in the acknowledgment comment
 **Last Updated:** October 31, 2025
 **Model:** gemini-2.0-flash-thinking-exp-1219 (default)
 **MCP Servers:** GitHub (v0.20.1), Context7
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Gemini-cli/Gemini-cli-usage-guide]]

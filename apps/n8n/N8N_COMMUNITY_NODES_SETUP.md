@@ -215,3 +215,7 @@ See: `workflows/README.md` for detailed workflow documentation.
 **Last Updated:** November 9, 2025
 **Package Version:** @n8n/n8n-nodes-langchain@1.118.0
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_community_nodes_setup]]

@@ -540,3 +540,7 @@ All Phase 3 examples now use the **InstrumentedPrimitive pattern**:
 5. **Multi-Agent** (`examples/multi_agent_workflow.py`) - Agent coordination
 
 See [`PHASE3_EXAMPLES_COMPLETE.md`](../../PHASE3_EXAMPLES_COMPLETE.md) for implementation details.
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Agents]]

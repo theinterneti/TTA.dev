@@ -645,3 +645,7 @@ python deploy_production.py
 ---
 
 **Remember**: Security is an ongoing process, not a one-time setup. Regularly audit and rotate your secrets!
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Secrets_management_guide]]

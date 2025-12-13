@@ -102,3 +102,7 @@ cached_chat = CachePrimitive(ttl=3600) >> your_openai_call
 This caches identical prompts for 1 hour. Most apps see 40-60% cost reduction. Your bill might drop to ~$25/day.
 
 When you're ready for more savings, we can look at prompt similarity matching, but this one-liner is a great start! 🚀
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Agents/Copilot/Agents/Vibe-scaling-expert.agent]]

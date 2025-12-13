@@ -13,3 +13,7 @@
 - [ ] Login UI (depends: T-002) (8h) [T-006]
 - [ ] Dashboard UI (depends: T-002) (8h) [T-007]
 - [ ] Settings UI (depends: T-002) (8h) [T-008]
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Tasks_output/Example5/Plan]]

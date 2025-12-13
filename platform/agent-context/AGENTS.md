@@ -343,3 +343,7 @@ python .augment/context/cli.py show session-name
 
 **Last Updated**: 2025-10-26
 **Status**: Active - Universal context standard for all AI agents
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/Agents]]

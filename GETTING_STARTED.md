@@ -493,3 +493,7 @@ Interested in contributing? Check out:
 ---
 
 **Last Updated:** 2025-11-10
+
+
+---
+**Logseq:** [[TTA.dev/Getting_started]]

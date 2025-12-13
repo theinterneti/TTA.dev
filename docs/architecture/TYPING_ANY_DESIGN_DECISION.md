@@ -427,3 +427,7 @@ This approach balances:
 **Last Updated:** 2025-11-05
 **Next Review:** After completing Phase 3 remediation
 **Owner:** TTA.dev Core Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Typing_any_design_decision]]

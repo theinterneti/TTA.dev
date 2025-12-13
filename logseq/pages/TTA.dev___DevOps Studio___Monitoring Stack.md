@@ -1422,3 +1422,7 @@ jobs:
 **Last Updated:** November 7, 2025
 **Stage Integration:** All stages supported
 **Maintained by:** TTA.dev Platform Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___devops studio___monitoring stack]]

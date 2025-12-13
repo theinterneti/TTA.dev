@@ -1,7 +1,7 @@
 # GitHub Issues → Logseq TODO Mapping
 
-**Date**: 2025-10-31  
-**Purpose**: Map open GitHub issues to Logseq TODOs for integrated tracking  
+**Date**: 2025-10-31
+**Purpose**: Map open GitHub issues to Logseq TODOs for integrated tracking
 **Status**: Phase 3 Complete
 
 ---
@@ -384,6 +384,10 @@
 
 ---
 
-**Status**: ✅ Phase 3 Complete  
+**Status**: ✅ Phase 3 Complete
 **Next Phase**: Phase 4 - KB Integration
 
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Github_issue_todo_mapping]]

@@ -168,7 +168,7 @@ mcp_server/
 ├── server.py       # FastMCP server with tool definitions
 analysis/
 ├── patterns.py     # PatternDetector
-├── matcher.py      # PrimitiveMatcher  
+├── matcher.py      # PrimitiveMatcher
 ├── templates.py    # TemplateProvider
 ├── analyzer.py     # TTAAnalyzer
 ```
@@ -182,3 +182,7 @@ tta_dev.mcp.analyze_code    code_length=500 file_path=app.py
 tta_dev.mcp.get_primitive   name=RetryPrimitive
 tta_dev.mcp.list_primitives category=recovery
 ```
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Mcp_server/Readme]]

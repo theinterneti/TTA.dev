@@ -34,3 +34,7 @@ router = RouterPrimitive(
 ```
 
 **Source:** `platform/primitives/src/tta_dev_primitives/core/routing.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Routerprimitive]]

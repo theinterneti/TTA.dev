@@ -34,3 +34,7 @@ workflow = FallbackPrimitive(
 ```
 
 **Source:** `platform/primitives/src/tta_dev_primitives/recovery/fallback.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Fallbackprimitive]]

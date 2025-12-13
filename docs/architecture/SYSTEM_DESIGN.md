@@ -563,3 +563,7 @@ api_key = "sk-hardcoded-key"  # Never do this!
 
 **Last Updated:** October 30, 2025
 **Maintainer:** TTA.dev Core Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/System_design]]

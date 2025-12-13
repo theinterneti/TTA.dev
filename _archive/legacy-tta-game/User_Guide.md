@@ -211,3 +211,7 @@ If you encounter issues not covered here:
 The Therapeutic Text Adventure is designed to provide an engaging, reflective experience that supports your emotional well-being. By exploring the game world, interacting with characters, and engaging with therapeutic elements, you can discover new insights and develop valuable skills for managing emotions and stress.
 
 Enjoy your journey! 🌟
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/User_guide]]

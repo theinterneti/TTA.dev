@@ -44,3 +44,7 @@ Here's an example of how an agent might use the `create_pull_request` tool:
     "body": "This pull request adds a new feature to the project."
   }
 }
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Github]]

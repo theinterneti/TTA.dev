@@ -517,3 +517,7 @@ gh issue create \
 
 **Note:** Always validate promotion criteria before executing promotion. Rollback is easier than fixing production issues.
 
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Component-promotion.prompt]]

@@ -74,3 +74,6 @@ category:: orchestration
 type:: multi-agent
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Multi-agent orchestration]]

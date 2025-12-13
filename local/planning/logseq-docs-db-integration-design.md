@@ -649,3 +649,7 @@ See: `local/planning/logseq-docs-integration-todos.md`
 **Last Updated:** October 31, 2025
 **Status:** Design Phase
 **Next:** Create TODO list and start Phase 1
+
+
+---
+**Logseq:** [[TTA.dev/Local/Planning/Logseq-docs-db-integration-design]]

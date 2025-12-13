@@ -277,3 +277,7 @@ uv run python scripts/update-markdown-todos.py --file docs/planning/feature.md
 **Last Updated:** November 2, 2025
 **Status:** ✅ Lifecycle guide complete and operational
 **Impact:** Clear workflows for TODO completion, archival, and embedded TODO management
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Status-reports/Todo-management/Todo_lifecycle_implementation_summary]]

@@ -110,7 +110,7 @@ Total: 1200 tokens
 ```
 @workspace Create toolset "tta-package-dev" with:
 - edit
-- search  
+- search
 - usages
 - problems
 - mcp_pylance_mcp_s_pylanceRunCodeSnippet
@@ -179,7 +179,7 @@ Try this workflow:
 @workspace Edit file X to add feature Y
 
 # Need observability data
-@workspace Switch to "tta-observability" toolset  
+@workspace Switch to "tta-observability" toolset
 @workspace Query Prometheus for error rates
 
 # Write incident report
@@ -218,7 +218,7 @@ npx -y @toolprint/hypertool-mcp mcp run --persona web-dev
 
 Available personas:
 - `web-dev` - Git, Docker, Filesystem, Browser
-- `data-scientist` - Python, Jupyter, Database  
+- `data-scientist` - Python, Jupyter, Database
 - `devops` - Docker, Kubernetes, AWS
 - `researcher` - Perplexity, Arxiv, Wikipedia
 
@@ -286,6 +286,10 @@ cp .mcp.json.backup .mcp.json
 
 ---
 
-**Created:** 2025-11-14  
-**Estimated Time:** 5 minutes to try  
+**Created:** 2025-11-14
+**Estimated Time:** 5 minutes to try
 **Impact:** Immediate - See the difference right away!
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Hypertool_quickstart]]

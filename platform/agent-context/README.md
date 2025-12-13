@@ -258,7 +258,11 @@ Developed as part of the [TTA (Therapeutic Text Adventure)](https://github.com/t
 
 ---
 
-**Version**: 1.0.0  
-**Status**: Production  
+**Version**: 1.0.0
+**Status**: Production
 **Last Updated**: 2025-10-28
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/Readme]]

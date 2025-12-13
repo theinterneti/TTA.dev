@@ -2,7 +2,7 @@
 
 **Purpose:** Map existing TTA.dev chat modes to Hypertool personas for automatic context optimization
 
-**Status:** Phase 3 - In Progress  
+**Status:** Phase 3 - In Progress
 **Last Updated:** 2025-11-14
 
 ---
@@ -22,7 +22,7 @@ This document maps the 44+ existing `.chatmode.md` files to the 6 Hypertool pers
 
 ### 1. Backend Engineer Persona (tta-backend-engineer)
 
-**Token Budget:** 2000 tokens  
+**Token Budget:** 2000 tokens
 **MCP Servers:** context7, github, sequential-thinking, gitmcp, serena, mcp-logseq
 
 **Chat Modes Mapped:**
@@ -42,7 +42,7 @@ This document maps the 44+ existing `.chatmode.md` files to the 6 Hypertool pers
 
 ### 2. Frontend Engineer Persona (tta-frontend-engineer)
 
-**Token Budget:** 1800 tokens  
+**Token Budget:** 1800 tokens
 **MCP Servers:** context7, playwright, github, gitmcp, serena
 
 **Chat Modes Mapped:**
@@ -63,7 +63,7 @@ This document maps the 44+ existing `.chatmode.md` files to the 6 Hypertool pers
 
 ### 3. DevOps Engineer Persona (tta-devops-engineer)
 
-**Token Budget:** 1800 tokens  
+**Token Budget:** 1800 tokens
 **MCP Servers:** github, gitmcp, serena, grafana
 
 **Chat Modes Mapped:**
@@ -84,7 +84,7 @@ This document maps the 44+ existing `.chatmode.md` files to the 6 Hypertool pers
 
 ### 4. Testing Specialist Persona (tta-testing-specialist)
 
-**Token Budget:** 1500 tokens  
+**Token Budget:** 1500 tokens
 **MCP Servers:** context7, playwright, github, gitmcp
 
 **Chat Modes Mapped:**
@@ -105,7 +105,7 @@ This document maps the 44+ existing `.chatmode.md` files to the 6 Hypertool pers
 
 ### 5. Observability Expert Persona (tta-observability-expert)
 
-**Token Budget:** 2000 tokens  
+**Token Budget:** 2000 tokens
 **MCP Servers:** context7, grafana, github, sequential-thinking, serena
 
 **Chat Modes Mapped:**
@@ -126,7 +126,7 @@ This document maps the 44+ existing `.chatmode.md` files to the 6 Hypertool pers
 
 ### 6. Data Scientist Persona (tta-data-scientist)
 
-**Token Budget:** 1700 tokens  
+**Token Budget:** 1700 tokens
 **MCP Servers:** context7, github, sequential-thinking, mcp-logseq
 
 **Chat Modes Mapped:**
@@ -284,6 +284,10 @@ After mapping all chat modes:
 
 ---
 
-**Last Updated:** 2025-11-14  
-**Progress:** 2/44 chat modes mapped (4.5%)  
+**Last Updated:** 2025-11-14
+**Progress:** 2/44 chat modes mapped (4.5%)
 **Next Priority:** Map DevOps, Testing, Observability chat modes
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Chatmode_mapping]]

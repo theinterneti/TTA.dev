@@ -72,3 +72,7 @@ See: [[TTA.dev/Guides/MCP Server Development]]
 
 integration:: mcp-servers
 tools:: available
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Mcp servers]]

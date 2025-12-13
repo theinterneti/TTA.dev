@@ -350,3 +350,7 @@ See `docs/KB_AUTOMATION_SUMMARY.md` for:
 **Last Updated:** November 3, 2025
 **Version:** 1.0
 **Status:** Phase 1 Complete
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Status-reports/Infrastructure/Kb_automation_quickref]]

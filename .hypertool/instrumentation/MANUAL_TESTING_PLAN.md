@@ -2,8 +2,8 @@
 
 **Purpose:** Validate all Hypertool workflows with APM instrumentation
 
-**Date:** 2025-11-15  
-**Phase:** Phase 5 Week 3 - Manual Testing  
+**Date:** 2025-11-15
+**Phase:** Phase 5 Week 3 - Manual Testing
 **Estimated Duration:** 2-3 hours
 
 ---
@@ -16,10 +16,10 @@
    ```bash
    # Check if Prometheus is running
    curl http://localhost:9090/-/healthy
-   
+
    # Check if Grafana is running
    curl http://localhost:3000/api/health
-   
+
    # If not running, start with:
    docker-compose -f docker-compose.test.yml up -d
    ```
@@ -30,7 +30,7 @@
    echo $LANGFUSE_PUBLIC_KEY
    echo $LANGFUSE_SECRET_KEY
    echo $LANGFUSE_HOST
-   
+
    # If missing, add to .env:
    # LANGFUSE_PUBLIC_KEY=pk-lf-...
    # LANGFUSE_SECRET_KEY=sk-lf-...
@@ -41,7 +41,7 @@
    ```bash
    # Install required packages
    uv sync --all-extras
-   
+
    # Verify Langfuse SDK
    python -c "import langfuse; print(f'Langfuse {langfuse.__version__}')"
    ```
@@ -66,25 +66,25 @@
    ```
    🚀 Starting Package Release Workflow
    ============================================================
-   
+
    📝 Stage 1: Version Bump
       Persona: backend-engineer
       ✅ Backend task completed: Update version to 1.2.0
       📊 Tokens: 650
       💰 Budget remaining: 1350
-   
+
    🧪 Stage 2: Quality Validation
       Persona: testing-specialist
       ✅ Testing task completed: Run full test suite
       📊 Tokens: 720
       💰 Budget remaining: 780
-   
+
    🚀 Stage 3: Deployment
       Persona: devops-engineer
       ✅ DevOps task completed: Deploy: Deploy to production
       📊 Tokens: 550
       💰 Budget remaining: 1250
-   
+
    ✅ Workflow Complete
    ```
 
@@ -103,11 +103,11 @@
    # Query persona switch count
    curl -G http://localhost:9090/api/v1/query \
      --data-urlencode 'query=hypertool_persona_switches_total'
-   
+
    # Query token usage
    curl -G http://localhost:9090/api/v1/query \
      --data-urlencode 'query=hypertool_token_usage_total'
-   
+
    # Query workflow duration
    curl -G http://localhost:9090/api/v1/query \
      --data-urlencode 'query=hypertool_workflow_stage_duration_seconds_sum'
@@ -189,7 +189,7 @@
      ```python
      from datetime import datetime
      from typing import Dict, Any
-     
+
      async def get_health_status() -> Dict[str, Any]:
          """Return system health status."""
          return {
@@ -236,18 +236,18 @@
      # packages/tta-dev-primitives/tests/test_health.py
      import pytest
      from tta_dev_primitives.health import get_health_status
-     
+
      @pytest.mark.asyncio
      async def test_health_status():
          """Test health check returns expected structure."""
          result = await get_health_status()
-         
+
          assert result["status"] == "healthy"
          assert "timestamp" in result
          assert "version" in result
          assert "components" in result
      ```
-   
+
    - Run tests:
      ```bash
      uv run pytest packages/tta-dev-primitives/tests/test_health.py -v
@@ -378,7 +378,7 @@ git branch -D test/manual-testing-feature-implementation
              }
          }
      ```
-   
+
    - Add validation to prevent regression
 
    **Verification:**
@@ -400,16 +400,16 @@ git branch -D test/manual-testing-feature-implementation
      async def test_health_timestamp_format():
          """Ensure timestamp is ISO8601 format."""
          result = await get_health_status()
-         
+
          # Verify ISO8601 format (includes time)
          assert "T" in result["timestamp"]
          assert result["timestamp"].endswith("Z") or "+" in result["timestamp"]
-         
+
          # Verify parseable
          from datetime import datetime
          datetime.fromisoformat(result["timestamp"].replace("Z", "+00:00"))
      ```
-   
+
    - Run all tests:
      ```bash
      uv run pytest packages/tta-dev-primitives/tests/test_health.py -v
@@ -502,18 +502,18 @@ git branch -D test/manual-testing-bug-fix
      sed -i 's/version = "1.0.0"/version = "1.0.1"/' \
        packages/tta-dev-primitives/pyproject.toml
      ```
-   
+
    - Update CHANGELOG.md:
      ```markdown
      ## [1.0.1] - 2025-11-15
-     
+
      ### Fixed
      - Health check timestamp format
-     
+
      ### Changed
      - Improved APM instrumentation
      ```
-   
+
    - Create git tag:
      ```bash
      git add packages/tta-dev-primitives/pyproject.toml CHANGELOG.md
@@ -538,12 +538,12 @@ git branch -D test/manual-testing-bug-fix
      ```bash
      uv run pytest packages/tta-dev-primitives/tests/ -v --cov
      ```
-   
+
    - Type check:
      ```bash
      uvx pyright packages/tta-dev-primitives/
      ```
-   
+
    - Lint check:
      ```bash
      uv run ruff check packages/tta-dev-primitives/
@@ -568,12 +568,12 @@ git branch -D test/manual-testing-bug-fix
      cd packages/tta-dev-primitives
      uv build
      ```
-   
+
    - Verify build artifacts:
      ```bash
      ls -lh dist/
      ```
-   
+
    - (Simulated) Publish to PyPI:
      ```bash
      echo "Would run: uv publish --token $PYPI_TOKEN"
@@ -694,8 +694,8 @@ After completing all tests, fill out this summary:
 
 ### Test Execution Summary
 
-**Date:** 2025-11-15  
-**Duration:** _____ hours  
+**Date:** 2025-11-15
+**Duration:** _____ hours
 **Tester:** _____
 
 ### Results
@@ -795,3 +795,7 @@ curl http://localhost:9090/api/v1/label/__name__/values | jq '.data[] | select(c
 ---
 
 **End of Manual Testing Plan**
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Instrumentation/Manual_testing_plan]]

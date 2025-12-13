@@ -544,3 +544,7 @@ jobs:
 
 **CI Status:** ![Tests](https://github.com/theinterneti/TTA.dev/actions/workflows/test.yml/badge.svg)
 **Coverage:** [![codecov](https://codecov.io/gh/theinterneti/TTA.dev/branch/main/graph/badge.svg)](https://codecov.io/gh/theinterneti/TTA.dev)
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Github actions]]

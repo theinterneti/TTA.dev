@@ -1,3 +1,4 @@
+// Logseq: [[TTA.dev/Apps/Observability-ui/Ui/App]]
 // TTA Observability UI - Client JavaScript
 // Handles API communication, WebSocket updates, and UI rendering
 
@@ -16,10 +17,10 @@ async function fetchTraces(limit = 50, status = null) {
     try {
         const params = new URLSearchParams({ limit });
         if (status) params.append('status', status);
-        
+
         const response = await fetch(`${API_BASE}/api/traces?${params}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
+
         const data = await response.json();
         return data.traces || [];
     } catch (error) {
@@ -32,7 +33,7 @@ async function fetchTrace(traceId) {
     try {
         const response = await fetch(`${API_BASE}/api/traces/${traceId}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
+
         return await response.json();
     } catch (error) {
         console.error('Failed to fetch trace:', error);
@@ -44,7 +45,7 @@ async function fetchMetricsSummary() {
     try {
         const response = await fetch(`${API_BASE}/api/metrics/summary`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
+
         return await response.json();
     } catch (error) {
         console.error('Failed to fetch metrics:', error);
@@ -59,13 +60,13 @@ async function fetchMetricsSummary() {
 function connectWebSocket() {
     try {
         ws = new WebSocket(WS_URL);
-        
+
         ws.onopen = () => {
             console.log('WebSocket connected');
             reconnectAttempts = 0;
             updateConnectionStatus(true);
         };
-        
+
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
@@ -74,17 +75,17 @@ function connectWebSocket() {
                 console.error('Failed to parse WebSocket message:', error);
             }
         };
-        
+
         ws.onclose = () => {
             console.log('WebSocket disconnected');
             updateConnectionStatus(false);
-            
+
             // Attempt to reconnect with exponential backoff
             const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
             reconnectAttempts++;
             setTimeout(connectWebSocket, delay);
         };
-        
+
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
@@ -106,7 +107,7 @@ function handleWebSocketMessage(data) {
 function updateConnectionStatus(connected) {
     const statusDot = document.getElementById('connectionStatus');
     const statusText = document.getElementById('connectionText');
-    
+
     if (connected) {
         statusDot.className = 'status-dot';
         statusText.textContent = 'Connected';
@@ -125,7 +126,7 @@ function renderTrace(trace, includeTimeline = false) {
     const duration = trace.duration_ms.toFixed(2);
     const timestamp = new Date(trace.start_time).toLocaleString();
     const primitiveCount = trace.spans.length;
-    
+
     let html = `
         <li class="trace-item status-${statusClass}" onclick="showTraceDetails('${trace.trace_id}')">
             <div class="trace-header">
@@ -139,15 +140,15 @@ function renderTrace(trace, includeTimeline = false) {
                 </div>
             </div>
     `;
-    
+
     if (includeTimeline && trace.spans.length > 0) {
         html += renderTimeline(trace);
     }
-    
+
     if (trace.error_message) {
         html += `<div class="trace-error">❌ ${trace.error_message}</div>`;
     }
-    
+
     html += `</li>`;
     return html;
 }
@@ -155,24 +156,24 @@ function renderTrace(trace, includeTimeline = false) {
 function renderTimeline(trace) {
     const totalDuration = trace.duration_ms;
     const startTime = new Date(trace.start_time).getTime();
-    
+
     let html = '<div class="timeline">';
-    
+
     trace.spans.forEach(span => {
         const spanStart = new Date(span.start_time).getTime();
         const spanDuration = span.duration_ms;
         const offset = ((spanStart - startTime) / totalDuration) * 100;
         const width = (spanDuration / totalDuration) * 100;
         const statusClass = span.status === 'error' ? 'error' : 'success';
-        
+
         html += `
-            <div class="timeline-bar status-${statusClass}" 
+            <div class="timeline-bar status-${statusClass}"
                  style="left: ${offset}%; width: ${width}%;"
                  title="${span.primitive_type || 'Unknown'}: ${spanDuration.toFixed(2)}ms">
             </div>
         `;
     });
-    
+
     html += '</div>';
     return html;
 }
@@ -181,7 +182,7 @@ function renderTraceDetails(trace) {
     const statusClass = trace.status === 'error' ? 'error' : 'success';
     const duration = trace.duration_ms.toFixed(2);
     const timestamp = new Date(trace.start_time).toLocaleString();
-    
+
     let html = `
         <div class="trace-detail">
             <div class="flex gap-2 mb-3">
@@ -189,14 +190,14 @@ function renderTraceDetails(trace) {
                 <div class="badge badge-info">${trace.spans.length} spans</div>
                 <div class="badge badge-secondary">${duration}ms</div>
             </div>
-            
+
             <div class="mb-3">
                 <strong>Trace ID:</strong> <code>${trace.trace_id}</code><br>
                 <strong>Started:</strong> ${timestamp}<br>
                 <strong>Duration:</strong> ${duration}ms
             </div>
     `;
-    
+
     if (trace.error_message) {
         html += `
             <div class="card bg-error mb-3" style="padding: 15px;">
@@ -204,7 +205,7 @@ function renderTraceDetails(trace) {
             </div>
         `;
     }
-    
+
     // Render timeline
     html += `
         <div class="mb-3">
@@ -212,7 +213,7 @@ function renderTraceDetails(trace) {
             ${renderTimeline(trace)}
         </div>
     `;
-    
+
     // Render spans
     html += '<div><strong>Spans:</strong></div>';
     trace.spans.forEach((span, index) => {
@@ -233,30 +234,30 @@ function renderTraceDetails(trace) {
                     <strong>Started:</strong> ${new Date(span.start_time).toLocaleString()}
                 </div>
         `;
-        
+
         if (span.attributes && Object.keys(span.attributes).length > 0) {
             html += '<div class="mt-2"><strong>Attributes:</strong></div>';
             html += '<pre style="font-size: 12px; background: var(--bg-primary); padding: 10px; border-radius: 4px; overflow-x: auto;">';
             html += JSON.stringify(span.attributes, null, 2);
             html += '</pre>';
         }
-        
+
         if (span.error_message) {
             html += `<div class="mt-2 text-error"><strong>Error:</strong> ${span.error_message}</div>`;
         }
-        
+
         html += '</div>';
     });
-    
+
     html += '</div>';
     return html;
 }
 
 function renderMetrics(metrics) {
     if (!metrics) return '<div class="empty-state">No metrics available</div>';
-    
+
     let html = '<div class="metrics-grid">';
-    
+
     html += `
         <div class="metric-card">
             <div class="metric-value text-info">${metrics.total_traces}</div>
@@ -271,17 +272,17 @@ function renderMetrics(metrics) {
             <div class="metric-label">Average Duration</div>
         </div>
     `;
-    
+
     html += '</div>';
-    
+
     // Primitive breakdown
     if (metrics.primitive_counts && Object.keys(metrics.primitive_counts).length > 0) {
         html += '<div class="mt-3"><h3>Primitive Usage</h3></div>';
         html += '<div class="card"><ul style="list-style: none; padding: 0;">';
-        
+
         const sortedPrimitives = Object.entries(metrics.primitive_counts)
             .sort((a, b) => b[1] - a[1]);
-        
+
         sortedPrimitives.forEach(([primitive, count]) => {
             html += `
                 <li style="padding: 10px; border-bottom: 1px solid var(--border);">
@@ -292,16 +293,16 @@ function renderMetrics(metrics) {
                 </li>
             `;
         });
-        
+
         html += '</ul></div>';
     }
-    
+
     return html;
 }
 
 function renderPrimitiveStats(traces) {
     const stats = {};
-    
+
     traces.forEach(trace => {
         trace.spans.forEach(span => {
             const primitive = span.primitive_type || 'Unknown';
@@ -313,7 +314,7 @@ function renderPrimitiveStats(traces) {
                     successes: 0
                 };
             }
-            
+
             stats[primitive].count++;
             stats[primitive].totalDuration += span.duration_ms;
             if (span.status === 'error') {
@@ -323,15 +324,15 @@ function renderPrimitiveStats(traces) {
             }
         });
     });
-    
+
     let html = '<div class="card-list">';
-    
+
     Object.entries(stats)
         .sort((a, b) => b[1].count - a[1].count)
         .forEach(([primitive, data]) => {
             const avgDuration = (data.totalDuration / data.count).toFixed(2);
             const errorRate = ((data.errors / data.count) * 100).toFixed(1);
-            
+
             html += `
                 <div class="card">
                     <div class="flex justify-between items-start mb-2">
@@ -359,11 +360,11 @@ function renderPrimitiveStats(traces) {
                 </div>
             `;
         });
-    
+
     html += '</div>';
-    
-    return Object.keys(stats).length > 0 
-        ? html 
+
+    return Object.keys(stats).length > 0
+        ? html
         : '<div class="empty-state">No primitive statistics available</div>';
 }
 
@@ -374,12 +375,12 @@ function renderPrimitiveStats(traces) {
 async function updateMetrics() {
     const metrics = await fetchMetricsSummary();
     if (!metrics) return;
-    
+
     // Update overview metrics
     document.getElementById('totalTraces').textContent = metrics.total_traces;
     document.getElementById('successRate').textContent = `${metrics.success_rate.toFixed(1)}%`;
     document.getElementById('avgDuration').textContent = `${metrics.average_duration.toFixed(2)}ms`;
-    
+
     const errorRate = 100 - metrics.success_rate;
     document.getElementById('errorRate').textContent = `${errorRate.toFixed(1)}%`;
 }
@@ -387,14 +388,14 @@ async function updateMetrics() {
 async function updateTraceList(containerId, limit = 50, status = null) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    
+
     const traces = await fetchTraces(limit, status);
-    
+
     if (traces.length === 0) {
         container.innerHTML = '<li class="empty-state">No traces found</li>';
         return;
     }
-    
+
     container.innerHTML = traces
         .map(trace => renderTrace(trace, containerId === 'recentTraces'))
         .join('');
@@ -402,23 +403,23 @@ async function updateTraceList(containerId, limit = 50, status = null) {
 
 function addTraceToList(trace) {
     const containers = ['recentTraces', 'allTraces'];
-    
+
     containers.forEach(containerId => {
         const container = document.getElementById(containerId);
         if (!container) return;
-        
+
         // Remove empty state if present
         const emptyState = container.querySelector('.empty-state');
         if (emptyState) {
             emptyState.remove();
         }
-        
+
         // Add new trace at the top
         const li = document.createElement('li');
         li.innerHTML = renderTrace(trace, containerId === 'recentTraces');
         li.className = 'trace-item fade-in';
         container.insertBefore(li.firstChild, container.firstChild);
-        
+
         // Limit number of displayed traces
         const maxTraces = containerId === 'recentTraces' ? 10 : 50;
         while (container.children.length > maxTraces) {
@@ -461,10 +462,10 @@ async function showTraceDetails(traceId) {
         alert('Failed to load trace details');
         return;
     }
-    
+
     const modal = document.getElementById('traceModal');
     const details = document.getElementById('traceDetails');
-    
+
     details.innerHTML = renderTraceDetails(trace);
     modal.style.display = 'block';
 }
@@ -481,21 +482,21 @@ function closeTraceModal() {
 function initTabNavigation() {
     const tabs = document.querySelectorAll('.nav-tab');
     const contents = document.querySelectorAll('.tab-content');
-    
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const targetId = tab.dataset.tab;
-            
+
             // Update active tab
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            
+
             // Update active content
             contents.forEach(c => c.classList.remove('active'));
             const targetContent = document.getElementById(targetId);
             if (targetContent) {
                 targetContent.classList.add('active');
-                
+
                 // Refresh data when switching to certain tabs
                 if (targetId === 'metrics') {
                     refreshMetrics();
@@ -513,17 +514,17 @@ function initTabNavigation() {
 
 async function init() {
     console.log('Initializing TTA Observability UI...');
-    
+
     // Setup tab navigation
     initTabNavigation();
-    
+
     // Connect WebSocket
     connectWebSocket();
-    
+
     // Load initial data
     await refreshTraces();
     await refreshMetrics();
-    
+
     console.log('TTA Observability UI initialized');
 }
 

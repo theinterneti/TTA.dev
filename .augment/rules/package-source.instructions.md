@@ -1152,3 +1152,7 @@ Before committing, ensure:
 - [ ] Formatted with `uv run ruff format`
 - [ ] Linted with `uv run ruff check --fix`
 - [ ] Type-checked with `uvx pyright`
+
+
+---
+**Logseq:** [[TTA.dev/.augment/Rules/Package-source.instructions]]

@@ -19,3 +19,7 @@ Generated: Sat Nov  8 00:23:54 PST 2025
 - Found: .env.local.example
 - Found: .env.production.example
 - Found: .env.staging.example
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Tta-analysis/Package-statistics]]

@@ -943,3 +943,7 @@ result = await router.execute(data, context)
 ---
 
 **Next Steps:** When cline detects routing scenarios in multi-provider systems, it should automatically suggest RouterPrimitive with intelligent routing strategies based on cost, performance, geography, or user requirements.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Router_primitive]]

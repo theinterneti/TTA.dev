@@ -55,3 +55,7 @@ Contributors are:
 
 audience:: contributors
 level:: intermediate-to-advanced
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Contributors]]

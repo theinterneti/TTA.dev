@@ -570,3 +570,7 @@ As you work, update the `status::` property.
 
 **Last Updated:** November 2, 2025
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Todo templates]]

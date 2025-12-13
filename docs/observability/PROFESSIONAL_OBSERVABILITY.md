@@ -352,3 +352,7 @@ curl http://localhost:9090/api/v1/targets
 **Last Updated:** November 7, 2025
 **Version:** 1.0.0
 **Maintained by:** TTA.dev Platform Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Observability/Professional_observability]]

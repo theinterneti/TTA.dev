@@ -35,3 +35,7 @@ workflow = RetryPrimitive(
 ```
 
 **Source:** `platform/primitives/src/tta_dev_primitives/recovery/retry.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Retryprimitive]]

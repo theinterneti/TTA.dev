@@ -141,3 +141,7 @@ Cache layer should not increase P99 latency by >10ms. Redis cluster should handl
 ### Approvals
 - [ ] Technical Lead: (pending)
 - [ ] Product Owner: (pending)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Specs/Add-caching-layer-to-improve.spec]]

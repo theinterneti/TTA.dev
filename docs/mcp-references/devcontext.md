@@ -37,3 +37,7 @@ Here's an example of the tool execution sequence defined by the core Cursor Rule
 3.  **`retrieve_relevant_context`**: Called when specific context is required.
 4.  **`record_milestone_context`**: Called occasionally for significant achievements.
 5.  **`finalize_conversation_context`**: Called once at the end of a conversation.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Devcontext]]

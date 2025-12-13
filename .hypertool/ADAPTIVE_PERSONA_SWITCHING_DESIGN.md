@@ -1,7 +1,7 @@
 # Adaptive Persona Switching Design
 
-**Purpose:** Intelligent, automatic persona selection using TTA.dev primitives  
-**Status:** Design Phase  
+**Purpose:** Intelligent, automatic persona selection using TTA.dev primitives
+**Status:** Design Phase
 **Created:** 2025-11-14
 
 ---
@@ -29,11 +29,11 @@ import re
 
 class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
     """Analyze task context to extract persona hints."""
-    
+
     async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
         """
         Extract context signals from task.
-        
+
         Input:
             {
                 "query": str,           # User's request
@@ -41,7 +41,7 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
                 "recent_commands": list[str],  # Recent terminal commands
                 "active_editor": str,   # Currently open file
             }
-        
+
         Output:
             {
                 "signals": {
@@ -59,13 +59,13 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
         """
         signals = self._extract_signals(input_data)
         scores = self._calculate_confidence(signals)
-        
+
         return {
             "signals": signals,
             "confidence_scores": scores,
             "original_input": input_data
         }
-    
+
     def _extract_signals(self, data: dict) -> dict:
         """Extract relevant signals from context."""
         signals = {
@@ -75,11 +75,11 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
             "commands": data.get("recent_commands", [])
         }
         return signals
-    
+
     def _extract_file_types(self, files: list[str]) -> list[str]:
         """Get file extensions."""
         return [Path(f).suffix.lstrip('.') for f in files if Path(f).suffix]
-    
+
     def _extract_keywords(self, text: str) -> list[str]:
         """Extract relevant keywords."""
         keywords = {
@@ -90,15 +90,15 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
             "observability": ["metrics", "trace", "prometheus", "grafana", "otel"],
             "data": ["pandas", "ml", "langgraph", "prompt", "jupyter"]
         }
-        
+
         found = []
         text_lower = text.lower()
         for category, terms in keywords.items():
             if any(term in text_lower for term in terms):
                 found.append(category)
-        
+
         return found
-    
+
     def _extract_directories(self, files: list[str]) -> list[str]:
         """Extract directory patterns."""
         dirs = set()
@@ -113,7 +113,7 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
             if "docker" in str(f).lower() or "infrastructure" in parts:
                 dirs.add("infrastructure/")
         return list(dirs)
-    
+
     def _calculate_confidence(self, signals: dict) -> dict[str, float]:
         """Calculate confidence score for each persona."""
         scores = {
@@ -124,7 +124,7 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
             "tta-observability-expert": 0.0,
             "tta-data-scientist": 0.0
         }
-        
+
         # File type scoring
         if "py" in signals["file_types"]:
             scores["tta-backend-engineer"] += 0.3
@@ -132,7 +132,7 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
             scores["tta-frontend-engineer"] += 0.5
         if "yaml" in signals["file_types"] or "yml" in signals["file_types"]:
             scores["tta-devops-engineer"] += 0.2
-        
+
         # Keyword scoring
         keyword_weights = {
             "testing": ("tta-testing-specialist", 0.4),
@@ -142,12 +142,12 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
             "observability": ("tta-observability-expert", 0.3),
             "data": ("tta-data-scientist", 0.3)
         }
-        
+
         for keyword in signals["keywords"]:
             if keyword in keyword_weights:
                 persona, weight = keyword_weights[keyword]
                 scores[persona] += weight
-        
+
         # Directory scoring
         if "tests/" in signals["directories"]:
             scores["tta-testing-specialist"] += 0.3
@@ -155,7 +155,7 @@ class ContextAnalyzer(WorkflowPrimitive[dict, dict]):
             scores["tta-frontend-engineer"] += 0.4
         if "infrastructure/" in signals["directories"]:
             scores["tta-devops-engineer"] += 0.4
-        
+
         # Normalize scores to 0-1 range
         max_score = max(scores.values()) if max(scores.values()) > 0 else 1
         return {k: v / max_score for k, v in scores.items()}
@@ -173,7 +173,7 @@ from tta_dev_primitives.core import RouterPrimitive
 
 class PersonaRouter(RouterPrimitive):
     """Route to optimal persona based on context analysis."""
-    
+
     def __init__(self):
         # Define persona "primitives" (they're actually personas, not executables)
         # We'll use this for routing logic, actual switching happens via MCP config
@@ -185,17 +185,17 @@ class PersonaRouter(RouterPrimitive):
             "tta-observability-expert": self._create_persona_handler("observability"),
             "tta-data-scientist": self._create_persona_handler("data")
         }
-        
+
         super().__init__(
             routes=personas,
             router_fn=self._select_persona,
             default_route="tta-backend-engineer"  # Fallback
         )
-    
+
     def _select_persona(self, data: dict, context: WorkflowContext) -> str:
         """
         Select persona based on confidence scores.
-        
+
         Input (from ContextAnalyzer):
             {
                 "confidence_scores": {
@@ -204,24 +204,24 @@ class PersonaRouter(RouterPrimitive):
                     ...
                 }
             }
-        
+
         Returns: Persona name (e.g., "tta-testing-specialist")
         """
         scores = data.get("confidence_scores", {})
-        
+
         # Get highest confidence persona
         if not scores:
             return self.default_route
-        
+
         selected = max(scores.items(), key=lambda x: x[1])
         persona_name, confidence = selected
-        
+
         # Only switch if confidence is high enough
         if confidence < 0.5:
             return self.default_route
-        
+
         return persona_name
-    
+
     def _create_persona_handler(self, persona_short_name: str):
         """Create a handler that returns persona metadata."""
         async def handler(data: dict, context: WorkflowContext) -> dict:
@@ -230,7 +230,7 @@ class PersonaRouter(RouterPrimitive):
                 "confidence": data.get("confidence_scores", {}).get(f"tta-{persona_short_name}", 0),
                 "context": data.get("original_input", {})
             }
-        
+
         return WorkflowPrimitive.from_function(handler)
 ```
 
@@ -247,22 +247,22 @@ from pathlib import Path
 
 class PersonaSwitcher(WorkflowPrimitive[dict, dict]):
     """Execute persona switch via MCP configuration update."""
-    
+
     def __init__(self, mcp_config_path: str = "~/.config/mcp/mcp_settings.json"):
         super().__init__()
         self.mcp_config_path = Path(mcp_config_path).expanduser()
-    
+
     async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
         """
         Switch to selected persona.
-        
+
         Input:
             {
                 "persona": "tta-testing-specialist",
                 "confidence": 0.9,
                 "context": {...}
             }
-        
+
         Output:
             {
                 "switched_to": "tta-testing-specialist",
@@ -271,13 +271,13 @@ class PersonaSwitcher(WorkflowPrimitive[dict, dict]):
             }
         """
         target_persona = input_data.get("persona")
-        
+
         if not target_persona:
             raise ValueError("No persona specified")
-        
+
         # Get current persona
         current = self._get_current_persona()
-        
+
         # Skip if already on target persona
         if current == target_persona:
             return {
@@ -287,17 +287,17 @@ class PersonaSwitcher(WorkflowPrimitive[dict, dict]):
                 "skipped": True,
                 "reason": "Already on target persona"
             }
-        
+
         # Execute switch
         success = await self._switch_persona(target_persona)
-        
+
         return {
             "switched_to": target_persona if success else current,
             "previous": current,
             "success": success,
             "skipped": False
         }
-    
+
     def _get_current_persona(self) -> str:
         """Extract current persona from MCP config."""
         try:
@@ -307,13 +307,13 @@ class PersonaSwitcher(WorkflowPrimitive[dict, dict]):
                 return match.group(1) if match else "unknown"
         except Exception as e:
             return "unknown"
-    
+
     async def _switch_persona(self, persona: str) -> bool:
         """Update MCP config with new persona."""
         try:
             # Use sed to update persona argument
             short_name = persona.replace("tta-", "")
-            
+
             result = subprocess.run(
                 [
                     "sed", "-i",
@@ -323,7 +323,7 @@ class PersonaSwitcher(WorkflowPrimitive[dict, dict]):
                 capture_output=True,
                 text=True
             )
-            
+
             return result.returncode == 0
         except Exception as e:
             return False
@@ -342,14 +342,14 @@ from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningStrategy, Lea
 class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
     """
     Learn optimal persona selection from usage patterns.
-    
+
     Features:
     - Learns which personas work best for different contexts
     - Tracks switching frequency and success rates
     - Adapts routing logic based on feedback
     - Persists learned strategies to Logseq
     """
-    
+
     def __init__(
         self,
         context_analyzer: ContextAnalyzer,
@@ -365,21 +365,21 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
                 "fallback_persona": "tta-backend-engineer"
             }
         )
-        
+
         super().__init__(
             baseline_strategy=baseline,
             learning_mode=LearningMode.ACTIVE,
             enable_circuit_breaker=True,
             min_observations_before_learning=10
         )
-        
+
         self.context_analyzer = context_analyzer
         self.persona_router = persona_router
         self.persona_switcher = persona_switcher
-        
+
         # Track switching patterns
         self.switch_history = []
-    
+
     async def _execute_with_strategy(
         self,
         strategy: LearningStrategy,
@@ -388,14 +388,14 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
     ) -> dict:
         """
         Execute persona switching with learned strategy.
-        
+
         Input:
             {
                 "query": "Write tests for CachePrimitive",
                 "files": ["tests/test_cache.py"],
                 "recent_commands": ["pytest"]
             }
-        
+
         Output:
             {
                 "switched_to": "tta-testing-specialist",
@@ -405,44 +405,44 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
         """
         # 1. Analyze context
         analysis = await self.context_analyzer.execute(input_data, context)
-        
+
         # 2. Apply learned strategy parameters
         min_confidence = strategy.parameters.get("min_confidence", 0.5)
-        
+
         # Adjust confidence scores based on learned patterns
         adjusted_scores = self._adjust_with_learned_patterns(
             analysis["confidence_scores"],
             strategy
         )
-        
+
         analysis["confidence_scores"] = adjusted_scores
-        
+
         # 3. Route to persona
         routing_result = await self.persona_router.execute(analysis, context)
-        
+
         # 4. Check confidence threshold
         selected_persona = routing_result["persona"]
         confidence = routing_result["confidence"]
-        
+
         if confidence < min_confidence:
             # Use fallback
             selected_persona = strategy.parameters["fallback_persona"]
             routing_result["persona"] = selected_persona
             routing_result["fallback_used"] = True
-        
+
         # 5. Execute switch
         switch_result = await self.persona_switcher.execute(routing_result, context)
-        
+
         # 6. Record switch for learning
         self._record_switch(input_data, selected_persona, confidence)
-        
+
         return {
             **switch_result,
             "confidence": confidence,
             "strategy_used": strategy.name,
             "analysis": analysis["signals"]
         }
-    
+
     async def _consider_new_strategy(
         self,
         input_data: dict,
@@ -451,22 +451,22 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
     ) -> LearningStrategy | None:
         """
         Learn new routing strategy from patterns.
-        
+
         Analyze:
         - Which personas are selected most often for specific contexts
         - Success rate of each persona for different task types
         - User corrections (manual persona switches after auto-switch)
-        
+
         Create new strategy if:
         - Current success rate < 80%
         - New pattern detected (e.g., always use testing for pytest keywords)
         """
         if len(self.switch_history) < self.min_observations_before_learning:
             return None
-        
+
         # Analyze patterns
         patterns = self._analyze_switch_patterns()
-        
+
         # Check if we should create new strategy
         if current_performance.success_rate < 0.8:
             # Create optimized strategy
@@ -480,11 +480,11 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
                     "directory_boosts": patterns["directory_weights"]
                 }
             )
-            
+
             return new_strategy
-        
+
         return None
-    
+
     def _adjust_with_learned_patterns(
         self,
         base_scores: dict[str, float],
@@ -492,17 +492,17 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
     ) -> dict[str, float]:
         """Apply learned pattern adjustments to confidence scores."""
         adjusted = base_scores.copy()
-        
+
         # Apply keyword boosts from learned strategy
         keyword_boosts = strategy.parameters.get("keyword_boosts", {})
         for persona, boost in keyword_boosts.items():
             if persona in adjusted:
                 adjusted[persona] *= (1 + boost)
-        
+
         # Normalize
         max_score = max(adjusted.values()) if adjusted else 1
         return {k: v / max_score for k, v in adjusted.items()}
-    
+
     def _record_switch(self, context: dict, persona: str, confidence: float):
         """Record switch for learning."""
         self.switch_history.append({
@@ -512,27 +512,27 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
             "selected_persona": persona,
             "confidence": confidence
         })
-        
+
         # Keep last 1000 switches
         if len(self.switch_history) > 1000:
             self.switch_history = self.switch_history[-1000:]
-    
+
     def _analyze_switch_patterns(self) -> dict:
         """Analyze historical switches to find patterns."""
         # Group by context patterns
         keyword_persona_map = {}
         directory_persona_map = {}
-        
+
         for switch in self.switch_history:
             persona = switch["selected_persona"]
-            
+
             # Track keyword → persona associations
             for keyword in switch["context_keywords"]:
                 if keyword not in keyword_persona_map:
                     keyword_persona_map[keyword] = {}
                 keyword_persona_map[keyword][persona] = \
                     keyword_persona_map[keyword].get(persona, 0) + 1
-            
+
             # Track directory → persona associations
             for file in switch["files"]:
                 dir_pattern = Path(file).parts[0] if Path(file).parts else ""
@@ -540,23 +540,23 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
                     directory_persona_map[dir_pattern] = {}
                 directory_persona_map[dir_pattern][persona] = \
                     directory_persona_map[dir_pattern].get(persona, 0) + 1
-        
+
         # Find optimal threshold (minimize false switches)
         confidences = [s["confidence"] for s in self.switch_history]
         optimal_threshold = np.percentile(confidences, 25) if confidences else 0.5
-        
+
         # Find best fallback (most commonly used)
         from collections import Counter
         persona_counts = Counter(s["selected_persona"] for s in self.switch_history)
         best_fallback = persona_counts.most_common(1)[0][0]
-        
+
         return {
             "optimal_threshold": optimal_threshold,
             "best_fallback": best_fallback,
             "keyword_weights": self._calculate_keyword_weights(keyword_persona_map),
             "directory_weights": self._calculate_directory_weights(directory_persona_map)
         }
-    
+
     def _calculate_keyword_weights(self, mapping: dict) -> dict:
         """Calculate boost weights for keywords."""
         # Return top keyword → persona associations as boost weights
@@ -570,7 +570,7 @@ class AdaptivePersonaRouter(AdaptivePrimitive[dict, dict]):
             if count > 2:  # Only boost if seen multiple times
                 weights[persona] = weights.get(persona, 0) + 0.1
         return weights
-    
+
     def _calculate_directory_weights(self, mapping: dict) -> dict:
         """Calculate boost weights for directories."""
         weights = {}
@@ -603,22 +603,22 @@ adaptive_persona_system = AdaptivePersonaRouter(
 # Execute
 async def auto_switch_persona(task_description: str, active_files: list[str]):
     """Automatically switch to optimal persona for task."""
-    
+
     input_data = {
         "query": task_description,
         "files": active_files,
         "recent_commands": get_recent_commands(),
         "active_editor": get_active_file()
     }
-    
+
     context = WorkflowContext(workflow_id="persona-switching")
-    
+
     result = await adaptive_persona_system.execute(input_data, context)
-    
+
     print(f"✅ Switched to: {result['switched_to']}")
     print(f"📊 Confidence: {result['confidence']:.1%}")
     print(f"🧠 Strategy: {result['strategy_used']}")
-    
+
     return result
 
 # Example usage
@@ -650,19 +650,19 @@ await auto_switch_persona(
 vscode.workspace.onDidOpenTextDocument(async (document) => {
     const filePath = document.fileName;
     const content = document.getText();
-    
+
     // Call Python adaptive system
     const result = await executePersonaSwitch({
         query: `Working on ${filePath}`,
         files: [filePath],
         recent_commands: getRecentCommands()
     });
-    
+
     if (result.success && !result.skipped) {
         vscode.window.showInformationMessage(
             `🎭 Switched to ${result.switched_to} (${result.confidence}% confidence)`
         );
-        
+
         // Reload Cline/Copilot
         await reloadAgent();
     }
@@ -677,25 +677,25 @@ vscode.workspace.onDidOpenTextDocument(async (document) => {
 class ClineTaskHandler:
     def __init__(self):
         self.persona_system = AdaptivePersonaRouter(...)
-    
+
     async def handle_task(self, task: dict):
         """Handle Cline task with auto persona switching."""
-        
+
         # 1. Analyze task
         switch_result = await self.persona_system.execute({
             "query": task["description"],
             "files": task.get("files", []),
             "recent_commands": []
         }, WorkflowContext())
-        
+
         # 2. Switch persona if needed
         if switch_result["success"] and not switch_result["skipped"]:
             # Reload Cline with new persona
             await self.reload_with_persona(switch_result["switched_to"])
-        
+
         # 3. Execute task with optimal persona
         result = await self.execute_task(task)
-        
+
         return result
 ```
 
@@ -730,13 +730,13 @@ class PersonaRequest(BaseModel):
 @app.post("/persona")
 async def get_optimal_persona(request: PersonaRequest):
     """API endpoint for Copilot to query optimal persona."""
-    
+
     result = await adaptive_persona_system.execute({
         "query": request.query,
         "files": request.files,
         "recent_commands": request.commands
     }, WorkflowContext())
-    
+
     return {
         "persona": result["switched_to"],
         "confidence": result["confidence"],
@@ -796,13 +796,13 @@ import pytest
 async def test_context_analyzer():
     """Test context analysis extracts correct signals."""
     analyzer = ContextAnalyzer()
-    
+
     result = await analyzer.execute({
         "query": "Write pytest tests for CachePrimitive",
         "files": ["tests/test_cache.py"],
         "recent_commands": ["pytest -v"]
     }, WorkflowContext())
-    
+
     assert "testing" in result["signals"]["keywords"]
     assert result["confidence_scores"]["tta-testing-specialist"] > 0.7
 
@@ -810,21 +810,21 @@ async def test_context_analyzer():
 async def test_persona_router():
     """Test router selects correct persona."""
     router = PersonaRouter()
-    
+
     result = await router.execute({
         "confidence_scores": {
             "tta-testing-specialist": 0.95,
             "tta-backend-engineer": 0.3
         }
     }, WorkflowContext())
-    
+
     assert result["persona"] == "tta-testing-specialist"
 
 @pytest.mark.asyncio
 async def test_adaptive_learning():
     """Test adaptive system learns from patterns."""
     adaptive = AdaptivePersonaRouter(...)
-    
+
     # Simulate 20 switches to testing persona for pytest contexts
     for i in range(20):
         await adaptive.execute({
@@ -832,7 +832,7 @@ async def test_adaptive_learning():
             "files": [f"tests/test_{i}.py"],
             "recent_commands": ["pytest"]
         }, WorkflowContext())
-    
+
     # Should learn testing bias
     assert len(adaptive.strategies) > 1  # Baseline + learned
     learned = list(adaptive.strategies.values())[-1]
@@ -845,21 +845,21 @@ async def test_adaptive_learning():
 @pytest.mark.integration
 async def test_full_persona_switching_workflow():
     """Test complete persona switching flow."""
-    
+
     # Start with backend persona
     initial = get_current_persona()
     assert initial == "tta-backend-engineer"
-    
+
     # Trigger switch for testing task
     result = await auto_switch_persona(
         task_description="Run integration tests",
         active_files=["tests/integration/test_workflows.py"]
     )
-    
+
     # Should switch to testing persona
     assert result["switched_to"] == "tta-testing-specialist"
     assert result["success"] is True
-    
+
     # Verify MCP config updated
     current = get_current_persona()
     assert current == "tta-testing-specialist"
@@ -932,7 +932,11 @@ async def test_full_persona_switching_workflow():
 
 ---
 
-**Status:** Ready for Implementation ✅  
-**Priority:** High - User requested feature  
-**Dependencies:** All 6 personas complete, TTA primitives package  
+**Status:** Ready for Implementation ✅
+**Priority:** High - User requested feature
+**Dependencies:** All 6 personas complete, TTA primitives package
 **Estimated Implementation:** 2-3 weeks
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Adaptive_persona_switching_design]]

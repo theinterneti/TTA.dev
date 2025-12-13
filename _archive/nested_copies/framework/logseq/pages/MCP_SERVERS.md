@@ -352,3 +352,7 @@ result = await workflow.execute(data, context)
 **Status:** Production-ready
 **Context:** Local VS Code only (not available in GitHub Actions)
 **Full Documentation:** `MCP_SERVERS.md` in repository root
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Mcp_servers]]

@@ -22,8 +22,8 @@ This runbook provides detailed investigation steps and resolution procedures for
 
 ### Description
 
-**Alert Name:** `TokenBudgetExceeded`  
-**Severity:** Critical  
+**Alert Name:** `TokenBudgetExceeded`
+**Severity:** Critical
 **Category:** Cost
 
 Fires when a persona has consumed more tokens than its allocated budget (`hypertool_persona_token_budget_remaining < 0`).
@@ -157,8 +157,8 @@ Then restart the application.
 
 ### Description
 
-**Alert Name:** `HighQualityGateFailureRate`  
-**Severity:** Warning  
+**Alert Name:** `HighQualityGateFailureRate`
+**Severity:** Warning
 **Category:** Quality
 
 Fires when quality gate failure rate exceeds 20% for a workflow stage over 5 minutes.
@@ -266,7 +266,7 @@ stages = {
 2. **Quality Gate Calibration**
    ```python
    # Analyze historical data
-   SELECT 
+   SELECT
      quality_gate_criteria,
      pass_rate,
      avg_retry_count
@@ -309,8 +309,8 @@ stages = {
 
 ### Description
 
-**Alert Name:** `ExcessivePersonaSwitching`  
-**Severity:** Warning  
+**Alert Name:** `ExcessivePersonaSwitching`
+**Severity:** Warning
 **Category:** Performance
 
 Fires when persona switch rate exceeds 2 switches per second over 5 minutes.
@@ -394,11 +394,11 @@ class PersonaSwitcher:
         # Check cooldown
         now = time.time()
         last_switch = self._last_switch_time.get(chatmode, 0)
-        
+
         if now - last_switch < self._cooldown_seconds:
             logger.debug(f"Cooldown active, skipping switch to {to_persona}")
             return from_persona  # Keep current persona
-        
+
         # Proceed with switch
         self._last_switch_time[chatmode] = now
         return to_persona
@@ -420,10 +420,10 @@ class PersonaSwitcher:
    # Group similar tasks
    tasks_for_backend = [
        "design_api",
-       "implement_endpoints", 
+       "implement_endpoints",
        "add_validation"
    ]
-   
+
    # Switch persona only when changing task type
    ```
 
@@ -432,11 +432,11 @@ class PersonaSwitcher:
    def should_switch_persona(current_persona, next_task, context):
        # Only switch if task truly requires different persona
        required_persona = get_persona_for_task(next_task)
-       
+
        # Check if current persona can handle it
        if current_persona in PERSONA_CAPABILITIES[next_task]:
            return False  # Current persona is capable
-       
+
        return required_persona != current_persona
    ```
 
@@ -459,8 +459,8 @@ class PersonaSwitcher:
 
 ### Description
 
-**Alert Name:** `SlowWorkflowStage`  
-**Severity:** Warning  
+**Alert Name:** `SlowWorkflowStage`
+**Severity:** Warning
 **Category:** Performance
 
 Fires when p95 duration for a workflow stage exceeds 5 minutes (300 seconds) over 10 minutes.
@@ -610,8 +610,8 @@ results = await asyncio.gather(
 
 ### Description
 
-**Alert Name:** `TokenBudgetDepletionPredicted`  
-**Severity:** Info  
+**Alert Name:** `TokenBudgetDepletionPredicted`
+**Severity:** Info
 **Category:** Cost
 
 Fires when linear prediction indicates persona will exceed budget within 1 hour.
@@ -701,8 +701,8 @@ Ratio > 1.5 indicates significant spike.
 
 ### Description
 
-**Alert Name:** `HypertoolMetricsNotReported`  
-**Severity:** Critical  
+**Alert Name:** `HypertoolMetricsNotReported`
+**Severity:** Critical
 **Category:** Availability
 
 Fires when Prometheus cannot scrape Hypertool metrics for 2 minutes.
@@ -789,7 +789,7 @@ docker restart hypertool
    ```bash
    # Is port 9464 in use?
    sudo lsof -i :9464
-   
+
    # Kill conflicting process if needed
    sudo kill -9 <PID>
    ```
@@ -820,8 +820,8 @@ docker restart hypertool
 
 ### Description
 
-**Alert Name:** `LangfuseIntegrationFailing`  
-**Severity:** Warning  
+**Alert Name:** `LangfuseIntegrationFailing`
+**Severity:** Warning
 **Category:** Observability
 
 Fires when LLM calls are being made but no Langfuse traces are created.
@@ -902,7 +902,7 @@ sudo systemctl restart hypertool
 1. **Verify SDK Installation**
    ```bash
    pip list | grep langfuse
-   
+
    # If missing
    pip install langfuse
    ```
@@ -911,13 +911,13 @@ sudo systemctl restart hypertool
    ```python
    # Quick test script
    from langfuse import Langfuse
-   
+
    client = Langfuse(
        public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
        secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
        host=os.getenv("LANGFUSE_HOST")
    )
-   
+
    trace = client.trace(name="test")
    print(f"Trace ID: {trace.id}")  # Should print trace ID
    ```
@@ -926,7 +926,7 @@ sudo systemctl restart hypertool
    ```bash
    # Can reach Langfuse?
    curl -I https://cloud.langfuse.com
-   
+
    # Check proxy settings if behind firewall
    echo $HTTP_PROXY
    echo $HTTPS_PROXY
@@ -977,6 +977,10 @@ open https://cloud.langfuse.com
 
 ---
 
-**Last Updated:** 2025-11-15  
-**Version:** 1.0  
+**Last Updated:** 2025-11-15
+**Version:** 1.0
 **Maintained by:** Hypertool Team
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Instrumentation/Alert_runbook]]

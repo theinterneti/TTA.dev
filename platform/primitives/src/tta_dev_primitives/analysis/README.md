@@ -133,7 +133,7 @@ def _detect_custom_pattern(self, tree: ast.AST) -> list[dict]:
     for node in ast.walk(tree):
         if self._is_custom_pattern(node):
             locations.append({"line": node.lineno})
-    
+
     if locations:
         return [{"name": "custom_pattern", "confidence": 0.8, "locations": locations}]
     return []
@@ -191,3 +191,7 @@ logger = structlog.get_logger("tta_dev.analysis")
 # - primitives_matched: Number of primitives matched
 # - analysis_complete: Analysis finished with timing
 ```
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Analysis/Readme]]

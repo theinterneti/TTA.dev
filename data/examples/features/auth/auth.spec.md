@@ -4,3 +4,7 @@
 
 - Add OAuth2 authentication
 - Support Google and GitHub providers
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Features/Auth/Auth.spec]]

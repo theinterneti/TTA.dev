@@ -343,38 +343,38 @@ Git Repository (TTA.dev)
 
 ```
                     ISOLATED                 SHARED
-                    
+
 TTA.dev/
-  .worktree/        ✓ (gitignored)           
+  .worktree/        ✓ (gitignored)
   logseq/
-    journals/       ✓                        
-    pages/          ✓                        
+    journals/       ✓
+    pages/          ✓
     shared/                                  ✓ (canonical)
-  [code files]      ✓                        
+  [code files]      ✓
 
 TTA.dev-augment/
-  .worktree/        ✓ (gitignored)           
+  .worktree/        ✓ (gitignored)
   logseq/
-    journals/       ✓                        
-    pages/          ✓                        
+    journals/       ✓
+    pages/          ✓
     shared/                                  ✓ (symlink)
-  [code files]      ✓                        
+  [code files]      ✓
 
 TTA.dev-cline/
-  .worktree/        ✓ (gitignored)           
+  .worktree/        ✓ (gitignored)
   logseq/
-    journals/       ✓                        
-    pages/          ✓                        
+    journals/       ✓
+    pages/          ✓
     shared/                                  ✓ (symlink)
-  [code files]      ✓                        
+  [code files]      ✓
 
 TTA.dev-copilot/
-  .worktree/        ✓ (gitignored)           
+  .worktree/        ✓ (gitignored)
   logseq/
-    journals/       ✓                        
-    pages/          ✓                        
+    journals/       ✓
+    pages/          ✓
     shared/                                  ✓ (symlink)
-  [code files]      ✓                        
+  [code files]      ✓
 
 SAFETY GUARANTEES:
 ✓ Agents cannot modify each other's working files
@@ -399,7 +399,7 @@ SAFETY GUARANTEES:
 ───────────────────────────────────────────────────────────────
 ✓ orchestrator      experimental/workflow-agent-integrations
 • augment           agent/augment
-• cline             experimental/issue-collaboration  
+• cline             experimental/issue-collaboration
 • copilot           agent/copilot
 
 🔄 Sync Status
@@ -466,6 +466,10 @@ Cross-Pollination:  60% (9 patterns used by 2+ agents)
 
 ---
 
-**Created:** November 17, 2025  
-**Status:** Production-Ready  
+**Created:** November 17, 2025
+**Status:** Production-Ready
 **Purpose:** Visual guide to worktree coordination architecture
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Git/Worktree_coordination_architecture]]

@@ -108,3 +108,7 @@ result = await workflow.execute(data, context)
 uv run ruff format .
 uv run pytest -v
 ```
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Refactor-to-primitives.prompt]]

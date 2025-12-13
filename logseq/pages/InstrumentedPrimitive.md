@@ -24,3 +24,7 @@ class MyPrimitive(InstrumentedPrimitive[dict, dict]):
 
 **Import:** `from tta_dev_primitives.observability import InstrumentedPrimitive`
 **Source:** `platform/primitives/src/tta_dev_primitives/observability/instrumented_primitive.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Instrumentedprimitive]]

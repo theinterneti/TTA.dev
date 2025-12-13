@@ -283,3 +283,7 @@ uv run pytest platform/primitives/tests/test_sequential.py
 **Last Updated:** 2025-10-30
 **Maintained by:** @theinterneti
 **Repository:** <https://github.com/theinterneti/TTA.dev>
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev (meta-project)]]

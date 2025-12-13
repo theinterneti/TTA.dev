@@ -84,3 +84,7 @@ This namespace contains detailed guides covering all aspects of TTA.dev developm
 namespace:: guides
 type:: documentation
 audience:: all-users
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides]]

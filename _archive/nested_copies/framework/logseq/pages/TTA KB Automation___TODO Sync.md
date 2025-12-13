@@ -509,3 +509,6 @@ See: `tests/integration/test_real_kb_integration.py::TestTODOSyncWithRealCodebas
 **Test Coverage:** 100% (44/44 tests passing)
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta kb automation___todo sync]]

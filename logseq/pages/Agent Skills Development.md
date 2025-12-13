@@ -31,3 +31,7 @@
 - Use MCP code execution for safe skill practice
 - Maintain cross-session persistence via Logseq
 
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Agent skills development]]

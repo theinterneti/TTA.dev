@@ -107,3 +107,7 @@ Use these MCP tools:
 - Reference existing patterns in codebase
 - Suggest actionable next steps
 - Be helpful and welcoming to contributors
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Triage-issue.prompt]]

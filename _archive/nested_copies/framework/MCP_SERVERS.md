@@ -730,3 +730,7 @@ Run query: [SQL query]
 **Maintained by:** TTA.dev Team
 **MCP Version:** 1.0
 **VS Code Integration:** Stable
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Mcp_servers]]

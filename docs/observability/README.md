@@ -461,3 +461,7 @@ uv run python examples/test_semantic_tracing.py
 ---
 
 **Happy Observing! 📊🔍📈**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Observability/Readme]]

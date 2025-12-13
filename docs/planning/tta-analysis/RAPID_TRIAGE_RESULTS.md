@@ -365,3 +365,7 @@ def _assess_immediate_risk(validation_result, level) -> bool
 **Last Updated:** November 8, 2025, 2:30 PM
 **Status:** Phase 1 - Rapid Triage Complete, Deep Dive Started
 **Next Action:** Read crisis intervention source code in detail
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta-analysis/Rapid_triage_results]]

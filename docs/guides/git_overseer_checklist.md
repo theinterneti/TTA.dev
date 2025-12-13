@@ -204,3 +204,7 @@ Keep these issues small and actionable; link to relevant branches, PRs, and Logs
 2. Branch hygiene using merged/stale analysis + backups.
 3. Worktree sync + pattern promotion.
 4. Open/update 2–3 GitHub issues capturing structural work.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Git_overseer_checklist]]

@@ -14,3 +14,7 @@ A minimal, production-ready agent setup using TTA.dev primitives.
 3. `cp .env.example .env` and add your keys.
 4. Edit `main.py` to add your LLM logic.
 5. `python main.py`
+
+
+---
+**Logseq:** [[TTA.dev/Templates/Basic-agent/Readme]]

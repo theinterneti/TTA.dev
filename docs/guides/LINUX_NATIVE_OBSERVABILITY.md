@@ -2,7 +2,7 @@
 
 **Migrating from Docker Desktop to Native Linux Services**
 
-**Last Updated:** 2025-11-15  
+**Last Updated:** 2025-11-15
 **Status:** Production-Ready Alternative
 
 ---
@@ -60,7 +60,7 @@ services:
 
 Optional Local Services (for offline dev):
   - Prometheus (native binary)
-  - Local Grafana (native binary) 
+  - Local Grafana (native binary)
 ```
 
 ---
@@ -179,7 +179,7 @@ prometheus.remote_write "grafana_cloud" {
 loki.source.journal "system_logs" {
   max_age = "24h"
   forward_to = [loki.write.grafana_cloud.receiver]
-  
+
   // Filter for TTA.dev application logs
   labels = {
     job = "tta-dev",
@@ -205,7 +205,7 @@ otelcol.receiver.otlp "default" {
   http {
     endpoint = "0.0.0.0:4318"
   }
-  
+
   output {
     traces = [otelcol.exporter.otlp.grafana_cloud.input]
   }
@@ -690,7 +690,11 @@ Create these additional guides:
 
 ---
 
-**Last Updated:** 2025-11-15  
-**Author:** TTA.dev Team  
+**Last Updated:** 2025-11-15
+**Author:** TTA.dev Team
 **Status:** Production-Ready
 
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Linux_native_observability]]

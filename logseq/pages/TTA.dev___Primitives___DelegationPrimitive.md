@@ -43,3 +43,7 @@ from tta_dev_primitives.orchestration import DelegationPrimitive
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Orchestration]] - Orchestration primitives
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___primitives___delegationprimitive]]

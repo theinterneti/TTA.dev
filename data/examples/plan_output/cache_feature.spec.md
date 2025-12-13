@@ -31,3 +31,7 @@ Add LRU cache with TTL support to reduce LLM API costs by 30-40%.
 - Cache reduces costs by 30%+
 - No performance degradation for cache hits
 - Cache hit rate > 60% in production
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Plan_output/Cache_feature.spec]]

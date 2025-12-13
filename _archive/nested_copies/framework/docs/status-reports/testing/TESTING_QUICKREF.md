@@ -104,3 +104,7 @@ lsof -ti:8001,8002 | xargs kill -9
 ---
 
 **Remember**: Always run `./scripts/test_fast.sh` before committing!
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Testing/Testing_quickref]]

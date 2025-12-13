@@ -370,3 +370,7 @@ This is experimental code in `local/`. If you improve it:
 **Last Updated:** 2025-10-30
 **Maintainer:** TTA.dev
 **Location:** `local/logseq-tools/`
+
+
+---
+**Logseq:** [[TTA.dev/Local/Logseq-tools/Readme]]

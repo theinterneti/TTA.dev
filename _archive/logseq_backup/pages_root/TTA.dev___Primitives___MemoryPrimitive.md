@@ -15,3 +15,7 @@ Hybrid memory primitive with automatic fallback.
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Performance]] - Performance primitives
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___primitives___memoryprimitive]]

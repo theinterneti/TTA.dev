@@ -184,3 +184,7 @@ class AdaptiveStrategyIntegration(WorkflowPrimitive[dict, dict]):
 **Version:** 1.0
 **Last Updated:** November 8, 2025
 **Related:** [CLINE_CONTEXT_INTEGRATION_GUIDE.md](./CLINE_CONTEXT_INTEGRATION_GUIDE.md)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integrations/Cline_integration_api_reference]]

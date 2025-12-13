@@ -27,3 +27,7 @@ workflow = step1 | step2    # Parallel
 
 **Import:** `from tta_dev_primitives import WorkflowPrimitive`
 **Source:** `platform/primitives/src/tta_dev_primitives/core/base.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Workflowprimitive]]

@@ -279,3 +279,7 @@ Recommended sequence:
 **Generated:** 2025-11-04
 **Status:** Ready for implementation
 **Estimated Time:** Phase 1 = 2-3 hours, Phase 2 = 2-3 hours, Phase 3 = 4-6 hours
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Infrastructure/Kb_broken_links_strategy]]

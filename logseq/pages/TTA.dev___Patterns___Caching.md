@@ -389,3 +389,7 @@ async def fault_tolerant_cache(data: dict, context: WorkflowContext) -> dict:
 **Impact:** High (40-60% cost reduction)
 **Complexity:** Low to Medium
 **Status:** Production-ready
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___patterns___caching]]

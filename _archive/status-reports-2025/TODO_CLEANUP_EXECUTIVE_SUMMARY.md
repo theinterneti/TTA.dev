@@ -280,3 +280,7 @@ uv run python scripts/scan-codebase-todos.py --output todos_$(date +%Y_%m).csv
 **Risk**: None
 
 **LET'S BUILD! 🚀**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Todo_cleanup_executive_summary]]

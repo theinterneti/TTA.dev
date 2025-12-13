@@ -595,6 +595,10 @@ scripts/setup-native-observability.sh
 
 ---
 
-**Last Updated:** 2025-11-15  
-**Status:** Production-Ready  
+**Last Updated:** 2025-11-15
+**Status:** Production-Ready
 **Recommendation:** Use simple approach (same port, different service names) for most cases
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Multi_workspace_observability]]

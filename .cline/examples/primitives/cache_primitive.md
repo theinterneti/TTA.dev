@@ -216,3 +216,7 @@ key_fn=lambda data, ctx: data.get("id", "")
 ---
 
 **Next Steps:** When cline detects caching patterns, it should automatically suggest CachePrimitive with appropriate configuration based on the use case.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Cache_primitive]]

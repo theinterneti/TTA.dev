@@ -175,3 +175,7 @@ graph TD
 This updated model now represents a state-of-the-art, fully AI-orchestrated DevSecOps and Platform Engineering system for late 2025. It integrates security and developer experience as first-class citizens and introduces the critical meta-control plane for managing the agents themselves.
 
 Let me know if you'd like any further adjustments or elaborations on specific agents\!
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Agent_matrix]]

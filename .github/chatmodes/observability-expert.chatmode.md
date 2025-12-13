@@ -78,3 +78,7 @@ You focus on making TTA.dev systems and AI interactions fully observable, from i
 - ✅ Langfuse tracks prompt/response patterns accurately
 - ✅ Alert rules reduce noise while catching real issues
 - ✅ Performance impact of observability is measured and optimized
+
+
+---
+**Logseq:** [[TTA.dev/.github/Chatmodes/Observability-expert.chatmode]]

@@ -136,3 +136,7 @@ Before moving to STAGING:
 - pytest documentation: https://docs.pytest.org/
 - pytest-asyncio: https://pytest-asyncio.readthedocs.io/
 - TTA.dev testing guide: `docs/development/CodingStandards.md`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___best practices___testing]]

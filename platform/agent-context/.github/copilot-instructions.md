@@ -191,3 +191,7 @@ gemini "/memory show"                          # View project context
 ```
 
 Focus on circuit breaker patterns, Redis-based messaging, and comprehensive error handling when working with agent orchestration. Always prefer `uv` over other Python package managers and ensure circuit breakers wrap external service calls. Leverage MCP servers (especially Context7 and Serena) for deep codebase understanding before making architectural changes.
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Copilot-instructions]]

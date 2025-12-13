@@ -98,3 +98,7 @@ Deploys to production on merge to `main`
 **Tags:** #devops #ci-cd #automation
 
 **Last Updated:** 2025-12-04
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Ci-cd]]

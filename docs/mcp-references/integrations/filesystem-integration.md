@@ -46,3 +46,7 @@ client.disconnect()
 
 *   [Filesystem MCP Server Documentation](https://github.com/mark3labs/mcp-filesystem-server)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Integrations/Filesystem-integration]]

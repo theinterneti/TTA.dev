@@ -1,9 +1,9 @@
 # Pattern Name
 
-**Discovered By:** agent/AGENT_NAME  
-**Date:** YYYY-MM-DD  
-**Category:** performance | security | architecture | testing | tooling | documentation  
-**Impact:** high | medium | low  
+**Discovered By:** agent/AGENT_NAME
+**Date:** YYYY-MM-DD
+**Category:** performance | security | architecture | testing | tooling | documentation
+**Impact:** high | medium | low
 **Status:** #local-pattern
 
 ---
@@ -46,7 +46,7 @@ from tta_dev_primitives import WorkflowPrimitive
 
 class ExamplePrimitive(WorkflowPrimitive):
     """Example implementation."""
-    
+
     async def execute(self, data, context):
         # Implementation
         return result
@@ -172,5 +172,9 @@ When ready for orchestrator review:
 
 ---
 
-**Last Updated:** YYYY-MM-DD  
+**Last Updated:** YYYY-MM-DD
 **Status:** Draft | Ready for Review | Approved | Integrated
+
+
+---
+**Logseq:** [[TTA.dev/Scripts/Worktree/Templates/Pattern-template]]

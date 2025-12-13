@@ -107,3 +107,7 @@ After successful setup:
 - **Workflow File**: `/home/thein/repos/TTA.dev/n8n_github_health_dashboard.json`
 - **Setup Script**: `/home/thein/repos/TTA.dev/setup_n8n_github_dashboard.sh`
 - **Documentation**: `/home/thein/repos/TTA.dev/N8N_GITHUB_DASHBOARD_GUIDE.md`
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_manual_setup_guide]]

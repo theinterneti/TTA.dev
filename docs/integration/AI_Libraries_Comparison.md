@@ -365,3 +365,7 @@ Each library in our stack has distinct strengths and optimal use cases:
 By using each library for its strengths and implementing the optimal integration strategy, we can create a powerful, flexible system that leverages the best of each library while minimizing overlaps and inefficiencies.
 
 The key to success will be creating clear abstraction layers, comprehensive testing, and thorough documentation to ensure that the integration is both powerful and maintainable.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integration/Ai_libraries_comparison]]

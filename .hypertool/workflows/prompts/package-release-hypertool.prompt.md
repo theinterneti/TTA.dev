@@ -142,5 +142,9 @@ ansible-playbook deploy-production.yml
 
 ---
 
-**Total Duration:** ~30 minutes (vs 2-4 hours traditional)  
+**Total Duration:** ~30 minutes (vs 2-4 hours traditional)
 **Workflow Version:** 1.0.0
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Workflows/Prompts/Package-release-hypertool.prompt]]

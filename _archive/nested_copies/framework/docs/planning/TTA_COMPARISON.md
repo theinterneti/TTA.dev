@@ -303,3 +303,7 @@ workflow = (
 **Created:** November 7, 2025
 **Purpose:** Support TTA remediation decision
 **Status:** Ready for review
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Tta_comparison]]

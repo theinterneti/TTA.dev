@@ -459,3 +459,7 @@ cline "Using Context7, find httpx async documentation"
 ---
 
 **Configuration Complete! Ready to collaborate with Cline at 90% cost savings. 🚀💰**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integrations/Cline_configuration_tta]]

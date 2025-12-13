@@ -69,3 +69,7 @@
     -
   - ### Architecture
     -
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Templates]]

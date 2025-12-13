@@ -183,3 +183,6 @@ logseq.table.stripes:: true
 **Maintained By:** TTA.dev Team
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev]]

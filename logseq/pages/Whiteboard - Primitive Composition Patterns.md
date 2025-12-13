@@ -228,3 +228,7 @@ workflow = (
 **Last Updated:** [[2025-10-31]]
 **Status:** Template Ready
 **Next:** Create interactive whiteboard in Logseq UI
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Whiteboard - primitive composition patterns]]

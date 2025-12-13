@@ -1,7 +1,7 @@
 # Next Session: Phase 5 Automated Testing & Validation
 
-**Session Date:** TBD  
-**Previous Session:** 2025-11-15 (Phase 5 Weeks 1, 2, 3 Complete)  
+**Session Date:** TBD
+**Previous Session:** 2025-11-15 (Phase 5 Weeks 1, 2, 3 Complete)
 **Current Branch:** `agent/augment`
 
 ---
@@ -135,26 +135,26 @@ async def test_augment_feature_implementation_workflow():
     metrics = PersonaMetricsCollector.get_instance()
     tracer = WorkflowTracer.get_instance()
     langfuse = LangfuseIntegration.get_instance()
-    
+
     with tracer.start_workflow("augment-feature-implementation"):
         # Stage 1: Requirements (product-manager)
         metrics.record_switch("product-manager", "augment", "feature-implementation")
         with tracer.start_stage("requirements-analysis"):
             await simulate_llm_call("Analyze requirements", persona="product-manager")
             tracer.record_quality_gate("requirements-complete", passed=True)
-        
+
         # Stage 2: Implementation (backend-engineer)
         metrics.record_switch("backend-engineer", "augment", "feature-implementation")
         with tracer.start_stage("implementation"):
             await simulate_llm_call("Implement feature", persona="backend-engineer")
             tracer.record_quality_gate("code-review", passed=True)
-        
+
         # Stage 3: Deployment (devops-engineer)
         metrics.record_switch("devops-engineer", "augment", "feature-implementation")
         with tracer.start_stage("deployment"):
             await simulate_llm_call("Deploy feature", persona="devops-engineer")
             tracer.record_quality_gate("deployment-ready", passed=True)
-    
+
     # Verify observability
     assert metrics.get_metric_value("hypertool_persona_switches_total") >= 3
     assert langfuse.has_traces_for_user("product-manager")
@@ -217,20 +217,20 @@ pytest test_automated_workflows.py -v
    - Verify:
      - ✅ All 7 Hypertool alerts loaded
      - ✅ No alerts firing (normal operation)
-   
+
    - **Manually trigger alerts:**
      ```python
      # In Python REPL or test script
      from hypertool.instrumentation import PersonaMetricsCollector
      metrics = PersonaMetricsCollector.get_instance()
-     
+
      # Trigger TokenBudgetExceeded
      metrics.update_budget("backend-engineer", -100)
-     
+
      # Wait 1-2 minutes for evaluation
      # Check http://localhost:9090/alerts
      ```
-   
+
    - Verify:
      - ✅ TokenBudgetExceeded alert fires
      - ✅ Alert has correct labels (persona, component)
@@ -397,8 +397,8 @@ pytest test_automated_workflows.py -v
 | Phase 5 Wrap-Up | 30 mins |
 | **Total** | **5 hours** |
 
-**Original Estimate:** 8-10 hours (manual agent testing)  
-**New Estimate:** 5 hours (automated testing)  
+**Original Estimate:** 8-10 hours (manual agent testing)
+**New Estimate:** 5 hours (automated testing)
 **Savings:** 3-5 hours (40-50% faster!)
 
 ---
@@ -417,23 +417,23 @@ class LangfuseIntegration:
     def __init__(self, public_key: str | None = None, secret_key: str | None = None):
         """Initialize Langfuse with API keys from env vars or params."""
         pass
-    
+
     def start_trace(self, name: str, persona: str, chatmode: str) -> TraceContext:
         """Start a new Langfuse trace with persona as user."""
         pass
-    
+
     def start_span(self, trace: TraceContext, name: str, **kwargs) -> SpanContext:
         """Start a span within a trace."""
         pass
-    
+
     def end_span(self, span: SpanContext, output: Any = None, **kwargs):
         """End a span and record output."""
         pass
-    
+
     def end_trace(self, trace: TraceContext, **kwargs):
         """End a trace and flush to Langfuse."""
         pass
-    
+
     def record_generation(
         self,
         trace: TraceContext,
@@ -477,7 +477,7 @@ class ObservableLLM:
     ):
         """Wrap an LLM function with observability."""
         pass
-    
+
     async def __call__(self, prompt: str, **kwargs) -> str:
         """Call LLM with automatic tracing and metrics."""
         pass
@@ -945,3 +945,7 @@ This prompt contains everything needed to pick up where we left off. Week 1 is c
 - Testing: 2-3 hours
 
 **Expected Completion:** Phase 5 fully implemented and validated.
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Next_session_prompt]]

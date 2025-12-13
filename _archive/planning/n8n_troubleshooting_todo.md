@@ -29,3 +29,7 @@
 - **Started:** 2025-11-09
 - **Priority:** High
 - **Dependencies:** n8n service, GitHub API, Gemini API
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/N8n_troubleshooting_todo]]

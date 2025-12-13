@@ -227,3 +227,7 @@ uv run pytest --cov=packages --cov-report=term-missing
 - [ ] Error cases covered
 - [ ] External services mocked
 - [ ] 100% test coverage achieved
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___common mistakes___testing antipatterns]]

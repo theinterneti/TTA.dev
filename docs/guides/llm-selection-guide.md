@@ -351,3 +351,7 @@ def select_route(task):
 **Last Updated:** October 30, 2025
 **For:** AI Agents & Developers (all skill levels)
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Llm-selection-guide]]

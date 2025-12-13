@@ -393,3 +393,7 @@ workflow = primitive1 >> primitive2 >> primitive3
 **Status:** Generic placeholder
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Primitive2]]

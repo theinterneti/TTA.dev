@@ -58,3 +58,7 @@
 ## Status: 8/11 items completed
 
 **Primary focus: Fix extension isolation violations**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/Workspace_qa_todo]]

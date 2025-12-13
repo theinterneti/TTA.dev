@@ -373,6 +373,10 @@ Only these 9 categories:
 
 ---
 
-**Maintained by:** TTA.dev Team  
-**Last Cleanup:** 2025-11-17  
+**Maintained by:** TTA.dev Team
+**Last Cleanup:** 2025-11-17
 **Next Review:** When adding 5+ new root-level files
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Workspace_organization]]

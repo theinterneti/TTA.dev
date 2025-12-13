@@ -1,7 +1,7 @@
 # Adaptive Persona Switching - Implementation Roadmap
 
-**Status:** Ready to Implement  
-**Timeline:** 2-3 weeks  
+**Status:** Ready to Implement
+**Timeline:** 2-3 weeks
 **Prerequisites:** ✅ All complete (6 personas, Hypertool active, design document ready)
 
 ---
@@ -36,7 +36,7 @@
            "query": "Write pytest tests",
            "files": ["tests/test_cache.py"]
        }, WorkflowContext())
-       
+
        assert result["confidence_scores"]["tta-testing-specialist"] > 0.7
    ```
 
@@ -65,7 +65,7 @@
    # Example workflow
    analyzer = ContextAnalyzer()
    router = PersonaRouter()
-   
+
    workflow = analyzer >> router
    result = await workflow.execute(task_data, context)
    # Result: {"persona": "tta-testing-specialist", "confidence": 0.9}
@@ -82,7 +82,7 @@
                "tta-backend-engineer": 0.3
            }
        }, WorkflowContext())
-       
+
        assert result["persona"] == "tta-testing-specialist"
    ```
 
@@ -113,13 +113,13 @@
    @pytest.mark.asyncio
    async def test_persona_switch():
        switcher = PersonaSwitcher()
-       
+
        # Mock MCP config
        result = await switcher.execute({
            "persona": "tta-testing-specialist",
            "confidence": 0.9
        }, WorkflowContext())
-       
+
        assert result["success"] is True
        assert result["switched_to"] == "tta-testing-specialist"
    ```
@@ -149,13 +149,13 @@
            PersonaRouter() >>
            PersonaSwitcher()
        )
-       
+
        # Execute
        result = await workflow.execute({
            "query": "Run pytest tests",
            "files": ["tests/test_cache.py"]
        }, WorkflowContext())
-       
+
        assert result["switched_to"] == "tta-testing-specialist"
        assert result["success"] is True
    ```
@@ -194,14 +194,14 @@
    @pytest.mark.asyncio
    async def test_adaptive_learning():
        adaptive = AdaptivePersonaRouter(...)
-       
+
        # Simulate 20 switches to testing
        for i in range(20):
            await adaptive.execute({
                "query": f"Test {i}",
                "files": [f"tests/test_{i}.py"]
            }, WorkflowContext())
-       
+
        # Should learn testing bias
        assert len(adaptive.strategies) > 1
    ```
@@ -227,10 +227,10 @@
 2. Implement file generation
    ```markdown
    # logseq/pages/Strategies/persona_routing_learned_v1.md
-   
+
    **Type:** AdaptivePersonaRouter
    **Performance:** 92% success rate
-   
+
    ## Parameters
    - min_confidence: 0.45
    - keyword_boosts: {...}
@@ -265,7 +265,7 @@
            query: `Working on ${doc.fileName}`,
            files: [doc.fileName]
        });
-       
+
        if (result.should_switch) {
            await switchPersona(result.persona);
        }
@@ -303,9 +303,9 @@
 1. Create FastAPI server
    ```python
    from fastapi import FastAPI
-   
+
    app = FastAPI()
-   
+
    @app.post("/persona")
    async def get_optimal_persona(request: PersonaRequest):
        result = await adaptive_router.execute(...)
@@ -493,7 +493,7 @@ uvicorn scripts.persona_api:app --reload --port 8765
 ## Risk Mitigation
 
 ### Risk 1: Performance Degradation
-**Mitigation:** 
+**Mitigation:**
 - Measure latency at each step
 - Set <200ms hard limit
 - Cache analysis results
@@ -540,7 +540,11 @@ uvicorn scripts.persona_api:app --reload --port 8765
 
 ---
 
-**Status:** Ready to Start ✅  
-**Next Action:** Create persona package directory and implement ContextAnalyzer  
-**Timeline:** 3 weeks to production-ready adaptive system  
+**Status:** Ready to Start ✅
+**Next Action:** Create persona package directory and implement ContextAnalyzer
+**Timeline:** 3 weeks to production-ready adaptive system
 **Goal:** 90% automatic persona switching, 85% accuracy
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Adaptive_implementation_roadmap]]

@@ -16,9 +16,9 @@ security:
 
 # Chat Mode: DevOps Engineer (Hypertool-Enhanced)
 
-**Role:** DevOps Engineer  
-**Expertise:** Infrastructure, CI/CD, containerization, monitoring, deployment automation  
-**Focus:** Docker, GitHub Actions, APM workflows, monitoring, production systems  
+**Role:** DevOps Engineer
+**Expertise:** Infrastructure, CI/CD, containerization, monitoring, deployment automation
+**Focus:** Docker, GitHub Actions, APM workflows, monitoring, production systems
 **Persona:** 🚀 TTA DevOps Engineer (1800 tokens)
 
 ---
@@ -288,7 +288,7 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-  
+
   neo4j:
     image: neo4j:5
     environment:
@@ -308,7 +308,7 @@ services:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
-  
+
   grafana:
     image: grafana/grafana:latest
     environment:
@@ -417,6 +417,10 @@ After switching, restart Cline to load new persona context.
 
 ---
 
-**Last Updated:** 2025-11-14  
-**Persona Version:** tta-devops-engineer v1.0  
+**Last Updated:** 2025-11-14
+**Persona Version:** tta-devops-engineer v1.0
 **Hypertool Integration:** Active ✅
+
+
+---
+**Logseq:** [[TTA.dev/.tta/Chatmodes/Devops-engineer.chatmode]]

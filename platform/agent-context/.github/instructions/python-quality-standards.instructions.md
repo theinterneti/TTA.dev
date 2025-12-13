@@ -135,22 +135,22 @@ def calculate_therapeutic_score(
     baseline: float = 0.0
 ) -> float:
     """Calculate therapeutic effectiveness score.
-    
+
     Analyzes player responses to determine therapeutic effectiveness
     based on emotional engagement and narrative coherence.
-    
+
     Args:
         session_id: Unique session identifier
         responses: List of player responses
         baseline: Starting score for comparison (default: 0.0)
-    
+
     Returns:
         Calculated therapeutic score (0.0-100.0)
-    
+
     Raises:
         ValueError: If session_id is empty or responses is empty
         SessionNotFoundError: If session doesn't exist
-    
+
     Example:
         >>> score = calculate_therapeutic_score(
         ...     "session_123",
@@ -290,3 +290,7 @@ def calculate_score(responses: list[str]) -> int:
 - PEP 8: https://www.python.org/dev/peps/pep-0008/
 - PEP 257: https://www.python.org/dev/peps/pep-0257/
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Python-quality-standards.instructions]]

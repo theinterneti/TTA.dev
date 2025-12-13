@@ -74,3 +74,7 @@ A typical data flow through the TTA.dev architecture is as follows:
 4.  **Context Management**: The `universal-agent-context` package ensures that the `WorkflowContext` is consistently propagated, even across distributed or multi-agent systems.
 
 This layered approach ensures a clean separation of concerns while providing powerful, cross-cutting features like observability and context management.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Architecture/Overview]]

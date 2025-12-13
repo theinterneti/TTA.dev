@@ -418,3 +418,7 @@ curl http://localhost:3000/api/health # Grafana
 **Last Updated:** November 7, 2025
 **System Version:** 1.0
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___agent instruction system]]

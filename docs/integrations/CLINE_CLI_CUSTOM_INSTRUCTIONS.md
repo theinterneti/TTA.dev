@@ -568,3 +568,7 @@ ls -la memory-bank/
 **Status:** ✅ ROOT CAUSE IDENTIFIED AND SOLUTION PROVIDED
 **Next Action:** User should create `.clinerules` file to enable CLI custom instructions
 **Expected Outcome:** CLI will follow TTA.dev coding standards correctly
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integrations/Cline_cli_custom_instructions]]

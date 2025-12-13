@@ -50,7 +50,7 @@ interface PlayerInputProps {
 
 /**
  * PlayerInput component for therapeutic text adventure.
- * 
+ *
  * @param props - Component props
  * @returns React component
  */
@@ -231,3 +231,7 @@ function usePlayerInput() {
 - WCAG 2.1: https://www.w3.org/WAI/WCAG21/quickref/
 - Playwright Testing: https://playwright.dev/
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Frontend-react.instructions]]

@@ -46,3 +46,7 @@ Enforce execution timeout with optional fallback.
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Recovery]] - Recovery primitives
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___primitives___timeoutprimitive]]

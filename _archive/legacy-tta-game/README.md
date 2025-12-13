@@ -76,3 +76,7 @@ However, be aware that:
 
 *Archived: October 2024*
 *Original development period: ~Early 2024 - September 2024*
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Readme]]

@@ -13,3 +13,7 @@
   - `MODERATE`: Analysis, summarization, basic reasoning.
   - `COMPLEX`: Multi-step reasoning, planning, creative tasks.
   - `EXPERT`: Advanced reasoning, code generation, research.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Data/Taskcomplexity]]

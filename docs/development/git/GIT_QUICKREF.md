@@ -1,6 +1,6 @@
 # Git Worktree & Branch Quick Reference
 
-**Date:** November 16, 2025  
+**Date:** November 16, 2025
 **Purpose:** Quick reference for managing TTA.dev git setup
 
 ---
@@ -312,3 +312,7 @@ less GIT_WORKTREE_BRANCH_ANALYSIS.md
 # Check current status
 git worktree list && git branch -vv
 ```
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Git/Git_quickref]]

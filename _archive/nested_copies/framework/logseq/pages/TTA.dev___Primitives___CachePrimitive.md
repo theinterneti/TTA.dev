@@ -276,3 +276,7 @@ workflow_execution
 **Status:** [[Stable]] - Production Ready
 
 **Real-world impact:** 30-80% cost reduction for LLM workflows
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___primitives___cacheprimitive]]

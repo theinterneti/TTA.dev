@@ -89,7 +89,7 @@ async def get_session(session_id: str):
 class SessionRepository:
     def __init__(self, redis_pool: ConnectionPool):
         self.redis = Redis(connection_pool=redis_pool)
-    
+
     async def get_session(self, session_id: str):
         return await self.redis.get(f"session:{session_id}")
 ```
@@ -190,10 +190,10 @@ async def get_session_data(session_id: str):
 async def get_session_data(session_id: str):
     session_task = get_session(session_id)
     narrative_task = get_narrative(session_id)
-    
+
     session, narrative = await asyncio.gather(session_task, narrative_task)
     user = await get_user(session.user_id)
-    
+
     return session, narrative, user
 ```
 
@@ -240,14 +240,14 @@ class AIProviderWithCache:
     def __init__(self, provider: AIProvider, redis: Redis):
         self.provider = provider
         self.redis = redis
-    
+
     async def generate(self, prompt: str) -> str:
         # Check cache
         cache_key = f"ai_response:{hash(prompt)}"
         cached = await self.redis.get(cache_key)
         if cached:
             return cached
-        
+
         # Generate and cache
         response = await self.provider.generate(prompt)
         await self.redis.setex(cache_key, 3600, response)  # Cache 1 hour
@@ -264,12 +264,12 @@ class RateLimitedAIProvider:
         self.provider = provider
         self.max_requests = max_requests_per_minute
         self.requests = []
-    
+
     @with_retry(RetryConfig(max_retries=3, base_delay=1.0))
     async def generate(self, prompt: str) -> str:
         # Rate limiting logic
         await self._wait_if_needed()
-        
+
         try:
             response = await self.provider.generate(prompt)
             self.requests.append(time.time())
@@ -278,12 +278,12 @@ class RateLimitedAIProvider:
             # Wait and retry
             await asyncio.sleep(60)
             raise
-    
+
     async def _wait_if_needed(self):
         now = time.time()
         # Remove requests older than 1 minute
         self.requests = [t for t in self.requests if now - t < 60]
-        
+
         if len(self.requests) >= self.max_requests:
             wait_time = 60 - (now - self.requests[0])
             await asyncio.sleep(wait_time)
@@ -349,11 +349,11 @@ from locust import HttpUser, task, between
 
 class TTAUser(HttpUser):
     wait_time = between(1, 3)
-    
+
     @task
     def create_session(self):
         self.client.post("/api/v1/sessions", json={"user_id": "test_user"})
-    
+
     @task(3)
     def player_action(self):
         self.client.post(
@@ -422,7 +422,7 @@ import time
 class PerformanceMonitor:
     def __init__(self):
         self.metrics = []
-    
+
     async def track(self, name: str, func, *args, **kwargs):
         start = time.time()
         try:
@@ -473,14 +473,14 @@ class SessionRepository:
         cached = await self.redis.get(f"session:{session_id}")
         if cached:
             return Session.parse_raw(cached)
-        
+
         # Fallback to Neo4j (slower)
         result = self.neo4j.run(
             "MATCH (s:Session {id: $id}) RETURN s",
             id=session_id
         )
         session = Session.from_neo4j(result.single()["s"])
-        
+
         # Cache for next time
         await self.redis.setex(f"session:{session_id}", 3600, session.json())
         return session
@@ -531,3 +531,7 @@ def get_narrative_context(session_id: str, depth: int = 5):
 
 **Note:** Always measure before and after optimization to verify improvement.
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Context/Performance.context]]

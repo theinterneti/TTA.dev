@@ -15,3 +15,7 @@ Retry primitive that learns optimal retry strategies from execution patterns.
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Adaptive]] - Adaptive primitives
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___primitives___adaptiveretryprimitive]]

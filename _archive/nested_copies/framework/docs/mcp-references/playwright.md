@@ -47,3 +47,7 @@ Here's an example of how an agent might use the `browser_navigate` and `browser_
       "tool": "browser_snapshot",
       "arguments": {}
     }
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Playwright]]

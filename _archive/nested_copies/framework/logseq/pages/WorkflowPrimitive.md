@@ -511,3 +511,6 @@ feature:: type-safety
 feature:: observability
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Workflowprimitive]]

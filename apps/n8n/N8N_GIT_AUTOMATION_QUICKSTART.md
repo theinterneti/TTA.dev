@@ -276,3 +276,7 @@ Just ask! 🚀
 **Your API Keys Status**: ✅ All configured
 **n8n Status**: Ready to start
 **Next Action**: Run `./scripts/start-n8n.sh`
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_git_automation_quickstart]]

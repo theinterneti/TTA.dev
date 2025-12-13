@@ -76,12 +76,12 @@ async def execute_workflow(
     context: dict
 ) -> WorkflowResult:
     """Execute workflow asynchronously.
-    
+
     Args:
         player_id: Player identifier
         player_input: Player's input text
         context: Workflow context
-    
+
     Returns:
         WorkflowResult with final state
     """
@@ -93,7 +93,7 @@ async def execute_workflow(
         safety_validated=False,
         step_count=0
     )
-    
+
     result = await graph.ainvoke(initial_state)
     return WorkflowResult(result)
 ```
@@ -209,3 +209,7 @@ workflow.add_node("complex_logic", compiled_subgraph.invoke)
 - Async Python: https://docs.python.org/3/library/asyncio.html
 - TTA Architecture: `Documentation/architecture/`
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Langgraph-orchestration.instructions]]

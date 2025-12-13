@@ -321,3 +321,7 @@ All analysis is complete and waiting in:
 ---
 
 **Awaiting your decision: Option A, B, or C?**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta-analysis/Decision_required]]

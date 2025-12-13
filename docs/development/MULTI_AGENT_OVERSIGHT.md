@@ -229,7 +229,7 @@ A	tests/test_cache.py
    ```bash
    python scripts/agent_oversight.py review
    ```
-   
+
    For each commit:
    - ✅ Check code quality
    - ✅ Verify follows standards
@@ -521,3 +521,7 @@ jq '[.[] | .agent] | group_by(.) | map({agent: .[0], count: length})' \
 **Last Updated:** 2025-11-17
 **Maintained by:** TTA.dev Team
 **Status:** Production Ready
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Multi_agent_oversight]]

@@ -448,3 +448,7 @@ workflow = (
 **Last Updated:** November 2, 2025
 **Status:** TTA primitives integration complete ✅
 **Recommendation:** Use `agent-activity-tracker-tta.py` for all future work
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Tta_primitives_integration_comparison]]

@@ -239,3 +239,6 @@ Before committing work:
 **Questions:** See [[TODO Management System]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Todo system quickstart]]

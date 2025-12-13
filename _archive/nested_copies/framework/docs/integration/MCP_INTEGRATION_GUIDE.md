@@ -592,3 +592,7 @@ telemetry:
 **Last Updated:** November 1, 2025
 **Status:** Implementation Complete - Awaiting PAT Configuration
 **Next Action:** Add GITHUB_COPILOT_CHAT secret for advanced mode testing
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integration/Mcp_integration_guide]]

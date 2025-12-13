@@ -509,3 +509,7 @@ TTA.dev/
 **Next Step:** Implement context markers and restructure documentation
 **Owner:** TTA.dev Team
 **Date:** November 2, 2025
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Copilot_context_confusion_analysis]]

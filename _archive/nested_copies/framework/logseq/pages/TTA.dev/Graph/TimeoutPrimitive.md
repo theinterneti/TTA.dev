@@ -16,3 +16,7 @@
   - The `execute` method uses `asyncio.wait_for` to run the target primitive.
   - If the primitive exceeds the `timeout_seconds`, a `TimeoutError` is caught. If a `fallback` primitive is provided, it is executed; otherwise, a `TimeoutError` is raised.
   - It tracks timeout occurrences in the `[[TTA.dev/Data/WorkflowContext.state]]` if `track_timeouts` is enabled.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Timeoutprimitive]]

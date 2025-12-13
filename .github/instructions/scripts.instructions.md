@@ -104,3 +104,7 @@ uv run ruff format scripts/
 uv run ruff check scripts/ --fix
 uv run python scripts/your_script.py
 ```
+
+
+---
+**Logseq:** [[TTA.dev/.github/Instructions/Scripts.instructions]]

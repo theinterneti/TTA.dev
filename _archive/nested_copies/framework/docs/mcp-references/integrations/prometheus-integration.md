@@ -46,3 +46,7 @@ client.disconnect()
 
 *   [Prometheus MCP Server Documentation](https://github.com/pab1it0/prometheus-mcp-server)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Integrations/Prometheus-integration]]

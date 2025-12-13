@@ -684,3 +684,7 @@ workflow = parse_input >> validate >> cached_process >> format
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 30 minutes
 **Difficulty:** [[Intermediate]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___workflow composition]]

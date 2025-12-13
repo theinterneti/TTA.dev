@@ -2,7 +2,7 @@
 
 **Lightweight, LangSmith-inspired visibility for TTA.dev workflows**
 
-**Created:** November 10, 2025  
+**Created:** November 10, 2025
 **Status:** Design Phase
 
 ---
@@ -453,5 +453,9 @@ tta-observability-ui start
 
 ---
 
-**Last Updated:** November 10, 2025  
+**Last Updated:** November 10, 2025
 **Status:** Design Complete - Ready for Implementation
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Observability_ui_design]]

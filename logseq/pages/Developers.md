@@ -42,3 +42,7 @@ Developers using TTA.dev are:
 
 audience:: developers
 level:: beginner-to-intermediate
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Developers]]

@@ -21,3 +21,7 @@ Add RESTful API endpoint for user profile management.
 
 - Integrate with existing auth service
 - Store avatars in S3-compatible storage
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Plan_output/Api_endpoint.spec]]

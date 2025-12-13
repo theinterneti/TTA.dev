@@ -39,3 +39,7 @@ Claude supports Extended Thinking mode for complex reasoning:
 - Available for deep problem analysis and planning
 - Useful for architecture decisions, debugging complex issues
 - Access via chat mode selection in supported tools
+
+
+---
+**Logseq:** [[TTA.dev/.universal-instructions/Claude-specific/Capabilities]]

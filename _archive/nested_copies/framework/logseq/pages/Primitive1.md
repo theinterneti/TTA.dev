@@ -388,3 +388,7 @@ class MetricsPrimitive(WorkflowPrimitive[dict, dict]):
 **Status:** Generic placeholder
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Primitive1]]

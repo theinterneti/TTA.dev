@@ -2,7 +2,7 @@
 
 **Goal:** Enable automatic TTA.dev integration for Copilot and Cline with zero manual configuration
 
-**Time to Implement:** 2-3 days  
+**Time to Implement:** 2-3 days
 **Impact:** Immediate 80% improvement in developer experience
 
 ---
@@ -46,7 +46,7 @@ cat > .vscode/mcp.json << 'EOF'
   "$schema": "https://modelcontextprotocol.io/schema.json",
   "version": "1.0",
   "description": "TTA.dev MCP Auto-Configuration",
-  
+
   "mcpServers": {
     "hypertool": {
       "command": "npx",
@@ -69,7 +69,7 @@ cat > .vscode/mcp.json << 'EOF'
       ]
     }
   },
-  
+
   "settings": {
     "autoStart": true,
     "restartOnChange": true,
@@ -87,32 +87,32 @@ cat > .vscode/settings.json << 'EOF'
     "python.defaultInterpreterPath": ".venv/bin/python",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "workspace",
-    
+
     // Ruff - Native Server
     "ruff.nativeServer": true,
     "ruff.configuration": "./pyproject.toml",
     "ruff.lineLength": 88,
     "ruff.fixAll": true,
     "ruff.organizeImports": true,
-    
+
     // MCP Auto-Configuration ✨ NEW
     "mcp.configFile": "${workspaceFolder}/.vscode/mcp.json",
     "mcp.autoStart": true,
     "mcp.watchConfigChanges": true,
-    
+
     // Copilot Integration
     "github.copilot.advanced": {
         "mcpIntegration": "enabled",
         "autoLoadToolsets": true
     },
-    
+
     // Editor
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.organizeImports": "explicit",
         "source.fixAll.ruff": "explicit"
     },
-    
+
     // Terminal
     "terminal.integrated.defaultProfile.linux": "zsh",
     "terminal.integrated.profiles.linux": {
@@ -153,7 +153,7 @@ cat > .vscode/toolset-persona-map.json << 'EOF'
   "$schema": "./schemas/toolset-persona-map.schema.json",
   "version": "1.0",
   "description": "Maps GitHub Copilot toolsets to Hypertool personas",
-  
+
   "mappings": {
     "tta-package-dev": {
       "persona": "tta-backend-engineer",
@@ -196,7 +196,7 @@ cat > .vscode/toolset-persona-map.json << 'EOF'
       "auto_activate": false
     }
   },
-  
+
   "fallback_persona": "tta-backend-engineer",
   "require_confirmation": false
 }
@@ -225,11 +225,11 @@ from pathlib import Path
 def load_mapping() -> dict:
     """Load toolset-persona mapping."""
     mapping_file = Path(".vscode/toolset-persona-map.json")
-    
+
     if not mapping_file.exists():
         print("⚠️  No toolset-persona mapping found")
         return {}
-    
+
     with open(mapping_file) as f:
         return json.load(f)
 
@@ -244,14 +244,14 @@ def switch_persona(persona: str) -> bool:
             text=True,
             timeout=5
         )
-        
+
         if result.returncode == 0:
             print(f"✅ Switched to persona: {persona}")
             return True
         else:
             print(f"⚠️  Failed to switch persona: {result.stderr}")
             return False
-            
+
     except FileNotFoundError:
         # Fallback: Update environment variable
         os.environ["HYPERTOOL_PERSONA"] = persona
@@ -267,40 +267,40 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: auto-activate-persona.py <toolset-hashtag>")
         sys.exit(1)
-    
+
     toolset = sys.argv[1].replace("#", "").replace("tta-", "")
     full_toolset = f"tta-{toolset}" if not toolset.startswith("tta-") else toolset
-    
+
     # Load mapping
     mapping = load_mapping()
-    
+
     if not mapping:
         sys.exit(1)
-    
+
     # Get persona for toolset
     toolset_config = mapping.get("mappings", {}).get(full_toolset)
-    
+
     if not toolset_config:
         fallback = mapping.get("fallback_persona", "tta-backend-engineer")
         print(f"⚠️  No mapping for {full_toolset}, using fallback: {fallback}")
         switch_persona(fallback)
         sys.exit(0)
-    
+
     # Check if auto-activation enabled
     if not toolset_config.get("auto_activate", True):
         print(f"ℹ️  Auto-activation disabled for {full_toolset}")
         sys.exit(0)
-    
+
     # Switch persona
     persona = toolset_config["persona"]
     description = toolset_config.get("description", "")
-    
+
     print(f"🔄 Activating {full_toolset}")
     print(f"   → Persona: {persona}")
     print(f"   → Purpose: {description}")
-    
+
     success = switch_persona(persona)
-    
+
     sys.exit(0 if success else 1)
 
 
@@ -381,24 +381,24 @@ cat >> .cline/mcp-server/tta_recommendations.py << 'EOF'
 async def get_tta_context(task_description: str) -> dict:
     """
     Automatically provide TTA.dev context for any development task.
-    
+
     This tool is called automatically before starting work on a task.
     It provides:
     - Recommended Hypertool persona
     - Relevant TTA.dev primitives
     - Code examples and patterns
     - Best practices
-    
+
     Args:
         task_description: What the user wants to accomplish
-        
+
     Returns:
         Complete context for the task including primitives, examples, and guidance
     """
-    
+
     # Analyze task intent
     task_lower = task_description.lower()
-    
+
     # Detect keywords and map to primitives
     context = {
         "task": task_description,
@@ -409,7 +409,7 @@ async def get_tta_context(task_description: str) -> dict:
         "best_practices": [],
         "imports": []
     }
-    
+
     # Retry/error handling
     if any(word in task_lower for word in ["retry", "error", "fail", "timeout"]):
         context["primitives"].append("RetryPrimitive")
@@ -417,7 +417,7 @@ async def get_tta_context(task_description: str) -> dict:
         context["examples"].append("platform/primitives/examples/recovery_patterns.py")
         context["imports"].append("from tta_dev_primitives.recovery import RetryPrimitive")
         context["best_practices"].append("Use exponential backoff with jitter")
-    
+
     # Caching
     if any(word in task_lower for word in ["cache", "store", "memoize", "performance"]):
         context["primitives"].append("CachePrimitive")
@@ -425,7 +425,7 @@ async def get_tta_context(task_description: str) -> dict:
         context["examples"].append("platform/primitives/examples/cache_patterns.py")
         context["imports"].append("from tta_dev_primitives.performance import CachePrimitive")
         context["best_practices"].append("Set appropriate TTL and max_size")
-    
+
     # Parallel/concurrent
     if any(word in task_lower for word in ["parallel", "concurrent", "multiple", "batch"]):
         context["primitives"].append("ParallelPrimitive")
@@ -433,7 +433,7 @@ async def get_tta_context(task_description: str) -> dict:
         context["examples"].append("platform/primitives/examples/parallel_execution.py")
         context["imports"].append("from tta_dev_primitives import ParallelPrimitive")
         context["best_practices"].append("Use | operator for parallel composition")
-    
+
     # Sequential workflow
     if any(word in task_lower for word in ["workflow", "pipeline", "sequence", "chain"]):
         context["primitives"].append("SequentialPrimitive")
@@ -441,7 +441,7 @@ async def get_tta_context(task_description: str) -> dict:
         context["examples"].append("platform/primitives/examples/basic_sequential.py")
         context["imports"].append("from tta_dev_primitives import SequentialPrimitive")
         context["best_practices"].append("Use >> operator for sequential composition")
-    
+
     # Testing
     if any(word in task_lower for word in ["test", "mock", "unittest", "pytest"]):
         context["primitives"].append("MockPrimitive")
@@ -450,14 +450,14 @@ async def get_tta_context(task_description: str) -> dict:
         context["examples"].append("platform/primitives/tests/")
         context["imports"].append("from tta_dev_primitives.testing import MockPrimitive")
         context["best_practices"].append("Use AAA pattern (Arrange, Act, Assert)")
-    
+
     # Observability
     if any(word in task_lower for word in ["trace", "metric", "monitor", "observability"]):
         context["persona"] = "tta-observability-expert"
         context["patterns"].append("observability")
         context["examples"].append("platform/observability/")
         context["best_practices"].append("All primitives have built-in observability")
-    
+
     # Add general best practices
     if context["primitives"]:
         context["best_practices"].extend([
@@ -466,7 +466,7 @@ async def get_tta_context(task_description: str) -> dict:
             "Include WorkflowContext for tracing",
             "Write tests with 100% coverage"
         ])
-    
+
     return context
 EOF
 ```
@@ -582,22 +582,22 @@ def check_persona_mapping() -> bool:
 def main():
     """Run setup checks."""
     print("\n📋 TTA.dev Auto-Integration Setup\n")
-    
+
     checks = {
         "Hypertool MCP available": check_hypertool_installed(),
         "MCP config (.vscode/mcp.json)": check_mcp_config(),
         "Persona mapping (.vscode/toolset-persona-map.json)": check_persona_mapping()
     }
-    
+
     all_good = True
     for check, status in checks.items():
         emoji = "✅" if status else "❌"
         print(f"{emoji} {check}")
         if not status:
             all_good = False
-    
+
     print()
-    
+
     if all_good:
         print("🎉 Auto-integration is ready!")
         print()
@@ -710,7 +710,11 @@ After implementing this quick start:
 
 ---
 
-**Last Updated:** November 17, 2025  
-**Status:** Ready for Implementation  
-**Estimated Time:** 2-3 days  
+**Last Updated:** November 17, 2025
+**Status:** Ready for Implementation
+**Estimated Time:** 2-3 days
 **Impact:** 80% reduction in setup time
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Auto_integration_quickstart]]

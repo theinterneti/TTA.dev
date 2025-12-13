@@ -487,3 +487,7 @@ feature:: retrieval
 feature:: generation
 primitives:: cache, retry, fallback, sequential
 pattern:: 5-stage-pipeline
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___examples___rag workflow]]

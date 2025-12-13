@@ -781,3 +781,7 @@ id:: llm-cost-summary
 **Maintained by:** TTA.dev Team
 
 **⚠️ Important:** Free tier limits change frequently. Always verify current rates on provider websites before production use.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___llm cost and free tiers]]

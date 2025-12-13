@@ -389,3 +389,7 @@ Contributors are recognized in:
 - Project README
 
 Thank you for helping make TTA.dev better! 🎉
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Contributing]]

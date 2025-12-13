@@ -27,3 +27,7 @@ TTA.dev project overview, installation, and quick start guide.
 **Tags:** #documentation #reference #overview
 
 **Note:** This page links to repository documentation. The authoritative source is `README.md` in the repo root.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Readme]]

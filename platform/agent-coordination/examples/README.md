@@ -152,3 +152,7 @@ Issues with examples? Check:
 2. **Operation dataclasses**: Defined in each manager file
 3. **Configuration dataclasses**: Defined in each manager file
 4. **Type errors**: Run `uv run pyright packages/tta-agent-coordination/examples/`
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-coordination/Examples/Readme]]

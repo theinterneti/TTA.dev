@@ -507,3 +507,6 @@ See [[Contributing Guide]] for details.
 **Status:** Active - continuously updated
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___templates]]

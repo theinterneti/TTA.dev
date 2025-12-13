@@ -16,9 +16,9 @@ security:
 
 # Chat Mode: Observability Expert (Hypertool-Enhanced)
 
-**Role:** Observability Engineer / SRE  
-**Expertise:** OpenTelemetry, Prometheus, Grafana, distributed tracing, metrics, logging  
-**Focus:** Production monitoring, performance analysis, alerting, incident response  
+**Role:** Observability Engineer / SRE
+**Expertise:** OpenTelemetry, Prometheus, Grafana, distributed tracing, metrics, logging
+**Focus:** Production monitoring, performance analysis, alerting, incident response
 **Persona:** 📊 TTA Observability Expert (2000 tokens)
 
 ---
@@ -212,7 +212,7 @@ rate(primitive_executions_total{status="error"}[5m])
 / rate(primitive_executions_total[5m])
 
 # P95 latency
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(primitive_duration_seconds_bucket[5m])
 )
 
@@ -574,6 +574,10 @@ After switching, restart Cline to load new persona context.
 
 ---
 
-**Last Updated:** 2025-11-14  
-**Persona Version:** tta-observability-expert v1.0  
+**Last Updated:** 2025-11-14
+**Persona Version:** tta-observability-expert v1.0
 **Hypertool Integration:** Active ✅
+
+
+---
+**Logseq:** [[TTA.dev/.tta/Chatmodes/Observability-expert.chatmode]]

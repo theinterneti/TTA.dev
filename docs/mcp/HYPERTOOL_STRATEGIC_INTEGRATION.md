@@ -1,8 +1,8 @@
 # Hypertool Strategic Integration with TTA.dev
 
-**Date:** 2025-11-14  
-**Version:** 1.0  
-**Status:** Architecture Specification  
+**Date:** 2025-11-14
+**Version:** 1.0
+**Status:** Architecture Specification
 **Priority:** CRITICAL
 
 ---
@@ -70,7 +70,7 @@ Security risks (wrong tools for wrong tasks)
 
 ### Pillar 1: Central MCP Loader
 
-**Replaces:** Multiple MCP server configurations  
+**Replaces:** Multiple MCP server configurations
 **Provides:** Single point of entry for all MCP servers
 
 #### Implementation
@@ -175,7 +175,7 @@ TTA.dev supports multiple AI agents. Hypertool ensures consistency:
 
 ### Pillar 2: Persona-Based Context Engineering
 
-**Aligns with:** TTA.dev Chat Modes (`.chatmode.md`)  
+**Aligns with:** TTA.dev Chat Modes (`.chatmode.md`)
 **Provides:** Domain-specific tool boundaries
 
 #### Persona Architecture
@@ -269,7 +269,7 @@ Agent prompt: 3000 tokens
 
 ### Pillar 3: Agentic Workflow Integration
 
-**Aligns with:** TTA.dev `.prompt.md` Workflow Primitives  
+**Aligns with:** TTA.dev `.prompt.md` Workflow Primitives
 **Provides:** Tool orchestration for CI/CD "Outer Loop"
 
 #### Workflow Orchestration Pattern
@@ -321,14 +321,14 @@ dependencies:
       package: "@toolprint/hypertool-mcp"
       version: "latest"
       priority: critical
-      
+
     # Underlying servers (managed by Hypertool)
     - name: context7
       enabled_via: hypertool
-      
+
     - name: github-mcp
       enabled_via: hypertool
-      
+
     - name: grafana-mcp
       enabled_via: hypertool
 
@@ -339,16 +339,16 @@ pipelines:
     agent: "github-actions-agent"
     mcp_loader: "hypertool"
     default_persona: "tta-ci-cd-runner"
-    
+
     workflows:
       - name: "package-release"
         prompt_file: ".prompts/package-release.prompt.md"
         persona: "tta-package-dev"
-        
+
       - name: "integration-tests"
         prompt_file: ".prompts/integration-tests.prompt.md"
         persona: "tta-testing-specialist"
-        
+
       - name: "observability-validation"
         prompt_file: ".prompts/observability-check.prompt.md"
         persona: "tta-observability"
@@ -359,17 +359,17 @@ personas:
     servers: [pylance, github, filesystem]
     tools: 8
     token_budget: 1800
-    
+
   tta-testing-specialist:
     servers: [pylance, e2b, github]
     tools: 6
     token_budget: 1500
-    
+
   tta-observability:
     servers: [grafana, prometheus, sift]
     tools: 7
     token_budget: 1400
-    
+
   tta-ci-cd-runner:
     servers: [github, filesystem]
     tools: 5
@@ -394,17 +394,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       # Install APM and Hypertool
       - name: Setup APM
         run: |
           npm install -g apm-cli
           apm install
-          
+
       # Install Hypertool (critical dependency)
       - name: Setup Hypertool MCP
         run: npm install -g @toolprint/hypertool-mcp@latest
-      
+
       # Run agentic workflow with persona
       - name: Execute Release Workflow
         env:
@@ -441,10 +441,10 @@ jobs:
    ```bash
    # Backup current config
    cp .mcp.json .mcp.json.backup
-   
+
    # Create Hypertool backend config
    cp .mcp.json .mcp.hypertool.json
-   
+
    # Replace .mcp.json with Hypertool loader
    cat > .mcp.json << 'EOF'
    {
@@ -532,7 +532,7 @@ jobs:
        with open(chatmode_file) as f:
            frontmatter = yaml.safe_load(f.read().split('---')[1])
        return frontmatter.get('persona', 'tta-default')
-   
+
    def activate_persona(persona_name: str):
        """Update .mcp.json to use specific persona."""
        config = {
@@ -584,15 +584,15 @@ jobs:
        def __init__(self, prompt_file: str):
            self.prompt = load_prompt(prompt_file)
            self.personas = self.prompt.frontmatter['personas']
-       
+
        async def execute_step(self, step_num: int):
            # Switch to step-specific persona
            persona = self.personas[f'step_{step_num}']
            activate_persona(persona)
-           
+
            # Wait for MCP reload
            await asyncio.sleep(1)
-           
+
            # Execute step
            result = await self.run_step(step_num)
            return result
@@ -609,18 +609,18 @@ jobs:
      step_2: tta-observability      # Check metrics
      step_3: tta-testing-specialist # Run tests
    ---
-   
+
    # Test Persona Switching Workflow
-   
+
    ## Step 1: Modify Backend Code
    Using persona: tta-backend-engineer
    - Edit Python file
    - Run type checking
-   
+
    ## Step 2: Check Observability
    Using persona: tta-observability
    - Query Prometheus for baseline metrics
-   
+
    ## Step 3: Run Tests
    Using persona: tta-testing-specialist
    - Execute test suite
@@ -644,20 +644,20 @@ jobs:
    `.github/workflows/setup-hypertool.yml`:
    ```yaml
    name: Setup Hypertool MCP
-   
+
    on:
      workflow_call:
-   
+
    jobs:
      setup:
        runs-on: ubuntu-latest
        steps:
          - name: Install Hypertool
            run: npm install -g @toolprint/hypertool-mcp@latest
-           
+
          - name: Verify Installation
            run: npx -y @toolprint/hypertool-mcp --version
-           
+
          - name: Cache Hypertool
            uses: actions/cache@v3
            with:
@@ -674,7 +674,7 @@ jobs:
        steps:
          - name: Setup Hypertool
            uses: ./.github/workflows/setup-hypertool.yml
-           
+
          - name: Run Agentic Release
            env:
              HYPERTOOL_PERSONA: tta-package-dev
@@ -687,25 +687,25 @@ jobs:
    `.github/workflows/validate-personas.yml`:
    ```yaml
    name: Validate Hypertool Personas
-   
+
    on: [pull_request]
-   
+
    jobs:
      validate:
        runs-on: ubuntu-latest
        steps:
          - uses: actions/checkout@v4
-         
+
          - name: Setup Hypertool
            run: npm install -g @toolprint/hypertool-mcp@latest
-           
+
          - name: Validate Persona Configs
            run: |
              for persona in .hypertool/personas/*.json; do
                echo "Validating $persona"
                npx -y @toolprint/hypertool-mcp validate-persona "$persona"
              done
-           
+
          - name: Check Token Budgets
            run: python scripts/validate_token_budgets.py
    ```
@@ -1042,7 +1042,11 @@ Context remains optimized throughout workflow
 
 ---
 
-**Created:** 2025-11-14  
-**Version:** 1.0  
-**Status:** Strategic Specification  
+**Created:** 2025-11-14
+**Version:** 1.0
+**Status:** Strategic Specification
 **Next Action:** Begin Phase 1 implementation
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Hypertool_strategic_integration]]

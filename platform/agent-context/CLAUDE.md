@@ -167,3 +167,7 @@ Use Sequential Thinking for multi-step procedures:
 
 **Last Updated**: 2025-10-26
 **Status**: Active - Claude-specific instructions and context
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/Claude]]

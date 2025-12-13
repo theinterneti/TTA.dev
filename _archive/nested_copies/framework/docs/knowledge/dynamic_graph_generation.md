@@ -220,3 +220,7 @@ The LLM is prompted to return structured JSON data, which is then parsed and map
 - Add support for more complex relationship patterns
 - Improve error handling and recovery
 - Add support for custom extraction templates
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Knowledge/Dynamic_graph_generation]]

@@ -166,3 +166,7 @@ print(f"PyTorch: {torch.__version__}")
 - ✅ TTA.dev primitives work perfectly with E2B
 - ⚠️ ML-specific workflows need runtime installation until template fixed
 - ✅ All planned integration patterns are achievable
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/E2b_investigation_report]]

@@ -1,5 +1,5 @@
 # Migration Checklist
-- origin /TTA/TTA 
+- origin /TTA/TTA
 - destination /app
 ## Priority Components
 1. Source Code
@@ -41,3 +41,6 @@
 - Obsolete documentation
 - Temporary files
 - Build artifacts
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Migration-checklist]]

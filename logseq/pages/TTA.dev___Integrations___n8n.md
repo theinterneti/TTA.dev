@@ -248,3 +248,7 @@ CREATE TABLE github_health (
 **Last Updated:** 2025-11-17
 **Documentation:** [docs.n8n.io](https://docs.n8n.io)
 **Tags:** integration:: n8n, automation:: workflows, monitoring:: github
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___integrations___n8n]]

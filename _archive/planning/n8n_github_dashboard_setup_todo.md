@@ -64,3 +64,7 @@
 ## Next Action Required
 
 **For User**: Follow the manual setup guide at `/home/thein/repos/TTA.dev/n8n_manual_setup_guide.md` to complete the configuration.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/N8n_github_dashboard_setup_todo]]

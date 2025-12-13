@@ -610,3 +610,7 @@ git push
 - [ ] Phase 3: Reusable Workflows
 - [ ] Phase 4: Migration
 - [ ] Phase 5: Cleanup
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Status-reports/Ci-cd/Workflow_rebuild_quickstart]]

@@ -346,3 +346,7 @@ retry = RetryPrimitive(
 ---
 
 **Next Steps:** When cline detects failure-prone operations, it should automatically suggest RetryPrimitive with appropriate backoff strategy and exception handling.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Retry_primitive]]

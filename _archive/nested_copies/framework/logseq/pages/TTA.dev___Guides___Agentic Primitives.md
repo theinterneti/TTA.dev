@@ -558,3 +558,6 @@ workflow = (
 **Difficulty:** [[Beginner]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___agentic primitives]]

@@ -373,3 +373,7 @@ To improve Gemini CLI integration:
 ---
 
 **Questions?** Post in [Discussions](https://github.com/theinterneti/TTA.dev/discussions) or create an [Issue](https://github.com/theinterneti/TTA.dev/issues).
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Gemini-cli/Gemini-cli-integration-guide]]

@@ -154,3 +154,7 @@ find docs/ -name "*.md" -mtime -7
 ---
 
 **Tags:** #index #documentation #reference
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___documentation index]]

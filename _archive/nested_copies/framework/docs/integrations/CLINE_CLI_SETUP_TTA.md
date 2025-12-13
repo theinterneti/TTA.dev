@@ -344,3 +344,7 @@ cline "What coding standards does this project follow?"
 
 **Created:** November 6, 2025
 **Status:** Diagnostic and setup guide
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integrations/Cline_cli_setup_tta]]

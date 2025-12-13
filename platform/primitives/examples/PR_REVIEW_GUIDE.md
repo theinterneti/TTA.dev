@@ -398,3 +398,7 @@ quality_threshold: 0.75
 **Last Updated:** October 30, 2025
 **Maintained by:** TTA.dev Team
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Examples/Pr_review_guide]]

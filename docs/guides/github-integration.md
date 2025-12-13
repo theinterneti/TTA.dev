@@ -115,3 +115,7 @@ The integration uses:
 - **Automated triggers**: Event-driven responses
 
 This creates a seamless experience where developers get AI-powered assistance directly in their GitHub issues, specifically tailored to the TTA.dev ecosystem.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Github-integration]]

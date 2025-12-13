@@ -15,3 +15,7 @@ Base class for primitives that learn from observability data.
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Adaptive]] - Adaptive primitives
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___primitives___adaptiveprimitive]]

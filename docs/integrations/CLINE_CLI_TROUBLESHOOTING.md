@@ -586,3 +586,7 @@ If you're still having issues after following this guide:
 ---
 
 **Configuration Complete! Ready to use Cline CLI with TTA.dev. 🚀**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integrations/Cline_cli_troubleshooting]]

@@ -138,3 +138,7 @@ client.disconnect()
 ```
 
 This allows you to integrate MCP servers into your own applications and workflows.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Usage]]

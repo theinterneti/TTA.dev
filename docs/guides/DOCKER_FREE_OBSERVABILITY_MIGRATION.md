@@ -1,7 +1,7 @@
 # Docker-Free Observability Migration - Summary
 
-**Date:** 2025-11-15  
-**Status:** Ready for Implementation  
+**Date:** 2025-11-15
+**Status:** Ready for Implementation
 **Estimated Time:** 30-60 minutes
 
 ---
@@ -447,8 +447,12 @@ podman-compose -f docker-compose.integration.yml up -d
 
 ---
 
-**Created:** 2025-11-15  
-**Author:** GitHub Copilot  
-**Purpose:** Migration from Docker Desktop to Linux-native observability  
+**Created:** 2025-11-15
+**Author:** GitHub Copilot
+**Purpose:** Migration from Docker Desktop to Linux-native observability
 **Outcome:** Reliable, lightweight, production-ready observability stack
 
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Docker_free_observability_migration]]

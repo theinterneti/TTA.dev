@@ -278,3 +278,7 @@ The client includes robust error handling:
 - **Caching**: Implement caching for common queries
 - **Batch Processing**: Support batch processing for multiple queries
 - **Model Versioning**: Track model versions and performance changes
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Models/Hybrid_model_approach]]

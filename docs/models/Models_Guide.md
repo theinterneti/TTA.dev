@@ -252,26 +252,26 @@ The TTA project uses a hybrid model approach that leverages the strengths of eac
 ```python
 class HybridLLMClient:
     """Client for hybrid LLM approach."""
-    
+
     def __init__(self, model_selector, neo4j_manager):
         """Initialize the client."""
         self.model_selector = model_selector
         self.neo4j_manager = neo4j_manager
-        
+
     async def generate(self, prompt, task_type, **kwargs):
         """Generate text using the appropriate model."""
         # Select the model
         model_name = self.model_selector.select_model(task_type, **kwargs)
-        
+
         # Get model-specific parameters
         params = self._get_model_params(model_name, task_type, **kwargs)
-        
+
         # Generate the response
         response = await self._generate_with_model(model_name, prompt, params)
-        
+
         # Record performance metrics
         self.model_selector.record_performance(model_name, task_type, response)
-        
+
         return response
 ```
 
@@ -294,7 +294,7 @@ The TTA project implements fallback mechanisms for when the preferred model is u
 ```python
 class ModelSelectionWithFallback:
     """Select models with fallback mechanisms."""
-    
+
     def __init__(self, model_configs):
         """Initialize the selector."""
         self.model_configs = model_configs
@@ -303,18 +303,18 @@ class ModelSelectionWithFallback:
             "gemma-3-1b-it": ["phi-4-mini-instruct", "qwen2.5-0.5b"],
             "qwen2.5-0.5b": ["gemma-3-1b-it", "phi-4-mini-instruct"]
         }
-    
+
     def select_with_fallback(self, task_type, preferred_model, **kwargs):
         """Select a model with fallback options."""
         # Check if preferred model is suitable
         if self._is_model_suitable(preferred_model, task_type, **kwargs):
             return preferred_model
-        
+
         # Try fallbacks
         for fallback in self.fallback_chains.get(preferred_model, []):
             if self._is_model_suitable(fallback, task_type, **kwargs):
                 return fallback
-        
+
         # Return the most general model as last resort
         return "qwen2.5-0.5b"  # Fastest and most reliable
 ```
@@ -331,3 +331,7 @@ The TTA project is designed to easily integrate new models as they become availa
 ## Conclusion
 
 The TTA project's model selection strategy enables optimal performance across a wide range of tasks by leveraging the strengths of each model while mitigating their weaknesses. By dynamically selecting the appropriate model for each task, the system provides high-quality therapeutic content while maintaining good performance and resource efficiency.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Models/Models_guide]]

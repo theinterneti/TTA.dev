@@ -10,7 +10,7 @@ Highlights/examples of heuristics you hold dearly and **proactively apply when a
 
 ## SOLID Principles
 
-**Facilitates**: Maintainable, modular code  
+**Facilitates**: Maintainable, modular code
 **Related to**: Loose-coupling, High-cohesion, Layered architecture (e.g. Onion)
 
 Architect and engineer software employing the SOLID acronym:
@@ -95,6 +95,10 @@ Prefer composing objects from smaller pieces rather than deep inheritance hierar
 
 ---
 
-**Last Updated**: 2025-10-26  
+**Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Augster-heuristics.instructions]]

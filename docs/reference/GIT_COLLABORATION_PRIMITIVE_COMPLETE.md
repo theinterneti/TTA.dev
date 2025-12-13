@@ -642,3 +642,7 @@ Track these to measure adoption and impact:
 **License:** MIT (aligned with tta-dev-primitives)
 
 **Next:** Read the [complete guide](packages/tta-dev-primitives/docs/collaboration/GIT_COLLABORATION_GUIDE.md) and run the [examples](packages/tta-dev-primitives/examples/git_collaboration_example.py)!
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Reference/Git_collaboration_primitive_complete]]

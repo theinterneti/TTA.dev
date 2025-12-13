@@ -33,8 +33,8 @@ AGENTS.md (workspace-wide hub for ALL agents)
 
 From `docs.github.com/en/copilot`:
 
-> **Agent Instructions (AGENTS.md)**: Used by AI agents within Copilot Chat. These instructions can be placed in `AGENTS.md` files anywhere in the repository, with the **nearest file taking precedence**. 
-> 
+> **Agent Instructions (AGENTS.md)**: Used by AI agents within Copilot Chat. These instructions can be placed in `AGENTS.md` files anywhere in the repository, with the **nearest file taking precedence**.
+>
 > For Copilot Chat in VS Code, these instructions **must be in the root of the workspace**.
 >
 > Alternatively, a single `CLAUDE.md` or `GEMINI.md` file can be used in the repository root.
@@ -132,3 +132,7 @@ ls -la CLINE_AGENT.md CURSOR_AGENT.md AUGMENT_AGENT.md  # Should NOT exist
 ---
 
 **Status**: Architecture corrected, YAML mappings updated, new AGENTS.md created. Generator script needs update to skip per-tool agent file generation.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports/Agents_architecture_fix]]

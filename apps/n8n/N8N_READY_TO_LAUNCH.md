@@ -260,3 +260,7 @@ Then open: <http://localhost:5678>
 - Troubleshooting
 - Advanced automation
 - Integration with other tools
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_ready_to_launch]]

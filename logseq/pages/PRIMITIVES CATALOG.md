@@ -76,3 +76,7 @@ cached_llm = CachePrimitive(
 
 reference:: primitives-catalog
 type:: documentation
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Primitives catalog]]

@@ -50,3 +50,7 @@
 - ✅ Code quality metrics
 
 ## Estimated Time: 45-60 minutes
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/N8n_dashboard_completion_todo]]

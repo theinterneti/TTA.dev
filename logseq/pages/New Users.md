@@ -48,3 +48,7 @@ New Users are:
 
 audience:: new-users
 level:: beginner
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/New users]]

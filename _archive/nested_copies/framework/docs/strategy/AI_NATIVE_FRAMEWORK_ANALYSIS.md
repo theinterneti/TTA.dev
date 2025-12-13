@@ -1126,3 +1126,7 @@ The proposed AI Native Development Framework represents a significant evolution 
 - How prescriptive should chat modes be?
 - What's the minimal viable implementation that still delivers value?
 - How do we migrate existing workflows to the new framework?
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Strategy/Ai_native_framework_analysis]]

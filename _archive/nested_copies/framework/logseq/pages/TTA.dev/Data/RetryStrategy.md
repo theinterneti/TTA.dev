@@ -13,3 +13,7 @@
   - `backoff_base`: The base for exponential backoff calculation (e.g., 2.0 for 2, 4, 8... seconds).
   - `max_backoff`: The maximum delay in seconds between retries.
   - `jitter`: A boolean indicating whether to add random jitter to the backoff delay to prevent thundering herd problems.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Data/Retrystrategy]]

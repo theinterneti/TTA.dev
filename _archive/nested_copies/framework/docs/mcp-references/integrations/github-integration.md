@@ -53,3 +53,7 @@ client.disconnect()
 
 *   [GitHub MCP Server Documentation](https://github.com/github/github-mcp-server)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Integrations/Github-integration]]

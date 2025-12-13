@@ -60,3 +60,7 @@ A wrapper script that:
 1.  Document specific setup for each runtime.
 2.  Implement `scripts/run_agent.py`.
 3.  Update `apm.yml` to use the wrapper.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Agentic_runtimes]]

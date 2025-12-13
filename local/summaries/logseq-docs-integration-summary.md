@@ -423,3 +423,7 @@ result = await doc_workflow.execute({
 **Created:** October 31, 2025
 **Status:** Design complete, ready for Phase 1
 **Next:** Create `tta-documentation-primitives` package structure
+
+
+---
+**Logseq:** [[TTA.dev/Local/Summaries/Logseq-docs-integration-summary]]

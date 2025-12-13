@@ -535,3 +535,6 @@ uv run python -m tta_kb_automation pre-commit-check
 **Status:** 🚧 Phase 1 Complete, Phase 2 In Progress
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___packages___tta-kb-automation]]

@@ -507,3 +507,7 @@ See: `tests/integration/test_real_kb_integration.py::TestTODOSyncWithRealCodebas
 **Package:** tta-kb-automation
 **Tool Status:** ✅ Production Ready
 **Test Coverage:** 100% (44/44 tests passing)
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta kb automation___todo sync]]

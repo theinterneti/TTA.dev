@@ -618,3 +618,7 @@ For TTA.dev-specific issues:
 **Last Updated:** November 10, 2025
 **Maintained by:** TTA.dev Team
 **License:** MIT
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Zsh-setup-guide]]

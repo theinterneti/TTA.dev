@@ -141,3 +141,7 @@ sudo systemctl restart n8n
 **Created:** 2025-11-08 11:36 PM
 **Last Updated:** 2025-11-08 11:36 PM
 **Estimated Total Time:** 30-45 minutes
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/N8n_dashboard_setup_todo]]

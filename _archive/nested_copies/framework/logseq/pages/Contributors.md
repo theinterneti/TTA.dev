@@ -57,3 +57,6 @@ audience:: contributors
 level:: intermediate-to-advanced
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Contributors]]

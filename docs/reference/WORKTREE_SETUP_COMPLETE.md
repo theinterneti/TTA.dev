@@ -229,3 +229,7 @@ workspace.code-workspace
 **Setup completed successfully!** 🎉
 
 Your multi-agent TTA.dev environment is ready to use.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Reference/Worktree_setup_complete]]

@@ -293,3 +293,7 @@ Once you answer these questions, I'll:
 ---
 
 **Please fill out Section 1-7 above so I can design this correctly!** 🙏
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Universal_llm_architecture_questions]]

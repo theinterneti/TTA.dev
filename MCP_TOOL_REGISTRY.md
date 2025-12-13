@@ -185,3 +185,7 @@ Show me the schema for the users table
 - Data analysis
 - Query testing
 - Database documentation
+
+
+---
+**Logseq:** [[TTA.dev/Mcp_tool_registry]]

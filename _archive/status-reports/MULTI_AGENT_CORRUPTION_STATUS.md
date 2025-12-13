@@ -136,3 +136,7 @@ This avoids further corruption and ensures we have 2 fully working examples alre
 ---
 
 **Conclusion:** We have **2 out of 5 examples fully working**. Focus on the remaining 2 fixable examples before attempting to recreate the corrupted one.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports/Multi_agent_corruption_status]]

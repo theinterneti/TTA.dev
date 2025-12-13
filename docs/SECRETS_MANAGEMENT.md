@@ -508,3 +508,7 @@ else:
 **Last Updated:** November 12, 2025
 **Maintained by:** TTA.dev Team
 **Version:** 1.1.0
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Secrets_management]]

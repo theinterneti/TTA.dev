@@ -325,3 +325,7 @@ ln -s /home/thein/repos/TTA.dev/logseq/shared logseq/shared
 ---
 
 **Last Updated:** November 17, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Scripts/Worktree/Readme]]

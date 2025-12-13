@@ -90,3 +90,6 @@ automation:: ci-cd
 standards:: high
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Testing & quality]]

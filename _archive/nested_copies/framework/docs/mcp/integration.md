@@ -163,3 +163,7 @@ The MCP integration uses Python's logging module. You can enable debug logging t
 ```bash
 python -m src.core.main --debug --start-mcp-servers
 ```
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp/Integration]]

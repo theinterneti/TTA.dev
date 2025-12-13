@@ -71,3 +71,7 @@ When adding Claude-specific features:
    - If it's Claude-specific → put it here
 
 3. Regenerate CLAUDE.md to apply changes
+
+
+---
+**Logseq:** [[TTA.dev/.universal-instructions/Claude-specific/Readme]]

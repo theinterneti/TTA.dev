@@ -62,3 +62,6 @@ status:: evaluation
 type:: ai-assistance
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Gemini cli integration]]

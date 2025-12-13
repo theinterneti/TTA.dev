@@ -298,3 +298,7 @@ experiments/tasks-real-world/
 **Next Action:** Use in production sprint planning
 
 **Last Updated:** November 4, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Data/Experiments/Tasks-real-world/Results]]

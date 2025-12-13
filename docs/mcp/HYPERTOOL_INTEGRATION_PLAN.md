@@ -1,7 +1,7 @@
 # Hypertool MCP Integration Plan
 
-**Status:** Planning Phase  
-**Priority:** High - Game Changer  
+**Status:** Planning Phase
+**Priority:** High - Game Changer
 **Impact:** Massive - 89% better tool selection, optimized context usage
 
 ---
@@ -39,7 +39,7 @@ This aligns perfectly with TTA.dev's composable primitives philosophy.
 # TTA.dev: Compose primitives for workflows
 workflow = cache >> router >> retry >> fallback
 
-# Hypertool: Compose toolsets for AI workflows  
+# Hypertool: Compose toolsets for AI workflows
 coding_flow = git_tools + docker_tools + filesystem_tools
 debug_flow = logs_tools + traces_tools + monitoring_tools
 
@@ -76,7 +76,7 @@ From `.vscode/copilot-toolsets.jsonc`:
 From `MCP_SERVERS.md`:
 
 1. **Context7** - Library documentation
-2. **AI Toolkit** - Agent best practices  
+2. **AI Toolkit** - Agent best practices
 3. **Grafana** - Prometheus/Loki queries
 4. **Pylance** - Python tools
 5. **Database Client** - SQL operations
@@ -117,11 +117,11 @@ cat > .mcp.json << 'EOF'
     "hypertool": {
       "command": "npx",
       "args": [
-        "-y", 
-        "@toolprint/hypertool-mcp", 
-        "mcp", 
-        "run", 
-        "--mcp-config", 
+        "-y",
+        "@toolprint/hypertool-mcp",
+        "mcp",
+        "run",
+        "--mcp-config",
         ".mcp.hypertool.json"
       ]
     }
@@ -188,7 +188,7 @@ Recreate current toolsets with optimization:
 
 // tta-package-dev (12 tools → optimize to 8-10 tools)
 {
-  "name": "tta-package-dev", 
+  "name": "tta-package-dev",
   "tools": [
     "edit",
     "search",
@@ -207,7 +207,7 @@ Recreate current toolsets with optimization:
   "name": "tta-observability",
   "tools": [
     "mcp_grafana_query_prometheus",
-    "mcp_grafana_query_loki_logs", 
+    "mcp_grafana_query_loki_logs",
     "mcp_grafana_list_alert_rules",
     "search",
     "problems",
@@ -219,7 +219,7 @@ Recreate current toolsets with optimization:
 
 **Token Budget Goals:**
 - Minimal: <300 tokens
-- Focused: <2000 tokens  
+- Focused: <2000 tokens
 - Comprehensive: <4000 tokens
 - ⚠️ Avoid: >5000 tokens (context waste)
 
@@ -257,7 +257,7 @@ Create new optimized toolsets:
 
 // E2B Code Execution
 {
-  "name": "tta-code-validation", 
+  "name": "tta-code-validation",
   "tools": [
     "mcp_e2b_execute_code",
     "edit",
@@ -294,7 +294,7 @@ For each toolset:
     "mcp_database_execute_query",
     "mcp_context7_get-library-docs",
     "edit",
-    "search", 
+    "search",
     "problems",
     "run_task",
     "think"
@@ -339,7 +339,7 @@ TTA.dev uses Hypertool MCP for dynamic, optimized toolsets with:
 
 **Deliverable:** Migrated toolsets with:
 - Token budgets documented
-- Optimization strategies applied  
+- Optimization strategies applied
 - User guide updated
 - Hot-swap workflows documented
 
@@ -360,7 +360,7 @@ Enhance tools with examples and context:
       "description": "Execute Python code in workspace context. PREFERRED over terminal for testing snippets. Handles imports, async, proper error reporting.",
       "examples": [
         "Test if a function works before committing",
-        "Validate imports are available", 
+        "Validate imports are available",
         "Check syntax without creating files"
       ],
       "when_to_use": "Always prefer this over 'python -c' or terminal execution"
@@ -387,7 +387,7 @@ Create pre-configured personas for common workflows:
   }
 }
 
-# TTA.dev Observability Engineer  
+# TTA.dev Observability Engineer
 {
   "name": "tta-observability-eng",
   "servers": ["grafana", "pylance", "github"],
@@ -494,7 +494,7 @@ async def test_package_dev_toolset():
     # 4. Check token usage within budget
     pass
 
-@pytest.mark.asyncio  
+@pytest.mark.asyncio
 async def test_hot_swap_performance():
     """Verify hot-swapping doesn't degrade performance."""
     # 1. Measure baseline with static toolset
@@ -551,18 +551,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install Hypertool
         run: npm install -g @toolprint/hypertool-mcp
-      
+
       - name: Validate Toolset Configs
         run: |
           hypertool-mcp validate-config .mcp.hypertool.json
-      
+
       - name: Check Token Budgets
         run: |
           hypertool-mcp analyze-tokens --fail-if-over-budget
-      
+
       - name: Test Hot-Swap
         run: |
           python tests/integration/test_hypertool_toolsets.py
@@ -734,9 +734,13 @@ If Hypertool causes issues:
 
 ---
 
-**Created:** 2025-11-14  
-**Status:** Planning  
-**Owner:** TTA.dev Team  
-**Priority:** High  
-**Estimated Effort:** 4 weeks  
+**Created:** 2025-11-14
+**Status:** Planning
+**Owner:** TTA.dev Team
+**Priority:** High
+**Estimated Effort:** 4 weeks
 **Expected Impact:** Massive - Game changer for AI-assisted development
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Hypertool_integration_plan]]

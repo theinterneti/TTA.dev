@@ -93,19 +93,19 @@ LangGraph orchestrates the flow between agents and tools:
 ```python
 class AgentMemory:
     """Memory system for agents."""
-    
+
     def __init__(self, neo4j_manager):
         """Initialize the memory system."""
         self.neo4j_manager = neo4j_manager
-        
+
     def store_memory(self, memory_type, content, metadata=None):
         """Store a memory in the knowledge graph."""
         # Implementation details...
-        
+
     def retrieve_memories(self, query, limit=5):
         """Retrieve relevant memories based on a query."""
         # Implementation details...
-        
+
     def get_recent_memories(self, memory_type=None, limit=5):
         """Get recent memories of a specific type."""
         # Implementation details...
@@ -116,15 +116,15 @@ class AgentMemory:
 ```python
 class DynamicToolGenerator:
     """Generate tools based on the current game state."""
-    
+
     def __init__(self, neo4j_manager):
         """Initialize the tool generator."""
         self.neo4j_manager = neo4j_manager
-        
+
     def generate_tools(self, context):
         """Generate tools based on the current context."""
         # Implementation details...
-        
+
     def create_tool(self, tool_name, tool_description, tool_function):
         """Create a new tool."""
         # Implementation details...
@@ -137,18 +137,18 @@ def create_agentic_rag_workflow():
     """Create the Agentic RAG workflow using LangGraph."""
     # Define the nodes
     builder = StateGraph(AgenticRAGState)
-    
+
     # Add nodes
     builder.add_node("input_processing", input_processing_agent)
     builder.add_node("tool_selection", tool_selection_agent)
     builder.add_node("tool_execution", tool_execution)
     builder.add_node("narrative_generation", narrative_generation_agent)
-    
+
     # Add edges
     builder.add_edge("input_processing", "tool_selection")
     builder.add_edge("tool_selection", "tool_execution")
     builder.add_edge("tool_execution", "narrative_generation")
-    
+
     # Add conditional edges
     builder.add_conditional_edges(
         "narrative_generation",
@@ -158,10 +158,10 @@ def create_agentic_rag_workflow():
             False: END
         }
     )
-    
+
     # Compile the graph
     graph = builder.compile()
-    
+
     return graph
 ```
 
@@ -178,3 +178,7 @@ def create_agentic_rag_workflow():
 Agentic RAG represents a significant advancement over traditional RAG systems by adding agency, planning, and tool use capabilities. In the context of the Therapeutic Text Adventure, this approach enables more personalized, engaging, and therapeutically effective experiences for players.
 
 By combining the strengths of knowledge graphs, LLMs, and agent-based systems, Agentic RAG provides a powerful framework for creating intelligent, context-aware applications that can reason about complex domains and take appropriate actions.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Agentic_rag]]

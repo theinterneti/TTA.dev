@@ -401,3 +401,7 @@ Examples:
 **Last Updated:** 2025-01-09
 **Maintained by:** TTA.dev Team
 **License:** See project LICENSE
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/Workflows/Readme]]

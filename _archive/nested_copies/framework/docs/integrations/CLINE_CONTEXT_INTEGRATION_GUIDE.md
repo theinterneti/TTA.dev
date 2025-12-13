@@ -439,3 +439,7 @@ TTA.dev's Cline integration provides a comprehensive agent coordination system w
 - **⏳ Advanced Primitives:** LogseqContextLoader and ClineEnvSensor planned for future implementation
 
 The integration enables Cline to work seamlessly within the TTA.dev ecosystem while maintaining the project's quality standards and development patterns.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integrations/Cline_context_integration_guide]]

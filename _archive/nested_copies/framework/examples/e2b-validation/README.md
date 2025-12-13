@@ -27,3 +27,7 @@ uv run python examples/e2b-validation/test_primitive_integration.py
 - **ML Template**: ❌ Sandbox creates but interpreter fails (port 49999 not open)
 
 See `E2B_INVESTIGATION_REPORT.md` for full analysis.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Examples/E2b-validation/Readme]]

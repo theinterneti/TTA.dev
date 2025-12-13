@@ -172,3 +172,7 @@ primitive:: llm
 status:: planned
 provider:: ollama
 deployment:: local
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Ollamaprimitive]]

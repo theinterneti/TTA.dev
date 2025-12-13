@@ -213,27 +213,27 @@ python persona_activator.py --workspace /path/to/TTA.dev --cline
 ## Persona-to-MCP-Tool Mapping
 
 ### tta-backend-engineer
-**Tools:** context7, github, sequential-thinking  
+**Tools:** context7, github, sequential-thinking
 **Use Cases:** Python package development, primitives, API design
 
 ### tta-frontend-engineer
-**Tools:** context7, playwright, github  
+**Tools:** context7, playwright, github
 **Use Cases:** UI development, React, TypeScript
 
 ### tta-testing-specialist
-**Tools:** playwright, github, sequential-thinking  
+**Tools:** playwright, github, sequential-thinking
 **Use Cases:** Test automation, E2E testing
 
 ### tta-observability-expert
-**Tools:** grafana, github, context7  
+**Tools:** grafana, github, context7
 **Use Cases:** Metrics, dashboards, tracing
 
 ### tta-devops-engineer
-**Tools:** github, grafana, sequential-thinking  
+**Tools:** github, grafana, sequential-thinking
 **Use Cases:** CI/CD, infrastructure, Docker
 
 ### tta-data-scientist
-**Tools:** context7, sequential-thinking  
+**Tools:** context7, sequential-thinking
 **Use Cases:** Data analysis, ML integration
 
 ---
@@ -428,6 +428,10 @@ Part of TTA.dev - See repository root for license information
 
 ---
 
-**Last Updated:** 2025-01-XX  
-**Maintained by:** TTA.dev Team  
+**Last Updated:** 2025-01-XX
+**Maintained by:** TTA.dev Team
 **Status:** Production-Ready ✅
+
+
+---
+**Logseq:** [[TTA.dev/Scripts/Mcp/Readme]]

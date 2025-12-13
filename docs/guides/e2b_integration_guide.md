@@ -850,3 +850,7 @@ python examples/e2b_validation_pipeline.py
 **Last Updated:** November 3, 2025
 **E2B SDK Version:** Compatible with e2b-code-interpreter ^0.0.8
 **TTA.dev Version:** 0.1.0+
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/E2b_integration_guide]]

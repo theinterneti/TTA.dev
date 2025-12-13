@@ -319,3 +319,7 @@ To add a new template:
 ---
 
 **Note:** These templates are loaded dynamically based on the development task detected in cline's conversation, providing more targeted and relevant TTA.dev primitive suggestions.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Context-templates/Development_tasks]]

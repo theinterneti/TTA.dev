@@ -167,6 +167,10 @@ When working on TTA.dev:
 
 ---
 
-**Last Updated:** 2025-11-17  
-**Cleanup Script:** `./scripts/cleanup_workspace.sh`  
+**Last Updated:** 2025-11-17
+**Cleanup Script:** `./scripts/cleanup_workspace.sh`
 **Full Guide:** `docs/WORKSPACE_ORGANIZATION.md`
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Quick-actions/Workspace_maintenance]]

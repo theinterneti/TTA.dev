@@ -85,3 +85,6 @@ The TTA project is planned across four key phases, each building upon the last:
 *   **Development Environment:** VS Code, Git, (Optional: Project Management Software)
 
 This Roadmap and Project Plan provides a structured overview for the development of TTA. It is designed to be a living document, adaptable and refined as the project progresses.
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Roadmap]]

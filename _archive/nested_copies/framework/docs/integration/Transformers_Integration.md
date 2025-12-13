@@ -40,30 +40,30 @@ class TransformersModelManager:
     Central manager for Transformers models in the TTA project.
     Handles model loading, inference, and embeddings.
     """
-    
+
     def __init__(self, model_configs: Dict[str, Any], cache_dir: str = ".model_cache"):
         """Initialize the model manager with configurations."""
         self.model_configs = model_configs
         self.cache_dir = cache_dir
         self.loaded_models = {}
         self.loaded_tokenizers = {}
-    
+
     def load_model(self, model_name: str) -> Tuple[Any, Any]:
         """Load a model and its tokenizer."""
         # Implementation details...
-    
+
     def unload_model(self, model_name: str) -> None:
         """Unload a model to free resources."""
         # Implementation details...
-    
+
     async def generate(self, prompt: str, model_name: str, **kwargs) -> str:
         """Generate text using the specified model."""
         # Implementation details...
-    
+
     async def generate_streaming(self, prompt: str, model_name: str, callback: Callable, **kwargs) -> str:
         """Generate text with streaming using the specified model."""
         # Implementation details...
-    
+
     def get_embeddings(self, texts: List[str], model_name: str = "sentence-transformers/all-MiniLM-L6-v2") -> List[List[float]]:
         """Generate embeddings for the given texts."""
         # Implementation details...
@@ -122,12 +122,12 @@ Specialized utilities for different inference patterns:
 ```python
 class TransformersInference:
     """Utilities for inference with Transformers models."""
-    
+
     @staticmethod
     async def generate_with_model(
-        model, 
-        tokenizer, 
-        prompt: str, 
+        model,
+        tokenizer,
+        prompt: str,
         max_tokens: int = 512,
         temperature: float = 0.7,
         top_p: float = 0.95,
@@ -135,7 +135,7 @@ class TransformersInference:
     ) -> str:
         """Generate text using a loaded model."""
         # Implementation details...
-    
+
     @staticmethod
     async def generate_streaming_with_model(
         model,
@@ -149,7 +149,7 @@ class TransformersInference:
     ) -> str:
         """Generate text with streaming using a loaded model."""
         # Implementation details...
-    
+
     @staticmethod
     def get_embeddings_with_model(
         model,
@@ -173,13 +173,13 @@ def select_model_for_task(
 ) -> str:
     """
     Select the most appropriate model for a given task.
-    
+
     Args:
         task_type: Type of task (narrative_generation, tool_selection, etc.)
         model_configs: Dictionary of model configurations
         content_length: Expected length of the content (if known)
         structured_output: Whether structured output is required
-        
+
     Returns:
         Name of the selected model
     """
@@ -207,11 +207,11 @@ result = guidance("""
     {{#system~}}
     You are a therapeutic content generator.
     {{~/system}}
-    
+
     {{#user~}}
     Create a breathing exercise for anxiety.
     {{~/user}}
-    
+
     {{#assistant~}}
     {{#gen 'exercise'}}{{/gen}}
     {{~/assistant}}
@@ -231,7 +231,7 @@ class TransformersRunner(LLMRunner):
     def __init__(self, model_name, **kwargs):
         self.model = AutoModelForCausalLM.from_pretrained(model_name, **kwargs)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-    
+
     def generate(self, model_class, prompt):
         # Implementation details...
 
@@ -383,10 +383,10 @@ async def _call_transformers(
     """Generate text using Transformers models."""
     # Get or load the model and tokenizer
     model, tokenizer = self.model_manager.load_model(model_config.name)
-    
+
     # Format the messages into a prompt
     prompt = self._format_messages_for_model(messages, model_config.name)
-    
+
     # Generate text
     if stream and model_config.supports_streaming:
         return await self.model_manager.generate_streaming(
@@ -481,3 +481,7 @@ Integrating the Transformers library into the TTA project will provide significa
 5. **No External Dependencies**: Models run directly within the application
 
 This integration will enable more sophisticated therapeutic content generation, better performance, and easier extension of the system in the future.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integration/Transformers_integration]]

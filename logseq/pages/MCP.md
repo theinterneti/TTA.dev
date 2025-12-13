@@ -55,3 +55,7 @@ MCP (Model Context Protocol) is an open standard for connecting AI applications 
 
 integration:: mcp
 protocol:: standard
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Mcp]]

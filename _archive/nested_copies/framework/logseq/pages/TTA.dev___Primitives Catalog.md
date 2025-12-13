@@ -18,3 +18,6 @@ type:: redirect
 target:: [[PRIMITIVES CATALOG]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___primitives catalog]]

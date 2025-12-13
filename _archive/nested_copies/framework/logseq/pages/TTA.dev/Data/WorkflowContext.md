@@ -21,3 +21,7 @@
   - `tags`: Custom tags for filtering and grouping observability data.
   - `start_time`: Timestamp when the workflow started.
   - `checkpoints`: List of named timing checkpoints.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Data/Workflowcontext]]

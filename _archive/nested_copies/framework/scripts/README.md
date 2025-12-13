@@ -89,3 +89,7 @@ When adding new scripts:
 2. Update this README
 3. Add to appropriate category
 4. Include usage examples
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Scripts/Readme]]

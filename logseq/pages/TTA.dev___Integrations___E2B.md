@@ -383,3 +383,7 @@ for attempt in range(3):
 **Repository:** [e2b-dev/e2b](https://github.com/e2b-dev/e2b)
 **Documentation:** [e2b.dev/docs](https://e2b.dev/docs)
 **Tags:** integration:: e2b, validation:: code-execution, sandbox:: secured
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___integrations___e2b]]

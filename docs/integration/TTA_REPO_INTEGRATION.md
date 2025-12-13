@@ -344,3 +344,7 @@ print(f"Hits: {stats['hits']}, Misses: {stats['misses']}")
 - **Issues**: [TTA.dev Issues](https://github.com/theinterneti/TTA.dev/issues)
 - **Discussions**: [TTA.dev Discussions](https://github.com/theinterneti/TTA.dev/discussions)
 - **Documentation**: See `docs/` in TTA.dev repository
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integration/Tta_repo_integration]]

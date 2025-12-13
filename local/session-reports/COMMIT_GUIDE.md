@@ -196,3 +196,7 @@ After committing:
 
 **Status:** Ready to commit
 **Next Session:** Phase 1.3 - MarkdownConverterPrimitive implementation
+
+
+---
+**Logseq:** [[TTA.dev/Local/Session-reports/Commit_guide]]

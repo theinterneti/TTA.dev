@@ -44,3 +44,7 @@ process_thought(
     axioms_used=["Complex problems require multifaceted solutions"],
     assumptions_challenged=["Technology alone can solve climate change"]
 )
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Sequential-thinking]]

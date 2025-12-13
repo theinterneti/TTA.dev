@@ -63,3 +63,7 @@ TTA.dev uses Logseq as its primary knowledge management system for:
 
 system:: knowledge-base
 tool:: logseq
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Logseq knowledge base]]

@@ -43,3 +43,7 @@ from tta_dev_primitives.knowledge import (
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Knowledge]] - Knowledge primitives
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___primitives___knowledgebaseprimitive]]

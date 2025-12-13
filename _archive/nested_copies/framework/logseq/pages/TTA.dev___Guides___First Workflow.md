@@ -550,3 +550,6 @@ Before moving to production:
 **Next Guide:** [[TTA.dev/Guides/Workflow Composition]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___first workflow]]

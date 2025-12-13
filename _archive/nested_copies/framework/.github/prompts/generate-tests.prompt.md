@@ -92,3 +92,7 @@ class Test<ClassName>:
 - Group related tests in classes
 - Use parametrize for similar tests
 - Follow AAA pattern (Arrange, Act, Assert)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/.github/Prompts/Generate-tests.prompt]]

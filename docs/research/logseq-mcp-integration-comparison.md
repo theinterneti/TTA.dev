@@ -1,6 +1,6 @@
 # Logseq MCP Integration Options - Comprehensive Comparison
 
-> **Research Date:** December 3, 2025  
+> **Research Date:** December 3, 2025
 > **Context:** TTA.dev workspace integration with VS Code Copilot
 
 ## Executive Summary
@@ -84,7 +84,7 @@ Logseq allows running JavaScript code directly inside blocks using the built-in 
 ### Example Usage
 ```javascript
 // Inside a Logseq block
-{{renderer :js, 
+{{renderer :js,
   const pages = await logseq.Editor.getAllPages();
   return pages.filter(p => p.name.includes('project'));
 }}
@@ -560,3 +560,7 @@ Both MCP servers use Logseq's HTTP API, which provides these capabilities:
 
 *Last Updated: December 3, 2025*
 *Author: GitHub Copilot (Claude Opus 4.5 Preview)*
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Research/Logseq-mcp-integration-comparison]]

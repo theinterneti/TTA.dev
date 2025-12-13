@@ -1,8 +1,8 @@
 # TTA Rebuild - Next Session Implementation Plan
 
-**Date:** November 8, 2025  
-**Status:** ✅ All 3 Pillar Specifications Complete  
-**Next Phase:** Week 1 Implementation Begins  
+**Date:** November 8, 2025
+**Status:** ✅ All 3 Pillar Specifications Complete
+**Next Phase:** Week 1 Implementation Begins
 **Target Dates:** November 11-15, 2025
 
 ---
@@ -116,10 +116,10 @@ class TTAContext:
 
 class TTAPrimitive(ABC, Generic[TInput, TOutput]):
     """Base class for all TTA primitives."""
-    
+
     async def execute(
-        self, 
-        input_data: TInput, 
+        self,
+        input_data: TInput,
         context: TTAContext
     ) -> TOutput:
         """Execute the primitive."""
@@ -148,7 +148,7 @@ class Metaconcept:
 
 class MetaconceptRegistry:
     """Registry of all TTA metaconcepts."""
-    
+
     THERAPEUTIC = [
         Metaconcept(
             "Support Therapeutic Goals",
@@ -158,7 +158,7 @@ class MetaconceptRegistry:
         ),
         # ... more metaconcepts
     ]
-    
+
     @classmethod
     def get_for_primitive(cls, primitive_type: str) -> list[Metaconcept]:
         """Get applicable metaconcepts."""
@@ -206,35 +206,35 @@ class GeneratedStory:
 
 class StoryGeneratorPrimitive(TTAPrimitive[StoryGenerationInput, GeneratedStory]):
     """Generates high-quality narrative content."""
-    
+
     def __init__(self, llm_provider):
         super().__init__("StoryGenerator")
         self.llm = llm_provider
-    
+
     async def execute(
         self,
         input_data: StoryGenerationInput,
         context: TTAContext
     ) -> GeneratedStory:
         """Generate narrative with metaconcept guidance."""
-        
+
         # Get metaconcepts
         metaconcepts = MetaconceptRegistry.get_for_primitive("narrative")
-        
+
         # Build LLM prompt
         prompt = self._build_prompt(input_data, metaconcepts, context)
-        
+
         # Generate story
         response = await self.llm.generate(prompt)
-        
+
         # Parse and structure
         story = self._parse_response(response, input_data, context)
-        
+
         # Assess quality
         story.quality_score = await self._assess_quality(story, context)
-        
+
         return story
-    
+
     def _build_prompt(self, input_data, metaconcepts, context) -> str:
         """Build LLM prompt with metaconcept guidance."""
         # Implementation
@@ -280,7 +280,7 @@ def sample_context():
 async def test_story_generation_basic(sample_context):
     """Test basic story generation."""
     primitive = StoryGeneratorPrimitive(mock_llm)
-    
+
     input_data = StoryGenerationInput(
         theme="overcoming fear",
         universe_id="test_universe",
@@ -290,9 +290,9 @@ async def test_story_generation_basic(sample_context):
         player_preferences={},
         narrative_style="cinematic"
     )
-    
+
     result = await primitive.execute(input_data, sample_context)
-    
+
     assert result.narrative_text
     assert result.quality_score > 0.7
     assert len(result.story_branches) >= 2
@@ -402,9 +402,13 @@ uv run ruff check packages/tta-rebuild/
 
 ## 🎯 Ready to Begin
 
-**Status:** ✅ All specifications complete  
-**Next Action:** Create package structure and begin implementation  
-**Timeline:** Week 1 (Nov 11-15, 2025)  
+**Status:** ✅ All specifications complete
+**Next Action:** Create package structure and begin implementation
+**Timeline:** Week 1 (Nov 11-15, 2025)
 **Duration:** 3-4 hours for next session
 
 **Let's build TTA! 🚀**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/Next_session_plan]]

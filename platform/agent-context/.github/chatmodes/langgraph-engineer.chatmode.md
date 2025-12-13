@@ -177,7 +177,7 @@ src/api_gateway/                  ❌ Not accessible
 
 ### Scenario 1: Implement New Workflow
 ```
-User: "Create a new LangGraph workflow that coordinates multiple 
+User: "Create a new LangGraph workflow that coordinates multiple
        agents for therapeutic intervention."
 
 Engineer Actions:
@@ -191,7 +191,7 @@ Engineer Actions:
 
 ### Scenario 2: Optimize Async Execution
 ```
-User: "Improve the async execution performance of the agent 
+User: "Improve the async execution performance of the agent
        coordination system."
 
 Engineer Actions:
@@ -313,3 +313,7 @@ Engineer Actions:
 - **Python Async Guide**: https://docs.python.org/3/library/asyncio.html
 - **TTA Architecture**: `GEMINI.md`
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Langgraph-engineer.chatmode]]

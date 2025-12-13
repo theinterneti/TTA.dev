@@ -515,3 +515,7 @@ When adding new language-specific checks:
 ## License
 
 See individual package licenses in TTA.dev monorepo.
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Lifecycle/Readme]]

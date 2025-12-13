@@ -1,10 +1,10 @@
 # Gemini CLI Diagnostic Test Results
 
-**Date**: October 30, 2025, 22:47 UTC  
-**Workflow Run**: #18955932233  
-**Duration**: 15 minutes 14 seconds (timeout)  
-**Command**: `@gemini-cli help` (simple help command)  
-**Expected Duration**: 1-2 minutes  
+**Date**: October 30, 2025, 22:47 UTC
+**Workflow Run**: #18955932233
+**Duration**: 15 minutes 14 seconds (timeout)
+**Command**: `@gemini-cli help` (simple help command)
+**Expected Duration**: 1-2 minutes
 **Result**: ❌ **FAILED - Timeout after 15 minutes**
 
 ---
@@ -315,3 +315,7 @@ use_vertex_ai: false
 
 **Status**: ✅ Analysis complete. Next action: Fix authentication configuration and retest.
 
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integration/Gemini-cli-diagnostic-test-results]]

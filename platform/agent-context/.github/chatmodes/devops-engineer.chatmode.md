@@ -182,7 +182,7 @@ secrets/                           ❌ Not accessible
 
 ### Scenario 1: Set Up CI/CD Pipeline
 ```
-User: "Create a GitHub Actions workflow for automated testing, 
+User: "Create a GitHub Actions workflow for automated testing,
        linting, and deployment to staging environment."
 
 DevOps Actions:
@@ -196,7 +196,7 @@ DevOps Actions:
 
 ### Scenario 2: Docker Configuration
 ```
-User: "Create Docker Compose configuration for local development 
+User: "Create Docker Compose configuration for local development
        with all required services (API, Redis, Neo4j)."
 
 DevOps Actions:
@@ -210,7 +210,7 @@ DevOps Actions:
 
 ### Scenario 3: Production Deployment
 ```
-User: "Deploy application to production with health checks, 
+User: "Deploy application to production with health checks,
        monitoring, and rollback capability."
 
 DevOps Actions:
@@ -224,7 +224,7 @@ DevOps Actions:
 
 ### Scenario 4: Monitoring and Alerting
 ```
-User: "Set up monitoring and alerting for production environment 
+User: "Set up monitoring and alerting for production environment
        with metrics, logs, and health dashboards."
 
 DevOps Actions:
@@ -319,3 +319,7 @@ DevOps Actions:
 - **GitHub Actions Documentation**: https://docs.github.com/en/actions
 - **TTA Architecture**: `GEMINI.md`
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Devops-engineer.chatmode]]

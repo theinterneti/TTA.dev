@@ -637,3 +637,6 @@ Learning materials
 **Purpose:** Guide AI agents in building TTA.dev using TTA.dev patterns
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Whiteboard - agentic development workflow]]

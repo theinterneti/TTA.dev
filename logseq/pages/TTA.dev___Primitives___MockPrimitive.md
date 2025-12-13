@@ -30,3 +30,7 @@ mock = MockPrimitive(
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Testing]] - Testing primitives
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___primitives___mockprimitive]]

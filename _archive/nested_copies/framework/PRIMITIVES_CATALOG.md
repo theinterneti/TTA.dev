@@ -913,3 +913,7 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 **Last Updated:** November 7, 2025
 **Maintained by:** TTA.dev Team
 **License:** MIT License - see [LICENSE](LICENSE) for details
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Primitives_catalog]]

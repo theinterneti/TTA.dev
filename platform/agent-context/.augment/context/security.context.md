@@ -94,7 +94,7 @@ from pydantic import BaseModel, Field, validator
 class SessionCreate(BaseModel):
     """Validated session creation request."""
     user_id: str = Field(..., min_length=3, max_length=100)
-    
+
     @validator("user_id")
     def validate_user_id(cls, v: str) -> str:
         # Alphanumeric and underscore only
@@ -223,11 +223,11 @@ async def get_session(
     current_user: User = Depends(get_current_user)
 ):
     session = await session_service.get(session_id)
-    
+
     # Verify user owns this session
     if session.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
+
     return session
 ```
 
@@ -407,7 +407,7 @@ async def test_authentication_required():
 async def test_authorization_enforced():
     # User A creates session
     session = await create_session(user_a_token)
-    
+
     # User B tries to access
     response = await client.get(
         f"/api/v1/sessions/{session.id}",
@@ -430,7 +430,7 @@ class AIProvider:
         self.api_key = os.getenv("OPENROUTER_API_KEY")
         if not self.api_key:
             raise ValueError("OPENROUTER_API_KEY required")
-    
+
     async def generate(self, prompt: str) -> str:
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -448,12 +448,12 @@ def sanitize_prompt(user_input: str) -> str:
     # Remove potential prompt injection
     sanitized = user_input.replace("Ignore previous instructions", "")
     sanitized = sanitized.replace("System:", "")
-    
+
     # Limit length
     max_length = 1000
     if len(sanitized) > max_length:
         sanitized = sanitized[:max_length]
-    
+
     return sanitized
 ```
 
@@ -478,7 +478,7 @@ class Session(BaseModel):
     user_id: str
     created_at: datetime
     expires_at: datetime
-    
+
     @classmethod
     def create(cls, user_id: str, ttl_hours: int = 24):
         now = datetime.utcnow()
@@ -488,7 +488,7 @@ class Session(BaseModel):
             created_at=now,
             expires_at=now + timedelta(hours=ttl_hours)
         )
-    
+
     def is_expired(self) -> bool:
         return datetime.utcnow() > self.expires_at
 ```
@@ -542,3 +542,7 @@ driver = GraphDatabase.driver(
 
 **Note:** Security is not a one-time task. Regular security reviews and updates are essential.
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Context/Security.context]]

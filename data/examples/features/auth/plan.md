@@ -64,3 +64,7 @@ No overview provided
 
 - **Phase 2: Testing & Deployment** (internal)
   - Depends on completion of Phase 1
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Features/Auth/Plan]]

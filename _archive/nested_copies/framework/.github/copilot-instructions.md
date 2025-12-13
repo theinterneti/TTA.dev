@@ -913,3 +913,7 @@ When working on tasks, remember:
 **Last Updated:** October 31, 2025
 **For:** GitHub Copilot in VS Code
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/.github/Copilot-instructions]]

@@ -387,3 +387,7 @@ Once you activate this mode, begin with:
 **Last Updated:** YYYY-MM-DD
 **Status:** [Draft | In Testing | Ready for Use | Deprecated]
 **Agent Mode:** [Mode Name]
+
+
+---
+**Logseq:** [[TTA.dev/Local/.prompts/Templates/Prompt-template]]

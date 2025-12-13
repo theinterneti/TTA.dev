@@ -548,3 +548,7 @@ Before moving to production:
 **Prerequisites:** Beginner Quickstart
 
 **Next Guide:** [[TTA.dev/Guides/Workflow Composition]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___first workflow]]

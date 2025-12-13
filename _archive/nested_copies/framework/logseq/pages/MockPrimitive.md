@@ -638,3 +638,7 @@ async def test_debug_calls():
 **Category:** Testing Primitives
 **Source:** `src/tta_dev_primitives/testing/mock_primitive.py`
 **Tests:** `tests/testing/test_mock_primitive.py`
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Mockprimitive]]

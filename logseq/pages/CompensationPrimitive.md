@@ -24,3 +24,7 @@ workflow = CompensationPrimitive(
 
 **Import:** `from tta_dev_primitives.recovery import CompensationPrimitive`
 **Source:** `platform/primitives/src/tta_dev_primitives/recovery/compensation.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Compensationprimitive]]

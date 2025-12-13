@@ -108,3 +108,7 @@ Interested in implementing OpenAIPrimitive? See:
 primitive:: llm
 status:: planned
 provider:: openai
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Openaiprimitive]]

@@ -33,3 +33,7 @@ Here's an example of how you might add a notebook to your library:
 
 ```
 "Add [link] to library tagged 'frontend, react, components'"
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Notebooklm]]

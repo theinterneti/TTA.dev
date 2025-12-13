@@ -394,3 +394,7 @@ async def test_retry_on_failure():
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 20 minutes
 **Difficulty:** [[Intermediate]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___error handling patterns]]

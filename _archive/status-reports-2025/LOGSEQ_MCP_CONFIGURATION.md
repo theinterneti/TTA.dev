@@ -282,3 +282,7 @@ See detailed troubleshooting in:
 **Last Updated:** November 1, 2025
 **Status:** Configuration Ready - Awaiting User Activation
 **Repository:** <https://github.com/ergut/mcp-logseq>
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Logseq_mcp_configuration]]

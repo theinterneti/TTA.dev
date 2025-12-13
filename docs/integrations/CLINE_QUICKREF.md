@@ -312,3 +312,7 @@ Cline: "Added cache_evictions_total. Updated tests."
 ---
 
 **Quick Start:** Install extension → Configure API → Run first task → Collaborate! 🚀
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integrations/Cline_quickref]]

@@ -378,3 +378,7 @@ Privacy: 100% local
 **Last Updated:** November 12, 2025
 **Next Review:** Monthly (check for new free models)
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Free_model_selection]]

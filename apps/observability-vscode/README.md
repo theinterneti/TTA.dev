@@ -55,7 +55,7 @@ code --install-extension tta-observability-vscode-0.1.0.vsix
 3. **Run TTA Workflows:**
    ```python
    from observability_integration import initialize_observability
-   
+
    initialize_observability(
        service_name="my-app",
        enable_tta_ui=True
@@ -225,3 +225,7 @@ MIT
 - **Quick Start**: `packages/tta-observability-ui/QUICKSTART.md`
 - **API Docs**: `http://localhost:8765/docs` (when service running)
 - **TTA.dev**: `AGENTS.md`
+
+
+---
+**Logseq:** [[TTA.dev/Apps/Observability-vscode/Readme]]

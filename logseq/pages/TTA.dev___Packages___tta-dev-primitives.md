@@ -38,3 +38,7 @@ Core workflow primitives and composition patterns used across TTA.dev. Contains 
 ## Owner Notes
 - Keep public API stable
 - Maintain 100% test coverage for primitives
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___packages___tta-dev-primitives]]

@@ -18,3 +18,7 @@ Documentation specific to the various AI agents operating within the TTA ecosyst
 
 ## See Also
 - [[Operations]] for scripts that manage these agents.
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Agents]]

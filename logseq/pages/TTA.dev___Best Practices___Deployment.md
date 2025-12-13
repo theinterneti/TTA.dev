@@ -131,3 +131,7 @@ Can't fix what you can't see
 
 - Blue-Green Deployments: <https://martinfowler.com/bliki/BlueGreenDeployment.html>
 - Observability integration: `platform/observability/README.md`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___best practices___deployment]]

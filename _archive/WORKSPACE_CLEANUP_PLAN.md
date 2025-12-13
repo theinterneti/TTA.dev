@@ -211,3 +211,7 @@ TTA.dev/
 3. **Better organization**: Documentation grouped by purpose
 4. **Clean git**: No temporary files in version control
 5. **Elegant presentation**: Professional, maintainable structure
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Workspace_cleanup_plan]]

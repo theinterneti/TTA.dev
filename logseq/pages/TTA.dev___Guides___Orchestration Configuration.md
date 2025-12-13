@@ -452,3 +452,7 @@ id:: orchestration-summary
 
 **Last Updated:** October 30, 2025
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___orchestration configuration]]

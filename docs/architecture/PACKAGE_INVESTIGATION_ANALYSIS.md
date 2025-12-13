@@ -1,8 +1,8 @@
 # TTA.dev Package Investigation & Reorganization Analysis
 
-**Date:** November 17, 2025  
-**Branch:** refactor/repo-reorg  
-**Context:** Phase 1 Complete (Archive Consolidation) → Phase 2 Planning  
+**Date:** November 17, 2025
+**Branch:** refactor/repo-reorg
+**Context:** Phase 1 Complete (Archive Consolidation) → Phase 2 Planning
 
 ---
 
@@ -50,7 +50,7 @@ Investigation revealed **8 active workspace packages** (not the initially scoped
 
 ### 1. tta-dev-integrations
 
-**Classification:** Platform Infrastructure  
+**Classification:** Platform Infrastructure
 **Destination:** `platform/integrations/`
 
 **Purpose:**
@@ -84,7 +84,7 @@ Your App → TTA.dev Primitives → Cline → Google Gemini (Free)
 
 ### 2. tta-observability-ui
 
-**Classification:** Application/Deployment Target  
+**Classification:** Application/Deployment Target
 **Destination:** `apps/observability-ui/`
 
 **Purpose:**
@@ -141,7 +141,7 @@ Your App → TTA.dev Primitives → Cline → Google Gemini (Free)
 
 ### 3. tta-documentation-primitives
 
-**Classification:** Platform Infrastructure  
+**Classification:** Platform Infrastructure
 **Destination:** `platform/documentation/`
 
 **Purpose:**
@@ -189,7 +189,7 @@ tta-docs validate                  # Validate sync status
 
 ### 4. tta-kb-automation
 
-**Classification:** Platform Infrastructure  
+**Classification:** Platform Infrastructure
 **Destination:** `platform/kb-automation/`
 
 **Purpose:**
@@ -250,7 +250,7 @@ from tta_kb_automation import (
 
 ### 5. tta-agent-coordination
 
-**Classification:** Platform Infrastructure  
+**Classification:** Platform Infrastructure
 **Destination:** `platform/agent-coordination/`
 
 **Purpose:**
@@ -319,8 +319,8 @@ result = await wrapper.execute(operation, context)
 
 **User Context:** "TTA.dev has an MCP registry (connected to hypertool)"
 
-**Location:** `TTA.dev-cline/hypertool` (separate worktree)  
-**Status:** Not in current refactor scope  
+**Location:** `TTA.dev-cline/hypertool` (separate worktree)
+**Status:** Not in current refactor scope
 **Note:** MCP registry development happens in hypertool branch
 
 ### MCPs We Integrate With
@@ -337,7 +337,7 @@ result = await wrapper.execute(operation, context)
 - Sift (investigation analysis)
 - LogSeq (knowledge base) - disabled by default
 
-**Status:** External integrations, not packages  
+**Status:** External integrations, not packages
 **Usage:** Available via Copilot toolsets in VS Code
 
 ### Non-MCP Integrations
@@ -352,7 +352,7 @@ result = await wrapper.execute(operation, context)
 - JWT (auth)
 - Cline + Gemini (LLM - strategic focus)
 
-**Status:** Platform package  
+**Status:** Platform package
 **Destination:** `platform/integrations/`
 
 ### Unofficial MCPs
@@ -390,8 +390,8 @@ result = await wrapper.execute(operation, context)
 
 ### 2. MCP (Model Context Protocol Servers)
 
-**Development Location:** `TTA.dev-cline/hypertool` branch  
-**Registry:** MCP server registry (hypertool)  
+**Development Location:** `TTA.dev-cline/hypertool` branch
+**Registry:** MCP server registry (hypertool)
 **Status:** Separate from current refactor
 
 **Integration:**
@@ -559,7 +559,7 @@ members = [
     "platform/documentation",
     "platform/kb-automation",
     "platform/agent-coordination",
-    
+
     # Application packages
     "apps/observability-ui",
 ]
@@ -691,6 +691,10 @@ packages/tta-agent-coordination -> ../platform/agent-coordination
 
 ---
 
-**Analysis Complete**  
-**Status:** Ready for Phase 2 execution  
+**Analysis Complete**
+**Status:** Ready for Phase 2 execution
 **Next Step:** Update issue #113 and begin platform/ structure creation
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Package_investigation_analysis]]

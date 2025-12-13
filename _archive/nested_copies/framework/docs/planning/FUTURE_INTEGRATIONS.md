@@ -483,3 +483,7 @@ Not just workflow primitives, not just MCP servers, but a **complete ecosystem**
 4. **Research OAuth patterns** when ready to build
 
 **The future is bright! But first, let's nail the foundation. 💪**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Future_integrations]]

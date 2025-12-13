@@ -225,3 +225,7 @@ pkill -f "n8n" && npx n8n
 ---
 
 **Last Updated:** November 9, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_quick_reference]]

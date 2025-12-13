@@ -1587,3 +1587,7 @@ def test_boundary_violation_prevention():
 ---
 
 *This specification represents the final pillar of TTA's three-component architecture: Narrative, Game, and Therapeutic integration working in harmony to create an experience that is both entertaining and potentially healing—always through story, never through prescription.*
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta-analysis/Specs/Therapeutic_integration_spec]]

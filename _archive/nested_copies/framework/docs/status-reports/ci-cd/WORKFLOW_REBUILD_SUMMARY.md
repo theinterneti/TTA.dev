@@ -170,3 +170,7 @@ Based on GitHub Actions official docs + "vibe coder" patterns:
 **TL;DR**: Replace 20 complex workflows with 4 simple, atomic workflows + shared reusable components. PRs get 10min validation, post-merge gets thorough checks. Update dependencies in 1 place instead of 10+.
 
 **Full Plan**: [`WORKFLOW_REBUILD_PLAN.md`](./WORKFLOW_REBUILD_PLAN.md)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Ci-cd/Workflow_rebuild_summary]]

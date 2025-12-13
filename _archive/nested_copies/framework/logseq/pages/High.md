@@ -423,3 +423,6 @@ rate(logseq_todo_completed_total{priority="high"}[7d])
 **Maintained by:** TTA.dev Team
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/High]]

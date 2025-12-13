@@ -255,3 +255,7 @@ Push/PR → Tests → Lint → Primitive Validation → Security Scan → Merge
 **Last Updated:** 2025-11-17
 **Primary Component:** [[.github/workflows/cline-responder.yml]]
 **Tags:** integration:: git, automation:: github, ci-cd:: pipeline
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___integrations___git]]

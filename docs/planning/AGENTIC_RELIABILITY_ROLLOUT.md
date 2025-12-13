@@ -47,3 +47,7 @@
 | **M4.2: Self-Healing CI** | ✅ **DONE** Enhance CI workflows (`scripts/ci_self_heal.py`) to allow agents to attempt automatic fixes when tests or checks fail, creating a closed-loop repair system. | Autonomy (Self-Correction) |
 | **M4.3: Dynamic Tooling in CI** | ✅ **DONE** Integrate MCP servers into the CI environment. Created `scripts/mcp/tta_knowledge_server.py` and verified `gemini mcp add` command to dynamically register custom tools (like documentation search) during automated runs. | Tooling (Advanced Capabilities) |
 | **M4.4: Autonomous Feature Dev** | ✅ **DONE** Build an end-to-end workflow (`scripts/autonomous_dev.py`) where an agent takes a task, generates a plan, implements code, runs self-healing tests, and performs a self-review before suggesting a PR. | Autonomy (End-to-End Workflows) |
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Agentic_reliability_rollout]]

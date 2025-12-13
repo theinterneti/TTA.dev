@@ -893,3 +893,7 @@ parallel_apis = api1 | api2 | api3
 ---
 
 **Next Steps:** When cline detects parallelizable operations, it should automatically suggest ParallelPrimitive with the `|` operator for clean syntax and provide aggregation/comparison strategies based on the use case.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Parallel_primitive]]

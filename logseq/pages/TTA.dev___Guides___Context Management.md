@@ -651,3 +651,7 @@ Context management checklist:
 **Prerequisites:** Beginner Quickstart
 
 **Next Guide:** [[TTA.dev/Guides/Observability]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___context management]]

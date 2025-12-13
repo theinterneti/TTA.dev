@@ -390,3 +390,7 @@ What do you want to do?
 5. **Something else** - You tell me!
 
 **The vision is clear. The path is defined. Let's build! 💪**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Your_journey]]

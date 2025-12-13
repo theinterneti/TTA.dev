@@ -571,3 +571,7 @@ Each package has dedicated TODO tracking:
 **Last Updated:** October 31, 2025
 **System Version:** 1.0
 **Next Review:** Weekly (every Monday)
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Todo management system]]

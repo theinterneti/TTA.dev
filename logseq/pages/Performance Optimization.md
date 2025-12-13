@@ -94,3 +94,7 @@ workflow = (
 
 category:: performance
 type:: optimization
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Performance optimization]]

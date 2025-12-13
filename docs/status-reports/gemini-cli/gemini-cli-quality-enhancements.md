@@ -797,3 +797,7 @@ Limit which MCP servers are available based on context:
 ---
 
 **Next Steps:** Review this plan and let me know which phases to prioritize!
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Status-reports/Gemini-cli/Gemini-cli-quality-enhancements]]

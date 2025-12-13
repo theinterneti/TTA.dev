@@ -1,7 +1,7 @@
 # Workspace Configuration Fix
 
-**Issue Resolved:** November 15, 2025  
-**Problem:** `uv` workspace dependency configuration error  
+**Issue Resolved:** November 15, 2025
+**Problem:** `uv` workspace dependency configuration error
 **Status:** ✅ Fixed
 
 ---
@@ -242,6 +242,10 @@ curl http://localhost:9464/metrics | grep tta_
 
 ---
 
-**Issue Closed:** ✅  
-**Status:** Workspace configuration working correctly  
+**Issue Closed:** ✅
+**Status:** Workspace configuration working correctly
 **Next Steps:** Continue with Grafana Alloy installation (if needed)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Troubleshooting/Workspace_configuration_fix]]

@@ -408,3 +408,6 @@ llm = AnthropicPrimitive(model="claude-3-5-sonnet-20241022")
 **Difficulty:** [[Beginner]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___llm selection]]

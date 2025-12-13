@@ -742,3 +742,7 @@ To modify a template:
 **Last Updated:** 2025-10-30
 **Version:** 1.0
 **Maintained by:** [[TTA Team]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Templates]]

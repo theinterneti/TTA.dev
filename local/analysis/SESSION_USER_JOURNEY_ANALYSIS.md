@@ -430,3 +430,7 @@ The network diagram clearly shows that **observability is TTA.dev's superpower**
 - GitHub Issues: https://github.com/theinterneti/TTA.dev/issues
 - Documentation: [USER_JOURNEY_ANALYSIS.md](USER_JOURNEY_ANALYSIS.md)
 - Quick Start: [BEGINNER_QUICKSTART.md](docs/guides/BEGINNER_QUICKSTART.md)
+
+
+---
+**Logseq:** [[TTA.dev/Local/Analysis/Session_user_journey_analysis]]

@@ -16,3 +16,7 @@
   - The `execute` method first attempts to run the `primary` primitive.
   - If the `primary` primitive raises an exception, the `fallback` primitive is executed with the same input and context.
   - Includes comprehensive logging, metrics, and tracing for both primary and fallback execution paths, leveraging `[[TTA.dev/Data/WorkflowContext]]`.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Fallbackprimitive]]

@@ -124,3 +124,7 @@ If issues occur during setup:
 ---
 
 **Next Action**: Begin with Phase 1 - Import the workflow file into n8n interface.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/N8n_dashboard_final_setup_todo]]

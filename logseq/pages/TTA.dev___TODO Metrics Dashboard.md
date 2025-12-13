@@ -484,3 +484,7 @@ Check these queries for TODOs needing better metadata:
 **Last Updated:** November 2, 2025
 **Maintained by:** TTA.dev Team
 **Auto-Updated:** Queries refresh on page load
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___todo metrics dashboard]]

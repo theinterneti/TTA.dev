@@ -129,3 +129,7 @@ Different AI agents have different capabilities:
 
 **Last Updated:** November 7, 2025
 **Next Review:** When adding new packages or major restructuring
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Repository_structure]]

@@ -43,7 +43,7 @@ graph TD
     B -->|Yes| D{Need real-time?}
     D -->|No| E[Supabase]
     D -->|Yes| F[Supabase with real-time]
-    
+
     C --> G{Need to deploy?}
     G -->|No| H[✅ SQLite - Perfect]
     G -->|Yes| I[⚠️ Consider Supabase instead]
@@ -78,7 +78,7 @@ graph TD
 
 ### Setup Difficulty
 - **Time:** 10 minutes
-- **Steps:** 
+- **Steps:**
   1. Sign up at supabase.com
   2. Create project (2 minutes)
   3. Get URL and API key
@@ -362,7 +362,7 @@ Would you like me to help you set up Supabase instead?
 ```
 It depends on your use case. There are several options:
 - Supabase
-- PostgreSQL  
+- PostgreSQL
 - SQLite
 - MongoDB
 
@@ -524,7 +524,11 @@ specific recommendations instead of generic "it depends" answers.
 
 ---
 
-**Last Updated:** October 30, 2025  
-**Timeline:** 1 week (5 days)  
+**Last Updated:** October 30, 2025
+**Timeline:** 1 week (5 days)
 **Can be done in parallel with:** Integration primitives development
 
+
+
+---
+**Logseq:** [[TTA.dev/Local/Planning/Decision_guides_plan]]

@@ -1,7 +1,7 @@
 # Workflow Rollback Runbook
 
-**Purpose**: Emergency rollback procedures for GitHub Actions workflow migration  
-**Audience**: DevOps engineers, on-call staff  
+**Purpose**: Emergency rollback procedures for GitHub Actions workflow migration
+**Audience**: DevOps engineers, on-call staff
 **Last Updated**: 2025-11-20
 
 ---
@@ -90,7 +90,7 @@ gh pr create --title "emergency: Re-enable v1 workflows" \
 # 1. Edit .github/workflows/pr-validation-v2.yml
 # Add "if: false" to job at line 17
 
-# 2. Edit .github/workflows/merge-validation-v2.yml  
+# 2. Edit .github/workflows/merge-validation-v2.yml
 # Add "if: false" to job at line 13
 
 # 3. Commit and push
@@ -302,11 +302,11 @@ See Step 4 in Phase 3.2 rollback procedure above.
 
 ## Emergency Contacts
 
-**Primary**: DevOps Team Lead  
-**Secondary**: Infrastructure Engineer  
+**Primary**: DevOps Team Lead
+**Secondary**: Infrastructure Engineer
 **Escalation**: CTO/Engineering VP
 
-**Issue Tracking**: GitHub Issues with `P0` + `rollback` labels  
+**Issue Tracking**: GitHub Issues with `P0` + `rollback` labels
 **Communication**: Slack #engineering-alerts channel
 
 ---
@@ -329,8 +329,8 @@ git checkout -b test/rollback-drill-$(date +%Y-%m-%d)
 # 5. Discard test branch
 ```
 
-**Schedule**: Quarterly (every 3 months)  
-**Duration**: 30-45 minutes  
+**Schedule**: Quarterly (every 3 months)
+**Duration**: 30-45 minutes
 **Participants**: All DevOps engineers
 
 ---
@@ -343,5 +343,9 @@ git checkout -b test/rollback-drill-$(date +%Y-%m-%d)
 
 ---
 
-**Emergency Hotline**: Create GitHub issue with `P0` + `rollback` labels  
+**Emergency Hotline**: Create GitHub issue with `P0` + `rollback` labels
 **Runbook Location**: `docs/runbooks/WORKFLOW_ROLLBACK_RUNBOOK.md`
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Runbooks/Workflow_rollback_runbook]]

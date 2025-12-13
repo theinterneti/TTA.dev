@@ -49,3 +49,7 @@ client.disconnect()
 
 *   [Grafana MCP Server Documentation](https://github.com/grafana/mcp-grafana)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Integrations/Grafana-integration]]

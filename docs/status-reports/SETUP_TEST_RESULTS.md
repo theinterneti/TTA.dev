@@ -12,7 +12,7 @@
 ```bash
 $ which gh git python3
 /usr/bin/gh
-/usr/bin/git  
+/usr/bin/git
 /home/thein/repos/TTA.dev/.venv/bin/python3
 
 $ gh auth status
@@ -208,7 +208,7 @@ AttributeError: 'NoneType' object has no attribute 'replace'
 if due_date != "No deadline":
     due = datetime.fromisoformat(due_date.replace("Z", "+00:00"))
 
-# After  
+# After
 if due_date and due_date != "No deadline":
     due = datetime.fromisoformat(due_date.replace("Z", "+00:00"))
 ```
@@ -275,7 +275,7 @@ if due_date and due_date != "No deadline":
 ## 📊 Summary
 
 **Total Tests Run:** 6
-**Tests Passed:** 6  
+**Tests Passed:** 6
 **Tests Failed:** 0
 **Bugs Found:** 1
 **Bugs Fixed:** 1
@@ -287,3 +287,7 @@ All core functionality is working as expected. The lazy developer automation sys
 ---
 
 **Next Test Session:** Branch creation and PR workflows after pushing current changes
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Status-reports/Setup_test_results]]

@@ -569,3 +569,7 @@ venv/
 
 **Last Updated:** November 17, 2025
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Reference/Worktree_setup_guide]]

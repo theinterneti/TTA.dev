@@ -31,3 +31,7 @@ Schema:
 1. Keep steps atomic and clear.
 2. Identify necessary files for context.
 3. Ensure the logical flow makes sense (e.g., write code before writing tests).
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Planner.prompt]]

@@ -28,3 +28,7 @@ You are a **Principal Software Architect** for TTA.dev.
 - Use clear headings and bullet points.
 - Include Mermaid diagrams for flows.
 - Explicitly state assumptions and risks.
+
+
+---
+**Logseq:** [[TTA.dev/.github/Agents/Architect.agent]]

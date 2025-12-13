@@ -1,8 +1,8 @@
 # TTA.dev Multi-Worktree Coordination Protocol
 
-**Version:** 1.0  
-**Date:** November 17, 2025  
-**Status:** Production-Ready  
+**Version:** 1.0
+**Date:** November 17, 2025
+**Status:** Production-Ready
 **Purpose:** Orchestrate 4 AI coding agents working in parallel via git worktrees
 
 ---
@@ -156,23 +156,23 @@ TTA.dev/ (main)
 1. **Agent documents in local Logseq:**
    ```markdown
    ## [[Worktree Pattern - {Name}]]
-   
+
    **Discovered By:** agent/augment
    **Date:** 2025-11-17
    **Status:** #local-pattern
    **Impact:** High/Medium/Low
-   
+
    ### Pattern
    [Description of pattern]
-   
+
    ### Evidence
    [Why this works, examples, metrics]
-   
+
    ### Applicability
    - [ ] Useful for all agents
    - [ ] Specific to this agent
    - [ ] Requires orchestrator review
-   
+
    ### Export
    - [ ] Ready to share
    ```
@@ -247,22 +247,22 @@ scripts/worktree/sync-learnings.py --sync-all
    ```
    Sync Report: 2025-11-17 11:45 UTC
    =====================================
-   
+
    Agent: augment
    - New patterns: 3
    - Updated patterns: 1
    - Issues discovered: 0
-   
+
    Agent: cline
    - New patterns: 5
    - Updated patterns: 0
    - Issues discovered: 2
-   
+
    Agent: copilot
    - New patterns: 2
    - Updated patterns: 1
    - Issues discovered: 1
-   
+
    Action Required:
    - Review 10 new patterns in .worktree/coordination/
    - Address 3 issues flagged by agents
@@ -284,15 +284,15 @@ scripts/worktree/sync-learnings.py --sync-all
 1. **Cline documents issue:**
    ```markdown
    ## [[Issue - Retry Logic Inefficient]]
-   
+
    **Discovered By:** agent/cline
    **Type:** #performance-issue
    **Impact:** High
    **Status:** #needs-solution
-   
+
    ### Problem
    Current retry logic uses linear backoff, causing delays...
-   
+
    ### Looking For
    Exponential backoff implementation or pattern
    ```
@@ -304,14 +304,14 @@ scripts/worktree/sync-learnings.py --sync-all
 3. **Orchestrator creates bridge:**
    ```markdown
    ## [[Cross-Agent Pattern - Exponential Backoff]]
-   
+
    **Source:** agent/augment (retry_primitive.py)
    **Applicable To:** agent/cline (issue #234)
    **Status:** #ready-to-integrate
-   
+
    ### Pattern from Augment
    [Code snippet, explanation]
-   
+
    ### Application to Cline's Issue
    [Adapted version for Cline's context]
    ```
@@ -405,30 +405,30 @@ def sync_agent_patterns(agent_name: str, dry_run: bool = False):
     """Sync patterns from agent worktree to orchestrator."""
     worktree_path = Path(WORKTREES[agent_name])
     patterns_dir = worktree_path / ".worktree" / "local-patterns"
-    
+
     if not patterns_dir.exists():
         print(f"No patterns directory for {agent_name}")
         return []
-    
+
     target_dir = COORDINATION_DIR / f"agent-{agent_name}"
     target_dir.mkdir(parents=True, exist_ok=True)
-    
+
     synced_patterns = []
-    
+
     for pattern_file in patterns_dir.glob("*.md"):
         target_file = target_dir / pattern_file.name
-        
+
         # Skip if already synced and not modified
         if target_file.exists():
             if target_file.stat().st_mtime >= pattern_file.stat().st_mtime:
                 continue
-        
+
         if not dry_run:
             shutil.copy2(pattern_file, target_file)
-        
+
         synced_patterns.append(pattern_file.name)
         print(f"  ✓ Synced: {pattern_file.name}")
-    
+
     return synced_patterns
 
 # [Additional functions for Logseq scanning, report generation]
@@ -475,7 +475,7 @@ TTA.dev Worktree Coordination Status
 Worktrees:
 ✓ TTA.dev (orchestrator)     - experimental/workflow-agent-integrations
 ✓ TTA.dev-augment            - agent/augment
-✓ TTA.dev-cline              - experimental/issue-collaboration  
+✓ TTA.dev-cline              - experimental/issue-collaboration
 ✓ TTA.dev-copilot            - agent/copilot
 
 Last Sync: 2025-11-17 11:30 UTC (15 minutes ago)
@@ -889,6 +889,10 @@ results = await coordination_workflow.execute({}, context)
 
 ---
 
-**Last Updated:** November 17, 2025  
-**Maintained By:** TTA.dev Orchestrator  
+**Last Updated:** November 17, 2025
+**Maintained By:** TTA.dev Orchestrator
 **Version:** 1.0 (Production-Ready)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Git/Worktree_coordination_protocol]]

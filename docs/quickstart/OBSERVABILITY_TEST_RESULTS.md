@@ -1,7 +1,7 @@
 # TTA.dev Observability Test Results ✅
 
-**Test Date:** November 15, 2025  
-**Test Suite:** `test_real_workflow.py`  
+**Test Date:** November 15, 2025
+**Test Suite:** `test_real_workflow.py`
 **Status:** All tests passed successfully
 
 ---
@@ -16,9 +16,9 @@
 4. ✅ **Cache Workflow** - Cache miss → Cache hit (50% hit rate)
 5. ✅ **Complex Nested Workflow** - Retry + Sequential + Cache
 
-**Total Duration:** ~1 second  
-**Workflows Executed:** 5  
-**Primitives Executed:** 15+  
+**Total Duration:** ~1 second
+**Workflows Executed:** 5
+**Primitives Executed:** 15+
 **All Tests:** Passed ✅
 
 ---
@@ -43,7 +43,7 @@ tta_primitive_executions_total{primitive_name="RetryPrimitive"} 2
 
 **All executions under 250ms** (p95 latency):
 - Simple primitives: 100-150ms
-- Sequential workflows: 200-250ms  
+- Sequential workflows: 200-250ms
 - Parallel workflows: 100-150ms (concurrent execution)
 - Cache hits: <1ms (near-instant)
 
@@ -79,8 +79,8 @@ tta_execution_duration_seconds_bucket{le="0.25",primitive_type="sequential"} 5
 
 ### Local Metrics Endpoint
 
-**Status:** ✅ Active  
-**URL:** http://localhost:9464/metrics  
+**Status:** ✅ Active
+**URL:** http://localhost:9464/metrics
 **Sample Metrics:**
 ```bash
 $ curl http://localhost:9464/metrics | grep tta_workflow
@@ -89,12 +89,12 @@ tta_workflow_executions_total{status="success"} 5
 
 ### Grafana Alloy
 
-**Status:** ✅ Running  
-**Metrics Scraped:** Every 30 seconds from localhost:9464  
+**Status:** ✅ Running
+**Metrics Scraped:** Every 30 seconds from localhost:9464
 **Remote Write:** https://prometheus-prod-36-prod-us-west-0.grafana.net/api/prom/push
 
-**Samples Sent:** 16,775 samples  
-**Bytes Sent:** 301,559 bytes  
+**Samples Sent:** 16,775 samples
+**Bytes Sent:** 301,559 bytes
 **Retry Failures:** 0
 
 ```bash
@@ -104,8 +104,8 @@ prometheus_remote_storage_samples_total{...} 16775
 
 ### Grafana Cloud
 
-**Region:** US West (prod-us-west-0)  
-**Stack ID:** 2497221  
+**Region:** US West (prod-us-west-0)
+**Stack ID:** 2497221
 **Dashboard:** https://theinterneti.grafana.net/
 
 **Expected Data Available:**
@@ -184,7 +184,7 @@ sum by (primitive_name) (tta_primitive_executions_total)
 ### 3. P95 Latency
 
 ```promql
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   sum by (le, primitive_type) (
     rate(tta_execution_duration_seconds_bucket[5m])
   )
@@ -196,7 +196,7 @@ histogram_quantile(0.95,
 ### 4. Cache Hit Rate
 
 ```promql
-sum(rate(tta_cache_hits_total[5m])) / 
+sum(rate(tta_cache_hits_total[5m])) /
 sum(rate(tta_cache_total[5m])) * 100
 ```
 
@@ -493,7 +493,11 @@ cat /etc/alloy/config.alloy
 
 ---
 
-**Test Completed:** 2025-11-15 20:22:19 PST  
+**Test Completed:** 2025-11-15 20:22:19 PST
 **Next Action:** Open Grafana Cloud and explore your metrics!
 
 🎉 **TTA.dev Observability is LIVE!**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Quickstart/Observability_test_results]]

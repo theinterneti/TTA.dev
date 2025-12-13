@@ -50,3 +50,7 @@ Here's an example of how you might configure the Prometheus MCP server to connec
     }
   }
 }
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Prometheus]]

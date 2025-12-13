@@ -473,3 +473,7 @@ result3 = await moderation_pipeline.execute({"text": "Clearly harmful content"},
 **Last Updated:** [[2025-10-30]]
 **Category:** [[Core]]
 **Complexity:** [[Medium]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___primitives___conditionalprimitive]]

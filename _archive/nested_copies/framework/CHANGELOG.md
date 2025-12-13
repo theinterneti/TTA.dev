@@ -288,3 +288,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 ## License
 
 All packages are MIT licensed. See individual package LICENSE files.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Changelog]]

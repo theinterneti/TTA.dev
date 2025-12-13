@@ -1248,3 +1248,6 @@ groups:
 **Maintained by:** TTA.dev Platform Team
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___devops studio___infrastructure as code]]

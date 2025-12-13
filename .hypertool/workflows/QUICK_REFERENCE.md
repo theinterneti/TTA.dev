@@ -8,8 +8,8 @@
 
 ### 1. 📦 Package Release
 
-**Use When:** Releasing a new version of a TTA.dev package  
-**Personas:** Backend → Testing → DevOps  
+**Use When:** Releasing a new version of a TTA.dev package
+**Personas:** Backend → Testing → DevOps
 **Time:** ~30 minutes (automated)
 
 ```bash
@@ -36,8 +36,8 @@ tta-persona devops
 
 ### 2. 🚀 Feature Development
 
-**Use When:** Building a full-stack feature (API + UI + Tests)  
-**Personas:** Backend → Frontend → Testing  
+**Use When:** Building a full-stack feature (API + UI + Tests)
+**Personas:** Backend → Frontend → Testing
 **Time:** ~5-6 hours
 
 ```bash
@@ -64,8 +64,8 @@ tta-persona testing
 
 ### 3. 🔥 Incident Response
 
-**Use When:** Production incident detected (API errors, outages, etc.)  
-**Personas:** Observability → Backend → DevOps  
+**Use When:** Production incident detected (API errors, outages, etc.)
+**Personas:** Observability → Backend → DevOps
 **Time:** ~20-30 minutes MTTR
 
 ```bash
@@ -418,16 +418,16 @@ if not result["success"]:
 
 ### Common Questions
 
-**Q: How do I choose which workflow to use?**  
+**Q: How do I choose which workflow to use?**
 A: See [Workflow Selection Guide](#-workflow-selection-guide) above
 
-**Q: What if workflow fails mid-execution?**  
+**Q: What if workflow fails mid-execution?**
 A: Each stage is idempotent - restart from failed stage
 
-**Q: Can I customize workflows?**  
+**Q: Can I customize workflows?**
 A: Yes - workflows are templates. Adapt to your needs.
 
-**Q: How do I add new workflows?**  
+**Q: How do I add new workflows?**
 A: Copy existing workflow, modify stages, update personas
 
 ---
@@ -444,6 +444,10 @@ After completing workflows:
 
 ---
 
-**Last Updated:** 2025-11-14  
-**Status:** Production Ready  
+**Last Updated:** 2025-11-14
+**Status:** Production Ready
 **Version:** 1.0
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Workflows/Quick_reference]]

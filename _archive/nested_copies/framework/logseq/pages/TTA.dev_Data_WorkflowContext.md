@@ -67,3 +67,7 @@ new_context = context.model_copy(update={"data": {"new_key": "new_value"}})
 ## Tags
 
 #data-schema #workflow-context #context-management #observability
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev_data_workflowcontext]]

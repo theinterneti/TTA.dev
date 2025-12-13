@@ -2,8 +2,8 @@
 
 **Comprehensive observability for Hypertool persona system with Langfuse LLM observability**
 
-**Status:** 🚧 Planning  
-**Created:** 2025-11-15  
+**Status:** 🚧 Planning
+**Created:** 2025-11-15
 **Phase:** 5 of 6 (Hypertool Roadmap)
 
 ---
@@ -242,14 +242,14 @@ def switch_persona(to_persona: str, chatmode: str = None):
     """Switch to a different persona."""
     collector = get_persona_metrics_collector()
     current = get_current_persona()
-    
+
     # Record switch
     collector.switch_persona(
         from_persona=current,
         to_persona=to_persona,
         chatmode=chatmode or "default"
     )
-    
+
     # ... existing switch logic
 ```
 
@@ -309,7 +309,7 @@ class WorkflowTracer:
     ) -> Any:
         """Trace a workflow stage execution."""
         start_time = time.time()
-        
+
         with tracer.start_as_current_span(f"stage.{stage_name}") as span:
             span.set_attribute("stage.name", stage_name)
             span.set_attribute("stage.persona", persona)
@@ -317,12 +317,12 @@ class WorkflowTracer:
 
             try:
                 result = await func(*args, **kwargs)
-                
+
                 duration = time.time() - start_time
                 span.set_attribute("stage.duration_seconds", duration)
                 span.set_attribute("stage.success", True)
                 span.set_status(Status(StatusCode.OK))
-                
+
                 # Record metrics
                 from .persona_metrics import get_persona_metrics_collector
                 collector = get_persona_metrics_collector()
@@ -333,7 +333,7 @@ class WorkflowTracer:
                     duration_seconds=duration,
                     quality_gate_passed=True  # Could check result
                 )
-                
+
                 return result
 
             except Exception as e:
@@ -343,7 +343,7 @@ class WorkflowTracer:
                 span.set_attribute("stage.error", str(e))
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 span.record_exception(e)
-                
+
                 # Record failure metrics
                 from .persona_metrics import get_persona_metrics_collector
                 collector = get_persona_metrics_collector()
@@ -354,7 +354,7 @@ class WorkflowTracer:
                     duration_seconds=duration,
                     quality_gate_passed=False
                 )
-                
+
                 raise
 ```
 
@@ -368,7 +368,7 @@ from ..instrumentation.persona_metrics import get_persona_metrics_collector
 
 async def package_release_workflow(version: str, changelog: str):
     """Package release workflow with full observability."""
-    
+
     async with WorkflowTracer("package_release") as tracer:
         # Stage 1: Backend Engineer
         result1 = await tracer.trace_stage(
@@ -378,7 +378,7 @@ async def package_release_workflow(version: str, changelog: str):
             version=version,
             changelog=changelog
         )
-        
+
         # Stage 2: Testing Specialist
         result2 = await tracer.trace_stage(
             stage_name="quality_validation",
@@ -386,7 +386,7 @@ async def package_release_workflow(version: str, changelog: str):
             func=testing_validation,
             release_data=result1
         )
-        
+
         # Stage 3: DevOps Engineer
         result3 = await tracer.trace_stage(
             stage_name="publish_deploy",
@@ -394,7 +394,7 @@ async def package_release_workflow(version: str, changelog: str):
             func=devops_publish,
             validated_release=result2
         )
-        
+
         return result3
 ```
 
@@ -453,7 +453,7 @@ class LangfuseIntegration:
     ) -> None:
         """
         Trace LLM call with Langfuse.
-        
+
         Captures:
         - Input/output
         - Model and persona
@@ -501,7 +501,7 @@ class LangfuseIntegration:
     ) -> None:
         """
         Trace persona-specific generation task.
-        
+
         Examples:
         - Backend: Code generation
         - Frontend: Component generation
@@ -533,7 +533,7 @@ class LangfuseIntegration:
     ) -> str:
         """
         Create Langfuse dataset for evaluation.
-        
+
         Example: Test dataset for persona prompt engineering
         """
         dataset = self.langfuse.create_dataset(
@@ -579,7 +579,7 @@ from .persona_metrics import get_persona_metrics_collector
 class ObservableLLM:
     """
     Wrapper for LLM calls with Langfuse and Prometheus tracking.
-    
+
     Usage:
         llm = ObservableLLM(persona="backend-engineer", chatmode="code-generation")
         response = await llm.generate(prompt="Generate FastAPI endpoint")
@@ -596,7 +596,7 @@ class ObservableLLM:
         self.chatmode = chatmode
         self.model = model
         self.cost_per_1k_tokens = cost_per_1k_tokens
-        
+
         self.langfuse = get_langfuse()
         self.metrics = get_persona_metrics_collector()
 
@@ -610,7 +610,7 @@ class ObservableLLM:
     ) -> Dict[str, Any]:
         """
         Generate LLM response with full observability.
-        
+
         Returns:
             {
                 "response": str,
@@ -1086,7 +1086,11 @@ async def main():
 
 ---
 
-**Status:** 🚧 Planning Complete, Ready for Implementation  
-**Next Phase:** Phase 6 - Adaptive System (auto persona switching)  
-**Owner:** TTA.dev Team  
+**Status:** 🚧 Planning Complete, Ready for Implementation
+**Next Phase:** Phase 6 - Adaptive System (auto persona switching)
+**Owner:** TTA.dev Team
 **Last Updated:** 2025-11-15
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Phase5_apm_langfuse_integration]]

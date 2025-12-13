@@ -648,3 +648,7 @@ logseq.table.version:: 2
 **Last Updated:** 2025-10-30
 **Status:** Ready to Use
 **Estimated Time:** 1-2 hours initial setup
+
+
+---
+**Logseq:** [[TTA.dev/Local/Planning/Logseq_migration_quickstart]]

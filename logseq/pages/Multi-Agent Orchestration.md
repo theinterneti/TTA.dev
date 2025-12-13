@@ -72,3 +72,7 @@ workflow = (
 
 category:: orchestration
 type:: multi-agent
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Multi-agent orchestration]]

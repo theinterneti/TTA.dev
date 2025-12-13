@@ -48,3 +48,7 @@ Create customized VS Code workspace files for 3 main AI agentic coders:
 - [ ] Create usage guide for each workspace
 - [ ] Document customization rationale
 - [ ] Add setup instructions
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/Workspace_planning_todo]]

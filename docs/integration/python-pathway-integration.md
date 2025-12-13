@@ -873,3 +873,7 @@ class QualityResult:
 **Last Updated:** 2024-03-19
 **Status:** Experimental
 **Maintainer:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integration/Python-pathway-integration]]

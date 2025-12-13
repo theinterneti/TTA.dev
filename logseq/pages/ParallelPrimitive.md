@@ -24,3 +24,7 @@ results = await workflow.execute(input_data, context)
 
 **Import:** `from tta_dev_primitives import ParallelPrimitive`
 **Source:** `platform/primitives/src/tta_dev_primitives/core/parallel.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Parallelprimitive]]

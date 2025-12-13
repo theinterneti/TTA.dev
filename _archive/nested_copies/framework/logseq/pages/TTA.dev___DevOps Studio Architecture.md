@@ -17,7 +17,7 @@ The TTA.dev DevOps Studio provides a complete production-ready infrastructure fo
 ### Core Philosophy
 
 - **Infrastructure as Code** - Everything versioned and repeatable
-- **Observability First** - Built-in monitoring, tracing, and alerting  
+- **Observability First** - Built-in monitoring, tracing, and alerting
 - **Security by Design** - Security integrated at every layer
 - **Scalable by Default** - Designed for production workloads
 - **Developer Experience** - Optimized for AI agent workflows
@@ -122,7 +122,7 @@ graph LR
     DEV --> TEST[Testing]
     TEST --> STAGE[Staging]
     STAGE --> PROD[Production]
-    
+
     EXP -.-> |Research| KB[Knowledge Base]
     DEV --> |Code| GIT[Git Repository]
     TEST --> |Quality| GATES[Quality Gates]
@@ -382,8 +382,11 @@ graph LR
 
 ---
 
-**Last Updated:** November 7, 2025  
-**Next Review:** Monthly  
+**Last Updated:** November 7, 2025
+**Next Review:** Monthly
 **Maintained by:** TTA.dev DevOps Team
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___devops studio architecture]]

@@ -12,3 +12,7 @@
 - ### Usage
   - It's primarily used for quick transformations, data adaptations, or integrating existing synchronous/asynchronous functions into a primitive chain without needing to define a full `WorkflowPrimitive` subclass.
   - Example: `transform = LambdaPrimitive(lambda x, ctx: x.upper())`
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Tools/Lambdaprimitive]]

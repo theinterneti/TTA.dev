@@ -222,3 +222,7 @@ If you're interested in JavaScript/TypeScript primitives:
 - Share what primitives you'd need most
 - Indicate if you'd contribute to development
 - Suggest priority features
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Packages-under-review/Js-dev-primitives/Status]]

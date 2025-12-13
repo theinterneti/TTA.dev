@@ -1,7 +1,7 @@
 # Chatmode Testing Plan - Hypertool Persona Integration
 
-**Date:** 2025-11-14  
-**Status:** 🔄 In Progress  
+**Date:** 2025-11-14
+**Status:** 🔄 In Progress
 **Goal:** Validate all 28 chatmodes correctly load Hypertool personas
 
 ---
@@ -149,48 +149,48 @@ def extract_frontmatter(content: str) -> Dict[str, any]:
     match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
     if not match:
         return {}
-    
+
     # Simple YAML parsing (just for key: value)
     frontmatter = {}
     for line in match.group(1).split('\n'):
         if ':' in line and not line.strip().startswith('-'):
             key, value = line.split(':', 1)
             frontmatter[key.strip()] = value.strip()
-    
+
     return frontmatter
 
 
 def validate_chatmode(file_path: Path) -> Tuple[bool, List[str]]:
     """Validate single chatmode file."""
     errors = []
-    
+
     # Read file
     try:
         content = file_path.read_text()
     except Exception as e:
         return False, [f"Failed to read file: {e}"]
-    
+
     # Check frontmatter exists
     frontmatter = extract_frontmatter(content)
     if not frontmatter:
         errors.append("No YAML frontmatter found")
         return False, errors
-    
+
     # Check hypertool_persona field
     if 'hypertool_persona' not in frontmatter:
         errors.append("Missing 'hypertool_persona' field")
     else:
         persona = frontmatter['hypertool_persona']
-        
+
         # Validate persona name
         if persona not in VALID_PERSONAS:
             errors.append(f"Invalid persona: {persona}")
-        
+
         # Check persona JSON exists
         persona_file = PERSONAS_DIR / f"{persona}.json"
         if not persona_file.exists():
             errors.append(f"Persona definition not found: {persona_file}")
-    
+
     # Check token budget
     if 'persona_token_budget' not in frontmatter:
         errors.append("Missing 'persona_token_budget' field")
@@ -198,7 +198,7 @@ def validate_chatmode(file_path: Path) -> Tuple[bool, List[str]]:
         try:
             budget = int(frontmatter['persona_token_budget'])
             persona = frontmatter.get('hypertool_persona')
-            
+
             if persona in TOKEN_BUDGET_RANGES:
                 min_budget, max_budget = TOKEN_BUDGET_RANGES[persona]
                 if not (min_budget <= budget <= max_budget):
@@ -208,13 +208,13 @@ def validate_chatmode(file_path: Path) -> Tuple[bool, List[str]]:
                     )
         except ValueError:
             errors.append("Invalid token budget (not a number)")
-    
+
     # Check tools_via_hypertool
     if 'tools_via_hypertool' not in frontmatter:
         errors.append("Missing 'tools_via_hypertool' field")
     elif frontmatter['tools_via_hypertool'] != 'true':
         errors.append("'tools_via_hypertool' should be 'true'")
-    
+
     return len(errors) == 0, errors
 
 
@@ -222,27 +222,27 @@ def main():
     """Run validation on all chatmodes."""
     print("🔍 Validating Chatmode Structure\n")
     print("=" * 70)
-    
+
     # Find all chatmode files
     chatmode_files = []
-    
+
     # Core chatmodes
     if TTA_CHATMODES.exists():
         chatmode_files.extend(TTA_CHATMODES.glob("*.chatmode.md"))
-    
+
     # UAC chatmodes
     if UAC_CHATMODES.exists():
         chatmode_files.extend(UAC_CHATMODES.rglob("*.chatmode.md"))
-    
+
     print(f"Found {len(chatmode_files)} chatmode files\n")
-    
+
     # Validate each file
     results = {"passed": 0, "failed": 0, "errors": {}}
-    
+
     for file_path in sorted(chatmode_files):
         relative_path = file_path.relative_to(Path("/home/thein/repos/TTA.dev"))
         valid, errors = validate_chatmode(file_path)
-        
+
         if valid:
             print(f"✅ {relative_path}")
             results["passed"] += 1
@@ -252,14 +252,14 @@ def main():
                 print(f"   └─ {error}")
             results["failed"] += 1
             results["errors"][str(relative_path)] = errors
-    
+
     # Summary
     print("\n" + "=" * 70)
     print(f"\n📊 Validation Summary:")
     print(f"   ✅ Passed: {results['passed']}")
     print(f"   ❌ Failed: {results['failed']}")
     print(f"   📈 Success Rate: {results['passed'] / len(chatmode_files) * 100:.1f}%")
-    
+
     if results["failed"] > 0:
         print(f"\n⚠️  {results['failed']} chatmode(s) need attention")
         return 1
@@ -309,8 +309,8 @@ if __name__ == "__main__":
 
 ### Run 1: Automated Validation
 
-**Date:** 2025-11-14  
-**Command:** `python scripts/validate_chatmode_structure.py`  
+**Date:** 2025-11-14
+**Command:** `python scripts/validate_chatmode_structure.py`
 **Status:** ✅ Complete
 
 **Results:**
@@ -337,6 +337,10 @@ if __name__ == "__main__":
 
 ---
 
-**Status:** ✅ Phase 1 Complete - Automated Validation  
-**Last Updated:** 2025-11-14  
+**Status:** ✅ Phase 1 Complete - Automated Validation
+**Last Updated:** 2025-11-14
 **Next Action:** Run MCP config simulation OR perform manual activation testing
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Chatmode_testing_plan]]

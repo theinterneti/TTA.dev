@@ -25,13 +25,13 @@
 
 ### 📋 AI-Powered PRs
 - **Auto-description**: AI generates comprehensive PR description
-- **Auto-review**: Requests @copilot review automatically  
+- **Auto-review**: Requests @copilot review automatically
 - **Draft support**: Create draft PRs for WIP
 - **Smart titles**: Extracts from branch name
 
 ### 🤝 Agent Collaboration
 - **@copilot integration**: Automatic code reviews
-- **@cline support**: CLI-based agent collaboration  
+- **@cline support**: CLI-based agent collaboration
 - **Multi-agent**: Coordinate multiple AI agents
 - **Real-time**: Agents respond in PR comments
 
@@ -53,7 +53,7 @@
 
 **Menu:**
 1. 🌿 Start working on something (create branch)
-2. 📋 Create a PR  
+2. 📋 Create a PR
 3. 🤝 Collaborate with agents on PR
 4. 🎯 Assign agents to an issue
 5. 📊 Show status
@@ -138,7 +138,7 @@ EOF
 ```bash
 # Copilot will create branch, implement, and PR
 ./scripts/lazy_dev.py
-# → Choose "4. Assign agents to an issue"  
+# → Choose "4. Assign agents to an issue"
 # → Enter issue number
 # → Enter task description
 # → @copilot gets assigned and starts work
@@ -156,19 +156,19 @@ import asyncio
 
 async def main():
     manager = LazyDevManager()
-    
+
     # Create feature branch
     branch = await manager.create_branch(
         "authentication system",
         WorkType.FEATURE
     )
-    
+
     # Later... create PR
     pr_number = await manager.create_pr(
         title="feat: Add OAuth authentication",
         draft=False
     )
-    
+
     # Start agent collaboration
     await manager.collaborate_on_pr(
         pr_number,
@@ -246,7 +246,7 @@ Adds complete reference docs for all 14 MCP servers used in TTA.dev
 
 ## Changes
 - Created docs/mcp-references/ with API refs for each server
-- Added integration guides 
+- Added integration guides
 - Documented Context7, E2B, GitHub, Grafana, and more
 
 ## Impact
@@ -259,7 +259,7 @@ Better MCP understanding, faster integration, complete coverage
 # You type: "fix the login bug in authentication"
 # Creates: fix/login-bug-authentication-20251116
 
-# You type: "add prometheus metrics"  
+# You type: "add prometheus metrics"
 # Creates: feature/prometheus-metrics-20251116
 ```
 
@@ -323,7 +323,7 @@ cat .github/CODEOWNERS
 - lazy_dev creates PRs
 - pr_manager monitors and analyzes them
 
-✅ **GitHub Actions**  
+✅ **GitHub Actions**
 - Auto-assign-copilot.yml
 - PR validation workflows
 - Gemini dispatch
@@ -403,7 +403,7 @@ alias ship='git add . && git commit -m "$(git branch --show-current | sed "s/.*\
 
 - [ ] AI-powered commit message generation
 - [ ] Automatic milestone assignment
-- [ ] Smart PR reviewer selection  
+- [ ] Smart PR reviewer selection
 - [ ] Integration with project boards
 - [ ] Slack/Discord notifications
 - [ ] Automatic changelog updates
@@ -420,3 +420,7 @@ alias ship='git add . && git commit -m "$(git branch --show-current | sed "s/.*\
 ---
 
 **Made with ❤️ for lazy developers who love automation**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Lazy_dev_guide]]

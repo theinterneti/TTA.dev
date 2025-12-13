@@ -1,7 +1,7 @@
 # Hypertool Observability Quick Reference Card
 
-**Last Updated:** 2025-11-15  
-**Phase:** 5 Week 3 Complete  
+**Last Updated:** 2025-11-15
+**Phase:** 5 Week 3 Complete
 **Status:** Production Ready
 
 ---
@@ -370,6 +370,10 @@ python -c "from .hypertool.instrumentation import get_langfuse_integration; prin
 
 ---
 
-**Status:** ✅ Production Ready  
-**Version:** 1.0  
+**Status:** ✅ Production Ready
+**Version:** 1.0
 **Last Tested:** 2025-11-15
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Observability_quick_reference]]

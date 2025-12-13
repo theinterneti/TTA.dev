@@ -93,3 +93,7 @@ Add real-time notification system with WebSocket support and push notifications
 ### Approvals
 - [ ] Technical Lead: (pending)
 - [ ] Product Owner: (pending)
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Plan_output/Add-real-time-notification-system-with.spec]]

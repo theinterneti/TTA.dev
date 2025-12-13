@@ -504,3 +504,6 @@ id:: mcp-ai-assistant-summary
 **Target:** AI Assistants (Claude, GPT-4, etc.)
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___mcp___ai assistant guide]]

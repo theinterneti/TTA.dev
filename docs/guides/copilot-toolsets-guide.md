@@ -343,3 +343,7 @@ To suggest new toolsets or improvements:
 - [Copilot Custom Instructions](../../.github/copilot-instructions.md)
 - [Package Development Guide](./package-development.md)
 - [VS Code Copilot Docs](https://code.visualstudio.com/docs/copilot/copilot-customization)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Copilot-toolsets-guide]]

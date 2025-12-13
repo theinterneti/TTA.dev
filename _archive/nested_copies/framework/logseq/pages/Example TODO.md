@@ -351,3 +351,6 @@ Document blocker:
 **Usage:** Copy and adapt for your own TODOs
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Example todo]]

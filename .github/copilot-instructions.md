@@ -1,13 +1,13 @@
 # TTA.dev Copilot Instructions
 
 > **For Vibe Coders:** TTA.dev helps you build fast AND scale when your app goes viral.
-> While awesome-copilot customizes GitHub Copilot, TTA.dev provides foundational patterns 
+> While awesome-copilot customizes GitHub Copilot, TTA.dev provides foundational patterns
 > and primitives that make ANY AI coding agent reliable and scale-ready.
 
 ## Philosophy
 
 1. **Vibe first** - Build fast, ship fast
-2. **Scale when needed** - Add primitives incrementally  
+2. **Scale when needed** - Add primitives incrementally
 3. **Don't over-engineer** - Simple code that works > complex code that doesn't
 
 ## Package Manager
@@ -76,3 +76,7 @@ for attempt in range(3):  # Never do this
 - [AGENTS.md](../AGENTS.md) - Quick reference for agents
 - [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md) - Complete primitive API
 - [GETTING_STARTED.md](../GETTING_STARTED.md) - Setup guide
+
+
+---
+**Logseq:** [[TTA.dev/.github/Copilot-instructions]]

@@ -178,3 +178,7 @@ Before November 7 decision:
 - Audit: [`REPOSITORY_AUDIT_2025_10_31.md`](../../REPOSITORY_AUDIT_2025_10_31.md)
 - Component Analysis: [`docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md`](../../docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md)
 - Integration Guide: [`docs/integration/python-pathway-integration.md`](../../docs/integration/python-pathway-integration.md)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Packages-under-review/Python-pathway/Status]]

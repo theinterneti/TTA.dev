@@ -111,3 +111,7 @@ Simplifies usage with correct workspace resolution
 ## Status: ✅ COMPLETE & WORKING
 
 All 4 tools (Copilot, Cline, Cursor, Augment) successfully generate configurations from universal sources!
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Universal_config_setup]]

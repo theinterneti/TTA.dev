@@ -407,3 +407,7 @@ async def test_player_creation(test_player_data):
 
 **Last Updated**: 2025-10-22
 **Maintainer**: theinterneti
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Testing.instructions]]

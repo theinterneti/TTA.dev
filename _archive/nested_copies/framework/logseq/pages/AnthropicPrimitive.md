@@ -125,3 +125,6 @@ status:: planned
 provider:: anthropic
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Anthropicprimitive]]

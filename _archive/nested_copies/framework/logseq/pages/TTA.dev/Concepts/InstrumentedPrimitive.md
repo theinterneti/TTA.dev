@@ -8,3 +8,7 @@
 - ---
 - ### Description
   - `InstrumentedPrimitive` extends `[[TTA.dev/Concepts/WorkflowPrimitive]]` by providing automatic OpenTelemetry instrumentation. Subclasses implement `_execute_impl()` instead of `execute()`, and `InstrumentedPrimitive` handles span creation, trace context injection, adding observability metadata from `[[TTA.dev/Data/WorkflowContext]]`, and collecting enhanced metrics. It ensures consistent observability across the framework, with graceful degradation if OpenTelemetry is not available.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Concepts/Instrumentedprimitive]]

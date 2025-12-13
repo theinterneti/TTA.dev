@@ -693,3 +693,6 @@ class TestCachePrimitiveIntegration:
 **For:** AI Agents writing tests for TTA.dev
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___best practices___agentic testing]]

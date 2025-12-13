@@ -37,3 +37,7 @@ This directory also contains documentation for integrating the various MCP serve
 *   **[Prometheus Integration](integrations/prometheus-integration.md)**
 *   **[Sequential Thinking Integration](integrations/sequential-thinking-integration.md)**
 *   **[Serena Integration](integrations/serena-integration.md)**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Readme]]

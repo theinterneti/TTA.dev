@@ -455,3 +455,7 @@ type:: pattern
 pattern:: saga
 feature:: distributed-transactions
 feature:: rollback
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Compensationprimitive]]

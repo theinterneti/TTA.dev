@@ -152,3 +152,7 @@ Detailed docs in `docs/`:
 ---
 
 **Tags:** #architecture #reference #system-design
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___architecture]]

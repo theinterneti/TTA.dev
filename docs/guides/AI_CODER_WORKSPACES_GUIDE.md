@@ -419,3 +419,7 @@ For issues with these workspace configurations:
 **Created**: November 9, 2025
 **Version**: 1.0
 **Compatibility**: TTA.dev v1.0.0+
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Ai_coder_workspaces_guide]]

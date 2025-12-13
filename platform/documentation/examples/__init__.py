@@ -1,4 +1,1 @@
-"""TTA Documentation Primitives - Examples.
-
-Example scripts demonstrating TTA.dev patterns with documentation primitives.
-"""
+# Logseq: [[TTA.dev/Platform/Documentation/Examples/__init__]]  # noqa: ERA001

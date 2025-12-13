@@ -58,3 +58,6 @@ infrastructure:: ci-cd
 automation:: true
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___ci-cd pipeline]]

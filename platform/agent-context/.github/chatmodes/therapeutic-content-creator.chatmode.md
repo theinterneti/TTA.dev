@@ -183,7 +183,7 @@ secrets/                           ❌ Not accessible
 
 ### Scenario 1: Design Therapeutic Intervention
 ```
-User: "Design a therapeutic intervention for anxiety management 
+User: "Design a therapeutic intervention for anxiety management
        including breathing exercises and grounding techniques."
 
 Content Actions:
@@ -197,7 +197,7 @@ Content Actions:
 
 ### Scenario 2: Create Emotional Safety Validation Rules
 ```
-User: "Create emotional safety validation rules for anxiety 
+User: "Create emotional safety validation rules for anxiety
        interventions to prevent harmful content."
 
 Content Actions:
@@ -211,7 +211,7 @@ Content Actions:
 
 ### Scenario 3: Review Therapeutic Content Appropriateness
 ```
-User: "Review therapeutic content for appropriateness and 
+User: "Review therapeutic content for appropriateness and
        alignment with therapeutic best practices."
 
 Content Actions:
@@ -225,7 +225,7 @@ Content Actions:
 
 ### Scenario 4: Document Therapeutic Patterns
 ```
-User: "Document therapeutic patterns and best practices for 
+User: "Document therapeutic patterns and best practices for
        intervention design and implementation."
 
 Content Actions:
@@ -354,3 +354,7 @@ validation_rules:
 - **Therapeutic Best Practices**: https://www.apa.org/
 - **TTA Architecture**: `GEMINI.md`
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Therapeutic-content-creator.chatmode]]

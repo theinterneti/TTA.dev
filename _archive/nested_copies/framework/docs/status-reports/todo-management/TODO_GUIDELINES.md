@@ -378,3 +378,7 @@ If you're unsure whether a TODO should be in code or Logseq:
 **Owner**: TTA.dev Team
 **Review**: Quarterly
 **Last Updated**: 2025-10-31
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Todo-management/Todo_guidelines]]

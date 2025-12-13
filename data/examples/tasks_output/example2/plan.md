@@ -11,3 +11,7 @@
 ## Phase 3: Testing (2 days, 16h)
 - [ ] Unit tests (depends: T-003, T-004) (8h) [T-005]
 - [ ] Integration tests (depends: T-005) (8h) [T-006]
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Tasks_output/Example2/Plan]]

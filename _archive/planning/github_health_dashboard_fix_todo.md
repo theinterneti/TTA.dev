@@ -63,3 +63,7 @@
 - `/home/thein/repos/TTA.dev/.env`
 - `/home/thein/repos/TTA.dev/setup_n8n_github_dashboard.sh`
 - Various n8n setup guides and troubleshooting files
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/Github_health_dashboard_fix_todo]]

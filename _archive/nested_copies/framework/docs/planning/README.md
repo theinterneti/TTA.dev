@@ -328,3 +328,7 @@ Also updated: `logseq/journals/2025_11_07.md` - Added TODO entry
 **Created:** November 7, 2025
 **Status:** Documentation complete, awaiting decision
 **Next:** Review and approve/modify/reject Option 3
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Readme]]

@@ -383,3 +383,7 @@ type:: integration
 feature:: tracing
 feature:: metrics
 feature:: logging
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta-observability-integration]]

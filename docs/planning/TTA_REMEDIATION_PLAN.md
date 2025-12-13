@@ -534,3 +534,7 @@ See `packages/tta-narrative-primitives/examples/` for:
 **Author:** GitHub Copilot
 **Date:** November 7, 2025
 **Related:** TTA.dev v1.0.0, TTA Repository Migration
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta_remediation_plan]]

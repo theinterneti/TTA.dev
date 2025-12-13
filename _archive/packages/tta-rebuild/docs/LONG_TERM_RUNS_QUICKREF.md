@@ -382,3 +382,7 @@ chmod 755 ./data
 
 **Last Updated:** 2025-11-09
 **Status:** Ready for Production Integration
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Packages/Tta-rebuild/Docs/Long_term_runs_quickref]]

@@ -233,3 +233,7 @@ The Cline integration setup system is **production-ready with minor fixes needed
 3. Plan implementation of planned primitives (LogseqContextLoader, ClineEnvSensor)
 
 The setup scripts provide an excellent foundation for Cline integration in the TTA.dev ecosystem.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integrations/Cline_setup_validation_report]]

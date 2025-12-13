@@ -307,3 +307,7 @@ pkill -f tta_api_server
 ---
 
 *Generated: November 7, 2025*
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Reports/Tta_api_success]]

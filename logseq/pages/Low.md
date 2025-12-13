@@ -477,3 +477,7 @@ rate(logseq_todo_completed_total{priority="low"}[30d])
 
 **Last Updated:** 2025-11-05
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Low]]

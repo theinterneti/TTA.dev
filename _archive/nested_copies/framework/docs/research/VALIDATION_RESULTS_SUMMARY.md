@@ -170,3 +170,7 @@ The research validation demonstrates conclusively that TTA.dev primitives repres
 **Statistical Framework**: A/B testing with power analysis
 **Validation Date**: November 2025
 **Next Review**: After expanded cohort studies
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Research/Validation_results_summary]]

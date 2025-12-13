@@ -457,3 +457,7 @@ workflow = api1 >> api2
 audience:: architects
 type:: guide
 focus:: architecture
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Architects]]

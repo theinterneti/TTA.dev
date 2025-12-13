@@ -91,3 +91,7 @@ The result is that the game's high-level rules, like prioritizing the player's c
 ***
 
 The way TTA manages its diverse realities is like designing a single computer program capable of running any game in history. The **Metaconcepts** are the core programming language and operating system—they ensure the software runs reliably and ethically everywhere. The **Universe Parameters** are the individual game cartridges (like *Chess* or *Space Invaders*); they provide the specific variable data (the board layout, the rules of movement, the physics engine) that tells the underlying system *what kind* of game to run right now, allowing the core software to stay constant while the experience changes infinitely.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta-analysis/Research-extracts/System-agnostic-design]]

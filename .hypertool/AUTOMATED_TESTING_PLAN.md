@@ -1,7 +1,7 @@
 # Automated Testing Plan for Phase 5 Validation
 
-**Created:** 2025-11-15  
-**Status:** Design Phase  
+**Created:** 2025-11-15
+**Status:** Design Phase
 **Goal:** Automate manual testing of Hypertool instrumentation across 3 AI agent workflows
 
 ---
@@ -59,7 +59,7 @@ async def test_augment_workflow():
     metrics = PersonaMetricsCollector.get_instance()
     tracer = WorkflowTracer.get_instance()
     langfuse = LangfuseIntegration.get_instance()
-    
+
     # 2. Simulate workflow stages
     with tracer.start_workflow("augment-feature-implementation"):
         # Stage 1: Requirements analysis (product-manager persona)
@@ -67,16 +67,16 @@ async def test_augment_workflow():
         with tracer.start_stage("requirements-analysis"):
             # Simulate LLM call with ObservableLLM
             await simulate_llm_call("Analyze requirements...", persona="product-manager")
-        
+
         # Stage 2: Implementation (backend-engineer persona)
         metrics.record_switch("backend-engineer", "augment", "feature-implementation")
         with tracer.start_stage("implementation"):
             await simulate_llm_call("Implement feature...", persona="backend-engineer")
-        
+
         # Stage 3: Quality gate
         with tracer.start_stage("quality-gate"):
             tracer.record_quality_gate("code-review", passed=True)
-    
+
     # 3. Verify observability
     assert metrics.get_metric("hypertool_persona_switches_total") > 0
     assert langfuse.has_traces_for_user("product-manager")
@@ -195,17 +195,17 @@ pytest .hypertool/instrumentation/test_automated_workflows.py -v
    - Verify:
      - ✅ All 7 Hypertool alerts loaded
      - ✅ No alerts firing (normal operation)
-   
+
    - **Trigger alerts manually:**
      ```python
      # Trigger TokenBudgetExceeded
      metrics.update_budget("backend-engineer", -100)
-     
+
      # Trigger HighQualityGateFailureRate
      for _ in range(10):
          tracer.record_quality_gate("test-gate", passed=False)
      ```
-   
+
    - Verify:
      - ✅ Alerts fire after evaluation period
      - ✅ Alert annotations have correct runbook links
@@ -272,7 +272,7 @@ Automated testing for Phase 5 Hypertool instrumentation.
 
 Tests:
 - test_augment_feature_implementation_workflow
-- test_cline_bug_fix_workflow  
+- test_cline_bug_fix_workflow
 - test_github_copilot_release_workflow
 - test_prometheus_metrics_collection
 - test_alert_rules_triggering
@@ -312,7 +312,7 @@ async def test_cline_bug_fix_workflow():
     """Simulate Cline bug-fix workflow."""
     # Implementation...
 
-# Test: GitHub Copilot Workflow  
+# Test: GitHub Copilot Workflow
 @pytest.mark.asyncio
 async def test_github_copilot_release_workflow():
     """Simulate GitHub Copilot package-release workflow."""
@@ -596,3 +596,7 @@ scrape_configs:
 6. **Phase 5 wrap-up** - Final summary
 
 **Status:** ✅ **Ready to implement automated testing approach**
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Automated_testing_plan]]

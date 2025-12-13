@@ -34,7 +34,7 @@ Add to `~/.bashrc` or `~/.zshrc`:
 
 ```bash
 alias work='./scripts/lazy_dev.py work-on'
-alias pr='./scripts/lazy_dev.py pr'  
+alias pr='./scripts/lazy_dev.py pr'
 alias status='./scripts/lazy_dev.py status'
 alias ship='git add . && git commit -m "update" && ./scripts/lazy_dev.py pr'
 ```
@@ -63,7 +63,7 @@ git add .
 git commit -m "Add feature X"
 pr
 # → AI generates description
-# → Creates PR  
+# → Creates PR
 # → @copilot reviews automatically
 ```
 
@@ -114,3 +114,7 @@ Comment on PRs:
 ---
 
 **Made with ❤️ for lazy developers**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Lazy_dev_quickref]]

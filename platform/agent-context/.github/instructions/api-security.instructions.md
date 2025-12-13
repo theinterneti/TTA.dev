@@ -46,13 +46,13 @@ security = HTTPBearer()
 
 async def verify_token(credentials: HTTPAuthCredentials = Depends(security)) -> dict:
     """Verify JWT token.
-    
+
     Args:
         credentials: HTTP bearer credentials
-    
+
     Returns:
         Decoded token payload
-    
+
     Raises:
         HTTPException: If token invalid or expired
     """
@@ -77,7 +77,7 @@ from typing import List
 
 def require_role(required_roles: List[str]):
     """Decorator to require specific roles.
-    
+
     Args:
         required_roles: List of required roles
     """
@@ -101,7 +101,7 @@ class PlayerInputRequest(BaseModel):
     """Validated player input request."""
     player_id: str = Field(..., min_length=1, max_length=100)
     input_text: str = Field(..., min_length=1, max_length=1000)
-    
+
     @validator('input_text')
     def validate_input_text(cls, v):
         """Validate input text for safety."""
@@ -191,7 +191,7 @@ async def submit_player_input(
     # Authorization check
     if request.player_id != current_user["player_id"]:
         raise HTTPException(status_code=403, detail="Cannot modify other player's data")
-    
+
     # Process input
     result = await process_input(request.input_text)
     return result
@@ -217,3 +217,7 @@ async def submit_player_input(
 - JWT Best Practices: https://tools.ietf.org/html/rfc8725
 - TTA Security Policy: `SECURITY.md`
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Api-security.instructions]]

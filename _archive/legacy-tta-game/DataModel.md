@@ -811,3 +811,6 @@ class Character(BaseModel):
 *(This section would include illustrative Cypher code snippets for creating nodes/relationships and visual diagrams of the schema, added iteratively during development).*
 
 ---
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Datamodel]]

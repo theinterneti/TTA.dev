@@ -31,3 +31,7 @@ to visualize system health, track performance trends, and identify bottlenecks.
 - Dashboard adoption: 80% of TTA.dev users within 30 days
 - MTTR reduction: 50% faster incident response
 - User satisfaction: 4.5+ stars
+
+
+---
+**Logseq:** [[TTA.dev/Data/Experiments/Tasks-real-world/Exp1-monitoring-dashboard/Spec]]

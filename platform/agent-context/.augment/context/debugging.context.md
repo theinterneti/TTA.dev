@@ -64,13 +64,13 @@ logger = logging.getLogger(__name__)
 async def process_action(action: PlayerAction, session: Session):
     logger.info(f"Processing action: {action.type}")
     logger.debug(f"Session state before: {session.state}")
-    
+
     result = await execute_action(action)
     logger.debug(f"Action result: {result}")
-    
+
     await update_session(session, result)
     logger.debug(f"Session state after: {session.state}")
-    
+
     return result
 ```
 
@@ -193,13 +193,13 @@ async def process_action(
 ):
     result = await execute_action(action)
     session.state.update(result)
-    
+
     # ✅ Persist to Redis
     await redis_client.set(
         f"session:{session.id}",
         json.dumps(session.state)
     )
-    
+
     return result
 
 # Add test to prevent regression
@@ -208,9 +208,9 @@ async def test_action_persists_state(redis_client):
     """Test that action updates persist to Redis."""
     session = Session(id="test", user_id="user123", state={})
     action = PlayerAction(type="explore")
-    
+
     await process_action(action, session, redis_client)
-    
+
     # Verify state persisted
     persisted = await redis_client.get(f"session:{session.id}")
     assert persisted is not None
@@ -455,20 +455,20 @@ print(f"DEBUG: dir = {dir(variable)}")
 ## Best Practices
 
 ### DO:
-✅ Reproduce the bug reliably  
-✅ Add logging to understand flow  
-✅ Write test to catch regression  
-✅ Fix root cause, not symptoms  
-✅ Document the fix  
-✅ Verify no regressions  
+✅ Reproduce the bug reliably
+✅ Add logging to understand flow
+✅ Write test to catch regression
+✅ Fix root cause, not symptoms
+✅ Document the fix
+✅ Verify no regressions
 ✅ Use debugger for complex issues
 
 ### DON'T:
-❌ Make random changes hoping to fix  
-❌ Skip writing regression test  
-❌ Fix symptoms without understanding root cause  
-❌ Commit debugging code (print statements, pdb)  
-❌ Ignore related issues  
+❌ Make random changes hoping to fix
+❌ Skip writing regression test
+❌ Fix symptoms without understanding root cause
+❌ Commit debugging code (print statements, pdb)
+❌ Ignore related issues
 ❌ Skip verification step
 
 ---
@@ -490,3 +490,7 @@ print(f"DEBUG: dir = {dir(variable)}")
 
 **Note:** Systematic debugging saves time. Follow the workflow, document findings, and add tests to prevent regressions.
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Context/Debugging.context]]

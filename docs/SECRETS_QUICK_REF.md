@@ -120,3 +120,7 @@ See `docs/SECRETS_MANAGEMENT.md` for comprehensive guide.
 ---
 
 **Last Updated:** November 12, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Secrets_quick_ref]]

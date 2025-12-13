@@ -386,3 +386,7 @@ class MetricsPrimitive(WorkflowPrimitive[dict, dict]):
 
 **Category:** Reference / Disambiguation
 **Status:** Generic placeholder
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Primitive1]]

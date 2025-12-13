@@ -438,3 +438,7 @@ Before deciding, investigate:
 **Deadline (keploy-framework, python-pathway):** [[2025-11-07]]
 **Deadline (js-dev-primitives):** [[2025-11-14]]
 **Status:** Awaiting decisions
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev package decisions]]

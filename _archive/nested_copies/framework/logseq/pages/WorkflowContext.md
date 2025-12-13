@@ -48,3 +48,6 @@ concept:: workflow-context
 type:: core-infrastructure
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Workflowcontext]]

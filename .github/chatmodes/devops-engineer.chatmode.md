@@ -78,3 +78,7 @@ You focus on creating reliable, observable infrastructure that supports TTA.dev'
 - ✅ Monitoring and alerting for all critical components
 - ✅ Security best practices and compliance checks
 - ✅ Cost optimization and resource utilization monitoring
+
+
+---
+**Logseq:** [[TTA.dev/.github/Chatmodes/Devops-engineer.chatmode]]

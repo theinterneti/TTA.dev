@@ -1002,3 +1002,6 @@ class MonitoredAPICall(WorkflowPrimitive[dict, dict]):
 **Difficulty:** [[Intermediate]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___how-to___integrating external services]]

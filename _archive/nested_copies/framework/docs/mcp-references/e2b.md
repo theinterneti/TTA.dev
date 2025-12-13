@@ -40,3 +40,7 @@ Here's an example of how you might configure the E2B MCP server in your Claude D
     }
   }
 }
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/E2b]]

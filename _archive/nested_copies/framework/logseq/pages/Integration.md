@@ -551,3 +551,7 @@ integration_health{integration_name="openai"} == 1
 
 **Category:** Integration patterns
 **Status:** Production-ready
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Integration]]

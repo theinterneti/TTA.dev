@@ -784,3 +784,7 @@ We welcome contributions! See [`CONTRIBUTING.md`](../../CONTRIBUTING.md) for gui
 ---
 
 **Built for GitHub Agent HQ** | **Production-Ready** | **Open Source**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integration/Github-agent-hq]]

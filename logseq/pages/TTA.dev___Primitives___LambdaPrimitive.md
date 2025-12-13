@@ -22,3 +22,7 @@ transform = LambdaPrimitive(lambda x, ctx: x.upper())
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Core]] - Core primitives
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___primitives___lambdaprimitive]]

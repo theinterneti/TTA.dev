@@ -644,3 +644,7 @@ workflow = ParallelPrimitive([
 ---
 
 **Next Steps:** Implement Phase 1 primitives (UniversalLLMPrimitive + coder-specific primitives + budget system)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Universal_llm_architecture]]

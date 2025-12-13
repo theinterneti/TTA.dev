@@ -265,3 +265,7 @@ Use GitHub Discussions or comment on issues:
 **Status:** All issues created and ready for work
 
 **Let's build the future of AI-native development! 🚀**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Github_issues_created]]

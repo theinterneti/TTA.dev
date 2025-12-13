@@ -16,3 +16,7 @@ This is a redirect page for the variant spelling. See [[PRIMITIVES CATALOG]] for
 
 type:: redirect
 target:: [[PRIMITIVES CATALOG]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___primitives catalog]]

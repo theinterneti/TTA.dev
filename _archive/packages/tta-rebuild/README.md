@@ -227,3 +227,7 @@ MIT License - See `LICENSE` file
 ---
 
 **Built with TTA.dev primitives** - Production-ready AI workflow components
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Packages/Tta-rebuild/Readme]]

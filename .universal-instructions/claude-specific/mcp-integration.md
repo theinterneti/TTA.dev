@@ -104,3 +104,7 @@ class DocLookupPrimitive(WorkflowPrimitive[str, str]):
 ```
 
 Consider creating primitives that wrap MCP tools for reusable workflows.
+
+
+---
+**Logseq:** [[TTA.dev/.universal-instructions/Claude-specific/Mcp-integration]]

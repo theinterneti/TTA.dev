@@ -8,3 +8,7 @@
 - ---
 - ### Description
   - `WorkflowPrimitive` defines the fundamental interface for any component that can be part of a TTA.dev workflow. It provides abstract methods for execution and defines composition operators (`>>` for sequential, `|` for parallel) to build complex workflows from simpler primitives. All concrete primitives in the framework inherit from this class.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Concepts/Workflowprimitive]]

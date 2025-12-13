@@ -185,7 +185,7 @@ secrets/                           ❌ Not accessible
 
 ### Scenario 1: Design Narrative Branching
 ```
-User: "Design narrative branching for player choices with 
+User: "Design narrative branching for player choices with
        multiple story paths and consequences."
 
 Narrative Actions:
@@ -199,7 +199,7 @@ Narrative Actions:
 
 ### Scenario 2: Implement Story Generation
 ```
-User: "Implement story generation using LangGraph orchestration 
+User: "Implement story generation using LangGraph orchestration
        with coherent narrative flow."
 
 Narrative Actions:
@@ -213,7 +213,7 @@ Narrative Actions:
 
 ### Scenario 3: Validate Narrative Coherence
 ```
-User: "Create narrative coherence validation to ensure story 
+User: "Create narrative coherence validation to ensure story
        consistency across player actions."
 
 Narrative Actions:
@@ -227,7 +227,7 @@ Narrative Actions:
 
 ### Scenario 4: Create Narrative Prompts
 ```
-User: "Create narrative generation prompts that guide story 
+User: "Create narrative generation prompts that guide story
        creation while maintaining therapeutic appropriateness."
 
 Narrative Actions:
@@ -327,3 +327,7 @@ def validate_coherence(
 - **Prompt Engineering Guide**: https://platform.openai.com/docs/guides/prompt-engineering
 - **TTA Architecture**: `GEMINI.md`
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Narrative-engine-developer.chatmode]]

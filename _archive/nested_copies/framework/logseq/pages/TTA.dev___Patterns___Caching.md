@@ -391,3 +391,7 @@ async def fault_tolerant_cache(data: dict, context: WorkflowContext) -> dict: # 
 **Status:** Production-ready
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___patterns___caching]]

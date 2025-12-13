@@ -175,3 +175,7 @@ See main repository CONTRIBUTING.md for guidelines.
 ## License
 
 MIT License - see main repository for details.
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-coordination/Readme]]

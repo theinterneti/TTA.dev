@@ -770,3 +770,7 @@ Use this template for new ADRs:
 
 **Last Updated:** October 30, 2025
 **Maintainer:** TTA.dev Core Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Decision_records]]

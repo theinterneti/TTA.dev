@@ -551,3 +551,7 @@ Use emoji/badges for quick status:
 
 **Last Updated:** November 2, 2025
 **Next Review:** Monthly (first Monday of each month)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Status-reports/Todo-management/Todo_lifecycle_guide]]

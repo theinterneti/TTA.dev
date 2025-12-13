@@ -48,14 +48,14 @@ async def process_player_action(session_id: str, action: dict):
         raise ValueError("Action type required")
     if action["type"] not in ["explore", "interact", "speak"]:
         raise ValueError("Invalid action type")
-    
+
     # Get session
     redis = await create_redis_connection()
     session_data = await redis.get(f"session:{session_id}")
     if not session_data:
         raise ValueError("Session not found")
     session = Session.parse_raw(session_data)
-    
+
     # Process action
     if action["type"] == "explore":
         result = await process_explore(session, action)
@@ -63,11 +63,11 @@ async def process_player_action(session_id: str, action: dict):
         result = await process_interact(session, action)
     else:
         result = await process_speak(session, action)
-    
+
     # Update session
     session.last_action = action
     await redis.set(f"session:{session_id}", session.json())
-    
+
     return result
 
 # After: Extracted functions
@@ -95,7 +95,7 @@ async def process_player_action(session_id: str, action: dict):
     """Process player action."""
     validate_action(action)
     session = await get_session(session_id)
-    
+
     # Process action
     if action["type"] == "explore":
         result = await process_explore(session, action)
@@ -103,10 +103,10 @@ async def process_player_action(session_id: str, action: dict):
         result = await process_interact(session, action)
     else:
         result = await process_speak(session, action)
-    
+
     session.last_action = action
     await update_session(session_id, session)
-    
+
     return result
 ```
 
@@ -142,10 +142,10 @@ async def get_narrative_history(session_id: str):
 # After: Extracted class
 class NarrativeRepository:
     """Repository for narrative operations."""
-    
+
     def __init__(self, neo4j_session):
         self.neo4j = neo4j_session
-    
+
     async def create_node(self, content: str, session_id: str) -> NarrativeNode:
         """Create narrative node."""
         result = self.neo4j.run(
@@ -154,7 +154,7 @@ class NarrativeRepository:
             session_id=session_id
         )
         return NarrativeNode.from_neo4j(result.single()["n"])
-    
+
     async def get_history(self, session_id: str) -> list[NarrativeNode]:
         """Get narrative history for session."""
         result = self.neo4j.run(
@@ -207,10 +207,10 @@ def get_explore_response(context: dict) -> str:
     """Get response for explore action."""
     if context.get("location") != "forest":
         return "You explore the area..."
-    
+
     if context.get("time") == "night":
         return "You explore the dark forest..."
-    
+
     return "You explore the forest..."
 
 def get_interact_response(context: dict) -> str:
@@ -218,7 +218,7 @@ def get_interact_response(context: dict) -> str:
     target = context.get("target")
     if not target:
         return "You look around for something to interact with..."
-    
+
     return f"You interact with {target}..."
 ```
 
@@ -251,7 +251,7 @@ class SessionStatus:
     ACTIVE = "active"
     PAUSED = "paused"
     COMPLETED = "completed"
-    
+
     @classmethod
     def all(cls):
         return [cls.ACTIVE, cls.PAUSED, cls.COMPLETED]
@@ -307,7 +307,7 @@ class DatabaseClients(BaseModel):
     """Database clients."""
     redis: Redis
     neo4j: Session
-    
+
     class Config:
         arbitrary_types_allowed = True
 
@@ -437,7 +437,7 @@ class AgentOrchestrator:
         self.session_repo = session_repo
         self.narrative_repo = narrative_repo
         self.ai_provider = ai_provider
-    
+
     async def process_turn(self, session_id: str, user_input: str):
         session = await self.session_repo.get(session_id)
         context = await self.narrative_repo.get_context(session_id)
@@ -471,7 +471,7 @@ async def get_user_sessions(user_id: str):
 class SessionRepository:
     def __init__(self, redis: Redis):
         self.redis = redis
-    
+
     async def get_user_sessions(self, user_id: str) -> list[Session]:
         """Get all sessions for user."""
         keys = await self.redis.keys(f"session:{user_id}:*")
@@ -498,3 +498,7 @@ class SessionRepository:
 
 **Note:** Always run tests before and after refactoring to ensure behavior is preserved.
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Context/Refactoring.context]]

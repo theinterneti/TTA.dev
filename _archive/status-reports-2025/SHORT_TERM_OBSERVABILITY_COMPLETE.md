@@ -363,3 +363,7 @@ This provides sufficient data to **infer workflow adherence** and detect anomali
 **Last Updated:** November 2, 2025
 **Next Review:** After Pushgateway deployment
 **Status:** ✅ Phase 1 Complete - Data Capture Operational
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Short_term_observability_complete]]

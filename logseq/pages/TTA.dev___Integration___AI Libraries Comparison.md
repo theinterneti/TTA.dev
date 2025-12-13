@@ -489,3 +489,7 @@ id:: integration-libraries-resources
 - [[TTA.dev/Integration/Transformers]] - Transformers deep dive
 - [[TTA.dev/Guides/Agentic Primitives]] - TTA.dev workflow composition
 - [[TTA.dev/Architecture/Component Integration]] - Architecture patterns
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___integration___ai libraries comparison]]

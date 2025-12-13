@@ -26,3 +26,7 @@ Post entity from requirements
 - `id`: UUID
 - `created_at`: DateTime
 - `updated_at`: DateTime
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Plan_output/Data-model]]

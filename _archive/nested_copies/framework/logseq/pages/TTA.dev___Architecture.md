@@ -142,3 +142,6 @@ workflow = (
 **Next:** Create whiteboards and migrate ADRs
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___architecture]]

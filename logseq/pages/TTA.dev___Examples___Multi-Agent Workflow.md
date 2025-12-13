@@ -604,3 +604,7 @@ feature:: coordination
 feature:: routing
 primitives:: router, parallel, conditional, sequential
 pattern:: agent-orchestration
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___examples___multi-agent workflow]]

@@ -39,3 +39,6 @@ Observability primitives and integrations (OpenTelemetry, Prometheus exporters, 
 - Export Prometheus metrics under `/metrics` endpoint
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___packages___tta-observability-integration]]

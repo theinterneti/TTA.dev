@@ -379,3 +379,7 @@ This will help diagnose the exact issue preventing LangChain nodes from executin
 **Most Likely Issue:** LangChain nodes are disconnected or not properly configured with credentials.
 
 **Resolution Time:** Should be fixable in 2-5 minutes once you open the workflow in the UI.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Reports/N8n_workflow_execution_diagnosis]]

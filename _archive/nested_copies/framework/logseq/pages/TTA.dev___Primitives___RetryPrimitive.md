@@ -472,3 +472,7 @@ logger.warning(
 **Last Updated:** [[2025-10-30]]
 **Test Coverage:** 100%
 **Status:** [[Stable]] - Production Ready
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___primitives___retryprimitive]]

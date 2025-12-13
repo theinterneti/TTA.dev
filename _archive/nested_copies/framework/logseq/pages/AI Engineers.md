@@ -43,3 +43,6 @@ audience:: ai-engineers
 level:: intermediate-to-advanced
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Ai engineers]]

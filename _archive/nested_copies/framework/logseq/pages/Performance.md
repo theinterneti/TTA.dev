@@ -603,3 +603,6 @@ async def test_cache_performance(benchmark):
 **Maintained by:** TTA.dev Team
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Performance]]

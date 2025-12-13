@@ -49,3 +49,7 @@ client.disconnect()
 
 *   [Playwright MCP Server Documentation](https://github.com/microsoft/playwright-mcp)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Integrations/Playwright-integration]]

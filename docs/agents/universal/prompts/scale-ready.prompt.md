@@ -127,3 +127,7 @@ result = await llm_workflow.execute(data, context)
 - [Reliability Patterns](../universal/patterns/reliability.instructions.md)
 - [Observability Patterns](../universal/patterns/observability.instructions.md)
 - [PRIMITIVES_CATALOG.md](../../PRIMITIVES_CATALOG.md)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Agents/Universal/Prompts/Scale-ready.prompt]]

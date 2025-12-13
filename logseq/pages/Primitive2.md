@@ -391,3 +391,7 @@ workflow = primitive1 >> primitive2 >> primitive3
 
 **Category:** Reference / Disambiguation
 **Status:** Generic placeholder
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Primitive2]]

@@ -23,10 +23,10 @@ async def test_workflow_success():
     mock2 = MockPrimitive("step2", return_value="result2")
     workflow = mock1 >> mock2
     context = WorkflowContext(workflow_id="test")
-    
+
     # Act
     result = await workflow.execute("input", context)
-    
+
     # Assert
     assert mock1.call_count == 1
     assert mock2.call_count == 1
@@ -40,7 +40,7 @@ async def test_workflow_failure():
     error = ValueError("Test error")
     mock_fail = MockPrimitive("fail", side_effect=error)
     context = WorkflowContext()
-    
+
     # Act & Assert
     with pytest.raises(ValueError, match="Test error"):
         await mock_fail.execute("input", context)
@@ -78,17 +78,17 @@ async def test_sequential_pipeline():
     mock1 = MockPrimitive("validate", return_value={"valid": True})
     mock2 = MockPrimitive("process", return_value={"processed": True})
     mock3 = MockPrimitive("save", return_value={"saved": True})
-    
+
     workflow = mock1 >> mock2 >> mock3
     context = WorkflowContext()
-    
+
     result = await workflow.execute({"input": "data"}, context)
-    
+
     # Verify execution order
     assert mock1.call_count == 1
     assert mock2.call_count == 1
     assert mock3.call_count == 1
-    
+
     # Verify data flow
     assert mock1.last_input == {"input": "data"}
     assert mock2.last_input == {"valid": True}
@@ -105,22 +105,22 @@ async def test_parallel_execution():
     mock1 = MockPrimitive("branch1", return_value="result1")
     mock2 = MockPrimitive("branch2", return_value="result2")
     mock3 = MockPrimitive("branch3", return_value="result3")
-    
+
     workflow = mock1 | mock2 | mock3
     context = WorkflowContext()
-    
+
     results = await workflow.execute("input", context)
-    
+
     # All branches executed
     assert mock1.call_count == 1
     assert mock2.call_count == 1
     assert mock3.call_count == 1
-    
+
     # All receive same input
     assert mock1.last_input == "input"
     assert mock2.last_input == "input"
     assert mock3.last_input == "input"
-    
+
     # Results collected
     assert results == ["result1", "result2", "result3"]
 ```
@@ -132,7 +132,7 @@ async def test_parallel_execution():
 async def test_retry_on_failure():
     """Test retry primitive retries on failure."""
     from tta_dev_primitives.recovery.retry import RetryPrimitive
-    
+
     call_count = 0
     async def flaky_operation(data, ctx):
         nonlocal call_count
@@ -140,16 +140,16 @@ async def test_retry_on_failure():
         if call_count < 3:
             raise ValueError("Temporary error")
         return "success"
-    
+
     retry_workflow = RetryPrimitive(
         MockPrimitive("flaky", side_effect=flaky_operation),
         max_attempts=3,
         backoff_factor=1.0
     )
-    
+
     context = WorkflowContext()
     result = await retry_workflow.execute("input", context)
-    
+
     assert call_count == 3
     assert result == "success"
 
@@ -157,18 +157,18 @@ async def test_retry_on_failure():
 async def test_timeout_enforced():
     """Test timeout primitive enforces time limits."""
     from tta_dev_primitives.recovery.timeout import TimeoutPrimitive, TimeoutError
-    
+
     async def slow_operation(data, ctx):
         await asyncio.sleep(10.0)  # Too slow
         return "done"
-    
+
     timeout_workflow = TimeoutPrimitive(
         MockPrimitive("slow", side_effect=slow_operation),
         timeout_seconds=0.1
     )
-    
+
     context = WorkflowContext()
-    
+
     with pytest.raises(TimeoutError):
         await timeout_workflow.execute("input", context)
 ```
@@ -180,31 +180,31 @@ async def test_timeout_enforced():
 async def test_cache_hits_and_misses():
     """Test cache primitive caches results correctly."""
     from tta_dev_primitives.performance.cache import CachePrimitive
-    
+
     call_count = 0
     async def expensive_op(data, ctx):
         nonlocal call_count
         call_count += 1
         return f"result-{call_count}"
-    
+
     cached = CachePrimitive(
         MockPrimitive("expensive", side_effect=expensive_op),
         cache_key_fn=lambda d, c: str(d),
         ttl_seconds=60.0
     )
-    
+
     context = WorkflowContext()
-    
+
     # First call - cache miss
     result1 = await cached.execute("input", context)
     assert result1 == "result-1"
     assert call_count == 1
-    
+
     # Second call - cache hit
     result2 = await cached.execute("input", context)
     assert result2 == "result-1"  # Same result
     assert call_count == 1  # Not called again
-    
+
     # Different input - cache miss
     result3 = await cached.execute("different", context)
     assert result3 == "result-2"
@@ -248,10 +248,10 @@ async def test_multiple_inputs(input_data, expected):
     """Test with multiple input scenarios."""
     async def double_value(data, ctx):
         return {"result": data["value"] * 2}
-    
+
     workflow = MockPrimitive("double", side_effect=double_value)
     context = WorkflowContext()
-    
+
     result = await workflow.execute(input_data, context)
     assert result == expected
 ```
@@ -263,19 +263,19 @@ async def test_multiple_inputs(input_data, expected):
 async def test_context_propagation():
     """Test that context is passed through workflow."""
     contexts_seen = []
-    
+
     async def capture_context(data, ctx):
         contexts_seen.append(ctx)
         return data
-    
+
     mock1 = MockPrimitive("step1", side_effect=capture_context)
     mock2 = MockPrimitive("step2", side_effect=capture_context)
-    
+
     workflow = mock1 >> mock2
     context = WorkflowContext(workflow_id="test-propagation")
-    
+
     await workflow.execute("input", context)
-    
+
     # Same context instance passed to both
     assert len(contexts_seen) == 2
     assert contexts_seen[0] is contexts_seen[1]
@@ -287,7 +287,7 @@ async def test_context_propagation():
 ```
 tests/
 ├── test_core.py          # Core primitive tests
-├── test_recovery.py      # Recovery pattern tests  
+├── test_recovery.py      # Recovery pattern tests
 ├── test_performance.py   # Performance utility tests
 ├── test_routing.py       # Router tests
 └── integration/          # Integration tests
@@ -309,3 +309,7 @@ tests/
 - [ ] Uses descriptive test names and docstrings
 - [ ] No external dependencies (no network, DB, filesystem)
 - [ ] Fast execution (< 1s per test)
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/.cursor/Rules/Tests.instructions]]

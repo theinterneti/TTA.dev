@@ -21,3 +21,7 @@ The CI system has detected a failure in the test suite. You will be provided wit
 The user will provide:
 - Test Failure Log
 - List of failing tests (if available)
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Fix-test-failure.prompt]]

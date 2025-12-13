@@ -482,3 +482,7 @@ This TODO architecture is a living system. As TTA.dev evolves:
 **Maintained by:** TTA.dev Team
 **License:** Same as TTA.dev project
 **Feedback:** Always welcome!
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___todo architecture]]

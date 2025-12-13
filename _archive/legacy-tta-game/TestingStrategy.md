@@ -183,3 +183,6 @@ Baseline: Measure performance under normal conditions periodically.
 Targeted Profiling: Use Neo4j PROFILE/EXPLAIN and Python profiling tools to investigate slow components identified during manual testing or based on complexity.
 
 Focus: Prioritize testing the performance of frequently used agents (IPA, NGA) and complex KG queries (LKA).
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Testingstrategy]]

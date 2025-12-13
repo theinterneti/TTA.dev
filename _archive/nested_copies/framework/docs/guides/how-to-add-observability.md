@@ -634,3 +634,7 @@ Before deploying to production:
 **Last Updated:** [[2025-10-31]]
 **Difficulty:** Intermediate
 **Time:** 1-2 hours
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Guides/How-to-add-observability]]

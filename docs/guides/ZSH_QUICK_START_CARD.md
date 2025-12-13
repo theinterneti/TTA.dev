@@ -100,3 +100,7 @@ omz update   # Update Oh My Zsh
 
 ---
 **TTA.dev Team • 2025-11-10**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Zsh_quick_start_card]]

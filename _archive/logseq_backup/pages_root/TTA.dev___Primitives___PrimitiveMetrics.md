@@ -15,3 +15,7 @@ Core OpenTelemetry metrics for TTA.dev primitives.
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Observability]] - Observability primitives
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___primitives___primitivemetrics]]

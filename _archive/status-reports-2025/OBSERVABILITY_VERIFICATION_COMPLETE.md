@@ -350,3 +350,7 @@ docker-compose -f docker-compose.integration.yml restart
 
 **Status:** ✅ Observability verified and operational
 **Next:** Run production examples and explore Jaeger traces
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Observability_verification_complete]]

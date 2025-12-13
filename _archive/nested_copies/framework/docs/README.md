@@ -153,3 +153,7 @@ docs/
 **Last Updated:** November 7, 2025
 **Documentation Files:** 144 total, organized by category
 **Status Reports Archived:** 44 files moved to dedicated structure
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Readme]]

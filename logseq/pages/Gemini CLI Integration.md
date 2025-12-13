@@ -60,3 +60,7 @@ This page tracks the integration and usage of Google's Gemini CLI tool for devel
 tool:: gemini-cli
 status:: evaluation
 type:: ai-assistance
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Gemini cli integration]]

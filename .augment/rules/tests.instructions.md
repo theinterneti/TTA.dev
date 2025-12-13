@@ -314,3 +314,7 @@ tests/
 - [ ] Uses descriptive test names and docstrings
 - [ ] No external dependencies (no network, DB, filesystem)
 - [ ] Fast execution (< 1s per test)
+
+
+---
+**Logseq:** [[TTA.dev/.augment/Rules/Tests.instructions]]

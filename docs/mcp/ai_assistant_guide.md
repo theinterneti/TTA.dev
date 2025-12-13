@@ -119,3 +119,7 @@ If a user asks about a character in the game:
 4. Agents may have limitations in what they can do
 
 By following this guide, you'll be able to effectively use the TTA MCP servers to help users interact with the TTA project's agents and knowledge graph.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Ai_assistant_guide]]

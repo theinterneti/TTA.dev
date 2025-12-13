@@ -684,3 +684,7 @@ Your expertise is **crucial**:
 
 **Questions? Ideas? Frustrations?**
 Open a discussion: https://github.com/theinterneti/TTA.dev/discussions
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Vision]]

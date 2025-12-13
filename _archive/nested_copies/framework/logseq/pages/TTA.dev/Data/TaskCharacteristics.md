@@ -15,3 +15,7 @@
   - `requires_speed`: True if the task demands an ultra-fast response time.
   - `requires_long_context`: True if the task needs a context window larger than 100K tokens.
   - `requires_accuracy`: True if the task prioritizes high correctness and precision.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Data/Taskcharacteristics]]

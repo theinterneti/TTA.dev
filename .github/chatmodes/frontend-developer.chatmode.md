@@ -165,3 +165,7 @@ Before finalizing components, verify:
 - ✅ Accessibility attributes (aria-*, alt, etc.)
 - ✅ Component testing with React Testing Library
 - ✅ Browser testing setup with Playwright
+
+
+---
+**Logseq:** [[TTA.dev/.github/Chatmodes/Frontend-developer.chatmode]]

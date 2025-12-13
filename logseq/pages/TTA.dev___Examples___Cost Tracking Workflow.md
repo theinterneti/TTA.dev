@@ -400,3 +400,7 @@ example:: cost-tracking
 type:: production
 feature:: cost-optimization
 primitives:: cache, router, budget-enforcement
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___examples___cost tracking workflow]]

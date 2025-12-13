@@ -513,3 +513,7 @@ class KeployTestPrimitive(WorkflowPrimitive[TestRequest, TestResult]):
 **Last Updated:** [[2025-10-30]]
 **Analysis Date:** [[2025-10-29]]
 **Status:** [[Complete]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___architecture___component integration]]

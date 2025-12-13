@@ -37,3 +37,7 @@ Observability primitives and integrations (OpenTelemetry, Prometheus exporters, 
 ## Owner Notes
 - Ensure safe failure when OTLP is unavailable
 - Export Prometheus metrics under `/metrics` endpoint
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___packages___tta-observability-integration]]

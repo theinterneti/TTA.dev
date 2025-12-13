@@ -11,3 +11,7 @@ Verify that file modifications are being tracked and exposed via Prometheus metr
 1. File creation should trigger `copilot_files_modified_total{file_type="markdown", operation="created"}`
 2. Metrics should be available at `http://localhost:8000/metrics`
 3. Session should become active (`copilot_session_active=1`)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Test_tracking]]

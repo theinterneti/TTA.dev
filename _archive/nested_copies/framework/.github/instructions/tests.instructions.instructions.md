@@ -470,3 +470,7 @@ python3 scripts/docs/check_md.py --all
 - **Comprehensive Guide**: `docs/TESTING_GUIDE.md` - Full testing methodology
 - **Quick Reference**: `docs/TESTING_QUICKREF.md` - Common commands and troubleshooting
 - **Implementation Details**: `docs/TESTING_METHODOLOGY_SUMMARY.md` - What changed and why
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/.github/Instructions/Tests.instructions.instructions]]

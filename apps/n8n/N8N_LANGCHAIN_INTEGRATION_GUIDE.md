@@ -770,3 +770,7 @@ Create a document Q&A system with vector store
 **Last Updated:** November 9, 2025
 **Version:** n8n 1.x with LangChain.js integration
 **Maintained by:** TTA.dev Team (based on n8n official docs)
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_langchain_integration_guide]]

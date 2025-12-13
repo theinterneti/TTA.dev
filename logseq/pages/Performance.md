@@ -601,3 +601,7 @@ async def test_cache_performance(benchmark):
 
 **Last Updated:** 2025-11-05
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Performance]]

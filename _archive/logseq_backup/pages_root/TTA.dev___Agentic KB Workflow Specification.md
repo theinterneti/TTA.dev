@@ -759,3 +759,7 @@ version:: 1.0.0
   **Last Updated:** 2025-12-04
   **Maintained by:** TTA.dev Team
   **Status:** Draft - Pending Review
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___agentic kb workflow specification]]

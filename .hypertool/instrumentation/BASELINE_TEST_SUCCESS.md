@@ -8,7 +8,7 @@
 The baseline test (`test_instrumented_workflow.py`) was failing with a Prometheus registry duplication error:
 
 ```
-ValueError: Duplicated timeseries in CollectorRegistry: 
+ValueError: Duplicated timeseries in CollectorRegistry:
 {'hypertool_persona_switches_created', 'hypertool_persona_switches_total', 'hypertool_persona_switches'}
 ```
 
@@ -25,7 +25,7 @@ Modified `persona_metrics.py` to accept an optional `registry` parameter:
 ```python
 def __init__(self, registry=None):
     """Initialize Prometheus metrics.
-    
+
     Args:
         registry: Optional Prometheus registry. If None, uses default REGISTRY.
     """
@@ -33,7 +33,7 @@ def __init__(self, registry=None):
         from prometheus_client import REGISTRY
         if registry is None:
             registry = REGISTRY
-    
+
     # All metrics now use the registry parameter
     self.persona_switches = Counter(
         "hypertool_persona_switches_total",
@@ -145,3 +145,7 @@ Refer to `.hypertool/instrumentation/MANUAL_TESTING_PLAN.md` for detailed instru
 2. **Registry parameter** - Better than try/except for re-registration
 3. **Thread-safe singleton** - Added lock for concurrent access
 4. **Method naming consistency** - record_token_usage vs record_tokens_used
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Instrumentation/Baseline_test_success]]

@@ -46,3 +46,7 @@ client.disconnect()
 
 *   [NotebookLM MCP Server Documentation](https://github.com/PleasePrompto/notebooklm-mcp)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Integrations/Notebooklm-integration]]

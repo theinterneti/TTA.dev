@@ -480,3 +480,6 @@ id:: mcp-integration-summary
 **Maintained by:** TTA.dev Team
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___mcp___integration]]

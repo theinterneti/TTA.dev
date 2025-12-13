@@ -439,3 +439,7 @@ cat packages/tta-narrative-engine/src/tta_narrative/coherence/[file].py
 **For Phase:** Phase 1 - Audit & Design
 **Use in workspace:** `/home/thein/recovered-tta-storytelling`
 **Return to TTA.dev for:** Phase 2 - Package Creation
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta_audit_checklist]]

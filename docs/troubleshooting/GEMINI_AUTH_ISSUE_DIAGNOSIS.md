@@ -108,12 +108,12 @@ settings: |-
     # gcp_project_id: '${{ vars.GOOGLE_CLOUD_PROJECT }}'
     # gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
     # gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
-    
+
     # Keep these:
     gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
     gemini_model: '${{ vars.GEMINI_MODEL }}'
     # ... other non-GCP settings
-    
+
     settings: |-
       {
         "telemetry": {
@@ -198,7 +198,7 @@ Let me create a patch for `gemini-triage.yml`:
           # gcp_project_id: '${{ vars.GOOGLE_CLOUD_PROJECT }}'
           # gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
           # gcp_workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
-          
+
           gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           gemini_cli_version: '${{ vars.GEMINI_CLI_VERSION || 'latest' }}'
           gemini_debug: '${{ fromJSON(vars.DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}'
@@ -285,3 +285,7 @@ After fixing:
 **Impact:** All 10 Gemini workflows affected
 **Estimated fix time:** 15-30 minutes
 **Testing:** Can test immediately after merge
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Troubleshooting/Gemini_auth_issue_diagnosis]]

@@ -133,3 +133,6 @@ Can't fix what you can't see
 - Observability integration: `packages/tta-observability-integration/README.md`
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___best practices___deployment]]

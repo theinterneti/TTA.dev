@@ -43,3 +43,7 @@ Senior Developers working with TTA.dev are:
 
 audience:: senior-developers
 level:: advanced-to-expert
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Senior developers]]

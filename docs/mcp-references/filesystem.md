@@ -40,3 +40,7 @@ Here's an example of how you might configure the Filesystem MCP server to allow 
     }
   }
 }
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Filesystem]]

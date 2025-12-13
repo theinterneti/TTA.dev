@@ -720,3 +720,7 @@ Build integration test suite that validates all MCP servers work correctly with:
 ---
 
 **Ready to create these issues on GitHub?**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Github_issues_mcp_servers]]

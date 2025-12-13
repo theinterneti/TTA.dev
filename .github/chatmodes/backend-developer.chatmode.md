@@ -113,3 +113,7 @@ Before finalizing code, verify:
 - ✅ Error handling uses TTA.dev recovery primitives
 - ✅ Tests use MockPrimitive for external dependencies
 - ✅ Code follows `.clinerules` standards
+
+
+---
+**Logseq:** [[TTA.dev/.github/Chatmodes/Backend-developer.chatmode]]

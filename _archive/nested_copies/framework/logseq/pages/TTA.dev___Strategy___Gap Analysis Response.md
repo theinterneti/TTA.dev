@@ -318,3 +318,6 @@ While many concerns were based on misunderstandings, **three gaps are real**:
 **Owner:** Core Team
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___strategy___gap analysis response]]

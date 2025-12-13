@@ -1,6 +1,6 @@
 # Quick Start: Using Observability in TTA.dev
 
-**Updated:** November 15, 2025  
+**Updated:** November 15, 2025
 **Status:** ✅ Workspace configuration fixed
 
 ---
@@ -155,7 +155,7 @@ initialize_observability(service_name="tta-dev-cline", prometheus_port=9465)
 initialize_observability(service_name="tta-dev-copilot", prometheus_port=9466)
 ```
 
-**Benefit:** Run multiple workspaces simultaneously.  
+**Benefit:** Run multiple workspaces simultaneously.
 **Trade-off:** Need to configure Grafana Alloy to scrape multiple ports.
 
 See: [`docs/guides/MULTI_WORKSPACE_OBSERVABILITY.md`](../guides/MULTI_WORKSPACE_OBSERVABILITY.md)
@@ -323,6 +323,10 @@ sudo systemctl status alloy
 
 ---
 
-**Last Updated:** November 15, 2025  
-**Status:** ✅ Working  
+**Last Updated:** November 15, 2025
+**Status:** ✅ Working
 **Next:** Install Grafana Alloy for cloud integration
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Quickstart/Observability_quickstart]]

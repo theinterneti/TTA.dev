@@ -591,3 +591,7 @@ gemini-1.0-pro        # Legacy, not recommended
 - ✅ Workflows imported
 - ⏳ Gemini credentials pending
 - ⏳ First test execution pending
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_gemini_setup_guide]]

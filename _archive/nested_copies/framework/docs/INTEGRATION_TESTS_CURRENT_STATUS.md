@@ -168,3 +168,7 @@ Integration test implementation is **BLOCKED** on API alignment but **substantia
 **Created:** 2025-11-07
 **Status:** BLOCKED - API Alignment Needed
 **Next Review:** After Phase 2 type annotations complete
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integration_tests_current_status]]

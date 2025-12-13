@@ -113,3 +113,7 @@ When adding a new guide:
 ---
 
 **Last Updated:** October 30, 2025
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Guides/Readme]]

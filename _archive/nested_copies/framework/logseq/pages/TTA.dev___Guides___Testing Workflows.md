@@ -907,3 +907,7 @@ async def test_second(mock):
 **Difficulty:** [[Intermediate]]
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___testing workflows]]

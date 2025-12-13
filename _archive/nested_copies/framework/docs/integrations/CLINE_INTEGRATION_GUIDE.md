@@ -1000,3 +1000,7 @@ cline config set monthly-budget 100
 ---
 
 **Ready to collaborate with Cline! 🤖🤝🚀**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integrations/Cline_integration_guide]]

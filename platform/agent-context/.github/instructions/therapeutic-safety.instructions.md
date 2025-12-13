@@ -45,15 +45,15 @@ async def validate_therapeutic_content(
     context: TherapeuticContext
 ) -> ValidationResult:
     """Validate content for therapeutic appropriateness.
-    
+
     Args:
         content: Content to validate
         player_id: Player receiving content
         context: Therapeutic context (history, preferences, etc.)
-    
+
     Returns:
         ValidationResult with safety score and recommendations
-    
+
     Raises:
         ValidationError: If content fails critical safety checks
     """
@@ -143,3 +143,7 @@ logger.info(
 - OWASP Top 10: https://owasp.org/www-project-top-ten/
 - TTA Security Policy: `SECURITY.md`
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Therapeutic-safety.instructions]]

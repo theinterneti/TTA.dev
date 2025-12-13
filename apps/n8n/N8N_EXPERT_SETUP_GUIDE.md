@@ -457,3 +457,7 @@ Once basic setup works:
 3. Any specific errors you're seeing with Cline?
 
 I'll guide you through each step! 🚀
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_expert_setup_guide]]

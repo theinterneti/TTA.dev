@@ -392,3 +392,7 @@ Players come for the stories, stay for the gameplay, and leave with insights the
 **Status:** Foundation document for all TTA specifications
 **Owner:** theinterneti
 **Next Review:** After first component specs are created
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta-analysis/Tta_guiding_principles]]

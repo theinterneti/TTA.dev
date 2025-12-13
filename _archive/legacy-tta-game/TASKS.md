@@ -97,3 +97,6 @@ This document outlines the specific tasks required to implement the TTA v2.0 arc
 *   [ ] Refactor code for clarity and efficiency.
 *   [ ] Maintain documentation (README, code comments).
 *   [ ] Regularly commit changes to Git.
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Tasks]]

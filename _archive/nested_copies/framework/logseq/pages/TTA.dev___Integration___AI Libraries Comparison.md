@@ -491,3 +491,6 @@ id:: integration-libraries-resources
 - [[TTA.dev/Architecture/Component Integration]] - Architecture patterns
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___integration___ai libraries comparison]]

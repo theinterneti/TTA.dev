@@ -206,10 +206,10 @@ async def test_bug_fix_regression():
     """Test that bug is fixed."""
     # Arrange
     setup_bug_scenario()
-    
+
     # Act
     result = await function_with_bug()
-    
+
     # Assert
     assert result == expected_result  # Currently fails
 ```
@@ -220,7 +220,7 @@ async def test_bug_fix_regression():
 async def function_with_bug():
     # Before: Buggy implementation
     # if condition:  # ❌ Wrong condition
-    
+
     # After: Fixed implementation
     if correct_condition:  # ✅ Correct condition
         return expected_result
@@ -559,3 +559,7 @@ async def get_ai_response(prompt):
 
 **Note:** Always write a regression test before fixing the bug. This ensures the bug is caught if it reappears.
 
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Bug-fix.prompt]]

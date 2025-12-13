@@ -322,3 +322,7 @@ CREATE INDEX item_name_index FOR (i:Item) ON (i.name);
 CREATE INDEX character_name_index FOR (c:Character) ON (c.name);
 CREATE INDEX memory_timestamp_index FOR (m:Memory) ON (m.timestamp);
 ```
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Neo4j_schema]]

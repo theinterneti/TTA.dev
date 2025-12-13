@@ -112,3 +112,7 @@ Full details in: `scripts/PERSISTENCE_SETUP.md`
 ---
 
 **Summary:** Run `./scripts/setup-persistence.sh` once, then everything persists across sessions and reboots.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Persistence_status]]

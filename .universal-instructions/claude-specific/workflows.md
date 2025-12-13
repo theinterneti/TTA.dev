@@ -60,3 +60,7 @@ When optimizing performance:
 2. Use `ParallelPrimitive` for independent operations
 3. Add `CachePrimitive` to avoid redundant work
 4. Measure impact with benchmarks
+
+
+---
+**Logseq:** [[TTA.dev/.universal-instructions/Claude-specific/Workflows]]

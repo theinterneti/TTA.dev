@@ -169,3 +169,7 @@ tta-dev-primitives
 type:: disambiguation
 purpose:: navigation
 topic:: packages
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Package]]

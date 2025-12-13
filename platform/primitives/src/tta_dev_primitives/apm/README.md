@@ -179,7 +179,7 @@ scrape_configs:
 rate(primitive_processor_executions_total[5m])
 
 # P95 latency
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(primitive_processor_duration_milliseconds_bucket[5m]))
 
 # Error rate
@@ -203,7 +203,7 @@ APM adds minimal overhead:
 # Good
 processor = DataProcessor(name="user_data_processor")
 
-# Bad  
+# Bad
 processor = DataProcessor()  # Uses class name, less specific
 ```
 
@@ -277,3 +277,7 @@ See `APM_CONTEXT7_RUNTIME_PACKAGE.md` for the full roadmap.
 - [Prometheus](https://prometheus.io/)
 - [Grafana Dashboards](https://grafana.com/grafana/dashboards/)
 - [APM Best Practices](https://opentelemetry.io/docs/concepts/signals/)
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Apm/Readme]]

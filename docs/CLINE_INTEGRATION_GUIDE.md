@@ -270,3 +270,7 @@ uv run ruff format . && uv run ruff check . --fix
 
 **Last Updated:** December 2025
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Cline_integration_guide]]

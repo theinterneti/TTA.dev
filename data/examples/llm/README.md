@@ -66,3 +66,7 @@ result = await llm.execute(
 - [Universal LLM Architecture](../../docs/architecture/UNIVERSAL_LLM_ARCHITECTURE.md)
 - [Free Model Selection Guide](../../docs/guides/FREE_MODEL_SELECTION.md)
 - [Package README](../../packages/tta-dev-integrations/README.md)
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Llm/Readme]]

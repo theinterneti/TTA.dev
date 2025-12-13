@@ -209,3 +209,7 @@ Result: Plan posted → Await approval → File created → PR opened
 ---
 
 **Quick Start:** Just type `@gemini-cli help` in any issue or PR! 🚀
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Gemini-cli/Gemini_quickref]]

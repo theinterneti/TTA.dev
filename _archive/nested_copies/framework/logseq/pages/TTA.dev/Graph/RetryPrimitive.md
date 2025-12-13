@@ -15,3 +15,7 @@
   - It takes a target primitive and an optional `[[TTA.dev/Data/RetryStrategy]]` during initialization.
   - The `execute` method attempts to run the target primitive. If an exception occurs, it calculates a backoff delay (potentially with jitter) and retries up to `max_retries`.
   - Includes comprehensive logging, metrics, and tracing for each attempt and backoff period, leveraging `[[TTA.dev/Data/WorkflowContext]]`.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Retryprimitive]]

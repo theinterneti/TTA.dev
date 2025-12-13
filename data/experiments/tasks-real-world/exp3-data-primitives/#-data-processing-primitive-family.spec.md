@@ -125,3 +125,7 @@ Add a new family of primitives for data transformation
 ### Approvals
 - [ ] Technical Lead: (pending)
 - [ ] Product Owner: (pending)
+
+
+---
+**Logseq:** [[TTA.dev/Data/Experiments/Tasks-real-world/Exp3-data-primitives/#-data-processing-primitive-family.spec]]

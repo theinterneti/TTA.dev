@@ -38,3 +38,6 @@ See testing documentation in:
 #testing #unit-tests #integration-tests #pytest #coverage
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___testing]]

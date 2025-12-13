@@ -365,3 +365,7 @@ Iterative: Cline draft → Copilot critique → Cline refine
 **Last Updated:** 2025-11-17
 **Official Documentation:** [Cline Bot](https://cline.bot)
 **Tags:** integration:: cline, ai:: coding-assistant, workflow:: automation
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___integrations___cline]]

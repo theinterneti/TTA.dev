@@ -505,3 +505,7 @@ See [[Contributing Guide]] for details.
 **Category:** Templates / Development Resources
 **Complexity:** Beginner to Advanced
 **Status:** Active - continuously updated
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___templates]]

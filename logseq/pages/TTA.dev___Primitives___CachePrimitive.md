@@ -48,3 +48,7 @@ Cache primitive execution results.
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Performance]] - Performance primitives
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___primitives___cacheprimitive]]

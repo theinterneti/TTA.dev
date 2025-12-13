@@ -349,3 +349,7 @@ Document blocker:
 **Category:** Templates
 **Status:** Reference
 **Usage:** Copy and adapt for your own TODOs
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Example todo]]

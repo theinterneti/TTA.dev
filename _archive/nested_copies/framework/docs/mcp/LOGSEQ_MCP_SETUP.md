@@ -372,3 +372,7 @@ Once configured, explore these workflows:
 **Last Updated:** November 1, 2025
 **Status:** Active
 **Maintainer:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp/Logseq_mcp_setup]]

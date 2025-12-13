@@ -621,3 +621,7 @@ sum(rate(cache_hits_total[5m])) /
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 35 minutes
 **Difficulty:** [[Intermediate]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___observability]]

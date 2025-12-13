@@ -454,3 +454,7 @@ Timeline Events:
 **Last Updated:** 2025-11-09
 **Status:** Architecture Design Complete
 **Next:** Implementation of POC Simulation
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Packages/Tta-rebuild/Docs/Long_term_runs_architecture]]

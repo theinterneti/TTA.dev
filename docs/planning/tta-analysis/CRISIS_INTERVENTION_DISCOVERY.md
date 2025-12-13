@@ -242,3 +242,7 @@ ai-framework has only 2 narrative proxy classes. The real narrative work is in *
 **Last Updated:** November 8, 2025, 2:30 PM
 **Status:** Ready for crisis intervention deep dive
 **Next Review:** After reading 4 key files (~2,059 lines)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta-analysis/Crisis_intervention_discovery]]

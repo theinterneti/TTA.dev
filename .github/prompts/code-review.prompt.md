@@ -64,3 +64,7 @@ Review ${file} for TTA.dev standards compliance.
 
 - Optional improvements
 ```
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Code-review.prompt]]

@@ -456,3 +456,7 @@ echo "✅ Documentation imported to Logseq: ${module_name}.md"
 **Last Updated:** October 30, 2025
 **Maintained by:** TTA.dev Team
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Examples/Doc_generation_guide]]

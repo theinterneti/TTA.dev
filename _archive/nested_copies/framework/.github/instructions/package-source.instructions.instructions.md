@@ -1152,3 +1152,7 @@ Before committing, ensure:
 - [ ] Formatted with `uv run ruff format`
 - [ ] Linted with `uv run ruff check --fix`
 - [ ] Type-checked with `uvx pyright`
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/.github/Instructions/Package-source.instructions.instructions]]

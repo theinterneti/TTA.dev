@@ -31,3 +31,6 @@ See the main observability documentation in:
 #observability #tracing #metrics #logging #opentelemetry
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___observability]]

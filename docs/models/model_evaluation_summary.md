@@ -14,7 +14,7 @@ We tested these models across various dimensions including speed, structured out
 ### phi-4-mini-instruct
 - **Speed**: Moderate (17.18 tokens/second average)
 - **Streaming Support**: No (confirmed by testing)
-- **Strengths**: 
+- **Strengths**:
   - Most detailed and coherent responses
   - Excellent at tool selection
   - Strong logical reasoning
@@ -116,3 +116,7 @@ Each model has distinct strengths and weaknesses:
 - **qwen2.5-0.5b**: Best for speed-critical applications and simple tasks
 
 By dynamically selecting the appropriate model for each task, the TTA project can achieve optimal performance across a wide range of use cases.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Models/Model_evaluation_summary]]

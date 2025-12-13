@@ -826,3 +826,6 @@ cached_llm = CachePrimitive(gpt4_call)  # Takes 2000ms
 **Difficulty:** [[Advanced]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___how-to___performance tuning]]

@@ -49,3 +49,7 @@ client.disconnect()
 
 *   [DevContext MCP Server Documentation](https://github.com/aiurda/devcontext)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Integrations/Devcontext-integration]]

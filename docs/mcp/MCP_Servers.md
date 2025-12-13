@@ -244,3 +244,7 @@ result = response_data["content"][0]["text"]
 
 - [MCP Protocol Specification](https://github.com/anthropics/anthropic-cookbook/tree/main/mcp)
 - [FastMCP Documentation](https://github.com/anthropics/fastmcp)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Mcp_servers]]

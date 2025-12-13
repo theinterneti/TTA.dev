@@ -181,3 +181,7 @@ logseq.table.stripes:: true
 **Created:** [[2025-10-30]]
 **Last Updated:** [[2025-10-30]]
 **Maintained By:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev]]

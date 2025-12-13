@@ -224,3 +224,7 @@ async def test_file_watcher_detects_changes(tmp_path):
 **Estimated Time:** 2-3 hours (after Phase 1.3 complete)
 **Priority:** Medium (blocked by Phase 1.3)
 **Complexity:** Medium
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/.github/Issue_template/File-watcher-implementation]]

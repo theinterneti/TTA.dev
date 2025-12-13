@@ -1001,3 +1001,7 @@ class ObservabilityConfig:
 **Last Updated:** 2024-03-19
 **Status:** Production Ready
 **Maintainer:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integration/Observability-integration]]

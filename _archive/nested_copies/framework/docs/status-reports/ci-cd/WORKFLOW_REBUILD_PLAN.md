@@ -644,3 +644,7 @@ jobs:
 **Last Updated**: 2025-11-05
 **Author**: GitHub Copilot + Research
 **Status**: Awaiting Review
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Ci-cd/Workflow_rebuild_plan]]

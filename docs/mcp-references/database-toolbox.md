@@ -43,3 +43,7 @@ Here's an example of how you might configure the MCP Toolbox for Databases in yo
     }
   }
 }
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Database-toolbox]]

@@ -212,3 +212,7 @@ The git manager tool can be extended for:
 **Action:** Choose one of the three options above and execute when ready.
 
 **Backup:** All methods create automatic backups for safety.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Git/Git_management_summary]]

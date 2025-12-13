@@ -29,25 +29,25 @@ Each Task, consisting of a title and description, MUST BE a FULLY self-contained
 
   #### 1.1. Setup Development Environment
   **What**: Configure local development environment with all required dependencies.
-  
+
   **Why**: Ensures consistent development environment across team members.
-  
+
   **How**:
   1. Install Python 3.11+
   2. Install uv package manager
   3. Clone repository
   4. Run `uv sync` to install dependencies
   5. Configure IDE (VS Code recommended)
-  
+
   **Risks & Mitigations**:
   - Risk: Version conflicts
   - Mitigation: Use uv for isolated environments
-  
+
   **Acceptance Criteria**:
   - All dependencies installed
   - Tests pass locally
   - IDE configured with linting/formatting
-  
+
   **Verification Strategy**:
   - Run `uvx pytest tests/`
   - Run `uvx ruff check src/`
@@ -165,6 +165,10 @@ Invoke this protocol for ANY/ALL questions posed to the user (filtered per Auton
 
 ---
 
-**Last Updated**: 2025-10-26  
+**Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Augster-protocols.instructions]]

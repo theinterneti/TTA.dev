@@ -198,3 +198,7 @@ gh pr list --repo theinterneti/TTA.dev
 
 **Last Updated:** 2025-11-13
 **Quick Access:** `Cmd/Ctrl+Shift+P` → "Task: Run Task" → PR commands
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Pr-management-quickref]]

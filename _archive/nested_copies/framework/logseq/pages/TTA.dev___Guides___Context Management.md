@@ -653,3 +653,6 @@ Context management checklist:
 **Next Guide:** [[TTA.dev/Guides/Observability]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___context management]]

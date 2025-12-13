@@ -44,3 +44,7 @@ from tta_dev_primitives.core.context_engineering import (
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Core]] - Core primitives
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___primitives___contextengineeringprimitive]]

@@ -195,3 +195,7 @@ If you encounter issues:
 **Last Updated:** 2025-10-29
 **Maintained by:** @theinterneti
 
+
+
+---
+**Logseq:** [[TTA.dev/.github/Copilot_reviewer_setup]]

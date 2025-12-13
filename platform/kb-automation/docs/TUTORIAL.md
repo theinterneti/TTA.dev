@@ -693,3 +693,7 @@ uv run python examples/tutorial_04_integration_test.py
 ---
 
 **Happy automating! 🚀**
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Kb-automation/Docs/Tutorial]]

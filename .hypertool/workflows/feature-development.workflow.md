@@ -1,7 +1,7 @@
 # Multi-Persona Workflow: Full-Stack Feature Development
 
-**Personas:** Backend Engineer → Frontend Engineer → Testing Specialist  
-**Purpose:** Develop a complete feature from API to UI with quality validation  
+**Personas:** Backend Engineer → Frontend Engineer → Testing Specialist
+**Purpose:** Develop a complete feature from API to UI with quality validation
 **Duration:** ~4-8 hours (full feature) or ~2-3 hours (automated steps)
 
 ---
@@ -46,8 +46,8 @@ So that I can keep my information up-to-date
 
 ## Stage 1: API Development (Backend Engineer Persona)
 
-**Persona:** `tta-backend-engineer` (2000 tokens, 48 tools)  
-**Duration:** ~2 hours  
+**Persona:** `tta-backend-engineer` (2000 tokens, 48 tools)
+**Duration:** ~2 hours
 **Deliverables:** REST API endpoints, tests, documentation
 
 ### Activate Backend Persona
@@ -185,10 +185,10 @@ async def get_user_profile(
 ):
     """Get user profile by ID."""
     user = await db.users.find_one({"id": user_id})
-    
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     return UserProfile(**user)
 
 @router.put("/{user_id}", response_model=UserProfile)
@@ -202,16 +202,16 @@ async def update_user_profile(
     existing = await db.users.find_one({"id": user_id})
     if not existing:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     # Update fields
     updated_data = update.model_dump(exclude_unset=True)
     updated_data["updated_at"] = datetime.utcnow()
-    
+
     result = await db.users.update_one(
         {"id": user_id},
         {"$set": updated_data}
     )
-    
+
     # Return updated user
     updated_user = await db.users.find_one({"id": user_id})
     return UserProfile(**updated_user)
@@ -301,10 +301,10 @@ async def test_get_user_profile_success(client: AsyncClient, test_db):
         "created_at": "2025-11-14T10:00:00Z",
         "updated_at": "2025-11-14T10:00:00Z"
     })
-    
+
     # Act
     response = await client.get(f"/api/users/{user_id}")
-    
+
     # Assert
     assert response.status_code == 200
     data = response.json()
@@ -329,19 +329,19 @@ async def test_update_user_profile_success(client: AsyncClient, test_db):
         "created_at": "2025-11-14T10:00:00Z",
         "updated_at": "2025-11-14T10:00:00Z"
     })
-    
+
     # Act
     response = await client.put(
         f"/api/users/{user_id}",
         json={"display_name": "New Name", "avatar_url": "https://..."}
     )
-    
+
     # Assert
     assert response.status_code == 200
     data = response.json()
     assert data["display_name"] == "New Name"
     assert data["avatar_url"] == "https://..."
-    
+
     # Verify database updated
     updated = await test_db.users.find_one({"id": user_id})
     assert updated["display_name"] == "New Name"
@@ -402,8 +402,8 @@ git push origin feature/user-profile-management
 
 ## Stage 2: UI Implementation (Frontend Engineer Persona)
 
-**Persona:** `tta-frontend-engineer` (1800 tokens, 42 tools)  
-**Duration:** ~2-3 hours  
+**Persona:** `tta-frontend-engineer` (1800 tokens, 42 tools)
+**Duration:** ~2-3 hours
 **Deliverables:** React components, state management, integration
 
 ### Activate Frontend Persona
@@ -529,7 +529,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
 
   const handleSave = async (updates: { display_name: string; avatar_url?: string }) => {
     if (!profile) return;
-    
+
     try {
       const updated = await api.updateProfile(userId, updates);
       setProfile(updated);
@@ -663,7 +663,7 @@ describe('UserProfile', () => {
 
   it('renders profile data', async () => {
     render(<UserProfile userId={mockProfile.id} />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Test User')).toBeInTheDocument();
     });
@@ -671,12 +671,12 @@ describe('UserProfile', () => {
 
   it('enters edit mode on edit button click', async () => {
     render(<UserProfile userId={mockProfile.id} />);
-    
+
     await waitFor(() => screen.getByText('Test User'));
-    
+
     const editButton = screen.getByText('Edit');
     await userEvent.click(editButton);
-    
+
     expect(screen.getByLabelText('Display Name')).toBeInTheDocument();
   });
 
@@ -687,20 +687,20 @@ describe('UserProfile', () => {
     });
 
     render(<UserProfile userId={mockProfile.id} />);
-    
+
     await waitFor(() => screen.getByText('Test User'));
-    
+
     // Click edit
     await userEvent.click(screen.getByText('Edit'));
-    
+
     // Update name
     const nameInput = screen.getByLabelText('Display Name');
     await userEvent.clear(nameInput);
     await userEvent.type(nameInput, 'Updated Name');
-    
+
     // Save
     await userEvent.click(screen.getByText('Save Changes'));
-    
+
     // Verify API called
     expect(UserAPI.prototype.updateProfile).toHaveBeenCalledWith(
       mockProfile.id,
@@ -764,8 +764,8 @@ git push origin feature/user-profile-management
 
 ## Stage 3: E2E Testing (Testing Specialist Persona)
 
-**Persona:** `tta-testing-specialist` (1500 tokens, 35 tools)  
-**Duration:** ~1 hour  
+**Persona:** `tta-testing-specialist` (1500 tokens, 35 tools)
+**Duration:** ~1 hour
 **Deliverables:** E2E tests, accessibility validation, integration verification
 
 ### Activate Testing Persona
@@ -802,7 +802,7 @@ test.describe('User Profile Management', () => {
   test('displays user profile', async ({ page }) => {
     // Wait for profile to load
     await page.waitForSelector('.user-profile');
-    
+
     // Verify profile data
     await expect(page.locator('h1')).toContainText('Test User');
     await expect(page.locator('.email')).toContainText('test@example.com');
@@ -811,27 +811,27 @@ test.describe('User Profile Management', () => {
   test('edits user profile', async ({ page }) => {
     // Click edit button
     await page.click('button:has-text("Edit")');
-    
+
     // Verify edit form visible
     await expect(page.locator('input#display_name')).toBeVisible();
-    
+
     // Update display name
     await page.fill('input#display_name', 'Updated Name');
-    
+
     // Save changes
     await page.click('button:has-text("Save Changes")');
-    
+
     // Verify update reflected
     await expect(page.locator('h1')).toContainText('Updated Name');
   });
 
   test('validates form input', async ({ page }) => {
     await page.click('button:has-text("Edit")');
-    
+
     // Try to submit with empty name
     await page.fill('input#display_name', '');
     await page.click('button:has-text("Save Changes")');
-    
+
     // Verify validation message
     await expect(page.locator('input#display_name:invalid')).toBeVisible();
   });
@@ -839,10 +839,10 @@ test.describe('User Profile Management', () => {
   test('cancels edit', async ({ page }) => {
     await page.click('button:has-text("Edit")');
     await page.fill('input#display_name', 'Changed');
-    
+
     // Cancel edit
     await page.click('button:has-text("Cancel")');
-    
+
     // Verify original data still displayed
     await expect(page.locator('h1')).toContainText('Test User');
   });
@@ -867,26 +867,26 @@ import AxeBuilder from '@axe-core/playwright';
 test.describe('Accessibility', () => {
   test('profile page meets WCAG AA', async ({ page }) => {
     await page.goto('/profile/550e8400-e29b-41d4-a716-446655440000');
-    
+
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
-    
+
     expect(accessibilityScanResults.violations).toEqual([]);
   });
 
   test('edit form is keyboard accessible', async ({ page }) => {
     await page.goto('/profile/550e8400-e29b-41d4-a716-446655440000');
-    
+
     // Tab to edit button
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
-    
+
     // Tab through form fields
     await page.keyboard.press('Tab'); // display_name
     await page.keyboard.press('Tab'); // avatar_url
     await page.keyboard.press('Tab'); // Save button
-    
+
     // Verify focus visible
     const focused = await page.evaluate(() => document.activeElement?.tagName);
     expect(focused).toBe('BUTTON');
@@ -905,7 +905,7 @@ test.describe('Accessibility', () => {
 @pytest.mark.asyncio
 async def test_full_stack_profile_update(test_db, api_client, playwright_page):
     """Test complete flow: API → Database → UI."""
-    
+
     # Step 1: Create user in database
     user_id = uuid4()
     await test_db.users.insert_one({
@@ -915,19 +915,19 @@ async def test_full_stack_profile_update(test_db, api_client, playwright_page):
         "created_at": datetime.utcnow(),
         "updated_at": datetime.utcnow()
     })
-    
+
     # Step 2: Load profile in UI
     await playwright_page.goto(f"/profile/{user_id}")
     await playwright_page.wait_for_selector('.user-profile')
-    
+
     # Step 3: Edit profile via UI
     await playwright_page.click('button:has-text("Edit")')
     await playwright_page.fill('input#display_name', 'Updated Integration')
     await playwright_page.click('button:has-text("Save Changes")')
-    
+
     # Step 4: Verify API call succeeded
     await playwright_page.wait_for_selector('h1:has-text("Updated Integration")')
-    
+
     # Step 5: Verify database updated
     updated_user = await test_db.users.find_one({"id": user_id})
     assert updated_user["display_name"] == "Updated Integration"
@@ -940,10 +940,10 @@ async def test_full_stack_profile_update(test_db, api_client, playwright_page):
 ```typescript
 test('profile loads within 2 seconds', async ({ page }) => {
   const startTime = Date.now();
-  
+
   await page.goto('/profile/550e8400-e29b-41d4-a716-446655440000');
   await page.waitForSelector('.user-profile');
-  
+
   const loadTime = Date.now() - startTime;
   expect(loadTime).toBeLessThan(2000);
 });
@@ -1062,12 +1062,12 @@ async def main():
             "story": "USER-123"
         }
     )
-    
+
     result = await feature_workflow.execute(
         {"action": "develop_feature", "feature_spec": "user_profile.md"},
         context
     )
-    
+
     print(f"Feature complete: {result}")
 
 if __name__ == "__main__":
@@ -1108,7 +1108,11 @@ if __name__ == "__main__":
 
 ---
 
-**Workflow Status:** ✅ Production-Ready  
-**Last Updated:** 2025-11-14  
-**Personas Required:** Backend, Frontend, Testing  
+**Workflow Status:** ✅ Production-Ready
+**Last Updated:** 2025-11-14
+**Personas Required:** Backend, Frontend, Testing
 **Estimated Time:** 5-6 hours (with automation) vs 8-12 hours (manual)
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Workflows/Feature-development.workflow]]

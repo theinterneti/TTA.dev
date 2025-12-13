@@ -154,3 +154,7 @@ These run automatically on every commit:
 ---
 
 **Tags:** #guide #agent #workflow #development
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___agent workflow]]

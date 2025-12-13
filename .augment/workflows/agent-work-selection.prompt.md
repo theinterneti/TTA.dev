@@ -31,14 +31,14 @@ apm_enabled: true
    - Priority: Items marked `priority:: high` or `priority:: critical`
    - Filter by: `package::` tags matching your expertise
 
-2. **GitHub Issues**: 
+2. **GitHub Issues**:
    ```bash
    # High priority issues
    gh issue list --label "P0,P1" --state open --limit 10
-   
+
    # Good first issues (for learning)
    gh issue list --label "good-first-issue" --state open --limit 5
-   
+
    # Package-specific issues
    gh issue list --label "pkg:primitives,pkg:observability" --state open
    ```
@@ -47,7 +47,7 @@ apm_enabled: true
    ```bash
    # PRs needing review
    gh pr list --label "needs-review" --state open
-   
+
    # Draft PRs (might need help)
    gh pr list --draft --state open
    ```
@@ -122,18 +122,18 @@ expertise:
   - Integration patterns and API contracts
   - Data flow and state management
   - Performance and scalability
-  
+
 mindset:
   - Think in systems, not features
   - Prioritize composability and extensibility
   - Consider failure modes and recovery
-  
+
 deliverables:
   - Architecture diagrams (Mermaid)
   - Component specifications
   - Integration plans
   - Design decision documents
-  
+
 tools:
   - Mermaid diagrams
   - PlantUML (if needed)
@@ -147,18 +147,18 @@ expertise:
   - Async/await patterns
   - TTA.dev primitives composition
   - Database design (Redis, Neo4j)
-  
+
 mindset:
   - Use primitives for EVERYTHING
   - Type safety is non-negotiable
   - Observability from day one
-  
+
 deliverables:
   - Working API endpoints
   - Pydantic models with validation
   - Primitive-based workflows
   - Unit tests (100% coverage)
-  
+
 anti_patterns:
   - Manual async orchestration (use SequentialPrimitive)
   - Try/except retry logic (use RetryPrimitive)
@@ -173,18 +173,18 @@ expertise:
   - TailwindCSS, responsive design
   - State management (Zustand/Redux)
   - API integration patterns
-  
+
 mindset:
   - User experience first
   - Performance matters
   - Accessibility is required
-  
+
 deliverables:
   - React components
   - TypeScript interfaces
   - Responsive UI (mobile-first)
   - Component tests
-  
+
 standards:
   - Use semantic HTML
   - WCAG 2.1 AA compliance
@@ -198,18 +198,18 @@ expertise:
   - MockPrimitive usage
   - Integration testing
   - E2E testing (Playwright)
-  
+
 mindset:
   - 100% coverage is the baseline
   - Test success AND failure paths
   - Edge cases reveal design flaws
-  
+
 deliverables:
   - Unit tests with MockPrimitive
   - Integration tests
   - Coverage reports (>90%)
   - Performance benchmarks
-  
+
 test_pyramid:
   - 70% unit tests (fast, isolated)
   - 20% integration tests (realistic)
@@ -223,18 +223,18 @@ expertise:
   - API documentation (Google style)
   - Markdown/MDX
   - Example code that works
-  
+
 mindset:
   - Documentation is code
   - Examples must be executable
   - Users read examples, not walls of text
-  
+
 deliverables:
   - README updates
   - Docstrings (Google style)
   - Usage examples (working code)
   - Architecture docs (with diagrams)
-  
+
 standards:
   - Code examples must run
   - Link to related docs
@@ -248,18 +248,18 @@ expertise:
   - Docker, Docker Compose
   - Prometheus, Grafana
   - Security scanning
-  
+
 mindset:
   - Automate everything
   - Security is not optional
   - Observability from infra up
-  
+
 deliverables:
   - GitHub Actions workflows
   - Dockerfiles (multi-stage)
   - Monitoring dashboards
   - Security scan configs
-  
+
 standards:
   - No secrets in code
   - Multi-stage builds
@@ -349,13 +349,13 @@ async def workflow(data):  # WRONG!
    ```bash
    # Format
    uv run ruff format .
-   
+
    # Lint
    uv run ruff check . --fix
-   
+
    # Type check
    uvx pyright packages/
-   
+
    # Tests
    uv run pytest -v --cov=src --cov-report=term
    ```
@@ -404,7 +404,7 @@ gh pr comment --body "@github-actions request-review"
    ```bash
    # Link PR to issue
    gh issue comment [issue-number] --body "PR created: #[pr-number]"
-   
+
    # Update labels
    gh issue edit [issue-number] --add-label "in-review"
    ```
@@ -494,7 +494,7 @@ gh pr comment --body "@github-actions request-review"
 gh issue list --label "P0,P1" --state open --limit 5
 
 # Output:
-# #142  [P1] CachePrimitive not thread-safe          pkg:primitives  
+# #142  [P1] CachePrimitive not thread-safe          pkg:primitives
 # #138  [P0] RetryPrimitive failing on timeout      pkg:primitives
 # #125  [P1] Add observability to RouterPrimitive   pkg:observability
 ```
@@ -586,7 +586,11 @@ gh pr create --title "fix(retry): Handle timeout errors correctly" \
 
 ---
 
-**Workflow Version:** 1.0.0  
-**Last Updated:** 2025-11-20  
-**Maintained by:** TTA.dev Team  
+**Workflow Version:** 1.0.0
+**Last Updated:** 2025-11-20
+**Maintained by:** TTA.dev Team
 **Integration:** Works with APM, Logseq TODOs, GitHub Issues/PRs
+
+
+---
+**Logseq:** [[TTA.dev/.augment/Workflows/Agent-work-selection.prompt]]

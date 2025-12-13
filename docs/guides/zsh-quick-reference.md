@@ -240,3 +240,7 @@ explain              # After any command
 ---
 
 **Last Updated:** November 10, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Zsh-quick-reference]]

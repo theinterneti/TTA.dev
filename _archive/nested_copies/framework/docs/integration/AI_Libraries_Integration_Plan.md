@@ -203,7 +203,7 @@ This document outlines the comprehensive integration strategy for the AI librari
 
 **Decision**: Use Transformers for direct model hosting instead of LM Studio.
 
-**Rationale**: 
+**Rationale**:
 - Provides more control over model parameters
 - Eliminates external service dependency
 - Enables more efficient resource utilization
@@ -311,3 +311,7 @@ This document outlines the comprehensive integration strategy for the AI librari
 This integration plan provides a comprehensive strategy for leveraging the strengths of Transformers, Guidance, Pydantic-AI, LangGraph, and spaCy in the TTA project. By implementing this plan, we will create a powerful, flexible system that can generate high-quality therapeutic content, manage complex game state, and provide a seamless user experience.
 
 The key advantage of this approach is the replacement of LM Studio with direct Transformers integration, providing greater control, efficiency, and flexibility in model usage. This will enable more sophisticated therapeutic content generation, better performance, and easier extension of the system in the future.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integration/Ai_libraries_integration_plan]]

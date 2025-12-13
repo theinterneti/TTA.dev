@@ -502,3 +502,7 @@ id:: mcp-ai-assistant-summary
 **Status:** Production Ready
 **Maintained by:** TTA.dev Team
 **Target:** AI Assistants (Claude, GPT-4, etc.)
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___mcp___ai assistant guide]]

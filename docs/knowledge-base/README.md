@@ -267,3 +267,7 @@ Provides **live knowledge base access** in VS Code:
 **Last Updated:** November 7, 2025
 **Next Review:** Weekly (every Monday)
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Knowledge-base/Readme]]

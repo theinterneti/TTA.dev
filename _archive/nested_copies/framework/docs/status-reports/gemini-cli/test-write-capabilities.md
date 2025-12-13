@@ -47,6 +47,10 @@ Once the PR is open and the workflow triggers, we can post this command to test 
 
 ---
 
-**Created**: October 31, 2025  
+**Created**: October 31, 2025
 **Status**: Testing in progress
 
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Gemini-cli/Test-write-capabilities]]

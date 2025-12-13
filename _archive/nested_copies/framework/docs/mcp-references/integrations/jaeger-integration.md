@@ -50,3 +50,7 @@ client.disconnect()
 
 *   [Jaeger MCP Server Documentation](https://github.com/serkan-ozal/jaeger-mcp-server)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Integrations/Jaeger-integration]]

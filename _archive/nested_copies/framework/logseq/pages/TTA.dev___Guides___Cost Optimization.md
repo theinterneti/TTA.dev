@@ -617,3 +617,7 @@ logger.info(
 **Difficulty:** [[Intermediate]]
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___cost optimization]]

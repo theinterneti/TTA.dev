@@ -76,3 +76,7 @@ This page helps clarify generic references to "pages" in the TTA.dev documentati
 
 type:: disambiguation
 purpose:: navigation
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Page reference]]

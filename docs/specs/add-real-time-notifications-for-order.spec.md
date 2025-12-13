@@ -125,3 +125,7 @@ Notifications delivered within 5s of status change. Support 10k concurrent WebSo
 ### Approvals
 - [ ] Technical Lead: (pending)
 - [ ] Product Owner: (pending)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Specs/Add-real-time-notifications-for-order.spec]]

@@ -1003,3 +1003,6 @@ id:: observability-implementation-success-p1
 - [[TTA.dev/Primitives/WorkflowPrimitive]] - Base primitive documentation
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___architecture___observability implementation]]

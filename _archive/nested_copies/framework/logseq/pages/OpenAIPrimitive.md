@@ -110,3 +110,6 @@ status:: planned
 provider:: openai
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Openaiprimitive]]

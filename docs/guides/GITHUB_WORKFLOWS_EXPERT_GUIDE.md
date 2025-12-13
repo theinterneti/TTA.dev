@@ -318,3 +318,7 @@ gh workflow run <workflow-name>
 **Last Updated:** 2025-11-17
 **Your Role:** GitHub Workflows Expert for TTA.dev
 **Status:** Experimental branch created, Gemini workflows organized
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Github_workflows_expert_guide]]

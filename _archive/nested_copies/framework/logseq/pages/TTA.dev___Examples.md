@@ -88,3 +88,6 @@ type:: code-examples
 audience:: all-users
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___examples]]

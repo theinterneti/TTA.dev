@@ -454,3 +454,7 @@ workflow = TimeoutPrimitive(
 ---
 
 **Next Steps:** When cline detects timeout-related patterns, it should automatically suggest TimeoutPrimitive with appropriate configuration and complementary primitives (caching, retry, fallback) based on the specific use case.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Timeout_primitive]]

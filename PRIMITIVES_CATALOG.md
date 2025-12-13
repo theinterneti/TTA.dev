@@ -1075,3 +1075,7 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 **Last Updated:** 2025-11-10
 **Maintained by:** TTA.dev Team
 **License:** See package licenses
+
+
+---
+**Logseq:** [[TTA.dev/Primitives_catalog]]

@@ -313,6 +313,10 @@ Your App → InstrumentedPrimitive → OTLP → TTA UI Service → SQLite → RE
 
 ---
 
-**Last Updated:** November 10, 2025  
-**Package Version:** 0.1.0  
+**Last Updated:** November 10, 2025
+**Package Version:** 0.1.0
 **Status:** Phase 1 Complete - API and Service Ready
+
+
+---
+**Logseq:** [[TTA.dev/Apps/Observability-ui/Quickstart]]

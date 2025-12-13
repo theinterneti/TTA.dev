@@ -556,3 +556,7 @@ workflow = (
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 25 minutes
 **Difficulty:** [[Beginner]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___agentic primitives]]

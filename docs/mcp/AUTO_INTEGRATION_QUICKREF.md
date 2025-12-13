@@ -8,7 +8,7 @@
 
 **Enable automatic TTA.dev integration for Copilot & Cline**
 - Zero manual configuration
-- Automatic primitive suggestions  
+- Automatic primitive suggestions
 - 77.9% token reduction
 - Setup time: 0 minutes
 
@@ -24,7 +24,7 @@
   "mcpServers": {
     "hypertool": {
       "command": "npx",
-      "args": ["-y", "@toolprint/hypertool-mcp@latest", "mcp", "run", 
+      "args": ["-y", "@toolprint/hypertool-mcp@latest", "mcp", "run",
                "--persona", "${env:HYPERTOOL_PERSONA:-tta-backend-engineer}"],
       "env": {
         "HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/.hypertool",
@@ -63,7 +63,7 @@
 @server.tool()
 async def get_tta_context(task_description: str) -> dict:
     """Auto-provide TTA.dev context for any task."""
-    
+
     # Detect keywords → recommend primitives
     if "retry" in task_description.lower():
         return {
@@ -84,7 +84,7 @@ async def get_tta_context(task_description: str) -> dict:
 # 1. Create workspace MCP config
 cp docs/mcp/templates/mcp.json .vscode/mcp.json
 
-# 2. Create persona mapping  
+# 2. Create persona mapping
 cp docs/mcp/templates/toolset-persona-map.json .vscode/toolset-persona-map.json
 
 # 3. Reload VS Code
@@ -215,7 +215,7 @@ Time: 0 minutes | Errors: Zero | Primitives: Auto-suggested
 2. `toolset-persona-map.json` → Copilot auto-activates personas
 3. `get_tta_context()` → Cline auto-suggests primitives
 
-**Result:** 
+**Result:**
 - 77.9% token reduction (automatic)
 - 89% tool selection accuracy (automatic)
 - Best practices applied (automatic)
@@ -290,8 +290,12 @@ Time: 0 minutes | Errors: Zero | Primitives: Auto-suggested
 
 ---
 
-**Status:** Ready to Use  
-**Effort:** 2-3 hours setup, lifetime of productivity  
+**Status:** Ready to Use
+**Effort:** 2-3 hours setup, lifetime of productivity
 **Impact:** Game-changing for developer experience
 
 **🚀 Let's make TTA.dev auto-integrate!**
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Auto_integration_quickref]]

@@ -87,3 +87,7 @@ result = await workflow.execute({"input": "Hello"}, context)
 
 guide:: getting-started
 audience:: all-users
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Getting started]]

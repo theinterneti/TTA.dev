@@ -499,3 +499,7 @@ workflow = FallbackPrimitive(
 **Category:** Error Handling Pattern
 **Complexity:** Medium to High
 **Status:** Production-ready
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___patterns___error handling]]

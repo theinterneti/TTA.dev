@@ -472,3 +472,7 @@ Markdown Documentation
 **Last Updated:** November 3, 2025
 **Status:** Active - Production Use
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Whiteboard - testing architecture]]

@@ -396,3 +396,6 @@ async def test_retry_on_failure():
 **Difficulty:** [[Intermediate]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___error handling patterns]]

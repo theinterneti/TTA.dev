@@ -273,6 +273,10 @@ Key metrics to monitor:
 
 ---
 
-**Created:** October 29, 2025  
-**Status:** Ready for testing  
+**Created:** October 29, 2025
+**Status:** Ready for testing
 **Next:** Run workflow test, then merge to main
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Testing_copilot_setup]]

@@ -186,11 +186,11 @@ from src.models.model_testing import ModelSelector
 def create_agent(agent_type, memory_constraint=None, speed_constraint=None):
     # Create selector
     selector = ModelSelector()
-    
+
     # Get latest analysis
     analysis_file = selector.get_latest_analysis_file()
     analysis = selector.load_analysis(analysis_file)
-    
+
     # Get model configuration for agent
     model_config = selector.get_model_config_for_agent(
         analysis,
@@ -198,15 +198,15 @@ def create_agent(agent_type, memory_constraint=None, speed_constraint=None):
         memory_constraint=memory_constraint,
         speed_constraint=speed_constraint
     )
-    
+
     # Extract model details
     model_name = model_config["selected_model"]
     quantization = model_config["recommended_config"]["quantization"]
     temperature = model_config["recommended_config"]["temperature"]
-    
+
     # Create agent with optimal model configuration
     # ...
-    
+
     return agent
 ```
 
@@ -227,3 +227,7 @@ def create_agent(agent_type, memory_constraint=None, speed_constraint=None):
 - Integrate with model serving frameworks
 - Add A/B testing capabilities for model selection
 - Implement continuous monitoring of model performance
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Models/Model_testing]]

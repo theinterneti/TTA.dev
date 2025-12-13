@@ -522,6 +522,10 @@ langfuse.create_generation(...)  # Easy to forget or get wrong
 
 ---
 
-**Last Updated:** 2025-11-15  
-**Status:** Week 2 Complete  
+**Last Updated:** 2025-11-15
+**Status:** Week 2 Complete
 **Next:** Week 3 - Grafana Dashboards & Prometheus Alerts
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Instrumentation/Langfuse_integration]]

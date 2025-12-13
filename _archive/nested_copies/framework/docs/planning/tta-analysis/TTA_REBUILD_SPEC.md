@@ -670,3 +670,7 @@ async for scene in game.play(story):
 **Last Updated:** November 8, 2025
 **Status:** Specification for rebuild approach
 **Next Action:** Get user approval on rebuild vs. migration
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Tta-analysis/Tta_rebuild_spec]]

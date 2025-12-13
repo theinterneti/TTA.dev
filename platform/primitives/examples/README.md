@@ -358,3 +358,7 @@ Have a useful pattern to share? We welcome contributions!
 5. Submit a PR
 
 See [CONTRIBUTING.md](../../../CONTRIBUTING.md) for details.
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Examples/Readme]]

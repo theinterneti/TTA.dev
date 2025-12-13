@@ -51,22 +51,22 @@ orchestration:
   enabled: true
   prefer_free_models: true
   quality_threshold: 0.85
-  
+
   orchestrator:
     model: claude-sonnet-4.5
     api_key_env: ANTHROPIC_API_KEY
-  
+
   executors:
     - model: gemini-2.5-pro
       provider: google-ai-studio
       api_key_env: GOOGLE_API_KEY
       use_cases: [moderate, complex]
-  
+
   fallback_strategy:
     models:
       - gemini-2.5-pro
       - claude-sonnet-4.5
-  
+
   cost_tracking:
     enabled: true
     budget_limit_usd: 100.0
@@ -108,36 +108,36 @@ orchestration:
   enabled: true
   prefer_free_models: true
   quality_threshold: 0.85
-  
+
   # Orchestrator (planning + validation)
   orchestrator:
     model: claude-sonnet-4.5
     api_key_env: ANTHROPIC_API_KEY
-  
+
   # Executors (bulk execution)
   executors:
     - model: gemini-2.5-pro
       provider: google-ai-studio
       api_key_env: GOOGLE_API_KEY
       use_cases: [moderate, complex]
-    
+
     - model: llama-3.3-70b-versatile
       provider: groq
       api_key_env: GROQ_API_KEY
       use_cases: [simple, speed-critical]
-    
+
     - model: deepseek/deepseek-r1:free
       provider: openrouter
       api_key_env: OPENROUTER_API_KEY
       use_cases: [complex, reasoning]
-  
+
   # Fallback strategy
   fallback_strategy:
     models:
       - gemini-2.5-pro
       - llama-3.3-70b-versatile
       - claude-sonnet-4.5
-  
+
   # Cost tracking
   cost_tracking:
     enabled: true
@@ -232,13 +232,13 @@ orchestration:
   enabled: true
   prefer_free_models: true
   quality_threshold: 0.75  # Lower threshold = more free model usage
-  
+
   executors:
     - model: gemini-2.5-pro
       provider: google-ai-studio
       api_key_env: GOOGLE_API_KEY
       use_cases: [simple, moderate, complex]  # Use for everything
-  
+
   fallback_strategy:
     models:
       - gemini-2.5-pro
@@ -255,16 +255,16 @@ orchestration:
   enabled: true
   prefer_free_models: false  # Prefer paid models
   quality_threshold: 0.95    # High threshold
-  
+
   orchestrator:
     model: claude-opus-4  # Use highest quality orchestrator
-  
+
   executors:
     - model: gemini-2.5-pro
       provider: google-ai-studio
       api_key_env: GOOGLE_API_KEY
       use_cases: [simple, moderate]  # Only simple/moderate tasks
-  
+
   fallback_strategy:
     models:
       - claude-opus-4  # Prefer paid model
@@ -280,18 +280,18 @@ orchestration:
   enabled: true
   prefer_free_models: true
   quality_threshold: 0.85  # Balanced threshold
-  
+
   executors:
     - model: gemini-2.5-pro
       provider: google-ai-studio
       api_key_env: GOOGLE_API_KEY
       use_cases: [moderate, complex]
-    
+
     - model: llama-3.3-70b-versatile
       provider: groq
       api_key_env: GROQ_API_KEY
       use_cases: [simple, speed-critical]
-  
+
   fallback_strategy:
     models:
       - gemini-2.5-pro
@@ -407,3 +407,7 @@ config = load_orchestration_config()
 **Last Updated:** October 30, 2025
 **Maintained by:** TTA.dev Team
 
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Guides/Orchestration-configuration-guide]]

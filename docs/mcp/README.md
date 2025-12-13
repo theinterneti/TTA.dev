@@ -74,3 +74,7 @@ The `examples/mcp` directory contains example MCP server implementations:
 - [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
 - [Augment Documentation](https://docs.augment.dev)
 - [VS Code Documentation](https://code.visualstudio.com/docs)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Readme]]

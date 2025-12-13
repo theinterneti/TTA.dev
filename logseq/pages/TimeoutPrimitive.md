@@ -34,3 +34,7 @@ workflow = TimeoutPrimitive(
 ```
 
 **Source:** `platform/primitives/src/tta_dev_primitives/recovery/timeout.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Timeoutprimitive]]

@@ -38,3 +38,7 @@
 ## Priority: HIGH - Security Critical
 
 **Status**: 🚨 CRITICAL - Real API keys exposed in .env file
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/Secrets_management_todo]]

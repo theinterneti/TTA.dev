@@ -631,3 +631,7 @@ The research will not only validate our current decisions but also guide future 
 **IRB Approval:** Required for human subjects research
 **Funding Source:** [TBD]
 **Expected Publication:** Q2 2026 - "Empirical Validation of Primitive-Based AI Development Frameworks"
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Research/Validation_research_plan]]

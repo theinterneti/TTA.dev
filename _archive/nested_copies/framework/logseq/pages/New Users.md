@@ -50,3 +50,7 @@ audience:: new-users
 level:: beginner
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/New users]]

@@ -493,6 +493,10 @@ Visual representations of Hypertool integration with TTA.dev.
 
 ---
 
-**Created:** 2025-11-14  
-**Purpose:** Visual reference for Hypertool integration architecture  
+**Created:** 2025-11-14
+**Purpose:** Visual reference for Hypertool integration architecture
 **Audience:** Technical team, stakeholders, documentation
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Hypertool_architecture_diagrams]]

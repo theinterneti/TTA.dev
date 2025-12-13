@@ -43,3 +43,6 @@ See comprehensive guides in `docs/guides/`
 #how-to #tutorials #guides #examples
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/How-to]]

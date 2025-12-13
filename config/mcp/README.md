@@ -68,3 +68,7 @@ tta-dev docs RetryPrimitive
 # Start MCP server manually
 tta-dev serve
 ```
+
+
+---
+**Logseq:** [[TTA.dev/Config/Mcp/Readme]]

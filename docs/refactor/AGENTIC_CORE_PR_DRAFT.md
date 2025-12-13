@@ -1,8 +1,8 @@
 # Pull Request: Agentic Core Architecture for TTA.dev Framework
 
-**Branch:** `agentic/core-architecture`  
-**Base:** `main`  
-**Type:** Feature (Major)  
+**Branch:** `agentic/core-architecture`
+**Base:** `main`
+**Type:** Feature (Major)
 **Status:** Ready for Review
 
 ---
@@ -86,7 +86,7 @@ result = await llm.execute(
 
 **Auth Primitives:**
 - Auth0 integration
-- Clerk integration  
+- Clerk integration
 - JWT token handling
 
 **Database Primitives:**
@@ -170,7 +170,7 @@ packages/tta-dev-integrations/
 **All Other Packages:**
 - Kept intact (no deletions)
 - tta-agent-coordination ✅ Kept
-- tta-kb-automation ✅ Kept  
+- tta-kb-automation ✅ Kept
 - tta-documentation-primitives ✅ Kept
 - universal-agent-context ✅ Kept
 - tta-observability-integration ✅ Kept
@@ -185,7 +185,7 @@ packages/tta-dev-integrations/
 
 **Reason:** Gemini integration couldn't be stabilized. On ice for now as we rebuild TTA.dev with new agentic primitives architecture.
 
-**Status:** 
+**Status:**
 - Code preserved for reference
 - Not part of active workspace
 - May be revived in future
@@ -424,6 +424,10 @@ This PR represents a major milestone in TTA.dev's evolution from experimental pl
 
 ---
 
-**Created:** 2024-11-14  
-**Branch:** `agentic/core-architecture`  
+**Created:** 2024-11-14
+**Branch:** `agentic/core-architecture`
 **Supersedes:** PR #80, PR #98 (partial)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Refactor/Agentic_core_pr_draft]]

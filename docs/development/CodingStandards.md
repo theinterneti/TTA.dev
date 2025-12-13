@@ -133,3 +133,7 @@ To continuously improve the quality and capabilities of TTA, we will implement a
 *   **Decoding Strategy Optimization:** We will explore and optimize different decoding strategies (e.g., temperature sampling, top-k sampling, beam search) to balance creativity, coherence, and computational cost of text generation. Dynamic adjustment of decoding parameters based on context will be considered.
 
 By consistently adhering to these coding practices and standards, we will build a robust, maintainable, and ethically sound foundation for the Therapeutic Text Adventure project. These guidelines will evolve as the project progresses and we gain new insights.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Codingstandards]]

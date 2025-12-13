@@ -87,3 +87,7 @@ The Neo4j Knowledge Graph serves as the structured memory and context provider.
 • Schema: The schema includes core node types such as Concept, Metaconcept, and Scope (Multiverse, Universe, World, Location).
 • Metaconcept Integration: Metaconcepts (e.g., "Utilize Web Resources," "Ensure Conceptual Clarity") are stored as nodes and are included in the agent prompts to guide Qwen2.5's reasoning and adherence to design principles. The Metaconcept Utilize Web Resources specifically guides agents in accessing external information (potentially via tools like FireCrawl) for worlds based on 'Our Universe' or 'Alternate Earths'.
 • Cypher Use: AI agents rely on Cypher for complex pattern matching and graph traversal, ensuring efficient retrieval of interconnected context. Best practices include parameterization, transaction use, and clear naming conventions.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta-analysis/Research-extracts/Technical-architecture]]

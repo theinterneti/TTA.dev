@@ -165,3 +165,7 @@ cat /home/thein/repos/TTA.dev/.hypertool/mcp_servers.json | jq .
 # Or clear cache
 rm -rf ~/.cache/mcp/*
 ```
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Persona_switching]]

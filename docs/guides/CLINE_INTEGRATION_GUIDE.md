@@ -31,3 +31,7 @@ This enhanced Cline integration for TTA.dev aims to significantly enhance the de
 ---
 
 **Last Updated:** 2025-11-10
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Cline_integration_guide]]

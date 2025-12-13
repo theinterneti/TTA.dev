@@ -31,10 +31,10 @@ def test_tool_selection():
         {"name": "look", "description": "Look around"}
     ]
     user_input = "I want to go north"
-    
+
     # Act
     selected_tool = selector.select_tool(user_input, tools)
-    
+
     # Assert
     assert selected_tool["name"] == "move"
 ```
@@ -63,10 +63,10 @@ async def test_neo4j_tool_integration():
     neo4j_manager = Neo4jManager(uri, username, password)
     tool_registry = ToolRegistry(neo4j_manager)
     move_tool = tool_registry.get_tool("move")
-    
+
     # Act
     result = await move_tool.execute({"direction": "north"})
-    
+
     # Assert
     player_location = neo4j_manager.get_player_location()
     assert player_location["name"] == "Forest Clearing"
@@ -93,14 +93,14 @@ def test_complete_game_flow():
     """Test a complete game interaction flow."""
     # Arrange
     game = GameEngine()
-    
+
     # Act
     responses = []
     responses.append(game.process_input("look around"))
     responses.append(game.process_input("go north"))
     responses.append(game.process_input("take journal"))
     responses.append(game.process_input("examine journal"))
-    
+
     # Assert
     assert "forest" in responses[0].lower()
     assert "clearing" in responses[1].lower()
@@ -145,10 +145,10 @@ def neo4j_manager():
     )
     manager.clear_database()
     manager.initialize_test_data()
-    
+
     # Provide the fixture
     yield manager
-    
+
     # Teardown
     manager.clear_database()
     manager.close()
@@ -159,7 +159,7 @@ def mock_llm_client():
     class MockLLMClient:
         async def generate(self, prompt, **kwargs):
             return {"content": "Mock response"}
-    
+
     return MockLLMClient()
 ```
 
@@ -235,12 +235,12 @@ def test_narrative_generation(mocker):
     mock_llm.return_value.generate.return_value = {
         "content": "You see a beautiful forest with tall trees."
     }
-    
+
     narrative_generator = NarrativeGenerator(mock_llm)
-    
+
     # Act
     result = narrative_generator.generate_description("forest")
-    
+
     # Assert
     assert "beautiful forest" in result
     mock_llm.return_value.generate.assert_called_once()
@@ -258,12 +258,12 @@ def test_neo4j_operations(mocker):
     mock_session.__enter__.return_value.run.return_value = [
         {"name": "Forest", "description": "A dense forest"}
     ]
-    
+
     neo4j_manager = Neo4jManager("bolt://localhost:7687", "neo4j", "password")
-    
+
     # Act
     result = neo4j_manager.get_location("Forest")
-    
+
     # Assert
     assert result["name"] == "Forest"
     assert result["description"] == "A dense forest"
@@ -278,10 +278,10 @@ Use pytest-asyncio for testing asynchronous functions:
 async def test_async_tool_execution():
     # Arrange
     tool = AsyncTool()
-    
+
     # Act
     result = await tool.execute({"param": "value"})
-    
+
     # Assert
     assert result["success"] is True
 ```
@@ -296,12 +296,12 @@ def test_tool_selection_performance():
     selector = ToolSelector()
     tools = [{"name": f"tool_{i}", "description": f"Description {i}"} for i in range(100)]
     user_input = "I want to use tool_50"
-    
+
     # Act
     start_time = time.time()
     selected_tool = selector.select_tool(user_input, tools)
     end_time = time.time()
-    
+
     # Assert
     assert end_time - start_time < 0.1  # Should complete in under 100ms
     assert selected_tool["name"] == "tool_50"
@@ -324,7 +324,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       neo4j:
         image: neo4j:4.4
@@ -332,7 +332,7 @@ jobs:
           NEO4J_AUTH: neo4j/password
         ports:
           - 7687:7687
-    
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -397,3 +397,7 @@ python -m pytest --trace  # Trace execution
 ## Conclusion
 
 A comprehensive testing strategy is essential for maintaining the quality and reliability of the TTA project. By following these guidelines, you can ensure that your code is well-tested and robust.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Development/Testing_guide]]

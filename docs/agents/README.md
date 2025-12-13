@@ -155,3 +155,7 @@ Add TTA.dev MCP server to your Claude config:
 ---
 
 **TTA.dev** - *Vibe today, scale tomorrow*
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Agents/Readme]]

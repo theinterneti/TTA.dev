@@ -1,7 +1,7 @@
 # Multi-Persona Workflow: Package Release
 
-**Personas:** Backend Engineer → Testing Specialist → DevOps Engineer  
-**Purpose:** Release a new TTA.dev package version with full quality gates  
+**Personas:** Backend Engineer → Testing Specialist → DevOps Engineer
+**Purpose:** Release a new TTA.dev package version with full quality gates
 **Duration:** ~2-4 hours (automated steps reduce to ~30 minutes)
 
 ---
@@ -54,8 +54,8 @@ ls ~/.hypertool/personas/
 
 ## Stage 1: Prepare Release (Backend Engineer Persona)
 
-**Persona:** `tta-backend-engineer` (2000 tokens, 48 tools)  
-**Duration:** ~45 minutes  
+**Persona:** `tta-backend-engineer` (2000 tokens, 48 tools)
+**Duration:** ~45 minutes
 **Trigger:** Manual or scheduled
 
 ### Activate Backend Persona
@@ -264,8 +264,8 @@ asyncio.run(store_commit())
 
 ## Stage 2: Quality Validation (Testing Specialist Persona)
 
-**Persona:** `tta-testing-specialist` (1500 tokens, 35 tools)  
-**Duration:** ~30 minutes (mostly automated)  
+**Persona:** `tta-testing-specialist` (1500 tokens, 35 tools)
+**Duration:** ~30 minutes (mostly automated)
 **Trigger:** After backend commit pushed
 
 ### Activate Testing Persona
@@ -479,8 +479,8 @@ await memory.add("quality_gate", {
 
 ## Stage 3: Deploy and Monitor (DevOps Engineer Persona)
 
-**Persona:** `tta-devops-engineer` (1800 tokens, 38 tools)  
-**Duration:** ~20 minutes  
+**Persona:** `tta-devops-engineer` (1800 tokens, 38 tools)
+**Duration:** ~20 minutes
 **Trigger:** After quality gate approval
 
 ### Activate DevOps Persona
@@ -683,8 +683,8 @@ gh workflow run docs-deploy.yml --ref main
 ```markdown
 # Release Announcement - v0.2.0
 
-**Date:** 2025-11-14  
-**Package:** tta-dev-primitives  
+**Date:** 2025-11-14
+**Package:** tta-dev-primitives
 **Version:** 0.2.0
 
 ## Highlights
@@ -792,12 +792,12 @@ async def main():
             "version": "0.2.0"
         }
     )
-    
+
     result = await release_workflow.execute(
         {"action": "release", "version_type": "minor"},
         context
     )
-    
+
     print(f"Release complete: {result}")
 
 if __name__ == "__main__":
@@ -916,7 +916,11 @@ After successful release:
 
 ---
 
-**Workflow Status:** ✅ Production-Ready  
-**Last Updated:** 2025-11-14  
-**Personas Required:** Backend, Testing, DevOps  
+**Workflow Status:** ✅ Production-Ready
+**Last Updated:** 2025-11-14
+**Personas Required:** Backend, Testing, DevOps
 **Estimated Time:** 30 minutes (automated) vs 2-4 hours (manual)
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Workflows/Package-release.workflow]]

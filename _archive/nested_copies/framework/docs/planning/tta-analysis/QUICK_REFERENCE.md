@@ -223,3 +223,7 @@ All migrated code must meet TTA.dev standards:
 ---
 
 **Status:** 🟡 Awaiting decision on Option A, B, or C
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Tta-analysis/Quick_reference]]

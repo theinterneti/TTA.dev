@@ -42,3 +42,7 @@ Here's an example of how you might configure the Jaeger MCP server in your Claud
     }
   }
 }
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Jaeger]]

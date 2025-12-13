@@ -422,3 +422,7 @@ jobs:
 **Phase:** Phase 2 (Component Integration)
 **Status:** Active
 **Category:** Testing
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Phase 2 integration tests]]

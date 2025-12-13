@@ -665,3 +665,6 @@ id:: observability-assessment-next-steps
 - [[TTA.dev/Architecture/Component Integration]] - Package integration architecture
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___architecture___observability assessment]]

@@ -46,3 +46,7 @@ client.disconnect()
 
 *   [MCP Toolbox for Databases Documentation](https://googleapis.github.io/genai-toolbox/getting-started/)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Integrations/Database-toolbox-integration]]

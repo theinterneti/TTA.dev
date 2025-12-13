@@ -11,3 +11,6 @@ All documentation and examples are now at the new location.
 **Also see:** [[TTA Primitives/RouterPrimitive]] (old namespace)
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Routerprimitive]]

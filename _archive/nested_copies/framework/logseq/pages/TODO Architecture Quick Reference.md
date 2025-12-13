@@ -451,3 +451,7 @@ Mark for automation:
 
 **Last Updated:** November 2, 2025
 **Quick Access:** Keep this page pinned for fast reference
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Todo architecture quick reference]]

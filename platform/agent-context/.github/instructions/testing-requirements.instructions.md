@@ -69,10 +69,10 @@ def test_player_creation_success():
         "name": "Test Player",
         "email": "test@example.com"
     }
-    
+
     # Act
     player = service.create_player(player_data)
-    
+
     # Assert
     assert player.name == "Test Player"
     assert player.email == "test@example.com"
@@ -85,7 +85,7 @@ def test_player_creation_success():
 def test_player_creation_invalid_email():
     """Test player creation with invalid email."""
     service = PlayerService()
-    
+
     with pytest.raises(ValueError, match="Invalid email"):
         service.create_player({"name": "Test", "email": "invalid"})
 ```
@@ -139,7 +139,7 @@ def test_player_persistence(neo4j_session):
     # Create player
     player = Player(name="Test", email="test@example.com")
     neo4j_session.create(player)
-    
+
     # Retrieve player
     retrieved = neo4j_session.get(Player, player.id)
     assert retrieved.name == "Test"
@@ -171,14 +171,14 @@ test.describe('Player Authentication', () => {
   test('should login successfully', async ({ page }) => {
     // Navigate to login page
     await page.goto('/login');
-    
+
     // Fill login form
     await page.fill('input[name="email"]', 'test@example.com');
     await page.fill('input[name="password"]', 'password123');
-    
+
     // Submit form
     await page.click('button:has-text("Login")');
-    
+
     // Verify redirect to dashboard
     await expect(page).toHaveURL('/dashboard');
     await expect(page.locator('text=Welcome')).toBeVisible();
@@ -276,7 +276,7 @@ async def test_ai_response_generation():
     """Test AI response generation with mocked API."""
     with patch('src.services.openrouter_client') as mock_client:
         mock_client.generate.return_value = "AI response"
-        
+
         result = await generate_response("player input")
         assert result == "AI response"
 ```
@@ -288,3 +288,7 @@ async def test_ai_response_generation():
 - Coverage.py: https://coverage.readthedocs.io/
 - Testing Best Practices: https://testingpython.com/
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Testing-requirements.instructions]]

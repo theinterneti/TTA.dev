@@ -41,3 +41,7 @@
 - [ ] Compile comprehensive assessment report
 - [ ] Provide actionable recommendations
 - [ ] Identify strengths and improvement areas
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/Tta_self_assessment_plan]]

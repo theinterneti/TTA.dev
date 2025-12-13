@@ -1,6 +1,7 @@
+// Logseq: [[TTA.dev/Apps/Observability-vscode/Src/Extension]]
 /**
  * TTA Observability VS Code Extension
- * 
+ *
  * Provides a webview panel for viewing TTA.dev workflow traces in VS Code.
  * Reuses the existing web dashboard UI from tta-observability-ui package.
  */
@@ -23,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.command = 'tta.openDashboard';
     statusBarItem.text = '$(pulse) TTA: 0 traces';
     statusBarItem.tooltip = 'Click to open TTA Observability Dashboard';
-    
+
     const config = vscode.workspace.getConfiguration('tta');
     if (config.get('showStatusBar', true)) {
         statusBarItem.show();
@@ -117,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showInformationMessage(
                         `Cleared ${result.deleted_count} traces`
                     );
-                    
+
                     if (dashboardPanel) {
                         dashboardPanel.webview.postMessage({ type: 'refresh' });
                     }
@@ -137,7 +138,7 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showInformationMessage(
             'To start the TTA Observability service, run: tta-observability-ui start'
         );
-        
+
         // Open integrated terminal with command
         const terminal = vscode.window.createTerminal('TTA Observability');
         terminal.sendText('cd packages/tta-observability-ui && tta-observability-ui start');
@@ -197,7 +198,7 @@ async function checkServiceHealth(statusBarItem: vscode.StatusBarItem) {
 
 /**
  * Generate HTML content for the webview
- * 
+ *
  * This loads the existing dashboard UI from tta-observability-ui package
  * and embeds it in the VS Code webview.
  */
@@ -240,7 +241,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
             `<script>
                 window.TTA_SERVICE_URL = '${serviceUrl}';
                 window.TTA_IN_VSCODE = true;
-                
+
                 // Send trace count updates to extension
                 window.addEventListener('tta:traceCountUpdate', (e) => {
                     const vscode = acquireVsCodeApi();
@@ -307,14 +308,14 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
             <body>
                 <div class="container">
                     <h1>🔍 TTA Observability Dashboard</h1>
-                    
+
                     <div class="status">
                         <h2>⚙️ Setup Required</h2>
                         <p>The TTA Observability service needs to be running to view traces.</p>
                     </div>
 
                     <h3>📋 Steps to Get Started:</h3>
-                    
+
                     <p><strong>1. Start the TTA Observability Service:</strong></p>
                     <div class="command">
                         <code>cd packages/tta-observability-ui</code><br>

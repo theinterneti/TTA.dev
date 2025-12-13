@@ -53,3 +53,7 @@ Fully configured n8n credentials enabling:
 - AI-powered health analysis via Gemini
 - Automated dashboard updates
 - Reliable API connectivity
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Planning/N8n_credential_configuration_todo]]

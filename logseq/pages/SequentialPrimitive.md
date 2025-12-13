@@ -23,3 +23,7 @@ result = await workflow.execute(input_data, context)
 
 **Import:** `from tta_dev_primitives import SequentialPrimitive`
 **Source:** `platform/primitives/src/tta_dev_primitives/core/sequential.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Sequentialprimitive]]

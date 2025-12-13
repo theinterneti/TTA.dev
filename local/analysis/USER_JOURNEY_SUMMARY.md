@@ -334,3 +334,7 @@ Week 4+: Contribute primitives, port to other languages
 **Last Updated:** October 29, 2025
 **Version:** 1.0.0
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Local/Analysis/User_journey_summary]]

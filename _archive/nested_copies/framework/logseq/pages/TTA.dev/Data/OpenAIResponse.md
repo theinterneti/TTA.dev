@@ -13,3 +13,7 @@
   - `model`: The specific OpenAI model that was used for generation.
   - `usage`: A dictionary containing token usage statistics (prompt, completion, total tokens).
   - `finish_reason`: The reason why the LLM stopped generating (e.g., "stop", "length").
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Data/Openairesponse]]

@@ -515,3 +515,7 @@ class KeployTestPrimitive(WorkflowPrimitive[TestRequest, TestResult]):
 **Status:** [[Complete]]
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___architecture___component integration]]

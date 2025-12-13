@@ -16,3 +16,7 @@
   - The `execute` method first evaluates the `condition` with the current input and `[[TTA.dev/Data/WorkflowContext]]`.
   - If the condition is `True`, `then_primitive` is executed. If `False` and `else_primitive` is provided, `else_primitive` is executed. Otherwise, the input is passed through.
   - Includes logging, metrics, and tracing for condition evaluation and branch execution.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Conditionalprimitive]]

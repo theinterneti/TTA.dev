@@ -215,3 +215,7 @@ ssh -T git@github.com
 cd ~/repos/TTA.dev
 ./scripts/setup-tta-audit-sandbox.sh
 ```
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Quick_start]]

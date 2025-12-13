@@ -73,3 +73,7 @@ Provide your review as:
 - Maintain 100% type coverage
 - All primitives must extend `InstrumentedPrimitive`
 - Use `>>` for sequential, `|` for parallel composition
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/.github/Prompts/Pr-review.prompt]]

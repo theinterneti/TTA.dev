@@ -69,3 +69,7 @@ None
 - [ ] Documentation is clear
 - [ ] Breaking changes are justified
 - [ ] Commit history is clean
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/.github/Pull_request_template]]

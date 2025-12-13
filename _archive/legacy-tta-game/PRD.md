@@ -81,3 +81,6 @@ This document outlines the technical specifications for the AI Agent design with
 *   Pydantic will ensure data validation at the boundaries of different system components, preventing type errors and ensuring data consistency.
 
 This technical specification provides a detailed overview of the AI Agent design for the TTA project, focusing on the core technologies, agent roles, dynamic generation mechanisms, model selection, and the roles of the orchestration framework and supporting libraries. This information should serve as a comprehensive reference for the AI coding assistant in the development process.
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Prd]]

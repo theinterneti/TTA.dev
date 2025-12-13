@@ -403,6 +403,10 @@ MIT - See [LICENSE](../../LICENSE)
 
 ---
 
-**Last Updated:** November 10, 2025  
-**Status:** Phase 1 Implementation  
+**Last Updated:** November 10, 2025
+**Status:** Phase 1 Implementation
 **Maintainer:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Apps/Observability-ui/Readme]]

@@ -215,3 +215,7 @@ OpenTelemetry integration, Prometheus metrics export, structured logging, and tr
 **Last Updated:** November 2, 2025
 **Package Maintainer:** TTA.dev Team
 **Next Review:** Weekly sprint planning
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___packages___tta-observability-integration___todos]]

@@ -335,3 +335,7 @@ The converter will take file paths from the watcher queue and:
 ---
 
 **Ready to start?** Let's implement the file watcher! 🎯
+
+
+---
+**Logseq:** [[TTA.dev/Local/Planning/Phase1-2-workflow]]

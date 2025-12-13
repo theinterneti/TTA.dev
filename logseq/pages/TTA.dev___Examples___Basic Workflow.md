@@ -299,3 +299,7 @@ example:: basic-workflow
 type:: tutorial
 audience:: beginners
 primitives:: sequential, parallel, conditional, cache, retry, fallback, timeout
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___examples___basic workflow]]

@@ -333,3 +333,7 @@ Indicate page maturity:
 **Purpose:** Navigation helper and documentation template
 **Status:** Reference
 **Usage:** Create specific topic pages following these patterns
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Topic page]]

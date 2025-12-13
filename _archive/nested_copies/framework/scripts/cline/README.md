@@ -444,3 +444,7 @@ Found a useful Cline CLI pattern? Add it to this directory!
 ---
 
 **Happy automating! 🤖✨**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Scripts/Cline/Readme]]

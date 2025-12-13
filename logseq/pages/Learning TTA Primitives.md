@@ -412,3 +412,7 @@ Key components:
 **Last Updated:** October 31, 2025
 **Card Count:** 22 flashcards + cloze deletions
 **Estimated Study Time:** 30-45 minutes for initial review
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Learning tta primitives]]

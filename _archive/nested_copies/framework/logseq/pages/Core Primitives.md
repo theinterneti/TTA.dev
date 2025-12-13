@@ -57,3 +57,6 @@ category:: core
 type:: primitives
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Core primitives]]

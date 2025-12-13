@@ -55,3 +55,7 @@ workflow = input >> (fast | slow | cached) >> aggregator
 
 category:: core
 type:: primitives
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Core primitives]]

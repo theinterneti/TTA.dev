@@ -174,12 +174,12 @@ After running recommendations:
   type:: deployment
   priority:: high
   pr:: #456
-  
+
 - TODO Review PR #789 (needs-review, 5d old) [[#dev-todo]]
   type:: code-review
   priority:: medium
   pr:: #789
-  
+
 - TODO Close PR #321 (stale, 45d inactive) [[#dev-todo]]
   type:: maintenance
   priority:: low
@@ -256,12 +256,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install GitHub CLI
         run: |
           type -p curl >/dev/null || sudo apt update && sudo apt install curl -y
@@ -274,7 +274,7 @@ jobs:
             sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
           sudo apt update
           sudo apt install gh -y
-      
+
       - name: Run health check
         env:
           GH_TOKEN: ${{ github.token }}
@@ -401,3 +401,7 @@ When enhancing the PR manager:
 
 **Last Updated:** 2025-11-13
 **Maintainer:** @theinterneti
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Pr-management-guide]]

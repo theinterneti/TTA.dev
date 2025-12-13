@@ -177,18 +177,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install uv
           cd packages/tta-dev-primitives
           uv sync --extra integrations
-      
+
       - name: Generate tests
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
@@ -198,7 +198,7 @@ jobs:
           git diff --name-only HEAD~1 HEAD | grep '\.py$' | while read file; do
             uv run python examples/orchestration_test_generation.py --file "$file"
           done
-      
+
       - name: Commit generated tests
         run: |
           git config user.name "Test Generator Bot"
@@ -379,3 +379,7 @@ scrape_configs:
 **Last Updated:** October 30, 2025
 **Maintained by:** TTA.dev Team
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Examples/Orchestration_demo_guide]]

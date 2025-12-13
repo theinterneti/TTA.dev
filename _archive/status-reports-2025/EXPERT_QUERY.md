@@ -31,3 +31,7 @@ Updated workflow to:
 **Status:** Ready for testing in Issue #61
 
 **See:** `GEMINI_CLI_INTEGRATION_QUESTIONS.md` for complete journey
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Expert_query]]

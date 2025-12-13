@@ -773,3 +773,7 @@ production_llm = (
 
 **Last Updated:** October 30, 2025
 **Maintainer:** TTA.dev Core Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Primitive_patterns]]

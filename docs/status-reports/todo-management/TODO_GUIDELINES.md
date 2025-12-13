@@ -1,8 +1,8 @@
 # TODO Guidelines for TTA.dev
 
-**Purpose**: Define when to use code TODOs vs. Logseq TODOs  
-**Audience**: All contributors (developers, agents, maintainers)  
-**Status**: ✅ Active  
+**Purpose**: Define when to use code TODOs vs. Logseq TODOs
+**Audience**: All contributors (developers, agents, maintainers)
+**Status**: ✅ Active
 **Last Updated**: 2025-10-31
 
 ---
@@ -11,21 +11,21 @@
 
 ### Use **Code TODO** (inline comment) when:
 
-✅ **Providing context** for future developers  
-✅ **Documenting limitations** of current implementation  
-✅ **Explaining non-obvious behavior** or edge cases  
-✅ **Marking optimization opportunities** (low priority)  
-✅ **Noting assumptions** or constraints  
+✅ **Providing context** for future developers
+✅ **Documenting limitations** of current implementation
+✅ **Explaining non-obvious behavior** or edge cases
+✅ **Marking optimization opportunities** (low priority)
+✅ **Noting assumptions** or constraints
 ✅ **Temporary debugging** notes (remove before merge)
 
 ### Use **Logseq TODO** when:
 
-✅ **Tracking actual work items** requiring completion  
-✅ **Managing feature development** across sprints  
-✅ **Coordinating work** across team members  
-✅ **Linking to documentation** or KB pages  
-✅ **Requiring priority/status tracking**  
-✅ **Blocking other work** or dependencies  
+✅ **Tracking actual work items** requiring completion
+✅ **Managing feature development** across sprints
+✅ **Coordinating work** across team members
+✅ **Linking to documentation** or KB pages
+✅ **Requiring priority/status tracking**
+✅ **Blocking other work** or dependencies
 ✅ **Needs effort estimation** or time tracking
 
 ---
@@ -373,8 +373,12 @@ If you're unsure whether a TODO should be in code or Logseq:
 
 ---
 
-**Status**: ✅ Active  
-**Owner**: TTA.dev Team  
-**Review**: Quarterly  
+**Status**: ✅ Active
+**Owner**: TTA.dev Team
+**Review**: Quarterly
 **Last Updated**: 2025-10-31
 
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Status-reports/Todo-management/Todo_guidelines]]

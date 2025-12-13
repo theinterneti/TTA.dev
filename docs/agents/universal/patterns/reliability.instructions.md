@@ -174,3 +174,7 @@ for item in items:
 ---
 
 **Remember:** You can always add reliability later. Don't let it slow down your vibing phase. TTA.dev is here when you need to scale.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Agents/Universal/Patterns/Reliability.instructions]]

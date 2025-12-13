@@ -298,3 +298,7 @@ audience:: beginners
 primitives:: sequential, parallel, conditional, cache, retry, fallback, timeout
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___examples___basic workflow]]

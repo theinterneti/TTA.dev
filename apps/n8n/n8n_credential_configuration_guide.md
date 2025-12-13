@@ -134,3 +134,7 @@ Once configured, your workflow will automatically:
 - Calculate health scores and metrics
 - Generate AI-powered insights
 - Provide actionable recommendations
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_credential_configuration_guide]]

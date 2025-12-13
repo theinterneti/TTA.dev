@@ -1279,3 +1279,7 @@ fallback_reporting = FallbackPrimitive(
 ---
 
 **Next Steps:** When cline detects complex data processing and quality assurance scenarios, it should automatically suggest appropriate pipeline architectures, state management strategies, and quality assurance patterns based on the specific data requirements and use cases.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Workflows/Agent_coordination_patterns]]

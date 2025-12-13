@@ -571,3 +571,7 @@ async def good_primitive(data: dict, context: WorkflowContext) -> dict:
 **Category:** Core Concept
 **Complexity:** Medium
 **Status:** Production-ready
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___concepts___composition]]

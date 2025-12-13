@@ -72,3 +72,7 @@ No overview provided
 See [`data-model.md`](./data-model.md) for complete data model definitions.
 
 **Entities:** User
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Tasks_output/Example4/Plan]]

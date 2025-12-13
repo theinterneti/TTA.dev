@@ -1,4 +1,4 @@
-"""SQLite integration primitive - SKELETON."""
+# Logseq: [[TTA.dev/Platform/Integrations/Src/Tta_dev_integrations/Database/Sqlite_primitive]]  # noqa: E501, ERA001
 
 # TODO: Implement SQLitePrimitive
 # Local SQLite database access

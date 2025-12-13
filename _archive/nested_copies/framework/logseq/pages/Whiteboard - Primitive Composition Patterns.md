@@ -230,3 +230,6 @@ workflow = (
 **Next:** Create interactive whiteboard in Logseq UI
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Whiteboard - primitive composition patterns]]

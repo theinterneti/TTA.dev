@@ -404,3 +404,7 @@ For new integrations, create:
 **Last Updated:** November 6, 2025
 **Maintained by:** TTA.dev Team
 **Status:** Active Development
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integrations/Readme]]

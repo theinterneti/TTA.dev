@@ -178,3 +178,7 @@ Copilot Worktree:
 ---
 
 **Quick Help:** `python scripts/agent_oversight.py --help`
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Agent_oversight_quickref]]

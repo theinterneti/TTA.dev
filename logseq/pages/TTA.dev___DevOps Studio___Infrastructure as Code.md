@@ -1246,3 +1246,7 @@ groups:
 **Last Updated:** November 7, 2025
 **Next Review:** Monthly
 **Maintained by:** TTA.dev Platform Team
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___devops studio___infrastructure as code]]

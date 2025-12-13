@@ -129,12 +129,12 @@ import subprocess
 
 def get_model_for_agent(agent_type, memory_constraint=None, speed_constraint=None):
     cmd = ["python3", "/app/scripts/dynamic_model_selector.py", "--agent", agent_type]
-    
+
     if memory_constraint:
         cmd.extend(["--max-memory", str(memory_constraint)])
     if speed_constraint:
         cmd.extend(["--min-speed", str(speed_constraint)])
-    
+
     result = subprocess.check_output(cmd).decode('utf-8')
     return json.loads(result)
 
@@ -174,3 +174,7 @@ To add support for new models or metrics:
 - Integrate with model serving frameworks
 - Add A/B testing capabilities for model selection
 - Implement continuous monitoring of model performance
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Scripts/Model_testing_readme]]

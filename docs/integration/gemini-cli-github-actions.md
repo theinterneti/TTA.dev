@@ -442,3 +442,7 @@ Include examples and error codes.
 **Status**: Active, test in progress
 **Maintainer**: TTA.dev Team
 
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integration/Gemini-cli-github-actions]]

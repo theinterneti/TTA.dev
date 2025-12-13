@@ -713,3 +713,7 @@ This should be the pattern for all external integrations: **fallback first, enha
 ---
 
 **Verdict:** Hybrid architecture validated. In-memory fallback + optional Redis is the right approach for TTA.dev integrations.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Architecture/Redis_memory_spike]]

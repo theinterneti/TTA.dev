@@ -246,3 +246,7 @@ created: 2025-11-04
   **Timeline:** 2026-2029
   **Related:** [[TTA.dev/Roadmap]], [[TTA.dev/Vision]]
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___atomic devops architecture]]

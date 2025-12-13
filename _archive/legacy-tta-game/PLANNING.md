@@ -15,7 +15,7 @@ The TTA project has evolved through three architectural approaches:
 
 ### Current Architecture (v0.3): Dynamic Tools with LangGraph
 
-1. **Player Input Processing**: 
+1. **Player Input Processing**:
    - Input Processing Agent (IPA) node processes natural language input
    - NLP processing with spaCy for initial parsing
    - Intent recognition and entity extraction
@@ -269,3 +269,7 @@ The integration strategy focuses on leveraging the strengths of each AI library 
    - Use LangGraph for orchestration
    - Implement state management
    - Support conditional branching
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Legacy-tta-game/Planning]]

@@ -19,3 +19,7 @@ This page indexes key operational scripts used for maintaining the TTA codebase 
 ## See Also
 - [[Testing]] for testing-specific scripts.
 - [[Agents]] for agent-specific documentation.
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Operations]]

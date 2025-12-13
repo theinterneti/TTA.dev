@@ -666,3 +666,7 @@ async def test_tool_caching():
 **License:** MIT
 **Source:** `platform/agent-context/`
 **Tests:** `platform/agent-context/tests/`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Universal-agent-context]]

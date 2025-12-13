@@ -22,10 +22,10 @@ Brief description of this role's purpose and responsibilities.
 
 - **Capability 1**: [Description]
   - Example: [Specific example]
-  
+
 - **Capability 2**: [Description]
   - Example: [Specific example]
-  
+
 - **Capability 3**: [Description]
   - Example: [Specific example]
 
@@ -33,10 +33,10 @@ Brief description of this role's purpose and responsibilities.
 
 - **Restriction 1**: [Description]
   - Rationale: [Why this restriction exists]
-  
+
 - **Restriction 2**: [Description]
   - Rationale: [Why this restriction exists]
-  
+
 - **Restriction 3**: [Description]
   - Rationale: [Why this restriction exists]
 
@@ -175,6 +175,10 @@ Brief description of this role's purpose and responsibilities.
 
 ---
 
-**Last Updated**: YYYY-MM-DD  
+**Last Updated**: YYYY-MM-DD
 **Maintainer**: [GitHub username]
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Chatmodes/Templates/Chatmode.template]]

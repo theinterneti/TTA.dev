@@ -233,3 +233,7 @@ Add to `logseq/journals/2025_10_31.md`:
 **Audit Completed:** October 31, 2025
 **Next Review:** November 30, 2025
 **Documentation:** All findings in Logseq journal
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Audit_summary]]

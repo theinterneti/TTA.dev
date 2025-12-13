@@ -504,3 +504,7 @@ Returns dict with:
 **Session:** KB Automation Phase 3 Implementation
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta kb automation___sessioncontextbuilder]]

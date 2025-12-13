@@ -252,3 +252,7 @@ reliable = FallbackPrimitive(
 ---
 
 **Next Steps:** When cline detects high availability needs, it should suggest FallbackPrimitive with appropriate provider ordering and emergency fallback strategy.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Fallback_primitive]]

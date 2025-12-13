@@ -117,3 +117,7 @@ The TTA architecture follows these key design principles:
 - **Transformers**: Library for working with language models
 - **Pydantic**: Data validation and settings management
 - **Docker**: Containerization for development and deployment
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Overview]]

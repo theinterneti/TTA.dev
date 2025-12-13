@@ -282,3 +282,7 @@ print(f'Orphans: {len(result[\"orphaned_pages\"])}')
 ---
 
 **Last Updated:** November 3, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Kb-automation/Docs/Quickref]]

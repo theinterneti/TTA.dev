@@ -278,7 +278,11 @@ Step 9: Copilot reviews the PR
 
 ---
 
-**Visual Guide Complete!** 
+**Visual Guide Complete!**
 
 Use this diagram to understand how the automatic Copilot reviewer assignment works and troubleshoot any issues.
 
+
+
+---
+**Logseq:** [[TTA.dev/.github/Copilot_reviewer_flow]]

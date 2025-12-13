@@ -775,3 +775,7 @@ tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
 
 **Last Updated:** October 30, 2025
 **Maintainer:** TTA.dev Core Team
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Architecture/Observability_architecture]]

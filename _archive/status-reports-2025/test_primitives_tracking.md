@@ -15,3 +15,7 @@ validate_file_event
       └─> emit_metrics
           └─> manage_session
 ```
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Test_primitives_tracking]]

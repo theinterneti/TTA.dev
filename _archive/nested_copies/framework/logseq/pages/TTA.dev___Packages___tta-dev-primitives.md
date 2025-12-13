@@ -40,3 +40,6 @@ Core workflow primitives and composition patterns used across TTA.dev. Contains 
 - Maintain 100% test coverage for primitives
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___packages___tta-dev-primitives]]

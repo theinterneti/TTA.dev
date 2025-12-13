@@ -440,3 +440,7 @@ This whiteboard visualizes:
 **Complexity:** Intermediate
 **Estimated Creation Time:** 30-45 minutes
 **Last Updated:** October 31, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Whiteboard - tta.dev architecture overview]]

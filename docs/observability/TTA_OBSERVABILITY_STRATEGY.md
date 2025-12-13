@@ -1174,3 +1174,7 @@ error.type, error.recoverable
 **Author:** Staff Observability Architect (AI)
 **Date:** November 11, 2025
 **Next Review:** After Phase 1 Implementation
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Observability/Tta_observability_strategy]]

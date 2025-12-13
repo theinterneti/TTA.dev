@@ -124,3 +124,7 @@ Expected output shows:
 This primitive is for **education only**. Production code should use the underlying `tta_secrets` functions directly, never this demonstration primitive.
 
 The primitive teaches patterns but does not provide actual secret access - use `tta_secrets.get_*()` functions in real workflows.
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Secrets_request_primitive_usage]]

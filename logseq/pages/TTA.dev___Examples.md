@@ -86,3 +86,7 @@ done
 namespace:: examples
 type:: code-examples
 audience:: all-users
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___examples]]

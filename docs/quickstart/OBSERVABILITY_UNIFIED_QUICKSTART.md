@@ -16,7 +16,7 @@ workflow = step1 >> RouterPrimitive(...) >> step3
 
 # When you run it, automatic spans created:
 # - primitive.Step1
-# - primitive.RouterPrimitive  
+# - primitive.RouterPrimitive
 # - primitive.Step3
 ```
 
@@ -151,7 +151,7 @@ workflow = (
 **Queries:**
 ```promql
 # Primitive performance
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(primitive_execution_duration_seconds_bucket[5m])
 )
 
@@ -241,7 +241,7 @@ sum by (persona) (rate(primitive_executions_total[1h]))
 ```promql
 # OpenAI integration error rate
 sum(rate(primitive_executions_total{
-  primitive_name=~"OpenAI.*", 
+  primitive_name=~"OpenAI.*",
   status="error"
 }[5m]))
 ```
@@ -291,3 +291,7 @@ sum(rate(primitive_executions_total{
 ---
 
 **Last Updated:** November 15, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Quickstart/Observability_unified_quickstart]]

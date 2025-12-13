@@ -45,3 +45,7 @@ Here's an example of how you might configure the Grafana MCP server to connect t
     }
   }
 }
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Grafana]]

@@ -1,7 +1,7 @@
 # Multi-Persona Workflow: Incident Response
 
-**Personas:** Observability Expert → Backend Engineer → DevOps Engineer  
-**Purpose:** Respond to production incidents with rapid detection, diagnosis, and resolution  
+**Personas:** Observability Expert → Backend Engineer → DevOps Engineer
+**Purpose:** Respond to production incidents with rapid detection, diagnosis, and resolution
 **Duration:** ~30 minutes to 2 hours (depending on severity)
 
 ---
@@ -44,8 +44,8 @@ Priority: P1 (Critical)
 
 ## Stage 1: Detect and Monitor (Observability Expert Persona)
 
-**Persona:** `tta-observability-expert` (2000 tokens, 44 tools)  
-**Duration:** ~5-10 minutes  
+**Persona:** `tta-observability-expert` (2000 tokens, 44 tools)
+**Duration:** ~5-10 minutes
 **Goal:** Identify issue, gather context, assess impact
 
 ### Activate Observability Persona
@@ -273,9 +273,9 @@ await incident_memory.add("impact_assessment", {
 ```markdown
 # Incident INC-2025-11-14-001
 
-**Status:** 🔴 Active  
-**Severity:** P1 (Critical)  
-**Started:** 2025-11-14 14:32:00 UTC  
+**Status:** 🔴 Active
+**Severity:** P1 (Critical)
+**Started:** 2025-11-14 14:32:00 UTC
 **Duration:** 8 minutes (ongoing)
 
 ## Summary
@@ -333,8 +333,8 @@ database_connection_pool_active / database_connection_pool_max
 
 ## Stage 2: Diagnose and Fix (Backend Engineer Persona)
 
-**Persona:** `tta-backend-engineer` (2000 tokens, 48 tools)  
-**Duration:** ~15-30 minutes  
+**Persona:** `tta-backend-engineer` (2000 tokens, 48 tools)
+**Duration:** ~15-30 minutes
 **Goal:** Implement fix for connection pool exhaustion
 
 ### Activate Backend Persona
@@ -506,9 +506,9 @@ from pydantic_settings import BaseSettings
 
 class DatabaseSettings(BaseSettings):
     """Database configuration."""
-    
+
     mongodb_url: str = Field(..., env="MONGODB_URL")
-    
+
     # Connection pool settings
     max_pool_size: int = Field(
         default=50,  # ← Changed from 10
@@ -670,8 +670,8 @@ git push origin hotfix/database-connection-pool-exhaustion
 
 ## Stage 3: Deploy and Verify (DevOps Engineer Persona)
 
-**Persona:** `tta-devops-engineer` (1800 tokens, 38 tools)  
-**Duration:** ~10-15 minutes  
+**Persona:** `tta-devops-engineer` (1800 tokens, 38 tools)
+**Duration:** ~10-15 minutes
 **Goal:** Deploy hotfix and monitor recovery
 
 ### Activate DevOps Persona
@@ -813,13 +813,13 @@ await incident_memory.add("deployment", {
 # Monitor error rate every 30 seconds
 for i in {1..10}; do
   echo "Check $i at $(date):"
-  
+
   # Current error rate
   query_prometheus "100 * sum(rate(http_requests_total{status='500',endpoint='/api/workflows/execute'}[1m])) / sum(rate(http_requests_total{endpoint='/api/workflows/execute'}[1m]))"
-  
+
   # Connection pool usage
   query_prometheus "database_connection_pool_active / database_connection_pool_max"
-  
+
   sleep 30
 done
 
@@ -858,19 +858,19 @@ async def verify_recovery():
         error_rate = await query_metric("error_rate_percentage")
         p95_latency = await query_metric("p95_latency_ms")
         pool_usage = await query_metric("connection_pool_usage_percentage")
-        
+
         print(f"Minute {i+1}:")
         print(f"  Error rate: {error_rate:.2f}% (threshold: <0.1%)")
         print(f"  P95 latency: {p95_latency:.0f}ms (baseline: 300ms)")
         print(f"  Pool usage: {pool_usage:.0f}% (healthy: <70%)")
-        
+
         # Check if recovered
         if error_rate < 0.1 and p95_latency < 500 and pool_usage < 70:
             print("✅ System recovered - SLA met")
             return True
-        
+
         await asyncio.sleep(60)
-    
+
     return False
 
 recovered = await verify_recovery()
@@ -916,9 +916,9 @@ query_prometheus "ALERTS{alertname='APIErrorRateHigh',alertstate='resolved'}"
 ```markdown
 # Incident INC-2025-11-14-001
 
-**Status:** ✅ Resolved  
-**Severity:** P1 (Critical)  
-**Duration:** 23 minutes  
+**Status:** ✅ Resolved
+**Severity:** P1 (Critical)
+**Duration:** 23 minutes
 **Resolved:** 2025-11-14 14:55:00 UTC
 
 ## Timeline
@@ -1039,7 +1039,7 @@ async def main():
             "service": "tta-dev-primitives-api"
         }
     )
-    
+
     result = await incident_router.execute(
         {
             "priority": "p1_high",
@@ -1048,7 +1048,7 @@ async def main():
         },
         context
     )
-    
+
     print(f"Incident resolved: {result}")
 
 if __name__ == "__main__":
@@ -1086,10 +1086,10 @@ if __name__ == "__main__":
 ```markdown
 # Post-Mortem: [Incident Title]
 
-**Date:** YYYY-MM-DD  
-**Incident ID:** INC-YYYY-MM-DD-NNN  
-**Severity:** P0/P1/P2  
-**Duration:** X minutes/hours  
+**Date:** YYYY-MM-DD
+**Incident ID:** INC-YYYY-MM-DD-NNN
+**Severity:** P0/P1/P2
+**Duration:** X minutes/hours
 **MTTR:** X minutes
 
 ## What Happened
@@ -1136,7 +1136,11 @@ if __name__ == "__main__":
 
 ---
 
-**Workflow Status:** ✅ Production-Ready  
-**Last Updated:** 2025-11-14  
-**Personas Required:** Observability, Backend, DevOps  
+**Workflow Status:** ✅ Production-Ready
+**Last Updated:** 2025-11-14
+**Personas Required:** Observability, Backend, DevOps
 **MTTR:** ~20-30 minutes (vs 2-4 hours manual)
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Workflows/Incident-response.workflow]]

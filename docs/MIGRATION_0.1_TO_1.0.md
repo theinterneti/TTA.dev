@@ -447,3 +447,7 @@ You're now on the first production-ready release of TTA.dev with:
 **Last Updated:** November 7, 2025
 **Version:** 1.0.0
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Migration_0.1_to_1.0]]

@@ -46,3 +46,7 @@ See: `platform/primitives/src/tta_dev_primitives/core/base.py`
 
 concept:: workflow-context
 type:: core-infrastructure
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Workflowcontext]]

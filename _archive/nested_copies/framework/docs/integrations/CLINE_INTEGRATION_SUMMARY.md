@@ -451,3 +451,7 @@ User: Orchestrates and reviews both
 **Expected Timeline:** Full integration in 2 weeks
 
 **🚀 Let's build with Cline!**
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Integrations/Cline_integration_summary]]

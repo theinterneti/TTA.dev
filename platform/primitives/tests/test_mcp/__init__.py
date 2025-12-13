@@ -1,1 +1,1 @@
-"""Tests for the TTA.dev MCP Server."""
+# Logseq: [[TTA.dev/Platform/Primitives/Tests/Test_mcp/__init__]]  # noqa: E501, ERA001

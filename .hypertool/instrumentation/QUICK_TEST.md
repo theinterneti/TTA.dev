@@ -207,3 +207,7 @@ After successful quick test:
 ---
 
 **For comprehensive testing:** See `MANUAL_TESTING_PLAN.md` (2-3 hours)
+
+
+---
+**Logseq:** [[TTA.dev/.hypertool/Instrumentation/Quick_test]]

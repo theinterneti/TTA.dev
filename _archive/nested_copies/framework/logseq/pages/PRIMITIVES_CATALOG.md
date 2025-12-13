@@ -51,3 +51,7 @@ From the catalog:
 **Tags:** #documentation #primitives #catalog #reference
 
 **Note:** This page links to repository documentation. The authoritative source is `PRIMITIVES_CATALOG.md` in the repo root.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Primitives_catalog]]

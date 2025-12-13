@@ -110,6 +110,9 @@ ignore = [
 "**/src/tta_dev_primitives/apm/decorators.py" = [
     "ANN",
 ] # Decorators use complex generic types
+"**/src/tta_dev_primitives/analysis/transformer.py" = [
+    "N802",
+] # AST visitors require CamelCase method names
 "**/src/tta_dev_primitives/integrations/*_primitive.py" = [
     "ANN204",
     "ANN001",

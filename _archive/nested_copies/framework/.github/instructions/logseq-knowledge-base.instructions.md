@@ -395,3 +395,7 @@ applyTo: '**'
 **Last Updated:** October 31, 2025
 **Applies To:** All agents working on TTA.dev
 **Priority:** High - Required for all work
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/.github/Instructions/Logseq-knowledge-base.instructions]]

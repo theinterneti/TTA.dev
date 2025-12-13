@@ -632,3 +632,7 @@ await present_scene(composed_scene, player_interface)
 **Status:** Draft for review
 **Next Review:** After user feedback
 **Owner:** theinterneti
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Tta-analysis/Specs/Narrative_generation_engine_spec]]

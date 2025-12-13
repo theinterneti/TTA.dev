@@ -355,3 +355,7 @@ Make sure your code passes all CI checks before submitting a pull request.
 - [LangChain Documentation](https://python.langchain.com/docs/get_started/introduction)
 - [LangGraph Documentation](https://python.langchain.com/docs/langgraph)
 - [Transformers Documentation](https://huggingface.co/docs/transformers/index)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Development/Development_guide]]

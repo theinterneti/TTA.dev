@@ -10,7 +10,7 @@ You have 4 worktrees on the same machine:
 
 1. **TTA.dev** (main) - Orchestrator, coordinates the other 3
 2. **TTA.dev-augment** - Augment Code agent
-3. **TTA.dev-cline** - Cline (Claude) agent  
+3. **TTA.dev-cline** - Cline (Claude) agent
 4. **TTA.dev-copilot** - GitHub Copilot agent
 
 This system lets them work independently but **share learnings** automatically.
@@ -309,3 +309,7 @@ After setup, you should be able to:
 ---
 
 **Last Updated:** November 17, 2025
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Development/Git/Worktree_coordination_quickstart]]

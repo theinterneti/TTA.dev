@@ -459,3 +459,7 @@ This guide covers:
 **Maintainer:** TTA.dev Team
 **Status:** Active Development
 **Version:** 1.0
+
+
+---
+**Logseq:** [[TTA.dev/Local/.prompts/Readme]]

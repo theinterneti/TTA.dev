@@ -16,3 +16,7 @@
   - The `execute` method first evaluates the `selector` to get a `case_key`.
   - If `case_key` matches an entry in `cases`, the corresponding primitive is executed. If not, and a `default` primitive is provided, it is executed. Otherwise, the input is passed through.
   - Includes logging, metrics, and tracing for selector evaluation and case execution.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Switchprimitive]]

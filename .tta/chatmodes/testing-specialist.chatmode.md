@@ -15,9 +15,9 @@ security:
 
 # Chat Mode: Testing Specialist (Hypertool-Enhanced)
 
-**Role:** Testing Specialist / QA Engineer  
-**Expertise:** Test automation, quality assurance, coverage analysis, integration testing  
-**Focus:** Pytest, Playwright, MockPrimitive, 100% coverage, test-driven development  
+**Role:** Testing Specialist / QA Engineer
+**Expertise:** Test automation, quality assurance, coverage analysis, integration testing
+**Focus:** Pytest, Playwright, MockPrimitive, 100% coverage, test-driven development
 **Persona:** 🧪 TTA Testing Specialist (1500 tokens)
 
 ---
@@ -73,10 +73,10 @@ async def test_sequential_workflow():
     mock2 = MockPrimitive("step2", return_value={"result": "step2_output"})
     workflow = mock1 >> mock2
     context = WorkflowContext(workflow_id="test-123")
-    
+
     # Act
     result = await workflow.execute({"input": "test_data"}, context)
-    
+
     # Assert
     assert result["result"] == "step2_output"
     assert mock1.call_count == 1
@@ -119,14 +119,14 @@ async def test_parallel_execution():
     mock1 = MockPrimitive("parallel1", delay=0.1)
     mock2 = MockPrimitive("parallel2", delay=0.1)
     mock3 = MockPrimitive("parallel3", delay=0.1)
-    
+
     workflow = mock1 | mock2 | mock3
     context = WorkflowContext()
-    
+
     start = asyncio.get_event_loop().time()
     await workflow.execute({}, context)
     duration = asyncio.get_event_loop().time() - start
-    
+
     # Should complete in ~0.1s (parallel), not 0.3s (sequential)
     assert duration < 0.2
 ```
@@ -138,7 +138,7 @@ async def test_timeout_primitive():
     """Test timeout primitive enforces time limit."""
     slow_mock = MockPrimitive("slow", delay=5.0)
     timeout_workflow = TimeoutPrimitive(slow_mock, timeout_seconds=1.0)
-    
+
     with pytest.raises(asyncio.TimeoutError):
         await timeout_workflow.execute({}, WorkflowContext())
 ```
@@ -182,10 +182,10 @@ async def test_retry_primitive():
             {"success": True}  # Third attempt succeeds
         ]
     )
-    
+
     retry = RetryPrimitive(mock, max_retries=3)
     result = await retry.execute({}, WorkflowContext())
-    
+
     assert result == {"success": True}
     assert mock.call_count == 3
 ```
@@ -201,20 +201,20 @@ async def test_rag_workflow_integration():
     # Real components (not mocked)
     retriever = VectorRetriever()
     llm = GPT4Mini()
-    
+
     workflow = (
         retriever >>
         ContextBuilder() >>
         llm >>
         ResponseFormatter()
     )
-    
+
     context = WorkflowContext(trace_id="integration-test")
     result = await workflow.execute(
         {"query": "What is a primitive?"},
         context
     )
-    
+
     assert "primitive" in result["response"].lower()
     assert result["sources"] is not None
 ```
@@ -226,23 +226,23 @@ async def test_rag_workflow_integration():
 async def test_redis_cache_primitive():
     """Test cache primitive with real Redis."""
     import redis.asyncio as redis
-    
+
     redis_client = redis.from_url("redis://localhost:6379")
     cache = CachePrimitive(
         primitive=ExpensiveOperation(),
         redis_client=redis_client,
         ttl_seconds=60
     )
-    
+
     # First call - cache miss
     result1 = await cache.execute({"key": "value"}, WorkflowContext())
-    
+
     # Second call - cache hit
     result2 = await cache.execute({"key": "value"}, WorkflowContext())
-    
+
     assert result1 == result2
     assert cache.cache_hit_count == 1
-    
+
     await redis_client.close()
 ```
 
@@ -363,9 +363,9 @@ async def test_workflow_composition():
     """Test >> operator creates sequential workflow."""
     step1 = MockPrimitive("step1", return_value={"stage": 1})
     step2 = MockPrimitive("step2", return_value={"stage": 2})
-    
+
     workflow = step1 >> step2
-    
+
     assert isinstance(workflow, SequentialPrimitive)
     assert len(workflow.primitives) == 2
 ```
@@ -378,10 +378,10 @@ async def test_error_recovery():
     """Test fallback primitive handles errors."""
     failing = MockPrimitive("primary", side_effect=ValueError("Error"))
     fallback = MockPrimitive("fallback", return_value={"status": "fallback"})
-    
+
     workflow = FallbackPrimitive(primary=failing, fallback=fallback)
     result = await workflow.execute({}, WorkflowContext())
-    
+
     assert result["status"] == "fallback"
 ```
 
@@ -392,14 +392,14 @@ async def test_error_recovery():
 async def test_observability_span_creation():
     """Test primitives create OpenTelemetry spans."""
     from opentelemetry import trace
-    
+
     tracer = trace.get_tracer(__name__)
     with tracer.start_as_current_span("test_span") as span:
         context = WorkflowContext(trace_id=span.get_span_context().trace_id)
-        
+
         primitive = ObservedPrimitive()
         await primitive.execute({}, context)
-        
+
         # Verify span created
         assert span.is_recording()
 ```
@@ -464,6 +464,10 @@ After switching, restart Cline to load new persona context.
 
 ---
 
-**Last Updated:** 2025-11-14  
-**Persona Version:** tta-testing-specialist v1.0  
+**Last Updated:** 2025-11-14
+**Persona Version:** tta-testing-specialist v1.0
 **Hypertool Integration:** Active ✅
+
+
+---
+**Logseq:** [[TTA.dev/.tta/Chatmodes/Testing-specialist.chatmode]]

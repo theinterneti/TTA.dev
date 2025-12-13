@@ -48,3 +48,7 @@ client.disconnect()
 
 *   [Hypertool MCP Server Documentation](https://github.com/toolprint/hypertool-mcp)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Integrations/Hypertool-integration]]

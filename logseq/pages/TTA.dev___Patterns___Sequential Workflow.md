@@ -554,3 +554,7 @@ workflow = (
 **Category:** Workflow Pattern
 **Complexity:** Beginner to Intermediate
 **Status:** Production-ready
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___patterns___sequential workflow]]

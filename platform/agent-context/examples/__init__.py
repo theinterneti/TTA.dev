@@ -1,9 +1,1 @@
-"""
-Examples demonstrating agent coordination primitives.
-
-This package contains working examples of:
-- Multi-agent workflows
-- Agent handoffs
-- Memory persistence
-- Parallel agent coordination
-"""
+# Logseq: [[TTA.dev/Platform/Agent-context/Examples/__init__]]  # noqa: E501, ERA001

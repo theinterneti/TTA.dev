@@ -303,3 +303,7 @@ Once GitHub credentials are working:
 **Created:** 2025-10-29
 **Status:** Production Ready
 **Version:** 1.0
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_github_credential_setup]]

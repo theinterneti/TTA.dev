@@ -328,3 +328,7 @@ See [Architecture Documentation - Troubleshooting](./augster-modular-architectur
 - [Architecture Documentation](./augster-modular-architecture.md)
 - [Migration Guide](./augster-migration-guide.md)
 - [Original Monolithic Prompt](../.augment/user_guidelines.md.backup)
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Docs/Augster-usage-guide]]

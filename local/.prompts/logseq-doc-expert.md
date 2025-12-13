@@ -438,3 +438,7 @@ Once you activate this mode, begin with:
 **Last Updated:** 2025-10-30
 **Status:** Ready for use
 **Agent Mode:** Logseq Documentation Expert
+
+
+---
+**Logseq:** [[TTA.dev/Local/.prompts/Logseq-doc-expert]]

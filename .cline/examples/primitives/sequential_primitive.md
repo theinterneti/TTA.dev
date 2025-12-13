@@ -475,3 +475,7 @@ result = await pipeline.execute(data, context)
 ---
 
 **Next Steps:** When cline detects sequential workflow patterns, it should suggest SequentialPrimitive with appropriate step composition and context tracking.
+
+
+---
+**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Sequential_primitive]]

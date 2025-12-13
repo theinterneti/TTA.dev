@@ -17,3 +17,7 @@
   - If a cache hit occurs and the entry is not expired, the cached result is returned immediately.
   - If a cache miss or expiration occurs, the wrapped primitive is executed, and its result is stored in the cache with a timestamp.
   - Includes logging for cache hits, misses, and expirations, and tracks statistics in the `[[TTA.dev/Data/WorkflowContext.state]]`.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Cacheprimitive]]

@@ -198,3 +198,7 @@ type:: composition
 operator:: >>
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Sequentialprimitive]]

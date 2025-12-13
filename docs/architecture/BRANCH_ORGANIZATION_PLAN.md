@@ -1,7 +1,7 @@
 # TTA.dev Branch Organization Plan
 
-**Date:** November 16, 2025  
-**Current Status:** Changes stashed, organizing into logical branches  
+**Date:** November 16, 2025
+**Current Status:** Changes stashed, organizing into logical branches
 **Worktree Location:** Main repo on `feature/phase5-apm-integration`, copilot worktree on `agent/copilot`
 
 ---
@@ -18,7 +18,7 @@ We have two sets of changes to organize:
 ## 🗂️ Main Worktree Changes Organization
 
 ### Category 1: Native Observability Migration ✅
-**Branch:** `feature/phase5-apm-integration` (CURRENT - keep these staged)  
+**Branch:** `feature/phase5-apm-integration` (CURRENT - keep these staged)
 **Files:**
 - `.hypertool/BASELINE_TEST_RESULTS.md`
 - `.hypertool/NATIVE_LINUX_OBSERVABILITY_SETUP.md`
@@ -52,7 +52,7 @@ We have two sets of changes to organize:
 ---
 
 ### Category 2: CLI Architecture & Planning 🆕
-**Branch:** `feature/tta-dev-cli-architecture` (NEW)  
+**Branch:** `feature/tta-dev-cli-architecture` (NEW)
 **Files:**
 - `docs/architecture/APPLICATION_DEPLOYMENT_ARCHITECTURE.md`
 - `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
@@ -71,7 +71,7 @@ We have two sets of changes to organize:
 ---
 
 ### Category 3: Documentation Reorganization 🆕
-**Branch:** `feature/docs-reorganization` (NEW)  
+**Branch:** `feature/docs-reorganization` (NEW)
 **Files:**
 - `docs/quickstart/` (entire directory)
 - `docs/sessions/` (entire directory)
@@ -103,8 +103,8 @@ We have two sets of changes to organize:
 ## 🗂️ Copilot Worktree Changes Organization
 
 ### Current Status
-**Worktree:** `/home/thein/repos/TTA.dev-copilot`  
-**Branch:** `agent/copilot`  
+**Worktree:** `/home/thein/repos/TTA.dev-copilot`
+**Branch:** `agent/copilot`
 **Changes:** MASSIVE `framework/` directory structure (all staged)
 
 ### What is This?
@@ -248,3 +248,7 @@ main
 ---
 
 **Ready to execute?** Let's start with Phase 1 - organizing the main worktree changes!
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Branch_organization_plan]]

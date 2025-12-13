@@ -86,9 +86,9 @@ async def redis_client():
         db=1,  # Use test database
         decode_responses=True
     )
-    
+
     yield client
-    
+
     # Cleanup
     await client.flushdb()
     await client.close()
@@ -106,9 +106,9 @@ def neo4j_session():
         auth=("neo4j", "test_password")
     )
     session = driver.session(database="test")
-    
+
     yield session
-    
+
     # Cleanup
     session.run("MATCH (n) DETACH DELETE n")
     session.close()
@@ -141,16 +141,16 @@ async def test_session_creation_and_persistence(redis_client, neo4j_session):
     # Arrange
     user_id = "test_user_123"
     session_repo = SessionRepository(redis_client, neo4j_session)
-    
+
     # Act
     session = await session_repo.create(user_id)
-    
+
     # Assert - Redis
     cached = await redis_client.get(f"session:{session.id}")
     assert cached is not None
     cached_session = Session.parse_raw(cached)
     assert cached_session.user_id == user_id
-    
+
     # Assert - Neo4j
     result = neo4j_session.run(
         "MATCH (s:Session {id: $id}) RETURN s",
@@ -170,16 +170,16 @@ async def test_session_retrieval(redis_client, neo4j_session):
     # Arrange
     session_repo = SessionRepository(redis_client, neo4j_session)
     original_session = await session_repo.create("test_user")
-    
+
     # Act - First retrieval (from Redis)
     retrieved_session_1 = await session_repo.get(original_session.id)
-    
+
     # Clear Redis cache
     await redis_client.delete(f"session:{original_session.id}")
-    
+
     # Act - Second retrieval (from Neo4j)
     retrieved_session_2 = await session_repo.get(original_session.id)
-    
+
     # Assert
     assert retrieved_session_1.id == original_session.id
     assert retrieved_session_2.id == original_session.id
@@ -200,10 +200,10 @@ async def test_narrative_node_creation(neo4j_session):
     narrative_repo = NarrativeRepository(neo4j_session)
     session_id = "test_session_123"
     content = "You enter a dark forest..."
-    
+
     # Act
     node = await narrative_repo.create_node(session_id, content)
-    
+
     # Assert
     result = neo4j_session.run(
         "MATCH (n:NarrativeNode {id: $id}) RETURN n",
@@ -224,12 +224,12 @@ async def test_narrative_chain(neo4j_session):
     # Arrange
     narrative_repo = NarrativeRepository(neo4j_session)
     session_id = "test_session_123"
-    
+
     # Act - Create chain of nodes
     node1 = await narrative_repo.create_node(session_id, "First node")
     node2 = await narrative_repo.create_node(session_id, "Second node", previous_id=node1.id)
     node3 = await narrative_repo.create_node(session_id, "Third node", previous_id=node2.id)
-    
+
     # Assert - Verify chain
     result = neo4j_session.run(
         "MATCH path = (start:NarrativeNode {id: $start_id})-[:NEXT*]->(end:NarrativeNode {id: $end_id}) "
@@ -256,28 +256,28 @@ async def test_agent_turn_processing(redis_client, neo4j_session):
     session_repo = SessionRepository(redis_client, neo4j_session)
     narrative_repo = NarrativeRepository(neo4j_session)
     ai_provider = MockAIProvider()  # Use mock for AI
-    
+
     orchestrator = AgentOrchestrator(
         session_repo=session_repo,
         narrative_repo=narrative_repo,
         ai_provider=ai_provider
     )
-    
+
     # Create session
     session = await session_repo.create("test_user")
-    
+
     # Act
     user_input = "I explore the forest"
     response = await orchestrator.process_turn(session.id, user_input)
-    
+
     # Assert - Response generated
     assert response is not None
     assert len(response) > 0
-    
+
     # Assert - Session updated in Redis
     updated_session = await session_repo.get(session.id)
     assert updated_session.turn_count == 1
-    
+
     # Assert - Narrative node created in Neo4j
     history = await narrative_repo.get_history(session.id)
     assert len(history) == 1
@@ -298,19 +298,19 @@ def test_create_session_endpoint(redis_client, neo4j_session):
     """Test session creation via API endpoint."""
     # Arrange
     client = TestClient(app)
-    
+
     # Act
     response = client.post(
         "/api/v1/sessions",
         json={"user_id": "test_user"}
     )
-    
+
     # Assert - Response
     assert response.status_code == 200
     session_data = response.json()
     assert session_data["user_id"] == "test_user"
     assert "id" in session_data
-    
+
     # Assert - Database persistence
     session_id = session_data["id"]
     cached = redis_client.get(f"session:{session_id}")
@@ -331,7 +331,7 @@ async def test_redis_connection_error_recovery():
     # Arrange
     invalid_redis = Redis(host="invalid_host", port=9999)
     session_repo = SessionRepository(invalid_redis, neo4j_session)
-    
+
     # Act & Assert
     with pytest.raises(ConnectionError):
         await session_repo.create("test_user")
@@ -346,14 +346,14 @@ async def test_transaction_rollback_on_error(neo4j_session):
     """Test transaction is rolled back on error."""
     # Arrange
     narrative_repo = NarrativeRepository(neo4j_session)
-    
+
     # Act - Simulate error during transaction
     with pytest.raises(ValueError):
         async with narrative_repo.transaction():
             await narrative_repo.create_node("session1", "Node 1")
             await narrative_repo.create_node("session1", "Node 2")
             raise ValueError("Simulated error")
-    
+
     # Assert - No nodes created (transaction rolled back)
     result = neo4j_session.run("MATCH (n:NarrativeNode) RETURN count(n) as count")
     count = result.single()["count"]
@@ -372,15 +372,15 @@ async def test_transaction_rollback_on_error(neo4j_session):
 async def test_session_creation_performance(redis_client, neo4j_session):
     """Test session creation meets performance requirements."""
     import time
-    
+
     # Arrange
     session_repo = SessionRepository(redis_client, neo4j_session)
-    
+
     # Act
     start = time.time()
     session = await session_repo.create("test_user")
     duration = time.time() - start
-    
+
     # Assert - Should complete in < 100ms
     assert duration < 0.1, f"Session creation took {duration:.3f}s (expected < 0.1s)"
 ```
@@ -430,15 +430,15 @@ async def redis_client():
 async def test_complete_gameplay_session():
     """Test complete gameplay session with multiple turns."""
     session = await create_session("user123")
-    
+
     # Turn 1
     response1 = await process_turn(session.id, "I explore the forest")
     assert "forest" in response1.lower()
-    
+
     # Turn 2
     response2 = await process_turn(session.id, "I look around")
     assert len(response2) > 0
-    
+
     # Verify history
     history = await get_narrative_history(session.id)
     assert len(history) == 2
@@ -469,3 +469,7 @@ async def test_session_exists():
 
 **Note:** Integration tests should be run before staging deployment to ensure all components work together correctly.
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Context/Integration.context]]

@@ -692,3 +692,7 @@ The `.universal-instructions/` directory contains:
 - `mappings/` - Tool-specific configuration mappings
 
 **All changes should be made to `.universal-instructions/` and regenerated**, not edited directly in tool-specific files or this AGENTS.md.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports/Agents_hub_implementation]]

@@ -49,3 +49,7 @@ client.disconnect()
 
 *   [E2B MCP Server Documentation](https://github.com/e2b-dev/mcp-server)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Integrations/E2b-integration]]

@@ -2,7 +2,7 @@
 
 **Complete observability across Primitives, Integrations, and Personas**
 
-**Last Updated:** November 15, 2025  
+**Last Updated:** November 15, 2025
 **Status:** Production-Ready
 
 ---
@@ -193,7 +193,7 @@ class LLMAnalyzerPrimitive(InstrumentedPrimitive[dict, dict]):
 
     async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
         # OpenTelemetry span created automatically by InstrumentedPrimitive
-        
+
         # Start Langfuse trace (for LLM-specific analytics)
         trace = self.langfuse.start_trace(
             name="document-analysis",
@@ -279,19 +279,19 @@ langfuse = LangfuseIntegration()
 
 def switch_persona(new_persona: str, chatmode: str, context: WorkflowContext):
     """Switch persona and update observability context."""
-    
+
     # Update WorkflowContext (propagates to OpenTelemetry)
     context.metadata["persona"] = new_persona
     context.metadata["chatmode"] = chatmode
     context.tags["persona"] = new_persona  # For Grafana filtering
-    
+
     # Start new Langfuse trace for persona
     trace = langfuse.start_trace(
         name=f"persona-{chatmode}",
         persona=new_persona,
         chatmode=chatmode,
     )
-    
+
     return trace
 
 # Usage
@@ -330,7 +330,7 @@ sum by (persona) (rate(primitive_executions_total[5m]))
 rate(primitive_executions_total[5m])
 
 # Primitive duration by type
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(primitive_execution_duration_seconds_bucket[5m])
 )
 
@@ -574,6 +574,10 @@ print(f"Observability: {is_observability_enabled()}")
 
 ---
 
-**Last Updated:** November 15, 2025  
-**Status:** Production-Ready  
+**Last Updated:** November 15, 2025
+**Status:** Production-Ready
 **Maintained by:** TTA.dev Team
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Unified_observability_architecture]]

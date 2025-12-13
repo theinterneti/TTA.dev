@@ -323,3 +323,7 @@ If stuck on any item:
 **For:** TTA.dev v1.0.0 Release
 **Owner:** Development Team
 **Status:** Ready to Execute
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Quick-actions/Release_quick_actions]]

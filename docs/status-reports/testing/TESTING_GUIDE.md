@@ -346,3 +346,7 @@ uv run pytest -k "cache"
 ---
 
 **Questions?** See [AGENTS.md](../AGENTS.md) or open an issue.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Status-reports/Testing/Testing_guide]]

@@ -30,3 +30,7 @@ class MyPrimitive(InstrumentedPrimitive[dict, str]):
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Observability]] - Observability primitives
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___primitives___instrumentedprimitive]]

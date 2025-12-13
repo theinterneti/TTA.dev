@@ -73,3 +73,7 @@ With working API keys, your n8n dashboard will:
 - ✅ Show trends and recommendations for improvement
 
 **Please provide both new API keys and I'll complete the setup in 2-3 minutes!**
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_api_setup_instructions]]

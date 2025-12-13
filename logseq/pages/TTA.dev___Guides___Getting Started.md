@@ -327,3 +327,7 @@ result = await workflow.execute(input_data)  # ❌ Missing context
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 15 minutes
 **Difficulty:** [[Beginner]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___guides___getting started]]

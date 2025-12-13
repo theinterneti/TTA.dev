@@ -1000,3 +1000,7 @@ class MonitoredAPICall(WorkflowPrimitive[dict, dict]):
 **Last Updated:** [[2025-10-30]]
 **Estimated Time:** 45 minutes
 **Difficulty:** [[Intermediate]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___how-to___integrating external services]]

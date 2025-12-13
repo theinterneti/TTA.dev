@@ -419,3 +419,7 @@ InstrumentedPrimitive + WorkflowContext provided observability out of the box. N
 
 **Last Updated:** 2025-01-06
 **Next Review:** After Phase 2 planning (if needed)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/E2b_phase1_complete]]

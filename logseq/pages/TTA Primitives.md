@@ -410,3 +410,7 @@ uv run pytest --cov=platform/primitives --cov-report=html
 **Last Updated:** 2025-10-30
 **Maintainer:** @theinterneti
 **Status:** Production-ready
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta primitives]]

@@ -276,3 +276,7 @@ if __name__ == "__main__":
 ```
 
 This allows you to expose your MCP server over HTTP, which can be useful for certain integration scenarios.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp/Extending]]

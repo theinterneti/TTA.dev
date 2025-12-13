@@ -38,3 +38,7 @@ AI: "Created 'coding' toolset with 15 focused tools"
 
 You: "Switch to coding toolset"
 AI: "Equipped! I now have just the tools needed for development"
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Mcp-references/Hypertool]]

@@ -87,3 +87,7 @@ To add new prompt types or test metrics:
 1. Add new prompt types to the `TEST_PROMPTS` dictionary in `async_model_test.py`
 2. Add new evaluation metrics to the `test_model` function in `async_model_test.py`
 3. Update the visualization code in `visualize_async_results.py` to include the new metrics
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Scripts/Async_model_testing_readme]]

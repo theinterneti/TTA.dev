@@ -331,3 +331,7 @@ read_memory_Serena: "authentication architecture decisions"
 
 **Last Updated**: 2025-10-26
 **Status**: Active - Safety Architect chat mode
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Safety-architect.chatmode]]

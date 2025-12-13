@@ -19,3 +19,7 @@
 - [ ] Create migration guide (depends: T-009) (4h) [T-010]
 - [ ] Update examples (depends: T-009) (8h) [T-011]
 - [ ] Deprecation warnings (depends: T-010, T-011) (4h) [T-012]
+
+
+---
+**Logseq:** [[TTA.dev/Data/Experiments/Tasks-real-world/Exp2-observability-refactor/Plan]]

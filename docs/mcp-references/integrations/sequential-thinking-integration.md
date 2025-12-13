@@ -49,3 +49,7 @@ client.disconnect()
 
 *   [Sequential Thinking MCP Server Documentation](https://github.com/arben-adm/mcp-sequential-thinking)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Integrations/Sequential-thinking-integration]]

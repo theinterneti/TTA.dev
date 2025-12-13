@@ -247,23 +247,27 @@ git push origin feat/codecov-integration  # Triggers workflow
 ## 🚨 Troubleshooting
 
 ### Workflow Fails
-**Check:** Logs in Actions tab  
-**Common:** Network timeout, dependency conflicts  
+**Check:** Logs in Actions tab
+**Common:** Network timeout, dependency conflicts
 **Fix:** See `docs/development/TESTING_COPILOT_SETUP.md`
 
 ### Cache Not Working
-**Check:** "Cache restored" message in logs  
-**Common:** Cache key mismatch  
+**Check:** "Cache restored" message in logs
+**Common:** Cache key mismatch
 **Fix:** Verify `hashFiles()` pattern in workflow
 
 ### Script Fails Locally
-**Check:** `./scripts/check-environment.sh --help`  
-**Common:** Missing Python or uv  
+**Check:** `./scripts/check-environment.sh --help`
+**Common:** Missing Python or uv
 **Fix:** Install: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 ---
 
-**Created:** October 29, 2025  
-**Current Status:** ✅ Workflow test in progress  
-**Next Step:** Monitor Actions tab for test results (2-3 min)  
+**Created:** October 29, 2025
+**Current Status:** ✅ Workflow test in progress
+**Next Step:** Monitor Actions tab for test results (2-3 min)
 **After That:** Test cache → Review checklist → Merge to main
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Action_items_copilot_setup]]

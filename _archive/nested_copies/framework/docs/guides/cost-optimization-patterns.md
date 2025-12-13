@@ -1111,3 +1111,7 @@ test_routing()
 **Maintained by:** TTA.dev Team
 
 **💡 Pro Tip:** Combine all 4 patterns for maximum cost savings (50-70% reduction typical)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Guides/Cost-optimization-patterns]]

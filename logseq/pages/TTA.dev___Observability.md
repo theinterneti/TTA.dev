@@ -29,3 +29,7 @@ See the main observability documentation in:
 ## Tags
 
 #observability #tracing #metrics #logging #opentelemetry
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___observability]]

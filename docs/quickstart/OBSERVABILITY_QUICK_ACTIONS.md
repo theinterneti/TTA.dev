@@ -82,12 +82,12 @@ rate(tta_workflow_executions_total[5m]) * 60
 
 ```promql
 # P95 latency
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   sum by (le) (rate(tta_execution_duration_seconds_bucket[5m]))
 )
 
 # Average duration
-avg(rate(tta_execution_duration_seconds_sum[5m])) / 
+avg(rate(tta_execution_duration_seconds_sum[5m])) /
 avg(rate(tta_execution_duration_seconds_count[5m]))
 ```
 
@@ -319,6 +319,10 @@ Run this checklist to verify everything is working:
 
 ---
 
-**Quick Actions Card Version:** 1.0  
-**Last Updated:** 2025-11-15 20:30 PST  
+**Quick Actions Card Version:** 1.0
+**Last Updated:** 2025-11-15 20:30 PST
 **System Status:** Production Ready 🚀
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Quickstart/Observability_quick_actions]]

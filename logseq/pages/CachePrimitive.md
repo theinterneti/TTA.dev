@@ -38,3 +38,7 @@ cached_op = CachePrimitive(
 ```
 
 **Source:** `platform/primitives/src/tta_dev_primitives/performance/cache.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Cacheprimitive]]

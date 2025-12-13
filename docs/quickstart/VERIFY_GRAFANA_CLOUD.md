@@ -27,7 +27,7 @@ sum by (primitive_name, status) (tta_primitive_executions_total)
 
 #### Monitor execution duration (p95):
 ```promql
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   sum by (le, primitive_type) (
     rate(tta_execution_duration_seconds_bucket[5m])
   )
@@ -205,3 +205,7 @@ All configuration is in place:
 
 **Setup Completed:** 2025-11-15 19:34 PST
 **Next Action:** Open Grafana Cloud and explore your metrics!
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Quickstart/Verify_grafana_cloud]]

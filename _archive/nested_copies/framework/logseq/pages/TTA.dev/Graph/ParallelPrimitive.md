@@ -17,3 +17,7 @@
   - Each parallel branch receives a child `[[TTA.dev/Data/WorkflowContext]]` for proper trace context inheritance.
   - Includes extensive logging, metrics, and tracing for each branch, capturing fan-out and fan-in points.
   - Supports the `|` operator for intuitive parallel composition.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Parallelprimitive]]

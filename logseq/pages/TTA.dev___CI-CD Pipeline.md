@@ -56,3 +56,7 @@ TTA.dev uses GitHub Actions for automated CI/CD with comprehensive validation an
 
 infrastructure:: ci-cd
 automation:: true
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___ci-cd pipeline]]

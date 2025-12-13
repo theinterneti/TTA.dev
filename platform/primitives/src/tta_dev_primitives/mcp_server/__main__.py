@@ -1,9 +1,1 @@
-"""TTA.dev MCP Server entry point.
-
-Allows running as: python -m tta_dev_primitives.mcp_server
-"""
-
-from tta_dev_primitives.mcp_server.server import run_server
-
-if __name__ == "__main__":
-    run_server()
+# Logseq: [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Mcp_server/__main__]]  # noqa: E501, ERA001

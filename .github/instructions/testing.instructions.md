@@ -88,3 +88,7 @@ RUN_INTEGRATION=true uv run pytest -m integration
 - [ ] Tests success, failure, and edge cases
 - [ ] No external dependencies
 - [ ] Fast execution (< 1s per test)
+
+
+---
+**Logseq:** [[TTA.dev/.github/Instructions/Testing.instructions]]

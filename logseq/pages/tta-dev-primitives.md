@@ -298,3 +298,7 @@ type:: core
 feature:: composition
 feature:: recovery
 feature:: performance
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta-dev-primitives]]

@@ -1,7 +1,7 @@
 # Auto-Integration Action Plan
 
-**Goal:** Enable automatic TTA.dev integration for Copilot and Cline  
-**Timeline:** 2-3 days for MVP  
+**Goal:** Enable automatic TTA.dev integration for Copilot and Cline
+**Timeline:** 2-3 days for MVP
 **Status:** Ready to Execute
 
 ---
@@ -207,14 +207,14 @@ Add to today's journal (`logseq/journals/2025_11_17.md`):
   estimated-effort:: 2-3 days
   impact:: game-changer
   deliverable:: Zero-config setup for Copilot & Cline
-  
+
   Steps:
   - [ ] Step 1: Workspace MCP config (30 min)
   - [ ] Step 2: Copilot-Hypertool bridge (1 hour)
   - [ ] Step 3: Cline auto-context (1 hour)
   - [ ] Step 4: Testing (1-2 hours)
   - [ ] Step 5: Documentation (30 min)
-  
+
   Docs:
   - [[docs/mcp/AUTO_INTEGRATION_ANALYSIS.md]]
   - [[docs/mcp/AUTO_INTEGRATION_QUICKSTART.md]]
@@ -271,6 +271,10 @@ Add to today's journal (`logseq/journals/2025_11_17.md`):
 
 ---
 
-**Last Updated:** November 17, 2025  
-**Status:** Ready to Execute  
+**Last Updated:** November 17, 2025
+**Status:** Ready to Execute
 **Next Action:** Get approval and start Day 1
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp/Auto_integration_action_plan]]

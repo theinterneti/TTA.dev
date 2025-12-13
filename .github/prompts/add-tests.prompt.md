@@ -36,10 +36,10 @@ class Test${input:ComponentName}:
         """Test successful execution."""
         # Arrange
         mock = MockPrimitive("test", return_value={"success": True})
-        
+
         # Act
         result = await mock.execute("input", context)
-        
+
         # Assert
         assert result == {"success": True}
         assert mock.call_count == 1
@@ -49,7 +49,7 @@ class Test${input:ComponentName}:
         """Test error handling."""
         # Arrange
         mock = MockPrimitive("test", side_effect=ValueError("Error"))
-        
+
         # Act & Assert
         with pytest.raises(ValueError, match="Error"):
             await mock.execute("input", context)
@@ -61,10 +61,10 @@ class Test${input:ComponentName}:
         mock1 = MockPrimitive("step1", return_value="result1")
         mock2 = MockPrimitive("step2", return_value="result2")
         workflow = mock1 >> mock2
-        
+
         # Act
         result = await workflow.execute("input", context)
-        
+
         # Assert
         assert result == "result2"
 ```
@@ -83,3 +83,7 @@ class Test${input:ComponentName}:
 uv run pytest tests/test_${input:module}.py -v
 uv run pytest --cov=src --cov-report=html
 ```
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Add-tests.prompt]]

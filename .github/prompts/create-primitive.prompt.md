@@ -67,3 +67,7 @@ class ${input:PrimitiveName}Primitive(WorkflowPrimitive[${input:InputType}, ${in
 2. Export from `__init__.py`
 3. Add to `PRIMITIVES_CATALOG.md`
 4. Run quality checks: `uv run ruff format . && uv run pytest -v`
+
+
+---
+**Logseq:** [[TTA.dev/.github/Prompts/Create-primitive.prompt]]

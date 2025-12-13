@@ -380,3 +380,7 @@ I just started the observability stack. Current status:
 
 **Status:** Observability services now running. Ready to test with example workflows.
 **Next Action:** Run an instrumented example and verify traces appear in Jaeger.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Status-reports-2025/Observability_gap_analysis]]

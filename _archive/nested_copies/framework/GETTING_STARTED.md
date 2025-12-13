@@ -471,3 +471,7 @@ Interested in contributing? Check out:
 ---
 
 **Ready to build?** Start with the [quick start](#quick-start-5-minutes) above or explore the [examples](packages/tta-dev-primitives/examples/).
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Getting_started]]

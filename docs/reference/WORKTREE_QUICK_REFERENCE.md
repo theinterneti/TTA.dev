@@ -122,7 +122,7 @@ git config --worktree user.name "GitHub Copilot Agent"
 
 ### All Worktrees Status
 ```bash
-for dir in ~/repos/TTA.dev-*; do 
+for dir in ~/repos/TTA.dev-*; do
     echo "=== $(basename $dir) ==="
     cd "$dir" && git status -sb
     echo ""
@@ -174,3 +174,7 @@ git rebase --continue
 ## 📚 Full Documentation
 
 See: `~/repos/TTA.dev/WORKTREE_SETUP_GUIDE.md`
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Reference/Worktree_quick_reference]]

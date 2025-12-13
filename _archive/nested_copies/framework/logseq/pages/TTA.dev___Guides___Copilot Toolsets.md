@@ -571,3 +571,6 @@ MCP servers expose tools that can be included in toolsets:
 **Difficulty:** [[Intermediate]]
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___copilot toolsets]]

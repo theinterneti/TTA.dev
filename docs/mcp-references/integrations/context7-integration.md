@@ -52,3 +52,7 @@ client.disconnect()
 
 *   [Context7 MCP Server Documentation](https://github.com/upstash/context7-mcp)
 *   [Model Context Protocol (MCP) Specification](https://modelcontextprotocol.io/)
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Mcp-references/Integrations/Context7-integration]]

@@ -350,3 +350,7 @@ If you have questions about contributing, please:
 
 **Thank you for contributing to the Universal Agent Context System!**
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/Contributing]]

@@ -123,3 +123,7 @@ Interested in implementing AnthropicPrimitive? See:
 primitive:: llm
 status:: planned
 provider:: anthropic
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Anthropicprimitive]]

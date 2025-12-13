@@ -11,3 +11,7 @@
 - ### Fields
   - `task_description`: A detailed textual description of the task to be classified.
   - `user_preferences`: An optional dictionary for user-specific preferences that might influence model selection (e.g., `{"prefer_free": True}`).
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Data/Taskclassifierrequest]]

@@ -41,3 +41,7 @@ See comprehensive guides in `docs/guides/`
 ## Tags
 
 #how-to #tutorials #guides #examples
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/How-to]]

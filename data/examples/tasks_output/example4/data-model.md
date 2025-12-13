@@ -16,3 +16,7 @@ User entity from requirements
 - `id`: UUID
 - `created_at`: DateTime
 - `updated_at`: DateTime
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Tasks_output/Example4/Data-model]]

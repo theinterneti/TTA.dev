@@ -488,3 +488,7 @@ Create `novel-patterns-registry.md`:
 **Status:** 🟢 Ready to begin deep dive
 **Next Action:** Start rapid triage of tta-ai-framework
 **Focus:** Therapeutic, Game, and Narrative patterns
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Planning/Tta-analysis/Option_a_deep_dive_plan]]

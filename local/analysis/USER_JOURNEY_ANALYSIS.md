@@ -925,3 +925,7 @@ graph TB
 **Last Updated:** October 29, 2025
 **Maintained by:** TTA.dev Team
 **Version:** 1.0.0
+
+
+---
+**Logseq:** [[TTA.dev/Local/Analysis/User_journey_analysis]]

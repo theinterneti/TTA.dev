@@ -475,3 +475,7 @@ Create a workflow that processes user signups:
 **Status:** Ready to Begin
 **Priority:** 🔥 High
 **Last Updated:** October 29, 2025
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Planning/Mcp_registry_integration_plan]]

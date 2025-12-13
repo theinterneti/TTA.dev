@@ -24,6 +24,15 @@ TTA.dev is a curated collection of **battle-tested, production-ready** component
 
 ---
 
+## 🤝 Relationship to TTA (The Game)
+
+TTA.dev was originally extracted from the **Therapeutic Text Adventure (TTA)** project.
+
+- **TTA.dev (This Repo):** The reusable DevOps, infrastructure, and agentic primitives.
+- **TTA (Game Repo):** The narrative storytelling game built on top of this platform.
+
+---
+
 ## 📦 Repository Structure
 
 TTA.dev is organized into **platform** infrastructure packages and **apps** for end-user deployments:
@@ -467,3 +476,7 @@ If you find TTA.dev useful, please consider giving it a star! ⭐
 ---
 
 **Last Updated:** 2025-11-10
+
+
+---
+**Logseq:** [[TTA.dev/Readme]]

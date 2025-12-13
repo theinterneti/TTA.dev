@@ -13,3 +13,7 @@
   - `model`: Optional. The specific OpenAI model to use for the request (overrides the primitive's default).
   - `temperature`: Optional. Controls the randomness of the output (0-2).
   - `max_tokens`: Optional. The maximum number of tokens to generate in the response.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Data/Openairequest]]

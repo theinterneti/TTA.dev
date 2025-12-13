@@ -877,3 +877,7 @@ done
 **Last Updated:** [[2025-10-30]]
 **Priority:** [[Critical]]
 **Applies To:** [[All AI Agents]], [[GitHub Copilot]], [[Development Team]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___guides___logseq documentation standards for agents]]

@@ -12,3 +12,7 @@
 - ### Usage
   - It allows developers to easily integrate OpenAI LLMs into TTA.dev workflows, handling request/response serialization (`[[TTA.dev/Data/OpenAIRequest]]`, `[[TTA.dev/Data/OpenAIResponse]]`) and leveraging `[[TTA.dev/Data/WorkflowContext]]` for observability.
   - Configurable with a default model and API key, with options to override per request.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Tools/Openaiprimitive]]

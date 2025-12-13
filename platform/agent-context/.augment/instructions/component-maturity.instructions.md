@@ -332,12 +332,12 @@ def validate_dependency_maturity(
     """Validate component dependencies meet maturity requirements."""
     stage_order = ["development", "staging", "production"]
     target_index = stage_order.index(target_stage)
-    
+
     for dep_component, dep_stage in dependencies:
         dep_index = stage_order.index(dep_stage)
         if dep_index < target_index:
             return False
-    
+
     return True
 ```
 
@@ -533,7 +533,11 @@ gh issue create \
 
 ---
 
-**Last Updated:** 2025-10-20  
-**Status:** Active  
+**Last Updated:** 2025-10-20
+**Status:** Active
 **Applies To:** All components in `src/` directory
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Component-maturity.instructions]]

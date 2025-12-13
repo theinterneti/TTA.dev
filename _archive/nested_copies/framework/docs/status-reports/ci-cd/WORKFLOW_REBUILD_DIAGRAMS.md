@@ -492,3 +492,7 @@ graph LR
 - 🔴 Red: Problem/Old
 
 **Full Documentation**: See [`WORKFLOW_REBUILD_PLAN.md`](./WORKFLOW_REBUILD_PLAN.md)
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Status-reports/Ci-cd/Workflow_rebuild_diagrams]]

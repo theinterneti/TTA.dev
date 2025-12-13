@@ -218,3 +218,7 @@ When your app goes viral:
 ---
 
 **Remember:** Observability is insurance. You don't need it until you REALLY need it. TTA.dev makes it easy to add when you're ready.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Agents/Universal/Patterns/Observability.instructions]]

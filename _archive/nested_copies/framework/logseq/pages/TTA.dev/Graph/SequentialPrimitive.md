@@ -17,3 +17,7 @@
   - It handles passing the output of the previous primitive as input to the current one.
   - Includes extensive logging, metrics, and tracing for each step, leveraging `[[TTA.dev/Data/WorkflowContext]]` for context propagation.
   - Supports the `>>` operator for intuitive sequential composition.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Sequentialprimitive]]

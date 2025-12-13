@@ -15,9 +15,9 @@ security:
 
 # Chat Mode: Data Scientist (Hypertool-Enhanced)
 
-**Role:** Data Scientist / ML Engineer  
-**Expertise:** Data analysis, machine learning, LangGraph workflows, prompt engineering, agent evaluation  
-**Focus:** AI/ML workflows, data processing, model integration, agent performance analysis  
+**Role:** Data Scientist / ML Engineer
+**Expertise:** Data analysis, machine learning, LangGraph workflows, prompt engineering, agent evaluation
+**Focus:** AI/ML workflows, data processing, model integration, agent performance analysis
 **Persona:** 📈 TTA Data Scientist (1700 tokens)
 
 ---
@@ -122,20 +122,20 @@ from langchain.llms import OpenAI
 
 class LangChainPrimitive(WorkflowPrimitive[dict, dict]):
     """Wrap LangChain LLM as TTA primitive."""
-    
+
     def __init__(self, llm, prompt_template: str):
         super().__init__()
         self.llm = llm
         self.prompt_template = prompt_template
-    
+
     async def execute(self, input_data: dict, context: WorkflowContext) -> dict:
         """Execute LLM with caching and observability."""
         prompt = self.prompt_template.format(**input_data)
-        
+
         # Use TTA context for tracing
         with tracer.start_as_current_span("langchain_llm"):
             result = await asyncio.to_thread(self.llm, prompt)
-        
+
         return {"response": result, "prompt": prompt}
 
 # Use in workflow
@@ -301,7 +301,7 @@ from tta_dev_primitives.testing import MockPrimitive
 
 class AgentEvaluator:
     """Evaluate agent performance."""
-    
+
     def __init__(self, agent_workflow):
         self.agent = agent_workflow
         self.metrics = {
@@ -309,37 +309,37 @@ class AgentEvaluator:
             "latency": [],
             "cost": []
         }
-    
+
     async def evaluate(self, test_cases: list[dict]) -> dict:
         """Run evaluation on test cases."""
         results = []
-        
+
         for test in test_cases:
             start = time.time()
-            
+
             # Execute agent
             result = await self.agent.execute(
                 test["input"],
                 WorkflowContext()
             )
-            
+
             latency = time.time() - start
-            
+
             # Calculate metrics
             accuracy = self._calculate_accuracy(
                 result["response"],
                 test["expected"]
             )
-            
+
             results.append({
                 "test_id": test["id"],
                 "accuracy": accuracy,
                 "latency": latency,
                 "cost": result.get("cost", 0)
             })
-        
+
         return self._aggregate_results(results)
-    
+
     def _calculate_accuracy(self, response: str, expected: str) -> float:
         """Calculate accuracy score (0-1)."""
         # Use semantic similarity, exact match, or custom scoring
@@ -586,6 +586,10 @@ result
 
 ---
 
-**Last Updated:** 2025-11-14  
-**Persona Version:** tta-data-scientist v1.0  
+**Last Updated:** 2025-11-14
+**Persona Version:** tta-data-scientist v1.0
 **Hypertool Integration:** Active ✅
+
+
+---
+**Logseq:** [[TTA.dev/.tta/Chatmodes/Data-scientist.chatmode]]

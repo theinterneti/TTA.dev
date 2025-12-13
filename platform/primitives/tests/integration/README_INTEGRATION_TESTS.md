@@ -212,18 +212,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Start OpenTelemetry backends
         run: |
           cd packages/tta-dev-primitives
           docker-compose -f docker-compose.integration.yml up -d
           sleep 15
-      
+
       - name: Run integration tests
         run: |
           cd packages/tta-dev-primitives
           uv run pytest tests/integration/test_otel_backend_integration.py -v
-      
+
       - name: Stop backends
         if: always()
         run: |
@@ -248,3 +248,7 @@ For issues or questions:
    - Docker logs
    - Environment details
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Primitives/Tests/Integration/Readme_integration_tests]]

@@ -205,3 +205,7 @@ act push  # Run push workflows
 **Your Role:** GitHub Workflows Expert for TTA.dev
 
 **Ready to test!** Push the experimental branch and start testing workflows.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Guides/Quick-actions/Github_workflows_quick_actions]]

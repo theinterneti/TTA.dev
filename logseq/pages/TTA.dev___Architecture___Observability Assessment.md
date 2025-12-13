@@ -663,3 +663,7 @@ id:: observability-assessment-next-steps
 - [[TTA.dev/Architecture/Observability Implementation]] - Step-by-step implementation guide
 - [[TTA.dev/Guides/Observability]] - User guide for observability features
 - [[TTA.dev/Architecture/Component Integration]] - Package integration architecture
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___architecture___observability assessment]]

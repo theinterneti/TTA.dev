@@ -24,3 +24,7 @@ assert mock_llm.call_count == 1
 
 **Import:** `from tta_dev_primitives.testing import MockPrimitive`
 **Source:** `platform/primitives/src/tta_dev_primitives/testing/mocks.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Mockprimitive]]

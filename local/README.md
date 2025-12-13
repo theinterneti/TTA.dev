@@ -40,3 +40,7 @@ Files in `local/` should be:
 ---
 
 **Note:** This directory is gitignored. Content here is local to your machine only.
+
+
+---
+**Logseq:** [[TTA.dev/Local/Readme]]

@@ -491,3 +491,6 @@ result = await memory.get("key")
 **Maintained by:** TTA.dev Team
 
 - [[Project Hub]]
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Database]]

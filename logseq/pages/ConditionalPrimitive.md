@@ -25,3 +25,7 @@ workflow = ConditionalPrimitive(
 
 **Import:** `from tta_dev_primitives import ConditionalPrimitive`
 **Source:** `platform/primitives/src/tta_dev_primitives/core/conditional.py`
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Conditionalprimitive]]

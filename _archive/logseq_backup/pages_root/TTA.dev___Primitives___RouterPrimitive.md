@@ -42,3 +42,7 @@ Route input to appropriate primitive based on routing function.
 
 - [[TTA.dev/Primitives]] - Primitives index
 - [[TTA.dev/Primitives/Core]] - Core primitives
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Tta.dev___primitives___routerprimitive]]

@@ -11,3 +11,7 @@
 ## Phase 3: Testing (1 day, 8h)
 - [ ] Unit tests (4h)
 - [ ] Integration tests (4h)
+
+
+---
+**Logseq:** [[TTA.dev/Data/Examples/Tasks_output/Example1/Plan]]

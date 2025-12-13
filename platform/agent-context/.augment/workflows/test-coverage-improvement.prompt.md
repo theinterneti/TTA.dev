@@ -220,20 +220,20 @@ async def test_process_narrative_branch_success():
     branch_id = "branch456"
     mock_redis = AsyncMock()
     mock_neo4j = Mock()
-    
+
     # Mock Redis response
     mock_redis.get.return_value = '{"current_node": "node1"}'
-    
+
     # Mock Neo4j response
     mock_result = Mock()
     mock_result.single.return_value = {"n": {"id": "node2", "content": "..."}}
     mock_neo4j.run.return_value = mock_result
-    
+
     # Act
     result = await process_narrative_branch(
         session_id, branch_id, mock_redis, mock_neo4j
     )
-    
+
     # Assert
     assert result.id == "node2"
     mock_redis.get.assert_called_once_with(f"session:{session_id}")
@@ -247,10 +247,10 @@ async def test_process_narrative_branch_invalid_session():
     branch_id = "branch456"
     mock_redis = AsyncMock()
     mock_neo4j = Mock()
-    
+
     # Mock Redis returns None (session not found)
     mock_redis.get.return_value = None
-    
+
     # Act & Assert
     with pytest.raises(SessionNotFoundError):
         await process_narrative_branch(
@@ -271,18 +271,18 @@ async def test_process_narrative_branch_multiple_branches(
     session_id = "session123"
     mock_redis = AsyncMock()
     mock_neo4j = Mock()
-    
+
     # Mock responses
     mock_redis.get.return_value = '{"current_node": "node1"}'
     mock_result = Mock()
     mock_result.single.return_value = {"n": {"id": expected_node}}
     mock_neo4j.run.return_value = mock_result
-    
+
     # Act
     result = await process_narrative_branch(
         session_id, branch_id, mock_redis, mock_neo4j
     )
-    
+
     # Assert
     assert result.id == expected_node
 ```
@@ -342,38 +342,38 @@ async def test_narrative_branch_persistence(redis_client, neo4j_session):
     # Arrange
     session_id = "session123"
     branch_id = "branch456"
-    
+
     # Create initial session in Redis
     await redis_client.set(
         f"session:{session_id}",
         '{"current_node": "node1"}'
     )
-    
+
     # Create nodes in Neo4j
     neo4j_session.run(
         "CREATE (n1:Node {id: 'node1'})-[:BRANCH {id: $branch_id}]->(n2:Node {id: 'node2'})",
         branch_id=branch_id
     )
-    
+
     # Act
     result = await process_narrative_branch(
         session_id, branch_id, redis_client, neo4j_session
     )
-    
+
     # Assert
     assert result.id == "node2"
-    
+
     # Verify Redis updated
     session_data = await redis_client.get(f"session:{session_id}")
     assert "node2" in session_data
-    
+
     # Verify Neo4j traversal recorded
     traversal = neo4j_session.run(
         "MATCH (s:Session {id: $session_id})-[:TRAVERSED]->(n:Node) RETURN n",
         session_id=session_id
     )
     assert traversal.single() is not None
-    
+
     # Cleanup
     await redis_client.delete(f"session:{session_id}")
     neo4j_session.run("MATCH (n) WHERE n.id IN ['node1', 'node2'] DETACH DELETE n")
@@ -385,22 +385,22 @@ async def test_narrative_branch_transaction_rollback(redis_client, neo4j_session
     # Arrange
     session_id = "session123"
     branch_id = "invalid_branch"
-    
+
     await redis_client.set(
         f"session:{session_id}",
         '{"current_node": "node1"}'
     )
-    
+
     # Act & Assert
     with pytest.raises(BranchNotFoundError):
         await process_narrative_branch(
             session_id, branch_id, redis_client, neo4j_session
         )
-    
+
     # Verify Redis not modified (transaction rolled back)
     session_data = await redis_client.get(f"session:{session_id}")
     assert "node1" in session_data  # Still at original node
-    
+
     # Cleanup
     await redis_client.delete(f"session:{session_id}")
 ```
@@ -570,3 +570,7 @@ python .augment/context/cli.py add coverage-improvement-component-2025-10-20 \
 
 **Note:** Focus on meaningful tests that verify behavior, not just increase coverage numbers.
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Workflows/Test-coverage-improvement.prompt]]

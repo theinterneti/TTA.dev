@@ -88,3 +88,7 @@ TTA.dev maintains high quality standards with comprehensive testing and automate
 quality:: testing
 automation:: ci-cd
 standards:: high
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Testing & quality]]

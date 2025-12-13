@@ -117,3 +117,7 @@ result = await workflow.execute(context)
 
 - [[TTA.dev/KB Structure]] - How the KB is organized
 - [[TTA.dev/Architecture]] - System architecture
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___primitives]]

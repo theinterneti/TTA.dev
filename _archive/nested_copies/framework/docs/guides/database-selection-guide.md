@@ -13,11 +13,11 @@ graph TD
     B -->|Yes| D{Need real-time updates?}
     D -->|No| E[SupabasePrimitive]
     D -->|Yes| F[SupabasePrimitive with real-time]
-    
+
     C --> G{Need to deploy?}
     G -->|No| H[✅ SQLitePrimitive - Perfect]
     G -->|Yes| I[⚠️ Consider SupabasePrimitive instead]
-    
+
     E --> J{Budget?}
     J -->|Free tier OK| K[✅ SupabasePrimitive - Start free]
     J -->|Need more| L[✅ SupabasePrimitive - Paid plan]
@@ -121,7 +121,7 @@ async def main():
     # Create primitive (uses local file)
     db = SQLitePrimitive(database="tasks.db")
     context = WorkflowContext(workflow_id="task-manager")
-    
+
     # Create table
     create_table = SQLiteRequest(
         query="""
@@ -135,7 +135,7 @@ async def main():
         fetch="none"
     )
     await db.execute(create_table, context)
-    
+
     # Add task
     add_task = SQLiteRequest(
         query="INSERT INTO tasks (title) VALUES (?)",
@@ -143,14 +143,14 @@ async def main():
         fetch="none"
     )
     await db.execute(add_task, context)
-    
+
     # Get all tasks
     get_tasks = SQLiteRequest(
         query="SELECT * FROM tasks ORDER BY created_at DESC",
         fetch="all"
     )
     response = await db.execute(get_tasks, context)
-    
+
     print(f"Tasks: {response.data}")
 
 if __name__ == "__main__":
@@ -178,7 +178,7 @@ async def main():
         key=os.getenv("SUPABASE_KEY")
     )
     context = WorkflowContext(workflow_id="team-tasks")
-    
+
     # Add task (table already exists in Supabase)
     add_task = SupabaseRequest(
         operation="insert",
@@ -190,7 +190,7 @@ async def main():
         }
     )
     await db.execute(add_task, context)
-    
+
     # Get team's tasks
     get_tasks = SupabaseRequest(
         operation="select",
@@ -199,9 +199,9 @@ async def main():
         columns="id,title,assigned_to,completed"
     )
     response = await db.execute(get_tasks, context)
-    
+
     print(f"Team tasks: {response.data}")
-    
+
     # Update task status
     update_task = SupabaseRequest(
         operation="update",
@@ -287,7 +287,11 @@ db = SupabasePrimitive(url=SUPABASE_URL, key=SUPABASE_KEY)
 
 ---
 
-**Last Updated:** October 30, 2025  
-**For:** AI Agents & Developers (all skill levels)  
+**Last Updated:** October 30, 2025
+**For:** AI Agents & Developers (all skill levels)
 **Maintained by:** TTA.dev Team
 
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Docs/Guides/Database-selection-guide]]

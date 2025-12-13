@@ -344,3 +344,7 @@ This workflow is provided as-is for educational and commercial use. Modify and a
 ---
 
 **Created with ❤️ using n8n, GitHub API, and Google Gemini AI**
+
+
+---
+**Logseq:** [[TTA.dev/Apps/N8n/N8n_github_dashboard_guide]]

@@ -153,3 +153,7 @@ Learn about [[TTA.dev/Observability]]
 **Tags:** #difficulty-level #beginner #learning #getting-started
 
 **Last Updated:** 2025-12-04
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Logseq_backup/Pages_root/Beginner]]

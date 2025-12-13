@@ -453,3 +453,7 @@ Interested in implementing SupabasePrimitive?
 **Priority:** Medium
 **Target Release:** TBD
 **Tracking:** [[TTA.dev/Roadmap]]
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Supabaseprimitive]]

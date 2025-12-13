@@ -508,3 +508,7 @@ The model selection strategy for the TTA project will leverage the strengths of 
 By implementing dynamic selection based on task requirements, performance metrics, and resource constraints, we can optimize both quality and efficiency across the system.
 
 This approach will enable the TTA project to provide high-quality therapeutic content while maintaining good performance and resource efficiency.
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Models/Model_selection_strategy]]

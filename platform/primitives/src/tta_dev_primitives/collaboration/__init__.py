@@ -1,17 +1,1 @@
-"""Multi-agent collaboration primitives for version control and coordination."""
-
-from .git_integration import (
-    AgentIdentity,
-    CommitFrequencyPolicy,
-    GitCollaborationPrimitive,
-    IntegrationFrequency,
-    MergeStrategy,
-)
-
-__all__ = [
-    "AgentIdentity",
-    "CommitFrequencyPolicy",
-    "GitCollaborationPrimitive",
-    "IntegrationFrequency",
-    "MergeStrategy",
-]
+# Logseq: [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Collaboration/__init__]]  # noqa: E501, ERA001

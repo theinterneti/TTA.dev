@@ -770,3 +770,7 @@ When making decisions, prioritize:
 **Last Updated:** October 29, 2025
 **Maintained by:** TTA.dev Team
 **License:** MIT License - see [LICENSE](LICENSE) for details
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Agents]]

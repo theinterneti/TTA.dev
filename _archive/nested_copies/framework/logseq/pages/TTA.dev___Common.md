@@ -424,3 +424,7 @@ To embed any of these blocks in your documentation:
 **Maintained by:** [[TTA Team]]
 
 - [[Project Hub]]
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev___common]]

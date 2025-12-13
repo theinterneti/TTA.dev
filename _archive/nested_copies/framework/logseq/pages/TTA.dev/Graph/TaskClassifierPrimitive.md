@@ -16,3 +16,7 @@
   - It analyzes the task description to determine its `[[TTA.dev/Data/TaskCharacteristics]]` (e.g., requires reasoning, creativity, code) and `[[TTA.dev/Data/TaskComplexity]]` (simple, moderate, complex, expert).
   - Based on this classification and user preferences (e.g., `prefer_free`), it recommends a specific LLM (e.g., Groq, Gemini Pro, DeepSeek R1, Claude Sonnet 4.5) and provides a `[[TTA.dev/Data/TaskClassification]]` output.
   - This primitive is crucial for dynamic model routing and cost optimization in LLM-powered workflows.
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Tta.dev/Graph/Taskclassifierprimitive]]

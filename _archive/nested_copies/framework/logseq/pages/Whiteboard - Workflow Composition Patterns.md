@@ -237,3 +237,7 @@ rag_workflow = (
 **Created:** [[2025-10-31]]
 **Status:** In Progress
 **Examples:** See packages/tta-dev-primitives/examples/
+
+
+---
+**Logseq:** [[TTA.dev/_archive/Nested_copies/Framework/Logseq/Pages/Whiteboard - workflow composition patterns]]

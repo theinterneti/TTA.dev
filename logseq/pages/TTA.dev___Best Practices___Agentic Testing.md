@@ -691,3 +691,7 @@ class TestCachePrimitiveIntegration:
 **Last Updated:** November 3, 2025
 **Status:** Active - Best Practices
 **For:** AI Agents writing tests for TTA.dev
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___best practices___agentic testing]]

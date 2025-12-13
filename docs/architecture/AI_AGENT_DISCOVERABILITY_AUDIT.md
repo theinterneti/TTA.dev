@@ -618,3 +618,7 @@ Time to full understanding: ~5 minutes
 **Prepared by:** GitHub Copilot
 **Review Status:** Ready for Implementation
 **Priority:** High - Improves AI agent developer experience significantly
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Architecture/Ai_agent_discoverability_audit]]

@@ -864,3 +864,7 @@ Start with simplest primitives first."
 ---
 
 **Ready to experiment! Start with P0 workflows and iterate based on results.** 🚀
+
+
+---
+**Logseq:** [[TTA.dev/Docs/Integrations/Cline_cli_workflow_opportunities]]

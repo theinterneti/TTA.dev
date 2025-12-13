@@ -40,11 +40,11 @@ class GateResult:
 
 class QualityGate(ABC):
     """Base class for quality gates."""
-    
+
     def __init__(self, component_path: Path, threshold: float | None = None):
         self.component_path = component_path
         self.threshold = threshold
-    
+
     @abstractmethod
     def check(self) -> GateResult:
         """Execute the quality gate check."""
@@ -68,12 +68,12 @@ COVERAGE_THRESHOLDS = {
 ```python
 class TestCoverageGate(QualityGate):
     """Validates test coverage meets threshold."""
-    
+
     def check(self) -> GateResult:
         """Run coverage check."""
         # Find test paths (supports multiple patterns)
         test_paths = self._find_test_paths()
-        
+
         # Run pytest with coverage
         result = subprocess.run(
             [
@@ -87,14 +87,14 @@ class TestCoverageGate(QualityGate):
             text=True,
             timeout=300,
         )
-        
+
         # Parse coverage from JSON report
         coverage_data = self._parse_coverage_json()
         coverage_percent = coverage_data.get("totals", {}).get("percent_covered", 0.0)
-        
+
         # Check against threshold
         passed = coverage_percent >= self.threshold
-        
+
         return GateResult(
             passed=passed,
             gate_name="test_coverage",
@@ -127,33 +127,33 @@ def _find_test_paths(self) -> list[str]:
     """Find test paths with naming variation support."""
     component_name = self.component_path.name
     test_paths = []
-    
+
     # Generate naming variations
     name_variations = [component_name]
     if component_name.endswith('ion'):
         name_variations.append(component_name.rstrip('ion') + 'or')
     if component_name.endswith('tion'):
         name_variations.append(component_name.rstrip('tion') + 'tor')
-    
+
     for name_var in name_variations:
         # Pattern 1: Directory-based
         dir_path = Path("tests") / name_var
         if dir_path.exists() and dir_path.is_dir():
             test_paths.append(str(dir_path))
-        
+
         # Pattern 2: Single file
         single_file = Path("tests") / f"test_{name_var}.py"
         if single_file.exists():
             test_paths.append(str(single_file))
-        
+
         # Pattern 3: Pattern-based
         pattern_files = list(Path("tests").glob(f"test_{name_var}_*.py"))
         test_paths.extend([str(f) for f in pattern_files])
-    
+
     # Fallback to default pattern
     if not test_paths:
         test_paths = [f"tests/{component_name}/"]
-    
+
     return test_paths
 ```
 
@@ -164,11 +164,11 @@ def _find_test_paths(self) -> list[str]:
 ```python
 class TestPassRateGate(QualityGate):
     """Validates all tests pass."""
-    
+
     def check(self) -> GateResult:
         """Run test pass rate check."""
         test_paths = self._find_test_paths()
-        
+
         # Run pytest
         result = subprocess.run(
             [
@@ -181,11 +181,11 @@ class TestPassRateGate(QualityGate):
             text=True,
             timeout=300,
         )
-        
+
         # Parse test results
         passed, failed, total = self._parse_test_output(result.stdout)
         pass_rate = (passed / total * 100) if total > 0 else 0.0
-        
+
         return GateResult(
             passed=(failed == 0),
             gate_name="test_pass_rate",
@@ -208,18 +208,18 @@ class TestPassRateGate(QualityGate):
 ```python
 class LintingGate(QualityGate):
     """Validates code linting with ruff."""
-    
+
     def __init__(self, component_path: Path, auto_fix: bool = False):
         super().__init__(component_path)
         self.auto_fix = auto_fix
-    
+
     def check(self) -> GateResult:
         """Run linting check."""
         paths = [
             f"src/{self.component_path.name}/",
             f"tests/test_{self.component_path.name}.py",
         ]
-        
+
         # Auto-fix if enabled
         if self.auto_fix:
             subprocess.run(
@@ -230,16 +230,16 @@ class LintingGate(QualityGate):
                 ["uvx", "ruff", "format", *paths],
                 capture_output=True,
             )
-        
+
         # Run linting check
         result = subprocess.run(
             ["uvx", "ruff", "check", *paths],
             capture_output=True,
             text=True,
         )
-        
+
         issues = self._parse_ruff_output(result.stdout)
-        
+
         return GateResult(
             passed=(result.returncode == 0),
             gate_name="linting",
@@ -260,7 +260,7 @@ class LintingGate(QualityGate):
 ```python
 class TypeCheckingGate(QualityGate):
     """Validates type checking with pyright."""
-    
+
     def check(self) -> GateResult:
         """Run type checking."""
         result = subprocess.run(
@@ -268,9 +268,9 @@ class TypeCheckingGate(QualityGate):
             capture_output=True,
             text=True,
         )
-        
+
         errors = self._parse_pyright_output(result.stdout)
-        
+
         return GateResult(
             passed=(result.returncode == 0),
             gate_name="type_checking",
@@ -290,7 +290,7 @@ class TypeCheckingGate(QualityGate):
 ```python
 class SecurityGate(QualityGate):
     """Validates security scanning with detect-secrets."""
-    
+
     def check(self) -> GateResult:
         """Run security scan."""
         result = subprocess.run(
@@ -298,9 +298,9 @@ class SecurityGate(QualityGate):
             capture_output=True,
             text=True,
         )
-        
+
         secrets = self._parse_detect_secrets_output(result.stdout)
-        
+
         return GateResult(
             passed=(len(secrets) == 0),
             gate_name="security",
@@ -325,10 +325,10 @@ def run_quality_gates(
 ) -> dict[str, GateResult]:
     """Run all quality gates for a component."""
     results = {}
-    
+
     # Get threshold for target stage
     coverage_threshold = COVERAGE_THRESHOLDS.get(target_stage, 70.0)
-    
+
     # Run gates
     gates = [
         TestCoverageGate(component_path, coverage_threshold),
@@ -337,11 +337,11 @@ def run_quality_gates(
         TypeCheckingGate(component_path),
         SecurityGate(component_path),
     ]
-    
+
     for gate in gates:
         result = gate.check()
         results[result.gate_name] = result
-    
+
     return results
 ```
 
@@ -353,18 +353,18 @@ def report_quality_gates(results: dict[str, GateResult]) -> None:
     print("\n" + "="*60)
     print("QUALITY GATE RESULTS")
     print("="*60)
-    
+
     all_passed = True
     for gate_name, result in results.items():
         status = "✓ PASS" if result.passed else "✗ FAIL"
         print(f"\n{status} - {gate_name.upper()}")
         print(f"  {result.message}")
-        
+
         if not result.passed:
             all_passed = False
             if result.details:
                 print(f"  Details: {result.details}")
-    
+
     print("\n" + "="*60)
     if all_passed:
         print("✓ ALL QUALITY GATES PASSED")
@@ -476,16 +476,16 @@ quality_gates:
     development_threshold: 60.0
     staging_threshold: 70.0
     production_threshold: 80.0
-  
+
   linting:
     auto_fix: true
     tools:
       - ruff
-  
+
   type_checking:
     tool: pyright
     strict: false
-  
+
   security:
     tool: detect-secrets
     baseline: .secrets.baseline
@@ -499,7 +499,7 @@ components:
     quality_gates:
       test_coverage:
         staging_threshold: 75.0  # Higher threshold for critical component
-  
+
   player_experience:
     quality_gates:
       test_coverage:
@@ -508,7 +508,11 @@ components:
 
 ---
 
-**Last Updated:** 2025-10-20  
-**Status:** Active  
+**Last Updated:** 2025-10-20
+**Status:** Active
 **Applies To:** Quality gate implementations in `scripts/workflow/`
 
+
+
+---
+**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Quality-gates.instructions]]

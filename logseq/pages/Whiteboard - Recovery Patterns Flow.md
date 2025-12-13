@@ -424,3 +424,7 @@ async def test_compensation_rolls_back_on_failure():
 **Created:** [[2025-10-31]]
 **Status:** Template for interactive whiteboard
 **Related:** platform/primitives/src/tta_dev_primitives/recovery/
+
+
+---
+**Logseq:** [[TTA.dev/Logseq/Pages/Whiteboard - recovery patterns flow]]
