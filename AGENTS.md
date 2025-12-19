@@ -50,6 +50,39 @@ For a complete list of available tools (Context7, AI Toolkit, Grafana, etc.), se
 - `#template-todo` - Reusable patterns (for agents/users)
 - `#ops-todo` - Infrastructure (deployment, monitoring)
 
+### 🧠 Hindsight Memory Architecture
+
+**CRITICAL:** All TTA.dev agents (worktree agents, sub-agents, external integrations) must use the Hindsight memory system for persistent, cross-session learning.
+
+**What is Hindsight?** A unified memory architecture enabling agents to:
+- **Learn from failures** - Never repeat the same mistakes
+- **Share knowledge** - Discoveries by one agent benefit all agents
+- **Persist across sessions** - Memory survives restarts and context resets
+- **Scale with the codebase** - Memory banks organize knowledge by domain
+
+**Quick Start:**
+```text
+.hindsight/
+├── config.yaml           # Memory bank configuration
+├── banks/
+│   ├── tta-dev/         # TTA.dev core concepts and patterns
+│   ├── user-repo/        # User's target repository knowledge
+│   └── session/          # Current session learnings
+└── index/                # Semantic search index
+```
+
+**Memory Categories:**
+| Category | When to Write | Example |
+|----------|---------------|---------|
+| `implementation-failures` | After debugging issues | Import errors, config mistakes |
+| `successful-patterns` | After solving problems | Effective test patterns, API usage |
+| `architectural-decisions` | After design choices | Why we chose primitives over raw async |
+| `codebase-insights` | After indexing repos | Module structure, key entry points |
+
+**For Detailed Guide:** [`docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md`](docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md)
+
+---
+
 ### 🎯 Agent Context & Tooling
 
 For GitHub Copilot users, comprehensive instructions are available in [`.github/copilot-instructions.md`](.github/copilot-instructions.md), including:
@@ -75,6 +108,11 @@ Additionally, context-specific modular instructions are in `.github/instructions
 
 ```text
 TTA.dev/
+├── .hindsight/              # 🧠 Hindsight Memory System
+│   ├── config.yaml          # Memory bank configuration
+│   └── banks/               # Organized memory storage
+│       ├── tta-dev/        # TTA.dev patterns and learnings
+│       └── session/         # Current session memories
 ├── platform/
 │   ├── primitives/          # ✅ Core workflow primitives (tta-dev-primitives)
 │   ├── observability/       # ✅ OpenTelemetry integration (tta-observability-integration)
@@ -91,6 +129,8 @@ TTA.dev/
 ├── data/
 │   └── ace_playbooks/       # 🧠 ACE Agent Playbooks (Learned Strategies)
 ├── docs/                    # Comprehensive documentation
+│   └── agents/              # Agent-specific docs
+│       └── HINDSIGHT_MEMORY_ARCHITECTURE.md  # Memory system guide
 ├── scripts/                 # Automation and validation scripts
 └── tests/                   # Integration tests
 ```

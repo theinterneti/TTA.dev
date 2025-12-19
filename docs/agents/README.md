@@ -148,9 +148,10 @@ Add TTA.dev MCP server to your Claude config:
 
 ## 📚 Learn More
 
-- [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md) - All primitives
-- [GETTING_STARTED.md](../GETTING_STARTED.md) - First workflow in 5 minutes
-- [Examples](../platform/primitives/examples/) - Real code patterns
+- [HINDSIGHT_MEMORY_ARCHITECTURE.md](HINDSIGHT_MEMORY_ARCHITECTURE.md) - Persistent memory for agents
+- [PRIMITIVES_CATALOG.md](../../PRIMITIVES_CATALOG.md) - All primitives
+- [GETTING_STARTED.md](../../GETTING_STARTED.md) - First workflow in 5 minutes
+- [Examples](../../platform/primitives/examples/) - Real code patterns
 
 ---
 

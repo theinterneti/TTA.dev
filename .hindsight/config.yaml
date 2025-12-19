@@ -1,0 +1,105 @@
+# TTA.dev Hindsight Memory Configuration
+# See docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md for details
+
+version: "1.0"
+
+# Memory banks configuration
+banks:
+  # Core TTA.dev knowledge (shared across all worktrees)
+  - name: tta-dev
+    path: banks/tta-dev
+    persistent: true
+    description: "TTA.dev patterns, primitives, and learnings"
+    categories:
+      - implementation-failures
+      - successful-patterns
+      - architectural-decisions
+
+  # User repository knowledge (created per-project)
+  - name: user-repo
+    path: banks/user-repo
+    persistent: true
+    auto_index: true
+    description: "Target repository structure and patterns"
+    categories:
+      - codebase-insights
+      - module-structure
+      - api-patterns
+
+  # Session-scoped memories (ephemeral)
+  - name: session
+    path: banks/session
+    persistent: false
+    description: "Current session work-in-progress"
+
+# Semantic indexing configuration
+indexing:
+  enabled: true
+  embedding_model: "text-embedding-3-small"
+  chunk_size: 1000
+  chunk_overlap: 200
+  # Reindex on file changes
+  watch_enabled: false
+  watch_interval_seconds: 300
+
+# Memory retrieval settings
+retrieval:
+  max_results: 10
+  similarity_threshold: 0.7
+  include_metadata: true
+  # Boost recent memories
+  recency_weight: 0.2
+
+# Agent integration settings
+agents:
+  # Load memories on agent startup
+  auto_load_on_start: true
+
+  # Share session memories between sub-agents
+  share_session_memories: true
+
+  # Sync interval for memory updates
+  sync_interval_minutes: 5
+
+  # Memory scopes for sub-agents
+  sub_agent_memory_scope: workflow  # session | workflow | global
+
+# TTA.dev specific integration
+tta_integration:
+  # Worktree agent configuration
+  worktree_agents:
+    - name: copilot
+      branch: main
+      memory_enabled: true
+    - name: cline
+      branch: main
+      memory_enabled: true
+    - name: augment
+      branch: main
+      memory_enabled: true
+
+  # Sync successful patterns back to main repo
+  sync_to_main:
+    enabled: true
+    categories:
+      - successful-patterns
+      - architectural-decisions
+    require_review: true
+
+  # Integration with existing systems
+  logseq_sync:
+    enabled: false  # Enable when Logseq MCP is ready
+    target_page: "[[Hindsight Memories]]"
+
+  ace_integration:
+    persist_strategies: true
+    strategy_bank: "banks/ace-strategies"
+
+# User repository isolation (for TTA.dev users)
+isolation:
+  use_container: false  # Enable for production
+  container_image: "tta-dev:latest"
+  mount_points:
+    - source: target_repo
+      destination: /workspace/repo
+      readonly: false

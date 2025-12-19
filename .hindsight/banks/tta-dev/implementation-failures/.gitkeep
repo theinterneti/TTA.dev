@@ -1,0 +1,20 @@
+# Implementation Failures
+
+Document failed approaches, bugs, and mistakes to prevent repetition.
+
+## When to Write
+
+- After debugging a significant issue
+- When an approach fails after substantial effort
+- When discovering anti-patterns or common pitfalls
+- After resolving a complex error
+
+## File Naming
+
+`YYYY-MM-DD-descriptive-name.memory.md`
+
+Example: `2025-12-19-async-import-order-failure.memory.md`
+
+## Template
+
+See `../../templates/memory.template.md` for the standard format.
