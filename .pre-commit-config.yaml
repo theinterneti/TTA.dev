@@ -16,6 +16,7 @@ repos:
         language: system
         types: [python]
         pass_filenames: true
+        exclude: ^(.cline/|.hypertool/|_archive/|\.venv/)
 
   # Bandit - Python-specific security linter
   # Catches: Hardcoded passwords, SQL injection, shell injection, etc.

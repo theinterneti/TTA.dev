@@ -6,6 +6,10 @@ _archive/
 archive/
 _DEPRECATED/
 
+# AI assistant tooling (non-production)
+.cline/
+.hypertool/
+
 # Dependencies and build artifacts
 .venv/
 venv/

@@ -5,6 +5,8 @@
 exclude_dirs:
   - _archive
   - archive
+  - .cline
+  - .hypertool
   - .venv
   - .git
   - __pycache__
