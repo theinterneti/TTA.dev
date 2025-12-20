@@ -62,7 +62,7 @@ jobs:
         if: inputs.test-type == 'integration' || inputs.test-type == 'all'
         run: |
           echo "Starting Docker Compose services..."
-          docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d
+          docker compose -f platform/primitives/docker-compose.integration.yml up -d
           echo "Waiting for services to be ready..."
           sleep 10
 
@@ -108,7 +108,7 @@ jobs:
         if: always() && (inputs.test-type == 'integration' || inputs.test-type == 'all')
         run: |
           echo "Stopping Docker Compose services..."
-          docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml down
+          docker compose -f platform/primitives/docker-compose.integration.yml down
 
       - name: Upload coverage report (HTML)
         if: inputs.coverage && always()

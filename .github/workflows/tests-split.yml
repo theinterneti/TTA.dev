@@ -10,8 +10,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'packages/**/tests/integration/**'
-      - 'packages/**/tests/mcp/**'
+      - 'platform/**/tests/integration/**'
+      - 'platform/**/tests/mcp/**'
       - 'docs/**'
       - 'scripts/docs/**'
 
@@ -57,7 +57,7 @@ jobs:
 
       - name: Start Docker services for integration tests
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           docker compose -f docker-compose.integration.yml up -d
           sleep 10  # Wait for services to be ready
 
@@ -69,5 +69,5 @@ jobs:
       - name: Stop Docker services
         if: always()
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           docker compose -f docker-compose.integration.yml down -v

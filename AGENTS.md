@@ -98,6 +98,20 @@ For GitHub Copilot users, comprehensive instructions are available in [`.github/
 - Development workflow
 - Copilot toolsets (VS Code)
 
+**Available Copilot Toolsets** (use with `@workspace #toolset-name`):
+
+| Toolset | Purpose |
+|---------|---------|
+| `#tta-package-dev` | Package development (primitives, orchestration) |
+| `#tta-testing` | Testing workflows (pytest, validation) |
+| `#tta-observability` | Tracing, metrics, Prometheus/Grafana |
+| `#tta-agent-dev` | Agent development with AI Toolkit |
+| `#tta-docs` | Documentation and knowledge base |
+| `#tta-pr-review` | Pull request review workflow |
+| `#tta-validation` | Quality checks and validation |
+
+**Full toolset definitions:** [`.vscode/copilot-toolsets.jsonc`](.vscode/copilot-toolsets.jsonc)
+
 Additionally, context-specific modular instructions are in `.github/instructions/` for tests, scripts, documentation, package source, and Logseq integration.
 
 ### ⚡ Before You Code: Primitive Usage Rules

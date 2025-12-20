@@ -80,7 +80,7 @@ jobs:
 
       - name: Start test services
         run: |
-          docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d
+          docker compose -f platform/primitives/docker-compose.integration.yml up -d
           sleep 10
 
       - name: Run integration tests
@@ -90,7 +90,7 @@ jobs:
 
       - name: Stop test services
         if: always()
-        run: docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml down
+        run: docker compose -f platform/primitives/docker-compose.integration.yml down
 
   quality-gates:
     name: Quality Gates
@@ -114,7 +114,7 @@ jobs:
 
       - name: Package validation
         run: |
-          for package in packages/*/pyproject.toml; do
+          for package in platform/*/pyproject.toml; do
             dir=$(dirname $package)
             echo "Validating $dir..."
             cd $dir

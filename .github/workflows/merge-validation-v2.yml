@@ -47,7 +47,7 @@ jobs:
     needs: [quality-checks, comprehensive-tests]
     uses: ./.github/workflows/reusable-build-package.yml
     with:
-      package-path: 'packages/tta-dev-primitives'
+      package-path: 'platform/primitives'
       python-version: '3.11'
       upload-artifact: true
       validate-manifest: true

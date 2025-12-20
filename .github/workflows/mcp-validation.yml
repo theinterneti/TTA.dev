@@ -4,19 +4,19 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'packages/**/apm.yml'
+      - 'platform/**/apm.yml'
       - '.github/instructions/**'
       - '.github/chatmodes/**'
       - '.github/workflows/**'
-      - 'packages/**/src/**/*.py'
+      - 'platform/**/src/**/*.py'
       - 'scripts/validate-*.py'
   push:
     branches: [main]
     paths:
-      - 'packages/**/apm.yml'
+      - 'platform/**/apm.yml'
       - '.github/instructions/**'
       - '.github/chatmodes/**'
-      - 'packages/**/src/**/*.py'
+      - 'platform/**/src/**/*.py'
 
 jobs:
   validate-mcp-schemas:
@@ -30,7 +30,7 @@ jobs:
       - name: Check if apm.yml exists
         id: check-apm
         run: |
-          if find packages -name "apm.yml" -type f | grep -q .; then
+          if find platform -name "apm.yml" -type f | grep -q .; then
             echo "has_apm=true" >> $GITHUB_OUTPUT
           else
             echo "has_apm=false" >> $GITHUB_OUTPUT
@@ -142,7 +142,7 @@ jobs:
       - name: Check if Python packages exist
         id: check-python
         run: |
-          if find packages -name "*.py" -type f | grep -q .; then
+          if find platform -name "*.py" -type f | grep -q .; then
             echo "has_python=true" >> $GITHUB_OUTPUT
           else
             echo "has_python=false" >> $GITHUB_OUTPUT

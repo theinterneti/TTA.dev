@@ -10,7 +10,7 @@ on:
       - 'kb/**'
     paths:
       - 'logseq/**'
-      - 'packages/tta-kb-automation/**'
+      - 'platform/kb-automation/**'
       - 'scripts/kb-*.sh'
       - '.github/workflows/kb-validation.yml'
   push:
@@ -19,7 +19,7 @@ on:
       - 'kb/**'
     paths:
       - 'logseq/**'
-      - 'packages/tta-kb-automation/**'
+      - 'platform/kb-automation/**'
   schedule:
     # Run daily at 3 AM UTC to catch drift
     - cron: '0 3 * * *'
@@ -52,7 +52,7 @@ jobs:
       - name: Install tta-kb-automation
         run: |
           uv sync --all-extras
-          uv pip install -e packages/tta-kb-automation
+          uv pip install -e platform/kb-automation
 
       - name: Run LinkValidator
         run: |
@@ -152,7 +152,7 @@ jobs:
       - name: Install tta-kb-automation
         run: |
           uv sync --all-extras
-          uv pip install -e packages/tta-kb-automation
+          uv pip install -e platform/kb-automation
 
       - name: Find orphaned pages
         run: |
@@ -272,7 +272,7 @@ jobs:
       - name: Install tta-kb-automation
         run: |
           uv sync --all-extras
-          uv pip install -e packages/tta-kb-automation
+          uv pip install -e platform/kb-automation
 
       - name: Check for new TODOs in code
         run: |
@@ -345,7 +345,7 @@ jobs:
       - name: Install tta-kb-automation
         run: |
           uv sync --all-extras
-          uv pip install -e packages/tta-kb-automation
+          uv pip install -e platform/kb-automation
 
       - name: Generate KB metrics
         run: |

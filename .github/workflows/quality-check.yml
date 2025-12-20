@@ -4,14 +4,16 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'packages/**'
+      - 'platform/**'
+      - 'apps/**'
       - 'tests/**'
       - 'pyproject.toml'
       - 'uv.lock'
   push:
     branches: [main]
     paths:
-      - 'packages/**'
+      - 'platform/**'
+      - 'apps/**'
       - 'tests/**'
       - 'pyproject.toml'
       - 'uv.lock'
@@ -48,10 +50,10 @@ jobs:
         run: uv pip install pyright
 
       - name: Run Pyright
-        run: uv run pyright packages/
+        run: uv run pyright platform/ apps/
 
       - name: Run tests with coverage
-        run: uv run pytest -m "not integration and not slow and not external" --cov=packages --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing
+        run: uv run pytest -m "not integration and not slow and not external" --cov=platform --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: always()  # Upload coverage even if tests fail

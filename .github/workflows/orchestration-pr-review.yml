@@ -8,7 +8,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'packages/**/*.py'
+      - 'platform/**/*.py'
       - 'src/**/*.py'
       - '*.py'
 
@@ -39,7 +39,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           uv sync --extra integrations
 
       - name: Run orchestrated PR review
@@ -50,7 +50,7 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           uv run python examples/orchestration_pr_review.py \
             --repo ${{ github.repository }} \
             --pr ${{ github.event.pull_request.number }}
