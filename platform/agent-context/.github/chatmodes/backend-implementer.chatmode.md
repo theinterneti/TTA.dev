@@ -398,7 +398,3 @@ read_memory_Serena: "caching strategy decisions"
 
 **Last Updated**: 2025-10-26
 **Status**: Active - Backend Implementer chat mode
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Backend-implementer.chatmode]]

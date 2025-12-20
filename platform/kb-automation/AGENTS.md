@@ -929,7 +929,3 @@ await document_feature(
 **Status:** ✅ Phase 4 Complete (Integration tests, KB documentation, agent guides)
 **For:** AI Agents working on TTA.dev
 **Package Version:** 0.1.0
-
-
----
-**Logseq:** [[TTA.dev/Platform/Kb-automation/Agents]]

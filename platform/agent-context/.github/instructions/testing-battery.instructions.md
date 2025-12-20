@@ -405,7 +405,3 @@ uv run pytest -m "integration and not slow"
 
 **Last Updated**: 2025-10-26
 **Status**: Active - Comprehensive test battery standards
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Testing-battery.instructions]]

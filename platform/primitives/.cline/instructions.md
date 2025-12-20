@@ -282,7 +282,3 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 ❌ Global state instead of `WorkflowContext`
 ❌ Modifying code without running quality checks
 ❌ Using `Optional[T]` instead of `T | None`
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/.cline/Instructions]]

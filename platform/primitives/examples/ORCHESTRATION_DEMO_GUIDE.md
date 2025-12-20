@@ -378,8 +378,3 @@ scrape_configs:
 
 **Last Updated:** October 30, 2025
 **Maintained by:** TTA.dev Team
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Examples/Orchestration_demo_guide]]

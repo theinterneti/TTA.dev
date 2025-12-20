@@ -295,7 +295,21 @@ def sync_coverage(data: dict[str, Any]):
 
 
 def inject_citation(file_path: Path, page_name: str):
-    """Inject Logseq citation into file."""
+    """
+    DISABLED: This function previously modified source code files directly,
+    which caused catastrophic data loss on 2025-12-12.
+
+    See GitHub issue for details on the incident and recovery.
+
+    This function should NOT modify source files. The Logseq KB should be
+    separate from the codebase. Use Logseq pages to reference code files,
+    not the other way around.
+    """
+    # DISABLED - Do not modify source files
+    print(f"⚠️ inject_citation is DISABLED - would have modified {file_path.name}")
+    return
+
+    # Original code below is preserved for reference but will never execute:
     try:
         content = file_path.read_text()
         citation = f"[[{page_name}]]"
@@ -330,7 +344,7 @@ def inject_citation(file_path: Path, page_name: str):
         print(f"❌ Failed to inject citation into {file_path}: {e}")
 
 
-def extract_blocks(file_path: Path, content: str, namespace: str, rel_path: Path = None):
+def extract_blocks(file_path: Path, content: str, namespace: str, rel_path: Path | None = None):
     """Extract and sync code blocks marked with # LogseqBlock: [[Page]]"""
     if rel_path is None:
         try:
@@ -573,7 +587,9 @@ def main():
     parser.add_argument("--process-files", action="store_true", help="Process code/doc files")
     parser.add_argument("--sync-journals", action="store_true", help="Sync journals")
     parser.add_argument(
-        "--annotate-types", action="store_true", help="Add type annotations to existing pages"
+        "--annotate-types",
+        action="store_true",
+        help="Add type annotations to existing pages",
     )
     parser.add_argument(
         "--dry-run",

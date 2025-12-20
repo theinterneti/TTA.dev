@@ -551,7 +551,3 @@ See [[TTA.dev/Guides/KB Automation Development]] for:
 **Last Updated:** November 3, 2025
 **Status:** 🚧 In Development - Phase 1
 **Maintainer:** TTA.dev Team
-
-
----
-**Logseq:** [[TTA.dev/Platform/Kb-automation/Readme]]

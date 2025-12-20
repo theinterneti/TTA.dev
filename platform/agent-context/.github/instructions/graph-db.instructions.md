@@ -372,7 +372,3 @@ result = await session.run(query, player_id=player_id)
 
 **Last Updated**: 2025-10-26
 **Status**: Active - Agent orchestration and graph database guidance
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Graph-db.instructions]]

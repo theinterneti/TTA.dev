@@ -223,8 +223,3 @@ The following export documentation files have been corrected:
 **Status**: ✅ **CORRECTED**
 **Date**: 2025-10-28
 **Corrected By**: AI Assistant (Claude)
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/Docs/Knowledge/Augment_cli_clarification]]

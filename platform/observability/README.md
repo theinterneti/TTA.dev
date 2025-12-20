@@ -86,7 +86,3 @@ uv run pytest tests/ --cov=src --cov-report=html
 ## License
 
 MIT (or as per TTA.dev repository)
-
-
----
-**Logseq:** [[TTA.dev/Platform/Observability/Readme]]

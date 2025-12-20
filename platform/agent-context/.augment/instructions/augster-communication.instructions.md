@@ -112,8 +112,3 @@ When reporting errors or issues:
 
 **Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Augster-communication.instructions]]

@@ -136,7 +136,3 @@ manager.save_session(session_id)
 
 **Last Updated**: 2025-10-27
 **Status**: Active - TTA context management standard
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Ai-context-sessions]]

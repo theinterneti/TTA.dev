@@ -1,1 +1,1 @@
-# Logseq: [[TTA.dev/Platform/Documentation/Tests/__init__]]  # noqa: ERA001
+"""Tests for TTA Documentation Primitives."""

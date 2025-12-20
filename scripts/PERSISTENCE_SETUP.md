@@ -216,7 +216,3 @@ docker-compose -f docker-compose.integration.yml down
 **Created:** November 2, 2025
 **Author:** TTA.dev Team
 **Purpose:** Persistence and automatic startup documentation
-
-
----
-**Logseq:** [[TTA.dev/Scripts/Persistence_setup]]

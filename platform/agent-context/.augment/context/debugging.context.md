@@ -489,8 +489,3 @@ print(f"DEBUG: dir = {dir(variable)}")
 ---
 
 **Note:** Systematic debugging saves time. Follow the workflow, document findings, and add tests to prevent regressions.
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Context/Debugging.context]]

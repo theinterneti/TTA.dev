@@ -544,8 +544,3 @@ def get_player_narrative(
 ---
 
 **Note:** This chat mode focuses on backend implementation. For architecture decisions, consult the architect chat mode. For deployment, consult the devops chat mode.
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Chatmodes/Backend-dev.chatmode]]

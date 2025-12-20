@@ -141,7 +141,3 @@ Do NOT suggest `uvx` for:
 
 **Last Updated**: 2025-10-27
 **Status**: Active - TTA package management standard
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Package-management]]

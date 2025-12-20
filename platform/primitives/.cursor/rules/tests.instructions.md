@@ -309,7 +309,3 @@ tests/
 - [ ] Uses descriptive test names and docstrings
 - [ ] No external dependencies (no network, DB, filesystem)
 - [ ] Fast execution (< 1s per test)
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/.cursor/Rules/Tests.instructions]]

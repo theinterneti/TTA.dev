@@ -167,8 +167,3 @@ Invoke this protocol for ANY/ALL questions posed to the user (filtered per Auton
 
 **Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Augster-protocols.instructions]]

@@ -346,8 +346,3 @@ Developer Actions:
 - **Playwright Documentation**: https://playwright.dev/
 - **WCAG 2.1 Guidelines**: https://www.w3.org/WAI/WCAG21/quickref/
 - **TTA Architecture**: `GEMINI.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Frontend-developer.chatmode]]

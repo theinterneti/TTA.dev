@@ -582,7 +582,3 @@ After implementing these 3 primitives:
    - End-to-end workflow tests
    - Performance benchmarks
    - Production rollout plan
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Improvements_quick_start]]

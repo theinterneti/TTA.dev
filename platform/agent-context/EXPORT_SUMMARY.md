@@ -267,8 +267,3 @@ packages/universal-agent-context/
 **Date**: 2025-10-28
 **Total Files**: 194
 **Package Size**: ~600 KB
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/Export_summary]]

@@ -121,8 +121,3 @@ services:
 ---
 
 **For detailed patterns, anti-patterns, and real-world examples, see the primitive file.**
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Workflows/Docker-migration.workflow]]

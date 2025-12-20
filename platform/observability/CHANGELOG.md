@@ -22,7 +22,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cost tracking and savings calculation
 - OpenTelemetry metrics integration
 - Environment-aware configuration
-
-
----
-**Logseq:** [[TTA.dev/Platform/Observability/Changelog]]

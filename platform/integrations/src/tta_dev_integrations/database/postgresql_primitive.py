@@ -1,4 +1,4 @@
-# Logseq: [[TTA.dev/Platform/Integrations/Src/Tta_dev_integrations/Database/Postgresql_primitive]]  # noqa: E501, ERA001
+"""PostgreSQL integration primitive - SKELETON."""
 
 # TODO: Implement PostgreSQLPrimitive
 # Direct PostgreSQL database access

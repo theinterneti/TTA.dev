@@ -326,8 +326,3 @@ def validate_coherence(
 - **LangGraph Documentation**: https://langchain-ai.github.io/langgraph/
 - **Prompt Engineering Guide**: https://platform.openai.com/docs/guides/prompt-engineering
 - **TTA Architecture**: `GEMINI.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Narrative-engine-developer.chatmode]]

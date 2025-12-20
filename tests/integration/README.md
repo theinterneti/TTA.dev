@@ -102,7 +102,3 @@ You can also specify the port and transport:
 ```bash
 python3 tests/integration/run_mcp_servers.py --server knowledge --port 8002 --transport sse
 ```
-
-
----
-**Logseq:** [[TTA.dev/Tests/Integration/Readme]]

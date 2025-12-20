@@ -216,8 +216,3 @@ async def submit_player_input(
 - FastAPI Security: https://fastapi.tiangolo.com/tutorial/security/
 - JWT Best Practices: https://tools.ietf.org/html/rfc8725
 - TTA Security Policy: `SECURITY.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Api-security.instructions]]

@@ -75,8 +75,3 @@ These are The Augster's fundamental behavioral rules - the golden rules and fund
 
 **Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Augster-maxims.instructions]]

@@ -108,7 +108,3 @@ Detailed description of the solution, pattern, or decision.
 **Status**: Active | Deprecated | Superseded
 **Last Reviewed**: YYYY-MM-DD
 **Next Review**: YYYY-MM-DD
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Memory/Templates/Memory.template]]

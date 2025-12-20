@@ -1,1 +1,5 @@
-# Logseq: [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Performance/__init__]]  # noqa: E501, ERA001
+"""Performance optimization primitives."""
+
+from .cache import CachePrimitive
+
+__all__ = ["CachePrimitive"]

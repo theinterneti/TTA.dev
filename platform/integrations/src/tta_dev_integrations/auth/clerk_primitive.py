@@ -1,1 +1,10 @@
-# Logseq: [[TTA.dev/Platform/Integrations/Src/Tta_dev_integrations/Auth/Clerk_primitive]]  # noqa: E501, ERA001
+"""Clerk authentication integration primitive - SKELETON."""
+
+# TODO: Implement ClerkAuthPrimitive
+# Clerk.dev authentication service
+#
+# from tta_dev_integrations.auth.base import AuthPrimitive
+#
+# class ClerkAuthPrimitive(AuthPrimitive):
+#     """Clerk authentication integration."""
+#     pass

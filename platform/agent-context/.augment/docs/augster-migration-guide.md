@@ -254,7 +254,3 @@ If you encounter issues with the modular architecture:
 - [Architecture Documentation](./augster-modular-architecture.md)
 - [Usage Guide](./augster-usage-guide.md)
 - [Original Monolithic Prompt](../.augment/user_guidelines.md.backup)
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Docs/Augster-migration-guide]]

@@ -500,8 +500,3 @@ curl https://staging.tta.dev/health
 ---
 
 **Note:** This chat mode focuses on deployment and infrastructure. For application code, delegate to backend-dev or frontend-dev. For testing, delegate to qa-engineer.
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Chatmodes/Devops.chatmode]]

@@ -173,7 +173,3 @@ Log events include:
 - `patterns_detected` - Patterns found with count
 - `primitives_matched` - Primitives matched with count
 - `analysis_complete` - Analysis finished with timing
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Cli/Readme]]

@@ -289,8 +289,3 @@ def calculate_score(responses: list[str]) -> int:
 - Pyright Documentation: https://github.com/microsoft/pyright
 - PEP 8: https://www.python.org/dev/peps/pep-0008/
 - PEP 257: https://www.python.org/dev/peps/pep-0257/
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Python-quality-standards.instructions]]

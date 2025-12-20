@@ -393,7 +393,3 @@ async def _run_agent(self, state: AgentWorkflowState) -> AgentWorkflowState:
 
 **Last Updated**: 2025-10-22
 **Maintainer**: theinterneti
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Agent-orchestration.instructions]]

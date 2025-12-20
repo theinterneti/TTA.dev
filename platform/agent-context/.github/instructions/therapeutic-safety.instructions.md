@@ -142,8 +142,3 @@ logger.info(
 - HIPAA Privacy Rule: 45 CFR §164.500-534
 - OWASP Top 10: https://owasp.org/www-project-top-ten/
 - TTA Security Policy: `SECURITY.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Therapeutic-safety.instructions]]

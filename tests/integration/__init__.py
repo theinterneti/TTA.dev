@@ -1,1 +1,5 @@
-# Logseq: [[TTA.dev/Tests/Integration/__init__]]  # noqa: E501, ERA001
+"""
+Integration tests for the TTA project.
+
+This package contains integration tests for the TTA project.
+"""

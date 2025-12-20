@@ -566,8 +566,3 @@ langfuse.create_generation(
 ---
 
 **Note:** This workflow ensures systematic feature implementation following TTA standards and quality gates.
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Workflows/Feature-implementation.prompt]]

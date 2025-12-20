@@ -191,7 +191,3 @@ logger = structlog.get_logger("tta_dev.analysis")
 # - primitives_matched: Number of primitives matched
 # - analysis_complete: Analysis finished with timing
 ```
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Analysis/Readme]]

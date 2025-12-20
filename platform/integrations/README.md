@@ -331,7 +331,3 @@ See `examples/` directory for complete working examples:
 **License**: See LICENSE file
 **Version**: 0.1.0 (Skeleton)
 **Status**: Under active development
-
-
----
-**Logseq:** [[TTA.dev/Platform/Integrations/Readme]]

@@ -268,7 +268,3 @@ For issues or questions:
 
 **Last Updated:** November 10, 2025
 **Maintained by:** TTA.dev Team
-
-
----
-**Logseq:** [[TTA.dev/Scripts/Readme]]

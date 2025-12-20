@@ -536,8 +536,3 @@ gh issue create \
 **Last Updated:** 2025-10-20
 **Status:** Active
 **Applies To:** All components in `src/` directory
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Component-maturity.instructions]]

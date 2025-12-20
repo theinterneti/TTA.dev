@@ -796,7 +796,3 @@ scanner = ScanCodebase(
 **Last Updated:** November 3, 2025
 **Version:** 0.1.0
 **License:** MIT
-
-
----
-**Logseq:** [[TTA.dev/Platform/Kb-automation/Docs/Complete_guide]]

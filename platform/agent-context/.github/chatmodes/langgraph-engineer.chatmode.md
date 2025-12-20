@@ -312,8 +312,3 @@ Engineer Actions:
 - **LangGraph Documentation**: https://langchain-ai.github.io/langgraph/
 - **Python Async Guide**: https://docs.python.org/3/library/asyncio.html
 - **TTA Architecture**: `GEMINI.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Langgraph-engineer.chatmode]]

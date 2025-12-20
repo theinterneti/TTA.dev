@@ -1,1 +1,5 @@
-# Logseq: [[TTA.dev/Tests/__init__]]  # noqa: E501, ERA001
+"""
+Tests for the TTA project.
+
+This package contains tests for the Therapeutic Text Adventure.
+"""

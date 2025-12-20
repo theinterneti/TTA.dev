@@ -1,4 +1,4 @@
-# Logseq: [[TTA.dev/Platform/Integrations/Src/Tta_dev_integrations/Database/Supabase_primitive]]  # noqa: E501, ERA001
+"""Supabase integration primitive."""
 
 import os
 from typing import Any

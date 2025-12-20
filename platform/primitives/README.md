@@ -547,7 +547,3 @@ Proprietary - TTA Storytelling Platform
 - `tta-narrative-engine`: Narrative generation (separate - for game components)
 
 This package is specifically for **development automation**, not player-facing features.
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Readme]]

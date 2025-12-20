@@ -576,8 +576,3 @@ async def test_agent_orchestration_integration(redis_client, neo4j_session):
 ---
 
 **Note:** This chat mode focuses on testing and quality assurance. For implementation fixes, delegate to backend-dev or frontend-dev. For deployment, delegate to devops.
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Chatmodes/Qa-engineer.chatmode]]

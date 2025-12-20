@@ -277,7 +277,3 @@ See `APM_CONTEXT7_RUNTIME_PACKAGE.md` for the full roadmap.
 - [Prometheus](https://prometheus.io/)
 - [Grafana Dashboards](https://grafana.com/grafana/dashboards/)
 - [APM Best Practices](https://opentelemetry.io/docs/concepts/signals/)
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Apm/Readme]]

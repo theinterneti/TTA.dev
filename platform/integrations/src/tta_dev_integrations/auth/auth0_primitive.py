@@ -1,1 +1,10 @@
-# Logseq: [[TTA.dev/Platform/Integrations/Src/Tta_dev_integrations/Auth/Auth0_primitive]]  # noqa: E501, ERA001
+"""Auth0 authentication integration primitive - SKELETON."""
+
+# TODO: Implement Auth0Primitive
+# Auth0 authentication service
+#
+# from tta_dev_integrations.auth.base import AuthPrimitive
+#
+# class Auth0Primitive(AuthPrimitive):
+#     """Auth0 authentication integration."""
+#     pass

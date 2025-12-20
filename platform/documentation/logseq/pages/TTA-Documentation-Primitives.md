@@ -300,7 +300,3 @@ See repository root for license information.
 **Status:** Phase 1 - Foundation (In Progress)
 **Version:** 0.1.0
 **Last Updated:** October 31, 2025
-
-
----
-**Logseq:** [[TTA.dev/Platform/Documentation/Logseq/Pages/Tta-documentation-primitives]]

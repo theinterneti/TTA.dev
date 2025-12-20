@@ -511,8 +511,3 @@ components:
 **Last Updated:** 2025-10-20
 **Status:** Active
 **Applies To:** Quality gate implementations in `scripts/workflow/`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Quality-gates.instructions]]

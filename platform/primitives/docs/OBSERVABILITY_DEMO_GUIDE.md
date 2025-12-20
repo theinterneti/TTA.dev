@@ -399,8 +399,3 @@ def get_enhanced_metrics_collector():
 **Last Updated:** 2025-10-28
 **Status:** ✅ Production-Ready
 **Phase:** 3 (Enhanced Metrics and SLO Tracking)
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Docs/Observability_demo_guide]]

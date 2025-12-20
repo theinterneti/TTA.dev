@@ -803,7 +803,3 @@ Before committing, ensure:
 - [ ] Formatted with `uv run ruff format`
 - [ ] Linted with `uv run ruff check --fix`
 - [ ] Type-checked with `uvx pyright`
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/.cursor/Rules/Package-source.instructions]]

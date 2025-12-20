@@ -318,8 +318,3 @@ DevOps Actions:
 - **Kubernetes Documentation**: https://kubernetes.io/docs/
 - **GitHub Actions Documentation**: https://docs.github.com/en/actions
 - **TTA Architecture**: `GEMINI.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Devops-engineer.chatmode]]

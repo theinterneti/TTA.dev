@@ -674,7 +674,3 @@ class RouterMetrics:
 - Cost savings targets (40%) are based on GitHub's agentic primitives article projections
 - All primitives follow TTA's WorkflowPrimitive interface for consistency
 - Graceful degradation ensures monitoring failures don't impact core functionality
-
-
----
-**Logseq:** [[TTA.dev/Platform/Observability/Specs/Observability-integration]]

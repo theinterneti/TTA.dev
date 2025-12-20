@@ -687,7 +687,3 @@ class LogseqStrategyIntegration:
 **Version:** 0.1.0
 **Status:** Production Ready ✅
 **Last Updated:** November 7, 2025
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Src/Tta_dev_primitives/Adaptive/Readme]]

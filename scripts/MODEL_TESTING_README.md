@@ -174,7 +174,3 @@ To add support for new models or metrics:
 - Integrate with model serving frameworks
 - Add A/B testing capabilities for model selection
 - Implement continuous monitoring of model performance
-
-
----
-**Logseq:** [[TTA.dev/Scripts/Model_testing_readme]]

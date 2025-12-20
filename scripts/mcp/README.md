@@ -431,7 +431,3 @@ Part of TTA.dev - See repository root for license information
 **Last Updated:** 2025-01-XX
 **Maintained by:** TTA.dev Team
 **Status:** Production-Ready ✅
-
-
----
-**Logseq:** [[TTA.dev/Scripts/Mcp/Readme]]

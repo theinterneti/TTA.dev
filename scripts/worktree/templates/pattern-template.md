@@ -174,7 +174,3 @@ When ready for orchestrator review:
 
 **Last Updated:** YYYY-MM-DD
 **Status:** Draft | Ready for Review | Approved | Integrated
-
-
----
-**Logseq:** [[TTA.dev/Scripts/Worktree/Templates/Pattern-template]]

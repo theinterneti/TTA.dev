@@ -230,8 +230,3 @@ function usePlayerInput() {
 - TypeScript Handbook: https://www.typescriptlang.org/docs/
 - WCAG 2.1: https://www.w3.org/WAI/WCAG21/quickref/
 - Playwright Testing: https://playwright.dev/
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Frontend-react.instructions]]

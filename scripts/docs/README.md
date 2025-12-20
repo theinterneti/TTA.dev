@@ -80,7 +80,3 @@ The markdown checker is integrated into the GitHub Actions workflow:
 - Code block execution with mocking
 - Automated link fixing suggestions
 - Markdown style guide enforcement
-
-
----
-**Logseq:** [[TTA.dev/Scripts/Docs/Readme]]

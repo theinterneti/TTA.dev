@@ -336,8 +336,3 @@ class PlayerAction(BaseModel):
 - **Pydantic Documentation**: https://docs.pydantic.dev/
 - **JWT Documentation**: https://jwt.io/
 - **TTA Architecture**: `GEMINI.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Api-gateway-engineer.chatmode]]

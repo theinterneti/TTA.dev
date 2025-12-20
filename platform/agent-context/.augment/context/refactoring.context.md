@@ -497,8 +497,3 @@ class SessionRepository:
 ---
 
 **Note:** Always run tests before and after refactoring to ensure behavior is preserved.
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Context/Refactoring.context]]

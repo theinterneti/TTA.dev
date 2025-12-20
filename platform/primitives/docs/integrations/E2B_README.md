@@ -414,7 +414,3 @@ executor = CodeExecutionPrimitive(default_timeout=120)
 **Last Updated:** November 6, 2025
 **Status:** Production-Ready ✅
 **Cost:** $0/month (FREE tier)
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Docs/Integrations/E2b_readme]]

@@ -338,7 +338,3 @@ result = await workflow.execute(data, context)  # Complete!
 - [ ] No lorem ipsum or placeholder text
 - [ ] Formatting is consistent
 - [ ] Technical terms are explained
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/.augment/Rules/Documentation.instructions]]

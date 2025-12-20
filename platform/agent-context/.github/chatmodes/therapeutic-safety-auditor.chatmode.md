@@ -275,8 +275,3 @@ When using this mode, verify:
 - **HIPAA Security Rule**: 45 CFR §164.300-318
 - **OWASP Top 10**: https://owasp.org/www-project-top-ten/
 - **TTA Security Policy**: `SECURITY.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Therapeutic-safety-auditor.chatmode]]

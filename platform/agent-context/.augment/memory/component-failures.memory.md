@@ -446,7 +446,3 @@ Before promoting a component, ensure:
 ---
 
 **Note:** This file should be updated whenever a component fails quality gates or when new anti-patterns are discovered.
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Memory/Component-failures.memory]]

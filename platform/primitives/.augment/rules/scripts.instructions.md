@@ -364,7 +364,3 @@ result = await retry_op.execute({}, context)
 - [ ] Has docstring explaining usage
 - [ ] Can be tested with MockPrimitive
 - [ ] Formatted with `uv run ruff format`
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/.augment/Rules/Scripts.instructions]]

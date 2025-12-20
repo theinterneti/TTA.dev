@@ -758,7 +758,3 @@ docker compose logs -f
 **Status**: Draft - Awaiting Review
 **Priority**: Critical for production readiness
 **Owner**: Infrastructure Team
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Docker-improvements]]

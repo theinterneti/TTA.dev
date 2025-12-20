@@ -1,1 +1,9 @@
-# Logseq: [[TTA.dev/Platform/Integrations/Src/Tta_dev_integrations/Auth/__init__]]  # noqa: E501, ERA001
+"""Auth module exports."""
+
+from tta_dev_integrations.auth.base import AuthPrimitive, AuthRequest, AuthResult
+
+__all__ = [
+    "AuthPrimitive",
+    "AuthRequest",
+    "AuthResult",
+]

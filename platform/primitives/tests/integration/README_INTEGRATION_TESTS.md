@@ -247,8 +247,3 @@ For issues or questions:
    - Test output
    - Docker logs
    - Environment details
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Tests/Integration/Readme_integration_tests]]

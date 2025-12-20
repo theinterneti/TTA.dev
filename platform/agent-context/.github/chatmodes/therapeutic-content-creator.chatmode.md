@@ -353,8 +353,3 @@ validation_rules:
 - **HIPAA Compliance**: https://www.hhs.gov/hipaa/
 - **Therapeutic Best Practices**: https://www.apa.org/
 - **TTA Architecture**: `GEMINI.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Therapeutic-content-creator.chatmode]]

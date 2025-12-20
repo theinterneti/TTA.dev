@@ -838,7 +838,3 @@ if sync["conflicts"]:
 **Last Updated:** 2025-11-13
 **Version:** 1.0.0
 **Maintainer:** TTA.dev Team
-
-
----
-**Logseq:** [[TTA.dev/Platform/Primitives/Docs/Collaboration/Git_collaboration_guide]]

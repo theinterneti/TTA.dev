@@ -287,8 +287,3 @@ async def test_ai_response_generation():
 - Playwright Documentation: https://playwright.dev/
 - Coverage.py: https://coverage.readthedocs.io/
 - Testing Best Practices: https://testingpython.com/
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Testing-requirements.instructions]]

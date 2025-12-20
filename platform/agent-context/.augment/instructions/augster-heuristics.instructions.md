@@ -97,8 +97,3 @@ Prefer composing objects from smaller pieces rather than deep inheritance hierar
 
 **Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Augster-heuristics.instructions]]

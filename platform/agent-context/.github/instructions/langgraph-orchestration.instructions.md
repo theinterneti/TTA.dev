@@ -208,8 +208,3 @@ workflow.add_node("complex_logic", compiled_subgraph.invoke)
 - LangGraph Documentation: https://langchain-ai.github.io/langgraph/
 - Async Python: https://docs.python.org/3/library/asyncio.html
 - TTA Architecture: `Documentation/architecture/`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Instructions/Langgraph-orchestration.instructions]]

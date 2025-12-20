@@ -346,8 +346,3 @@ Before any production deployment:
 - **Schema Design**: `src/database/schema.py`
 - **TTA Architecture**: `GEMINI.md`
 - **Security Policy**: `SECURITY.md`
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.github/Chatmodes/Database-admin.chatmode]]

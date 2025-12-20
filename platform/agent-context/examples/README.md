@@ -293,7 +293,3 @@ Found a bug or want to add an example? See [`/CONTRIBUTING.md`](../../../CONTRIB
 **Last Updated:** October 29, 2025
 **Package Version:** 1.0.0
 **Maintained by:** TTA.dev Team
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/Examples/Readme]]

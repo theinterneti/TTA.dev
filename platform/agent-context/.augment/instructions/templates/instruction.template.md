@@ -154,8 +154,3 @@ Common mistakes to avoid:
 
 **Last Updated**: YYYY-MM-DD
 **Maintainer**: [GitHub username]
-
-
-
----
-**Logseq:** [[TTA.dev/Platform/Agent-context/.augment/Instructions/Templates/Instruction.template]]
