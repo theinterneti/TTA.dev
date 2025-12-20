@@ -129,9 +129,10 @@ class N8nSetupEngine:
         """Verify Gemini API connectivity with robust error handling"""
         logger.info("🤖 Verifying Gemini AI API connectivity...")
 
-        gemini_key = (
-            os.getenv("GEMINI_API_KEY") or "AIzaSyDgpvqlw7B2TqnEHpy6tUaIM-WbdScuioE"
-        )
+        gemini_key = os.getenv("GEMINI_API_KEY")
+        if not gemini_key:
+            logger.warning("⚠️ GEMINI_API_KEY not set - skipping API verification")
+            return {"status": "skipped", "ai_ready": False, "reason": "No API key"}
 
         async def test_gemini_api():
             payload = {"contents": [{"parts": [{"text": "Hello, test message"}]}]}

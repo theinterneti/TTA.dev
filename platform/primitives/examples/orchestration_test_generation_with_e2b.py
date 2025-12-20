@@ -22,7 +22,7 @@ Claude analyzes code → Gemini generates tests → **E2B executes tests** → C
 - Net: Same cost, way better quality!
 
 Example:
-    $ export E2B_API_KEY="your-key-here"
+    $ export E2B_API_KEY="your-key-here"  # pragma: allowlist secret
     $ python examples/orchestration_test_generation_with_e2b.py --file src/calculator.py
 
     ✅ Tests generated, executed in E2B, and validated!
@@ -169,14 +169,17 @@ class TestGenerationWithE2BWorkflow:
         logger.info("🧪 [E2B Validator] Executing tests in secure sandbox...")
 
         try:
-            result = await self.test_executor.execute({"code": test_code, "timeout": 60}, context)
+            result = await self.test_executor.execute(
+                {"code": test_code, "timeout": 60}, context
+            )
 
             execution_result = {
                 "tests_execute": result["success"],
                 "execution_time": result["execution_time"],
                 "output": result["logs"],
                 "errors": result["error"],
-                "syntax_valid": result["success"] or "SyntaxError" not in str(result["error"]),
+                "syntax_valid": result["success"]
+                or "SyntaxError" not in str(result["error"]),
             }
 
             if result["success"]:
@@ -204,7 +207,9 @@ class TestGenerationWithE2BWorkflow:
                 "syntax_valid": False,
             }
 
-    async def validate_tests(self, test_code: str, analysis: dict, execution_result: dict) -> bool:
+    async def validate_tests(
+        self, test_code: str, analysis: dict, execution_result: dict
+    ) -> bool:
         """Validate generated tests (orchestrator role) with E2B results.
 
         Enhanced validation using REAL execution results from E2B instead of
@@ -286,13 +291,17 @@ class TestGenerationWithE2BWorkflow:
             context.data["orchestrator_cost"] = 0.006
 
             # Step 2: Executor generates tests
-            test_code = await self.generate_tests(file_path, code_content, analysis, context)
+            test_code = await self.generate_tests(
+                file_path, code_content, analysis, context
+            )
 
             # Step 3: E2B executes tests (NEW!)
             execution_result = await self.execute_tests_in_e2b(test_code, context)
 
             # Step 4: Orchestrator validates with E2B results (ENHANCED!)
-            validation_passed = await self.validate_tests(test_code, analysis, execution_result)
+            validation_passed = await self.validate_tests(
+                test_code, analysis, execution_result
+            )
             context.data["validation_passed"] = validation_passed
             context.data["orchestrator_tokens"] += 100
             context.data["orchestrator_cost"] += 0.003
@@ -321,11 +330,17 @@ class TestGenerationWithE2BWorkflow:
             logger.info(
                 f"E2B execution: {'✅ Success' if execution_result['tests_execute'] else '❌ Failed'}"
             )
-            logger.info(f"E2B execution time: {execution_result['execution_time']:.2f}s")
-            logger.info(f"Validation: {'✅ Passed' if validation_passed else '❌ Failed'}")
+            logger.info(
+                f"E2B execution time: {execution_result['execution_time']:.2f}s"
+            )
+            logger.info(
+                f"Validation: {'✅ Passed' if validation_passed else '❌ Failed'}"
+            )
             logger.info(f"Total duration: {duration_ms:.0f}ms")
             logger.info("\n💰 COST ANALYSIS")
-            logger.info(f"Orchestrator (Claude): ${context.data['orchestrator_cost']:.4f}")
+            logger.info(
+                f"Orchestrator (Claude): ${context.data['orchestrator_cost']:.4f}"
+            )
             logger.info(f"Executor (Gemini): ${context.data['executor_cost']:.4f}")
             logger.info(f"E2B Execution: ${context.data['e2b_cost']:.4f} (FREE!)")
             logger.info(f"Total: ${total_cost:.4f}")
@@ -365,7 +380,9 @@ class TestGenerationWithE2BWorkflow:
 
 async def main() -> None:
     """Main entry point for CLI usage."""
-    parser = argparse.ArgumentParser(description="Generate tests with E2B execution validation")
+    parser = argparse.ArgumentParser(
+        description="Generate tests with E2B execution validation"
+    )
     parser.add_argument("--file", required=True, help="Path to Python file")
     args = parser.parse_args()
 

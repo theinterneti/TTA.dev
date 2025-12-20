@@ -24,7 +24,9 @@ from fastapi.responses import JSONResponse
 app = FastAPI(title="E2B Webhook Monitor")
 
 # Configuration
-WEBHOOK_SECRET = os.getenv("E2B_WEBHOOK_SECRET", "your-secret-key")
+WEBHOOK_SECRET = os.getenv(
+    "E2B_WEBHOOK_SECRET", "your-secret-key"
+)  # pragma: allowlist secret
 DAILY_SANDBOX_LIMIT = int(os.getenv("DAILY_SANDBOX_LIMIT", "100"))
 SANDBOX_TIMEOUT_MINUTES = int(os.getenv("SANDBOX_TIMEOUT_MINUTES", "10"))
 
@@ -46,7 +48,9 @@ def verify_webhook_signature(secret: str, payload: bytes, signature: str) -> boo
 
     E2B uses SHA256 hash of (secret + payload) for verification.
     """
-    expected_signature_raw = hashlib.sha256((secret + payload.decode()).encode()).digest()
+    expected_signature_raw = hashlib.sha256(
+        (secret + payload.decode()).encode()
+    ).digest()
 
     # E2B uses base64url encoding
     expected_signature = (
@@ -129,11 +133,15 @@ async def handle_sandbox_created(event: dict, sandbox_id: str):
 
     # Check daily limit
     today_count = sum(
-        1 for created_at in sandbox_timers.values() if created_at.date() == datetime.now().date()
+        1
+        for created_at in sandbox_timers.values()
+        if created_at.date() == datetime.now().date()
     )
 
     if today_count > DAILY_SANDBOX_LIMIT:
-        print(f"⚠️  WARNING: Daily sandbox limit exceeded! {today_count}/{DAILY_SANDBOX_LIMIT}")
+        print(
+            f"⚠️  WARNING: Daily sandbox limit exceeded! {today_count}/{DAILY_SANDBOX_LIMIT}"
+        )
         # In production: send alert, potentially pause new creations
 
     print(
@@ -261,7 +269,7 @@ def main():
               "sandbox.lifecycle.created",
               "sandbox.lifecycle.killed"
             ],
-            "signatureSecret": "your-secret-key"
+            "signatureSecret": "your-secret-key"  # pragma: allowlist secret
           }'
     """
     print("🚀 Starting E2B Webhook Monitor")

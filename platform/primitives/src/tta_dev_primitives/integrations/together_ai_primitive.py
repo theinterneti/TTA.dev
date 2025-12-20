@@ -15,12 +15,18 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class TogetherAIRequest(BaseModel):
     """Request model for Together.ai primitive."""
 
-    messages: list[dict[str, str]] = Field(description="List of messages in chat format")
+    messages: list[dict[str, str]] = Field(
+        description="List of messages in chat format"
+    )
     model: str | None = Field(
         default=None, description="Model to use (overrides primitive default)"
     )
-    temperature: float | None = Field(default=None, description="Sampling temperature (0-2)")
-    max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
+    temperature: float | None = Field(
+        default=None, description="Sampling temperature (0-2)"
+    )
+    max_tokens: int | None = Field(
+        default=None, description="Maximum tokens to generate"
+    )
 
 
 class TogetherAIResponse(BaseModel):
@@ -52,7 +58,7 @@ class TogetherAIPrimitive(WorkflowPrimitive[TogetherAIRequest, TogetherAIRespons
         # Create primitive ($25 free credits)
         llm = TogetherAIPrimitive(
             model="meta-llama/Llama-4-Scout",
-            api_key="your-together-key"
+            api_key="your-together-key"  # pragma: allowlist secret
         )
 
         # Execute

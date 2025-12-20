@@ -15,12 +15,18 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class OpenRouterRequest(BaseModel):
     """Request model for OpenRouter primitive."""
 
-    messages: list[dict[str, str]] = Field(description="List of messages in chat format")
+    messages: list[dict[str, str]] = Field(
+        description="List of messages in chat format"
+    )
     model: str | None = Field(
         default=None, description="Model to use (overrides primitive default)"
     )
-    temperature: float | None = Field(default=None, description="Sampling temperature (0-2)")
-    max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
+    temperature: float | None = Field(
+        default=None, description="Sampling temperature (0-2)"
+    )
+    max_tokens: int | None = Field(
+        default=None, description="Maximum tokens to generate"
+    )
 
 
 class OpenRouterResponse(BaseModel):
@@ -53,7 +59,7 @@ class OpenRouterPrimitive(WorkflowPrimitive[OpenRouterRequest, OpenRouterRespons
         # Create primitive (free DeepSeek R1 access)
         llm = OpenRouterPrimitive(
             model="deepseek/deepseek-r1:free",
-            api_key="your-openrouter-key"
+            api_key="your-openrouter-key"  # pragma: allowlist secret
         )
 
         # Execute

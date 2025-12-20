@@ -238,7 +238,7 @@ Based on your prompt:
 
 This is a demonstration response. To enable real AI analysis:
 1. Get a free Gemini API key: https://ai.google.dev/
-2. Set environment variable: export GEMINI_API_KEY='your_key_here'
+2. Set environment variable: export GEMINI_API_KEY='your_key_here'  # pragma: allowlist secret
 3. Restart this API server
 
 The prompt was received successfully and the workflow is operational.

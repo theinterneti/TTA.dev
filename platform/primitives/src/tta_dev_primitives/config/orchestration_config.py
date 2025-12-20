@@ -42,10 +42,19 @@ class ExecutorConfig(BaseModel):
     @classmethod
     def validate_use_cases(cls, v: list[str]) -> list[str]:
         """Validate use_cases are valid complexity levels."""
-        valid_cases = {"simple", "moderate", "complex", "expert", "speed-critical", "reasoning"}
+        valid_cases = {
+            "simple",
+            "moderate",
+            "complex",
+            "expert",
+            "speed-critical",
+            "reasoning",
+        }
         invalid = set(v) - valid_cases
         if invalid:
-            raise ValueError(f"Invalid use_cases: {invalid}. Must be one of: {valid_cases}")
+            raise ValueError(
+                f"Invalid use_cases: {invalid}. Must be one of: {valid_cases}"
+            )
         return v
 
 
@@ -53,7 +62,9 @@ class CostTrackingConfig(BaseModel):
     """Configuration for cost tracking and budgeting."""
 
     enabled: bool = Field(default=True, description="Enable cost tracking")
-    budget_limit_usd: float = Field(default=100.0, description="Monthly budget limit in USD")
+    budget_limit_usd: float = Field(
+        default=100.0, description="Monthly budget limit in USD"
+    )
     alert_threshold: float = Field(
         default=0.8,
         description="Alert when budget reaches this percentage (0.0-1.0)",
@@ -150,7 +161,9 @@ class OrchestrationConfig(BaseModel):
 
         # Override from environment variables
         if os.getenv("TTA_ORCHESTRATION_ENABLED"):
-            config.enabled = os.getenv("TTA_ORCHESTRATION_ENABLED", "true").lower() == "true"
+            config.enabled = (
+                os.getenv("TTA_ORCHESTRATION_ENABLED", "true").lower() == "true"
+            )
 
         if os.getenv("TTA_PREFER_FREE_MODELS"):
             config.prefer_free_models = (
@@ -161,7 +174,9 @@ class OrchestrationConfig(BaseModel):
             config.quality_threshold = float(os.getenv("TTA_QUALITY_THRESHOLD", "0.85"))
 
         if os.getenv("TTA_ORCHESTRATOR_MODEL"):
-            config.orchestrator.model = os.getenv("TTA_ORCHESTRATOR_MODEL", "claude-sonnet-4.5")
+            config.orchestrator.model = os.getenv(
+                "TTA_ORCHESTRATOR_MODEL", "claude-sonnet-4.5"
+            )
 
         if os.getenv("TTA_BUDGET_LIMIT_USD"):
             config.cost_tracking.budget_limit_usd = float(
@@ -250,13 +265,17 @@ def load_orchestration_config(
         config.prefer_free_models = env_config.prefer_free_models
         config.quality_threshold = env_config.quality_threshold
         config.orchestrator.model = env_config.orchestrator.model
-        config.cost_tracking.budget_limit_usd = env_config.cost_tracking.budget_limit_usd
+        config.cost_tracking.budget_limit_usd = (
+            env_config.cost_tracking.budget_limit_usd
+        )
         logger.info("✅ Applied environment variable overrides")
 
     return config
 
 
-def create_default_config(output_path: str | Path = ".tta/orchestration-config.yaml") -> None:
+def create_default_config(
+    output_path: str | Path = ".tta/orchestration-config.yaml",
+) -> None:
     """Create a default orchestration configuration file.
 
     Args:
@@ -276,25 +295,25 @@ def create_default_config(output_path: str | Path = ".tta/orchestration-config.y
             "quality_threshold": 0.85,
             "orchestrator": {
                 "model": "claude-sonnet-4.5",
-                "api_key_env": "ANTHROPIC_API_KEY",
+                "api_key_env": "ANTHROPIC_API_KEY",  # pragma: allowlist secret (env var name, not value)
             },
             "executors": [
                 {
                     "model": "gemini-2.5-pro",
                     "provider": "google-ai-studio",
-                    "api_key_env": "GOOGLE_API_KEY",
+                    "api_key_env": "GOOGLE_API_KEY",  # pragma: allowlist secret (env var name, not value)
                     "use_cases": ["moderate", "complex"],
                 },
                 {
                     "model": "llama-3.3-70b-versatile",
                     "provider": "groq",
-                    "api_key_env": "GROQ_API_KEY",
+                    "api_key_env": "GROQ_API_KEY",  # pragma: allowlist secret (env var name, not value)
                     "use_cases": ["simple", "speed-critical"],
                 },
                 {
                     "model": "deepseek/deepseek-r1:free",
                     "provider": "openrouter",
-                    "api_key_env": "OPENROUTER_API_KEY",
+                    "api_key_env": "OPENROUTER_API_KEY",  # pragma: allowlist secret (env var name, not value)
                     "use_cases": ["complex", "reasoning"],
                 },
             ],

@@ -1909,7 +1909,7 @@ class CodeTransformer:
             TransformResult with transformed code and metadata
         """
         try:
-            tree = ast.parse(code)
+            ast.parse(code)
         except SyntaxError as e:
             return TransformResult(
                 original_code=code,
@@ -2404,7 +2404,6 @@ class CodeTransformer:
             return start
 
         base_indent = len(lines[start]) - len(lines[start].lstrip())
-        in_block = True
 
         for i in range(start + 1, len(lines)):
             line = lines[i]
@@ -2519,7 +2518,6 @@ class CodeTransformer:
 
     def _transform_circuit_breaker_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
         """Transform functions with multiple exception handlers into CircuitBreakerPrimitive."""
-        changes = []
         transformer = CircuitBreakerTransformer()
         new_tree = transformer.visit(tree)
 
@@ -2628,7 +2626,6 @@ class CodeTransformer:
 
     def _transform_compensation_ast(self, code: str, tree: ast.Module) -> dict[str, Any]:
         """Transform saga/compensation patterns into CompensationPrimitive."""
-        changes = []
         transformer = CompensationTransformer()
         new_tree = transformer.visit(tree)
 

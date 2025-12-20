@@ -258,15 +258,15 @@ async def test_sequential_primitive_creates_spans(otel_tracer_provider, test_con
     span_names = [span.get("operationName", "") for span in all_spans]
 
     # Check for SequentialPrimitive span
-    assert any(
-        name == "primitive.SequentialPrimitive" for name in span_names
-    ), f"Expected primitive.SequentialPrimitive span, got: {span_names}"
+    assert any(name == "primitive.SequentialPrimitive" for name in span_names), (
+        f"Expected primitive.SequentialPrimitive span, got: {span_names}"
+    )
 
     # Check for child primitive spans (SimplePrimitive, MultiplyPrimitive)
     primitive_spans = [name for name in span_names if name.startswith("primitive.")]
-    assert (
-        len(primitive_spans) >= 3
-    ), f"Expected at least 3 primitive spans (1 Sequential + 2 children), got {len(primitive_spans)}: {primitive_spans}"
+    assert len(primitive_spans) >= 3, (
+        f"Expected at least 3 primitive spans (1 Sequential + 2 children), got {len(primitive_spans)}: {primitive_spans}"
+    )
 
 
 # ============================================================================
@@ -323,15 +323,15 @@ async def test_parallel_primitive_creates_concurrent_spans(
     span_names = [span.get("operationName", "") for span in all_spans]
 
     # Check for ParallelPrimitive span
-    assert any(
-        name == "primitive.ParallelPrimitive" for name in span_names
-    ), f"Expected primitive.ParallelPrimitive span, got: {span_names}"
+    assert any(name == "primitive.ParallelPrimitive" for name in span_names), (
+        f"Expected primitive.ParallelPrimitive span, got: {span_names}"
+    )
 
     # Check for child primitive spans (3 MultiplyPrimitive)
     multiply_spans = [name for name in span_names if name == "primitive.MultiplyPrimitive"]
-    assert (
-        len(multiply_spans) >= 3
-    ), f"Expected at least 3 primitive.MultiplyPrimitive spans, got {len(multiply_spans)}: {multiply_spans}"
+    assert len(multiply_spans) >= 3, (
+        f"Expected at least 3 primitive.MultiplyPrimitive spans, got {len(multiply_spans)}: {multiply_spans}"
+    )
 
 
 # ============================================================================
@@ -382,9 +382,9 @@ async def test_conditional_primitive_creates_branch_spans(
     span_names = [span.get("operationName", "") for span in all_spans]
 
     # Check for child primitive span (MultiplyPrimitive from then branch)
-    assert any(
-        name == "primitive.MultiplyPrimitive" for name in span_names
-    ), f"Expected primitive.MultiplyPrimitive span (from then branch), got: {span_names}"
+    assert any(name == "primitive.MultiplyPrimitive" for name in span_names), (
+        f"Expected primitive.MultiplyPrimitive span (from then branch), got: {span_names}"
+    )
 
 
 # ============================================================================
@@ -436,9 +436,9 @@ async def test_switch_primitive_creates_case_spans(otel_tracer_provider, test_co
     span_names = [span.get("operationName", "") for span in all_spans]
 
     # Check for child primitive span (MultiplyPrimitive from case_add)
-    assert any(
-        name == "primitive.MultiplyPrimitive" for name in span_names
-    ), f"Expected primitive.MultiplyPrimitive span (from case_add), got: {span_names}"
+    assert any(name == "primitive.MultiplyPrimitive" for name in span_names), (
+        f"Expected primitive.MultiplyPrimitive span (from case_add), got: {span_names}"
+    )
 
 
 # ============================================================================
@@ -504,9 +504,9 @@ async def test_retry_primitive_creates_attempt_spans(otel_tracer_provider, test_
 
     # Check for child primitive spans (FlakeyPrimitive - should have 2 attempts)
     flakey_spans = [name for name in span_names if name == "primitive.FlakeyPrimitive"]
-    assert (
-        len(flakey_spans) >= 2
-    ), f"Expected at least 2 primitive.FlakeyPrimitive spans (retry attempts), got {len(flakey_spans)}: {flakey_spans}"
+    assert len(flakey_spans) >= 2, (
+        f"Expected at least 2 primitive.FlakeyPrimitive spans (retry attempts), got {len(flakey_spans)}: {flakey_spans}"
+    )
 
 
 # ============================================================================
@@ -556,12 +556,12 @@ async def test_fallback_primitive_creates_execution_spans(
     span_names = [span.get("operationName", "") for span in all_spans]
 
     # Check for both primary (FailingPrimitive) and fallback (SimplePrimitive) spans
-    assert any(
-        name == "primitive.FailingPrimitive" for name in span_names
-    ), f"Expected primitive.FailingPrimitive span (primary), got: {span_names}"
-    assert any(
-        name == "primitive.SimplePrimitive" for name in span_names
-    ), f"Expected primitive.SimplePrimitive span (fallback), got: {span_names}"
+    assert any(name == "primitive.FailingPrimitive" for name in span_names), (
+        f"Expected primitive.FailingPrimitive span (primary), got: {span_names}"
+    )
+    assert any(name == "primitive.SimplePrimitive" for name in span_names), (
+        f"Expected primitive.SimplePrimitive span (fallback), got: {span_names}"
+    )
 
 
 # ============================================================================
@@ -611,12 +611,12 @@ async def test_saga_primitive_creates_compensation_spans(
     span_names = [span.get("operationName", "") for span in all_spans]
 
     # Check for both forward (FailingPrimitive) and compensation (CompensationPrimitive) spans
-    assert any(
-        name == "primitive.FailingPrimitive" for name in span_names
-    ), f"Expected primitive.FailingPrimitive span (forward), got: {span_names}"
-    assert any(
-        name == "primitive.CompensationPrimitive" for name in span_names
-    ), f"Expected primitive.CompensationPrimitive span (compensation), got: {span_names}"
+    assert any(name == "primitive.FailingPrimitive" for name in span_names), (
+        f"Expected primitive.FailingPrimitive span (forward), got: {span_names}"
+    )
+    assert any(name == "primitive.CompensationPrimitive" for name in span_names), (
+        f"Expected primitive.CompensationPrimitive span (compensation), got: {span_names}"
+    )
 
 
 # ============================================================================
@@ -679,23 +679,23 @@ async def test_composed_workflow_trace_propagation(otel_tracer_provider, test_co
     span_names = [span.get("operationName", "") for span in all_spans]
 
     # Check for SequentialPrimitive and ParallelPrimitive (both extend InstrumentedPrimitive)
-    assert any(
-        name == "primitive.SequentialPrimitive" for name in span_names
-    ), f"Missing primitive.SequentialPrimitive span, got: {span_names}"
-    assert any(
-        name == "primitive.ParallelPrimitive" for name in span_names
-    ), f"Missing primitive.ParallelPrimitive span, got: {span_names}"
+    assert any(name == "primitive.SequentialPrimitive" for name in span_names), (
+        f"Missing primitive.SequentialPrimitive span, got: {span_names}"
+    )
+    assert any(name == "primitive.ParallelPrimitive" for name in span_names), (
+        f"Missing primitive.ParallelPrimitive span, got: {span_names}"
+    )
 
     # Check for child primitives (MultiplyPrimitive, SimplePrimitive, AggregatorPrimitive)
-    assert any(
-        name == "primitive.MultiplyPrimitive" for name in span_names
-    ), f"Missing primitive.MultiplyPrimitive spans, got: {span_names}"
-    assert any(
-        name == "primitive.SimplePrimitive" for name in span_names
-    ), f"Missing primitive.SimplePrimitive span, got: {span_names}"
-    assert any(
-        name == "primitive.AggregatorPrimitive" for name in span_names
-    ), f"Missing primitive.AggregatorPrimitive span, got: {span_names}"
+    assert any(name == "primitive.MultiplyPrimitive" for name in span_names), (
+        f"Missing primitive.MultiplyPrimitive spans, got: {span_names}"
+    )
+    assert any(name == "primitive.SimplePrimitive" for name in span_names), (
+        f"Missing primitive.SimplePrimitive span, got: {span_names}"
+    )
+    assert any(name == "primitive.AggregatorPrimitive" for name in span_names), (
+        f"Missing primitive.AggregatorPrimitive span, got: {span_names}"
+    )
 
     # Verify span hierarchy (parent-child relationships)
     span_refs = {}

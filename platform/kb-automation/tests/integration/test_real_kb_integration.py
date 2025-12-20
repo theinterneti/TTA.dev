@@ -297,9 +297,9 @@ class TestCrossReferenceBuilderWithRealData:
         print(f"   Code files referencing KB: {len(code_to_kb)}")
 
         # At least one direction should have references
-        assert (
-            len(kb_to_code) > 0 or len(code_to_kb) > 0
-        ), "Should find at least some cross-references"
+        assert len(kb_to_code) > 0 or len(code_to_kb) > 0, (
+            "Should find at least some cross-references"
+        )
 
     @pytest.mark.integration
     async def test_cross_reference_builder_generates_valid_report(self, skip_if_no_kb):

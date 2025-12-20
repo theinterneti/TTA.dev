@@ -410,7 +410,7 @@ class TestPrimitiveConfidenceScoring:
             inferred_requirements=["error_recovery"],
         )
         single_matches = matcher.find_matches(single_analysis)
-        single_retry = next((m for m in single_matches if m[0] == "RetryPrimitive"), None)
+        next((m for m in single_matches if m[0] == "RetryPrimitive"), None)
 
         # Multiple requirements
         multi_analysis = CodeAnalysisResult(
@@ -582,6 +582,6 @@ class TestPrimitiveRelationships:
         """All related_primitives should reference valid primitives."""
         for name, info in matcher.primitive_catalog.items():
             for related in info.get("related_primitives", []):
-                assert (
-                    related in matcher.primitive_catalog
-                ), f"{name} references invalid primitive: {related}"
+                assert related in matcher.primitive_catalog, (
+                    f"{name} references invalid primitive: {related}"
+                )

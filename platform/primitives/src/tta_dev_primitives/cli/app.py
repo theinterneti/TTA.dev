@@ -15,7 +15,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 
 import structlog
 import typer
@@ -62,7 +62,7 @@ def _get_config(config_path: Path | None = None) -> TTAConfig:
     return _config
 
 
-def _resolve_option(cli_value, config_value, default):
+def _resolve_option(cli_value: object, config_value: object, default: object) -> object:
     """Resolve option value: CLI > config > default.
 
     Returns config value if CLI value equals the default (wasn't set by user).
@@ -190,8 +190,12 @@ def analyze(
         show_templates if show_templates is not None else config.analysis.show_templates
     )
     quiet = quiet if quiet is not None else config.analysis.quiet
-    show_lines = show_lines if show_lines is not None else config.analysis.show_line_numbers
-    suggest_diff = suggest_diff if suggest_diff is not None else config.transform.suggest_diff
+    show_lines = (
+        show_lines if show_lines is not None else config.analysis.show_line_numbers
+    )
+    suggest_diff = (
+        suggest_diff if suggest_diff is not None else config.transform.suggest_diff
+    )
     apply = apply if apply is not None else config.transform.auto_fix
 
     # Suppress logs if --quiet
@@ -258,14 +262,20 @@ def analyze(
                     )
                 raise typer.Exit(0) from None
 
-            transformed = _generate_transformation(code, primitive_to_apply, targets, info)
+            transformed = _generate_transformation(
+                code, primitive_to_apply, targets, info
+            )
 
             # Write back to file
             file.write_text(transformed)
 
             if not quiet:
-                console.print(f"[green]✓ Applied {primitive_to_apply} to {file}[/green]")
-                console.print(f"  Wrapped functions: {', '.join(t['name'] for t in targets)}")
+                console.print(
+                    f"[green]✓ Applied {primitive_to_apply} to {file}[/green]"
+                )
+                console.print(
+                    f"  Wrapped functions: {', '.join(t['name'] for t in targets)}"
+                )
         else:
             # AST transform succeeded
             file.write_text(result.transformed_code)
@@ -331,7 +341,9 @@ def _print_table(
     )
 
     if not report.recommendations:
-        console.print("\n[yellow]No recommendations found above the confidence threshold.[/yellow]")
+        console.print(
+            "\n[yellow]No recommendations found above the confidence threshold.[/yellow]"
+        )
         return
 
     # Recommendations table
@@ -342,7 +354,9 @@ def _print_table(
     table.add_column("Related", style="dim")
 
     for rec in report.recommendations:
-        related = ", ".join(rec.related_primitives[:2]) if rec.related_primitives else "-"
+        related = (
+            ", ".join(rec.related_primitives[:2]) if rec.related_primitives else "-"
+        )
         table.add_row(
             rec.primitive_name,
             rec.confidence_percent,
@@ -359,7 +373,9 @@ def _print_table(
             if rec.code_template:
                 console.print(f"\n[cyan]{rec.primitive_name}[/cyan]")
                 console.print(
-                    Syntax(rec.code_template, "python", theme="monokai", line_numbers=False)
+                    Syntax(
+                        rec.code_template, "python", theme="monokai", line_numbers=False
+                    )
                 )
 
     # Show detected issues
@@ -370,11 +386,11 @@ def _print_table(
             if line_info:
                 # Find relevant lines for this issue
                 if "API calls" in issue and "api_calls" in line_info:
-                    lines_str = f" (lines: {', '.join(map(str, line_info['api_calls'][:3]))})"
-                elif "Async" in issue and "async_operations" in line_info:
                     lines_str = (
-                        f" (lines: {', '.join(map(str, line_info['async_operations'][:3]))})"
+                        f" (lines: {', '.join(map(str, line_info['api_calls'][:3]))})"
                     )
+                elif "Async" in issue and "async_operations" in line_info:
+                    lines_str = f" (lines: {', '.join(map(str, line_info['async_operations'][:3]))})"
             console.print(f"  • {issue}{lines_str}")
 
     # Show optimization opportunities
@@ -383,7 +399,9 @@ def _print_table(
         for opp in report.context.optimization_opportunities:
             lines_str = ""
             if line_info and "API calls" in opp and "api_calls" in line_info:
-                lines_str = f" (lines: {', '.join(map(str, line_info['api_calls'][:5]))})"
+                lines_str = (
+                    f" (lines: {', '.join(map(str, line_info['api_calls'][:5]))})"
+                )
             console.print(f"  • {opp}{lines_str}")
 
 
@@ -403,7 +421,9 @@ def _find_pattern_lines(code: str) -> dict[str, list[int]]:
     api_patterns = re.compile(r"(requests\.|httpx\.|aiohttp|\.get\(|\.post\(|fetch\()")
     async_patterns = re.compile(r"(async def|await\s)")
     error_patterns = re.compile(r"(try:|except\s|raise\s)")
-    llm_patterns = re.compile(r"(openai|anthropic|chat.*completion|llm|gpt|claude)", re.IGNORECASE)
+    llm_patterns = re.compile(
+        r"(openai|anthropic|chat.*completion|llm|gpt|claude)", re.IGNORECASE
+    )
     for_patterns = re.compile(r"^\s*for\s+\w+\s+in\s+")
     timeout_patterns = re.compile(
         r"(asyncio\.wait_for|asyncio\.timeout|signal\.alarm|timeout\s*=|TimeoutError)"
@@ -475,7 +495,9 @@ def _print_suggested_diffs(
             console.print(
                 f"  Lines {line_info['timeout_patterns'][:3]} have manual timeout handling."
             )
-            console.print("\n[dim]Replace asyncio.wait_for with TimeoutPrimitive:[/dim]")
+            console.print(
+                "\n[dim]Replace asyncio.wait_for with TimeoutPrimitive:[/dim]"
+            )
             timeout_code = """from tta_dev_primitives.recovery import TimeoutPrimitive
 from tta_dev_primitives import WorkflowContext
 
@@ -489,14 +511,20 @@ protected_operation = TimeoutPrimitive(
 # Usage:
 context = WorkflowContext(workflow_id="timeout-workflow")
 result = await protected_operation.execute(input_data, context)"""
-            console.print(Syntax(timeout_code, "python", theme="monokai", line_numbers=False))
+            console.print(
+                Syntax(timeout_code, "python", theme="monokai", line_numbers=False)
+            )
 
     # For fallback suggestions
     if "fallback_patterns" in line_info or "error_handling" in line_info:
         if any("Fallback" in rec.primitive_name for rec in report.recommendations):
             console.print("\n[cyan]Fallback cascade suggestion:[/cyan]")
-            lines_to_show = line_info.get("fallback_patterns", line_info.get("error_handling", []))
-            console.print(f"  Lines {lines_to_show[:3]} have manual fallback/error handling.")
+            lines_to_show = line_info.get(
+                "fallback_patterns", line_info.get("error_handling", [])
+            )
+            console.print(
+                f"  Lines {lines_to_show[:3]} have manual fallback/error handling."
+            )
             console.print("\n[dim]Replace with FallbackPrimitive:[/dim]")
             fallback_code = """from tta_dev_primitives.recovery import FallbackPrimitive
 from tta_dev_primitives import WorkflowContext
@@ -513,7 +541,9 @@ resilient_workflow = FallbackPrimitive(
 # Usage - automatically tries fallbacks on failure:
 context = WorkflowContext(workflow_id="fallback-workflow")
 result = await resilient_workflow.execute(input_data, context)"""
-            console.print(Syntax(fallback_code, "python", theme="monokai", line_numbers=False))
+            console.print(
+                Syntax(fallback_code, "python", theme="monokai", line_numbers=False)
+            )
 
     # For parallelization suggestions
     if "api_calls" in line_info and len(line_info["api_calls"]) >= 2:
@@ -537,7 +567,9 @@ workflow = ParallelPrimitive([
 # Execute all in parallel
 context = WorkflowContext(workflow_id="parallel-api")
 results = await workflow.execute(input_data, context)"""
-            console.print(Syntax(parallel_code, "python", theme="monokai", line_numbers=False))
+            console.print(
+                Syntax(parallel_code, "python", theme="monokai", line_numbers=False)
+            )
 
     # For retry suggestions
     if top_rec.primitive_name == "RetryPrimitive" and "api_calls" in line_info:
@@ -547,7 +579,9 @@ results = await workflow.execute(input_data, context)"""
         )
         if top_rec.code_template:
             console.print(
-                Syntax(top_rec.code_template, "python", theme="monokai", line_numbers=False)
+                Syntax(
+                    top_rec.code_template, "python", theme="monokai", line_numbers=False
+                )
             )
 
     # For circuit breaker
@@ -558,7 +592,9 @@ results = await workflow.execute(input_data, context)"""
         )
         if top_rec.code_template:
             console.print(
-                Syntax(top_rec.code_template, "python", theme="monokai", line_numbers=False)
+                Syntax(
+                    top_rec.code_template, "python", theme="monokai", line_numbers=False
+                )
             )
 
 
@@ -616,7 +652,9 @@ def primitives(
         print(json.dumps(prims, indent=2))
         return
 
-    table = Table(title="TTA.dev Primitives", show_header=True, header_style="bold cyan")
+    table = Table(
+        title="TTA.dev Primitives", show_header=True, header_style="bold cyan"
+    )
     table.add_column("Primitive", style="cyan", no_wrap=True)
     table.add_column("Description", style="white")
     table.add_column("Use Cases", style="dim")
@@ -665,7 +703,9 @@ def docs(
 
     # Resolve options from config
     show_all_templates = (
-        show_all_templates if show_all_templates is not None else config.analysis.show_templates
+        show_all_templates
+        if show_all_templates is not None
+        else config.analysis.show_templates
     )
 
     info = analyzer.get_primitive_info(primitive)
@@ -696,7 +736,9 @@ def docs(
 
     # Related primitives
     if info["related_primitives"]:
-        console.print(f"\n[bold]Related Primitives:[/bold] {', '.join(info['related_primitives'])}")
+        console.print(
+            f"\n[bold]Related Primitives:[/bold] {', '.join(info['related_primitives'])}"
+        )
 
     # Templates
     templates = info.get("templates", {})
@@ -706,13 +748,21 @@ def docs(
         if show_all_templates:
             for name, template in templates.items():
                 console.print(f"\n[cyan]Template: {name}[/cyan]")
-                console.print(Syntax(template, "python", theme="monokai", line_numbers=False))
+                console.print(
+                    Syntax(template, "python", theme="monokai", line_numbers=False)
+                )
         else:
             # Show just the basic template
-            basic = templates.get("basic", list(templates.values())[0] if templates else "")
+            basic = templates.get(
+                "basic", list(templates.values())[0] if templates else ""
+            )
             if basic:
-                console.print(Syntax(basic, "python", theme="monokai", line_numbers=False))
-            console.print(f"\n[dim]Use --all to see all {len(templates)} templates[/dim]")
+                console.print(
+                    Syntax(basic, "python", theme="monokai", line_numbers=False)
+                )
+            console.print(
+                f"\n[dim]Use --all to see all {len(templates)} templates[/dim]"
+            )
 
 
 @app.command()
@@ -837,7 +887,9 @@ def transform(
 
     if not targets:
         if not quiet:
-            console.print(f"[yellow]No suitable functions found for {primitive}[/yellow]")
+            console.print(
+                f"[yellow]No suitable functions found for {primitive}[/yellow]"
+            )
         raise typer.Exit(0) from None
 
     # Generate transformed code
@@ -855,7 +907,9 @@ def transform(
         print(transformed)
 
 
-def _find_transform_targets(code: str, primitive: str, specific_function: str | None) -> list[dict]:
+def _find_transform_targets(
+    code: str, primitive: str, specific_function: str | None
+) -> list[dict]:
     """Find functions suitable for transformation."""
     import ast
 
@@ -934,7 +988,9 @@ def _is_suitable_for_primitive(func_code: str, primitive: str) -> bool:
     return any(kw in code_lower for kw in keywords)
 
 
-def _generate_transformation(code: str, primitive: str, targets: list[dict], info: dict) -> str:
+def _generate_transformation(
+    code: str, primitive: str, targets: list[dict], info: dict
+) -> str:
     """Generate transformed code."""
     # Use AST transformer for smarter extraction on specific primitives
     if primitive == "CompensationPrimitive":
@@ -1061,19 +1117,17 @@ protected_{func_names[0]} = CircuitBreakerPrimitive(
 # context = WorkflowContext(workflow_id="circuit-breaker-workflow")
 # result = await protected_{func_names[0]}.execute(data, context)
 """,
-        "SequentialPrimitive": f"""
-# Compose {", ".join(func_names)} into a sequential workflow
-sequential_workflow = SequentialPrimitive([
-    {",\n    ".join(func_names)}
-])
-
-# Or use the >> operator for cleaner composition:
-# workflow = {" >> ".join(func_names)}
-
-# Usage:
-# context = WorkflowContext(workflow_id="sequential-workflow")
-# result = await sequential_workflow.execute(initial_data, context)
-""",
+        "SequentialPrimitive": (
+            f"# Compose {', '.join(func_names)} into a sequential workflow\n"
+            "sequential_workflow = SequentialPrimitive([\n"
+            f"    {','.join(func_names)}\n"
+            "])\n\n"
+            "# Or use the >> operator for cleaner composition:\n"
+            f"# workflow = {' >> '.join(func_names)}\n\n"
+            "# Usage:\n"
+            '# context = WorkflowContext(workflow_id="sequential-workflow")\n'
+            "# result = await sequential_workflow.execute(initial_data, context)\n"
+        ),
         "RouterPrimitive": """
 # Dynamic routing based on input conditions
 router = RouterPrimitive(
@@ -1125,7 +1179,9 @@ async def {func_names[0]}_compensation(data: dict, context: WorkflowContext):
     return templates.get(primitive, f"# TODO: Wrap with {primitive}")
 
 
-def _generate_compensation_transformation(code: str, targets: list[dict], info: dict) -> str:
+def _generate_compensation_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
     """Generate smart CompensationPrimitive transformation using AST analysis."""
     import ast
 
@@ -1180,7 +1236,11 @@ def _generate_compensation_transformation(code: str, targets: list[dict], info: 
                                     forward_stmts.append("    " + ast.unparse(try_stmt))
                                 except Exception:
                                     pass
-                            forward_body = "\n".join(forward_stmts) if forward_stmts else "    pass"
+                            forward_body = (
+                                "\n".join(forward_stmts)
+                                if forward_stmts
+                                else "    pass"
+                            )
 
                             # Get except body (excluding raise) as compensation
                             for handler in stmt.handlers:
@@ -1188,7 +1248,9 @@ def _generate_compensation_transformation(code: str, targets: list[dict], info: 
                                 for h_stmt in handler.body:
                                     if not isinstance(h_stmt, ast.Raise):
                                         try:
-                                            comp_stmts.append("    " + ast.unparse(h_stmt))
+                                            comp_stmts.append(
+                                                "    " + ast.unparse(h_stmt)
+                                            )
                                         except Exception:
                                             pass
                                 compensation_body = (
@@ -1197,9 +1259,7 @@ def _generate_compensation_transformation(code: str, targets: list[dict], info: 
                                 break
 
                 if not forward_body:
-                    forward_body = (
-                        "    # Extract forward operations from original function\n    pass"
-                    )
+                    forward_body = "    # Extract forward operations from original function\n    pass"
                 if not compensation_body:
                     compensation_body = (
                         f"    # Cleanup actions: {', '.join(cleanup_actions)}\n    pass"
@@ -1299,10 +1359,14 @@ def _generate_timeout_transformation(code: str, targets: list[dict], info: dict)
         pass
 
     # Fallback to template
-    return _fallback_template_transformation(code, lines, targets, info, "TimeoutPrimitive")
+    return _fallback_template_transformation(
+        code, lines, targets, info, "TimeoutPrimitive"
+    )
 
 
-def _generate_fallback_transformation(code: str, targets: list[dict], info: dict) -> str:
+def _generate_fallback_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
     """Generate smart FallbackPrimitive transformation using AST analysis."""
     import ast
 
@@ -1332,7 +1396,9 @@ def _generate_fallback_transformation(code: str, targets: list[dict], info: dict
             for pattern in detector.fallback_patterns:
                 primary = pattern.get("primary", "primary_func")
                 fallback = pattern.get("fallback", "fallback_func")
-                func_name = pattern.get("function", targets[0]["name"] if targets else "operation")
+                func_name = pattern.get(
+                    "function", targets[0]["name"] if targets else "operation"
+                )
 
                 wrapper_parts.append(f"""
 # Extracted from try/except pattern
@@ -1354,7 +1420,9 @@ def _generate_fallback_transformation(code: str, targets: list[dict], info: dict
         pass
 
     # Fallback to template
-    return _fallback_template_transformation(code, lines, targets, info, "FallbackPrimitive")
+    return _fallback_template_transformation(
+        code, lines, targets, info, "FallbackPrimitive"
+    )
 
 
 def _generate_router_transformation(code: str, targets: list[dict], info: dict) -> str:
@@ -1367,7 +1435,9 @@ def _generate_router_transformation(code: str, targets: list[dict], info: dict) 
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get("import_path", "from tta_dev_primitives.core import RouterPrimitive")
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives.core import RouterPrimitive"
+    )
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
@@ -1385,10 +1455,14 @@ def _generate_router_transformation(code: str, targets: list[dict], info: dict) 
             for pattern in detector.router_patterns:
                 routes = pattern.get("routes", {})
                 variable = pattern.get("variable", "provider")
-                func_name = pattern.get("function", targets[0]["name"] if targets else "router")
+                func_name = pattern.get(
+                    "function", targets[0]["name"] if targets else "router"
+                )
 
                 if routes:
-                    routes_str = ",\n        ".join([f'"{k}": {v}' for k, v in routes.items()])
+                    routes_str = ",\n        ".join(
+                        [f'"{k}": {v}' for k, v in routes.items()]
+                    )
                     default_key = list(routes.keys())[0] if routes else "default"
 
                     wrapper_parts.append(f"""
@@ -1413,10 +1487,14 @@ def _generate_router_transformation(code: str, targets: list[dict], info: dict) 
         pass
 
     # Fallback to template
-    return _fallback_template_transformation(code, lines, targets, info, "RouterPrimitive")
+    return _fallback_template_transformation(
+        code, lines, targets, info, "RouterPrimitive"
+    )
 
 
-def _generate_circuit_breaker_transformation(code: str, targets: list[dict], info: dict) -> str:
+def _generate_circuit_breaker_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
     """Generate smart CircuitBreakerPrimitive transformation using AST analysis."""
     import ast
 
@@ -1472,7 +1550,9 @@ def _generate_circuit_breaker_transformation(code: str, targets: list[dict], inf
         pass
 
     # Fallback to template
-    return _fallback_template_transformation(code, lines, targets, info, "CircuitBreakerPrimitive")
+    return _fallback_template_transformation(
+        code, lines, targets, info, "CircuitBreakerPrimitive"
+    )
 
 
 def _generate_memory_transformation(code: str, targets: list[dict], info: dict) -> str:
@@ -1503,9 +1583,15 @@ def _generate_memory_transformation(code: str, targets: list[dict], info: dict) 
             wrapper_parts = ["\n# --- TTA.dev Transformation ---\n"]
 
             # Group by pattern type
-            message_appends = [p for p in detector.memory_patterns if p["type"] == "message_append"]
-            deque_patterns = [p for p in detector.memory_patterns if p["type"] == "deque_history"]
-            dict_patterns = [p for p in detector.memory_patterns if p["type"] == "dict_storage"]
+            message_appends = [
+                p for p in detector.memory_patterns if p["type"] == "message_append"
+            ]
+            deque_patterns = [
+                p for p in detector.memory_patterns if p["type"] == "deque_history"
+            ]
+            dict_patterns = [
+                p for p in detector.memory_patterns if p["type"] == "dict_storage"
+            ]
 
             if message_appends:
                 var = message_appends[0]["variable"]
@@ -1575,10 +1661,14 @@ async def get_history(query: str = None) -> list:
         pass
 
     # Fallback to template
-    return _fallback_template_transformation(code, lines, targets, info, "MemoryPrimitive")
+    return _fallback_template_transformation(
+        code, lines, targets, info, "MemoryPrimitive"
+    )
 
 
-def _generate_delegation_transformation(code: str, targets: list[dict], info: dict) -> str:
+def _generate_delegation_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
     """Generate smart DelegationPrimitive transformation using AST analysis."""
     import ast
 
@@ -1614,7 +1704,9 @@ def _generate_delegation_transformation(code: str, targets: list[dict], info: di
                 p for p in detector.delegation_patterns if p["type"] == "agent_dispatch"
             ]
             executor_dispatch = [
-                p for p in detector.delegation_patterns if p["type"] == "executor_dispatch"
+                p
+                for p in detector.delegation_patterns
+                if p["type"] == "executor_dispatch"
             ]
 
             if model_routing:
@@ -1707,10 +1799,14 @@ delegation = DelegationPrimitive()
         pass
 
     # Fallback to template
-    return _fallback_template_transformation(code, lines, targets, info, "DelegationPrimitive")
+    return _fallback_template_transformation(
+        code, lines, targets, info, "DelegationPrimitive"
+    )
 
 
-def _generate_sequential_transformation(code: str, targets: list[dict], info: dict) -> str:
+def _generate_sequential_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
     """Generate smart SequentialPrimitive transformation using AST analysis."""
     import ast
 
@@ -1720,7 +1816,9 @@ def _generate_sequential_transformation(code: str, targets: list[dict], info: di
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get("import_path", "from tta_dev_primitives import SequentialPrimitive")
+    import_path = info.get(
+        "import_path", "from tta_dev_primitives import SequentialPrimitive"
+    )
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
@@ -1813,10 +1911,14 @@ class Step1Primitive(WorkflowPrimitive[dict, dict]):
         pass
 
     # Fallback to template
-    return _fallback_template_transformation(code, lines, targets, info, "SequentialPrimitive")
+    return _fallback_template_transformation(
+        code, lines, targets, info, "SequentialPrimitive"
+    )
 
 
-def _generate_adaptive_transformation(code: str, targets: list[dict], info: dict) -> str:
+def _generate_adaptive_transformation(
+    code: str, targets: list[dict], info: dict
+) -> str:
     """Generate smart AdaptivePrimitive transformation using AST analysis."""
     import ast
 
@@ -1832,7 +1934,9 @@ def _generate_adaptive_transformation(code: str, targets: list[dict], info: dict
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from tta_dev_primitives import WorkflowContext")
-        lines.insert(import_idx + 2, "from tta_dev_primitives.adaptive import LearningMode")
+        lines.insert(
+            import_idx + 2, "from tta_dev_primitives.adaptive import LearningMode"
+        )
         lines.insert(import_idx + 3, "")
 
     # Parse code to extract adaptive patterns
@@ -1942,7 +2046,9 @@ class Adaptive{var.title()}Primitive(AdaptivePrimitive[dict, dict]):
         pass
 
     # Fallback to template
-    return _fallback_template_transformation(code, lines, targets, info, "AdaptivePrimitive")
+    return _fallback_template_transformation(
+        code, lines, targets, info, "AdaptivePrimitive"
+    )
 
 
 def _find_import_index(lines: list[str]) -> int:
@@ -1960,8 +2066,8 @@ def _fallback_template_transformation(
     code: str, lines: list[str], targets: list[dict], info: dict, primitive: str
 ) -> str:
     """Fallback to simple template-based transformation."""
-    func_names = [t["name"] for t in targets]
-    is_async = any(t["is_async"] for t in targets)
+    [t["name"] for t in targets]
+    any(t["is_async"] for t in targets)
     wrapper_code = _generate_wrapper_code(primitive, targets, info)
     lines.append("")
     lines.append("# --- TTA.dev Transformation ---")
@@ -2201,7 +2307,9 @@ def ab_test(
 
     # First analyze the code
     report = analyzer.analyze(code, file_path=str(code_file))
-    console.print(f"Detected patterns: {', '.join(report.analysis.detected_patterns) or 'none'}")
+    console.print(
+        f"Detected patterns: {', '.join(report.analysis.detected_patterns) or 'none'}"
+    )
     console.print()
 
     async def run_ab_tests() -> dict:
@@ -2286,7 +2394,9 @@ def ab_test(
     if results:
         best = min(
             results.items(),
-            key=lambda x: x[1]["avg_time"] if x[1]["success_rate"] > 0.5 else float("inf"),
+            key=lambda x: x[1]["avg_time"]
+            if x[1]["success_rate"] > 0.5
+            else float("inf"),
         )
         console.print(f"\n[bold green]🏆 Recommended: {best[0]}[/bold green]")
 
@@ -2467,7 +2577,7 @@ def config_show(
         tta-dev config show --config ./my-config.yaml
     """
     try:
-        config = load_config(config_path)
+        load_config(config_path)
         config_file = find_config_file()
 
         if config_file:
@@ -2502,7 +2612,9 @@ def config_path() -> None:
     else:
         console.print("[yellow]No configuration file found.[/yellow]")
         console.print("\nSearched locations:")
-        console.print("  • .ttadevrc.yaml / .ttadevrc.yml / .ttadevrc.toml / .ttadevrc.json")
+        console.print(
+            "  • .ttadevrc.yaml / .ttadevrc.yml / .ttadevrc.toml / .ttadevrc.json"
+        )
         console.print("  • pyproject.toml [tool.tta-dev]")
         console.print("  • Parent directories (up to root)")
         console.print("  • Home directory")

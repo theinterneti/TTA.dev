@@ -19,7 +19,7 @@ from tta_dev_primitives.integrations.e2b_primitive import (
 
 # Mock E2B API key if not present to allow tests to run with mocks
 if not os.getenv("E2B_API_KEY"):
-    os.environ["E2B_API_KEY"] = "mock_key"
+    os.environ["E2B_API_KEY"] = "mock_key"  # pragma: allowlist secret
 
 
 class TestE2BIntegration:
@@ -131,7 +131,9 @@ print(fibonacci(10))
         """Test code that uses standard library imports."""
         # Setup mock execution result
         mock_execution = MagicMock()
-        mock_execution.logs.stdout = ['{"pi": 3.141592653589793, "sqrt2": 1.4142135623730951}']
+        mock_execution.logs.stdout = [
+            '{"pi": 3.141592653589793, "sqrt2": 1.4142135623730951}'
+        ]
         mock_execution.logs.stderr = []
         mock_execution.error = None
         mock_sandbox.run_code.return_value = mock_execution
@@ -163,9 +165,13 @@ print(json.dumps(data))
         # Setup mock execution result
         mock_execution = MagicMock()
         mock_execution.logs.stdout = []
-        mock_execution.logs.stderr = ["NameError: name 'undefined_variable' is not defined"]
+        mock_execution.logs.stderr = [
+            "NameError: name 'undefined_variable' is not defined"
+        ]
         mock_execution.error = MagicMock()
-        mock_execution.error.value = "NameError: name 'undefined_variable' is not defined"
+        mock_execution.error.value = (
+            "NameError: name 'undefined_variable' is not defined"
+        )
         mock_sandbox.run_code.return_value = mock_execution
 
         primitive = CodeExecutionPrimitive()

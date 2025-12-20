@@ -177,15 +177,15 @@ class TestRealCodebaseScanning:
             # Check classification rules
             if any(word in message for word in ["test", "pytest", "coverage", "unittest"]):
                 # Should be classified as testing
-                assert (
-                    todo["type"] == "testing"
-                ), f"TODO about testing not classified correctly: {todo['message']}"
+                assert todo["type"] == "testing", (
+                    f"TODO about testing not classified correctly: {todo['message']}"
+                )
 
             if any(word in message for word in ["urgent", "asap", "critical", "blocker"]):
                 # Should have high priority
-                assert (
-                    todo["priority"] == "high"
-                ), f"Urgent TODO not prioritized high: {todo['message']}"
+                assert todo["priority"] == "high", (
+                    f"Urgent TODO not prioritized high: {todo['message']}"
+                )
 
             if any(word in message for word in ["fix", "bug", "error", "crash"]):
                 # Should be classified as bugfix

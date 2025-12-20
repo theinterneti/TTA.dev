@@ -167,7 +167,7 @@ class GitCollaborationPrimitive(BaseModel, WorkflowPrimitive[dict[str, Any], dic
                 for prefix in ["feat:", "fix:", "docs:", "test:", "refactor:", "chore:"]
             ):
                 raise ValueError(
-                    "Use conventional commits format: " "feat:/fix:/docs:/test:/refactor:/chore:"
+                    "Use conventional commits format: feat:/fix:/docs:/test:/refactor:/chore:"
                 )
 
         # Hygiene check: Require tests if policy enforces

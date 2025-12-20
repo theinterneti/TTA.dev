@@ -596,7 +596,7 @@ def fetch_data():
 """
         tree = ast.parse(code)
         transformer = RetryLoopTransformer()
-        new_tree = transformer.visit(tree)
+        transformer.visit(tree)
 
         assert len(transformer.transformations) == 1
         assert transformer.transformations[0]["function"] == "fetch_data"

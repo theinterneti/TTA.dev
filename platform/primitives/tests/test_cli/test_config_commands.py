@@ -105,7 +105,7 @@ class TestConfigShow:
 
     def test_config_show_defaults(self) -> None:
         """Test config show displays defaults."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory():
             # Run from a directory with no config
             result = runner.invoke(
                 app,
@@ -150,7 +150,7 @@ class TestConfigPath:
 
     def test_config_path_not_found(self) -> None:
         """Test config path when no config exists."""
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory():
             # Change to temp dir
             result = runner.invoke(app, ["config", "path"])
             # Should show helpful message

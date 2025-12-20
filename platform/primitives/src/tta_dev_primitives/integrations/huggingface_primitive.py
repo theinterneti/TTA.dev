@@ -15,12 +15,18 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class HuggingFaceRequest(BaseModel):
     """Request model for Hugging Face primitive."""
 
-    messages: list[dict[str, str]] = Field(description="List of messages in chat format")
+    messages: list[dict[str, str]] = Field(
+        description="List of messages in chat format"
+    )
     model: str | None = Field(
         default=None, description="Model to use (overrides primitive default)"
     )
-    temperature: float | None = Field(default=None, description="Sampling temperature (0-2)")
-    max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
+    temperature: float | None = Field(
+        default=None, description="Sampling temperature (0-2)"
+    )
+    max_tokens: int | None = Field(
+        default=None, description="Maximum tokens to generate"
+    )
 
 
 class HuggingFaceResponse(BaseModel):
@@ -52,7 +58,7 @@ class HuggingFacePrimitive(WorkflowPrimitive[HuggingFaceRequest, HuggingFaceResp
         # Create primitive (free access to thousands of models)
         llm = HuggingFacePrimitive(
             model="meta-llama/Llama-3.3-70B-Instruct",
-            api_key="your-hf-token"
+            api_key="your-hf-token"  # pragma: allowlist secret
         )
 
         # Execute
@@ -129,7 +135,9 @@ class HuggingFacePrimitive(WorkflowPrimitive[HuggingFaceRequest, HuggingFaceResp
             "Content-Type": "application/json",
         }
 
-        response = await self.client.post(f"{self.base_url}/{model}", json=params, headers=headers)
+        response = await self.client.post(
+            f"{self.base_url}/{model}", json=params, headers=headers
+        )
         response.raise_for_status()
         data = response.json()
 

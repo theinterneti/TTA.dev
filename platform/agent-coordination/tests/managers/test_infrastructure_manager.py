@@ -298,7 +298,7 @@ async def test_orchestrate_single_container_success(
     assert result.success is True
     assert result.operation == "orchestrate_containers"
     assert len(result.containers_started) == 1
-    assert "abc123def456" in result.containers_started
+    assert "abc123def456" in result.containers_started  # pragma: allowlist secret (mock container ID)
     assert result.error is None
 
     # Verify DockerExpert was called correctly
