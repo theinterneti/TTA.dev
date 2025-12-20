@@ -45,7 +45,8 @@ async def test_linear_backoff():
 
     elapsed_time = end_time - start_time
     expected_min_time = 1.0**0 + 1.0**1  # 1 + 1 = 2
-    assert elapsed_time >= expected_min_time
+    # Allow 50ms tolerance for asyncio.sleep imprecision
+    assert elapsed_time >= expected_min_time - 0.05
 
 
 async def test_constant_backoff():
@@ -110,13 +111,13 @@ async def test_max_backoff_limit():
     expected_min_time = 1.0 + 10.0 + 20.0
     # Allow 10% tolerance for timing variations due to asyncio scheduling
     # and system load (observed ~29s instead of 31s in CI environments)
-    assert elapsed_time >= expected_min_time * 0.90, (
-        f"Expected at least {expected_min_time * 0.90:.1f}s, got {elapsed_time:.1f}s"
-    )
+    assert (
+        elapsed_time >= expected_min_time * 0.90
+    ), f"Expected at least {expected_min_time * 0.90:.1f}s, got {elapsed_time:.1f}s"
     # Ensure we don't have unexpected long delays
-    assert elapsed_time <= expected_min_time * 1.20, (
-        f"Expected at most {expected_min_time * 1.20:.1f}s, got {elapsed_time:.1f}s"
-    )
+    assert (
+        elapsed_time <= expected_min_time * 1.20
+    ), f"Expected at most {expected_min_time * 1.20:.1f}s, got {elapsed_time:.1f}s"
 
 
 async def test_retry_success_after_failure():

@@ -20,7 +20,6 @@
     "workflow"
   ],
   "activationEvents": [
-    "onCommand:tta.openDashboard",
     "onStartupFinished"
   ],
   "main": "./out/extension.js",

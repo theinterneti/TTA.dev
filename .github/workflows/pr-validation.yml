@@ -4,10 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'logseq/**'
-      - 'archive/**'
+      - "**.md"
+      - "docs/**"
+      - "logseq/**"
+      - "archive/**"
 
 concurrency:
   group: pr-${{ github.event.pull_request.number }}
@@ -26,21 +26,25 @@ jobs:
       - name: Setup TTA environment
         uses: ./.github/actions/setup-tta-env
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Sync dependencies
         run: uv sync --all-extras
 
       - name: Format check
+        id: format-check
         run: uv run ruff format --check .
 
       - name: Lint
+        id: lint
         run: uv run ruff check .
 
       - name: Type check
+        id: type-check
         run: uv run pyright platform/ apps/
 
       - name: Run unit tests
+        id: unit-tests
         run: uv run pytest -v -m "not integration and not slow" --maxfail=5
 
       - name: PR validation summary
