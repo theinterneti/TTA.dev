@@ -108,7 +108,7 @@ async def build_cross_references(kb_path: str, code_path: str) -> dict[str, Any]
         >>> result = await build_cross_references("logseq", "platform")
         >>> print(f"Found {len(result['kb_to_code'])} KB pages with code refs")
     """
-    builder = CrossReferenceBuilder(kb_path=kb_path, code_path=code_path)
+    builder = CrossReferenceBuilder(kb_path=Path(kb_path), code_path=Path(code_path))
     result = await builder.build()
 
     # Enhance with suggestions using SuggestKBLinks
@@ -448,7 +448,9 @@ async def pre_commit_validation(
         issues.append(f"⚠️ {todo_count} TODOs in codebase (consider syncing to KB)")
 
     # 3. Build cross-references (lightweight check)
-    xref_builder = CrossReferenceBuilder(kb_path=kb_path, code_path=code_path)
+    xref_builder = CrossReferenceBuilder(
+        kb_path=Path(kb_path), code_path=Path(code_path)
+    )
     xref_result = await xref_builder.build()
 
     missing_refs = len(xref_result.get("missing_references", []))
