@@ -4,13 +4,18 @@ Logseq Graph Agent (Sync Tool)
 
 Automates the synchronization between the TTA codebase, documentation, and the Logseq Knowledge Base.
 
+SAFETY ARCHITECTURE (See docs/architecture/KB_SAFETY_ARCHITECTURE.md):
+- ONE-WAY SYNC ONLY: Code -> KB (never KB -> Code)
+- This tool should ONLY READ from the codebase
+- This tool should ONLY WRITE to the Logseq knowledge base (~/repos/TTA-notes)
+- NEVER modify source code files
+
 Features:
 1. Coverage Sync: Updates Logseq pages with coverage data from component-maturity-analysis.json.
 2. Namespace Management: Enforces TTA vs TTA.dev naming conventions.
 3. Doc Processing: Maps new docs to Logseq pages and adds tags.
-4. Code Processing: Adds Logseq citations to code files.
-5. Block Sync: Extracts marked code blocks (# LogseqBlock: [[Page]]) and syncs them to Logseq.
-6. Journal Sync: Aggregates project journals into TTA.notes.
+4. Block Sync: Extracts marked code blocks (# LogseqBlock: [[Page]]) and syncs them to Logseq.
+5. Journal Sync: Aggregates project journals into TTA.notes.
 
 Usage:
     python platform/kb-automation/src/tta_kb_automation/tools/logseq_graph_sync.py --sync-coverage
@@ -41,6 +46,59 @@ LOGSEQ_ROOT = Path(os.path.expanduser("~/repos/TTA-notes"))
 PAGES_DIR = LOGSEQ_ROOT / "pages"
 JOURNALS_DIR = LOGSEQ_ROOT / "journals"
 MATURITY_FILE = REPO_ROOT / "component-maturity-analysis.json"
+
+
+# =============================================================================
+# SAFETY: Path Validation (Prevents code modification disasters)
+# See: docs/architecture/KB_SAFETY_ARCHITECTURE.md
+# =============================================================================
+def is_safe_write_path(path: Path) -> bool:
+    """
+    Validate that a path is safe to write to.
+
+    SAFETY RULE: Never write to the codebase. Only write to Logseq directories.
+
+    Args:
+        path: The path to validate
+
+    Returns:
+        True if the path is safe to write to, False otherwise
+    """
+    resolved = path.resolve()
+
+    # Never write inside the repository (codebase protection)
+    if resolved.is_relative_to(REPO_ROOT):
+        return False
+
+    # Only allow writing to Logseq directories
+    return resolved.is_relative_to(LOGSEQ_ROOT.resolve())
+
+
+def safe_write_file(path: Path, content: str) -> bool:
+    """
+    Safely write content to a file, with path validation.
+
+    Args:
+        path: The file path to write to
+        content: The content to write
+
+    Returns:
+        True if write was successful, False if blocked by safety check
+
+    Raises:
+        ValueError: If the path fails safety validation
+    """
+    if not is_safe_write_path(path):
+        raise ValueError(
+            f"❌ SAFETY BLOCK: Cannot write to {path}. "
+            f"This path is inside the codebase ({REPO_ROOT}). "
+            "KB sync should only write to Logseq directories."
+        )
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content)
+    return True
+
 
 # Namespace Rules
 NAMESPACE_RULES = {
@@ -260,12 +318,13 @@ def update_logseq_page(
         new_content += "\n" + body_append
 
     if not file_path.exists() or content != new_content:
-        if not file_path.parent.exists():
-            print(f"⚠️ Parent dir {file_path.parent} does not exist. Skipping write.")
+        # Use safe_write_file to ensure we're only writing to Logseq directories
+        try:
+            safe_write_file(file_path, new_content)
+            print(f"✅ Updated {title}")
+        except ValueError as e:
+            print(f"❌ SAFETY BLOCK: {e}")
             return
-
-        file_path.write_text(new_content)
-        print(f"✅ Updated {title}")
 
 
 def sync_coverage(data: dict[str, Any]):
@@ -296,52 +355,32 @@ def sync_coverage(data: dict[str, Any]):
 
 def inject_citation(file_path: Path, page_name: str):
     """
-    DISABLED: This function previously modified source code files directly,
-    which caused catastrophic data loss on 2025-12-12.
+    PERMANENTLY DISABLED: This function is architecturally forbidden.
 
-    See GitHub issue for details on the incident and recovery.
+    This function previously modified source code files directly, which caused
+    catastrophic data loss on 2025-12-12 (227,297 lines deleted across 1,155 files).
 
-    This function should NOT modify source files. The Logseq KB should be
-    separate from the codebase. Use Logseq pages to reference code files,
-    not the other way around.
+    See:
+    - GitHub issue #175 for incident details
+    - docs/architecture/KB_SAFETY_ARCHITECTURE.md for architectural decision
+
+    ARCHITECTURAL RULE: Knowledge base sync should NEVER modify source files.
+    The data flow is ONE-WAY: Code -> KB (never KB -> Code)
     """
-    # DISABLED - Do not modify source files
-    print(f"⚠️ inject_citation is DISABLED - would have modified {file_path.name}")
-    return
+    # SAFETY: This function is architecturally forbidden
+    # Even if someone removes the early return, is_safe_write_path() will block writes
 
-    # Original code below is preserved for reference but will never execute:
-    try:
-        content = file_path.read_text()
-        citation = f"[[{page_name}]]"
+    # Validate that we would be blocked anyway
+    if not is_safe_write_path(file_path):
+        print(f"⚠️ inject_citation is DISABLED - {file_path.name} is protected")
+    else:
+        # This should never happen - all codebase files should be protected
+        raise ValueError(
+            f"❌ SAFETY ERROR: {file_path} passed safety check but inject_citation "
+            "is architecturally forbidden. Please review KB_SAFETY_ARCHITECTURE.md"
+        )
 
-        if citation in content:
-            return
-
-        print(f"💉 Injecting citation {citation} into {file_path.name}")
-
-        ext = file_path.suffix
-        if ext == ".py":
-            lines = content.splitlines()
-            insert_idx = 0
-            if lines and lines[0].startswith("#!"):
-                insert_idx = 1
-
-            # Always insert as comment at insert_idx
-            # This avoids issues with docstrings and ensures it's a valid comment
-            lines.insert(insert_idx, f"# Logseq: {citation}  # noqa: E501, ERA001")
-
-            file_path.write_text("\n".join(lines))
-
-        elif ext in [".ts", ".js"]:
-            lines = content.splitlines()
-            lines.insert(0, f"// Logseq: {citation}")
-            file_path.write_text("\n".join(lines))
-
-        elif ext == ".md":
-            file_path.write_text(content + f"\n\n---\n**Logseq:** {citation}")
-
-    except Exception as e:
-        print(f"❌ Failed to inject citation into {file_path}: {e}")
+    return  # Always return without modification
 
 
 def extract_blocks(file_path: Path, content: str, namespace: str, rel_path: Path | None = None):
@@ -491,12 +530,15 @@ def sync_journals():
             print(f"Found journal entry in {j_path}")
             entry = f"\n### Update from {j_path.parent.name}\n{content}\n"
 
-            if journal_file.exists():
-                current_content = journal_file.read_text()
-                if entry.strip() not in current_content:
-                    journal_file.write_text(current_content + "\n" + entry)
-            else:
-                journal_file.write_text(entry)
+            try:
+                if journal_file.exists():
+                    current_content = journal_file.read_text()
+                    if entry.strip() not in current_content:
+                        safe_write_file(journal_file, current_content + "\n" + entry)
+                else:
+                    safe_write_file(journal_file, entry)
+            except ValueError as e:
+                print(f"❌ SAFETY BLOCK: {e}")
 
 
 def annotate_existing_pages(dry_run: bool = True):
@@ -567,8 +609,12 @@ def annotate_existing_pages(dry_run: bool = True):
                     new_lines.append("")
                     new_lines.append(body)
 
-                page_path.write_text("\n".join(new_lines) + "\n")
-                print(f"   ✅ Added type:: {page_type} to {page_path.name}")
+                try:
+                    safe_write_file(page_path, "\n".join(new_lines) + "\n")
+                    print(f"   ✅ Added type:: {page_type} to {page_path.name}")
+                except ValueError as e:
+                    print(f"   ❌ SAFETY BLOCK: {e}")
+                    continue
 
             updated += 1
 
