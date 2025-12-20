@@ -69,17 +69,17 @@ jobs:
       - name: Run unit tests
         if: inputs.test-type == 'unit' || inputs.test-type == 'all'
         env:
-          PYTHONPATH: ${{ github.workspace }}/packages
+          PYTHONPATH: ${{ github.workspace }}/platform
         run: |
           if [ "${{ inputs.coverage }}" == "true" ]; then
             echo "Running unit tests with coverage..."
             if [ -n "${{ inputs.pytest-markers }}" ]; then
               uv run pytest -v -m "${{ inputs.pytest-markers }}" \
-                --cov=packages --cov-report=xml --cov-report=term-missing \
+                --cov=platform --cov-report=xml --cov-report=term-missing \
                 --cov-report=html
             else
               uv run pytest -v -m "not integration and not slow" \
-                --cov=packages --cov-report=xml --cov-report=term-missing \
+                --cov=platform --cov-report=xml --cov-report=term-missing \
                 --cov-report=html
             fi
           else
@@ -95,7 +95,7 @@ jobs:
         if: inputs.test-type == 'integration' || inputs.test-type == 'all'
         env:
           RUN_INTEGRATION: "true"
-          PYTHONPATH: ${{ github.workspace }}/packages
+          PYTHONPATH: ${{ github.workspace }}/platform
         run: |
           echo "Running integration tests..."
           if [ -n "${{ inputs.pytest-markers }}" ]; then
