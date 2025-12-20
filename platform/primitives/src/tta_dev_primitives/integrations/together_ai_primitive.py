@@ -15,18 +15,12 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 class TogetherAIRequest(BaseModel):
     """Request model for Together.ai primitive."""
 
-    messages: list[dict[str, str]] = Field(
-        description="List of messages in chat format"
-    )
+    messages: list[dict[str, str]] = Field(description="List of messages in chat format")
     model: str | None = Field(
         default=None, description="Model to use (overrides primitive default)"
     )
-    temperature: float | None = Field(
-        default=None, description="Sampling temperature (0-2)"
-    )
-    max_tokens: int | None = Field(
-        default=None, description="Maximum tokens to generate"
-    )
+    temperature: float | None = Field(default=None, description="Sampling temperature (0-2)")
+    max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
 
 
 class TogetherAIResponse(BaseModel):
@@ -90,7 +84,7 @@ class TogetherAIPrimitive(WorkflowPrimitive[TogetherAIRequest, TogetherAIRespons
             **kwargs: Additional arguments for configuration
         """
         super().__init__()
-        self.client = httpx.AsyncClient()
+        self.client = httpx.AsyncClient(timeout=30.0)
         self.model = model
         self.api_key = api_key
         self.base_url = "https://api.together.xyz/v1"

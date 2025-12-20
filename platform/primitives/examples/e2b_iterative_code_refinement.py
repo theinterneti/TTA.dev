@@ -60,9 +60,7 @@ class CodeGeneratorPrimitive(InstrumentedPrimitive[dict, dict]):
         super().__init__(name="code_generator")
         self.attempt = 0
 
-    async def _execute_impl(
-        self, input_data: dict, context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict[str, Any]:
         """Generate code, learning from previous errors."""
         self.attempt += 1
         requirement = input_data.get("requirement", "Calculate fibonacci")
@@ -126,9 +124,7 @@ print(f"Result: {result}")
 class CodeValidatorPrimitive(InstrumentedPrimitive[dict, dict]):
     """Validates E2B execution results and provides feedback."""
 
-    async def _execute_impl(
-        self, input_data: dict, context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict[str, Any]:
         """Check if code executed successfully."""
         execution_result = input_data.get("execution_result", {})
         code = input_data.get("code", "")
@@ -144,9 +140,7 @@ class CodeValidatorPrimitive(InstrumentedPrimitive[dict, dict]):
         if success:
             logger.info("✅ Code executed successfully!")
             logger.info(f"📊 Output: {logs}")
-            logger.info(
-                f"⏱️  Execution time: {execution_result.get('execution_time', 0):.2f}s"
-            )
+            logger.info(f"⏱️  Execution time: {execution_result.get('execution_time', 0):.2f}s")
             return {
                 "valid": True,
                 "code": code,
@@ -177,9 +171,7 @@ class IterativeCodeRefinementWorkflow(InstrumentedPrimitive[dict, dict]):
         self.executor = CodeExecutionPrimitive(default_timeout=30)
         self.validator = CodeValidatorPrimitive()
 
-    async def _execute_impl(
-        self, input_data: dict, context: WorkflowContext
-    ) -> dict[str, Any]:
+    async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict[str, Any]:
         """Run iterative refinement loop."""
         requirement = input_data.get("requirement", "Calculate fibonacci(10)")
 
@@ -225,9 +217,7 @@ class IterativeCodeRefinementWorkflow(InstrumentedPrimitive[dict, dict]):
                 logger.info(f"{'=' * 80}")
                 logger.info(f"✅ Working code generated in {attempt} iteration(s)")
                 logger.info(f"💰 Estimated cost: ${0.01 * attempt:.2f}")
-                logger.info(
-                    f"⏱️  Total execution time: {validation_result['execution_time']:.2f}s"
-                )
+                logger.info(f"⏱️  Total execution time: {validation_result['execution_time']:.2f}s")
                 logger.info(f"{'=' * 80}\n")
 
                 return {
@@ -253,9 +243,7 @@ class IterativeCodeRefinementWorkflow(InstrumentedPrimitive[dict, dict]):
                 logger.error(f"\n{'=' * 80}")
                 logger.error("❌ MAX ATTEMPTS REACHED")
                 logger.error(f"{'=' * 80}")
-                logger.error(
-                    f"Failed to generate working code after {self.max_attempts} attempts"
-                )
+                logger.error(f"Failed to generate working code after {self.max_attempts} attempts")
                 logger.error(f"Last error: {validation_result['error']}")
                 logger.error(f"{'=' * 80}\n")
 
@@ -303,9 +291,7 @@ async def demo_with_sequential_primitive():
     context = WorkflowContext(workflow_id="sequential-pattern")
 
     # In production, wrap this in a loop with retry logic
-    result = await single_iteration.execute(
-        {"requirement": "Calculate fibonacci(10)"}, context
-    )
+    result = await single_iteration.execute({"requirement": "Calculate fibonacci(10)"}, context)
 
     logger.info(f"\nSingle iteration result: {result.get('valid', False)}")
 
@@ -322,9 +308,7 @@ async def demo_real_world_use_case():
     context = WorkflowContext(workflow_id="real-world-demo")
 
     result = await workflow.execute(
-        {
-            "requirement": "Parse JSON and extract user emails, handle missing fields gracefully"
-        },
+        {"requirement": "Parse JSON and extract user emails, handle missing fields gracefully"},
         context,
     )
 

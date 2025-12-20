@@ -448,25 +448,19 @@ async def pre_commit_validation(
         issues.append(f"⚠️ {todo_count} TODOs in codebase (consider syncing to KB)")
 
     # 3. Build cross-references (lightweight check)
-    xref_builder = CrossReferenceBuilder(
-        kb_path=Path(kb_path), code_path=Path(code_path)
-    )
+    xref_builder = CrossReferenceBuilder(kb_path=Path(kb_path), code_path=Path(code_path))
     xref_result = await xref_builder.build()
 
     missing_refs = len(xref_result.get("missing_references", []))
     cross_ref_check = {
         "missing_references": missing_refs,
-        "kb_pages_with_code_refs": xref_result.get("stats", {}).get(
-            "kb_pages_with_code_refs", 0
-        ),
+        "kb_pages_with_code_refs": xref_result.get("stats", {}).get("kb_pages_with_code_refs", 0),
     }
 
     if missing_refs > 0:
         issues.append(f"⚠️ {missing_refs} missing cross-references")
         for ref in xref_result.get("missing_references", [])[:3]:
-            issues.append(
-                f"   - {ref.get('reference', 'unknown')}: {ref.get('suggestion', '')}"
-            )
+            issues.append(f"   - {ref.get('reference', 'unknown')}: {ref.get('suggestion', '')}")
 
     # Generate summary
     passed = len(issues) == 0

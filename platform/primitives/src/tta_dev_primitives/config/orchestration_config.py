@@ -52,9 +52,7 @@ class ExecutorConfig(BaseModel):
         }
         invalid = set(v) - valid_cases
         if invalid:
-            raise ValueError(
-                f"Invalid use_cases: {invalid}. Must be one of: {valid_cases}"
-            )
+            raise ValueError(f"Invalid use_cases: {invalid}. Must be one of: {valid_cases}")
         return v
 
 
@@ -62,9 +60,7 @@ class CostTrackingConfig(BaseModel):
     """Configuration for cost tracking and budgeting."""
 
     enabled: bool = Field(default=True, description="Enable cost tracking")
-    budget_limit_usd: float = Field(
-        default=100.0, description="Monthly budget limit in USD"
-    )
+    budget_limit_usd: float = Field(default=100.0, description="Monthly budget limit in USD")
     alert_threshold: float = Field(
         default=0.8,
         description="Alert when budget reaches this percentage (0.0-1.0)",
@@ -161,9 +157,7 @@ class OrchestrationConfig(BaseModel):
 
         # Override from environment variables
         if os.getenv("TTA_ORCHESTRATION_ENABLED"):
-            config.enabled = (
-                os.getenv("TTA_ORCHESTRATION_ENABLED", "true").lower() == "true"
-            )
+            config.enabled = os.getenv("TTA_ORCHESTRATION_ENABLED", "true").lower() == "true"
 
         if os.getenv("TTA_PREFER_FREE_MODELS"):
             config.prefer_free_models = (
@@ -174,9 +168,7 @@ class OrchestrationConfig(BaseModel):
             config.quality_threshold = float(os.getenv("TTA_QUALITY_THRESHOLD", "0.85"))
 
         if os.getenv("TTA_ORCHESTRATOR_MODEL"):
-            config.orchestrator.model = os.getenv(
-                "TTA_ORCHESTRATOR_MODEL", "claude-sonnet-4.5"
-            )
+            config.orchestrator.model = os.getenv("TTA_ORCHESTRATOR_MODEL", "claude-sonnet-4.5")
 
         if os.getenv("TTA_BUDGET_LIMIT_USD"):
             config.cost_tracking.budget_limit_usd = float(
@@ -265,9 +257,7 @@ def load_orchestration_config(
         config.prefer_free_models = env_config.prefer_free_models
         config.quality_threshold = env_config.quality_threshold
         config.orchestrator.model = env_config.orchestrator.model
-        config.cost_tracking.budget_limit_usd = (
-            env_config.cost_tracking.budget_limit_usd
-        )
+        config.cost_tracking.budget_limit_usd = env_config.cost_tracking.budget_limit_usd
         logger.info("✅ Applied environment variable overrides")
 
     return config

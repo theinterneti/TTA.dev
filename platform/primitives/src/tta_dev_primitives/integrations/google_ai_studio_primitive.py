@@ -21,12 +21,8 @@ class GoogleAIStudioRequest(BaseModel):
     model: str | None = Field(
         default=None, description="Model to use (overrides primitive default)"
     )
-    temperature: float | None = Field(
-        default=None, description="Sampling temperature (0-2)"
-    )
-    max_tokens: int | None = Field(
-        default=None, description="Maximum tokens to generate"
-    )
+    temperature: float | None = Field(default=None, description="Sampling temperature (0-2)")
+    max_tokens: int | None = Field(default=None, description="Maximum tokens to generate")
 
 
 class GoogleAIStudioResponse(BaseModel):
@@ -38,9 +34,7 @@ class GoogleAIStudioResponse(BaseModel):
     finish_reason: str = Field(description="Reason for completion")
 
 
-class GoogleAIStudioPrimitive(
-    WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIStudioResponse]
-):
+class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIStudioResponse]):
     """Wrapper around official Google Generative AI SDK.
 
     This primitive provides a consistent TTA.dev interface for Google AI Studio's
