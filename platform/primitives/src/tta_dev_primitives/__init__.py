@@ -1,4 +1,8 @@
-"""TTA Dev Primitives - Production-quality workflow primitives for AI applications."""
+"""TTA Dev Primitives - Production-quality workflow primitives for AI applications.
+
+KB Safety: All primitives follow the one-way sync architecture (Code → KB only).
+See docs/architecture/KB_SAFETY_ARCHITECTURE.md for details.
+"""
 
 # Core primitives
 # Collaboration primitives
