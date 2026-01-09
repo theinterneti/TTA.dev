@@ -12,8 +12,8 @@
         "--quiet"
       ],
       "env": {
-        "HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/.hypertool",
-        "HYPERTOOL_SERVERS_FILE": "${workspaceFolder}/.hypertool/mcp_servers.json",
+        "HYPERTOOL_CONFIG_DIR": "/home/thein/repos/TTA.dev/.hypertool",
+        "HYPERTOOL_SERVERS_FILE": "/home/thein/repos/TTA.dev/.hypertool/mcp_servers.json",
         "HYPERTOOL_ENABLE_CONFIG_TOOLS_MENU": "false",
         "LOGSEQ_API_TOKEN": "${LOGSEQ_API_TOKEN}",
         "LOGSEQ_API_URL": "http://127.0.0.1:12315",

@@ -1,123 +1,91 @@
-type:: index
-status:: active
-generated:: 2025-12-04
+type:: [[Catalog]]
+description:: Complete reference for all workflow primitives
 
-# TTA.dev Primitives
-
-**Composable workflow building blocks for AI-powered applications.**
-
-## Overview
-
-Primitives are the fundamental units of the TTA.dev workflow system. They can be combined, nested, and orchestrated to build complex AI workflows.
-
-**Source:** `platform/primitives/src/tta_dev_primitives/`
-
----
+# TTA.dev Primitives Catalog
 
 ## Core Primitives
 
-Foundation primitives for workflow composition:
+### WorkflowPrimitive
+- **Import:** `from tta_dev_primitives import WorkflowPrimitive`
+- **Description:** Base class for all workflow primitives
+- **Type Parameters:** `WorkflowPrimitive[TInput, TOutput]`
 
-- [[TTA.dev/Primitives/WorkflowPrimitive]] - Base class for all primitives
-- [[TTA.dev/Primitives/SequentialPrimitive]] - Execute primitives in sequence
-- [[TTA.dev/Primitives/ParallelPrimitive]] - Execute primitives concurrently
-- [[TTA.dev/Primitives/ConditionalPrimitive]] - Conditional branching
-- [[TTA.dev/Primitives/RouterPrimitive]] - Dynamic routing based on input
-- [[TTA.dev/Primitives/LambdaPrimitive]] - Wrap functions as primitives
+### SequentialPrimitive
+- **Import:** `from tta_dev_primitives import SequentialPrimitive`
+- **Operator:** `>>`
+- **Description:** Execute primitives in sequence
 
----
+### ParallelPrimitive
+- **Import:** `from tta_dev_primitives import ParallelPrimitive`
+- **Operator:** `|`
+- **Description:** Execute primitives concurrently
 
 ## Recovery Primitives
 
-Error handling and resilience patterns:
+### RetryPrimitive
+- **Import:** `from tta_dev_primitives.recovery import RetryPrimitive`
+- **Description:** Automatic retry with exponential backoff
+- **Parameters:**
+  - `max_retries: int` - Maximum retry attempts
+  - `backoff_strategy: str` - "exponential" or "linear"
+  - `initial_delay: float` - Initial delay in seconds
 
-- [[TTA.dev/Primitives/RetryPrimitive]] - Retry with exponential backoff
-- [[TTA.dev/Primitives/FallbackPrimitive]] - Graceful degradation
-- [[TTA.dev/Primitives/TimeoutPrimitive]] - Timeout enforcement
-- [[TTA.dev/Primitives/CircuitBreaker]] - Prevent cascade failures
-- [[TTA.dev/Primitives/SagaPrimitive]] - Distributed transactions
-- [[TTA.dev/Primitives/CompensationPrimitive]] - Rollback operations
+### FallbackPrimitive
+- **Import:** `from tta_dev_primitives.recovery import FallbackPrimitive`
+- **Description:** Graceful degradation with fallback cascade
+- **Parameters:**
+  - `primary: WorkflowPrimitive` - Primary primitive
+  - `fallbacks: list` - Fallback primitives in order
 
----
+### TimeoutPrimitive
+- **Import:** `from tta_dev_primitives.recovery import TimeoutPrimitive`
+- **Description:** Circuit breaker with timeout
+- **Parameters:**
+  - `timeout_seconds: float` - Timeout duration
+  - `raise_on_timeout: bool` - Whether to raise exception
 
-## Adaptive Primitives
-
-Self-tuning primitives that learn from runtime behavior:
-
-- [[TTA.dev/Primitives/AdaptivePrimitive]] - Base adaptive class
-- [[TTA.dev/Primitives/AdaptiveRetryPrimitive]] - Auto-tuning retry
-- [[TTA.dev/Primitives/AdaptiveTimeoutPrimitive]] - Dynamic timeouts
-- [[TTA.dev/Primitives/AdaptiveCachePrimitive]] - Smart caching
-- [[TTA.dev/Primitives/AdaptiveFallbackPrimitive]] - Adaptive fallbacks
-
----
+### CircuitBreakerPrimitive
+- **Import:** `from tta_dev_primitives.recovery import CircuitBreakerPrimitive`
+- **Description:** Prevent cascade failures
+- **Parameters:**
+  - `failure_threshold: int` - Failures to open circuit
+  - `recovery_timeout: float` - Seconds until half-open
 
 ## Performance Primitives
 
-Optimization and resource management:
+### CachePrimitive
+- **Import:** `from tta_dev_primitives.performance import CachePrimitive`
+- **Description:** LRU cache with TTL
+- **Parameters:**
+  - `ttl_seconds: int` - Time to live
+  - `max_size: int` - Maximum cache entries
 
-- [[TTA.dev/Primitives/CachePrimitive]] - Result caching
-- [[TTA.dev/Primitives/MemoryPrimitive]] - Memory management
+### MemoryPrimitive
+- **Import:** `from tta_dev_primitives.performance import MemoryPrimitive`
+- **Description:** Conversational memory with hybrid storage
+- **Parameters:**
+  - `max_size: int` - Maximum memory entries
+  - `redis_url: str` - Optional Redis connection
 
----
-
-## Observability Primitives
-
-Monitoring and tracing:
-
-- [[TTA.dev/Primitives/InstrumentedPrimitive]] - OpenTelemetry integration
-- [[TTA.dev/Primitives/ObservablePrimitive]] - Metrics collection
-
----
-
-## Testing Primitives
-
-Development and testing utilities:
-
-- [[TTA.dev/Primitives/MockPrimitive]] - Mock primitives for testing
-
----
-
-## Orchestration Primitives
-
-Multi-agent coordination:
-
-- [[TTA.dev/Primitives/TaskClassifierPrimitive]] - Route tasks by type
-- [[TTA.dev/Primitives/DelegationPrimitive]] - Delegate to sub-agents
-- [[TTA.dev/Primitives/KnowledgeBasePrimitive]] - KB-backed decisions
-
----
-
-## Quick Start
+## Usage Example
 
 ```python
-from tta_dev_primitives import (
-    SequentialPrimitive,
-    RetryPrimitive,
-    RetryStrategy,
-)
+from tta_dev_primitives import WorkflowContext
+from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive
+from tta_dev_primitives.performance import CachePrimitive
 
-# Compose a resilient workflow
-workflow = RetryPrimitive(
-    SequentialPrimitive([
-        step1,
-        step2,
-        step3,
-    ]),
-    strategy=RetryStrategy(max_retries=3)
+# Compose workflow
+workflow = (
+    CachePrimitive(ttl=3600) >>
+    RetryPrimitive(max_retries=3) >>
+    FallbackPrimitive(primary=gpt4, fallbacks=[claude, gemini])
 )
 
 # Execute
-result = await workflow.execute(context)
+context = WorkflowContext(workflow_id="demo")
+result = await workflow.execute(data, context)
 ```
 
----
-
-## Related
-
-- [[TTA.dev/KB Structure]] - How the KB is organized
-- [[TTA.dev/Architecture]] - System architecture
-
-
----
-**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___primitives]]
+## Related Pages
+- [[TTA.dev/Packages]] - Package overview
+- [[TTA.dev/Architecture]] - System design

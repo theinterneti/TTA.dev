@@ -1,21 +1,31 @@
 {:meta/version 1
+
+ ;; Core settings
  :feature/enable-journals? true
  :feature/enable-whiteboards? false
- :default-home {:page "TTA.dev"}
  :preferred-format :markdown
  :preferred-workflow :now
- :hidden []
- :default-templates {:journals ""}
- :publishing/all-pages-public? false
 
- ;; Enable namespace support for multi-repo structure
- :feature/enable-block-timestamps? false
- :feature/enable-search-remove-accents? true
+ ;; Home page
+ :default-home {:page "TTA.dev"}
 
- ;; Configure page references
+ ;; Journal format
+ :journal/page-title-format "yyyy-MM-dd"
+ :journal/file-name-format "yyyy_MM_dd"
+
+ ;; File handling - use triple lowbar for namespaces
+ :file/name-format :triple-lowbar
+
+ ;; Block settings
  :ref/default-open-blocks-level 2
  :ref/linked-references-collapsed-threshold 50
 
+ ;; Performance - keep these minimal
+ :feature/enable-block-timestamps? false
+ :feature/enable-search-remove-accents? true
+
+ ;; Publishing
+ :publishing/all-pages-public? false
+
  ;; Graph settings
- :graph/settings {:journal/page-title-format "yyyy-MM-dd"
-                  :builtin-pages-hidden? false}}
+ :graph/settings {:builtin-pages-hidden? false}}

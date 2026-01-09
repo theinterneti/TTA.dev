@@ -31,6 +31,7 @@ dev-dependencies = [
     "pre-commit>=4.0.0", # Git hooks framework
     "bandit>=1.7.10", # Python security linter
     "detect-secrets>=1.5.0", # Prevents secrets in code
+    "claude>=0.4.11",
 ]
 
 [tool.coverage.run]

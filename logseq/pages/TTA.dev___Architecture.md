@@ -1,158 +1,75 @@
-type:: reference
-status:: active
-created:: 2025-12-04
+type:: [[Architecture]]
+description:: System architecture and design patterns
 
 # TTA.dev Architecture
 
-**System architecture overview for the TTA.dev multi-agent development platform.**
+## Design Principles
 
----
+1. **Composition Over Inheritance** - Combine primitives rather than extend them
+2. **Type Safety** - Full Python type hints throughout
+3. **Observable by Default** - Built-in OpenTelemetry integration
+4. **Fail Fast, Recover Gracefully** - Explicit error handling patterns
 
-## High-Level Overview
+## Package Structure
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        TTA.dev Platform                          │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │   Augment   │  │    Cline    │  │   Copilot   │   Agents     │
-│  │  Worktree   │  │  Worktree   │  │  Worktree   │              │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
-│         │                │                │                      │
-│         └────────────────┼────────────────┘                      │
-│                          ▼                                       │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                    Main Worktree                           │  │
-│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐       │  │
-│  │  │ pages/  │  │journals/│  │platform/│  │  docs/  │       │  │
-│  │  │   KB    │  │ Shared  │  │Packages │  │  Docs   │       │  │
-│  │  └─────────┘  └─────────┘  └─────────┘  └─────────┘       │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│                          │                                       │
-│                          ▼                                       │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │                    TTA-notes (Shared Brain)                │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+TTA.dev/
+├── platform/                    # Core packages
+│   ├── primitives/             # tta-dev-primitives
+│   │   └── src/tta_dev_primitives/
+│   │       ├── core/           # Base classes, sequential, parallel
+│   │       ├── recovery/       # Retry, fallback, timeout, circuit breaker
+│   │       ├── performance/    # Cache, memory
+│   │       ├── orchestration/  # Multi-model, delegation
+│   │       └── testing/        # MockPrimitive
+│   ├── observability/          # tta-observability-integration
+│   └── agent-context/          # universal-agent-context
+├── apps/                       # User-facing applications
+├── templates/                  # Starter templates
+└── docs/                       # Documentation
 ```
 
----
+## Primitive Composition
 
-## Platform Packages
-
-Located in `platform/`:
-
-| Package | Purpose |
-|---------|---------|
-| **primitives** | Core workflow building blocks (30+ primitives) |
-| **agent-context** | Context engineering for agents |
-| **agent-coordination** | Multi-agent coordination protocols |
-| **kb-automation** | Knowledge base automation |
-| **observability** | OpenTelemetry integration |
-| **integrations** | External service integrations |
-| **documentation** | Auto-documentation generation |
-| **shared** | Common utilities |
-
----
-
-## Primitives Architecture
-
-The core abstraction is the `WorkflowPrimitive`:
-
+### Sequential (`>>`)
 ```python
-class WorkflowPrimitive[I, O](ABC):
-    """Base class for all workflow primitives."""
-
-    @abstractmethod
-    async def execute(self, input: I, context: Context) -> O:
-        """Execute the primitive."""
-        ...
+workflow = step1 >> step2 >> step3
+# Executes: step1 → step2 → step3
 ```
 
-**Categories:**
-- **Core**: Composition (Sequential, Parallel, Conditional, Router)
-- **Recovery**: Resilience (Retry, Fallback, Timeout, CircuitBreaker)
-- **Adaptive**: Self-tuning (AdaptiveRetry, AdaptiveCache, etc.)
-- **Performance**: Optimization (Cache, Memory)
-- **Observability**: Monitoring (Instrumented, Observable)
-
-See: [[TTA.dev/Primitives]] for full index.
-
----
-
-## Knowledge Architecture
-
-```
-┌────────────────┐     sync     ┌────────────────┐
-│    TTA.dev     │─────────────►│   TTA-notes    │
-│    pages/      │              │    pages/      │
-└───────┬────────┘              └────────────────┘
-        │ links
-        ▼
-┌────────────────┐     sync     ┌────────────────┐
-│    TTA.dev     │─────────────►│   TTA-notes    │
-│   journals/    │              │   journals/    │
-└───────┬────────┘              └────────────────┘
-        ▲ consolidate
-        │
-┌───────┴────────┐
-│ logseq/journals│  (per-worktree, gitignored)
-│  agent notes   │
-└────────────────┘
+### Parallel (`|`)
+```python
+workflow = branch1 | branch2 | branch3
+# Executes: all branches concurrently
 ```
 
----
+## Data Flow
 
-## Multi-Agent Coordination
+```
+Input → Primitive → Context → Output
+         ↓
+    WorkflowContext
+    - workflow_id
+    - trace_id
+    - correlation_id
+    - metadata
+```
 
-### Worktree Isolation
+## Recovery Patterns
 
-Each agent has its own worktree with isolated:
-- Working directory
-- Git index
-- Local journals (`logseq/journals/`)
+| Pattern | Use Case |
+|---------|----------|
+| Retry | Transient failures (network, rate limits) |
+| Fallback | Provider failover (GPT-4 → Claude → Gemini) |
+| Timeout | Prevent hanging operations |
+| Circuit Breaker | Protect against cascade failures |
 
-### Shared Resources
+## Observability Stack
 
-All agents share:
-- `pages/` (Canonical KB)
-- `journals/` (Consolidated thinking)
-- `platform/` (Code packages)
+- **Tracing:** OpenTelemetry → Jaeger/Grafana Tempo
+- **Metrics:** Prometheus → Grafana
+- **Logging:** Structured JSON → Loki
 
-### Sync Mechanisms
-
-| Script | Purpose |
-|--------|---------|
-| `scripts/sync_journals.py` | Consolidate worktree journals |
-| `scripts/generate_kb_pages.py` | Generate KB from code |
-
----
-
-## Documentation Index
-
-Detailed docs in `docs/`:
-
-| Category | Content |
-|----------|---------|
-| `architecture/` | System design, primitives patterns |
-| `guides/` | How-to guides, tutorials |
-| `integration/` | Integration documentation |
-| `runbooks/` | Operational procedures |
-| `quickstart/` | Getting started guides |
-
----
-
-## Related
-
-- [[TTA.dev/Primitives]] - Primitives index
-- [[TTA.dev/Agent Workflow]] - How agents work
-- [[TTA.dev/KB Structure]] - Knowledge organization
-- `docs/architecture/MONOREPO_STRUCTURE.md` - Full structure details
-
----
-
-**Tags:** #architecture #reference #system-design
-
-
----
-**Logseq:** [[TTA.dev/Logseq/Pages/Tta.dev___architecture]]
+## Related Pages
+- [[TTA.dev/Primitives]] - Primitives catalog
+- [[TTA.dev/Packages]] - Package details
