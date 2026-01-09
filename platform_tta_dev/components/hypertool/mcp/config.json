@@ -1,0 +1,94 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "disabled": false
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--headless",
+        "--browser=chromium",
+        "--caps=vision,pdf",
+        "--output-dir=./browser-outputs",
+        "--timeout-action=5000"
+      ],
+      "disabled": false
+    },
+    "github": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "disabled": false
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "disabled": false
+    },
+    "gitmcp": {
+      "command": "npx",
+      "args": ["-y", "gitmcp"],
+      "disabled": false
+    },
+    "grafana": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "--network=host",
+        "-e", "GRAFANA_URL=http://localhost:3000",
+        "-e", "GRAFANA_API_KEY",
+        "ghcr.io/grafana/mcp-grafana:latest"
+      ],
+      "env": {
+        "GRAFANA_API_KEY": "${GRAFANA_API_KEY}"
+      },
+      "disabled": true
+    },
+    "notebooklm": {
+      "command": "uv",
+      "args": [
+        "run",
+        "notebooklm-mcp",
+        "--config",
+        "${workspaceFolder}/notebooklm-config.json",
+        "server"
+      ],
+      "cwd": "${workspaceFolder}",
+      "disabled": true
+    },
+    "neo4j": {
+      "command": "uvx",
+      "args": ["mcp-neo4j-cypher@0.3.0", "--transport", "stdio"],
+      "env": {
+        "NEO4J_URI": "bolt://localhost:7687",
+        "NEO4J_USERNAME": "neo4j",
+        "NEO4J_PASSWORD": "${NEO4J_PASSWORD}",
+        "NEO4J_DATABASE": "neo4j",
+        "NEO4J_NAMESPACE": "tta"
+      },
+      "disabled": false
+    },
+    "postgresql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@executeautomation/database-server",
+        "--postgresql",
+        "--host", "localhost",
+        "--database", "tta_db",
+        "--user", "tta_user",
+        "--password", "${POSTGRES_PASSWORD}"
+      ],
+      "disabled": false
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "_description": "TTA.dev Persona Performance Metrics",
+  "_version": "1.0.0",
+  "_created": "2025-11-16T04:14:17.285Z",
+  "personas": {
+    "DevOpsGuardian": {
+      "totalTasks": 0,
+      "successfulTasks": 0,
+      "failedTasks": 0,
+      "averageResponseTime": 0,
+      "totalResponseTime": 0,
+      "completedTasks": 0,
+      "tasksByCategory": {},
+      "performanceRating": 0,
+      "qualityMetrics": {
+        "securityIncidents": 0,
+        "deploymentSuccess": 0,
+        "rollbackCount": 0
+      }
+    },
+    "QualityGuardian": {
+      "totalTasks": 4,
+      "successfulTasks": 4,
+      "failedTasks": 0,
+      "averageResponseTime": 95,
+      "totalResponseTime": 380,
+      "completedTasks": 0,
+      "tasksByCategory": {
+        "testing": 4
+      },
+      "performanceRating": 34,
+      "qualityMetrics": {
+        "testCoverage": [
+          85,
+          85,
+          85,
+          85
+        ],
+        "securityFindings": 0,
+        "lintErrorsPrevented": 3
+      }
+    },
+    "PrimitiveArchitect": {
+      "totalTasks": 0,
+      "successfulTasks": 0,
+      "failedTasks": 0,
+      "averageResponseTime": 0,
+      "totalResponseTime": 0,
+      "completedTasks": 0,
+      "tasksByCategory": {},
+      "performanceRating": 0,
+      "qualityMetrics": {
+        "architecturalImprovements": 0,
+        "primitiveImplementations": 0,
+        "performanceOptimizations": 0
+      }
+    }
+  },
+  "summary": {
+    "totalTasks": 4,
+    "averageSuccessRate": 1,
+    "overallPerformanceRating": 11.333333333333334,
+    "mostEffectivePersona": "QualityGuardian",
+    "tasksByHour": {
+      "20": 4
+    },
+    "tasksByDay": {
+      "2025-11-16": 4
+    },
+    "errorPatterns": {}
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "_description": "TTA.dev Persona Override Configuration",
+  "_lastModified": "2025-11-15T20:00:00.000Z",
+  "_version": "1.0.0",
+
+  "global": null,
+
+  "tasks": {
+    "deploy": "DevOpsGuardian",
+    "deployment": "DevOpsGuardian",
+    "infrastructure": "DevOpsGuardian",
+    "ci/cd": "DevOpsGuardian",
+    "pipeline": "DevOpsGuardian",
+    "docker": "DevOpsGuardian",
+    "kubernetes": "DevOpsGuardian",
+    "production": "DevOpsGuardian",
+    "monitoring": "DevOpsGuardian",
+
+    "test": "QualityGuardian",
+    "testing": "QualityGuardian",
+    "quality": "QualityGuardian",
+    "security": "QualityGuardian",
+    "lint": "QualityGuardian",
+    "coverage": "QualityGuardian",
+    "pytest": "QualityGuardian",
+    "playwright": "QualityGuardian",
+    "mutation testing": "QualityGuardian",
+
+    "primitive": "PrimitiveArchitect",
+    "architecture": "PrimitiveArchitect",
+    "component": "PrimitiveArchitect",
+    "database": "PrimitiveArchitect",
+    "neo4j": "PrimitiveArchitect",
+    "mongodb": "PrimitiveArchitect",
+    "redis": "PrimitiveArchitect",
+    "refactor": "PrimitiveArchitect",
+    "design pattern": "PrimitiveArchitect"
+  },
+
+  "filePatterns": {
+    "*.tf": "DevOpsGuardian",
+    "*.yml": "DevOpsGuardian",
+    "*.yaml": "DevOpsGuardian",
+    "Dockerfile*": "DevOpsGuardian",
+    "*.sh": "DevOpsGuardian",
+    "*.py": {
+      "contentPatterns": {
+        "async def": "PrimitiveArchitect",
+        "contextlib": "PrimitiveArchitect",
+        "@property": "PrimitiveArchitect",
+        "protocol": "PrimitiveArchitect",
+        "neo4j": "PrimitiveArchitect",
+        "mongodb": "PrimitiveArchitect",
+        "redis": "PrimitiveArchitect",
+        "class.*\\(": "PrimitiveArchitect"
+      }
+    },
+    "*test*.py": "QualityGuardian",
+    "*spec*.ts": "QualityGuardian",
+    "*test*.ts": "QualityGuardian"
+  },
+
+  "contextOverrides": {
+    "urgent": "DevOpsGuardian",
+    "production issue": "DevOpsGuardian",
+    "security vulnerability": "QualityGuardian",
+    "performance problem": "PrimitiveArchitect",
+    "architecture review": "PrimitiveArchitect"
+  },
+
+  "schedule": {
+    "_description": "Time-based persona activation (optional)",
+    "business_hours": {
+      "days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+      "hours": {"start": "09:00", "end": "17:00"},
+      "defaultPersona": "QualityGuardian"
+    },
+    "off_hours": {
+      "days": ["saturday", "sunday"],
+      "hours": {"start": "00:00", "end": "23:59"},
+      "defaultPersona": "DevOpsGuardian"
+    }
+  },
+
+  "analytics": {
+    "_description": "Observability tracking for persona effectiveness",
+    "enabled": true,
+    "metrics": [
+      "response_time",
+      "success_rate",
+      "accuracy",
+      "user_satisfaction",
+      "task_completion_rate"
+    ]
+  }
+}

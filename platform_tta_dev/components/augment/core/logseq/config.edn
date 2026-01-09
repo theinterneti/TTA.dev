@@ -1,0 +1,80 @@
+;; Logseq Configuration for TTA TODO/Issue Management
+;; This file configures Logseq for optimal TODO and GitHub issue tracking
+
+{:meta/version 1
+
+ ;; Preferred workflow: TODO -> DOING -> DONE
+ :preferred-workflow :todo
+
+ ;; TODO keywords and their states
+ :todo-keywords ["TODO" "DOING" "WAITING" "BLOCKED" "LATER" "NOW" "DONE" "CANCELLED"]
+
+ ;; Custom markers for different priority levels
+ :markers/colors
+ {:now "#dc2626"           ;; Urgent/Critical (red)
+  :doing "#2563eb"         ;; In Progress (blue)
+  :todo "#6b7280"          ;; Not started (gray)
+  :waiting "#f59e0b"       ;; Waiting on dependency (amber)
+  :blocked "#dc2626"       ;; Blocked (red)
+  :done "#16a34a"          ;; Completed (green)
+  :cancelled "#9ca3af"}    ;; Cancelled (light gray)
+
+ ;; Custom properties for TODO items
+ :property-pages/enabled? true
+
+ ;; Properties to treat as pages
+ :property-pages/excludelist #{"github-issue" "related" "component" "effort"}
+
+ ;; Custom date format
+ :journal/page-title-format "yyyy-MM-dd"
+
+ ;; File paths
+ :pages-directory "pages"
+ :journals-directory "journals"
+
+ ;; Publishing settings
+ :publishing/all-pages-public? false
+
+ ;; Feature flags
+ :feature/enable-block-timestamps? true
+ :feature/enable-search-remove-accents? true
+ :feature/enable-journals? true
+
+ ;; Default home page
+ :default-home {:page "TODO-AUDIT"}
+
+ ;; Shortcuts for TTA development
+ :shortcuts
+ {:editor/new-block "enter"
+  :editor/new-line "shift+enter"
+  :go/journals "alt+j"
+  :go/home "alt+h"}
+
+ ;; Query settings
+ :default-queries
+ {:journals
+  [{:title "🔥 MVP Blockers"
+    :query [:find (pull ?h [*])
+            :in $ ?current-page
+            :where
+            [?h :block/marker ?marker]
+            [(contains? #{"TODO" "DOING" "NOW"} ?marker)]
+            [?h :block/page ?p]
+            [?p :block/journal? false]
+            (or
+              [?h :block/content ?content]
+              [(clojure.string/includes? ?content "#mvp-blocker")])]]
+   :result-transform (fn [result]
+                      (sort-by (fn [r] (get r :block/priority "Z")) result))}
+
+  {:title "🚀 In Progress"
+    :query [:find (pull ?h [*])
+            :where
+            [?h :block/marker ?marker]
+            [(contains? #{"DOING" "NOW"} ?marker)]]}
+
+  {:title "⏸️ Blocked Items"
+    :query [:find (pull ?h [*])
+            :where
+            [?h :block/marker ?marker]
+            [(= "BLOCKED" ?marker)]]}]}}
