@@ -1,29 +1,27 @@
-# Platform Shared Components
+# Shared Package
 
-This directory contains shared components and utilities that are used across multiple TTA.dev platform packages.
+## Purpose
+This package contains **truly universal** utilities shared across all TTA.dev packages.
 
-## Directory Structure
+## Current State
+**Minimal by design** - only contains code that is genuinely needed by multiple packages.
 
-```
-platform/
-├── shared/
-│   ├── utils/           # Shared utility functions
-│   ├── README.md        # This file
-│   └── ...              # Future shared components
-```
+## Philosophy
+- Keep this package small and focused
+- Don't add code here "just in case"
+- Only promote utilities after they're used in 2+ packages
+- Consider if code belongs in a specific package instead
 
-## Usage
+## Contents
+- Common types and interfaces
+- Universal constants
+- Cross-cutting utilities
 
-Import shared utilities with:
+## When to Add Here
+✅ Used by 3+ packages
+✅ No domain-specific logic
+✅ Truly generic/reusable
 
-```python
-from platform.shared.utils import some_utility
-```
-
-## Contributing
-
-When adding shared components:
-1. Ensure they are truly shared across multiple platform components
-2. Follow TTA.dev coding standards (type hints, testing, documentation)
-3. Add appropriate unit tests
-4. Update this README as needed
+❌ Used by only 1-2 packages
+❌ Contains domain logic
+❌ "Might be useful someday"
