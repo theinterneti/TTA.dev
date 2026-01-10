@@ -88,9 +88,9 @@ class TestPrimitiveAdoption:
 
         unexpected_files = [f for f in files_with_gather if f not in allowed_files]
 
-        assert not unexpected_files, (
-            f"Examples using asyncio.gather() without allowance: {unexpected_files}"
-        )
+        assert (
+            not unexpected_files
+        ), f"Examples using asyncio.gather() without allowance: {unexpected_files}"
 
     def test_no_direct_asyncio_create_task_in_examples(self, examples_dir: Path):
         """Verify examples don't use asyncio.create_task() directly."""
@@ -112,9 +112,9 @@ class TestPrimitiveAdoption:
             if "asyncio.create_task(" in content:
                 files_with_create_task.append(example_file.name)
 
-        assert not files_with_create_task, (
-            f"Examples using asyncio.create_task(): {files_with_create_task}"
-        )
+        assert (
+            not files_with_create_task
+        ), f"Examples using asyncio.create_task(): {files_with_create_task}"
 
     def test_examples_use_workflow_context(self, examples_dir: Path):
         """Verify examples use WorkflowContext for execution."""
@@ -198,9 +198,9 @@ class TestPrimitiveAdoption:
                 if not has_correct_base:
                     invalid_primitives.append(f"{py_file.name}:{cls.name}")
 
-        assert not invalid_primitives, (
-            f"Primitives not extending base classes: {invalid_primitives}"
-        )
+        assert (
+            not invalid_primitives
+        ), f"Primitives not extending base classes: {invalid_primitives}"
 
     def test_recovery_primitives_handle_errors(self, src_dir: Path):
         """Verify recovery primitives have error handling."""
@@ -229,9 +229,9 @@ class TestPrimitiveAdoption:
 
         unexpected_files = [f for f in missing_error_handling if f not in allowed_exceptions]
 
-        assert not unexpected_files, (
-            f"Recovery primitives without error handling: {unexpected_files}"
-        )
+        assert (
+            not unexpected_files
+        ), f"Recovery primitives without error handling: {unexpected_files}"
 
 
 class TestValidatorIntegration:
@@ -280,6 +280,11 @@ class TestPreCommitHook:
     def test_pre_commit_hook_exists(self):
         """Verify pre-commit hook is installed."""
         hook_path = Path(".git/hooks/pre-commit")
+        # Skip in CI environments where hooks aren't installed
+        import os
+
+        if os.getenv("CI"):
+            pytest.skip("Skipping pre-commit hook test in CI environment")
         assert hook_path.exists(), "Pre-commit hook not found"
 
     def test_pre_commit_hook_is_executable(self):
