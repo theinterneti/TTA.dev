@@ -5,6 +5,8 @@ import asyncio
 import sys
 from pathlib import Path
 
+import pytest
+
 # Add packages to path
 sys.path.insert(0, str(Path(__file__).parent / "packages" / "tta-dev-primitives" / "src"))
 
@@ -49,6 +51,7 @@ class EnricherPrimitive(WorkflowPrimitive[dict, dict]):
         }
 
 
+@pytest.mark.asyncio
 async def test_sequential_workflow():
     """Test sequential workflow with observability."""
     print("🔄 Testing Sequential Workflow...")
@@ -68,9 +71,11 @@ async def test_sequential_workflow():
     )
 
     print(f"✅ Sequential workflow result: {result}")
-    return result
+    assert result["processed"] is True
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_parallel_workflow():
     """Test parallel workflow with observability."""
     print("\n🔄 Testing Parallel Workflow...")
@@ -89,9 +94,11 @@ async def test_parallel_workflow():
     )
 
     print(f"✅ Parallel workflow result: {len(result)} branches completed")
-    return result
+    assert isinstance(result, list)
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_retry_workflow():
     """Test retry primitive with observability."""
     print("\n🔄 Testing Retry Workflow...")
@@ -114,9 +121,11 @@ async def test_retry_workflow():
     )
 
     print(f"✅ Retry workflow result: {result}")
-    return result
+    assert result["processed"] is True
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_cache_workflow():
     """Test cache primitive with observability."""
     print("\n🔄 Testing Cache Workflow...")
@@ -147,9 +156,11 @@ async def test_cache_workflow():
     print(f"  Result: {result2}")
 
     print("✅ Cache workflow completed")
-    return result2
+    assert result1 == result2
 
 
+@pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_complex_workflow():
     """Test complex nested workflow."""
     print("\n🔄 Testing Complex Nested Workflow...")
@@ -184,7 +195,9 @@ async def test_complex_workflow():
     )
 
     print(f"✅ Complex workflow result: {result}")
-    return result
+    assert result["processed"] is True
+    assert result["validated"] is True
+    assert result["enriched"] is True
 
 
 async def main():
