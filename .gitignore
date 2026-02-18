@@ -80,6 +80,14 @@ Thumbs.db
 *.swp
 *.swo
 
+# === Local Dev / Session Files ===
+local/
+list/
+monitoring/
+output/
+/src/
+custom/
+
 # === Project-Specific ===
 # Logs
 logs/
