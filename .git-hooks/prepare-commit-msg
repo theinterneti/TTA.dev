@@ -16,16 +16,18 @@ elif [[ "$WORKTREE_PATH" == *"TTA.dev-cline"* ]]; then
     AGENT="cline"
 elif [[ "$WORKTREE_PATH" == *"TTA.dev-copilot"* ]]; then
     AGENT="copilot"
+elif [[ "$WORKTREE_PATH" == *"TTA.dev-claude"* ]] || [[ -n "$CLAUDE_CODE" ]] || [[ -n "$ANTHROPIC_API_KEY" && "$TERM_PROGRAM" == "claude-code" ]]; then
+    AGENT="claude"
 else
-    AGENT="unknown"
+    AGENT="claude"  # Claude Code is the main agent; default to it on the main worktree
 fi
 
 # Only modify message if it's a new commit (not amend, merge, etc.)
 if [ "$COMMIT_SOURCE" = "" ] || [ "$COMMIT_SOURCE" = "message" ]; then
     COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
-    
+
     # Check if agent identifier already exists
-    if ! echo "$COMMIT_MSG" | grep -qE "\[agent:(augment|cline|copilot)\]"; then
+    if ! echo "$COMMIT_MSG" | grep -qE "\[agent:(augment|cline|copilot|claude)\]"; then
         # Add agent identifier to the beginning of the message
         echo "[agent:$AGENT] $COMMIT_MSG" > "$COMMIT_MSG_FILE"
     fi
