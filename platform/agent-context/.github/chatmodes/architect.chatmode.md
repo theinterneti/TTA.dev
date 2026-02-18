@@ -1,1 +1,1 @@
-/home/thein/recovered-tta-storytelling/.augment/chatmodes/architect.chatmode.md
+../../.augment/chatmodes/architect.chatmode.md
