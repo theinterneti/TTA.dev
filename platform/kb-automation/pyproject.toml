@@ -25,6 +25,14 @@ classifiers = [
 
 dependencies = ["tta-dev-primitives", "tta-observability-integration"]
 
+[project.urls]
+Homepage = "https://github.com/theinterneti/TTA.dev"
+Repository = "https://github.com/theinterneti/TTA.dev"
+Changelog = "https://github.com/theinterneti/TTA.dev/blob/main/CHANGELOG.md"
+
+[tool.hatch.publish.index]
+url = "https://upload.pypi.org/legacy/"
+
 [tool.uv.sources]
 tta-dev-primitives = { workspace = true }
 tta-observability-integration = { workspace = true }
@@ -42,12 +50,12 @@ dev = [
 [project.scripts]
 tta-kb-automation = "tta_kb_automation.cli:main"
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.setuptools.packages.find]
+where = ["src"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/tta_kb_automation"]
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

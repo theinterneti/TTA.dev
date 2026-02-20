@@ -1,9 +1,9 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.setuptools.packages.find]
+where = ["src"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/observability_integration"]
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "tta-observability-integration"
@@ -49,6 +49,14 @@ ignore = ["E501"]
 [tool.pyright]
 pythonVersion = "3.11"
 typeCheckingMode = "basic"
+
+[project.urls]
+Homepage = "https://github.com/theinterneti/TTA.dev"
+Repository = "https://github.com/theinterneti/TTA.dev"
+Changelog = "https://github.com/theinterneti/TTA.dev/blob/main/CHANGELOG.md"
+
+[tool.hatch.publish.index]
+url = "https://upload.pypi.org/legacy/"
 
 [tool.uv.sources]
 tta-dev-primitives = { workspace = true }

@@ -52,15 +52,23 @@ all = [
     "pyjwt>=2.8.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/theinterneti/TTA.dev"
+Repository = "https://github.com/theinterneti/TTA.dev"
+Changelog = "https://github.com/theinterneti/TTA.dev/blob/main/CHANGELOG.md"
+
+[tool.hatch.publish.index]
+url = "https://upload.pypi.org/legacy/"
+
 [tool.uv.sources]
 tta-dev-primitives = { workspace = true }
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.setuptools.packages.find]
+where = ["src"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/tta_dev_integrations"]
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

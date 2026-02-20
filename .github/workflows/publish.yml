@@ -1,0 +1,112 @@
+name: Publish to PyPI
+
+# Triggered by tags in the form: packages/{dir}/v{semver}
+# Example: packages/primitives/v1.3.1
+#
+# Publish order respects dependency graph:
+#   1. tta-dev-primitives (root, no internal deps)
+#   2. tta-observability-integration, universal-agent-context, tta-dev-integrations (depend on primitives)
+#   3. tta-agent-coordination, tta-documentation-primitives, tta-kb-automation, tta-dolt-primitives (depend on above)
+#
+# Manual setup required (one-time per package):
+#   - Register PyPI trusted publisher at https://pypi.org/manage/account/publishing/
+#   - Publisher: GitHub Actions, repo: theinterneti/TTA.dev, workflow: publish.yml
+#   - Environment name: pypi
+
+on:
+  push:
+    tags:
+      - "packages/*/v*.*.*"
+
+permissions:
+  id-token: write  # Required for OIDC trusted publishing
+  contents: read
+
+jobs:
+  extract-package:
+    name: Determine package from tag
+    runs-on: ubuntu-latest
+    outputs:
+      package-dir: ${{ steps.extract.outputs.package-dir }}
+      package-name: ${{ steps.extract.outputs.package-name }}
+      version: ${{ steps.extract.outputs.version }}
+    steps:
+      - id: extract
+        name: Extract package info from tag
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          # Tag format: packages/{dir}/v{semver}
+          if [[ "$TAG" =~ ^packages/([^/]+)/v(.+)$ ]]; then
+            PKG_DIR="${BASH_REMATCH[1]}"
+            VERSION="${BASH_REMATCH[2]}"
+          else
+            echo "ERROR: Tag '$TAG' does not match 'packages/{dir}/v{semver}'" >&2
+            exit 1
+          fi
+
+          # Map dir to PyPI package name
+          declare -A DIR_TO_NAME=(
+            ["primitives"]="tta-dev-primitives"
+            ["observability"]="tta-observability-integration"
+            ["agent-context"]="universal-agent-context"
+            ["integrations"]="tta-dev-integrations"
+            ["agent-coordination"]="tta-agent-coordination"
+            ["documentation"]="tta-documentation-primitives"
+            ["kb-automation"]="tta-kb-automation"
+            ["dolt"]="tta-dolt-primitives"
+          )
+
+          PKG_NAME="${DIR_TO_NAME[$PKG_DIR]}"
+          if [[ -z "$PKG_NAME" ]]; then
+            echo "ERROR: Unknown package directory '$PKG_DIR'" >&2
+            echo "Known dirs: ${!DIR_TO_NAME[*]}" >&2
+            exit 1
+          fi
+
+          echo "package-dir=$PKG_DIR" >> "$GITHUB_OUTPUT"
+          echo "package-name=$PKG_NAME" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Publishing $PKG_NAME v$VERSION from platform/$PKG_DIR"
+
+  build-and-publish:
+    name: Build and publish ${{ needs.extract-package.outputs.package-name }}
+    needs: extract-package
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Build package
+        working-directory: platform/${{ needs.extract-package.outputs.package-dir }}
+        run: uv build
+
+      - name: Verify built artifacts
+        working-directory: platform/${{ needs.extract-package.outputs.package-dir }}
+        run: |
+          ls -la dist/
+          # Ensure we have both wheel and sdist
+          WHEEL_COUNT=$(ls dist/*.whl 2>/dev/null | wc -l)
+          SDIST_COUNT=$(ls dist/*.tar.gz 2>/dev/null | wc -l)
+          if [[ "$WHEEL_COUNT" -eq 0 ]]; then
+            echo "ERROR: No wheel found in dist/" >&2
+            exit 1
+          fi
+          if [[ "$SDIST_COUNT" -eq 0 ]]; then
+            echo "ERROR: No sdist found in dist/" >&2
+            exit 1
+          fi
+          echo "Built: $(ls dist/)"
+
+      - name: Publish to PyPI (OIDC)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: platform/${{ needs.extract-package.outputs.package-dir }}/dist/
+          print-hash: true

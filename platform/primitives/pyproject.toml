@@ -53,12 +53,20 @@ integrations = [
     "aiosqlite>=0.19.0",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[project.urls]
+Homepage = "https://github.com/theinterneti/TTA.dev"
+Repository = "https://github.com/theinterneti/TTA.dev"
+Changelog = "https://github.com/theinterneti/TTA.dev/blob/main/CHANGELOG.md"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/tta_dev_primitives"]
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.hatch.publish.index]
+url = "https://upload.pypi.org/legacy/"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

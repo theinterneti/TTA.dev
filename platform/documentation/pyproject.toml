@@ -33,12 +33,12 @@ ollama = ["ollama>=0.1.0"]
 [project.scripts]
 tta-docs = "tta_documentation_primitives.cli:main"
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.setuptools.packages.find]
+where = ["src"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/tta_documentation_primitives"]
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -133,6 +133,14 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+
+[project.urls]
+Homepage = "https://github.com/theinterneti/TTA.dev"
+Repository = "https://github.com/theinterneti/TTA.dev"
+Changelog = "https://github.com/theinterneti/TTA.dev/blob/main/CHANGELOG.md"
+
+[tool.hatch.publish.index]
+url = "https://upload.pypi.org/legacy/"
 
 [tool.uv.sources]
 tta-dev-primitives = { workspace = true }
