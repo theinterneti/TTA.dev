@@ -1,8 +1,4 @@
-name: Orchestrated PR Review (DEPRECATED)
-
-# ⚠️ DEPRECATED: This workflow is being replaced by consolidated-ai-review.yml
-# Will be removed after migration is complete
-# See .github/workflows/MIGRATION_PLAN.md for details
+name: Orchestrated PR Review
 
 # This workflow automatically reviews pull requests using multi-model orchestration
 # Orchestrator (Claude) analyzes PR → Executor (Gemini Pro) performs review → Claude validates
@@ -12,7 +8,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'packages/**/*.py'
+      - 'platform/**/*.py'
       - 'src/**/*.py'
       - '*.py'
 
@@ -21,22 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  deprecation-notice:
-    name: Deprecation Notice
-    runs-on: ubuntu-latest
-    steps:
-      - name: Show deprecation notice
-        run: |
-          echo "## ⚠️ Workflow Deprecated" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "This workflow (\`orchestration-pr-review.yml\`) is deprecated." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**New workflow:** \`consolidated-ai-review.yml\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "See \`.github/workflows/MIGRATION_PLAN.md\` for migration details." >> $GITHUB_STEP_SUMMARY
-
   orchestrated-review:
-    if: false  # Disabled during migration
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -58,7 +39,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           uv sync --extra integrations
 
       - name: Run orchestrated PR review
@@ -69,14 +50,18 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
-          cd packages/tta-dev-primitives
+          cd platform/primitives
           uv run python examples/orchestration_pr_review.py \
             --repo ${{ github.repository }} \
             --pr ${{ github.event.pull_request.number }}
 
-            - name: Upload PR review
+      - name: Upload PR review
         if: always()
         uses: actions/upload-artifact@v4
+        with:
+          name: pr-review
+          path: platform/**/pr-review-output.json
+          if-no-files-found: ignore
 
       - name: Comment on PR (if review generated)
         if: success()

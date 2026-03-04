@@ -1,8 +1,4 @@
-name: Merge Validation (DEPRECATED)
-
-# ⚠️ DEPRECATED: This workflow is being replaced by consolidated-merge-gate.yml
-# Will be removed after migration is complete
-# See .github/workflows/MIGRATION_PLAN.md for details
+name: Merge Validation
 
 on:
   push:
@@ -20,22 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deprecation-notice:
-    name: Deprecation Notice
-    runs-on: ubuntu-latest
-    steps:
-      - name: Show deprecation notice
-        run: |
-          echo "## ⚠️ Workflow Deprecated" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "This workflow (\`merge-validation.yml\`) is deprecated." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**New workflow:** \`consolidated-merge-gate.yml\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "See \`.github/workflows/MIGRATION_PLAN.md\` for migration details." >> $GITHUB_STEP_SUMMARY
-
   comprehensive-tests:
-    if: false  # Disabled during migration
     name: Comprehensive Test Suite
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -99,7 +80,7 @@ jobs:
 
       - name: Start test services
         run: |
-          docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d
+          docker compose -f platform/primitives/docker-compose.integration.yml up -d
           sleep 10
 
       - name: Run integration tests
@@ -109,7 +90,7 @@ jobs:
 
       - name: Stop test services
         if: always()
-        run: docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml down
+        run: docker compose -f platform/primitives/docker-compose.integration.yml down
 
   quality-gates:
     name: Quality Gates
@@ -133,7 +114,7 @@ jobs:
 
       - name: Package validation
         run: |
-          for package in packages/*/pyproject.toml; do
+          for package in platform/*/pyproject.toml; do
             dir=$(dirname $package)
             echo "Validating $dir..."
             cd $dir

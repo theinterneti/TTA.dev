@@ -1,16 +1,11 @@
-name: CI (DEPRECATED)
-
-# ⚠️ DEPRECATED: This workflow is being replaced by:
-# - consolidated-pr-validation.yml (for PRs)
-# - consolidated-platform-compatibility.yml (for matrix builds)
-# Will be removed after migration is complete
-# See .github/workflows/MIGRATION_PLAN.md for details
+name: CI
 
 on:
   pull_request:
     branches: [main]
     paths:
-      - 'packages/**'
+      - 'platform/**'
+      - 'apps/**'
       - 'tests/**'
       - '*.py'
       - 'pyproject.toml'
@@ -18,37 +13,26 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/**'
+      - 'platform/**'
+      - 'apps/**'
       - 'tests/**'
       - '*.py'
       - 'pyproject.toml'
       - 'uv.lock'
 
-jobs:
-  deprecation-notice:
-    name: Deprecation Notice
-    runs-on: ubuntu-latest
-    steps:
-      - name: Show deprecation notice
-        run: |
-          echo "## ⚠️ Workflow Deprecated" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "This workflow (\`ci.yml\`) is deprecated." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Replacements:**" >> $GITHUB_STEP_SUMMARY
-          echo "- PRs: \`consolidated-pr-validation.yml\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Matrix builds: \`consolidated-platform-compatibility.yml\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "See \`.github/workflows/MIGRATION_PLAN.md\` for migration details." >> $GITHUB_STEP_SUMMARY
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
   test:
-    if: false  # Disabled during migration
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.11', '3.12']
+        split-group: [1, 2, 3]
 
     steps:
       - name: Checkout code
@@ -59,24 +43,30 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install uv (Unix)
-        if: runner.os != 'Windows'
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-      - name: Install uv (Windows)
-        if: runner.os == 'Windows'
-        run: irm https://astral.sh/uv/install.ps1 | iex
-        shell: powershell
-
-      - name: Add uv to PATH (Unix)
-        if: runner.os != 'Windows'
-        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
 
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Run tests with coverage
-        run: uv run pytest -v --tb=short -m "not integration and not slow and not external" --cov=packages --cov-branch --cov-report=xml:coverage.xml --cov-report=term-missing
+      - name: Run tests with coverage (split across runners)
+        # pytest-split selects tests at collection time (horizontal scaling),
+        # pytest-xdist parallelises them across CPU cores (vertical scaling).
+        # --dist=loadfile groups tests by file to prevent state collisions.
+        run: >
+          uv run pytest -v --tb=short
+          -m "not integration and not slow and not external and not quarantine"
+          -n auto
+          --dist=loadfile
+          --splitting-algorithm=least_duration
+          --splits=${{ strategy.job-total }}
+          --group=${{ matrix.split-group }}
+          --store-durations
+          --cov=platform --cov-branch
+          --cov-report=xml:coverage.xml
+          --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: always()  # Upload coverage even if tests fail
@@ -85,10 +75,10 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           flags: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }},python-${{ matrix.python-version }}
-          name: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }}-py${{ matrix.python-version }}
+          name: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }}-py${{ matrix.python-version }}-group${{ matrix.split-group }}
           fail_ci_if_error: false
           verbose: true
 
       - name: Test package installation
         run: |
-          uv pip install -e packages/tta-dev-primitives/
+          uv pip install -e platform/primitives/
