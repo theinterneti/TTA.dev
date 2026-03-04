@@ -271,23 +271,23 @@ How this primitive composes with `>>` and `|` operators.
 
 ### 4.1 Gap Summary
 
-| # | Gap | Severity | Category | Package |
-|---|-----|----------|----------|---------|
-| G1 | No formal primitive specifications exist | 🔴 Critical | Spec | tta-dev-primitives |
-| G2 | Sample specs in `docs/reference/specs/` are not TTA.dev-related | 🔴 Critical | Spec | infrastructure |
-| G3 | No OpenTelemetry span schema specification | 🔴 Critical | Spec | tta-observability-integration |
-| G4 | `agent-coordination` does not use `universal-agent-context` models | 🔴 Critical | Architecture | tta-agent-coordination |
-| G5 | No error contract for any primitive | 🟡 High | Spec | tta-dev-primitives |
-| G6 | No observability metrics specification document | 🟡 High | Spec | tta-observability-integration |
-| G7 | Missing spec index/README in `docs/reference/specs/` | 🟡 High | Documentation | infrastructure |
-| G8 | `docs/examples/` has only 2 files | 🟡 High | Documentation | infrastructure |
-| G9 | `MemoryPrimitive` lacks formal API specification | 🟡 High | Spec | tta-dev-primitives |
-| G10 | `CompensationPrimitive`/`SagaPrimitive` have sparse documentation | 🟡 High | Documentation | tta-dev-primitives |
-| G11 | No spec template or SDD guide for contributors | 🟡 High | Documentation | infrastructure |
-| G12 | Context propagation rules not formally specified | 🟡 High | Spec | tta-observability-integration |
-| G13 | `platform/shared/` is an empty placeholder | 🟡 Medium | Architecture | infrastructure |
-| G14 | No integration test specs for cross-package workflows | 🟡 Medium | Testing | infrastructure |
-| G15 | Skills package lacks discovery mechanism specification | 🟡 Medium | Spec | tta-skill-primitives |
+| # | Gap | Severity | Category | Package | Status |
+|---|-----|----------|----------|---------|--------|
+| G1 | No formal primitive specifications exist | 🔴 Critical | Spec | tta-dev-primitives | ✅ Resolved |
+| G2 | Sample specs in `docs/reference/specs/` are not TTA.dev-related | 🔴 Critical | Spec | infrastructure | ✅ Resolved |
+| G3 | No OpenTelemetry span schema specification | 🔴 Critical | Spec | tta-observability-integration | ✅ Resolved |
+| G4 | `agent-coordination` does not use `universal-agent-context` models | 🔴 Critical | Architecture | tta-agent-coordination | ⏳ Open |
+| G5 | No error contract for any primitive | 🟡 High | Spec | tta-dev-primitives | ✅ Resolved |
+| G6 | No observability metrics specification document | 🟡 High | Spec | tta-observability-integration | ✅ Resolved |
+| G7 | Missing spec index/README in `docs/reference/specs/` | 🟡 High | Documentation | infrastructure | ✅ Resolved |
+| G8 | `docs/examples/` has only 2 files | 🟡 High | Documentation | infrastructure | ✅ Resolved |
+| G9 | `MemoryPrimitive` lacks formal API specification | 🟡 High | Spec | tta-dev-primitives | ✅ Resolved |
+| G10 | `CompensationPrimitive`/`SagaPrimitive` have sparse documentation | 🟡 High | Documentation | tta-dev-primitives | ✅ Resolved |
+| G11 | No spec template or SDD guide for contributors | 🟡 High | Documentation | infrastructure | ✅ Resolved |
+| G12 | Context propagation rules not formally specified | 🟡 High | Spec | tta-observability-integration | ✅ Resolved |
+| G13 | `platform/shared/` is an empty placeholder | 🟡 Medium | Architecture | infrastructure | ⏳ Open |
+| G14 | No integration test specs for cross-package workflows | 🟡 Medium | Testing | infrastructure | ⏳ Open |
+| G15 | Skills package lacks discovery mechanism specification | 🟡 Medium | Spec | tta-skill-primitives | ✅ Resolved |
 
 ### 4.2 Logseq-Compliant TODO Blocks
 

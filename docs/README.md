@@ -41,7 +41,7 @@ API reference, protocol documentation, and specifications.
 | [mcp/](reference/mcp/) | Model Context Protocol usage, integration, and Hypertool docs |
 | [mcp-references/](reference/mcp-references/) | MCP server reference (GitHub, Grafana, filesystem, etc.) |
 | [models/](reference/models/) | Model selection strategy and evaluation |
-| [specs/](reference/specs/) | Technical specifications |
+| [specs/](reference/specs/) | Formal SDD specifications ([index](reference/specs/README.md)) |
 
 ## architecture/
 
@@ -57,6 +57,7 @@ Key files:
 Working code examples demonstrating TTA.dev primitives and patterns.
 
 - [README.md](examples/README.md) — Example index
+- [primitive-composition.md](examples/primitive-composition.md) — Sequential, parallel, retry, fallback, timeout, cache, routing examples
 - [custom_tool.md](examples/custom_tool.md) — Custom tool example
 
 ## _archive/
@@ -73,6 +74,7 @@ research, strategy, refactor, and completed milestone reports.
 |------|------------|
 | **New to TTA.dev** | [GETTING_STARTED.md](../GETTING_STARTED.md) |
 | **Core Primitives** | [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md) |
+| **Primitive Specs** | [reference/specs/README.md](reference/specs/README.md) |
 | **System Design** | [architecture/Overview.md](architecture/Overview.md) |
 | **MCP Integration** | [reference/mcp/README.md](reference/mcp/README.md) |
 | **How-to Guides** | [guides/README.md](guides/README.md) |
