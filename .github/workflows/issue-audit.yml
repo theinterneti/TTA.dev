@@ -38,8 +38,8 @@ jobs:
       - name: Run issue audit
         env:
           GH_TOKEN: ${{ github.token }}
+          STALE_DAYS: ${{ github.event.inputs.stale_days || '90' }}
         run: |
-          STALE_DAYS="${{ github.event.inputs.stale_days || '90' }}"
           echo "# 🔍 Issue Audit Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
