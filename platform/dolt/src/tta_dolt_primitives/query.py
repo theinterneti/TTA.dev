@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 
 import aiomysql
 import structlog
-
 from tta_dev_primitives.core.base import WorkflowContext
 
 from .core.base import DoltPrimitive

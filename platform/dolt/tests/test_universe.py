@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 
 from tta_dolt_primitives import BranchOperation, DoltUniversePrimitive, UniverseInput
-from tta_dolt_primitives.core.models import BranchInfo
 
 
 @pytest.mark.asyncio

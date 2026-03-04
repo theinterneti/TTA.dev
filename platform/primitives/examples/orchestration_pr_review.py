@@ -242,8 +242,8 @@ Format your review as structured markdown with clear sections.
         )
 
         # Record executor metrics
-        context.data["executor_tokens"] = response.usage.get("total_tokens", 0)
-        context.data["executor_cost"] = response.cost
+        context.metadata["executor_tokens"] = response.usage.get("total_tokens", 0)
+        context.metadata["executor_cost"] = response.cost
 
         return response.content
 
@@ -334,7 +334,7 @@ Format your review as structured markdown with clear sections.
         # Create workflow context
         context = WorkflowContext(
             workflow_id=f"pr-review-{repo.replace('/', '-')}-{pr_number}",
-            data={
+            metadata={
                 "repo": repo,
                 "pr_number": pr_number,
                 "workflow_type": "pr_review",
@@ -349,29 +349,29 @@ Format your review as structured markdown with clear sections.
 
             # Step 2: Orchestrator analyzes PR scope
             analysis = await self.analyze_pr_scope(pr_data)
-            context.data["orchestrator_tokens"] = 300  # Estimated tokens for analysis
-            context.data["orchestrator_cost"] = 0.009  # ~$3/1M tokens
+            context.metadata["orchestrator_tokens"] = 300  # Estimated tokens for analysis
+            context.metadata["orchestrator_cost"] = 0.009  # ~$3/1M tokens
 
             # Step 3: Executor performs code review
             review_content = await self.perform_code_review(pr_data, analysis, context)
 
             # Step 4: Orchestrator validates review
             validation = await self.validate_review(review_content, analysis)
-            context.data["validation_passed"] = validation["passed"]
-            context.data["quality_score"] = validation["quality_score"]
-            context.data["orchestrator_tokens"] += 200  # Validation tokens
-            context.data["orchestrator_cost"] += 0.006  # Validation cost
+            context.metadata["validation_passed"] = validation["passed"]
+            context.metadata["quality_score"] = validation["quality_score"]
+            context.metadata["orchestrator_tokens"] += 200  # Validation tokens
+            context.metadata["orchestrator_cost"] += 0.006  # Validation cost
 
             # Step 5: Post review to GitHub
             posted = await self.post_review_to_github(repo, pr_number, review_content)
 
             # Calculate total cost and savings
-            total_cost = context.data["orchestrator_cost"] + context.data["executor_cost"]
+            total_cost = context.metadata["orchestrator_cost"] + context.metadata["executor_cost"]
             all_claude_cost = 2.00  # Estimated cost if using Claude for everything
             cost_savings = (all_claude_cost - total_cost) / all_claude_cost
 
-            context.data["total_cost"] = total_cost
-            context.data["cost_savings_vs_all_paid"] = cost_savings
+            context.metadata["total_cost"] = total_cost
+            context.metadata["cost_savings_vs_all_paid"] = cost_savings
 
             # Calculate duration
             duration_ms = (time.time() - start_time) * 1000
@@ -389,8 +389,8 @@ Format your review as structured markdown with clear sections.
             logger.info(f"Posted to GitHub: {'✅ Yes' if posted else '❌ No'}")
             logger.info(f"Duration: {duration_ms:.0f}ms")
             logger.info("\n💰 COST ANALYSIS")
-            logger.info(f"Orchestrator (Claude): ${context.data['orchestrator_cost']:.4f}")
-            logger.info(f"Executor (Gemini): ${context.data['executor_cost']:.4f}")
+            logger.info(f"Orchestrator (Claude): ${context.metadata['orchestrator_cost']:.4f}")
+            logger.info(f"Executor (Gemini): ${context.metadata['executor_cost']:.4f}")
             logger.info(f"Total: ${total_cost:.4f}")
             logger.info(f"vs. All-Claude: ${all_claude_cost:.2f}")
             logger.info(f"Cost Savings: {cost_savings * 100:.0f}%")
@@ -402,7 +402,7 @@ Format your review as structured markdown with clear sections.
                 "review_posted": posted,
                 "quality_score": validation["quality_score"],
                 "validation_passed": validation["passed"],
-                "metrics": context.data,
+                "metrics": context.metadata,
                 "duration_ms": duration_ms,
             }
 

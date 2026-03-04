@@ -5,15 +5,14 @@ from __future__ import annotations
 import pytest
 
 from tta_dolt_primitives import DoltMergePrimitive, MergeInput
-from tta_dolt_primitives.core.models import MergeStrategy
 
 
 @pytest.mark.asyncio
 async def test_merge_success(dolt_config, workflow_context, mock_dolt_run):
     """Successful merge returns commit hash."""
     mock_dolt_run.side_effect = [
-        ("", "", 0),                                      # dolt checkout main
-        ("", "", 0),                                      # dolt merge player-42/brave-choice
+        ("", "", 0),  # dolt checkout main
+        ("", "", 0),  # dolt merge player-42/brave-choice
         ("abc1234 Merge brave-choice into main", "", 0),  # dolt log
     ]
 
@@ -37,8 +36,8 @@ async def test_merge_success(dolt_config, workflow_context, mock_dolt_run):
 async def test_merge_squash(dolt_config, workflow_context, mock_dolt_run):
     """Squash merge passes --squash to dolt."""
     mock_dolt_run.side_effect = [
-        ("", "", 0),    # checkout
-        ("", "", 0),    # merge --squash
+        ("", "", 0),  # checkout
+        ("", "", 0),  # merge --squash
         ("bcd2345 squash", "", 0),  # log
     ]
 
@@ -58,7 +57,7 @@ async def test_merge_squash(dolt_config, workflow_context, mock_dolt_run):
 async def test_merge_conflict(dolt_config, workflow_context, mock_dolt_run):
     """Merge conflict returns failure with conflict details."""
     mock_dolt_run.side_effect = [
-        ("", "", 0),                                          # checkout
+        ("", "", 0),  # checkout
         ("", "conflict: character_state has 2 conflicts", 1),  # merge fails
     ]
 

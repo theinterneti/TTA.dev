@@ -113,6 +113,8 @@ class DoltCommitPrimitive(DoltPrimitive[CommitInput, CommitOutput]):
 
         return CommitOutput(
             success=True,
-            commit=CommitInfo(hash=commit_hash, message=input_data.message, author=input_data.author),
+            commit=CommitInfo(
+                hash=commit_hash, message=input_data.message, author=input_data.author
+            ),
             message=f"Committed: {commit_hash}",
         )

@@ -86,11 +86,11 @@ jobs:
             
       - name: Check for lazy dev usage
         id: check-usage
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           # Check if PR was created using lazy_dev
-          pr_body="${{ github.event.pull_request.body }}"
-          
-          if echo "$pr_body" | grep -qi "lazy.dev\|auto-generated\|@copilot"; then
+          if echo "$PR_BODY" | grep -qi "lazy.dev\|auto-generated\|@copilot"; then
             echo "used_lazy_dev=true" >> $GITHUB_OUTPUT
           else
             echo "used_lazy_dev=false" >> $GITHUB_OUTPUT

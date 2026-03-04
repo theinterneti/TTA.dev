@@ -175,9 +175,7 @@ class InstructionLoader:
             content = file_path.read_text(encoding="utf-8")
 
             # Extract YAML frontmatter (between --- markers)
-            frontmatter_match = re.match(
-                r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL
-            )
+            frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
             if not frontmatter_match:
                 logger.warning(f"No YAML frontmatter found in {file_path.name}")
                 return None
@@ -298,9 +296,7 @@ class InstructionLoader:
                 return False
         return True
 
-    def get_relevant_instructions(
-        self, current_file: str | None = None
-    ) -> list[dict[str, Any]]:
+    def get_relevant_instructions(self, current_file: str | None = None) -> list[dict[str, Any]]:
         """
         Get instructions relevant to the current file context.
 
@@ -374,7 +370,8 @@ class MemoryLoader:
             file_path: Path to memory file
 
         Returns:
-            Dict with 'frontmatter', 'content', 'filename', 'category' keys, or None if parsing fails
+            Dict with 'frontmatter', 'content', 'filename', 'category' keys,
+            or None if parsing fails
         """
         # Check cache first
         cache_key = str(file_path)
@@ -389,9 +386,7 @@ class MemoryLoader:
             content = file_path.read_text(encoding="utf-8")
 
             # Extract YAML frontmatter (between --- markers)
-            frontmatter_match = re.match(
-                r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL
-            )
+            frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
             if not frontmatter_match:
                 logger.warning(f"No YAML frontmatter found in {file_path.name}")
                 return None
@@ -529,7 +524,8 @@ class MemoryLoader:
         Args:
             component: Current component being worked on
             tags: Current task tags
-            category: Desired memory category (implementation-failures, successful-patterns, architectural-decisions)
+            category: Desired memory category
+                (implementation-failures, successful-patterns, architectural-decisions)
             min_importance: Minimum importance score to include (0.0 to 1.0)
             max_memories: Maximum number of memories to return
 
@@ -562,7 +558,8 @@ class MemoryLoader:
         result = scored_memories[:max_memories]
 
         logger.debug(
-            f"Found {len(result)} relevant memories (component={component}, tags={tags}, category={category})"
+            f"Found {len(result)} relevant memories"
+            f" (component={component}, tags={tags}, category={category})"
         )
         return result
 
@@ -645,9 +642,7 @@ class AIConversationContextManager:
             current_tokens=0,
         )
         self.contexts[session_id] = context
-        logger.info(
-            f"Created new session: {session_id} (max_tokens: {context.max_tokens})"
-        )
+        logger.info(f"Created new session: {session_id} (max_tokens: {context.max_tokens})")
         return context
 
     def add_message(
@@ -793,7 +788,8 @@ class AIConversationContextManager:
             session_id: Session identifier
             component: Current component being worked on (e.g., "agent-orchestration")
             tags: Current task tags (e.g., ["testing", "pytest", "fixtures"])
-            category: Desired memory category (implementation-failures, successful-patterns, architectural-decisions)
+            category: Desired memory category
+                (implementation-failures, successful-patterns, architectural-decisions)
             min_importance: Minimum importance score to include (0.0 to 1.0)
             max_memories: Maximum number of memories to load
 
@@ -1116,8 +1112,5 @@ def create_tta_session(
     # Load instructions
     manager.load_instructions(session_id, current_file)
 
-    logger.info(
-        f"Created TTA development session: {session_id} "
-        f"(file: {current_file or 'global'})"
-    )
+    logger.info(f"Created TTA development session: {session_id} (file: {current_file or 'global'})")
     return manager, session_id
