@@ -86,7 +86,7 @@ jobs:
 
       - name: Build package
         working-directory: platform/${{ needs.extract-package.outputs.package-dir }}
-        run: uv build
+        run: uv build --out-dir dist
 
       - name: Verify built artifacts
         working-directory: platform/${{ needs.extract-package.outputs.package-dir }}
