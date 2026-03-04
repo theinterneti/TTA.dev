@@ -129,6 +129,7 @@ TTA.dev/
 │       └── session/         # Current session memories
 ├── platform/
 │   ├── primitives/          # ✅ Core workflow primitives (tta-dev-primitives)
+│   ├── skills/              # ✅ SKILL.md agent capabilities (tta-skill-primitives)
 │   ├── observability/       # ✅ OpenTelemetry integration (tta-observability-integration)
 │   ├── agent-context/       # ✅ Agent context management (universal-agent-context)
 │   ├── agent-coordination/  # ✅ Multi-agent orchestration
@@ -177,9 +178,40 @@ result = await workflow.execute(input_data, context)
 | **Core** | `SequentialPrimitive`, `ParallelPrimitive`, `RouterPrimitive` |
 | **Recovery** | `RetryPrimitive`, `FallbackPrimitive`, `TimeoutPrimitive` |
 | **Performance** | `CachePrimitive`, `MemoryPrimitive` |
+| **Skills** | `Skill`, `SkillDescriptor`, `SkillRegistry` |
 | **Collaboration** | `GitCollaborationPrimitive` |
 | **Adaptive** | `AdaptiveRetryPrimitive`, `LogseqStrategyIntegration` |
 | **Testing** | `MockPrimitive` |
+
+## Agent Skills (SKILL.md)
+
+Skills are self-describing agent capabilities that follow the open SKILL.md
+specification. They extend `WorkflowPrimitive` so they compose with `>>` and `|`.
+
+```python
+from tta_skill_primitives import Skill, SkillDescriptor, SkillRegistry
+
+class CodeReviewSkill(Skill[str, dict]):
+    descriptor = SkillDescriptor(
+        name="code-review",
+        description="Analyse code for quality and security issues.",
+    )
+
+    async def execute(self, input_data, context):
+        return {"issues": [], "score": 100}
+
+# Register for discovery
+registry = SkillRegistry()
+registry.register(CodeReviewSkill())
+skill = registry.get("code-review")
+```
+
+**Extension Modules:** Non-core primitives (ace, adaptive, analysis, orchestration,
+etc.) are accessible via `tta_dev_primitives.extensions`:
+
+```python
+from tta_dev_primitives.extensions import list_extensions, adaptive
+```
 
 ## Documentation
 

@@ -7,6 +7,7 @@
 # and not included in workspace until architectural decisions are made
 members = [
     "platform/primitives",
+    "platform/skills",
     "platform/dolt",
     "platform/integrations",
     "platform/observability",
