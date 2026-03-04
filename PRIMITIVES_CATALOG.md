@@ -15,10 +15,12 @@ This catalog provides a complete reference for all TTA.dev workflow primitives, 
 1. [Core Workflow Primitives](#core-workflow-primitives) - Composition and control flow
 2. [Recovery Primitives](#recovery-primitives) - Error handling and resilience
 3. [Performance Primitives](#performance-primitives) - Optimization and caching
-4. [Orchestration Primitives](#orchestration-primitives) - Multi-agent coordination
-5. [Testing Primitives](#testing-primitives) - Testing utilities
-6. [Observability Primitives](#observability-primitives) - Tracing and metrics
-7. [ACE Framework Agents](#ace-framework-agents) - LLM-powered code generation and learning
+4. [Skill Primitives](#skill-primitives) - SKILL.md-compatible agent capabilities
+5. [Orchestration Primitives](#orchestration-primitives) - Multi-agent coordination
+6. [Testing Primitives](#testing-primitives) - Testing utilities
+7. [Observability Primitives](#observability-primitives) - Tracing and metrics
+8. [ACE Framework Agents](#ace-framework-agents) - LLM-powered code generation and learning
+9. [Extension Modules](#extension-modules) - Specialized non-core primitives
 
 ---
 
@@ -553,6 +555,130 @@ policy = CommitFrequencyPolicy(
 - 🤝 **Enables Collaboration** - Clear agent attribution and coordination
 
 **Full Guide:** [\`packages/tta-dev-primitives/docs/collaboration/GIT_COLLABORATION_GUIDE.md\`](packages/tta-dev-primitives/docs/collaboration/GIT_COLLABORATION_GUIDE.md)
+
+---
+
+## Skill Primitives
+
+**Package:** `tta-skill-primitives` (`platform/skills/`)
+
+Skills are self-describing, SKILL.md-compatible agent capabilities built on `WorkflowPrimitive`. They follow the open SKILL.md specification adopted by mainstream AI agent frameworks.
+
+### Skill[TInput, TOutput]
+
+**Base class for agent skills — extends WorkflowPrimitive with metadata.**
+
+**Import:**
+```python
+from tta_skill_primitives import Skill, SkillDescriptor
+```
+
+**Source:** [`platform/skills/src/tta_skill_primitives/core/base.py`](platform/skills/src/tta_skill_primitives/core/base.py)
+
+**Usage:**
+```python
+from tta_skill_primitives import Skill, SkillDescriptor, SkillMetadata
+from tta_dev_primitives import WorkflowContext
+
+class CodeReviewSkill(Skill[str, dict]):
+    descriptor = SkillDescriptor(
+        name="code-review",
+        description="Analyse code for quality and security issues.",
+        metadata=SkillMetadata(author="TTA Team", version="1.0.0", tags=["security"]),
+    )
+
+    async def execute(self, input_data: str, context: WorkflowContext) -> dict:
+        return {"issues": [], "score": 100}
+
+# Skills compose like any WorkflowPrimitive
+pipeline = code_review >> security_scan >> format_report
+```
+
+**Properties:** `name`, `description`, `version`, `status`, `tags`
+
+### SkillDescriptor
+
+**Pydantic model for SKILL.md YAML frontmatter.**
+
+**Import:**
+```python
+from tta_skill_primitives import SkillDescriptor, SkillMetadata, SkillParameter, SkillStatus
+```
+
+**Fields:**
+- `name` (str, required) — unique lowercase-hyphenated identifier (1–64 chars)
+- `description` (str, required) — what the skill does (1–1024 chars)
+- `license` (str) — license identifier (default: "MIT")
+- `compatibility` (str) — environment requirements
+- `allowed_tools` (list[str]) — tools the skill may invoke
+- `status` (SkillStatus) — draft / stable / deprecated
+- `metadata` (SkillMetadata) — author, version, tags
+- `parameters` (list[SkillParameter]) — input parameter declarations
+- `instructions` (str) — markdown body from SKILL.md
+
+### SkillRegistry
+
+**In-memory registry for skill discovery and search.**
+
+**Import:**
+```python
+from tta_skill_primitives import SkillRegistry
+```
+
+**Key Methods:**
+```python
+registry = SkillRegistry()
+registry.register(my_skill)          # Register a skill
+skill = registry.get("code-review")  # Get by name
+results = registry.search(tags=["security"], status=SkillStatus.STABLE)
+catalog = registry.to_prompt_catalog()  # Markdown catalog for LLM prompts
+```
+
+### SKILL.md Loader
+
+**Parse and write SKILL.md files.**
+
+**Import:**
+```python
+from tta_skill_primitives import parse_skill_md, load_skill_md, dump_skill_md
+```
+
+**Usage:**
+```python
+# Parse from string
+descriptor = parse_skill_md("---\nname: my-skill\ndescription: ...\n---\n# Instructions")
+
+# Load from file
+descriptor = load_skill_md("skills/code-review/SKILL.md")
+
+# Write back
+text = dump_skill_md(descriptor)
+```
+
+---
+
+## Extension Modules
+
+Extension modules provide specialised, non-core capabilities. They are available
+via their original import paths or through the `extensions` namespace:
+
+```python
+from tta_dev_primitives.extensions import EXTENSION_MODULES, list_extensions
+from tta_dev_primitives.extensions import adaptive  # Lazy-loaded
+```
+
+| Module | Import Path | Purpose |
+|--------|------------|---------|
+| **ace** | `tta_dev_primitives.ace` | LLM-powered code generation with sandbox execution |
+| **adaptive** | `tta_dev_primitives.adaptive` | Self-improving retry, cache, timeout, fallback |
+| **analysis** | `tta_dev_primitives.analysis` | AST-based pattern detection and transformation |
+| **apm** | `tta_dev_primitives.apm` | Application Performance Monitoring decorators |
+| **benchmarking** | `tta_dev_primitives.benchmarking` | Performance benchmarking utilities |
+| **knowledge** | `tta_dev_primitives.knowledge` | Logseq knowledge base querying |
+| **lifecycle** | `tta_dev_primitives.lifecycle` | Stage management and validation gates |
+| **orchestration** | `tta_dev_primitives.orchestration` | Multi-model LLM orchestration |
+| **research** | `tta_dev_primitives.research` | Provider research and free-tier discovery |
+| **speckit** | `tta_dev_primitives.speckit` | Specification-driven development workflow |
 
 ---
 
