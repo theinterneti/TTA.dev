@@ -107,9 +107,9 @@ async def check_docstrings_complete(project_path: Path, context: WorkflowContext
         # No src directory - check passes vacuously
         return True
 
-    py_files = [
-        f for f in src_dir.rglob("*.py") if f.name != "__init__.py" and not f.name.startswith("_")
-    ]
+    # Skip __init__.py and dunder files (e.g., __main__.py) but include
+    # private modules like _internal.py since they should still be documented.
+    py_files = [f for f in src_dir.rglob("*.py") if not f.name.startswith("__")]
 
     if not py_files:
         return True
@@ -130,9 +130,12 @@ async def check_docstrings_complete(project_path: Path, context: WorkflowContext
         except (OSError, UnicodeDecodeError):
             missing_count += 1
 
-    # Allow up to 20% of files to be missing docstrings
+    # Allow a small tolerance: up to 20% of files may be missing docstrings.
+    # This avoids failing for one-off utility files while still enforcing that
+    # the majority of the codebase is documented.
+    max_missing_ratio = 0.2
     total = len(py_files)
-    return missing_count <= total * 0.2
+    return missing_count <= total * max_missing_ratio
 
 
 # Pre-configured validation checks

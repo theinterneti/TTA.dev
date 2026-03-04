@@ -28,15 +28,11 @@ _SECRET_PATTERNS = [
     re.compile(r"""(?:private_key)\s*=\s*['"]-----BEGIN""", re.IGNORECASE),
 ]
 
-# File patterns to skip when scanning for secrets
-_SKIP_PATTERNS = {
-    ".env.example",
-    ".env.template",
-    "conftest.py",
-    "test_",
-    "fixture",
-    "_test.py",
-}
+# File name patterns to skip when scanning for secrets.
+# Uses prefix/suffix matching to avoid false positives (e.g. "my_test_utils.py").
+_SKIP_EXACT = {"conftest.py", ".env.example", ".env.template"}
+_SKIP_PREFIXES = ("test_", "fixture_")
+_SKIP_SUFFIXES = ("_test.py",)
 
 
 async def check_no_secrets_in_code(project_path: Path, context: WorkflowContext) -> bool:
@@ -65,9 +61,13 @@ async def check_no_secrets_in_code(project_path: Path, context: WorkflowContext)
         if source_file.suffix not in source_extensions:
             continue
 
-        # Skip test/fixture/example files
+        # Skip test/fixture/example files using precise prefix/suffix matching
         file_name = source_file.name
-        if any(skip in file_name for skip in _SKIP_PATTERNS):
+        if (
+            file_name in _SKIP_EXACT
+            or file_name.startswith(_SKIP_PREFIXES)
+            or file_name.endswith(_SKIP_SUFFIXES)
+        ):
             continue
 
         try:

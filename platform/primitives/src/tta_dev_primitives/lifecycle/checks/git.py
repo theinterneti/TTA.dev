@@ -181,8 +181,10 @@ def _version_differs_from_latest_tag(project_path: Path, current_version: str) -
             return True
 
         latest_tag = result.stdout.strip()
-        # Strip common prefixes like 'v', 'V', 'packages/*/v'
-        tag_version = re.sub(r"^.*v", "", latest_tag)
+        # Strip version prefix: handle "v1.2.3", "packages/foo/v1.2.3", etc.
+        # First remove any path prefix (e.g. "packages/foo/"), then strip leading v/V.
+        tag_version = latest_tag.rsplit("/", 1)[-1]
+        tag_version = re.sub(r"^[vV]", "", tag_version)
 
         return current_version != tag_version
     except (subprocess.TimeoutExpired, FileNotFoundError):

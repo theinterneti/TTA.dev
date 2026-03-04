@@ -984,7 +984,7 @@ class TestSecurityChecks:
         """Test NO_SECRETS_IN_CODE fails when secret is detected."""
         src = tmp_path / "src"
         src.mkdir()
-        (src / "config.py").write_text('api_key = "sk_live_1234567890abcdef"\n')
+        (src / "config.py").write_text('api_key = "sk_test_FAKE_KEY_FOR_TESTING"\n')
         result = await NO_SECRETS_IN_CODE.execute(tmp_path, context)
         assert not result.passed
 
@@ -995,7 +995,7 @@ class TestSecurityChecks:
         """Test NO_SECRETS_IN_CODE skips test files."""
         src = tmp_path / "src"
         src.mkdir()
-        (src / "test_config.py").write_text('api_key = "sk_live_1234567890abcdef"\n')
+        (src / "test_config.py").write_text('api_key = "sk_test_FAKE_KEY_FOR_TESTING"\n')
         result = await NO_SECRETS_IN_CODE.execute(tmp_path, context)
         assert result.passed  # Skipped because it's a test file
 
