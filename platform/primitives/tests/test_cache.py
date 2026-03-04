@@ -1,6 +1,6 @@
 """Tests for cache primitive."""
 
-import time
+import asyncio
 
 import pytest
 
@@ -60,7 +60,7 @@ async def test_cache_expiration() -> None:
     assert mock.call_count == 1
 
     # Wait for expiration
-    time.sleep(0.2)
+    await asyncio.sleep(0.2)
 
     # Second call after expiration
     await cached.execute({}, WorkflowContext())
@@ -151,7 +151,7 @@ async def test_cache_eviction() -> None:
     assert cached.get_stats()["size"] == 2
 
     # Wait for expiration
-    time.sleep(0.2)
+    await asyncio.sleep(0.2)
 
     # Manually evict
     evicted = cached.evict_expired()

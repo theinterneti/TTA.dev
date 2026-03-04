@@ -27,6 +27,12 @@ dev-dependencies = [
     "pytest-cov>=4.1.0",
     "pytest-mock>=3.14.0",
     "pytest-timeout>=2.2.0",
+    "pytest-xdist>=3.5.0", # Parallel test execution across CPU cores
+    "pytest-split>=0.9.0", # Split test suite for horizontal CI scaling
+    "pytest-profiling>=1.7.0", # Profiling and heat-graph output for tests
+    "pytest-unused-fixtures>=0.1.0", # Detect unused fixtures
+    "pytest-flakefinder>=1.1.0", # Detect flaky tests by repeated runs
+    "tenacity>=8.2.0", # Smart retry/polling instead of time.sleep()
     "ruff>=0.8.0",
     # Security scanning (local CodeQL-equivalent)
     # Note: semgrep installed via uvx/pipx due to opentelemetry version conflict
@@ -65,6 +71,7 @@ select = [
     "UP", # pyupgrade
     "B",  # flake8-bugbear
     "C4", # flake8-comprehensions
+    "PT", # flake8-pytest-style — consistent fixture/parameterize formatting
 ]
 ignore = [
     "ANN",     # Type annotations - not required for this project
@@ -88,6 +95,8 @@ ignore = [
     "S101",
     "PLR2004",
     "SLF001",
+    "PT011",  # Broad pytest.raises(Exception) — tighten incrementally
+    "PT018",  # Compound assertions — tighten incrementally
 ] # Allow long lines, missing annotations, import order, unused args, and test-specific patterns
 "**/examples/**/*.py" = [
     "E501",
@@ -157,4 +166,6 @@ markers = [
     "unit: mark test as unit test",
     "slow: mark test as slow running",
     "external: mark test as requiring external services",
+    "flaky: mark test as known flaky (non-deterministic, e.g. AI model evals)",
+    "quarantine: mark test as quarantined — excluded from CI gate, tracked separately",
 ]

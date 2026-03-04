@@ -46,7 +46,7 @@ jobs:
 
       - name: Run unit tests
         id: unit-tests
-        run: uv run pytest -v -m "not integration and not slow" --maxfail=5
+        run: uv run pytest -v -n auto -m "not integration and not slow and not quarantine" --maxfail=5
 
       - name: PR validation summary
         if: always()
