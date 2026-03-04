@@ -115,7 +115,7 @@ class DoltDiffPrimitive(DoltPrimitive[DiffInput, DiffResult]):
             if len(values) != len(headers):
                 continue
 
-            row_dict = dict(zip(headers, values, strict=False))
+            row_dict = dict(zip(headers, values, strict=True))
             diff_type = (
                 row_dict.pop("diff_type", "modified") if diff_type_idx is not None else "modified"
             )
