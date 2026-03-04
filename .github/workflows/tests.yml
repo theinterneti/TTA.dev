@@ -11,6 +11,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: "Pytest Split ${{ matrix.group }} / ${{ strategy.job-total }}"
@@ -53,7 +56,7 @@ jobs:
         # -n auto: Vertical scaling via pytest-xdist (uses all CPU cores on the runner)
         # --dist=loadfile: Group tests by file to prevent state collisions
         # --splits / --group: Horizontal scaling via pytest-split (divides suite across matrix runners)
-        # --store-durations: Records test durations to optimise future splits
+        # --store-durations: Records test durations to optimize future splits
         run: |
           uv run pytest \
             -v --tb=short \
