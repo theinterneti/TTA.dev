@@ -48,8 +48,8 @@ class BranchOperation(str, Enum):
 class MergeStrategy(str, Enum):
     """Strategy for merging branches (universes)."""
 
-    THEIRS = "theirs"   # accept incoming branch entirely
-    OURS = "ours"       # keep current branch entirely
+    THEIRS = "theirs"  # accept incoming branch entirely
+    OURS = "ours"  # keep current branch entirely
     DEFAULT = "default"  # standard three-way merge
 
 

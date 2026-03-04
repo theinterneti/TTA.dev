@@ -115,14 +115,18 @@ class DoltDiffPrimitive(DoltPrimitive[DiffInput, DiffResult]):
             if len(values) != len(headers):
                 continue
 
-            row_dict = dict(zip(headers, values))
-            diff_type = row_dict.pop("diff_type", "modified") if diff_type_idx is not None else "modified"
+            row_dict = dict(zip(headers, values, strict=False))
+            diff_type = (
+                row_dict.pop("diff_type", "modified") if diff_type_idx is not None else "modified"
+            )
 
-            rows.append(DiffRow(
-                table=table,
-                diff_type=diff_type,
-                from_values=row_dict if diff_type == "removed" else None,
-                to_values=row_dict if diff_type in ("added", "modified") else None,
-            ))
+            rows.append(
+                DiffRow(
+                    table=table,
+                    diff_type=diff_type,
+                    from_values=row_dict if diff_type == "removed" else None,
+                    to_values=row_dict if diff_type in ("added", "modified") else None,
+                )
+            )
 
         return rows
