@@ -100,9 +100,11 @@ jobs:
             ${{ runner.os }}-python-
 
       - name: Sync dependencies
+        shell: bash
         run: uv sync --all-extras
 
       - name: Run tests with coverage
+        shell: bash
         run: |
           uv run pytest -v \
             --tb=short \
@@ -123,6 +125,7 @@ jobs:
           fail_ci_if_error: false
 
       - name: Test package installation
+        shell: bash
         run: uv pip install -e packages/tta-dev-primitives/
 
   # Compatibility summary
@@ -137,10 +140,8 @@ jobs:
         run: |
           echo "## Platform Compatibility Test Results 🌐" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Platform | Python 3.11 | Python 3.12 |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------------|-------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Ubuntu | ${{ needs.platform-matrix.result == 'success' && '✅' || '❌' }} | ${{ needs.platform-matrix.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| macOS | ${{ needs.platform-matrix.result == 'success' && '✅' || '❌' }} | ${{ needs.platform-matrix.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Windows | ${{ needs.platform-matrix.result == 'success' && '✅' || '❌' }} | ${{ needs.platform-matrix.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "Overall matrix status: ${{ needs.platform-matrix.result == 'success' && '✅ Success' || needs.platform-matrix.result == 'failure' && '❌ Failure' || '⚠️ Cancelled/Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "For detailed per-platform and per-version results, see the individual matrix jobs in this workflow run." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note:** This workflow runs nightly to validate cross-platform compatibility." >> $GITHUB_STEP_SUMMARY

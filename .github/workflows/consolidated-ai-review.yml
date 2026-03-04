@@ -29,19 +29,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     outputs:
-      gemini-available: ${{ steps.check.outputs.available }}
+      gemini-available: ${{ steps.gemini-configured.outcome == 'success' }}
 
     steps:
       - name: Check Gemini configuration
-        id: check
-        run: |
-          if [ -n "${{ secrets.GEMINI_API_KEY }}" ] && [ -n "${{ vars.GEMINI_MODEL }}" ]; then
-            echo "available=true" >> $GITHUB_OUTPUT
-            echo "✅ Gemini API is configured"
-          else
-            echo "available=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Gemini API not configured, will skip AI review"
-          fi
+        id: gemini-configured
+        if: ${{ secrets.GEMINI_API_KEY != '' && vars.GEMINI_MODEL != '' }}
+        run: echo "Gemini configuration check step executed"
 
   # Gemini AI review (with retry mechanism)
   gemini-review:

@@ -2,7 +2,7 @@
 
 ## 🎯 Project Goals (from Issue #TBD)
 
-Consolidate 32+ fragmented GitHub Actions workflows with:
+Consolidate ~30 fragmented GitHub Actions workflows (32 at the time of migration) with:
 - 80%+ code duplication elimination
 - Improved performance (target: 80% reduction in PR validation time)
 - Enhanced reliability (external API fallbacks)

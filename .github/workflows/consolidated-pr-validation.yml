@@ -12,7 +12,6 @@ on:
       - 'docs/**'
       - 'logseq/**'
       - 'archive/**'
-      - '.github/workflows/**'  # Don't run on workflow changes
 
 concurrency:
   group: pr-${{ github.event.pull_request.number }}

@@ -43,8 +43,6 @@ jobs:
 
   debugger:
     if: false  # Disabled during migration
-    if: |-
-     ${{ fromJSON(vars.DEBUG || vars.ACTIONS_STEP_DEBUG || false) }}
     runs-on: 'ubuntu-latest'
     permissions:
       contents: 'read'
