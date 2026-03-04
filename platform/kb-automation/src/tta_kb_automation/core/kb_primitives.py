@@ -93,6 +93,9 @@ class ExtractLinks(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
     def __init__(self) -> None:
         super().__init__(name="extract_links")
 
+    # Logseq property declaration pattern: "propertyname:: value"
+    _PROPERTY_LINE_RE = re.compile(r"^\s*[\w-]+::\s")
+
     async def _execute_impl(
         self, input_data: dict[str, Any], context: WorkflowContext
     ) -> dict[str, Any]:
@@ -105,9 +108,12 @@ class ExtractLinks(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):
             source = page["title"]
             content = page["content"]
 
-            # Find [[links]] with line numbers
+            # Find [[links]] with line numbers, skipping property declaration lines
             lines = content.split("\n")
             for line_num, line in enumerate(lines, start=1):
+                # Skip Logseq property declarations (e.g. "type:: [[Dashboard]]")
+                if self._PROPERTY_LINE_RE.match(line):
+                    continue
                 for match in re.finditer(r"\[\[([^\]]+)\]\]", line):
                     target = match.group(1)
                     all_links.append(

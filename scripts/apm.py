@@ -24,19 +24,21 @@ logging.basicConfig(
 logger = logging.getLogger("apm")
 
 APM_FILE = "apm.yml"
+APM_SEARCH_PATHS = [APM_FILE, "config/apm.yml"]
 
 def load_apm_config():
     """Load configuration from apm.yml."""
-    if not os.path.exists(APM_FILE):
-        logger.error(f"Configuration file '{APM_FILE}' not found.")
-        sys.exit(1)
+    for path in APM_SEARCH_PATHS:
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    return yaml.safe_load(f)
+            except yaml.YAMLError as e:
+                logger.error(f"Error parsing '{path}': {e}")
+                sys.exit(1)
 
-    try:
-        with open(APM_FILE, 'r') as f:
-            return yaml.safe_load(f)
-    except yaml.YAMLError as e:
-        logger.error(f"Error parsing '{APM_FILE}': {e}")
-        sys.exit(1)
+    logger.error(f"Configuration file not found. Searched: {APM_SEARCH_PATHS}")
+    sys.exit(1)
 
 def run_script(script_name: str, extra_args: list):
     """Run a script defined in apm.yml."""

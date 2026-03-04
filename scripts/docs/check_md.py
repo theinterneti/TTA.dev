@@ -19,6 +19,7 @@ import argparse
 import os
 import re
 import sys
+import urllib.parse
 from pathlib import Path
 
 
@@ -62,6 +63,9 @@ class MarkdownChecker:
                 if not clean_target:
                     continue
 
+                # URL-decode the target (e.g. "TODO%20Management%20System.md" → "TODO Management System.md")
+                clean_target = urllib.parse.unquote(clean_target)
+
                 # Resolve relative to file location
                 target_path = (md_file.parent / clean_target).resolve()
 
@@ -76,6 +80,9 @@ class MarkdownChecker:
         fence_pattern = re.compile(r"^```(\w*)\s*$", re.MULTILINE)
 
         for md_file in md_files:
+            # Skip broken symlinks
+            if not md_file.exists():
+                continue
             content = md_file.read_text(encoding="utf-8", errors="ignore")
             for line_num, line in enumerate(content.split("\n"), 1):
                 if line.strip().startswith("```"):
@@ -97,6 +104,9 @@ class MarkdownChecker:
         is_runnable = False
 
         for md_file in md_files:
+            # Skip broken symlinks
+            if not md_file.exists():
+                continue
             content = md_file.read_text(encoding="utf-8", errors="ignore")
             lines = content.split("\n")
 
@@ -133,6 +143,9 @@ class MarkdownChecker:
         print("📋 Checking frontmatter...")
 
         for md_file in md_files:
+            # Skip broken symlinks
+            if not md_file.exists():
+                continue
             content = md_file.read_text(encoding="utf-8", errors="ignore")
             if content.startswith("---"):
                 # Has frontmatter, validate it's properly closed

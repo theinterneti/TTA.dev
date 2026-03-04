@@ -4,18 +4,20 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Any
+from typing import Any, TypeVar
 
 import structlog
-
 from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 from .models import DoltConfig
 
 logger = structlog.get_logger(__name__)
 
+T = TypeVar("T")
+U = TypeVar("U")
 
-class DoltPrimitive[T, U](WorkflowPrimitive[T, U]):
+
+class DoltPrimitive(WorkflowPrimitive[T, U]):
     """Base class for all Dolt primitives.
 
     Provides shared helpers for running Dolt CLI commands and logging.

@@ -150,8 +150,7 @@ def example_context_pruning():
         manager.add_message(
             session_id=session_id,
             role="user" if i % 2 == 0 else "assistant",
-            content=f"Message {i}: This is a test message to demonstrate context pruning. "
-            * 5,
+            content=f"Message {i}: This is a test message to demonstrate context pruning. " * 5,
             importance=importance,
             metadata={"message_number": i},
         )
@@ -218,21 +217,15 @@ def example_metadata_usage():
     # Query messages by metadata
     context = manager.contexts[session_id]
 
-    task_requests = [
-        msg for msg in context.messages if msg.metadata.get("type") == "task_request"
-    ]
+    task_requests = [msg for msg in context.messages if msg.metadata.get("type") == "task_request"]
     for _msg in task_requests:
         pass
 
-    high_priority = [
-        msg for msg in task_requests if msg.metadata.get("priority") == "high"
-    ]
+    high_priority = [msg for msg in task_requests if msg.metadata.get("priority") == "high"]
     for _msg in high_priority:
         pass
 
-    phase1_tasks = [
-        msg for msg in task_requests if msg.metadata.get("phase") == "phase1"
-    ]
+    phase1_tasks = [msg for msg in task_requests if msg.metadata.get("phase") == "phase1"]
     sum(msg.metadata.get("estimated_days", 0) for msg in phase1_tasks)
 
     return manager, session_id

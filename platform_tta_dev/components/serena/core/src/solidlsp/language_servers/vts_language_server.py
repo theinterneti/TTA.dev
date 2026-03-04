@@ -159,7 +159,9 @@ class VtsLanguageServer(SolidLanguageServer):
             await lsp.request_definition(...)
             await lsp.request_references(...)
             # Shutdown the LanguageServer on exit from scope
-        # LanguageServer has been shutdown"""
+        # LanguageServer has been shutdown
+        ```
+        """
 
         def register_capability_handler(params):
             assert "registrations" in params

@@ -11,8 +11,8 @@ from tta_dolt_primitives import CommitInput, DoltCommitPrimitive
 async def test_commit_success(dolt_config, workflow_context, mock_dolt_run):
     """Successful commit returns commit hash."""
     mock_dolt_run.side_effect = [
-        ("", "", 0),   # dolt add -A
-        ("", "", 0),   # dolt commit -m ...
+        ("", "", 0),  # dolt add -A
+        ("", "", 0),  # dolt commit -m ...
         ("abc1234 Player chose the forest path", "", 0),  # dolt log --oneline -1
     ]
 
@@ -32,8 +32,8 @@ async def test_commit_success(dolt_config, workflow_context, mock_dolt_run):
 async def test_commit_nothing_to_commit(dolt_config, workflow_context, mock_dolt_run):
     """Nothing to commit is treated as success with no commit object."""
     mock_dolt_run.side_effect = [
-        ("", "", 0),                              # dolt add -A
-        ("", "nothing to commit", 1),             # dolt commit fails gracefully
+        ("", "", 0),  # dolt add -A
+        ("", "nothing to commit", 1),  # dolt commit fails gracefully
     ]
 
     primitive = DoltCommitPrimitive(dolt_config)

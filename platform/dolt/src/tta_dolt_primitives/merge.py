@@ -93,7 +93,10 @@ class DoltMergePrimitive(DoltPrimitive[MergeInput, MergeResult]):
         if input_data.strategy != MergeStrategy.DEFAULT:
             merge_args += ["--strategy", input_data.strategy.value]
 
-        msg = input_data.message or f"Merge universe '{input_data.source_branch}' into '{input_data.target_branch}'"
+        msg = (
+            input_data.message
+            or f"Merge universe '{input_data.source_branch}' into '{input_data.target_branch}'"
+        )
         merge_args += ["-m", msg]
 
         stdout, stderr, rc = await self._run_dolt(*merge_args)
@@ -122,8 +125,4 @@ class DoltMergePrimitive(DoltPrimitive[MergeInput, MergeResult]):
 
     def _parse_conflicts(self, stderr: str) -> list[str]:
         """Extract conflict descriptions from Dolt merge stderr."""
-        return [
-            line.strip()
-            for line in stderr.splitlines()
-            if "conflict" in line.lower()
-        ]
+        return [line.strip() for line in stderr.splitlines() if "conflict" in line.lower()]
