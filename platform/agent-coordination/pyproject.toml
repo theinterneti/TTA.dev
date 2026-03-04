@@ -4,11 +4,20 @@ version = "1.0.0"
 description = "Atomic DevOps Architecture - Agent coordination and orchestration primitives"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 authors = [{ name = "TTA.dev Team" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 dependencies = [
-    "tta-dev-primitives",
+    "tta-dev-primitives>=1.3.0",
     "PyGithub>=2.1.1",
     "docker>=7.0.0",
     "pytest-json-report>=1.5.0",
