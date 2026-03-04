@@ -76,6 +76,9 @@ class MarkdownChecker:
         fence_pattern = re.compile(r"^```(\w*)\s*$", re.MULTILINE)
 
         for md_file in md_files:
+            # Skip broken symlinks
+            if not md_file.exists():
+                continue
             content = md_file.read_text(encoding="utf-8", errors="ignore")
             for line_num, line in enumerate(content.split("\n"), 1):
                 if line.strip().startswith("```"):
@@ -97,6 +100,9 @@ class MarkdownChecker:
         is_runnable = False
 
         for md_file in md_files:
+            # Skip broken symlinks
+            if not md_file.exists():
+                continue
             content = md_file.read_text(encoding="utf-8", errors="ignore")
             lines = content.split("\n")
 
@@ -133,6 +139,9 @@ class MarkdownChecker:
         print("📋 Checking frontmatter...")
 
         for md_file in md_files:
+            # Skip broken symlinks
+            if not md_file.exists():
+                continue
             content = md_file.read_text(encoding="utf-8", errors="ignore")
             if content.startswith("---"):
                 # Has frontmatter, validate it's properly closed
