@@ -44,5 +44,5 @@ result = await workflow.execute(data, WorkflowContext())
 ## Resources
 
 - [GitHub Repository](https://github.com/theinterneti/TTA.dev)
-- [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md)
-- [GETTING_STARTED.md](../GETTING_STARTED.md)
+- [PRIMITIVES_CATALOG.md](../../PRIMITIVES_CATALOG.md)
+- [GETTING_STARTED.md](../../GETTING_STARTED.md)

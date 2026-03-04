@@ -19,6 +19,7 @@ import argparse
 import os
 import re
 import sys
+import urllib.parse
 from pathlib import Path
 
 
@@ -61,6 +62,9 @@ class MarkdownChecker:
                 clean_target = link_target.split("#")[0]
                 if not clean_target:
                     continue
+
+                # URL-decode the target (e.g. "TODO%20Management%20System.md" → "TODO Management System.md")
+                clean_target = urllib.parse.unquote(clean_target)
 
                 # Resolve relative to file location
                 target_path = (md_file.parent / clean_target).resolve()
