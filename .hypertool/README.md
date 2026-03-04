@@ -282,8 +282,8 @@ hypertool persona switch tta-backend-engineer  # 2000 tokens
 
 ## Related Documentation
 
-- [Hypertool Strategic Integration](../../docs/mcp/HYPERTOOL_STRATEGIC_INTEGRATION.md)
-- [Hypertool Quick Start](../../docs/mcp/HYPERTOOL_QUICKSTART.md)
+- [Hypertool Strategic Integration](../../docs/reference/mcp/HYPERTOOL_STRATEGIC_INTEGRATION.md)
+- [Hypertool Quick Start](../../docs/reference/mcp/HYPERTOOL_QUICKSTART.md)
 - [TTA.dev Chat Modes](../.tta/chatmodes/)
 - [MCP Servers Documentation](../../MCP_SERVERS.md)
 

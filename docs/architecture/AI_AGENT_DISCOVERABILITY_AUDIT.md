@@ -228,7 +228,7 @@ Result: Copilot gets good guidance BUT misses workspace-level overview
 ### 4.1 Current MCP State
 
 **MCP Documentation:**
-- ✅ `/docs/mcp/README.md` - Overview of MCP concepts
+- ✅ `/docs/reference/mcp/README.md` - Overview of MCP concepts
 - ✅ MCP validation workflow in CI
 - ⚠️ MCP servers not yet fully cataloged for agent discovery
 

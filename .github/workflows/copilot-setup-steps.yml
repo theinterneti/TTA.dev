@@ -6,9 +6,9 @@ name: "Copilot Setup Steps"
 # Cache: ~/.cache/uv + .venv (~43MB)
 #
 # For more information:
-# - Workflow docs: docs/development/TESTING_COPILOT_SETUP.md
+# - Workflow docs: docs/guides/development/TESTING_COPILOT_SETUP.md
 # - Environment verification: scripts/check-environment.sh
-# - Optimization guide: docs/development/COPILOT_ENVIRONMENT_OPTIMIZATION.md
+# - Optimization guide: docs/guides/development/COPILOT_ENVIRONMENT_OPTIMIZATION.md
 # - Agent guidance: AGENTS.md
 
 on:

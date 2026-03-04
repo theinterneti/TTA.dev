@@ -136,7 +136,7 @@ The **Phase 3 Examples** demonstrate production-ready patterns:
 
 For architectural documentation, see:
 - [`docs/architecture/`](../architecture/) - Architecture decisions and patterns
-- [`docs/observability/`](../observability/) - Observability architecture
+- [`docs/guides/observability/`](../observability/) - Observability architecture
 
 ## Contributing
 

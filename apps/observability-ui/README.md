@@ -398,7 +398,7 @@ MIT - See [LICENSE](../../LICENSE)
 ## Related Documentation
 
 - **Architecture**: `docs/architecture/OBSERVABILITY_UI_DESIGN.md`
-- **Integration Guide**: `docs/integration/observability-integration.md`
+- **Integration Guide**: `docs/guides/integration/observability-integration.md`
 - **Primitives**: `packages/tta-dev-primitives/README.md`
 
 ---

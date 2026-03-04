@@ -129,7 +129,7 @@ Unified memory architecture enables agents to truly learn and collaborate. The k
 
 ## References
 
-- [Hindsight Memory Architecture](../../../docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md)
+- [Hindsight Memory Architecture](../../../docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md)
 - [AGENTS.md](../../../AGENTS.md)
 - [Platform Agent Context](../../../platform/agent-context/)
 

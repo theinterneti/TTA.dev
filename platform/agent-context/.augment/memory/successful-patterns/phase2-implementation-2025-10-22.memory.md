@@ -97,7 +97,7 @@ Phase 2 of the Agentic Primitives implementation focused on extending the file-b
 
 ## References
 
-- Session Guide: `docs/development/agentic-primitives-session-guide.md`
+- Session Guide: `docs/guides/development/agentic-primitives-session-guide.md`
 - Implementation Files: `.augment/context/conversation_manager.py`, `tests/context/test_memory_loading.py`
 
 ## Impact

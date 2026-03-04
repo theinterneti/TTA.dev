@@ -26,7 +26,7 @@ For a complete list of available tools (Context7, AI Toolkit, Grafana, etc.), se
 
 **IMPORTANT:** All agents must use the Logseq TODO management system. Refer to the `.clinerules` for detailed tag conventions and properties.
 
-**🧭 Knowledge Base Hub:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - **START HERE** for intelligent navigation between documentation and knowledge base systems.
+**🧭 Knowledge Base Hub:** [`docs/_archive/knowledge-base/README.md`](docs/_archive/knowledge-base/README.md) - **START HERE** for intelligent navigation between documentation and knowledge base systems.
 
 - **📐 TODO Architecture:** [`logseq/pages/TTA.dev/TODO Architecture.md`](logseq/pages/TTA.dev___TODO Architecture.md) - Complete system design
 - **📊 Main Dashboard:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO Management System.md) - Active queries
@@ -79,7 +79,7 @@ For a complete list of available tools (Context7, AI Toolkit, Grafana, etc.), se
 | `architectural-decisions` | After design choices | Why we chose primitives over raw async |
 | `codebase-insights` | After indexing repos | Module structure, key entry points |
 
-**For Detailed Guide:** [`docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md`](docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md)
+**For Detailed Guide:** [`docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md`](docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md)
 
 ---
 

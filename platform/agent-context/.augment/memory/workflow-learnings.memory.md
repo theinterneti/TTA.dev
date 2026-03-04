@@ -308,7 +308,7 @@ from scripts.workflow.stage_handlers import (...)
 ## Resources
 
 ### Documentation
-- Integrated Workflow Design: `docs/development/integrated-workflow-design.md`
+- Integrated Workflow Design: `docs/guides/development/integrated-workflow-design.md`
 - Workflow README: `scripts/workflow/README.md`
 - Augment Rule: `.augment/rules/integrated-workflow.md`
 

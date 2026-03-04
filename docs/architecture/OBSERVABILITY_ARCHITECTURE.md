@@ -767,7 +767,7 @@ tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
 ## Related Documentation
 
 - **Package README:** [`platform/observability/README.md`](../../platform/observability/README.md)
-- **Integration Guide:** [`docs/integration/observability-integration.md`](../integration/observability-integration.md)
+- **Integration Guide:** [`docs/guides/integration/observability-integration.md`](../integration/observability-integration.md)
 - **Component Analysis:** [`COMPONENT_INTEGRATION_ANALYSIS.md`](COMPONENT_INTEGRATION_ANALYSIS.md)
 - **Monitoring Dashboard:** [`WEEK1_MONITORING_DASHBOARD.md`](../../WEEK1_MONITORING_DASHBOARD.md)
 

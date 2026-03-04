@@ -130,7 +130,7 @@ manager.save_session(session_id)
 
 - **Workflow**: `.augment/workflows/context-management.workflow.md` - Detailed patterns
 - **Development Workflow**: Memory `development_workflow` - Multi-commit approach
-- **Component Maturity**: `docs/development/COMPONENT_MATURITY_WORKFLOW.md` - Promotion workflow
+- **Component Maturity**: `docs/guides/development/COMPONENT_MATURITY_WORKFLOW.md` - Promotion workflow
 
 ---
 

@@ -388,8 +388,8 @@ def get_enhanced_metrics_collector():
 
 ## Related Documentation
 
-- **Observability Assessment:** `docs/observability/OBSERVABILITY_ASSESSMENT.md`
-- **Implementation Guide:** `docs/observability/IMPLEMENTATION_GUIDE.md`
+- **Observability Assessment:** `docs/guides/observability/OBSERVABILITY_ASSESSMENT.md`
+- **Implementation Guide:** `docs/guides/observability/IMPLEMENTATION_GUIDE.md`
 - **Grafana Dashboards:** `dashboards/grafana/README.md`
 - **AlertManager Rules:** `dashboards/alertmanager/README.md`
 - **Examples README:** `examples/README.md`
