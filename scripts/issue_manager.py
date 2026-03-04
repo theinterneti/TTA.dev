@@ -19,6 +19,9 @@ Usage:
     ./scripts/issue_manager.py assign-milestone <issue-number>
     ./scripts/issue_manager.py progress
     ./scripts/issue_manager.py audit
+    ./scripts/issue_manager.py close-stale [days]
+    ./scripts/issue_manager.py close-duplicates
+    ./scripts/issue_manager.py label-unlabeled
 """
 
 import json
@@ -596,6 +599,121 @@ class IssueManager:
         print(f"  Estimated cleanup:       ~{cleanup} issues")
         print()
 
+    # ------------------------------------------------------------------
+    # Write operations — require GH_TOKEN with issues:write permission
+    # ------------------------------------------------------------------
+
+    def _close_issue(self, number: int, comment: str) -> bool:
+        """Close an issue with a comment explaining why."""
+        try:
+            subprocess.run(
+                [
+                    "gh",
+                    "issue",
+                    "comment",
+                    str(number),
+                    "--repo",
+                    self.repo,
+                    "--body",
+                    comment,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                [
+                    "gh",
+                    "issue",
+                    "close",
+                    str(number),
+                    "--repo",
+                    self.repo,
+                    "--reason",
+                    "not planned",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"  ❌ Failed to close #{number}: {e.stderr}", file=sys.stderr)
+            return False
+
+    def close_stale(self, stale_days: int = 90) -> None:
+        """Close stale issues that have had no activity."""
+        issues = self._list_open_issues()
+        stale = self._detect_stale(issues, stale_days)
+        exempt_labels = {
+            "pinned",
+            "priority: critical",
+            "priority: high",
+            "production-readiness",
+        }
+        actionable = [i for i in stale if not set(i.labels) & exempt_labels]
+
+        if not actionable:
+            print("No actionable stale issues found.")
+            return
+
+        print(f"Closing {len(actionable)} stale issues (>{stale_days} days)...\n")
+        closed = 0
+        for issue in actionable:
+            comment = (
+                f"🤖 **Automated issue audit**\n\n"
+                f"This issue has had no activity for over {stale_days} days "
+                f"and does not carry a high-priority or production-readiness "
+                f"label.\n\nClosing as stale. "
+                f"Please reopen if this work is still needed."
+            )
+            if self._close_issue(issue.number, comment):
+                print(f"  ✅ Closed #{issue.number}: {issue.title[:60]}")
+                closed += 1
+
+        print(f"\n🎉 Closed {closed}/{len(actionable)} stale issues.")
+
+    def close_duplicates(self) -> None:
+        """Close duplicate issues, keeping the lower-numbered original."""
+        issues = self._list_open_issues()
+        duplicates = self._detect_duplicates(issues)
+
+        if not duplicates:
+            print("No duplicate issues found.")
+            return
+
+        print(f"Closing {len(duplicates)} duplicate issue(s)...\n")
+        closed = 0
+        for original, dupe in duplicates:
+            comment = (
+                f"🤖 **Automated issue audit**\n\n"
+                f"This issue appears to be a duplicate of #{original.number}.\n\n"
+                f"Closing in favour of the original. "
+                f"Please reopen if this is intentionally distinct."
+            )
+            if self._close_issue(dupe.number, comment):
+                print(f"  ✅ Closed #{dupe.number} (duplicate of #{original.number})")
+                closed += 1
+
+        print(f"\n🎉 Closed {closed}/{len(duplicates)} duplicate issues.")
+
+    def label_unlabeled(self) -> None:
+        """Auto-label all unlabeled open issues."""
+        issues = self._list_open_issues()
+        unlabeled = [i for i in issues if not i.labels]
+
+        if not unlabeled:
+            print("No unlabeled issues found.")
+            return
+
+        print(f"Auto-labeling {len(unlabeled)} unlabeled issues...\n")
+        labeled = 0
+        for issue in unlabeled:
+            if self.auto_label(issue.number):
+                labeled += 1
+
+        print(f"\n🎉 Labeled {labeled}/{len(unlabeled)} issues.")
+
     def show_progress(self) -> None:
         """Show milestone progress dashboard."""
         try:
@@ -703,6 +821,19 @@ def main():
     elif command == "audit":
         stale_days = int(sys.argv[2]) if len(sys.argv) >= 3 else 90
         manager.audit(stale_days)
+        sys.exit(0)
+
+    elif command == "close-stale":
+        stale_days = int(sys.argv[2]) if len(sys.argv) >= 3 else 90
+        manager.close_stale(stale_days)
+        sys.exit(0)
+
+    elif command == "close-duplicates":
+        manager.close_duplicates()
+        sys.exit(0)
+
+    elif command == "label-unlabeled":
+        manager.label_unlabeled()
         sys.exit(0)
 
     else:

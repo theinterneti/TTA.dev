@@ -11,9 +11,14 @@ on:
         required: false
         default: '90'
         type: string
+      apply:
+        description: 'Actually close stale/duplicate issues and label unlabeled ones'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
-  issues: read
+  issues: write
 
 jobs:
   audit:
@@ -45,3 +50,22 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           python scripts/issue_manager.py audit "$STALE_DAYS" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Apply — close stale issues
+        if: github.event.inputs.apply == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STALE_DAYS: ${{ github.event.inputs.stale_days || '90' }}
+        run: python scripts/issue_manager.py close-stale "$STALE_DAYS"
+
+      - name: Apply — close duplicate issues
+        if: github.event.inputs.apply == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/issue_manager.py close-duplicates
+
+      - name: Apply — auto-label unlabeled issues
+        if: github.event.inputs.apply == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/issue_manager.py label-unlabeled
