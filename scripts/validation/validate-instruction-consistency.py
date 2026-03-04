@@ -36,7 +36,7 @@ def validate_instruction_file(file_path: Path) -> bool:
     """Validate a single instruction file."""
     print(f"\n🔍 Validating: {file_path.name}")
 
-    content = file_path.read_text()
+    content = file_path.read_text(encoding="utf-8")
 
     # Check for frontmatter
     frontmatter = parse_frontmatter(content)
@@ -81,7 +81,7 @@ def check_for_conflicts(instruction_files: list[Path]) -> bool:
     pattern_map: dict[str, list[Path]] = {}
 
     for file_path in instruction_files:
-        content = file_path.read_text()
+        content = file_path.read_text(encoding="utf-8")
         frontmatter = parse_frontmatter(content)
 
         if not frontmatter:
