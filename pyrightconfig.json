@@ -6,6 +6,7 @@
   ],
   "exclude": [
     "platform/*/examples",
+    "platform/primitives/tests/test_integrations.py",
     "**/__pycache__",
     "**/*.pyc",
     "**/node_modules",

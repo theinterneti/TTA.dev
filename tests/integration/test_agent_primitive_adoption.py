@@ -37,7 +37,7 @@ class TestPrimitiveAdoption:
             if example_file.name.startswith("_"):
                 continue
 
-            content = example_file.read_text()
+            content = example_file.read_text(encoding="utf-8")
             tree = ast.parse(content)
 
             # Check for primitive imports
@@ -71,7 +71,7 @@ class TestPrimitiveAdoption:
             if example_file.name.startswith("_"):
                 continue
 
-            content = example_file.read_text()
+            content = example_file.read_text(encoding="utf-8")
 
             # Skip if explicitly allowed
             if "# pragma: allow-asyncio" in content:
@@ -103,7 +103,7 @@ class TestPrimitiveAdoption:
             if example_file.name.startswith("_"):
                 continue
 
-            content = example_file.read_text()
+            content = example_file.read_text(encoding="utf-8")
 
             # Skip if explicitly allowed
             if "# pragma: allow-asyncio" in content:
@@ -127,7 +127,7 @@ class TestPrimitiveAdoption:
             if example_file.name.startswith("_"):
                 continue
 
-            content = example_file.read_text()
+            content = example_file.read_text(encoding="utf-8")
 
             # Check for WorkflowContext import
             if "WorkflowContext" not in content:
@@ -162,7 +162,7 @@ class TestPrimitiveAdoption:
             if py_file.name in ("__init__.py", "base.py"):
                 continue
 
-            content = py_file.read_text()
+            content = py_file.read_text(encoding="utf-8")
             tree = ast.parse(content)
 
             # Find class definitions
@@ -215,7 +215,7 @@ class TestPrimitiveAdoption:
             if py_file.name == "__init__.py":
                 continue
 
-            content = py_file.read_text()
+            content = py_file.read_text(encoding="utf-8")
             tree = ast.parse(content)
 
             # Check for try/except blocks

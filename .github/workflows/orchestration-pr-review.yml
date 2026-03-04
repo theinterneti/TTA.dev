@@ -55,9 +55,13 @@ jobs:
             --repo ${{ github.repository }} \
             --pr ${{ github.event.pull_request.number }}
 
-            - name: Upload PR review
+      - name: Upload PR review
         if: always()
         uses: actions/upload-artifact@v4
+        with:
+          name: pr-review
+          path: platform/primitives/pr-review-output.json
+          if-no-files-found: ignore
 
       - name: Comment on PR (if review generated)
         if: success()
