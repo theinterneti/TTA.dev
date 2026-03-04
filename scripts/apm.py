@@ -31,7 +31,7 @@ def load_apm_config():
     for path in APM_SEARCH_PATHS:
         if os.path.exists(path):
             try:
-                with open(path, 'r') as f:
+                with open(path, 'r', encoding='utf-8') as f:
                     return yaml.safe_load(f)
             except yaml.YAMLError as e:
                 logger.error(f"Error parsing '{path}': {e}")

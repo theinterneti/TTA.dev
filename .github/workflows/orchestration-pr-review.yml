@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pr-review
-          path: platform/primitives/pr-review-output.json
+          path: platform/**/pr-review-output.json
           if-no-files-found: ignore
 
       - name: Comment on PR (if review generated)
