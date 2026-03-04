@@ -30,7 +30,7 @@
 | `packages/tta-dev-integrations/src/tta_dev_integrations/llm/__init__.py` | **CORE** | LLM integrations package init |
 | `docs/architecture/UNIVERSAL_LLM_ARCHITECTURE.md` | **CORE DOC** | Primary architecture document for Universal LLM design |
 | `docs/guides/FREE_MODEL_SELECTION.md` | **CORE DOC** | Guide for selecting free-tier models (Gemini, Kimi, DeepSeek) |
-| `docs/planning/UNIVERSAL_LLM_ARCHITECTURE_QUESTIONS.md` | **CORE DOC** | Requirements questionnaire responses that drove the design |
+| `docs/_archive/planning/UNIVERSAL_LLM_ARCHITECTURE_QUESTIONS.md` | **CORE DOC** | Requirements questionnaire responses that drove the design |
 
 **Rationale:** These files implement the core "agentic primitives" worldview - supporting any coder (Copilot, Cline, Augment), any provider (OpenAI, Google, OpenRouter), with budget profiles (FREE/CAREFUL/UNLIMITED).
 
@@ -59,7 +59,7 @@
 | `platform/primitives/examples/test_core_metrics.py` | **EXAMPLE** | Example demonstrating core metrics |
 | `platform/primitives/examples/test_semantic_tracing.py` | **EXAMPLE** | Example demonstrating semantic tracing |
 | `platform/primitives/examples/test_trace_propagation.py` | **EXAMPLE** | Example demonstrating trace propagation |
-| `docs/observability/*.md` | **CORE DOC** | Comprehensive observability documentation (multiple phases) |
+| `docs/guides/observability/*.md` | **CORE DOC** | Comprehensive observability documentation (multiple phases) |
 
 **Rationale:** Observability is critical for production agentic systems. These enhancements build on existing `tta-observability-integration` work.
 
@@ -535,7 +535,7 @@ TTA.dev/
 3. Copy documentation:
    - `docs/architecture/UNIVERSAL_LLM_ARCHITECTURE.md`
    - `docs/guides/FREE_MODEL_SELECTION.md`
-   - `docs/planning/UNIVERSAL_LLM_ARCHITECTURE_QUESTIONS.md`
+   - `docs/_archive/planning/UNIVERSAL_LLM_ARCHITECTURE_QUESTIONS.md`
 4. Create examples:
    - `examples/llm/budget_aware_routing.py`
    - `examples/llm/multi_provider_fallback.py`
@@ -850,7 +850,7 @@ All tasks from the migration plan have been successfully completed:
 
 #### 🚀 Ready for Review
 
-**PR Description:** `docs/refactor/AGENTIC_CORE_PR_DRAFT.md`
+**PR Description:** `docs/_archive/refactor/AGENTIC_CORE_PR_DRAFT.md`
 
 **Key Features:**
 - UniversalLLMPrimitive with budget-aware routing
@@ -874,7 +874,7 @@ All tasks from the migration plan have been successfully completed:
 
 #### 📝 Next Steps for User
 
-1. **Review the PR draft:** `docs/refactor/AGENTIC_CORE_PR_DRAFT.md`
+1. **Review the PR draft:** `docs/_archive/refactor/AGENTIC_CORE_PR_DRAFT.md`
 2. **Review this inventory:** Confirms all decisions made correctly
 3. **Test the integration:** Optionally test UniversalLLMPrimitive
 4. **Push the branch:** `git push -u TTA.dev agentic/core-architecture`

@@ -36,7 +36,7 @@
 
 ### TTA_SANDBOX_WORKFLOW.md
 
-**Location:** `docs/planning/TTA_SANDBOX_WORKFLOW.md`
+**Location:** `docs/_archive/planning/TTA_SANDBOX_WORKFLOW.md`
 
 **Content:**
 - Complete sandbox architecture diagram
@@ -97,7 +97,7 @@
 
 ## 4. Planning Documentation Updated ✅
 
-**Updated:** `docs/planning/README.md`
+**Updated:** `docs/_archive/planning/README.md`
 
 **Changes:**
 - Added section 5: Sandbox Workflow
@@ -218,7 +218,7 @@ cd ../scripts
 - Assess migration complexity
 
 **In TTA.dev:**
-- Transfer analysis to `docs/planning/tta-analysis/`
+- Transfer analysis to `docs/_archive/planning/tta-analysis/`
 - Update Logseq TODO with findings
 - Create primitive-mapping.json
 - Refine package spec
@@ -376,7 +376,7 @@ python scripts/docs/check_md.py --all
 
 ### Created Today (November 8)
 
-1. **docs/planning/TTA_SANDBOX_WORKFLOW.md** (~600 lines)
+1. **docs/_archive/planning/TTA_SANDBOX_WORKFLOW.md** (~600 lines)
    - Complete workflow guide
    - Architecture diagrams
    - Commands and examples
@@ -392,7 +392,7 @@ python scripts/docs/check_md.py --all
    - Workflow strategy documented
    - Deliverables specified
 
-4. **docs/planning/README.md** (updated)
+4. **docs/_archive/planning/README.md** (updated)
    - Added Sandbox Workflow section
    - Updated reading paths
    - Added setup script reference
@@ -461,15 +461,15 @@ cd ~/repos/TTA.dev
 
 ## Reference Links
 
-**Planning Hub:** `docs/planning/README.md`
+**Planning Hub:** `docs/_archive/planning/README.md`
 
-**Workflow Guide:** `docs/planning/TTA_SANDBOX_WORKFLOW.md`
+**Workflow Guide:** `docs/_archive/planning/TTA_SANDBOX_WORKFLOW.md`
 
 **Setup Script:** `scripts/setup-tta-audit-sandbox.sh`
 
 **Logseq TODO:** `logseq/journals/2025_11_08.md`
 
-**Original Plan:** `docs/planning/TTA_REMEDIATION_PLAN.md`
+**Original Plan:** `docs/_archive/planning/TTA_REMEDIATION_PLAN.md`
 
 ---
 

@@ -568,7 +568,7 @@ This implementation provides:
 - `scripts/mcp/config_parser.py` - MCP config parser and converter
 - `scripts/mcp/persona_activator.py` - Persona selection and activation
 - `scripts/mcp/setup_auto_integration.sh` - One-command setup script
-- `docs/mcp/AUTO_INTEGRATION_IMPLEMENTATION.md` - This document
+- `docs/reference/mcp/AUTO_INTEGRATION_IMPLEMENTATION.md` - This document
 
 **Ready for Execution:**
 ```bash

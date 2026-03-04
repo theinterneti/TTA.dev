@@ -4,8 +4,8 @@ date: 2025-10-30
 tags: [integration, gemini-cli, github-actions, async, ai-agent]
 status: active
 related:
-  - docs/integration/keploy-integration.md
-  - docs/integration/observability-integration.md
+  - docs/guides/integration/keploy-integration.md
+  - docs/guides/integration/observability-integration.md
   - platform/primitives/README.md
 ---
 

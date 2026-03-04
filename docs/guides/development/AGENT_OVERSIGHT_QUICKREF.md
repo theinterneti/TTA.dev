@@ -171,9 +171,9 @@ Copilot Worktree:
 
 ## 🔗 Related
 
-- Full docs: `docs/development/MULTI_AGENT_OVERSIGHT.md`
+- Full docs: `docs/guides/development/MULTI_AGENT_OVERSIGHT.md`
 - Copilot instructions: `.github/copilot-instructions.md`
-- Coding standards: `docs/development/CodingStandards.md`
+- Coding standards: `docs/guides/development/CodingStandards.md`
 
 ---
 

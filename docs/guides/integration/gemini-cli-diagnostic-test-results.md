@@ -309,7 +309,7 @@ use_vertex_ai: false
 - **Issue #63**: Test: Gemini CLI Diagnostic Run
 - **PR #62**: perf: optimize Gemini CLI configuration for headless execution (merged)
 - **PR #64**: test: Gemini CLI diagnostic configuration for performance investigation (draft)
-- **Investigation Document**: `docs/integration/gemini-cli-performance-investigation.md`
+- **Investigation Document**: `docs/guides/integration/gemini-cli-performance-investigation.md`
 
 ---
 

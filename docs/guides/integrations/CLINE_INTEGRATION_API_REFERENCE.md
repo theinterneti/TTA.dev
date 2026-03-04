@@ -167,7 +167,7 @@ class AdaptiveStrategyIntegration(WorkflowPrimitive[dict, dict]):
 
 ### File Locations
 
-- **Main Guide:** `docs/integrations/CLINE_CONTEXT_INTEGRATION_GUIDE.md`
+- **Main Guide:** `docs/guides/integrations/CLINE_CONTEXT_INTEGRATION_GUIDE.md`
 - **Agent System:** `logseq/pages/TTA.dev___Agent Instruction System.md`
 - **Setup Script:** `scripts/setup/cline-agent.sh`
 - **Custom Instructions:** `.cline/instructions.md`

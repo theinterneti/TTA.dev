@@ -175,19 +175,19 @@ TTA.dev/
 - Integration guides
 - Quick reference cards (in `quick-actions/`)
 
-#### `docs/development/`
+#### `docs/guides/development/`
 - Coding standards and conventions
 - Development workflow documentation
 - Git/worktree management (in `git/`)
 - Testing strategies
 
-#### `docs/status-reports/`
+#### `docs/_archive/status-reports/`
 - Project completion summaries
 - Migration reports
 - Validation results
 - Implementation status updates
 
-#### `docs/troubleshooting/`
+#### `docs/guides/troubleshooting/`
 - Problem diagnosis documents
 - Known issues and solutions
 - Debugging guides
@@ -249,9 +249,9 @@ One-time documents that are no longer actively used but preserved for reference:
 
 - **"How do I...?"** → `docs/guides/`
 - **"What's the architecture?"** → `docs/architecture/`
-- **"What changed?"** → `docs/status-reports/`
-- **"Something's broken"** → `docs/troubleshooting/`
-- **"Git workflows"** → `docs/development/git/`
+- **"What changed?"** → `docs/_archive/status-reports/`
+- **"Something's broken"** → `docs/guides/troubleshooting/`
+- **"Git workflows"** → `docs/guides/development/git/`
 
 ### Package-Specific Guidance
 
@@ -342,11 +342,11 @@ find . -name "*.log" -o -name "*_output.log" -o -name "verification_test_*"
 |-------------|----------|
 | Architecture design doc | `docs/architecture/` |
 | User guide or tutorial | `docs/guides/` |
-| Development workflow | `docs/development/` |
-| Project status report | `docs/status-reports/` |
-| Troubleshooting guide | `docs/troubleshooting/` |
+| Development workflow | `docs/guides/development/` |
+| Project status report | `docs/_archive/status-reports/` |
+| Troubleshooting guide | `docs/guides/troubleshooting/` |
 | Quick reference card | `docs/guides/quick-actions/` |
-| Git/worktree doc | `docs/development/git/` |
+| Git/worktree doc | `docs/guides/development/git/` |
 | Workspace config file | `.vscode/workspaces/` |
 | Historical/one-time doc | `_archive/historical/` |
 | Package-specific doc | `platform/{package}/docs/` |

@@ -190,7 +190,7 @@ tar -xzf ~/TTA.dev-backup-20260108-155654.tar.gz
 du -sh _archive
 
 # Review old status reports
-ls -lt docs/status-reports/ | tail -20
+ls -lt docs/_archive/status-reports/ | tail -20
 
 # Clean temp files
 find _archive -name "*.backup.*" -mtime +90 -delete

@@ -71,11 +71,11 @@ cat ../analysis/audit-report.md
 
 ```bash
 # Create analysis directory in TTA.dev
-mkdir -p ~/repos/TTA.dev/docs/planning/tta-analysis
+mkdir -p ~/repos/TTA.dev/docs/_archive/planning/tta-analysis
 
 # Copy all analysis files
 cp ~/sandbox/tta-audit/analysis/* \
-   ~/repos/TTA.dev/docs/planning/tta-analysis/
+   ~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 
 # Update Logseq
 cd ~/repos/TTA.dev
@@ -92,7 +92,7 @@ cd ~/repos/TTA.dev
 
 ```bash
 cd ~/repos/TTA.dev
-vim docs/planning/tta-analysis/primitive-mapping.json
+vim docs/_archive/planning/tta-analysis/primitive-mapping.json
 ```
 
 **Format:**
@@ -145,16 +145,16 @@ ssh -T git@github.com
 - `~/sandbox/tta-audit/scripts/analyze_package.py` - Analyzer
 
 ### You Will Create
-- `~/repos/TTA.dev/docs/planning/tta-analysis/primitive-mapping.json`
+- `~/repos/TTA.dev/docs/_archive/planning/tta-analysis/primitive-mapping.json`
 - `~/repos/TTA.dev/packages/tta-narrative-primitives/DESIGN_SPEC.md`
 
 ---
 
 ## Documentation
 
-- **Workflow Guide:** `docs/planning/TTA_SANDBOX_WORKFLOW.md`
-- **Full Plan:** `docs/planning/TTA_REMEDIATION_PLAN.md`
-- **Checklist:** `docs/planning/TTA_AUDIT_CHECKLIST.md`
+- **Workflow Guide:** `docs/_archive/planning/TTA_SANDBOX_WORKFLOW.md`
+- **Full Plan:** `docs/_archive/planning/TTA_REMEDIATION_PLAN.md`
+- **Checklist:** `docs/_archive/planning/TTA_AUDIT_CHECKLIST.md`
 
 ---
 

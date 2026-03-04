@@ -17,8 +17,8 @@ Hypertool MCP is the solution to our "130+ tools causing AI confusion" problem. 
 ## 🔗 Key Links
 
 - **Repository:** https://github.com/toolprint/hypertool-mcp
-- **Quick Start:** `/home/thein/repos/TTA.dev/docs/mcp/HYPERTOOL_QUICKSTART.md`
-- **Integration Plan:** `/home/thein/repos/TTA.dev/docs/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
+- **Quick Start:** `/home/thein/repos/TTA.dev/docs/reference/mcp/HYPERTOOL_QUICKSTART.md`
+- **Integration Plan:** `/home/thein/repos/TTA.dev/docs/reference/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
 - **Research:** https://github.com/toolprint/hypertool-mcp/blob/main/guides/RESEARCH.md
 
 ## 🧠 Why This is Revolutionary
@@ -133,10 +133,10 @@ AI sees ALL 130 = confused 😵   │
 ## 🎯 Immediate Actions
 
 1. **Try Quick Start** - 5 minutes to see the difference
-   - See `/home/thein/repos/TTA.dev/docs/mcp/HYPERTOOL_QUICKSTART.md`
+   - See `/home/thein/repos/TTA.dev/docs/reference/mcp/HYPERTOOL_QUICKSTART.md`
 
 2. **Review Integration Plan** - Complete 4-week roadmap
-   - See `/home/thein/repos/TTA.dev/docs/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
+   - See `/home/thein/repos/TTA.dev/docs/reference/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
 
 3. **Add Logseq TODOs** - Track implementation
    - See TODO items below
@@ -164,7 +164,7 @@ Add to today's journal:
   package:: mcp-integration
   related:: [[TTA.dev/MCP Servers]]
   estimated-effort:: 5 minutes
-  next-action:: Follow docs/mcp/HYPERTOOL_QUICKSTART.md
+  next-action:: Follow docs/reference/mcp/HYPERTOOL_QUICKSTART.md
 
 - TODO Implement Hypertool Phase 1 (Setup) #dev-todo
   type:: implementation
@@ -264,8 +264,8 @@ Long-lived server for better performance:
 - **Troubleshooting:** https://github.com/toolprint/hypertool-mcp/blob/main/guides/TROUBLESHOOTING.md
 
 ### TTA.dev Documentation
-- **Quick Start:** `/home/thein/repos/TTA.dev/docs/mcp/HYPERTOOL_QUICKSTART.md`
-- **Integration Plan:** `/home/thein/repos/TTA.dev/docs/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
+- **Quick Start:** `/home/thein/repos/TTA.dev/docs/reference/mcp/HYPERTOOL_QUICKSTART.md`
+- **Integration Plan:** `/home/thein/repos/TTA.dev/docs/reference/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
 - **MCP Servers:** `/home/thein/repos/TTA.dev/MCP_SERVERS.md`
 - **Toolsets Guide:** `/home/thein/repos/TTA.dev/docs/guides/copilot-toolsets-guide.md`
 

@@ -24,7 +24,7 @@ gh milestone create "tta-dev CLI MVP - Intelligent VS Code Setup" \
 
 ### 2. Create GitHub Issues
 
-**Template source:** `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
+**Template source:** `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
 
 **7 Issues to Create:**
 
@@ -38,7 +38,7 @@ gh milestone create "tta-dev CLI MVP - Intelligent VS Code Setup" \
 
 **Quick Create:**
 ```bash
-# Copy issue templates from docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md
+# Copy issue templates from docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md
 # Create each via GitHub UI or CLI
 ```
 
@@ -67,7 +67,7 @@ Build a working CLI for intelligent VS Code setup automation.
 - Target: <5 minutes, 0 errors
 
 ## Implementation Plan
-See docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md
+See docs/_archive/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md
 
 ## Architecture
 See docs/architecture/APPLICATION_DEPLOYMENT_ARCHITECTURE.md
@@ -185,7 +185,7 @@ git push
 - `src/lib/types.ts`
 - `tests/detector.test.ts`
 
-**See:** `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md` Issue #2 for code examples
+**See:** `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md` Issue #2 for code examples
 
 ### Day 5-7: Configuration Logic (Issue #3)
 
@@ -199,7 +199,7 @@ git push
 - `src/lib/templates/` (JSON templates)
 - `tests/configurator.test.ts`
 
-**See:** `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md` Issue #3 for code examples
+**See:** `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md` Issue #3 for code examples
 
 ---
 
@@ -215,12 +215,12 @@ git push
 ## 📚 Reference Documents
 
 ### Implementation Plan
-- **File:** `docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md`
+- **File:** `docs/_archive/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md`
 - **Content:** Complete 2-week timeline, code examples, test strategy
 - **Use:** Daily reference for implementation details
 
 ### GitHub Issues
-- **File:** `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
+- **File:** `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
 - **Content:** 7 issues with acceptance criteria and code examples
 - **Use:** Copy-paste issue templates into GitHub
 
@@ -230,7 +230,7 @@ git push
 - **Use:** Understand "why" behind CLI design
 
 ### Session Summary
-- **File:** `docs/sessions/SESSION_2025_11_15_CLI_MILESTONE.md`
+- **File:** `docs/_archive/sessions/SESSION_2025_11_15_CLI_MILESTONE.md`
 - **Content:** Complete session documentation, decisions, insights
 - **Use:** Context for future sessions
 
@@ -323,10 +323,10 @@ Before writing code:
 ## 📞 Need Help?
 
 **Reference Documents:**
-- Implementation plan: `docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md`
-- Issue templates: `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
+- Implementation plan: `docs/_archive/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md`
+- Issue templates: `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
 - Architecture: `docs/architecture/APPLICATION_DEPLOYMENT_ARCHITECTURE.md`
-- Session summary: `docs/sessions/SESSION_2025_11_15_CLI_MILESTONE.md`
+- Session summary: `docs/_archive/sessions/SESSION_2025_11_15_CLI_MILESTONE.md`
 
 **Logseq:**
 - Today's journal: `logseq/journals/2025_11_15.md`

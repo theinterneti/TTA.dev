@@ -414,9 +414,9 @@ python scripts/mcp/persona_activator.py --workspace . --analyze
 
 ## Related Documentation
 
-- **Complete Implementation Guide:** `../../docs/mcp/AUTO_INTEGRATION_IMPLEMENTATION.md`
-- **Status Report:** `../../docs/mcp/AUTO_INTEGRATION_STATUS_REPORT.md`
-- **Quick Reference:** `../../docs/mcp/AUTO_INTEGRATION_QUICKREF.md`
+- **Complete Implementation Guide:** `../../docs/reference/mcp/AUTO_INTEGRATION_IMPLEMENTATION.md`
+- **Status Report:** `../../docs/reference/mcp/AUTO_INTEGRATION_STATUS_REPORT.md`
+- **Quick Reference:** `../../docs/reference/mcp/AUTO_INTEGRATION_QUICKREF.md`
 - **MCP Servers Registry:** `../../MCP_SERVERS.md`
 - **Agent Instructions:** `../../AGENTS.md`
 

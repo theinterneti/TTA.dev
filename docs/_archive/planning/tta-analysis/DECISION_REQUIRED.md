@@ -307,7 +307,7 @@ Skip tta-ai-framework entirely:
 All analysis is complete and waiting in:
 
 ```
-~/repos/TTA.dev/docs/planning/tta-analysis/
+~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 ├── INITIAL_ANALYSIS.md              # Complete findings
 ├── ANALYSIS_SESSION_SUMMARY.md      # Session summary
 ├── DECISION_REQUIRED.md              # This file

@@ -371,7 +371,7 @@ No Python files found. Package can be ignored.
 ### In TTA.dev
 
 ```
-~/repos/TTA.dev/docs/planning/tta-analysis/
+~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 ├── package-statistics.md              ✅ Copied
 ├── class-list.txt                     ✅ Copied
 ├── tta-ai-framework-structure.json    ✅ Copied

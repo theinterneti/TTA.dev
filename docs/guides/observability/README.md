@@ -173,7 +173,7 @@ Read [PHASE3_COMPLETION_SUMMARY.md](./PHASE3_COMPLETION_SUMMARY.md) for the cele
 **1. Understand the Vision** (15 minutes)
 ```bash
 # Read the summary
-cat docs/observability/IMPLEMENTATION_SUMMARY.md
+cat docs/guides/observability/IMPLEMENTATION_SUMMARY.md
 
 # Visualize the architecture
 # See "Architecture Diagram" section
@@ -194,7 +194,7 @@ uv run python platform/primitives/examples/observability_demo.py
 **3. Implement Phase 1** (1 day)
 ```bash
 # Follow quickstart guide
-cat docs/observability/QUICKSTART_IMPLEMENTATION.md
+cat docs/guides/observability/QUICKSTART_IMPLEMENTATION.md
 
 # Make changes to:
 # - core/base.py (WorkflowContext fields)
@@ -280,9 +280,9 @@ uv run python examples/test_semantic_tracing.py
 ## 🔗 External Resources
 
 **OpenTelemetry:**
-- Specification: https://opentelemetry.io/docs/specs/otel/
+- Specification: https://opentelemetry.io/docs/reference/specs/otel/
 - Python SDK: https://opentelemetry.io/docs/languages/python/
-- Semantic Conventions: https://opentelemetry.io/docs/specs/semconv/
+- Semantic Conventions: https://opentelemetry.io/docs/reference/specs/semconv/
 
 **Prometheus:**
 - Query Basics: https://prometheus.io/docs/prometheus/latest/querying/basics/
@@ -404,7 +404,7 @@ uv run python examples/test_semantic_tracing.py
 
 1. **Understand** (30 min)
    ```bash
-   cat docs/observability/IMPLEMENTATION_SUMMARY.md
+   cat docs/guides/observability/IMPLEMENTATION_SUMMARY.md
    ```
 
 2. **Explore** (30 min)
@@ -416,13 +416,13 @@ uv run python examples/test_semantic_tracing.py
 
 3. **Plan** (1 hour)
    ```bash
-   cat docs/observability/TTA_OBSERVABILITY_STRATEGY.md
+   cat docs/guides/observability/TTA_OBSERVABILITY_STRATEGY.md
    # Understand the full vision
    ```
 
 4. **Implement** (3-5 days)
    ```bash
-   cat docs/observability/QUICKSTART_IMPLEMENTATION.md
+   cat docs/guides/observability/QUICKSTART_IMPLEMENTATION.md
    # Follow step-by-step
    ```
 

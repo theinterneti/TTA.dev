@@ -54,20 +54,20 @@
 
 **Documents Created:**
 
-1. **`docs/planning/TTA_REMEDIATION_PLAN.md`** (Full detailed plan)
+1. **`docs/_archive/planning/TTA_REMEDIATION_PLAN.md`** (Full detailed plan)
    - Complete analysis of both repositories
    - All three options evaluated
    - Detailed 4-phase implementation plan (5-7 weeks)
    - Package structure design
    - Success criteria and risk mitigation
 
-2. **`docs/planning/TTA_REMEDIATION_SUMMARY.md`** (Executive summary)
+2. **`docs/_archive/planning/TTA_REMEDIATION_SUMMARY.md`** (Executive summary)
    - Quick overview for decision makers
    - Key primitives to migrate
    - Timeline and benefits
    - Clear recommendation
 
-3. **`docs/planning/TTA_COMPARISON.md`** (Visual comparison)
+3. **`docs/_archive/planning/TTA_COMPARISON.md`** (Visual comparison)
    - Repository statistics
    - Architecture comparison
    - Code pattern comparison
@@ -239,9 +239,9 @@ packages/tta-narrative-primitives/
 ### Immediate (This Week)
 
 1. **Review documentation** (you)
-   - Read full plan: `docs/planning/TTA_REMEDIATION_PLAN.md`
-   - Read summary: `docs/planning/TTA_REMEDIATION_SUMMARY.md`
-   - Review comparison: `docs/planning/TTA_COMPARISON.md`
+   - Read full plan: `docs/_archive/planning/TTA_REMEDIATION_PLAN.md`
+   - Read summary: `docs/_archive/planning/TTA_REMEDIATION_SUMMARY.md`
+   - Review comparison: `docs/_archive/planning/TTA_COMPARISON.md`
 
 2. **Make decision** (you)
    - Approve Option 3 (Extract Core + Archive)?
@@ -277,9 +277,9 @@ packages/tta-narrative-primitives/
 
 ## Files Created This Session
 
-1. `docs/planning/TTA_REMEDIATION_PLAN.md` - Complete detailed plan
-2. `docs/planning/TTA_REMEDIATION_SUMMARY.md` - Executive summary
-3. `docs/planning/TTA_COMPARISON.md` - Visual comparison
+1. `docs/_archive/planning/TTA_REMEDIATION_PLAN.md` - Complete detailed plan
+2. `docs/_archive/planning/TTA_REMEDIATION_SUMMARY.md` - Executive summary
+3. `docs/_archive/planning/TTA_COMPARISON.md` - Visual comparison
 4. `logseq/journals/2025_11_07.md` - Added TODO entry
 
 ---

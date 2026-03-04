@@ -298,7 +298,7 @@ async def get_player_data(player_id: str) -> dict:
 
 ## References
 
-- [Component Maturity Workflow](../../docs/development/COMPONENT_MATURITY_WORKFLOW.md)
+- [Component Maturity Workflow](../../docs/guides/development/COMPONENT_MATURITY_WORKFLOW.md)
 - [Phase 1 Architecture](../../src/agent_orchestration/PHASE1_ARCHITECTURE.md)
 - [Integrated Workflow](../rules/integrated-workflow.md)
 - [File Size Limits](../rules/avoid-long-files.md)

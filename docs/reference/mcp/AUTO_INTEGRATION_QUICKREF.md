@@ -82,10 +82,10 @@ async def get_tta_context(task_description: str) -> dict:
 
 ```bash
 # 1. Create workspace MCP config
-cp docs/mcp/templates/mcp.json .vscode/mcp.json
+cp docs/reference/mcp/templates/mcp.json .vscode/mcp.json
 
 # 2. Create persona mapping
-cp docs/mcp/templates/toolset-persona-map.json .vscode/toolset-persona-map.json
+cp docs/reference/mcp/templates/toolset-persona-map.json .vscode/toolset-persona-map.json
 
 # 3. Reload VS Code
 code --reload
@@ -226,12 +226,12 @@ Time: 0 minutes | Errors: Zero | Primitives: Auto-suggested
 
 | Document | Purpose | Link |
 |----------|---------|------|
-| **Quick Reference** | This page | `docs/mcp/AUTO_INTEGRATION_QUICKREF.md` |
-| **Implementation Guide** | Step-by-step setup | `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` |
-| **Full Analysis** | Complete architecture | `docs/mcp/AUTO_INTEGRATION_ANALYSIS.md` |
-| **Summary** | Executive overview | `docs/mcp/AUTO_INTEGRATION_SUMMARY.md` |
-| **Action Plan** | Execution timeline | `docs/mcp/AUTO_INTEGRATION_ACTION_PLAN.md` |
-| **Architecture** | Visual diagrams | `docs/mcp/AUTO_INTEGRATION_ARCHITECTURE.md` |
+| **Quick Reference** | This page | `docs/reference/mcp/AUTO_INTEGRATION_QUICKREF.md` |
+| **Implementation Guide** | Step-by-step setup | `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` |
+| **Full Analysis** | Complete architecture | `docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md` |
+| **Summary** | Executive overview | `docs/reference/mcp/AUTO_INTEGRATION_SUMMARY.md` |
+| **Action Plan** | Execution timeline | `docs/reference/mcp/AUTO_INTEGRATION_ACTION_PLAN.md` |
+| **Architecture** | Visual diagrams | `docs/reference/mcp/AUTO_INTEGRATION_ARCHITECTURE.md` |
 
 ---
 
@@ -274,7 +274,7 @@ Time: 0 minutes | Errors: Zero | Primitives: Auto-suggested
 
 ## Next Steps
 
-1. **Implement:** Follow `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md`
+1. **Implement:** Follow `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md`
 2. **Test:** Run all 3 test scenarios above
 3. **Verify:** Check success metrics
 4. **Deploy:** Merge to main branch
@@ -284,9 +284,9 @@ Time: 0 minutes | Errors: Zero | Primitives: Auto-suggested
 
 ## Questions?
 
-- **Setup issues:** See `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md`
-- **Architecture questions:** See `docs/mcp/AUTO_INTEGRATION_ARCHITECTURE.md`
-- **Full details:** See `docs/mcp/AUTO_INTEGRATION_ANALYSIS.md`
+- **Setup issues:** See `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md`
+- **Architecture questions:** See `docs/reference/mcp/AUTO_INTEGRATION_ARCHITECTURE.md`
+- **Full details:** See `docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md`
 
 ---
 

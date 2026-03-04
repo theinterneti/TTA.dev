@@ -111,9 +111,9 @@ result = await llm.execute(
 - `platform/primitives/src/tta_dev_primitives/observability/prometheus_exporter.py`
 - `platform/primitives/src/tta_dev_primitives/observability/prometheus_metrics.py`
 - `platform/primitives/src/tta_dev_primitives/observability/metrics_v2.py`
-- `docs/observability/README.md`
-- `docs/observability/PROFESSIONAL_OBSERVABILITY.md`
-- `docs/observability/TTA_OBSERVABILITY_STRATEGY.md`
+- `docs/guides/observability/README.md`
+- `docs/guides/observability/PROFESSIONAL_OBSERVABILITY.md`
+- `docs/guides/observability/TTA_OBSERVABILITY_STRATEGY.md`
 
 ### 4. Secrets Management
 
@@ -199,7 +199,7 @@ packages/tta-dev-integrations/
 ### Architecture
 
 - `docs/architecture/UNIVERSAL_LLM_ARCHITECTURE.md` - Design document for Universal LLM
-- `docs/planning/UNIVERSAL_LLM_ARCHITECTURE_QUESTIONS.md` - Requirements that drove design
+- `docs/_archive/planning/UNIVERSAL_LLM_ARCHITECTURE_QUESTIONS.md` - Requirements that drove design
 
 ### Guides
 
@@ -209,13 +209,13 @@ packages/tta-dev-integrations/
 
 ### Observability
 
-- `docs/observability/README.md` - Observability overview
-- `docs/observability/PROFESSIONAL_OBSERVABILITY.md` - Professional stack setup
-- `docs/observability/TTA_OBSERVABILITY_STRATEGY.md` - Strategy and best practices
+- `docs/guides/observability/README.md` - Observability overview
+- `docs/guides/observability/PROFESSIONAL_OBSERVABILITY.md` - Professional stack setup
+- `docs/guides/observability/TTA_OBSERVABILITY_STRATEGY.md` - Strategy and best practices
 
 ### Refactor Documentation
 
-- `docs/refactor/AGENTIC_CORE_INVENTORY.md` - Complete inventory of changes from both source branches
+- `docs/_archive/refactor/AGENTIC_CORE_INVENTORY.md` - Complete inventory of changes from both source branches
 
 ### Examples
 
@@ -250,7 +250,7 @@ packages/tta-dev-integrations/
 - ❌ Package deletions
 - ❌ Test deletions
 
-**See:** `docs/refactor/AGENTIC_CORE_INVENTORY.md` for complete migration details
+**See:** `docs/_archive/refactor/AGENTIC_CORE_INVENTORY.md` for complete migration details
 
 ---
 
@@ -360,7 +360,7 @@ A separate PR will address observability/validation work from PR #26, built on t
 - [Universal LLM Architecture](./docs/architecture/UNIVERSAL_LLM_ARCHITECTURE.md)
 - [Free Model Selection Guide](./docs/guides/FREE_MODEL_SELECTION.md)
 - [Secrets Management](./docs/SECRETS_MANAGEMENT.md)
-- [Observability Strategy](./docs/observability/TTA_OBSERVABILITY_STRATEGY.md)
+- [Observability Strategy](./docs/guides/observability/TTA_OBSERVABILITY_STRATEGY.md)
 
 ### Package Documentation
 
@@ -369,7 +369,7 @@ A separate PR will address observability/validation work from PR #26, built on t
 
 ### Migration Documentation
 
-- [Agentic Core Inventory](./docs/refactor/AGENTIC_CORE_INVENTORY.md) - Complete migration details
+- [Agentic Core Inventory](./docs/_archive/refactor/AGENTIC_CORE_INVENTORY.md) - Complete migration details
 
 ---
 

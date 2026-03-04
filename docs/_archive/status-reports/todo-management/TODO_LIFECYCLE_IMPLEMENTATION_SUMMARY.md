@@ -116,7 +116,7 @@ uv run python scripts/extract-embedded-todos.py --dry-run
 uv run python scripts/update-markdown-todos.py
 
 # Update specific file
-uv run python scripts/update-markdown-todos.py --file docs/planning/feature.md
+uv run python scripts/update-markdown-todos.py --file docs/_archive/planning/feature.md
 ```
 
 ### 4. Documentation Updated

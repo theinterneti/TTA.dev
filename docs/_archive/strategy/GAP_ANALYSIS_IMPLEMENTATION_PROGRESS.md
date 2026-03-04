@@ -12,24 +12,24 @@
 ### 1. Strategic Response (100% Complete)
 
 **Documents Created:**
-- ✅ `docs/strategy/GAP_ANALYSIS_RESPONSE_2025_11_03.md` (40+ pages)
+- ✅ `docs/_archive/strategy/GAP_ANALYSIS_RESPONSE_2025_11_03.md` (40+ pages)
   - Point-by-point response to expert's critique
   - Clarified TTA.dev positioning: primitives library, NOT a framework
   - Identified 3 real gaps vs perceived misunderstandings
   - Demonstrated complementary relationship with LangGraph/DSPy
 
-- ✅ `docs/strategy/PLANNING_DOCS_MIGRATION_PLAN.md`
+- ✅ `docs/_archive/strategy/PLANNING_DOCS_MIGRATION_PLAN.md`
   - Complete inventory of 44 planning documents
   - Classification strategy (active/archive/KB/cleanup)
   - Migration steps with verification
   - New archive structure design
 
-- ✅ `docs/strategy/GAP_ANALYSIS_EXECUTIVE_SUMMARY.md`
+- ✅ `docs/_archive/strategy/GAP_ANALYSIS_EXECUTIVE_SUMMARY.md`
   - Quick reference (15-minute read)
   - Key findings and priorities
   - 9 hours of work mapped by priority
 
-- ✅ `docs/strategy/ACTION_CHECKLIST_GAP_ANALYSIS.md`
+- ✅ `docs/_archive/strategy/ACTION_CHECKLIST_GAP_ANALYSIS.md`
   - Day-by-day execution plan
   - Code templates included
   - Time estimates per task
@@ -319,7 +319,7 @@ archive/
 ## 🎯 Implementation Complete
 
 **Total Deliverables:**
-- 5 strategic response documents (docs/strategy/)
+- 5 strategic response documents (docs/_archive/strategy/)
 - 4 KB pages (logseq/pages/, 1,240+ lines)
 - 8 Logseq documentation files
 - 39 files archived with git history preserved
@@ -343,7 +343,7 @@ archive/
 **Verification:**
 ```bash
 # Check for broken links
-grep -r "docs/planning/" docs/ --include="*.md"
+grep -r "docs/_archive/planning/" docs/ --include="*.md"
 grep -r "PROOF_OF_CONCEPT_COMPLETE.md" . --include="*.md"
 ```
 
@@ -448,12 +448,12 @@ git grep "OBSERVABILITY_GAP_ANALYSIS.md"
 ## 🔗 Key Files
 
 **Strategic Response:**
-- `docs/strategy/GAP_ANALYSIS_RESPONSE_2025_11_03.md`
-- `docs/strategy/GAP_ANALYSIS_EXECUTIVE_SUMMARY.md`
-- `docs/strategy/ACTION_CHECKLIST_GAP_ANALYSIS.md`
+- `docs/_archive/strategy/GAP_ANALYSIS_RESPONSE_2025_11_03.md`
+- `docs/_archive/strategy/GAP_ANALYSIS_EXECUTIVE_SUMMARY.md`
+- `docs/_archive/strategy/ACTION_CHECKLIST_GAP_ANALYSIS.md`
 
 **Planning & Organization:**
-- `docs/strategy/PLANNING_DOCS_MIGRATION_PLAN.md`
+- `docs/_archive/strategy/PLANNING_DOCS_MIGRATION_PLAN.md`
 - `archive/` (new directory structure)
 
 **Infrastructure:**

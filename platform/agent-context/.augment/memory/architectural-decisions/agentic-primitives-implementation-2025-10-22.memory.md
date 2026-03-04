@@ -355,9 +355,9 @@ Decision to implement comprehensive agentic primitives infrastructure using file
 
 ## References
 
-- **Implementation Plan**: `docs/development/agentic-primitives-implementation-plan.md`
-- **Session Guide**: `docs/development/agentic-primitives-session-guide.md`
-- **Assessment**: `docs/development/agentic-primitives-assessment-2025-10-22.md`
+- **Implementation Plan**: `docs/guides/development/agentic-primitives-implementation-plan.md`
+- **Session Guide**: `docs/guides/development/agentic-primitives-session-guide.md`
+- **Assessment**: `docs/guides/development/agentic-primitives-assessment-2025-10-22.md`
 - **Phase 1 Commits**:
   - `4252ddf66` - Global instructions
   - `af74a02c6` - Testing instructions

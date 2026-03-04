@@ -272,7 +272,7 @@ With write permissions, Gemini CLI can now:
 - **Failed Workflow**: [#18978922410](https://github.com/theinterneti/TTA.dev/actions/runs/18978922410) - ❌ Cancelled
 - **Documentation**: [`docs/gemini-cli-capabilities-analysis.md`](gemini-cli-capabilities-analysis.md)
 - **Documentation**: [`docs/gemini-cli-integration-guide.md`](gemini-cli-integration-guide.md)
-- **Daily Log**: [`docs/daily-logs/2025-10-31-gemini-cli-investigation.md`](daily-logs/2025-10-31-gemini-cli-investigation.md)
+- **Daily Log**: [`docs/_archive/daily-logs/2025-10-31-gemini-cli-investigation.md`](daily-logs/2025-10-31-gemini-cli-investigation.md)
 
 ---
 

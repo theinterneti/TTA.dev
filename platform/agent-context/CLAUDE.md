@@ -160,7 +160,7 @@ Use Sequential Thinking for multi-step procedures:
 - **AGENTS.md** - Universal context for all AI agents
 - **GEMINI.md** - Gemini CLI sub-agent context
 - **.github/copilot-instructions.md** - GitHub Copilot instructions
-- **docs/development/** - Detailed development guides
+- **docs/guides/development/** - Detailed development guides
 - **specs/** - Component and feature specifications
 
 ---

@@ -344,7 +344,7 @@ git checkout -b test/rollback-drill-$(date +%Y-%m-%d)
 ---
 
 **Emergency Hotline**: Create GitHub issue with `P0` + `rollback` labels
-**Runbook Location**: `docs/runbooks/WORKFLOW_ROLLBACK_RUNBOOK.md`
+**Runbook Location**: `docs/guides/runbooks/WORKFLOW_ROLLBACK_RUNBOOK.md`
 
 
 ---

@@ -46,7 +46,7 @@ _archive/
 
 ### 2. ✅ Documentation Reorganized
 
-**Moved to `docs/status-reports/`:**
+**Moved to `docs/_archive/status-reports/`:**
 - MIGRATION_FINAL.md
 - MIGRATION_SUMMARY.md
 - SETUP_TEST_RESULTS.md
@@ -69,7 +69,7 @@ _archive/
 - GITHUB_WORKFLOWS_QUICK_ACTIONS.md
 - RELEASE_QUICK_ACTIONS.md
 
-**Moved to `docs/development/git/`:**
+**Moved to `docs/guides/development/git/`:**
 - GIT_CLEANUP_PLAN.md
 - GIT_MANAGEMENT_SUMMARY.md
 - GIT_QUICKREF.md
@@ -87,7 +87,7 @@ _archive/
 - REPOSITORY_STRUCTURE.md
 - BRANCH_ORGANIZATION_PLAN.md
 
-**Moved to `docs/troubleshooting/`:**
+**Moved to `docs/guides/troubleshooting/`:**
 - GEMINI_AUTH_ISSUE_DIAGNOSIS.md
 - kb-broken-links-analysis.txt
 - kb-real-broken-links.txt

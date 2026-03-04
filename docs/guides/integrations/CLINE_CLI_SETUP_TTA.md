@@ -328,7 +328,7 @@ cline "What coding standards does this project follow?"
 - **Custom Instructions:** `/home/thein/repos/TTA.dev/.cline/instructions.md`
 - **Agent Instructions:** `/home/thein/repos/TTA.dev/AGENTS.md`
 - **Copilot Instructions:** `/home/thein/repos/TTA.dev/.github/copilot-instructions.md`
-- **Cline Integration Guide:** `/home/thein/repos/TTA.dev/docs/integrations/CLINE_INTEGRATION_GUIDE.md`
+- **Cline Integration Guide:** `/home/thein/repos/TTA.dev/docs/guides/integrations/CLINE_INTEGRATION_GUIDE.md`
 - **MCP Servers:** `/home/thein/repos/TTA.dev/MCP_SERVERS.md`
 
 ---

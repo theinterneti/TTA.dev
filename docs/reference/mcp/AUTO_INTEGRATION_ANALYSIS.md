@@ -633,7 +633,7 @@ vscode.window.onDidChangeActiveTextEditor((editor) => {
 - **Hypertool Integration:** `.hypertool/IMPLEMENTATION_COMPLETE_SUMMARY.md`
 - **MCP Servers:** `MCP_SERVERS.md`
 - **Copilot Toolsets:** `docs/guides/copilot-toolsets-guide.md`
-- **Cline Integration:** `docs/integrations/CLINE_CONTEXT_INTEGRATION_GUIDE.md`
+- **Cline Integration:** `docs/guides/integrations/CLINE_CONTEXT_INTEGRATION_GUIDE.md`
 - **Agent Instructions:** `AGENTS.md`
 
 ---

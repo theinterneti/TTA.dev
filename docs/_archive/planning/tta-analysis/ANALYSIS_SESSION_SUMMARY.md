@@ -67,7 +67,7 @@ Created `analyze_package.py` tool using Python AST to extract:
 - `tta-narrative-engine-structure.json` - Detailed structure (11KB)
 - `universal-agent-context-structure.json` - Detailed structure (3.8KB)
 
-**Transferred to TTA.dev (`~/repos/TTA.dev/docs/planning/tta-analysis/`):**
+**Transferred to TTA.dev (`~/repos/TTA.dev/docs/_archive/planning/tta-analysis/`):**
 - All 5 analysis files (148KB total)
 - `INITIAL_ANALYSIS.md` - Comprehensive findings and recommendations
 - `ANALYSIS_SESSION_SUMMARY.md` - This file
@@ -447,7 +447,7 @@ python3 ../scripts/analyze_package.py tta-ai-framework
 │   └── analyze_package.py                 ✅
 └── workspace/                              # For future prototyping
 
-~/repos/TTA.dev/docs/planning/tta-analysis/
+~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 ├── package-statistics.md                  ✅ (copied)
 ├── class-list.txt                         ✅ (copied)
 ├── tta-ai-framework-structure.json        ✅ (copied)

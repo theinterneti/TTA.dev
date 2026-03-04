@@ -444,8 +444,8 @@ Document the `copilot` environment feature for future use:
 - **Main Hub:** `AGENTS.md`
 - **MCP Tools:** `MCP_SERVERS.md`
 - **Toolsets:** `docs/guides/copilot-toolsets-guide.md`
-- **Testing Guide:** `docs/development/TESTING_COPILOT_SETUP.md`
-- **Optimization Guide:** `docs/development/COPILOT_ENVIRONMENT_OPTIMIZATION.md`
+- **Testing Guide:** `docs/guides/development/TESTING_COPILOT_SETUP.md`
+- **Optimization Guide:** `docs/guides/development/COPILOT_ENVIRONMENT_OPTIMIZATION.md`
 
 ---
 

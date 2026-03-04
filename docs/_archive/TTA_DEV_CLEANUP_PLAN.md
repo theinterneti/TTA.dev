@@ -74,7 +74,7 @@ platform/*/docs/              176KB (11 files)
    rm -rf _archive/status-reports-docs   # 104KB
    rm -rf _archive/reports               # 580KB
    ```
-   **Rationale:** Redundant with docs/status-reports/
+   **Rationale:** Redundant with docs/_archive/status-reports/
 
 5. **Remove planning duplicates (352KB)**
    ```bash
@@ -275,7 +275,7 @@ echo
 |--------|--------|-------|-------------|
 | **Total Size** | 2.3GB | ~2GB | -300MB (13%) |
 | **_archive/** | 295MB | <5MB | -290MB (98%) |
-| **docs/status-reports/** | 708KB | ~200KB | -500KB (70%) |
+| **docs/_archive/status-reports/** | 708KB | ~200KB | -500KB (70%) |
 | **Structure Clarity** | Low | High | Normalized |
 
 ---

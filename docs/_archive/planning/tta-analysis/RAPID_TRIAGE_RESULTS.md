@@ -358,7 +358,7 @@ def _assess_immediate_risk(validation_result, level) -> bool
 - `rapid-triage-results.json` - Complete triage data (44 flagged classes)
 - `RAPID_TRIAGE_RESULTS.md` - This report
 
-**Location:** `~/sandbox/tta-audit/analysis/` and `~/repos/TTA.dev/docs/planning/tta-analysis/`
+**Location:** `~/sandbox/tta-audit/analysis/` and `~/repos/TTA.dev/docs/_archive/planning/tta-analysis/`
 
 ---
 

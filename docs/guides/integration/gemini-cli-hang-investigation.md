@@ -261,8 +261,8 @@ Update this document with:
 - **Issue #61**: ✅ Gemini CLI GitHub Actions Integration - Success Report
 - **PR #62**: Performance optimizations (merged)
 - **Workflow Run #18953391176**: Baseline (cancelled after 90+ minutes)
-- **Documentation**: `docs/integration/gemini-cli-github-actions.md`
-- **Documentation**: `docs/integration/gemini-cli-performance-investigation.md`
+- **Documentation**: `docs/guides/integration/gemini-cli-github-actions.md`
+- **Documentation**: `docs/guides/integration/gemini-cli-performance-investigation.md`
 
 ### External Resources
 

@@ -355,7 +355,7 @@ cline "List all files in platform/primitives/src/"
 - `#tta-cline` Copilot toolset
 - `.vscode/commands/cline-handoff.ts` (if needed)
 - Updated AGENTS.md with collaboration guide
-- Example workflows in docs/integrations/
+- Example workflows in docs/guides/integrations/
 
 **Example Toolset:**
 ```jsonc
@@ -438,7 +438,7 @@ jobs:
 **Goal:** Optimize collaboration patterns for TTA.dev
 
 **Tasks:**
-1. ✅ Create workflow templates in `docs/integrations/cline-workflows/`
+1. ✅ Create workflow templates in `docs/guides/integrations/cline-workflows/`
 2. ✅ Add Cline to Logseq TODO system
 3. ✅ Integrate with observability dashboard
 4. ✅ Create custom MCP server for TTA.dev primitives

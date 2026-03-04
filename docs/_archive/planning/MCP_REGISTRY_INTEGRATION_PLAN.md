@@ -407,7 +407,7 @@ Create a workflow that processes user signups:
 ### TTA.dev Resources
 
 - **Primitives Documentation:** `PRIMITIVES_CATALOG.md`
-- **Agent HQ Guide:** `docs/integration/github-agent-hq.md`
+- **Agent HQ Guide:** `docs/guides/integration/github-agent-hq.md`
 - **Current MCP Integrations:** `MCP_SERVERS.md`
 
 ### Examples to Study

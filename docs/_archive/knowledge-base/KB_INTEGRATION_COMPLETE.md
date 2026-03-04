@@ -14,7 +14,7 @@
 
 #### 1.1 Knowledge Base Hub Created ✅
 
-**File:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md)
+**File:** [`docs/_archive/knowledge-base/README.md`](docs/_archive/knowledge-base/README.md)
 
 **Features:**
 - **User-type navigation** - AI agents, developers, writers get different entry points
@@ -58,7 +58,7 @@ README.md → Learning Paths + Architecture + Examples
 
 **For Documentation Writers:**
 ```
-docs/knowledge-base/README.md → Standards + Templates + Cross-refs
+docs/_archive/knowledge-base/README.md → Standards + Templates + Cross-refs
 ```
 
 #### 2.2 Context-Aware Integration ✅
@@ -87,7 +87,7 @@ docs/knowledge-base/README.md → Standards + Templates + Cross-refs
 **Structured Learning:** Logseq learning paths discoverable from docs
 - `GETTING_STARTED.md` → Learning paths and flashcards
 - `README.md` → Interactive learning systems
-- `docs/knowledge-base/README.md` → Complete learning integration
+- `docs/_archive/knowledge-base/README.md` → Complete learning integration
 
 #### 3.3 Primitive Documentation Sync ✅
 
@@ -194,7 +194,7 @@ docs/knowledge-base/README.md → Standards + Templates + Cross-refs
 ```text
 1. Agent reads AGENTS.md
 2. Finds "Knowledge Base Hub" reference at top
-3. Navigates to docs/knowledge-base/README.md
+3. Navigates to docs/_archive/knowledge-base/README.md
 4. Gets user-type specific entry point
 5. Accesses both documentation and KB seamlessly
 ```
@@ -222,8 +222,8 @@ Knowledge Base: "📚 API Reference: See PRIMITIVES_CATALOG.md for complete API 
 
 ### Files Created ✅
 
-1. **`docs/knowledge-base/README.md`** - Main hub for KB integration (270 lines)
-2. **`docs/knowledge-base/INTEGRATION_PLAN.md`** - Technical implementation plan
+1. **`docs/_archive/knowledge-base/README.md`** - Main hub for KB integration (270 lines)
+2. **`docs/_archive/knowledge-base/INTEGRATION_PLAN.md`** - Technical implementation plan
 
 ### Files Updated ✅
 

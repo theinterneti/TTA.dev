@@ -48,9 +48,9 @@ python3 scripts/agent_oversight.py reject <id>   # Reject with reason
 
 #### 4. **Documentation**
 
-- 📖 **Full Guide:** `docs/development/MULTI_AGENT_OVERSIGHT.md`
-- ⚡ **Quick Reference:** `docs/development/AGENT_OVERSIGHT_QUICKREF.md`
-- 📋 **This Summary:** `docs/development/AGENT_OVERSIGHT_SETUP_COMPLETE.md`
+- 📖 **Full Guide:** `docs/guides/development/MULTI_AGENT_OVERSIGHT.md`
+- ⚡ **Quick Reference:** `docs/guides/development/AGENT_OVERSIGHT_QUICKREF.md`
+- 📋 **This Summary:** `docs/guides/development/AGENT_OVERSIGHT_SETUP_COMPLETE.md`
 
 ---
 
@@ -479,10 +479,10 @@ jq '.[-10:]' /home/thein/repos/TTA.dev-copilot/.agent-reviews.json
 ## 🔗 Quick Links
 
 ### Documentation
-- **Full Guide:** `docs/development/MULTI_AGENT_OVERSIGHT.md`
-- **Quick Reference:** `docs/development/AGENT_OVERSIGHT_QUICKREF.md`
+- **Full Guide:** `docs/guides/development/MULTI_AGENT_OVERSIGHT.md`
+- **Quick Reference:** `docs/guides/development/AGENT_OVERSIGHT_QUICKREF.md`
 - **Copilot Instructions:** `.github/copilot-instructions.md`
-- **Coding Standards:** `docs/development/CodingStandards.md`
+- **Coding Standards:** `docs/guides/development/CodingStandards.md`
 
 ### Scripts
 - **Review CLI:** `scripts/agent_oversight.py`
@@ -549,7 +549,7 @@ rm TEST.md
 
 **Need Help?**
 - Check troubleshooting section above
-- Review full docs: `docs/development/MULTI_AGENT_OVERSIGHT.md`
+- Review full docs: `docs/guides/development/MULTI_AGENT_OVERSIGHT.md`
 - Run: `python3 scripts/agent_oversight.py --help`
 
 

@@ -2,7 +2,7 @@
 
 **Date:** November 8, 2025
 **Status:** ✅ COMPLETE
-**Location:** `docs/planning/tta-analysis/specs/GAME_SYSTEM_ARCHITECTURE_SPEC.md`
+**Location:** `docs/_archive/planning/tta-analysis/specs/GAME_SYSTEM_ARCHITECTURE_SPEC.md`
 
 ---
 

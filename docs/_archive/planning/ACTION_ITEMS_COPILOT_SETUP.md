@@ -15,7 +15,7 @@
 - **Usage:** `./scripts/check-environment.sh --quick` or full check
 
 ### 3. Documentation Created ✓
-- `docs/development/TESTING_COPILOT_SETUP.md` - Testing guide
+- `docs/guides/development/TESTING_COPILOT_SETUP.md` - Testing guide
 - `MERGE_CHECKLIST_COPILOT_SETUP.md` - Pre-merge checklist
 - `COPILOT_SETUP_TESTING_SUMMARY.md` - Overall summary
 
@@ -63,7 +63,7 @@
 
 **If Failure:**
 - ❌ Check error logs
-- ❌ See troubleshooting in `docs/development/TESTING_COPILOT_SETUP.md`
+- ❌ See troubleshooting in `docs/guides/development/TESTING_COPILOT_SETUP.md`
 - ❌ Fix and re-trigger
 
 #### 2. Test Cache Performance ⚡
@@ -213,7 +213,7 @@ git push origin feat/codecov-integration  # Triggers workflow
 
 ### Documentation Links
 
-- **Testing Guide:** `docs/development/TESTING_COPILOT_SETUP.md`
+- **Testing Guide:** `docs/guides/development/TESTING_COPILOT_SETUP.md`
 - **Merge Checklist:** `MERGE_CHECKLIST_COPILOT_SETUP.md`
 - **Summary:** `COPILOT_SETUP_TESTING_SUMMARY.md`
 - **Strategy:** `docs/architecture/AGENT_ENVIRONMENT_STRATEGY.md`
@@ -249,7 +249,7 @@ git push origin feat/codecov-integration  # Triggers workflow
 ### Workflow Fails
 **Check:** Logs in Actions tab
 **Common:** Network timeout, dependency conflicts
-**Fix:** See `docs/development/TESTING_COPILOT_SETUP.md`
+**Fix:** See `docs/guides/development/TESTING_COPILOT_SETUP.md`
 
 ### Cache Not Working
 **Check:** "Cache restored" message in logs

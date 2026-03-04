@@ -433,14 +433,14 @@ fastmcp = "^0.1.0"
 
 ### 🎯 Objective
 
-Create a comprehensive documentation hub for all TTA.dev MCP servers in `docs/mcp/`.
+Create a comprehensive documentation hub for all TTA.dev MCP servers in `docs/reference/mcp/`.
 
 ### 📋 Deliverables
 
 **Required Files:**
 
 ```
-docs/mcp/
+docs/reference/mcp/
 ├── README.md                       # Hub landing page
 ├── getting-started.md              # Quick start guide
 ├── installation.md                 # Installation for all servers

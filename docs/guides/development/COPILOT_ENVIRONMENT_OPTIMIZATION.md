@@ -321,7 +321,7 @@ name: "Copilot Setup Steps"
 # Cache: ~/.cache/uv + .venv (~43MB)
 #
 # For more information:
-# - Workflow docs: docs/development/TESTING_COPILOT_SETUP.md
+# - Workflow docs: docs/guides/development/TESTING_COPILOT_SETUP.md
 # - Environment verification: scripts/check-environment.sh
 # - Agent guidance: AGENTS.md
 
@@ -455,7 +455,7 @@ The setup workflow should be referenced in custom instructions:
 If environment issues occur:
 1. Check workflow logs: <workflow-link>
 2. Run verification: `./scripts/check-environment.sh`
-3. See: docs/development/TESTING_COPILOT_SETUP.md
+3. See: docs/guides/development/TESTING_COPILOT_SETUP.md
 ```
 
 ### Path-Specific Instructions
@@ -550,7 +550,7 @@ TTA.dev's current Copilot setup is **already excellent**:
 - **Community Best Practices:** [awesome-copilot](https://github.com/github/awesome-copilot)
 - **TTA.dev Workflow:** `.github/workflows/copilot-setup-steps.yml`
 - **Verification Script:** `scripts/check-environment.sh`
-- **Testing Guide:** `docs/development/TESTING_COPILOT_SETUP.md`
+- **Testing Guide:** `docs/guides/development/TESTING_COPILOT_SETUP.md`
 
 ---
 

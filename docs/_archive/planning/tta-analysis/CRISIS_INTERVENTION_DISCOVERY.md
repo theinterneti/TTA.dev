@@ -172,7 +172,7 @@
 - ✅ `rapid-triage-results.json` - Raw triage data
 
 **Location:**
-- TTA.dev: `docs/planning/tta-analysis/`
+- TTA.dev: `docs/_archive/planning/tta-analysis/`
 - Sandbox: `~/sandbox/tta-audit/analysis/`
 
 **Logseq:**

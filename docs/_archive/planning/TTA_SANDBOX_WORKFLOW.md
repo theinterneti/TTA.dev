@@ -112,7 +112,7 @@ find packages/ai-dev-toolkit -name "*.py" | xargs wc -l
 
 ### Audit Checklist (Reference TTA.dev)
 
-Use: `TTA.dev/docs/planning/TTA_AUDIT_CHECKLIST.md`
+Use: `TTA.dev/docs/_archive/planning/TTA_AUDIT_CHECKLIST.md`
 
 ### Deliverables from Sandbox
 
@@ -143,10 +143,10 @@ Transfer findings from sandbox:
 ```bash
 # Copy analysis reports
 cp ~/sandbox/tta-audit/analysis/*.md \
-   ~/repos/TTA.dev/docs/planning/tta-analysis/
+   ~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 
 # Review findings
-cat docs/planning/tta-analysis/tta-narrative-engine-analysis.md
+cat docs/_archive/planning/tta-analysis/tta-narrative-engine-analysis.md
 ```
 
 ### Create Package Spec
@@ -269,7 +269,7 @@ python analyze_package.py tta-narrative-engine
 **Evening: Update Coordination Hub**
 ```bash
 # Copy results to TTA.dev
-cp analysis/* ~/repos/TTA.dev/docs/planning/tta-analysis/
+cp analysis/* ~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 
 # Update Logseq TODO
 cd ~/repos/TTA.dev
@@ -284,7 +284,7 @@ cd ~/repos/TTA.dev
 
 ```
 TTA.dev/
-├── docs/planning/
+├── docs/_archive/planning/
 │   ├── TTA_REMEDIATION_PLAN.md       ✅ Strategy
 │   ├── TTA_AUDIT_CHECKLIST.md        ✅ Audit guide
 │   ├── TTA_SANDBOX_WORKFLOW.md       ✅ This file
@@ -436,10 +436,10 @@ with open("primitive-mapping.json", "w") as f:
 ```bash
 # Transfer analysis
 cp narrative-engine-structure.json \
-   ~/repos/TTA.dev/docs/planning/tta-analysis/
+   ~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 
 cp primitive-mapping.json \
-   ~/repos/TTA.dev/docs/planning/tta-analysis/
+   ~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 
 # Update coordination hub
 cd ~/repos/TTA.dev

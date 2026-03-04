@@ -36,7 +36,7 @@
 
 ### 2. Move to `docs/`
 
-**Status Reports & Summaries** → `docs/status-reports/`
+**Status Reports & Summaries** → `docs/_archive/status-reports/`
 - `MIGRATION_FINAL.md`, `MIGRATION_SUMMARY.md`
 - `SETUP_TEST_RESULTS.md`, `VALIDATION_RESULTS.md`
 - `WORKFLOW_REBASE_COMPLETE.md`
@@ -53,7 +53,7 @@
 - `LAZY_DEV_QUICKREF.md`
 - `ZSH_QUICK_START_CARD.md`
 
-**Git/Worktree Docs** → `docs/development/git/`
+**Git/Worktree Docs** → `docs/guides/development/git/`
 - `GIT_CLEANUP_PLAN.md`
 - `GIT_MANAGEMENT_SUMMARY.md`
 - `GIT_QUICKREF.md`
@@ -73,7 +73,7 @@
 - `REPOSITORY_STRUCTURE.md`
 - `BRANCH_ORGANIZATION_PLAN.md`
 
-**Troubleshooting** → `docs/troubleshooting/`
+**Troubleshooting** → `docs/guides/troubleshooting/`
 - `GEMINI_AUTH_ISSUE_DIAGNOSIS.md`
 - `kb-broken-links-analysis.txt`
 - `kb-real-broken-links.txt`

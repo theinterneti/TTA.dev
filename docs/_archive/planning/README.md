@@ -281,7 +281,7 @@ Extract TTA's therapeutic narrative primitives (5,612 lines) into a new `tta-nar
 
 ## Files Created
 
-All files in: `docs/planning/`
+All files in: `docs/_archive/planning/`
 
 1. `TTA_SESSION_SUMMARY.md` - This session's work
 2. `TTA_REMEDIATION_SUMMARY.md` - Executive summary

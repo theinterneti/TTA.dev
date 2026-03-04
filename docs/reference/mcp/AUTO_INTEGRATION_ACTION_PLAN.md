@@ -28,7 +28,7 @@
 - [ ] Test: Fresh clone → MCP servers auto-start
 - [ ] Commit changes
 
-**Guide:** `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 1)
+**Guide:** `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 1)
 
 ---
 
@@ -40,7 +40,7 @@
 - [ ] Test: `#tta-package-dev` → `tta-backend-engineer` activated
 - [ ] Commit changes
 
-**Guide:** `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 2)
+**Guide:** `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 2)
 
 ---
 
@@ -52,7 +52,7 @@
 - [ ] Test: Cline suggests primitives automatically
 - [ ] Commit changes
 
-**Guide:** `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 3)
+**Guide:** `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 3)
 
 ---
 
@@ -64,7 +64,7 @@
 - [ ] Test 4: Rollback procedure
 - [ ] Document any issues found
 
-**Guide:** `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Testing section)
+**Guide:** `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Testing section)
 
 ---
 
@@ -85,7 +85,7 @@
 4. `.vscode/scripts/setup-auto-integration.py` - Setup verification
 5. Enhanced `.cline/mcp-server/tta_recommendations.py` - Add get_tta_context()
 
-**All templates available in:** `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md`
+**All templates available in:** `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md`
 
 ---
 
@@ -216,9 +216,9 @@ Add to today's journal (`logseq/journals/2025_11_17.md`):
   - [ ] Step 5: Documentation (30 min)
 
   Docs:
-  - [[docs/mcp/AUTO_INTEGRATION_ANALYSIS.md]]
-  - [[docs/mcp/AUTO_INTEGRATION_QUICKSTART.md]]
-  - [[docs/mcp/AUTO_INTEGRATION_SUMMARY.md]]
+  - [[docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md]]
+  - [[docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md]]
+  - [[docs/reference/mcp/AUTO_INTEGRATION_SUMMARY.md]]
 ```
 
 ---
@@ -226,16 +226,16 @@ Add to today's journal (`logseq/journals/2025_11_17.md`):
 ## 🔗 Quick Links
 
 **Documentation:**
-- Analysis: `docs/mcp/AUTO_INTEGRATION_ANALYSIS.md`
-- Implementation Guide: `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md`
-- Summary: `docs/mcp/AUTO_INTEGRATION_SUMMARY.md`
-- This Action Plan: `docs/mcp/AUTO_INTEGRATION_ACTION_PLAN.md`
+- Analysis: `docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md`
+- Implementation Guide: `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md`
+- Summary: `docs/reference/mcp/AUTO_INTEGRATION_SUMMARY.md`
+- This Action Plan: `docs/reference/mcp/AUTO_INTEGRATION_ACTION_PLAN.md`
 
 **Existing Infrastructure:**
 - Hypertool: `.hypertool/IMPLEMENTATION_COMPLETE_SUMMARY.md`
 - MCP Servers: `MCP_SERVERS.md`
 - Copilot Toolsets: `docs/guides/copilot-toolsets-guide.md`
-- Cline Integration: `docs/integrations/CLINE_CONTEXT_INTEGRATION_GUIDE.md`
+- Cline Integration: `docs/guides/integrations/CLINE_CONTEXT_INTEGRATION_GUIDE.md`
 
 ---
 

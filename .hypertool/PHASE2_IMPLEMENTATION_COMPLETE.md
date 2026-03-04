@@ -203,9 +203,9 @@ tta-persona
 
 ### Related Documentation
 - Phase 1: `.hypertool/PHASE1_IMPLEMENTATION_COMPLETE.md`
-- Quick Start: `docs/mcp/HYPERTOOL_QUICKSTART.md`
-- Strategic Plan: `docs/mcp/HYPERTOOL_STRATEGIC_INTEGRATION.md`
-- Master Index: `docs/mcp/HYPERTOOL_INDEX.md`
+- Quick Start: `docs/reference/mcp/HYPERTOOL_QUICKSTART.md`
+- Strategic Plan: `docs/reference/mcp/HYPERTOOL_STRATEGIC_INTEGRATION.md`
+- Master Index: `docs/reference/mcp/HYPERTOOL_INDEX.md`
 
 ---
 
@@ -310,7 +310,7 @@ When you restart, watch for:
 **Questions?** See:
 - Switching Guide: `.hypertool/PERSONA_SWITCHING.md`
 - Phase 1 Summary: `.hypertool/PHASE1_IMPLEMENTATION_COMPLETE.md`
-- Master Index: `docs/mcp/HYPERTOOL_INDEX.md`
+- Master Index: `docs/reference/mcp/HYPERTOOL_INDEX.md`
 
 
 ---

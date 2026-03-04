@@ -21,7 +21,7 @@
 
 ```bash
 # Status reports & completion summaries
-docs/status-reports/
+docs/_archive/status-reports/
 
 # User guides & tutorials
 docs/guides/
@@ -33,10 +33,10 @@ docs/guides/quick-actions/
 docs/architecture/
 
 # Git & worktree documentation
-docs/development/git/
+docs/guides/development/git/
 
 # Problem-solving guides
-docs/troubleshooting/
+docs/guides/troubleshooting/
 
 # Workspace configuration files
 .vscode/workspaces/
@@ -139,7 +139,7 @@ When creating new documentation:
 Full details in:
 - **Organization Guide**: `docs/WORKSPACE_ORGANIZATION.md`
 - **Cleanup Plan**: `WORKSPACE_CLEANUP_PLAN.md`
-- **Completion Report**: `docs/status-reports/WORKSPACE_CLEANUP_COMPLETE.md`
+- **Completion Report**: `docs/_archive/status-reports/WORKSPACE_CLEANUP_COMPLETE.md`
 
 ## 🤖 For AI Agents
 
@@ -155,12 +155,12 @@ When working on TTA.dev:
 
 | "I have a..." | "Put it in..." |
 |--------------|----------------|
-| New status report | `docs/status-reports/` |
+| New status report | `docs/_archive/status-reports/` |
 | User guide | `docs/guides/` |
 | Quick reference | `docs/guides/quick-actions/` |
 | Architecture doc | `docs/architecture/` |
-| Git workflow doc | `docs/development/git/` |
-| Debugging guide | `docs/troubleshooting/` |
+| Git workflow doc | `docs/guides/development/git/` |
+| Debugging guide | `docs/guides/troubleshooting/` |
 | Workspace config | `.vscode/workspaces/` |
 | Old migration doc | `_archive/historical/` |
 | Test output | Delete or add to `.gitignore` |

@@ -97,7 +97,7 @@
 - **Before:** 22 local branches with 7 stale/merged
 - **After:** 15 clean branches with clear purpose
 - **Deleted:** `gemini-cli-integration`, `kb-automation-phase2`, etc.
-- **Documentation:** [`docs/development/BRANCH_CLEANUP_PLAN.md`](docs/development/BRANCH_CLEANUP_PLAN.md)
+- **Documentation:** [`docs/guides/development/BRANCH_CLEANUP_PLAN.md`](docs/guides/development/BRANCH_CLEANUP_PLAN.md)
 
 #### Git Workflow Optimization
 - **Branch Naming Standards:** `feature/`, `fix/`, `docs/`, `refactor/`
@@ -107,7 +107,7 @@
 ### 3. Intelligent Knowledge Base Integration ✅
 
 #### Knowledge Base Hub Creation
-**File:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md)
+**File:** [`docs/_archive/knowledge-base/README.md`](docs/_archive/knowledge-base/README.md)
 
 **Features:**
 - **User-Type Navigation** - AI agents, developers, writers get custom entry points
@@ -172,7 +172,7 @@ Access: Progressive depth with structured onboarding
 
 #### 📝 Documentation Writers
 ```text
-Entry: docs/knowledge-base/README.md → Standards + Templates
+Entry: docs/_archive/knowledge-base/README.md → Standards + Templates
 Access: Rich tooling with cross-reference power
 ```
 
@@ -265,11 +265,11 @@ Access: Rich tooling with cross-reference power
 ## 📁 File Statistics
 
 ### Created Files (New)
-- `docs/knowledge-base/README.md` - **Main KB hub** (270 lines)
-- `docs/knowledge-base/INTEGRATION_PLAN.md` - Technical implementation
-- `docs/knowledge-base/KB_INTEGRATION_COMPLETE.md` - This status report
+- `docs/_archive/knowledge-base/README.md` - **Main KB hub** (270 lines)
+- `docs/_archive/knowledge-base/INTEGRATION_PLAN.md` - Technical implementation
+- `docs/_archive/knowledge-base/KB_INTEGRATION_COMPLETE.md` - This status report
 - `docs/README.md` - Documentation navigation guide
-- `docs/development/BRANCH_CLEANUP_PLAN.md` - Branch management guide
+- `docs/guides/development/BRANCH_CLEANUP_PLAN.md` - Branch management guide
 - `archive/packages-under-review/PACKAGE_DECISION.md` - Package archival rationale
 - `REPOSITORY_STRUCTURE.md` - High-level organization guide
 
@@ -281,7 +281,7 @@ Access: Rich tooling with cross-reference power
 
 ### Archived Files (Organized)
 - **68 root files** → `archive/status-reports-2025/`
-- **44 docs files** → `docs/status-reports/` (categorized)
+- **44 docs files** → `docs/_archive/status-reports/` (categorized)
 - **3 packages** → `archive/packages-under-review/`
 
 ---
@@ -306,7 +306,7 @@ Access: Rich tooling with cross-reference power
 
 **AI Agent Discovery:**
 1. Agent reads `AGENTS.md` → Finds KB hub reference at top
-2. Navigates to `docs/knowledge-base/README.md` → Gets user-type entry point
+2. Navigates to `docs/_archive/knowledge-base/README.md` → Gets user-type entry point
 3. Accesses both documentation and KB seamlessly → Success
 
 **Developer Onboarding:**
@@ -315,7 +315,7 @@ Access: Rich tooling with cross-reference power
 3. Uses TODO system for contribution → Active participation
 
 **Writer Workflow:**
-1. Writer accesses `docs/knowledge-base/README.md` → Gets standards
+1. Writer accesses `docs/_archive/knowledge-base/README.md` → Gets standards
 2. Uses templates and cross-reference patterns → Efficient creation
 3. Maintains integration health → Long-term sustainability
 

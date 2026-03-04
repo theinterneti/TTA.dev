@@ -606,7 +606,7 @@ def main():
         print("2. Ask Cline to implement something (auto-loads TTA.dev context)")
         print()
     else:
-        print("⚠️  Some components need setup. See docs/mcp/AUTO_INTEGRATION_QUICKSTART.md")
+        print("⚠️  Some components need setup. See docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md")
         print()
 
 

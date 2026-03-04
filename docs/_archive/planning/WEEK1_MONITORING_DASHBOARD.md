@@ -270,7 +270,7 @@ gh run view <run-id> --log | grep -i cache
 
 ## Resources
 
-- **Full Guide:** `docs/development/COPILOT_ENVIRONMENT_OPTIMIZATION.md`
+- **Full Guide:** `docs/guides/development/COPILOT_ENVIRONMENT_OPTIMIZATION.md`
 - **Deployment Summary:** `PHASE1_DEPLOYED.md`
 - **Quick Reference:** `COPILOT_OPTIMIZATION_QUICKREF.md`
 - **Enhancement Script:** `scripts/enhance-copilot-workflow.sh`

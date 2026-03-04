@@ -56,7 +56,7 @@ Create a **Knowledge Base Hub** that intelligently routes between systems:
 #### 1.1 Create Knowledge Navigation Guide
 
 ```markdown
-# docs/knowledge-base/README.md
+# docs/_archive/knowledge-base/README.md
 - Maps documentation → Logseq relationships
 - Provides entry points for different user types
 - Explains when to use which system
@@ -100,7 +100,7 @@ Entry Point: README.md
 
 **For Documentation Writers:**
 ```
-Entry Point: docs/knowledge-base/README.md
+Entry Point: docs/_archive/knowledge-base/README.md
 ├── Standards → logseq/pages/TTA.dev/Guides/Logseq Documentation Standards
 ├── Templates → logseq/pages/TODO Templates.md
 └── Cross-refs → Live reference system
@@ -209,7 +209,7 @@ Cross-reference pattern:
 
 ### Task 1: Create Knowledge Base Hub
 ```markdown
-# File: docs/knowledge-base/README.md
+# File: docs/_archive/knowledge-base/README.md
 - Navigation guide between systems
 - User-type specific entry points
 - Integration patterns and examples

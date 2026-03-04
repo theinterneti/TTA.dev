@@ -270,9 +270,9 @@ sudo systemctl restart alloy
 
 ### Quick Start Guides
 
-- **5-Minute Setup:** `docs/quickstart/OBSERVABILITY_UNIFIED_QUICKSTART.md`
-- **Verification:** `docs/quickstart/VERIFY_GRAFANA_CLOUD.md`
-- **Test Results:** `docs/quickstart/OBSERVABILITY_TEST_RESULTS.md`
+- **5-Minute Setup:** `docs/guides/quickstart/OBSERVABILITY_UNIFIED_QUICKSTART.md`
+- **Verification:** `docs/guides/quickstart/VERIFY_GRAFANA_CLOUD.md`
+- **Test Results:** `docs/guides/quickstart/OBSERVABILITY_TEST_RESULTS.md`
 
 ### Comprehensive Guides
 

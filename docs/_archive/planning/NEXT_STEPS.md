@@ -22,7 +22,7 @@ The CI pipeline should now be running with Phase 1 enhancements. Check status at
 ```bash
 # Check the workflow logs in GitHub Actions
 # Common issues and fixes are documented in:
-cat docs/development/WORKFLOW_IMPLEMENTATION_GUIDE.md
+cat docs/guides/development/WORKFLOW_IMPLEMENTATION_GUIDE.md
 ```
 
 ### 2. Record Keploy API Tests 🎬 NEXT
@@ -252,8 +252,8 @@ All tasks available via `Ctrl+Shift+P -> Tasks: Run Task`:
 
 ## 📚 Documentation
 
-- **Proposal**: `docs/development/WORKFLOW_ENHANCEMENT_PROPOSAL.md`
-- **Implementation Guide**: `docs/development/WORKFLOW_IMPLEMENTATION_GUIDE.md`
+- **Proposal**: `docs/guides/development/WORKFLOW_ENHANCEMENT_PROPOSAL.md`
+- **Implementation Guide**: `docs/guides/development/WORKFLOW_IMPLEMENTATION_GUIDE.md`
 - **Executive Summary**: `WORKFLOW_REVIEW_SUMMARY.md`
 - **Build Summary**: `IMPLEMENTATION_SUMMARY.md`
 

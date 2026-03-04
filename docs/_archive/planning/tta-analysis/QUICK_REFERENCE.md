@@ -112,7 +112,7 @@
 ### In TTA.dev
 
 ```
-~/repos/TTA.dev/docs/planning/tta-analysis/
+~/repos/TTA.dev/docs/_archive/planning/tta-analysis/
 ├── INITIAL_ANALYSIS.md                    ✅ Complete findings
 ├── ANALYSIS_SESSION_SUMMARY.md            ✅ Session summary
 ├── DECISION_REQUIRED.md                   ✅ Decision guide
@@ -204,8 +204,8 @@ Reply with one of:
 - JSON files - Detailed structure data
 
 **For context:**
-- `~/repos/TTA.dev/docs/planning/TTA_REMEDIATION_PLAN.md` - Original plan
-- `~/repos/TTA.dev/docs/planning/TTA_SANDBOX_WORKFLOW.md` - Workflow guide
+- `~/repos/TTA.dev/docs/_archive/planning/TTA_REMEDIATION_PLAN.md` - Original plan
+- `~/repos/TTA.dev/docs/_archive/planning/TTA_SANDBOX_WORKFLOW.md` - Workflow guide
 
 ---
 

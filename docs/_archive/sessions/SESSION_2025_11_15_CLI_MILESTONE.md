@@ -26,7 +26,7 @@
 - CachePrimitive initialization (now uses cache_key_fn)
 
 **Documentation Created:**
-- `docs/quickstart/OBSERVABILITY_TEST_RESULTS.md` (600+ lines)
+- `docs/guides/quickstart/OBSERVABILITY_TEST_RESULTS.md` (600+ lines)
 - `docs/OBSERVABILITY_SETUP_COMPLETE.md` (500+ lines)
 - 9 additional guides and references
 
@@ -73,7 +73,7 @@ Layer 3: AI-Native Development (VS Code + agents)
 3. `tta-dev status` - System health check
 
 **Implementation Plan Created:**
-- `docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md` (450+ lines)
+- `docs/_archive/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md` (450+ lines)
 - 2-week timeline with daily breakdown
 - TypeScript + Node.js + commander framework
 - Detection logic (project type, agents, packages)
@@ -85,7 +85,7 @@ Layer 3: AI-Native Development (VS Code + agents)
 ### 4. GitHub Project Structure Prepared ✅
 
 **Created for next session:**
-- `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md` (complete issue templates)
+- `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md` (complete issue templates)
 - 7 implementation issues with acceptance criteria
 - Milestone definition (November 15-29, 2025)
 - 2-week timeline breakdown
@@ -246,9 +246,9 @@ Implements the `tta-dev` CLI tool for intelligent VS Code setup automation.
 **Milestone:** tta-dev CLI MVP - Intelligent VS Code Setup
 
 **Related Documents:**
-- Implementation plan: `docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md`
+- Implementation plan: `docs/_archive/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md`
 - Architecture: `docs/architecture/APPLICATION_DEPLOYMENT_ARCHITECTURE.md`
-- GitHub issues: `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
+- GitHub issues: `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
 
 **Checklist:**
 - [ ] Issue #1: Package structure
@@ -274,7 +274,7 @@ Implements the `tta-dev` CLI tool for intelligent VS Code setup automation.
    ```
 
 2. **Create GitHub Issues:**
-   - Use templates from `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
+   - Use templates from `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
    - Link each issue to milestone
    - Assign priority labels
    - Add estimates
@@ -288,7 +288,7 @@ Implements the `tta-dev` CLI tool for intelligent VS Code setup automation.
    ```bash
    gh pr create --draft \
      --title "[WIP] tta-dev CLI MVP - Intelligent VS Code Setup" \
-     --body "See docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md"
+     --body "See docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md"
    ```
 
 ### Week 1 Implementation (Days 1-7)

@@ -166,7 +166,7 @@ Before opening a pull request:
 - **Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](../PRIMITIVES_CATALOG.md)
 - **Agent Instructions:** [`AGENTS.md`](../AGENTS.md)
 - **Prompt Templates:** [`.vscode/tta-prompts.md`](../.vscode/tta-prompts.md)
-- **Coding Standards:** [`docs/development/CodingStandards.md`](../docs/development/CodingStandards.md)
+- **Coding Standards:** [`docs/guides/development/CodingStandards.md`](../docs/guides/development/CodingStandards.md)
 - **Testing Guide:** [`packages/tta-dev-primitives/AGENTS.md#testing`](../packages/tta-dev-primitives/AGENTS.md)
 
 ---

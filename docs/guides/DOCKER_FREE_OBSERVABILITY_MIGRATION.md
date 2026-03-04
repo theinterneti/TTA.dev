@@ -303,7 +303,7 @@ docker-compose -f docker-compose.integration.yml up -d
 ### Related Documentation
 
 - [Observability Architecture](docs/architecture/OBSERVABILITY_ARCHITECTURE.md)
-- [Observability Integration](docs/integration/observability-integration.md)
+- [Observability Integration](docs/guides/integration/observability-integration.md)
 - [MCP Servers Guide](MCP_SERVERS.md) - Grafana MCP tools
 - [Infrastructure Guide](logseq/pages/Infrastructure.md)
 

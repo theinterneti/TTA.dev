@@ -347,7 +347,7 @@ async def test_my_workflow():
 
 **Interactive Learning:** [`Learning TTA Primitives`](logseq/pages/Learning%20TTA%20Primitives.md) - Flashcards and exercises for mastering concepts
 
-**Knowledge Base:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - Navigate between documentation and knowledge systems
+**Knowledge Base:** [`docs/_archive/knowledge-base/README.md`](docs/_archive/knowledge-base/README.md) - Navigate between documentation and knowledge systems
 
 ### 📋 Task Management
 
@@ -358,7 +358,7 @@ Add tasks to today's journal: `logseq/journals/YYYY_MM_DD.md`
 ### Learn More
 
 - 📚 [Architecture Overview](docs/architecture/Overview.md) - Understand the design
-- 🎯 [Coding Standards](docs/development/CodingStandards.md) - Best practices
+- 🎯 [Coding Standards](docs/guides/development/CodingStandards.md) - Best practices
 - 🔧 [MCP Integration](MCP_SERVERS.md) - Model Context Protocol
 - 📦 [Package README](platform/primitives/README.md) - Detailed docs
 
@@ -482,7 +482,7 @@ Understand what's happening:
 ## Contributing
 
 Interested in contributing? Check out:
-- [Coding Standards](docs/development/CodingStandards.md)
+- [Coding Standards](docs/guides/development/CodingStandards.md)
 - [Architecture Overview](docs/architecture/Overview.md)
 - Existing examples and tests
 

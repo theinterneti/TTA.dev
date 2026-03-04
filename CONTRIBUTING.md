@@ -11,7 +11,7 @@ If you're looking for a place to start, you can check out the [open issues](http
 - **[Agent Instructions](AGENTS.md)** - Comprehensive guidance for AI agents
 - **[GitHub Copilot Instructions](.github/copilot-instructions.md)** - Best practices and requirements for Copilot users
 - **[Getting Started Guide](GETTING_STARTED.md)** - Development environment setup
-- **[Coding Standards](docs/development/CodingStandards.md)** - Code quality standards
+- **[Coding Standards](docs/guides/development/CodingStandards.md)** - Code quality standards
 
 ## How to Contribute
 

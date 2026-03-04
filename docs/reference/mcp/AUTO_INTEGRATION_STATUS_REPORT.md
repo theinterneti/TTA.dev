@@ -84,7 +84,7 @@ bash scripts/mcp/setup_auto_integration.sh
 
 ### Documentation (2 files)
 
-#### 1. `docs/mcp/AUTO_INTEGRATION_IMPLEMENTATION.md`
+#### 1. `docs/reference/mcp/AUTO_INTEGRATION_IMPLEMENTATION.md`
 Complete implementation guide with:
 - Architecture diagrams (before/after)
 - Component descriptions
@@ -95,7 +95,7 @@ Complete implementation guide with:
 - Troubleshooting guide
 - Next steps
 
-#### 2. `docs/mcp/AUTO_INTEGRATION_QUICKREF.md`
+#### 2. `docs/reference/mcp/AUTO_INTEGRATION_QUICKREF.md`
 One-page quick reference with:
 - Quick start commands
 - Files created summary
@@ -394,10 +394,10 @@ This documentation package also includes analyses of alternative approaches:
 
 ### Approach 1: Hypertool Orchestration (Previous Analysis)
 **Files:**
-- `docs/mcp/AUTO_INTEGRATION_ANALYSIS.md` - Gap analysis
-- `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` - Implementation steps
-- `docs/mcp/AUTO_INTEGRATION_ARCHITECTURE.md` - Architecture diagrams
-- `docs/mcp/AUTO_INTEGRATION_ACTION_PLAN.md` - Timeline
+- `docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md` - Gap analysis
+- `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` - Implementation steps
+- `docs/reference/mcp/AUTO_INTEGRATION_ARCHITECTURE.md` - Architecture diagrams
+- `docs/reference/mcp/AUTO_INTEGRATION_ACTION_PLAN.md` - Timeline
 
 **Approach:** Use Hypertool MCP server for orchestration
 **Status:** Analyzed but not implemented
@@ -408,7 +408,7 @@ This documentation package also includes analyses of alternative approaches:
 - `scripts/mcp/config_parser.py` - Implementation
 - `scripts/mcp/persona_activator.py` - Implementation
 - `scripts/mcp/setup_auto_integration.sh` - Implementation
-- `docs/mcp/AUTO_INTEGRATION_IMPLEMENTATION.md` - Documentation
+- `docs/reference/mcp/AUTO_INTEGRATION_IMPLEMENTATION.md` - Documentation
 
 **Approach:** Parse Hypertool config, generate standard MCP configs
 **Status:** ✅ **Implemented and Ready**

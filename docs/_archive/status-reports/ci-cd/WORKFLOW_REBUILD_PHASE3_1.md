@@ -142,7 +142,7 @@ If issues during Phase 3.1:
 
 - [Implementation Plan](file:///home/thein/.gemini/antigravity/brain/e4e7aabd-c6f4-4292-a6c3-19fd96becc25/implementation_plan.md)
 - [Issue #79](https://github.com/theinterneti/TTA.dev/issues/79)
-- [Phase 2 Complete](file:///home/thein/repos/TTA.dev/docs/status-reports/ci-cd/WORKFLOW_REBUILD_PHASE2_COMPLETE.md)
+- [Phase 2 Complete](file:///home/thein/repos/TTA.dev/docs/_archive/status-reports/ci-cd/WORKFLOW_REBUILD_PHASE2_COMPLETE.md)
 
 ---
 

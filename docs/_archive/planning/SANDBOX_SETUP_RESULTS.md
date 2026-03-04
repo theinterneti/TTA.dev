@@ -262,7 +262,7 @@ The setup script partially worked but didn't complete all analysis. We manually 
 ### In TTA.dev
 
 ```
-docs/planning/tta-analysis/
+docs/_archive/planning/tta-analysis/
 ├── package-statistics.md        (copy from sandbox)
 ├── tta-ai-framework-assessment.md (create after analysis)
 ├── primitive-mapping.json       (create after categorization)

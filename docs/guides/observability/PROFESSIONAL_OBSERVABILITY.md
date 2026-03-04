@@ -320,7 +320,7 @@ curl http://localhost:9090/api/v1/targets
 
 ## 📚 Related Documentation
 
-- **Architecture Analysis:** `docs/observability/ARCHITECTURE_ANALYSIS.md`
+- **Architecture Analysis:** `docs/guides/observability/ARCHITECTURE_ANALYSIS.md`
 - **Basic Setup:** `scripts/setup-observability.sh`
 - **Integration Testing:** `platform/primitives/docker-compose.integration.yml`
 - **Observability Examples:** `platform/primitives/examples/observability_demo.py`

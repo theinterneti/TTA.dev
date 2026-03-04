@@ -55,8 +55,8 @@ We have two sets of changes to organize:
 **Branch:** `feature/tta-dev-cli-architecture` (NEW)
 **Files:**
 - `docs/architecture/APPLICATION_DEPLOYMENT_ARCHITECTURE.md`
-- `docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
-- `docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md`
+- `docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md`
+- `docs/_archive/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md`
 
 **Action:**
 1. Create new branch from `main`
@@ -73,9 +73,9 @@ We have two sets of changes to organize:
 ### Category 3: Documentation Reorganization 🆕
 **Branch:** `feature/docs-reorganization` (NEW)
 **Files:**
-- `docs/quickstart/` (entire directory)
-- `docs/sessions/` (entire directory)
-- `docs/troubleshooting/` (entire directory)
+- `docs/guides/quickstart/` (entire directory)
+- `docs/_archive/sessions/` (entire directory)
+- `docs/guides/troubleshooting/` (entire directory)
 
 **Action:**
 1. Create new branch from `main`
@@ -182,7 +182,7 @@ Looking at the files, this appears to be:
    git checkout -b feature/tta-dev-cli-architecture
    # Cherry-pick architecture docs from stash
    git add docs/architecture/APPLICATION_DEPLOYMENT_ARCHITECTURE.md
-   git add docs/planning/TTA_DEV_CLI_*.md
+   git add docs/_archive/planning/TTA_DEV_CLI_*.md
    git commit -m "Architecture: TTA-dev CLI design and planning"
    git push origin feature/tta-dev-cli-architecture
    ```
@@ -191,7 +191,7 @@ Looking at the files, this appears to be:
    ```bash
    git checkout main
    git checkout -b feature/docs-reorganization
-   git add docs/quickstart/ docs/sessions/ docs/troubleshooting/
+   git add docs/guides/quickstart/ docs/_archive/sessions/ docs/guides/troubleshooting/
    git commit -m "Docs: Add quickstart, sessions, troubleshooting directories"
    git push origin feature/docs-reorganization
    ```

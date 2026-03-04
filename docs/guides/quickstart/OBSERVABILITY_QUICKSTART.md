@@ -300,7 +300,7 @@ sudo ufw allow 9464/tcp
 | `platform/observability/` | Observability package |
 | `docs/guides/MULTI_WORKSPACE_OBSERVABILITY.md` | Multi-workspace guide |
 | `docs/guides/LINUX_NATIVE_OBSERVABILITY.md` | Grafana Alloy setup |
-| `docs/troubleshooting/WORKSPACE_CONFIGURATION_FIX.md` | Fix details |
+| `docs/guides/troubleshooting/WORKSPACE_CONFIGURATION_FIX.md` | Fix details |
 
 ### Useful Commands
 

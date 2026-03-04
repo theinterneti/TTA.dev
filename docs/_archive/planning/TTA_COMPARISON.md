@@ -291,8 +291,8 @@ workflow = (
 ## Next Steps
 
 1. ✅ Review this comparison
-2. ✅ Read full plan: `docs/planning/TTA_REMEDIATION_PLAN.md`
-3. ✅ Read summary: `docs/planning/TTA_REMEDIATION_SUMMARY.md`
+2. ✅ Read full plan: `docs/_archive/planning/TTA_REMEDIATION_PLAN.md`
+3. ✅ Read summary: `docs/_archive/planning/TTA_REMEDIATION_SUMMARY.md`
 4. ⏳ Approve strategy
 5. ⏳ Begin Phase 1: Audit TTA packages
 6. ⏳ Design tta-narrative-primitives package

@@ -59,8 +59,8 @@ scripts/setup-native-observability.sh
 **Files:**
 ```
 docs/architecture/APPLICATION_DEPLOYMENT_ARCHITECTURE.md
-docs/planning/TTA_DEV_CLI_GITHUB_ISSUES.md
-docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md
+docs/_archive/planning/TTA_DEV_CLI_GITHUB_ISSUES.md
+docs/_archive/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md
 ```
 
 ### ✅ Branch 3: Documentation Reorganization
@@ -70,9 +70,9 @@ docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md
 
 **Changes:**
 - ✅ 13 files, +4,240 lines
-- ✅ Created `docs/quickstart/` for quick-access guides
-- ✅ Created `docs/sessions/` for session notes and milestones
-- ✅ Created `docs/troubleshooting/` for common issues
+- ✅ Created `docs/guides/quickstart/` for quick-access guides
+- ✅ Created `docs/_archive/sessions/` for session notes and milestones
+- ✅ Created `docs/guides/troubleshooting/` for common issues
 - ✅ UNIFIED_OBSERVABILITY_ARCHITECTURE.md consolidating patterns
 - ✅ Updated docs/guides/README.md with new structure
 - ✅ Added tta-dev-integrations package to workspace
@@ -82,14 +82,14 @@ docs/planning/TTA_DEV_CLI_IMPLEMENTATION_PLAN.md
 docs/OBSERVABILITY_SETUP_COMPLETE.md
 docs/guides/README.md (modified)
 docs/guides/UNIFIED_OBSERVABILITY_ARCHITECTURE.md
-docs/quickstart/OBSERVABILITY_QUICKSTART.md
-docs/quickstart/OBSERVABILITY_QUICK_ACTIONS.md
-docs/quickstart/OBSERVABILITY_TEST_RESULTS.md
-docs/quickstart/OBSERVABILITY_UNIFIED_QUICKSTART.md
-docs/quickstart/VERIFY_GRAFANA_CLOUD.md
-docs/sessions/NEXT_SESSION_CLI_QUICKSTART.md
-docs/sessions/SESSION_2025_11_15_CLI_MILESTONE.md
-docs/troubleshooting/WORKSPACE_CONFIGURATION_FIX.md
+docs/guides/quickstart/OBSERVABILITY_QUICKSTART.md
+docs/guides/quickstart/OBSERVABILITY_QUICK_ACTIONS.md
+docs/guides/quickstart/OBSERVABILITY_TEST_RESULTS.md
+docs/guides/quickstart/OBSERVABILITY_UNIFIED_QUICKSTART.md
+docs/guides/quickstart/VERIFY_GRAFANA_CLOUD.md
+docs/_archive/sessions/NEXT_SESSION_CLI_QUICKSTART.md
+docs/_archive/sessions/SESSION_2025_11_15_CLI_MILESTONE.md
+docs/guides/troubleshooting/WORKSPACE_CONFIGURATION_FIX.md
 packages/tta-dev-integrations/pyproject.toml
 uv.lock (modified)
 ```
@@ -171,14 +171,14 @@ git reset --hard origin/main  # Or appropriate base branch
 ```bash
 # Extract valuable unique files
 cd /home/thein/repos/TTA.dev-copilot
-cp -r framework/docs/mcp-references/ /tmp/
+cp -r framework/docs/reference/mcp-references/ /tmp/
 
 # Discard framework/ duplication
 git reset --hard <commit-before-af245d4>
 
 # Re-add unique content to proper location
 cp -r /tmp/mcp-references/ docs/
-git add docs/mcp-references/
+git add docs/reference/mcp-references/
 git commit -m "docs: Add MCP reference documentation"
 ```
 

@@ -1033,9 +1033,9 @@ Context remains optimized throughout workflow
 
 ## 📖 Related Documentation
 
-- **Hypertool Quick Start:** `docs/mcp/HYPERTOOL_QUICKSTART.md`
-- **Integration Plan:** `docs/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
-- **Comparison Analysis:** `docs/mcp/HYPERTOOL_COMPARISON.md`
+- **Hypertool Quick Start:** `docs/reference/mcp/HYPERTOOL_QUICKSTART.md`
+- **Integration Plan:** `docs/reference/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
+- **Comparison Analysis:** `docs/reference/mcp/HYPERTOOL_COMPARISON.md`
 - **TTA.dev MCP Servers:** `MCP_SERVERS.md`
 - **Chat Modes Guide:** `docs/guides/chat-modes-guide.md`
 - **Agentic Workflows:** `docs/guides/agentic-workflows-guide.md`

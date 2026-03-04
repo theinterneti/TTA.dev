@@ -170,7 +170,7 @@ User: Orchestrates and reviews both
 
 **Deliverables:**
 
-- ✅ Workflow templates in `docs/integrations/cline-workflows/`
+- ✅ Workflow templates in `docs/guides/integrations/cline-workflows/`
 - ✅ Custom MCP server for TTA.dev primitives
 - ✅ Best practices guide
 
@@ -180,7 +180,7 @@ User: Orchestrates and reviews both
 
 ### 1. Comprehensive Evaluation
 
-**File:** `docs/integrations/CLINE_INTEGRATION_EVALUATION.md`
+**File:** `docs/guides/integrations/CLINE_INTEGRATION_EVALUATION.md`
 
 **Contents:**
 
@@ -198,7 +198,7 @@ User: Orchestrates and reviews both
 
 ### 2. Step-by-Step Guide
 
-**File:** `docs/integrations/CLINE_INTEGRATION_GUIDE.md`
+**File:** `docs/guides/integrations/CLINE_INTEGRATION_GUIDE.md`
 
 **Contents:**
 
@@ -214,7 +214,7 @@ User: Orchestrates and reviews both
 
 ### 3. Quick Reference
 
-**File:** `docs/integrations/CLINE_QUICKREF.md`
+**File:** `docs/guides/integrations/CLINE_QUICKREF.md`
 
 **Contents:**
 
@@ -412,9 +412,9 @@ User: Orchestrates and reviews both
 
 ### Documentation
 
-- **Evaluation:** [CLINE_INTEGRATION_EVALUATION.md](./docs/integrations/CLINE_INTEGRATION_EVALUATION.md)
-- **Guide:** [CLINE_INTEGRATION_GUIDE.md](./docs/integrations/CLINE_INTEGRATION_GUIDE.md)
-- **Quick Ref:** [CLINE_QUICKREF.md](./docs/integrations/CLINE_QUICKREF.md)
+- **Evaluation:** [CLINE_INTEGRATION_EVALUATION.md](./docs/guides/integrations/CLINE_INTEGRATION_EVALUATION.md)
+- **Guide:** [CLINE_INTEGRATION_GUIDE.md](./docs/guides/integrations/CLINE_INTEGRATION_GUIDE.md)
+- **Quick Ref:** [CLINE_QUICKREF.md](./docs/guides/integrations/CLINE_QUICKREF.md)
 - **MCP Servers:** [MCP_SERVERS.md](./MCP_SERVERS.md)
 
 ### External

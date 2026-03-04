@@ -414,7 +414,7 @@ TTA.dev uses:
 
 I need to audit TTA's tta-narrative-engine package to create migration specs.
 
-See: docs/planning/TTA_AUDIT_CHECKLIST.md (this file)
+See: docs/_archive/planning/TTA_AUDIT_CHECKLIST.md (this file)
 ```
 
 ### Useful Commands

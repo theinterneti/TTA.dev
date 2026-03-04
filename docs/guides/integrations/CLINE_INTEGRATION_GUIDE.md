@@ -689,7 +689,7 @@ jobs:
 
 ### Pre-built Workflow Templates
 
-**Create in `docs/integrations/cline-workflows/`:**
+**Create in `docs/guides/integrations/cline-workflows/`:**
 
 #### 1. PR Review Workflow
 
@@ -995,7 +995,7 @@ cline config set monthly-budget 100
 - **Cline Documentation:** <https://github.com/cline/cline>
 - **TTA.dev MCP Servers:** [MCP_SERVERS.md](../../MCP_SERVERS.md)
 - **Copilot Toolsets:** [.vscode/copilot-toolsets.jsonc](../../.vscode/copilot-toolsets.jsonc)
-- **Workflow Templates:** [docs/integrations/cline-workflows/](./cline-workflows/)
+- **Workflow Templates:** [docs/guides/integrations/cline-workflows/](./cline-workflows/)
 
 ---
 

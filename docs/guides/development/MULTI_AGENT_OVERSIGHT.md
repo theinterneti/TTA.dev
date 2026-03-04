@@ -512,7 +512,7 @@ jq '[.[] | .agent] | group_by(.) | map({agent: .[0], count: length})' \
 ## Related Documentation
 
 - [Multi-Agent Coordination](../docs/architecture/multi-agent-coordination.md)
-- [Git Workflow](../docs/development/git-workflow.md)
+- [Git Workflow](../docs/guides/development/git-workflow.md)
 - [Copilot Instructions](../.github/copilot-instructions.md)
 - [Logseq TODO System](../logseq/pages/TODO Management System.md)
 

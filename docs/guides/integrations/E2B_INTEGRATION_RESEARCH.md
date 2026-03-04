@@ -869,7 +869,7 @@ class SecureCodeExecutor(E2BCodeExecutionPrimitive):
 - `platform/primitives/tests/execution/test_e2b_code_execution.py` (comprehensive, not minimal)
 - `platform/primitives/tests/integration/test_e2b_real.py` (full coverage!)
 - `platform/primitives/examples/e2b_code_execution.py`
-- `docs/integrations/E2B_CODE_EXECUTION.md`
+- `docs/guides/integrations/E2B_CODE_EXECUTION.md`
 
 **Estimated Cost:** $0 ✅
 

@@ -412,7 +412,7 @@ result = await agent.execute(
 
 - **E2B Phase 1:** `E2B_PHASE1_COMPLETE.md`
 - **Integration Examples:** `platform/primitives/examples/e2b_code_execution_workflow.py`
-- **E2B README:** `platform/primitives/docs/integrations/E2B_README.md`
+- **E2B README:** `platform/primitives/docs/guides/integrations/E2B_README.md`
 - **Test Generation:** `examples/orchestration_test_generation.py`
 - **Doc Generation:** `examples/orchestration_doc_generation.py`
 - **PR Review:** `examples/orchestration_pr_review.py`

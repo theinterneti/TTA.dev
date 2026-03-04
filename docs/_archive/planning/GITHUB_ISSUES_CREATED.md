@@ -44,7 +44,7 @@
 **Timeline:** 3 weeks (1 week per server + 1 week testing)
 **Outcome:** Complete MCP server ecosystem with quality assurance
 
-**Note on #32:** Augment has been working on observability all day. See `docs/observability/EXECUTIVE_SUMMARY.md` for current state. Coordinate with Augment's work!
+**Note on #32:** Augment has been working on observability all day. See `docs/guides/observability/EXECUTIVE_SUMMARY.md` for current state. Coordinate with Augment's work!
 
 ### Phase 4: Community (Weeks 7-8)
 
@@ -106,13 +106,13 @@
 
 ### Integration Guides
 
-- **[docs/integration/github-agent-hq.md](./docs/integration/github-agent-hq.md)** - Complete integration guide with examples
+- **[docs/guides/integration/github-agent-hq.md](./docs/guides/integration/github-agent-hq.md)** - Complete integration guide with examples
 - **[docs/guides/](./docs/guides/)** - Excellent guides generated via Notebook LM
 
 ### Observability (Augment's Work)
 
-- **[docs/observability/EXECUTIVE_SUMMARY.md](./docs/observability/EXECUTIVE_SUMMARY.md)** - Observability assessment
-- **[docs/observability/OBSERVABILITY_ASSESSMENT.md](./docs/observability/OBSERVABILITY_ASSESSMENT.md)** - Detailed assessment
+- **[docs/guides/observability/EXECUTIVE_SUMMARY.md](./docs/guides/observability/EXECUTIVE_SUMMARY.md)** - Observability assessment
+- **[docs/guides/observability/OBSERVABILITY_ASSESSMENT.md](./docs/guides/observability/OBSERVABILITY_ASSESSMENT.md)** - Detailed assessment
 - **[platform/observability/](./platform/observability/)** - Package Augment worked on
 
 ---
@@ -198,7 +198,7 @@ Augment has been working on **observability all day**. Key findings:
 - **Current State:** 3/10 maturity, NOT production ready
 - **Critical Gaps:** No trace context propagation, core primitives not instrumented, no observability testing
 - **Estimated Effort:** 6-10 weeks
-- **Documentation:** `docs/observability/EXECUTIVE_SUMMARY.md`
+- **Documentation:** `docs/guides/observability/EXECUTIVE_SUMMARY.md`
 
 **Action:** Coordinate Issue #32 (observability MCP server) with Augment's ongoing work.
 

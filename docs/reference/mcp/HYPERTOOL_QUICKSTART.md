@@ -272,7 +272,7 @@ cp .mcp.json.backup .mcp.json
 
 ## 📚 Learn More
 
-- **Full Integration Plan:** `docs/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
+- **Full Integration Plan:** `docs/reference/mcp/HYPERTOOL_INTEGRATION_PLAN.md`
 - **Hypertool Docs:** https://github.com/toolprint/hypertool-mcp
 - **TTA.dev MCP Guide:** `MCP_SERVERS.md`
 

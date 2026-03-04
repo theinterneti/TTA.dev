@@ -74,7 +74,7 @@ The proposed **AI Native Development Framework** presents a mature, structured a
 |-----------|-------------------|----------------------|--------------|
 | **/speckit.specify** | High-level requirement → `.spec.md` | ❌ **MISSING** | **GAP** - Jump directly to implementation |
 | **Clarification Loop** | `/speckit.clarify` for iterative refinement | ❌ **MISSING** | **GAP** - Ad-hoc clarification, not formalized |
-| **/speckit.plan** | Generate `plan.md` + `data-model.md` | ⚠️ Manual planning in `docs/planning/` | **GAP** - Not automated or templated |
+| **/speckit.plan** | Generate `plan.md` + `data-model.md` | ⚠️ Manual planning in `docs/_archive/planning/` | **GAP** - Not automated or templated |
 | **/speckit.tasks** | Generate ordered `tasks.md` with dependencies | ⚠️ Logseq TODOs (manual) | **PARTIAL** - TODO system exists but not spec-driven |
 | **Human Validation Gate** | 🚨 Mandatory stop before implementation | ❌ **MISSING** | **GAP** - Relies on developer discipline |
 | **.spec.md Artifacts** | Formal specification documents | ❌ **MISSING** | **GAP** - No standardized spec format |
@@ -818,7 +818,7 @@ Transform the high-level requirement into a formal `.spec.md` specification docu
 - Flag potential risks
 
 ### Step 4: Create Artifact
-- Save as `docs/specs/{feature-name}.spec.md`
+- Save as `docs/reference/specs/{feature-name}.spec.md`
 - Set status to "Draft"
 - Return path to created spec
 

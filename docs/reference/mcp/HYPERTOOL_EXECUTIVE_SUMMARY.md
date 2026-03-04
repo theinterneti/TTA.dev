@@ -410,7 +410,7 @@ A: Week 1 might be slower (learning). Weeks 2-4 already faster. ROI clear by Wee
 
 ### Documentation
 - **Main Repo:** https://github.com/toolprint/hypertool-mcp
-- **TTA.dev Docs:** `/docs/mcp/HYPERTOOL_*.md`
+- **TTA.dev Docs:** `/docs/reference/mcp/HYPERTOOL_*.md`
 
 ### Support
 - **Discord:** https://discord.gg/MbvndnJ45W

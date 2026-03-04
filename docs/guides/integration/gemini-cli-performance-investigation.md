@@ -218,7 +218,7 @@ Added critical settings for headless execution:
 
 - **Issue #59**: Test: Gemini CLI GitHub Integration
 - **Issue #61**: ✅ Gemini CLI GitHub Actions Integration - Success Report
-- **Documentation**: `docs/integration/gemini-cli-github-actions.md`
+- **Documentation**: `docs/guides/integration/gemini-cli-github-actions.md`
 
 ---
 

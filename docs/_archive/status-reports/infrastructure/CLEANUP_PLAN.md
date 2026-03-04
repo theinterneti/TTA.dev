@@ -84,13 +84,13 @@ experiments/tasks-real-world/
 
 **SpecKit Documentation:**
 - `docs/SPECKIT_DAY8_9_COMPLETE.md` ✅ (main completion doc)
-- `docs/planning/SPECKIT_DAY1_COMPLETE.md`
-- `docs/planning/SPECKIT_DAY3_COMPLETE.md`
-- `docs/planning/SPECKIT_DAY5_COMPLETE.md`
-- `docs/planning/SPECKIT_DAY6_COMPLETE.md`
-- `docs/planning/SPECKIT_DAY6_7_PLAN.md`
-- `docs/planning/SPECKIT_DAY8_9_PLAN.md`
-- `docs/planning/SPECKIT_IMPLEMENTATION_PLAN.md`
+- `docs/_archive/planning/SPECKIT_DAY1_COMPLETE.md`
+- `docs/_archive/planning/SPECKIT_DAY3_COMPLETE.md`
+- `docs/_archive/planning/SPECKIT_DAY5_COMPLETE.md`
+- `docs/_archive/planning/SPECKIT_DAY6_COMPLETE.md`
+- `docs/_archive/planning/SPECKIT_DAY6_7_PLAN.md`
+- `docs/_archive/planning/SPECKIT_DAY8_9_PLAN.md`
+- `docs/_archive/planning/SPECKIT_IMPLEMENTATION_PLAN.md`
 
 **Recommendation:** ✅ **ORGANIZE INTO ARCHIVE**
 - These are historical planning docs (Days 1-7)
@@ -100,7 +100,7 @@ experiments/tasks-real-world/
 **Action:**
 ```bash
 mkdir -p archive/speckit-planning
-mv docs/planning/SPECKIT_*.md archive/speckit-planning/
+mv docs/_archive/planning/SPECKIT_*.md archive/speckit-planning/
 # Keep SPECKIT_DAY8_9_COMPLETE.md in docs/ as the main reference
 ```
 
@@ -273,13 +273,13 @@ tests/speckit/
 3. **Organize SpecKit planning docs:**
    ```bash
    mkdir -p archive/speckit-planning
-   mv docs/planning/SPECKIT_DAY1_COMPLETE.md archive/speckit-planning/
-   mv docs/planning/SPECKIT_DAY3_COMPLETE.md archive/speckit-planning/
-   mv docs/planning/SPECKIT_DAY5_COMPLETE.md archive/speckit-planning/
-   mv docs/planning/SPECKIT_DAY6_COMPLETE.md archive/speckit-planning/
-   mv docs/planning/SPECKIT_DAY6_7_PLAN.md archive/speckit-planning/
-   mv docs/planning/SPECKIT_DAY8_9_PLAN.md archive/speckit-planning/
-   mv docs/planning/SPECKIT_IMPLEMENTATION_PLAN.md archive/speckit-planning/
+   mv docs/_archive/planning/SPECKIT_DAY1_COMPLETE.md archive/speckit-planning/
+   mv docs/_archive/planning/SPECKIT_DAY3_COMPLETE.md archive/speckit-planning/
+   mv docs/_archive/planning/SPECKIT_DAY5_COMPLETE.md archive/speckit-planning/
+   mv docs/_archive/planning/SPECKIT_DAY6_COMPLETE.md archive/speckit-planning/
+   mv docs/_archive/planning/SPECKIT_DAY6_7_PLAN.md archive/speckit-planning/
+   mv docs/_archive/planning/SPECKIT_DAY8_9_PLAN.md archive/speckit-planning/
+   mv docs/_archive/planning/SPECKIT_IMPLEMENTATION_PLAN.md archive/speckit-planning/
    ```
 
 ### Priority 2: Decision Points

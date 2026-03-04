@@ -144,14 +144,14 @@ TTA.dev follows a **composable, modular architecture**:
 
 - **[Getting Started Guide](GETTING_STARTED.md)** - 5-minute quickstart
 - **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
-- **[Coding Standards](docs/development/CodingStandards.md)** - Development best practices
-- **[MCP Integration](docs/mcp/README.md)** - Model Context Protocol guides
+- **[Coding Standards](docs/guides/development/CodingStandards.md)** - Development best practices
+- **[MCP Integration](docs/reference/mcp/README.md)** - Model Context Protocol guides
 - **[Package Documentation](packages/tta-dev-primitives/README.md)** - Detailed API reference
 
 ### Additional Resources
 
-- [AI Libraries Comparison](docs/integration/AI_Libraries_Comparison.md)
-- [Model Selection Guide](docs/models/Model_Selection_Strategy.md)
+- [AI Libraries Comparison](docs/guides/integration/AI_Libraries_Comparison.md)
+- [Model Selection Guide](docs/reference/models/Model_Selection_Strategy.md)
 - [Examples](packages/tta-dev-primitives/examples/)
 
 ---

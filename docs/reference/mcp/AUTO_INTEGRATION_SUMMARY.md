@@ -83,7 +83,7 @@ Total time: 0 minutes, Zero errors
 
 ### Priority 1: Workspace MCP Auto-Discovery (HIGH)
 
-**File Created:** `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 1)
+**File Created:** `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 1)
 
 **What It Does:**
 - `.vscode/mcp.json` → workspace-level MCP config
@@ -102,7 +102,7 @@ Total time: 0 minutes, Zero errors
 
 ### Priority 2: Copilot-Hypertool Bridge (HIGH)
 
-**File Created:** `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 2)
+**File Created:** `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 2)
 
 **What It Does:**
 - Maps `#tta-package-dev` → `tta-backend-engineer` persona
@@ -121,7 +121,7 @@ Total time: 0 minutes, Zero errors
 
 ### Priority 3: Cline Auto-Context (MEDIUM)
 
-**File Created:** `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 3)
+**File Created:** `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` (Step 3)
 
 **What It Does:**
 - Enhanced `.cline/mcp-server/tta_recommendations.py`
@@ -140,7 +140,7 @@ Total time: 0 minutes, Zero errors
 
 ### Priority 4: Pattern Detection (MEDIUM)
 
-**File Created:** `docs/mcp/AUTO_INTEGRATION_ANALYSIS.md` (Priority 4)
+**File Created:** `docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md` (Priority 4)
 
 **What It Does:**
 - Detects anti-patterns (manual retry, caching, etc.)
@@ -159,7 +159,7 @@ Total time: 0 minutes, Zero errors
 
 ### Priority 5: Chatmode Auto-Activation (LOW)
 
-**File Created:** `docs/mcp/AUTO_INTEGRATION_ANALYSIS.md` (Priority 5)
+**File Created:** `docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md` (Priority 5)
 
 **What It Does:**
 - File extension → chatmode mapping
@@ -201,20 +201,20 @@ Total time: 0 minutes, Zero errors
 
 ### Documentation
 
-1. **`docs/mcp/AUTO_INTEGRATION_ANALYSIS.md`**
+1. **`docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md`**
    - Comprehensive analysis of current state
    - Gap analysis
    - 5 priority recommendations
    - Security considerations
    - Success metrics
 
-2. **`docs/mcp/AUTO_INTEGRATION_QUICKSTART.md`**
+2. **`docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md`**
    - Step-by-step implementation guide
    - Priority 1-3 implementations
    - Testing procedures
    - Rollback plan
 
-3. **`docs/mcp/AUTO_INTEGRATION_SUMMARY.md`** (this file)
+3. **`docs/reference/mcp/AUTO_INTEGRATION_SUMMARY.md`** (this file)
    - Executive summary
    - Quick reference
    - Status overview
@@ -345,15 +345,15 @@ Total time: 0 minutes, Zero errors
 ## 📚 Related Documentation
 
 **Created in This Analysis:**
-- `docs/mcp/AUTO_INTEGRATION_ANALYSIS.md` - Full analysis
-- `docs/mcp/AUTO_INTEGRATION_QUICKSTART.md` - Implementation guide
-- `docs/mcp/AUTO_INTEGRATION_SUMMARY.md` - This file
+- `docs/reference/mcp/AUTO_INTEGRATION_ANALYSIS.md` - Full analysis
+- `docs/reference/mcp/AUTO_INTEGRATION_QUICKSTART.md` - Implementation guide
+- `docs/reference/mcp/AUTO_INTEGRATION_SUMMARY.md` - This file
 
 **Existing Documentation:**
 - `.hypertool/IMPLEMENTATION_COMPLETE_SUMMARY.md` - Hypertool integration
 - `MCP_SERVERS.md` - MCP server registry
 - `docs/guides/copilot-toolsets-guide.md` - Copilot toolsets
-- `docs/integrations/CLINE_CONTEXT_INTEGRATION_GUIDE.md` - Cline integration
+- `docs/guides/integrations/CLINE_CONTEXT_INTEGRATION_GUIDE.md` - Cline integration
 - `AGENTS.md` - Agent instructions hub
 
 ---

@@ -133,18 +133,18 @@ sudo journalctl -u alloy -f
 ### Quick Start Guides
 
 1. **Unified Observability Quick Start**
-   - `docs/quickstart/OBSERVABILITY_UNIFIED_QUICKSTART.md`
+   - `docs/guides/quickstart/OBSERVABILITY_UNIFIED_QUICKSTART.md`
    - 5-minute setup guide
    - What's built-in vs what you configure
 
 2. **Grafana Cloud Verification**
-   - `docs/quickstart/VERIFY_GRAFANA_CLOUD.md`
+   - `docs/guides/quickstart/VERIFY_GRAFANA_CLOUD.md`
    - Query examples
    - Dashboard creation
    - Troubleshooting tips
 
 3. **Test Results**
-   - `docs/quickstart/OBSERVABILITY_TEST_RESULTS.md`
+   - `docs/guides/quickstart/OBSERVABILITY_TEST_RESULTS.md`
    - Complete test report
    - Metrics breakdown
    - Dashboard recommendations
@@ -571,10 +571,10 @@ curl http://localhost:12345/metrics | grep prometheus_remote_storage_samples_tot
 
 ### Documentation
 
-- **Quick Start:** `docs/quickstart/OBSERVABILITY_UNIFIED_QUICKSTART.md`
+- **Quick Start:** `docs/guides/quickstart/OBSERVABILITY_UNIFIED_QUICKSTART.md`
 - **Architecture:** `docs/guides/UNIFIED_OBSERVABILITY_ARCHITECTURE.md`
 - **Troubleshooting:** `docs/guides/LINUX_NATIVE_OBSERVABILITY.md`
-- **Test Results:** `docs/quickstart/OBSERVABILITY_TEST_RESULTS.md`
+- **Test Results:** `docs/guides/quickstart/OBSERVABILITY_TEST_RESULTS.md`
 
 ### External Resources
 

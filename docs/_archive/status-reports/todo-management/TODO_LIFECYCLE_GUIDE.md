@@ -295,7 +295,7 @@ Steps:
 mkdir -p docs/archive/2025
 
 # Move completed planning docs
-mv docs/planning/cache-primitive-plan.md docs/archive/2025/
+mv docs/_archive/planning/cache-primitive-plan.md docs/archive/2025/
 
 # Add note in archive
 echo "Archived: November 2, 2025 - Feature complete" >> docs/archive/2025/README.md
@@ -427,7 +427,7 @@ uv run python scripts/extract-embedded-todos.py --dry-run
 uv run python scripts/update-markdown-todos.py
 
 # Update specific file
-uv run python scripts/update-markdown-todos.py --file docs/planning/feature.md
+uv run python scripts/update-markdown-todos.py --file docs/_archive/planning/feature.md
 ```
 
 ---
