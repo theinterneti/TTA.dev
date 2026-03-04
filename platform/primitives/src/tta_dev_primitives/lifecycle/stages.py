@@ -5,15 +5,22 @@ between lifecycle stages, along with recommended actions.
 """
 
 from tta_dev_primitives.lifecycle.checks import (
+    DEPENDENCIES_UP_TO_DATE,
     FORMAT_CHECK_PASSES,
+    HAS_CHANGELOG,
+    HAS_EXAMPLES,
     HAS_LICENSE,
     HAS_PACKAGE_MANIFEST,
     HAS_README,
+    HAS_README_SECTIONS,
     HAS_SRC_DIRECTORY,
     HAS_TESTS_DIRECTORY,
     LINT_PASSES,
+    NO_SECRETS_IN_CODE,
     TESTS_PASS,
     TYPE_CHECK_PASSES,
+    VERSION_BUMPED,
+    WORKING_TREE_CLEAN,
 )
 from tta_dev_primitives.lifecycle.stage import Stage
 from tta_dev_primitives.lifecycle.stage_criteria import StageCriteria
@@ -48,6 +55,8 @@ TESTING_TO_STAGING = StageCriteria(
     ],
     exit_criteria=[
         HAS_README,
+        HAS_README_SECTIONS,
+        HAS_EXAMPLES,
         LINT_PASSES,
         FORMAT_CHECK_PASSES,
     ],
@@ -71,8 +80,12 @@ STAGING_TO_DEPLOYMENT = StageCriteria(
     ],
     exit_criteria=[
         HAS_LICENSE,
+        HAS_CHANGELOG,
         TYPE_CHECK_PASSES,
         FORMAT_CHECK_PASSES,
+        NO_SECRETS_IN_CODE,
+        WORKING_TREE_CLEAN,
+        VERSION_BUMPED,
     ],
     recommended_actions=[
         "Add LICENSE file (MIT or Apache 2.0 recommended)",
@@ -93,6 +106,8 @@ DEPLOYMENT_TO_PRODUCTION = StageCriteria(
         TESTS_PASS,
         TYPE_CHECK_PASSES,
         LINT_PASSES,
+        NO_SECRETS_IN_CODE,
+        DEPENDENCIES_UP_TO_DATE,
     ],
     exit_criteria=[],  # No exit criteria - production is the final stage
     recommended_actions=[
