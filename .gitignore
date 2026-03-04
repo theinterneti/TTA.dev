@@ -33,6 +33,7 @@ junit*.xml
 *.log
 test-results/
 playwright-report/
+.test_durations
 
 # Type checking & linting
 .mypy_cache/
