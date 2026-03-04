@@ -1,0 +1,33 @@
+name: Stale Issue Management
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  stale:
+    name: Close Stale Issues
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/stale@v9
+        with:
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not
+            had recent activity. It will be closed in 14 days if no further
+            activity occurs. If this issue is still relevant, please comment or
+            update it to keep it open.
+          close-issue-message: >
+            This issue has been closed due to inactivity. Feel free to reopen it
+            if the work is still needed.
+          days-before-stale: 90
+          days-before-close: 14
+          stale-issue-label: 'stale'
+          exempt-issue-labels: 'pinned,priority: critical,priority: high,production-readiness'
+          operations-per-run: 30
