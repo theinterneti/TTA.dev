@@ -28,6 +28,9 @@ from .recovery.fallback import FallbackPrimitive
 from .recovery.retry import RetryPrimitive, RetryStrategy
 from .recovery.timeout import TimeoutPrimitive
 
+# Persistence primitives
+from .persistence import AbstractRepository, AbstractUnitOfWork, FakeUnitOfWork
+
 # Testing primitives
 from .testing.mocks import MockPrimitive
 
@@ -55,8 +58,12 @@ __all__ = [
     "RetryPrimitive",
     "RetryStrategy",
     "TimeoutPrimitive",
+    # Persistence primitives
+    "AbstractRepository",
+    "AbstractUnitOfWork",
+    "FakeUnitOfWork",
     # Testing primitives
     "MockPrimitive",
 ]
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
