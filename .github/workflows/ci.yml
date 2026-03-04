@@ -60,6 +60,8 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run tests with coverage (split across runners)
+        # pytest-split selects tests at collection time (horizontal scaling),
+        # pytest-xdist parallelises them across CPU cores (vertical scaling).
         run: >
           uv run pytest -v --tb=short
           -m "not integration and not slow and not external and not quarantine"

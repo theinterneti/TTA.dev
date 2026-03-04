@@ -40,7 +40,7 @@ class FakeRepository(Generic[T]):
         self._store[key] = entity
 
     async def get(self, key: str) -> T | None:
-        """Retrieve an entity by key, or ``None`` if absent."""
+        """Retrieve an entity by key, or None if absent."""
         return self._store.get(key)
 
     async def list_all(self) -> list[T]:
@@ -48,7 +48,7 @@ class FakeRepository(Generic[T]):
         return list(self._store.values())
 
     async def delete(self, key: str) -> bool:
-        """Remove an entity by key. Returns ``True`` if it existed."""
+        """Remove an entity by key. Returns True if it existed."""
         return self._store.pop(key, None) is not None
 
     async def exists(self, key: str) -> bool:
