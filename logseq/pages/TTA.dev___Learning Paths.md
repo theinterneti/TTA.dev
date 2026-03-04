@@ -62,5 +62,5 @@ result = await workflow.execute(data, WorkflowContext())
 
 - [[TTA.dev/Primitives]] - Complete primitives reference
 - [[TTA.dev/Architecture]] - System design
-- [GETTING_STARTED.md](../GETTING_STARTED.md)
-- [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md)
+- [GETTING_STARTED.md](../../GETTING_STARTED.md)
+- [PRIMITIVES_CATALOG.md](../../PRIMITIVES_CATALOG.md)
