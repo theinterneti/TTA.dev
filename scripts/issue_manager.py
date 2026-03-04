@@ -638,7 +638,7 @@ class IssueManager:
             )
             return True
         except subprocess.CalledProcessError as e:
-            print(f"  ❌ Failed to close #{number}: {e.stderr}", file=sys.stderr)
+            print(f"  ❌ Failed to close #{number}: {e.stderr or 'unknown error'}", file=sys.stderr)
             return False
 
     def close_stale(self, stale_days: int = 90) -> None:
@@ -688,7 +688,7 @@ class IssueManager:
             comment = (
                 f"🤖 **Automated issue audit**\n\n"
                 f"This issue appears to be a duplicate of #{original.number}.\n\n"
-                f"Closing in favour of the original. "
+                f"Closing in favor of the original. "
                 f"Please reopen if this is intentionally distinct."
             )
             if self._close_issue(dupe.number, comment):
