@@ -1,0 +1,71 @@
+name: Issue Audit
+
+on:
+  schedule:
+    # Run on the 1st of every month at 8 AM UTC
+    - cron: '0 8 1 * *'
+  workflow_dispatch:
+    inputs:
+      stale_days:
+        description: 'Number of days without activity to consider stale'
+        required: false
+        default: '90'
+        type: string
+      apply:
+        description: 'Actually close stale/duplicate issues and label unlabeled ones'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  issues: write
+
+jobs:
+  audit:
+    name: Run Issue Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install GitHub CLI
+        run: gh --version
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Run issue audit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STALE_DAYS: ${{ github.event.inputs.stale_days || '90' }}
+        run: |
+          echo "# 🔍 Issue Audit Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          python scripts/issue_manager.py audit "$STALE_DAYS" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Apply — close stale issues
+        if: github.event.inputs.apply == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STALE_DAYS: ${{ github.event.inputs.stale_days || '90' }}
+        run: python scripts/issue_manager.py close-stale "$STALE_DAYS"
+
+      - name: Apply — close duplicate issues
+        if: github.event.inputs.apply == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/issue_manager.py close-duplicates
+
+      - name: Apply — auto-label unlabeled issues
+        if: github.event.inputs.apply == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/issue_manager.py label-unlabeled
