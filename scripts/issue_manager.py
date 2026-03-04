@@ -462,12 +462,16 @@ class IssueManager:
 
     def _detect_duplicates(self, issues: list[Issue]) -> list[tuple[Issue, Issue]]:
         """Detect issues that are likely duplicates based on title similarity."""
+        from difflib import SequenceMatcher
+
         duplicates: list[tuple[Issue, Issue]] = []
+        threshold = 0.85
         for i, a in enumerate(issues):
             for b in issues[i + 1 :]:
                 title_a = re.sub(r"[^a-z0-9 ]", "", a.title.lower()).strip()
                 title_b = re.sub(r"[^a-z0-9 ]", "", b.title.lower()).strip()
-                if title_a == title_b:
+                ratio = SequenceMatcher(None, title_a, title_b).ratio()
+                if ratio >= threshold:
                     duplicates.append((a, b))
         return duplicates
 
@@ -489,29 +493,28 @@ class IssueManager:
         return stale
 
     def _detect_potentially_resolved(self, issues: list[Issue]) -> list[Issue]:
-        """Detect issues that reference directories/files already present."""
+        """Detect issues whose title mentions a path that already exists.
+
+        This is a heuristic: an issue is flagged if *any* referenced path
+        exists, even when the issue mentions multiple deliverables.  Manual
+        verification is still required before closing.
+        """
         repo_root = Path(__file__).resolve().parent.parent
         resolved: list[Issue] = []
-        # Heuristic patterns: "Create X" where X already exists
-        create_patterns = [
-            (r"create\s+`?([a-zA-Z0-9_./-]+/?)`?", "directory/file creation"),
-        ]
+        pattern = re.compile(r"create\s+`?([a-zA-Z0-9_./-]+/?)`?", re.IGNORECASE)
         for issue in issues:
             content = f"{issue.title} {issue.body}"
-            for pattern, _ in create_patterns:
-                matches = re.findall(pattern, content, re.IGNORECASE)
-                for match in matches:
-                    candidate = repo_root / match
-                    if candidate.exists():
-                        resolved.append(issue)
-                        break
-                else:
-                    continue
-                break
+            matches = pattern.findall(content)
+            if any((repo_root / match).exists() for match in matches):
+                resolved.append(issue)
         return resolved
 
     def audit(self, stale_days: int = 90) -> None:
         """Run a comprehensive issue audit and print a report."""
+
+        def _trunc(text: str, width: int = 65) -> str:
+            return text if len(text) <= width else text[: width - 3] + "..."
+
         print("\n🔍 Issue Audit Report")
         print("=" * 80)
         print(f"Generated: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}")
@@ -530,7 +533,7 @@ class IssueManager:
         print(f"🔁 Duplicate Issues ({len(duplicates)} pair(s) found)\n")
         if duplicates:
             for a, b in duplicates:
-                print(f'  #{a.number} ↔ #{b.number}  "{a.title}"')
+                print(f'  #{a.number} ↔ #{b.number}  "{_trunc(a.title, 60)}"')
             print("\n  ➡️  Action: close the duplicate and reference the original in a comment.\n")
         else:
             print("  None detected.\n")
@@ -546,7 +549,7 @@ class IssueManager:
         )
         for issue in actionable_stale:
             labels = ", ".join(issue.labels) if issue.labels else "none"
-            print(f"  #{issue.number:>4}  {issue.title[:65]}")
+            print(f"  #{issue.number:>4}  {_trunc(issue.title)}")
             print(f"         Labels: {labels}  |  Updated: {issue.updated_at[:10]}")
         if actionable_stale:
             print(
@@ -561,7 +564,7 @@ class IssueManager:
         print("-" * 80)
         print(f"✅ Potentially Resolved Issues ({len(resolved)} found)\n")
         for issue in resolved:
-            print(f"  #{issue.number:>4}  {issue.title[:70]}")
+            print(f"  #{issue.number:>4}  {_trunc(issue.title, 70)}")
         if resolved:
             print("\n  ➡️  Action: verify completion and close with a summary comment.\n")
         else:
@@ -572,7 +575,7 @@ class IssueManager:
         print("-" * 80)
         print(f"🏷️  Unlabeled Issues ({len(unlabeled)} found)\n")
         for issue in unlabeled:
-            print(f"  #{issue.number:>4}  {issue.title[:70]}")
+            print(f"  #{issue.number:>4}  {_trunc(issue.title, 70)}")
         if unlabeled:
             print(
                 "\n  ➡️  Action: add appropriate labels or run "
