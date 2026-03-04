@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+from ..core.base import WorkflowContext
 from .base import PackageManagerOutput, PackageManagerPrimitive
 
 # ---------------------------------------------------------------------------
@@ -148,6 +149,7 @@ class UvAddPrimitive(PackageManagerPrimitive[UvAddInput, UvAddOutput]):
 
     def __init__(self, working_dir: str | None = None) -> None:
         super().__init__(command_name="uv", working_dir=working_dir)
+        self._last_packages: list[str] = []
 
     def _build_command(self, input_data: UvAddInput) -> list[str]:
         cmd: list[str] = ["uv", "add"]
@@ -157,6 +159,11 @@ class UvAddPrimitive(PackageManagerPrimitive[UvAddInput, UvAddOutput]):
             cmd.extend(["--group", input_data.group])
         cmd.extend(input_data.packages)
         return cmd
+
+    async def execute(self, input_data: UvAddInput, context: WorkflowContext) -> UvAddOutput:
+        """Override to capture input packages for output."""
+        self._last_packages = list(input_data.packages)
+        return await super().execute(input_data, context)
 
     def _parse_output(
         self,
@@ -173,7 +180,7 @@ class UvAddPrimitive(PackageManagerPrimitive[UvAddInput, UvAddOutput]):
             return_code=return_code,
             execution_time=execution_time,
             command=command,
-            packages_added=command.split()[2:] if return_code == 0 else [],
+            packages_added=self._last_packages if return_code == 0 else [],
         )
 
 
@@ -182,9 +189,15 @@ class UvRemovePrimitive(PackageManagerPrimitive[UvRemoveInput, UvRemoveOutput]):
 
     def __init__(self, working_dir: str | None = None) -> None:
         super().__init__(command_name="uv", working_dir=working_dir)
+        self._last_packages: list[str] = []
 
     def _build_command(self, input_data: UvRemoveInput) -> list[str]:
         return ["uv", "remove", *input_data.packages]
+
+    async def execute(self, input_data: UvRemoveInput, context: WorkflowContext) -> UvRemoveOutput:
+        """Override to capture input packages for output."""
+        self._last_packages = list(input_data.packages)
+        return await super().execute(input_data, context)
 
     def _parse_output(
         self,
@@ -201,7 +214,7 @@ class UvRemovePrimitive(PackageManagerPrimitive[UvRemoveInput, UvRemoveOutput]):
             return_code=return_code,
             execution_time=execution_time,
             command=command,
-            packages_removed=(command.split()[2:] if return_code == 0 else []),
+            packages_removed=(self._last_packages if return_code == 0 else []),
         )
 
 

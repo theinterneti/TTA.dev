@@ -70,8 +70,10 @@ class PackageManagerPrimitive(WorkflowPrimitive[T, U]):
             def _build_command(self, input_data: MyInput) -> list[str]:
                 return ["my-tool", "run"]
 
-            def _parse_output(self, stdout, stderr, rc, t) -> MyOutput:
-                return MyOutput(success=rc == 0, ...)
+            def _parse_output(
+                self, stdout, stderr, return_code, execution_time, command,
+            ) -> MyOutput:
+                return MyOutput(success=return_code == 0, ...)
         ```
     """
 
