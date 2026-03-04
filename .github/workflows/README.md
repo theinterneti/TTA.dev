@@ -86,7 +86,7 @@ This directory contains GitHub Actions workflows for TTA.dev. The workflows have
 - Graceful degradation
 
 **When it runs:**
-- Every PR update (Python files only)
+- Every PR update (excluding documentation-only, Logseq, and markdown-only changes)
 - Falls back if API unavailable
 
 ## Performance Comparison
