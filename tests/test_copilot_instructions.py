@@ -195,12 +195,17 @@ def test_documentation_and_logseq_overlap_acknowledged():
 
 
 def test_consistent_package_manager_guidance():
-    """All files recommending a package manager should agree on 'uv'."""
+    """All files referencing package commands should use 'uv'."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
     assert "uv" in main_content, "Main instructions should mention 'uv'"
     assert "never `pip`" in main_content.lower() or "never pip" in main_content.lower(), (
         "Main instructions should warn against pip"
     )
+
+    # Files with shell command examples should all use 'uv' commands
+    for filename in ["python.instructions.md", "scripts.instructions.md"]:
+        content = (INSTRUCTIONS_DIR / filename).read_text(encoding="utf-8")
+        assert "uv run" in content, f"{filename} should use 'uv run' in commands"
 
 
 def test_consistent_testing_framework():
@@ -222,6 +227,7 @@ def test_consistent_primitives_over_manual_loops():
     ]
     for path in files_to_check:
         content = path.read_text(encoding="utf-8")
+        # Check for specific class name OR general term (case-insensitive)
         has_primitive_guidance = "RetryPrimitive" in content or "primitives" in content.lower()
         assert has_primitive_guidance, f"{path.name} should mention primitives usage"
 
