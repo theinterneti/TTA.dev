@@ -13,7 +13,7 @@ the current `main` branch before any code changes.
 
 | Check | Tool | Status | Count |
 |-------|------|--------|-------|
-| Linting | `uv run ruff check .` | ⚠️ Errors | 42 errors (38 auto-fixable) |
+| Linting | `uv run ruff check .` | ⚠️ Errors | 91 errors (38 auto-fixable) after setting `line-length = 88` |
 | Type Checking | `uvx pyright platform/` | ❌ Failing | 326 errors, 16 warnings |
 | Tests | `uv run pytest` | ✅ Passing | 221 passed, 4 skipped |
 | Coverage | `--cov=platform` | ⚠️ Below target | 47% (target: 80%/100%) |
@@ -34,9 +34,11 @@ the current `main` branch before any code changes.
 All 38 auto-fixable errors in this file can be resolved in one command.
 The 4 remaining non-auto-fixable errors need manual attention.
 
+- [ ] Update `pyproject.toml`: change `line-length = 100` to `line-length = 88` to match
+  the enforced standard in CLAUDE.md and `.github/copilot-instructions.md`
 - [ ] Run `uv run ruff check . --fix` to resolve 38 auto-fixable violations
 - [ ] Fix remaining 4 non-auto-fixable errors in `.github/scripts/workflow-migration.py`:
-  - `E501` — shorten lines >100 chars (note: pyproject.toml sets `line-length = 100`)
+  - `E501` — shorten lines >88 chars (will become violations once `line-length = 88` is set)
   - `UP035`/`UP006` residuals — replace all `typing.Dict` / `typing.List` usages with built-in `dict` / `list`
 - [ ] Confirm zero errors: `uv run ruff check .`
 
@@ -48,7 +50,7 @@ The 4 remaining non-auto-fixable errors need manual attention.
 | UP035 | `typing.Dict`/`typing.List` deprecated | 2 | ✅ |
 | UP006 | Use `dict`/`list` for type annotations | 2 | ✅ |
 | W293 | Blank line contains whitespace | 33+ | ✅ |
-| E501 | Line too long (>100 chars) | 4 | ❌ manual |
+| E501 | Line too long (>88 chars) | 4+ | ❌ manual |
 
 ### 1.2 — Fix Pyright Type Errors
 
