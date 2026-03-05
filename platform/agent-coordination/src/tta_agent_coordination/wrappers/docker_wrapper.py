@@ -271,8 +271,10 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
                     "name": container.name,
                     "status": container.status,
                     "image": container.image.tags[0]
-                    if container.image.tags
-                    else container.image.id,
+                    if container.image is not None and container.image.tags
+                    else (
+                        container.image.id if container.image is not None else "unknown"
+                    ),
                 }
             )
 

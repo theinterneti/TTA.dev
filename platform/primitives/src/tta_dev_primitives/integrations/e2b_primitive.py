@@ -278,13 +278,14 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
             self._sandbox = await AsyncSandbox.create(timeout=self.session_max_age)
 
         self._session_created_at = time.time()
-        logger.info(
-            f"Sandbox created: {self._sandbox.sandbox_id}",
-            extra={
-                "sandbox_id": self._sandbox.sandbox_id,
-                "template_id": self.template_id,
-            },
-        )
+        if self._sandbox is not None:
+            logger.info(
+                f"Sandbox created: {self._sandbox.sandbox_id}",
+                extra={
+                    "sandbox_id": self._sandbox.sandbox_id,
+                    "template_id": self.template_id,
+                },
+            )
 
     async def _run_code_with_retries(self, code: str, timeout: int) -> object:
         """Run code in the sandbox with short retries to tolerate startup races.

@@ -6,7 +6,7 @@ Exposes TTA.dev analysis and primitive recommendations as MCP tools.
 
 import argparse
 import sys
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import structlog
 
@@ -19,12 +19,15 @@ except ImportError:
     MCP_AVAILABLE = False
     FastMCP = None  # type: ignore
 
+if TYPE_CHECKING:
+    from mcp.server.fastmcp import FastMCP
+
 from tta_dev_primitives.analysis import TTAAnalyzer
 
 logger = structlog.get_logger("tta_dev.mcp")
 
 
-def create_server() -> "FastMCP":
+def create_server() -> Any:
     """Create and configure the MCP server.
 
     Returns:
@@ -33,7 +36,7 @@ def create_server() -> "FastMCP":
     Raises:
         ImportError: If MCP package is not installed
     """
-    if not MCP_AVAILABLE:
+    if not MCP_AVAILABLE or FastMCP is None:
         raise ImportError("MCP package not installed. Install with: uv add mcp")
 
     # Create server

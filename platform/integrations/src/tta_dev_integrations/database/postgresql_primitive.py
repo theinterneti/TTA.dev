@@ -1,11 +1,23 @@
 """PostgreSQL integration primitive - SKELETON."""
 
 # TODO: Implement PostgreSQLPrimitive
-# Direct PostgreSQL database access
-#
-# from tta_dev_integrations.database.base import DatabasePrimitive
-# import asyncpg
-#
-# class PostgreSQLPrimitive(DatabasePrimitive):
-#     """PostgreSQL database integration."""
-#     pass
+# Direct PostgreSQL database access via asyncpg
+
+from tta_dev_primitives import WorkflowContext
+
+from tta_dev_integrations.database.base import (
+    DatabasePrimitive,
+    DatabaseQuery,
+    DatabaseResult,
+)
+
+
+class PostgreSQLPrimitive(DatabasePrimitive):
+    """PostgreSQL database integration (stub)."""
+
+    async def _execute_impl(
+        self,
+        input_data: DatabaseQuery,
+        context: WorkflowContext,
+    ) -> DatabaseResult:
+        raise NotImplementedError("PostgreSQLPrimitive is not yet implemented")

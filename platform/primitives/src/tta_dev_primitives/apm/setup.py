@@ -72,7 +72,7 @@ def setup_apm(
     # Setup tracing
     _tracer_provider = TracerProvider(resource=resource)
 
-    if enable_console:
+    if enable_console and _tracer_provider is not None:
         # Add console exporter for debugging
         console_processor = BatchSpanProcessor(ConsoleSpanExporter())
         _tracer_provider.add_span_processor(console_processor)

@@ -58,6 +58,8 @@ def start_prometheus_exporter(port: int = 9464, host: str = "0.0.0.0") -> bool:
 
     try:
         # Start HTTP server
+        if start_http_server is None:
+            return False
         start_http_server(port, addr=host)
         _exporter_running = True
         _exporter_port = port
@@ -95,6 +97,8 @@ class TTAPrometheusExporter:
             return True
 
         try:
+            if REGISTRY is None or start_http_server is None:
+                return False
             # Register our custom collector
             REGISTRY.register(self)
 
@@ -113,7 +117,8 @@ class TTAPrometheusExporter:
         """Stop the metrics server."""
         if self.running:
             try:
-                REGISTRY.unregister(self)
+                if REGISTRY is not None:
+                    REGISTRY.unregister(self)
             except (KeyError, ValueError):
                 pass  # Already unregistered
             self.running = False
