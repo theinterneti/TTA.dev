@@ -2,6 +2,8 @@
 
 Universal entry point for all AI agents working in this repository.
 
+Boundary Rules: Write all project documentation, status updates, and notes exclusively to docs/kb-exports/. Never create or modify .md files in the project root or source directories unless explicitly asked to
+
 ## What is TTA.dev?
 
 A Python monorepo providing composable workflow primitives, observability, and multi-agent coordination for building reliable AI applications.
