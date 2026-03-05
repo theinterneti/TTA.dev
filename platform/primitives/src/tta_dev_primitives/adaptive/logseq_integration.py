@@ -179,7 +179,7 @@ class LogseqStrategyIntegration:
         performance_history_table = f"""
 | Date | Success Rate | Avg Latency | Observations |
 |------|--------------|-------------|--------------|
-| {datetime.now().strftime("%Y-%m-%d")} | {strategy.metrics.success_rate:.1%} | {strategy.metrics.avg_latency_ms:.1f}ms | {strategy.metrics.contexts_seen} |
+| {datetime.now().strftime("%Y-%m-%d")} | {strategy.metrics.success_rate:.1%} | {strategy.metrics.avg_latency * 1000:.1f}ms | {len(strategy.metrics.contexts_seen)} |
 """
         # Query for related strategies - adjust query as needed
         related_strategies_query = f"{{query (and [[Strategies]] [[{service_name}]])}}"
@@ -190,7 +190,7 @@ class LogseqStrategyIntegration:
 **Type:** {primitive_type}
 **Context:** {context}
 **Created:** {datetime.now().strftime("%Y-%m-%d")}
-**Performance:** {strategy.metrics.success_rate:.1%} success, {strategy.metrics.avg_latency_ms:.1f}ms avg latency
+**Performance:** {strategy.metrics.success_rate:.1%} success, {strategy.metrics.avg_latency * 1000:.1f}ms avg latency
 
 ## Parameters
 
@@ -225,7 +225,7 @@ class LogseqStrategyIntegration:
         if notes:
             entry += f"  - Notes: {notes}\n"
         if metrics:
-            entry += f"  - Metrics: Success Rate={metrics.success_rate:.1%}, Avg Latency={metrics.avg_latency_ms:.1f}ms, Observations={metrics.contexts_seen}\n"
+            entry += f"  - Metrics: Success Rate={metrics.success_rate:.1%}, Avg Latency={metrics.avg_latency * 1000:.1f}ms, Observations={len(metrics.contexts_seen)}\n"
         return entry
 
     def _format_parameters(self, parameters: dict[str, Any]) -> str:
@@ -248,9 +248,10 @@ async def _example_usage() -> None:
         name="test_strategy_v1",
         description="A test strategy",
         parameters={"timeout": 10, "retries": 2},
-        metrics=StrategyMetrics(success_rate=0.95, avg_latency_ms=500, contexts_seen=5),
+        context_pattern="development",
+        metrics=StrategyMetrics(success_count=95, total_executions=100, total_latency=47.5),
     )
-    mock_metrics = StrategyMetrics(success_rate=0.98, avg_latency_ms=450, contexts_seen=10)
+    mock_metrics = StrategyMetrics(success_count=98, total_executions=100, total_latency=45.0)
 
     # Initialize integration
     logseq_integration = LogseqStrategyIntegration("example_service")
