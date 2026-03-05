@@ -3067,6 +3067,7 @@ dependencies = [
     { name = "pygithub" },
     { name = "pytest-json-report" },
     { name = "tta-dev-primitives" },
+    { name = "universal-agent-context" },
 ]
 
 [package.optional-dependencies]
@@ -3089,6 +3090,7 @@ requires-dist = [
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.11.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
     { name = "tta-dev-primitives", editable = "platform/primitives" },
+    { name = "universal-agent-context", editable = "platform/agent-context" },
 ]
 provides-extras = ["dev"]
 
