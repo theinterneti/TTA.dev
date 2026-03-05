@@ -20,15 +20,14 @@ TTA.dev/
 │   ├── agent-context/     # universal-agent-context v1.0.0
 │   ├── agent-coordination/# tta-agent-coordination (active dev)
 │   ├── integrations/      # tta-dev-integrations v0.1.0
-│   ├── documentation/     # tta-documentation-primitives
-│   └── kb-automation/     # tta-kb-automation
+│   └── agent-coordination/# tta-agent-coordination (active dev)
 ├── apps/                  # observability-ui, n8n, streamlit-mvp
 ├── templates/             # Vibe coding templates
 ├── docs/                  # Architecture, guides, agent docs
+│   └── kb-exports/        # Atomic notes — ingested by TTA-notes KB
 ├── tests/                 # Integration tests
 ├── scripts/               # Automation and validation scripts
 ├── data/ace_playbooks/    # ACE agent playbooks
-├── logseq/                # Knowledge base + TODO management
 ├── .hindsight/            # Cross-agent persistent memory
 ├── .cline/                # Cline agent config
 ├── .augment/              # Augment CLI agent config
@@ -74,8 +73,8 @@ uv run pytest -v
 
 ## TODO Management
 
-All TODOs go in Logseq (`logseq/journals/YYYY_MM_DD.md`).
-Tags: `#dev-todo`, `#learning-todo`, `#template-todo`, `#ops-todo`
+All TODOs go in `docs/kb-exports/` as atomic notes (`type: todo`). Use the `create-atomic-note` skill (`.claude/skills/create-atomic-note/SKILL.md`).
+Tags: `dev-todo`, `learning-todo`, `template-todo`, `ops-todo`
 
 ## Multi-Agent Context
 
@@ -97,3 +96,4 @@ Cross-agent memory lives in `.hindsight/`. Claude Code's own persistent memory i
 - `docs/architecture/Overview.md` — system architecture
 - `.cline/instructions.md` — Cline-specific instructions
 - `MCP_TOOL_REGISTRY.md` — available MCP tools
+- `.claude/skills/create-atomic-note/SKILL.md` — post-task documentation workflow

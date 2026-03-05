@@ -22,33 +22,35 @@ TTA.dev is a production-ready **AI development toolkit** providing:
 For a complete list of available tools (Context7, AI Toolkit, Grafana, etc.), see:
 [`MCP_TOOL_REGISTRY.md`](MCP_TOOL_REGISTRY.md)
 
-### 📋 TODO Management & Knowledge Base
+### 🔍 Pre-Task: Search for Context First (MANDATORY)
 
-**IMPORTANT:** All agents must use the Logseq TODO management system. Refer to the `.clinerules` for detailed tag conventions and properties.
+**Before executing any significant task**, query the TTA-notes KB via MCP:
 
-**🧭 Knowledge Base Hub:** [`docs/knowledge-base/README.md`](docs/knowledge-base/README.md) - **START HERE** for intelligent navigation between documentation and knowledge base systems.
+```
+Tool: tta-notes-kb → search_kb("<topic you're about to work on>")
+Tool: tta-notes-kb → get_high_priority_todos()
+```
 
-- **📐 TODO Architecture:** [`logseq/pages/TTA.dev/TODO Architecture.md`](logseq/pages/TTA.dev___TODO Architecture.md) - Complete system design
-- **📊 Main Dashboard:** [`logseq/pages/TODO Management System.md`](logseq/pages/TODO Management System.md) - Active queries
-- **📋 Templates:** [`logseq/pages/TODO Templates.md`](logseq/pages/TODO Templates.md) - Copy-paste patterns
-- **🎓 Learning Paths:** [`logseq/pages/TTA.dev/Learning Paths.md`](logseq/pages/TTA.dev___Learning Paths.md) - Structured sequences
-- **📈 Metrics:** [`logseq/pages/TTA.dev/TODO Metrics Dashboard.md`](logseq/pages/TTA.dev___TODO Metrics Dashboard.md) - Analytics
-- **⚡ Quick Reference:** [`logseq/pages/TODO Architecture Quick Reference.md`](logseq/pages/TODO Architecture Quick Reference.md) - Fast lookup
+This surfaces prior decisions, known issues, and outstanding work that may affect your approach.
 
-**Package Dashboards:**
+### 📝 Post-Task: Document Your Work (MANDATORY)
 
-- [`TTA.dev/Packages/tta-dev-primitives/TODOs`](logseq/pages/TTA.dev___Packages___tta-dev-primitives___TODOs.md) - Core primitives ✅
-- [`TTA.dev/Packages/tta-observability-integration/TODOs`](logseq/pages/TTA.dev___Packages___tta-observability-integration___TODOs.md) - Observability ✅
-- [`TTA.dev/Packages/universal-agent-context/TODOs`](logseq/pages/TTA.dev___Packages___universal-agent-context___TODOs.md) - Agent context ✅
+After completing any significant task, use the `create-atomic-note` skill:
 
-**Daily Journal:** Add TODOs to `logseq/journals/YYYY_MM_DD.md`
+1. Read `.claude/skills/create-atomic-note/SKILL.md` for the full template
+2. Create `docs/kb-exports/YYYY-MM-DD_<slug>.md` — one topic, one file
+3. Required YAML frontmatter: `type`, `priority`, `status`, `tags`, `source_agent`, `date`, `related_files`
 
-**Tag Convention:**
+The `TTA-notes` repo ingests `docs/kb-exports/` periodically.
 
-- `#dev-todo` - Development work (building TTA.dev itself)
-- `#learning-todo` - User education (tutorials, flashcards, exercises)
-- `#template-todo` - Reusable patterns (for agents/users)
-- `#ops-todo` - Infrastructure (deployment, monitoring)
+### 📋 TODO Management
+
+Record TODOs as atomic notes with `type: todo` in `docs/kb-exports/`. Tag convention:
+
+- `dev-todo` - Development work (building TTA.dev itself)
+- `learning-todo` - User education (tutorials, flashcards, exercises)
+- `template-todo` - Reusable patterns (for agents/users)
+- `ops-todo` - Infrastructure (deployment, monitoring)
 
 ### 🧠 Hindsight Memory Architecture
 
@@ -112,7 +114,7 @@ For GitHub Copilot users, comprehensive instructions are available in [`.github/
 
 **Full toolset definitions:** [`.vscode/copilot-toolsets.jsonc`](.vscode/copilot-toolsets.jsonc)
 
-Additionally, context-specific modular instructions are in `.github/instructions/` for tests, scripts, documentation, package source, and Logseq integration.
+Additionally, context-specific modular instructions are in `.github/instructions/` for tests, scripts, documentation, and package source.
 
 ### ⚡ Before You Code: Primitive Usage Rules
 
@@ -178,7 +180,7 @@ result = await workflow.execute(input_data, context)
 | **Recovery** | `RetryPrimitive`, `FallbackPrimitive`, `TimeoutPrimitive` |
 | **Performance** | `CachePrimitive`, `MemoryPrimitive` |
 | **Collaboration** | `GitCollaborationPrimitive` |
-| **Adaptive** | `AdaptiveRetryPrimitive`, `LogseqStrategyIntegration` |
+| **Adaptive** | `AdaptiveRetryPrimitive` |
 | **Testing** | `MockPrimitive` |
 
 ## Documentation
@@ -197,5 +199,4 @@ result = await workflow.execute(input_data, context)
 | `pip install` | `uv add` |
 
 
----
-**Logseq:** [[TTA.dev/Agents]]
+

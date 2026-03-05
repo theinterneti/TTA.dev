@@ -42,9 +42,16 @@
                 "HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/.hypertool",
                 "HYPERTOOL_SERVERS_FILE": "${workspaceFolder}/.hypertool/mcp_servers.json",
                 "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",
-                "LOGSEQ_API_TOKEN": "${env:LOGSEQ_API_TOKEN}"
+                "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
             },
             "description": "Hypertool MCP Loader - Persona-based tool orchestration",
+            "disabled": false
+        },
+        "tta-notes-kb": {
+            "command": "python",
+            "args": ["/home/thein/repos/TTA-notes/mcp_server.py"],
+            "env": {},
+            "description": "TTA-notes KB — search_kb, get_high_priority_todos",
             "disabled": false
         },
         "tta-dev": {

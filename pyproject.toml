@@ -12,8 +12,6 @@ members = [
     "platform/observability",
     "apps/observability-ui",
     "platform/agent-context",
-    "platform/documentation",
-    "platform/kb-automation",
     "platform/agent-coordination",
 ]
 

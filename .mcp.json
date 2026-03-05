@@ -15,11 +15,15 @@
         "HYPERTOOL_CONFIG_DIR": "/home/thein/repos/TTA.dev/.hypertool",
         "HYPERTOOL_SERVERS_FILE": "/home/thein/repos/TTA.dev/.hypertool/mcp_servers.json",
         "HYPERTOOL_ENABLE_CONFIG_TOOLS_MENU": "false",
-        "LOGSEQ_API_TOKEN": "${LOGSEQ_API_TOKEN}",
-        "LOGSEQ_API_URL": "http://127.0.0.1:12315",
         "GITHUB_TOKEN": "${GITHUB_TOKEN}",
         "HOME": "${HOME}"
       }
+    },
+    "tta-notes-kb": {
+      "command": "python",
+      "args": ["/home/thein/repos/TTA-notes/mcp_server.py"],
+      "env": {},
+      "description": "TTA-notes Knowledge Base — exposes search_kb and get_high_priority_todos"
     }
   }
 }
