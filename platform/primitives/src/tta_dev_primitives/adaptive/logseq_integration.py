@@ -176,21 +176,29 @@ class LogseqStrategyIntegration:
     ) -> str:
         """Formats the content for a Logseq strategy page."""
         # Basic table for performance history - could be more sophisticated
+        date = datetime.now().strftime("%Y-%m-%d")
+        rate = f"{strategy.metrics.success_rate:.1%}"
+        latency = f"{strategy.metrics.avg_latency * 1000:.1f}ms"
+        contexts = len(strategy.metrics.contexts_seen)
         performance_history_table = f"""
-| Date | Success Rate | Avg Latency | Observations |
-|------|--------------|-------------|--------------|
-| {datetime.now().strftime("%Y-%m-%d")} | {strategy.metrics.success_rate:.1%} | {strategy.metrics.avg_latency * 1000:.1f}ms | {len(strategy.metrics.contexts_seen)} |
+| Date | Success Rate | Avg Latency | Contexts |
+|------|--------------|-------------|----------|
+| {date} | {rate} | {latency} | {contexts} |
 """
         # Query for related strategies - adjust query as needed
         related_strategies_query = f"{{query (and [[Strategies]] [[{service_name}]])}}"
+
+        perf_rate = f"{strategy.metrics.success_rate:.1%}"
+        perf_latency = f"{strategy.metrics.avg_latency * 1000:.1f}ms"
+        created = datetime.now().strftime("%Y-%m-%d")
 
         content = f"""
 # Strategy - {service_name}_{strategy.name}
 
 **Type:** {primitive_type}
 **Context:** {context}
-**Created:** {datetime.now().strftime("%Y-%m-%d")}
-**Performance:** {strategy.metrics.success_rate:.1%} success, {strategy.metrics.avg_latency * 1000:.1f}ms avg latency
+**Created:** {created}
+**Performance:** {perf_rate} success, {perf_latency} avg latency
 
 ## Parameters
 
@@ -221,11 +229,21 @@ class LogseqStrategyIntegration:
     ) -> str:
         """Formats a Logseq journal entry for a learning event."""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        entry = f"- **{event_type}** for **{strategy_name}** ({primitive_type} in context '{context}') at {timestamp}\n"
+        header = (
+            f"- **{event_type}** for **{strategy_name}**"
+            f" ({primitive_type} in context '{context}')"
+            f" at {timestamp}\n"
+        )
+        entry = header
         if notes:
             entry += f"  - Notes: {notes}\n"
         if metrics:
-            entry += f"  - Metrics: Success Rate={metrics.success_rate:.1%}, Avg Latency={metrics.avg_latency * 1000:.1f}ms, Observations={len(metrics.contexts_seen)}\n"
+            rate = f"{metrics.success_rate:.1%}"
+            latency = f"{metrics.avg_latency * 1000:.1f}ms"
+            ctx_count = len(metrics.contexts_seen)
+            entry += (
+                f"  - Metrics: Success Rate={rate}, Avg Latency={latency}, Contexts={ctx_count}\n"
+            )
         return entry
 
     def _format_parameters(self, parameters: dict[str, Any]) -> str:
@@ -249,9 +267,19 @@ async def _example_usage() -> None:
         description="A test strategy",
         parameters={"timeout": 10, "retries": 2},
         context_pattern="development",
-        metrics=StrategyMetrics(success_count=95, total_executions=100, total_latency=47.5),
+        metrics=StrategyMetrics(
+            success_count=95,
+            failure_count=5,
+            total_executions=100,
+            total_latency=47.5,
+        ),
     )
-    mock_metrics = StrategyMetrics(success_count=98, total_executions=100, total_latency=45.0)
+    mock_metrics = StrategyMetrics(
+        success_count=98,
+        failure_count=2,
+        total_executions=100,
+        total_latency=45.0,
+    )
 
     # Initialize integration
     logseq_integration = LogseqStrategyIntegration("example_service")
