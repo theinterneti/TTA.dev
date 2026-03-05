@@ -141,7 +141,7 @@ context = WorkflowContext(
     correlation_id="req-123",
     data={"user_id": "user-789"},
 )
-result = await workflow.execute(context, input_data)
+result = await workflow.execute(input_data, context)
 ```
 
 ## Key Files

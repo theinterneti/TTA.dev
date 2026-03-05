@@ -44,7 +44,7 @@ for attempt in range(3):  # WRONG
 | Manual caching dicts | `CachePrimitive` |
 | Global variables for state | `WorkflowContext` |
 | `pip install` | `uv add` |
-| `Optional[str]` | `str \| None` |
+| `Optional[str]` | `str | None` |
 
 #### State Management
 
