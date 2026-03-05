@@ -3,21 +3,17 @@
 
 set -e
 
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 echo "🔧 Setting up TTA.dev persistence..."
 
-# 1. Add restart policies to docker-compose
-echo "📝 Updating docker-compose.integration.yml with restart policies..."
-cd /home/thein/repos/TTA.dev/packages/tta-dev-primitives
-
-# Backup original
-cp docker-compose.integration.yml docker-compose.integration.yml.backup
-
-# Add restart: unless-stopped to all services
-# (This will be done manually to preserve formatting)
+# 1. Ensure restart policies are set
+echo "📝 docker-compose.yml already includes restart: unless-stopped policies..."
+cd "$REPO_ROOT"
 
 # 2. Install systemd service for agent-activity-tracker
 echo "📦 Installing systemd service..."
-sudo cp /home/thein/repos/TTA.dev/scripts/agent-activity-tracker.service /etc/systemd/system/
+sudo cp "$REPO_ROOT/scripts/agent-activity-tracker.service" /etc/systemd/system/
 sudo systemctl daemon-reload
 
 # 3. Enable and start services
@@ -27,8 +23,8 @@ sudo systemctl start agent-activity-tracker
 
 # 4. Start observability stack
 echo "🔭 Starting observability stack..."
-cd /home/thein/repos/TTA.dev/packages/tta-dev-primitives
-docker-compose -f docker-compose.integration.yml up -d
+cd "$REPO_ROOT"
+docker compose --profile observability up -d
 
 # 5. Verify
 echo ""
@@ -40,7 +36,7 @@ echo "  - Docker containers: $(docker ps --format '{{.Names}}' | grep -E '(jaege
 echo ""
 echo "🔍 View logs:"
 echo "  - Agent tracker: sudo journalctl -u agent-activity-tracker -f"
-echo "  - Docker: docker-compose -f docker-compose.integration.yml logs -f"
+echo "  - Docker: docker compose --profile observability logs -f"
 echo ""
 echo "🎯 Access:"
 echo "  - Metrics: http://localhost:8001/metrics"

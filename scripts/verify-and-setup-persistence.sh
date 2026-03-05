@@ -4,6 +4,8 @@
 
 set -e
 
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -48,18 +50,17 @@ fi
 
 # 3. Check restart policies
 echo -n "Checking Docker restart policies... "
-cd /home/thein/repos/TTA.dev/packages/tta-dev-primitives
-if grep -q "restart: unless-stopped" docker-compose.integration.yml; then
+if grep -q "restart: unless-stopped" "$REPO_ROOT/docker-compose.yml"; then
     echo -e "${GREEN}✅ Configured${NC}"
 else
     echo -e "${RED}❌ Not configured${NC}"
-    echo "   Note: docker-compose.integration.yml needs restart policies"
+    echo "   Note: docker-compose.yml needs restart policies"
     ALL_GOOD=false
 fi
 
 # 4. Check git hook
 echo -n "Checking git post-commit hook... "
-if [ -x "/home/thein/repos/TTA.dev/.git/hooks/post-commit" ]; then
+if [ -x "$REPO_ROOT/.git/hooks/post-commit" ]; then
     echo -e "${GREEN}✅ Installed${NC}"
 else
     echo -e "${YELLOW}⚠️  Not found or not executable${NC}"
@@ -100,8 +101,7 @@ if [ "$NEEDS_SYSTEMD" = true ] || [ "$NEEDS_DOCKER_START" = true ]; then
 
     if [ "$NEEDS_DOCKER_START" = true ]; then
         echo "2. Start Docker containers only:"
-        echo "   cd packages/tta-dev-primitives"
-        echo "   docker-compose -f docker-compose.integration.yml up -d"
+        echo "   docker compose --profile observability up -d"
         echo ""
     fi
 

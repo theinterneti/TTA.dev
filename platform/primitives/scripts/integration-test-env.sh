@@ -24,8 +24,9 @@ NC='\033[0m' # No Color
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-COMPOSE_FILE="$PROJECT_DIR/docker-compose.integration.yml"
+PROJECT_DIR="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || cd "$SCRIPT_DIR/../../../.." && pwd)"
+COMPOSE_FILE="$PROJECT_DIR/docker-compose.yml"
+COMPOSE_PROFILE="test"
 
 # Functions
 log_info() {
@@ -60,7 +61,7 @@ start_services() {
     log_info "Starting OpenTelemetry integration test environment..."
     
     cd "$PROJECT_DIR"
-    docker-compose -f "$COMPOSE_FILE" up -d
+    docker compose --profile "$COMPOSE_PROFILE" up -d
     
     log_info "Waiting for services to be ready..."
     sleep 10
@@ -81,7 +82,7 @@ stop_services() {
     log_info "Stopping OpenTelemetry integration test environment..."
     
     cd "$PROJECT_DIR"
-    docker-compose -f "$COMPOSE_FILE" stop
+    docker compose --profile "$COMPOSE_PROFILE" stop
     
     log_success "Services stopped successfully!"
 }
@@ -98,14 +99,14 @@ check_status() {
     log_info "Checking service status..."
     
     cd "$PROJECT_DIR"
-    docker-compose -f "$COMPOSE_FILE" ps
+    docker compose --profile "$COMPOSE_PROFILE" ps
 }
 
 view_logs() {
     log_info "Viewing service logs (Ctrl+C to exit)..."
     
     cd "$PROJECT_DIR"
-    docker-compose -f "$COMPOSE_FILE" logs -f
+    docker compose --profile "$COMPOSE_PROFILE" logs -f
 }
 
 check_service_health() {
@@ -148,14 +149,14 @@ run_tests() {
     cd "$PROJECT_DIR"
     
     # Check if services are running
-    if ! docker-compose -f "$COMPOSE_FILE" ps | grep -q "Up"; then
+    if ! docker compose --profile "$COMPOSE_PROFILE" ps | grep -q "Up"; then
         log_warning "Services are not running. Starting them now..."
         start_services
     fi
     
     # Run tests
     log_info "Executing pytest..."
-    uv run pytest tests/integration/test_otel_backend_integration.py -v
+    uv run pytest platform/primitives/tests/integration/test_otel_backend_integration.py -v
     
     if [ $? -eq 0 ]; then
         log_success "All integration tests passed!"
@@ -169,7 +170,7 @@ clean_environment() {
     log_info "Cleaning up OpenTelemetry integration test environment..."
     
     cd "$PROJECT_DIR"
-    docker-compose -f "$COMPOSE_FILE" down -v
+    docker compose --profile "$COMPOSE_PROFILE" down -v
     
     log_success "Environment cleaned successfully!"
 }

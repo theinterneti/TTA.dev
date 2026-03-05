@@ -99,10 +99,9 @@ Created in `logseq/journals/2025_11_15.md`:
 
 ```bash
 # 1. Keep Docker running (for comparison)
-docker-compose -f docker-compose.integration.yml up -d
+docker compose --profile observability up -d
 
-# 2. Install Alloy using automated script
-cd /home/thein/repos/TTA.dev
+# 2. Install Alloy using automated script (run from repo root)
 sudo GRAFANA_CLOUD_TOKEN="$(grep GRAFANA_CLOUD_API_KEY ~/.env.tta-dev | cut -d= -f2)" \
      ./scripts/setup-native-observability.sh
 
@@ -117,7 +116,7 @@ sudo GRAFANA_CLOUD_TOKEN="$(grep GRAFANA_CLOUD_API_KEY ~/.env.tta-dev | cut -d= 
 
 ```bash
 # 1. Stop Docker services
-docker-compose -f docker-compose.integration.yml down
+docker compose --profile observability down
 
 # 2. Verify Alloy still running
 sudo systemctl status alloy
@@ -284,7 +283,7 @@ sudo systemctl stop alloy
 sudo systemctl disable alloy
 
 # Restart Docker
-docker-compose -f docker-compose.integration.yml up -d
+docker compose --profile observability up -d
 ```
 
 ---
@@ -353,7 +352,7 @@ After successful migration:
 ```bash
 sudo apt-get install podman podman-compose
 alias docker=podman
-podman-compose -f docker-compose.integration.yml up -d
+podman-compose -f docker-compose.yml --profile observability up -d
 ```
 
 ### Option 3: Individual Native Binaries
@@ -418,7 +417,6 @@ podman-compose -f docker-compose.integration.yml up -d
 
 2. **Run Installation:**
    ```bash
-   cd /home/thein/repos/TTA.dev
    sudo GRAFANA_CLOUD_TOKEN="<token-from-env-file>" \
         ./scripts/setup-native-observability.sh
    ```

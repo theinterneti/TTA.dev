@@ -13,14 +13,14 @@ This directory contains integration tests for verifying that TTA.dev primitives 
 ### 1. Start OpenTelemetry Backends
 
 ```bash
-# From packages/tta-dev-primitives directory
-docker-compose -f docker-compose.integration.yml up -d
+# From the repository root
+docker compose --profile test up -d
 
 # Wait for services to be ready (~10 seconds)
 sleep 10
 
 # Verify services are running
-docker-compose -f docker-compose.integration.yml ps
+docker compose --profile test ps
 ```
 
 ### 2. Run Integration Tests
@@ -58,10 +58,10 @@ uv run pytest tests/integration/test_otel_backend_integration.py -v -s
 
 ```bash
 # Stop and remove containers
-docker-compose -f docker-compose.integration.yml down
+docker compose --profile test down
 
 # Stop and remove containers + volumes
-docker-compose -f docker-compose.integration.yml down -v
+docker compose --profile test down -v
 ```
 
 ## Architecture
@@ -140,18 +140,18 @@ Edit configuration files in `tests/integration/config/`:
 
 ```bash
 # Check Docker logs
-docker-compose -f docker-compose.integration.yml logs
+docker compose --profile test logs
 
 # Check specific service
-docker-compose -f docker-compose.integration.yml logs jaeger
-docker-compose -f docker-compose.integration.yml logs prometheus
+docker compose --profile test logs jaeger
+docker compose --profile test logs prometheus
 ```
 
 ### Tests Skipped
 
 If tests are skipped with "OpenTelemetry backends not available":
 
-1. Verify services are running: `docker-compose ps`
+1. Verify services are running: `docker compose --profile test ps`
 2. Check service health:
    ```bash
    curl http://localhost:16686/api/services
@@ -164,7 +164,7 @@ If tests are skipped with "OpenTelemetry backends not available":
 1. Verify OTLP exporter is configured correctly
 2. Check OpenTelemetry Collector logs:
    ```bash
-   docker-compose -f docker-compose.integration.yml logs otel-collector
+   docker compose --profile test logs otel-collector
    ```
 3. Verify test execution completed successfully
 4. Wait a few seconds for spans to be exported (batch processing)
@@ -215,20 +215,16 @@ jobs:
 
       - name: Start OpenTelemetry backends
         run: |
-          cd packages/tta-dev-primitives
-          docker-compose -f docker-compose.integration.yml up -d
+          docker compose --profile test up -d
           sleep 15
 
       - name: Run integration tests
         run: |
-          cd packages/tta-dev-primitives
-          uv run pytest tests/integration/test_otel_backend_integration.py -v
+          uv run pytest platform/primitives/tests/integration/test_otel_backend_integration.py -v
 
       - name: Stop backends
         if: always()
-        run: |
-          cd packages/tta-dev-primitives
-          docker-compose -f docker-compose.integration.yml down -v
+        run: docker compose --profile test down -v
 ```
 
 ## References
