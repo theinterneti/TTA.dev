@@ -55,7 +55,9 @@ def test_copilot_instructions_has_key_sections():
         "Workflow Primitives",
     ]
     for section in required:
-        assert section in content, f"Missing section '{section}' in copilot-instructions.md"
+        assert section in content, (
+            f"Missing section '{section}' in copilot-instructions.md"
+        )
 
 
 def test_all_expected_instruction_files_exist():
@@ -73,7 +75,9 @@ def test_instruction_files_have_valid_frontmatter():
         assert "applyTo" in fm, f"{filename}: missing 'applyTo' in frontmatter"
         assert "description" in fm, f"{filename}: missing 'description' in frontmatter"
         assert isinstance(fm["applyTo"], str), f"{filename}: 'applyTo' must be a string"
-        assert len(fm["description"]) > 0, f"{filename}: 'description' must not be empty"
+        assert len(fm["description"]) > 0, (
+            f"{filename}: 'description' must not be empty"
+        )
 
 
 def test_instruction_files_have_markdown_headers():
@@ -165,7 +169,9 @@ def test_no_exact_pattern_duplicates():
         fm = _parse_frontmatter(path)
         pattern = fm["applyTo"]
         if pattern in seen:
-            raise AssertionError(f"Duplicate applyTo '{pattern}' in {filename} and {seen[pattern]}")
+            raise AssertionError(
+                f"Duplicate applyTo '{pattern}' in {filename} and {seen[pattern]}"
+            )
         seen[pattern] = filename
 
 
@@ -188,7 +194,9 @@ def test_documentation_and_logseq_overlap_acknowledged():
         "logseq files should match both"
     )
     # All logseq matches should be a subset of documentation matches
-    assert logseq_matches <= doc_matches, "Logseq files should be a subset of all markdown files"
+    assert logseq_matches <= doc_matches, (
+        "Logseq files should be a subset of all markdown files"
+    )
 
 
 # --- Content consistency checks ---
@@ -198,9 +206,9 @@ def test_consistent_package_manager_guidance():
     """All files referencing package commands should use 'uv'."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
     assert "uv" in main_content, "Main instructions should mention 'uv'"
-    assert "never `pip`" in main_content.lower() or "never pip" in main_content.lower(), (
-        "Main instructions should warn against pip"
-    )
+    assert (
+        "never `pip`" in main_content.lower() or "never pip" in main_content.lower()
+    ), "Main instructions should warn against pip"
 
     # Files with shell command examples should all use 'uv' commands
     for filename in ["python.instructions.md", "scripts.instructions.md"]:
@@ -211,9 +219,14 @@ def test_consistent_package_manager_guidance():
 def test_consistent_testing_framework():
     """Both main and testing instructions should reference pytest and MockPrimitive."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
-    testing_content = (INSTRUCTIONS_DIR / "testing.instructions.md").read_text(encoding="utf-8")
+    testing_content = (INSTRUCTIONS_DIR / "testing.instructions.md").read_text(
+        encoding="utf-8"
+    )
 
-    for content, name in [(main_content, "copilot-instructions"), (testing_content, "testing")]:
+    for content, name in [
+        (main_content, "copilot-instructions"),
+        (testing_content, "testing"),
+    ]:
         assert "pytest" in content, f"{name} should reference pytest"
         assert "MockPrimitive" in content, f"{name} should reference MockPrimitive"
 
@@ -228,14 +241,18 @@ def test_consistent_primitives_over_manual_loops():
     for path in files_to_check:
         content = path.read_text(encoding="utf-8")
         # Check for specific class name OR general term (case-insensitive)
-        has_primitive_guidance = "RetryPrimitive" in content or "primitives" in content.lower()
+        has_primitive_guidance = (
+            "RetryPrimitive" in content or "primitives" in content.lower()
+        )
         assert has_primitive_guidance, f"{path.name} should mention primitives usage"
 
 
 def test_consistent_python_version():
     """All files referencing Python version should agree on 3.11+."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
-    python_content = (INSTRUCTIONS_DIR / "python.instructions.md").read_text(encoding="utf-8")
+    python_content = (INSTRUCTIONS_DIR / "python.instructions.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "3.11" in main_content, "Main instructions should specify Python 3.11+"
     assert "3.11" in python_content, "Python instructions should specify Python 3.11+"
@@ -244,7 +261,9 @@ def test_consistent_python_version():
 def test_consistent_type_hint_style():
     """All files should agree on modern type hint style."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
-    python_content = (INSTRUCTIONS_DIR / "python.instructions.md").read_text(encoding="utf-8")
+    python_content = (INSTRUCTIONS_DIR / "python.instructions.md").read_text(
+        encoding="utf-8"
+    )
 
     for content, name in [
         (main_content, "copilot-instructions"),
@@ -257,7 +276,9 @@ def test_consistent_type_hint_style():
 def test_consistent_formatter_guidance():
     """Files referencing formatting should agree on Ruff."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
-    python_content = (INSTRUCTIONS_DIR / "python.instructions.md").read_text(encoding="utf-8")
+    python_content = (INSTRUCTIONS_DIR / "python.instructions.md").read_text(
+        encoding="utf-8"
+    )
 
     for content, name in [
         (main_content, "copilot-instructions"),

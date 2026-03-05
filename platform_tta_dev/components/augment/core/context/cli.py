@@ -107,7 +107,9 @@ def cmd_add(args):
     manager.load_session(session_file)
 
     # Add message
-    manager.add_message(session_id=session_id, role=role, content=message, importance=importance)
+    manager.add_message(
+        session_id=session_id, role=role, content=message, importance=importance
+    )
 
     # Save
     manager.save_session(session_id)

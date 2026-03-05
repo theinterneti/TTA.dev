@@ -27,7 +27,8 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers",
-        "quarantine: marks tests as quarantined — excluded from CI gate, tracked separately",
+        "quarantine: marks tests as quarantined — excluded from CI gate,"
+        " tracked separately",
     )
 
 
@@ -50,5 +51,7 @@ def pytest_collection_modifyitems(config, items):
         if quarantined:
             for item in quarantined:
                 item.add_marker(
-                    pytest.mark.skip(reason="Quarantined: run with -m quarantine to include")
+                    pytest.mark.skip(
+                        reason="Quarantined: run with -m quarantine to include"
+                    )
                 )
