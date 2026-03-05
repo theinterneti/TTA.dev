@@ -24,7 +24,8 @@ specs/
 │   ├── metrics-catalog.spec.md       # Prometheus & OTel metrics
 │   └── context-propagation.spec.md   # W3C trace context propagation
 └── packages/                          # Package-level contracts
-    └── skill-registry.spec.md         # Skill discovery & registration
+    ├── skill-registry.spec.md         # Skill discovery & registration
+    └── integration-tests.spec.md      # Cross-package integration test contracts
 ```
 
 ## SDD Phases

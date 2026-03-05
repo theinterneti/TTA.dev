@@ -276,7 +276,7 @@ How this primitive composes with `>>` and `|` operators.
 | G1 | No formal primitive specifications exist | 🔴 Critical | Spec | tta-dev-primitives | ✅ Resolved |
 | G2 | Sample specs in `docs/reference/specs/` are not TTA.dev-related | 🔴 Critical | Spec | infrastructure | ✅ Resolved |
 | G3 | No OpenTelemetry span schema specification | 🔴 Critical | Spec | tta-observability-integration | ✅ Resolved |
-| G4 | `agent-coordination` does not use `universal-agent-context` models | 🔴 Critical | Architecture | tta-agent-coordination | ⏳ Open |
+| G4 | `agent-coordination` does not use `universal-agent-context` models | 🔴 Critical | Architecture | tta-agent-coordination | ✅ Resolved |
 | G5 | No error contract for any primitive | 🟡 High | Spec | tta-dev-primitives | ✅ Resolved |
 | G6 | No observability metrics specification document | 🟡 High | Spec | tta-observability-integration | ✅ Resolved |
 | G7 | Missing spec index/README in `docs/reference/specs/` | 🟡 High | Documentation | infrastructure | ✅ Resolved |
@@ -285,8 +285,8 @@ How this primitive composes with `>>` and `|` operators.
 | G10 | `CompensationPrimitive`/`SagaPrimitive` have sparse documentation | 🟡 High | Documentation | tta-dev-primitives | ✅ Resolved |
 | G11 | No spec template or SDD guide for contributors | 🟡 High | Documentation | infrastructure | ✅ Resolved |
 | G12 | Context propagation rules not formally specified | 🟡 High | Spec | tta-observability-integration | ✅ Resolved |
-| G13 | `platform/shared/` is an empty placeholder | 🟡 Medium | Architecture | infrastructure | ⏳ Open |
-| G14 | No integration test specs for cross-package workflows | 🟡 Medium | Testing | infrastructure | ⏳ Open |
+| G13 | `platform/shared/` is an empty placeholder | 🟡 Medium | Architecture | infrastructure | ✅ Resolved |
+| G14 | No integration test specs for cross-package workflows | 🟡 Medium | Testing | infrastructure | ✅ Resolved |
 | G15 | Skills package lacks discovery mechanism specification | 🟡 Medium | Spec | tta-skill-primitives | ✅ Resolved |
 
 ### 4.2 Logseq-Compliant TODO Blocks
