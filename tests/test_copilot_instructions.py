@@ -121,8 +121,8 @@ def test_python_pattern_matches_platform_source():
     assert len(matches) > 0, "No platform source Python files found"
     for m in matches:
         rel = m.relative_to(REPO_ROOT)
-        assert str(rel).startswith("platform/"), f"Unexpected match: {rel}"
-        assert "/src/" in str(rel), f"Matched non-source file: {rel}"
+        assert rel.parts[0] == "platform", f"Unexpected match: {rel}"
+        assert "src" in rel.parts, f"Matched non-source file: {rel}"
 
 
 def test_testing_pattern_matches_test_files():
@@ -140,7 +140,7 @@ def test_scripts_pattern_matches_scripts_dir():
     assert len(matches) > 0, "No script files found"
     for m in matches:
         rel = m.relative_to(REPO_ROOT)
-        assert str(rel).startswith("scripts/"), f"Unexpected match: {rel}"
+        assert rel.parts[0] == "scripts", f"Unexpected match: {rel}"
 
 
 def test_logseq_pattern_matches_logseq_dir():
@@ -149,7 +149,7 @@ def test_logseq_pattern_matches_logseq_dir():
     assert len(matches) > 0, "No logseq markdown files found"
     for m in matches:
         rel = m.relative_to(REPO_ROOT)
-        assert str(rel).startswith("logseq/"), f"Unexpected match: {rel}"
+        assert rel.parts[0] == "logseq", f"Unexpected match: {rel}"
 
 
 def test_documentation_pattern_matches_markdown_files():

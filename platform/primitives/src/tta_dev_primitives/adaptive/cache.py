@@ -389,6 +389,9 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
         if strategy is None:
             strategy = self.baseline_strategy
 
+        if strategy is None:
+            return 0
+
         ttl_seconds = strategy.parameters.get("ttl_seconds", 3600.0)
         now = time.time()
 
