@@ -331,7 +331,7 @@ class FallbackTransformer(ast.NodeTransformer):
                         return stmt.value.func.id
         return None
 
-    def _create_fallback_call(self, primary: str, fallback: str, lineno: int) -> ast.Expr:
+    def _create_fallback_call(self, primary: str, fallback: str, lineno: int) -> ast.stmt:
         """Create FallbackPrimitive expression."""
         # fallback_workflow = FallbackPrimitive(primary=primary, fallbacks=[fallback])
         # return await fallback_workflow.execute(data, context)
