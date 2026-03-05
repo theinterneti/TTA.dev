@@ -34,13 +34,13 @@ the current `main` branch before any code changes.
 All 38 auto-fixable errors in this file can be resolved in one command.
 The 4 remaining non-auto-fixable errors need manual attention.
 
-- [ ] Update `pyproject.toml`: change `line-length = 100` to `line-length = 88` to match
+- [x] Update `pyproject.toml`: change `line-length = 100` to `line-length = 88` to match
   the enforced standard in CLAUDE.md and `.github/copilot-instructions.md`
-- [ ] Run `uv run ruff check . --fix` to resolve 38 auto-fixable violations
-- [ ] Fix remaining 4 non-auto-fixable errors in `.github/scripts/workflow-migration.py`:
+- [x] Run `uv run ruff check . --fix` to resolve 38 auto-fixable violations
+- [x] Fix remaining 4 non-auto-fixable errors in `.github/scripts/workflow-migration.py`:
   - `E501` — shorten lines >88 chars (will become violations once `line-length = 88` is set)
   - `UP035`/`UP006` residuals — replace all `typing.Dict` / `typing.List` usages with built-in `dict` / `list`
-- [ ] Confirm zero errors: `uv run ruff check .`
+- [x] Confirm zero errors: `uv run ruff check .`
 
 **Error breakdown (`.github/scripts/workflow-migration.py`):**
 
@@ -62,40 +62,40 @@ Run `uvx pyright platform/` to see the current full list. Fix in this order:
 
 The highest-impact package. Key error clusters:
 
-- [ ] `adaptive/logseq_integration.py` — `StrategyMetrics` has no `avg_latency_ms` attribute; constructor
+- [x] `adaptive/logseq_integration.py` — `StrategyMetrics` has no `avg_latency_ms` attribute; constructor
   call mismatches (`success_rate`/`avg_latency_ms` not accepted). Align call sites with the
   actual `StrategyMetrics` dataclass fields.
-- [ ] `adaptive/cache.py:392` — `"parameters"` accessed on `None`. Add a `None` guard before access.
-- [ ] `ace/benchmarks.py:219,232,235` — Constructor `__init__` overload mismatch; `str | None`
+- [x] `adaptive/cache.py:392` — `"parameters"` accessed on `None`. Add a `None` guard before access.
+- [x] `ace/benchmarks.py:219,232,235` — Constructor `__init__` overload mismatch; `str | None`
   passed where `str` is required. Add `assert` / early return guards.
-- [ ] `analysis/transformer.py:367` — Return type mismatch: `Return` assigned to `Expr`. Fix the
+- [x] `analysis/transformer.py:367` — Return type mismatch: `Return` assigned to `Expr`. Fix the
   return type annotation or the return statement.
-- [ ] `apm/setup.py:78` — `add_span_processor` called on `None`. Guard the tracer provider
+- [x] `apm/setup.py:78` — `add_span_processor` called on `None`. Guard the tracer provider
   dereference with an `if provider is not None` check.
-- [ ] `core/context_engineering.py:187–219` — Multiple `TypedDict` item access errors and
+- [x] `core/context_engineering.py:187–219` — Multiple `TypedDict` item access errors and
   `str | None` → `str` mismatches. Add `None` guards and narrow types before passing to
   functions that require `str`.
 
 #### 1.2.2 — `platform/integrations` (5 errors)
 
-- [ ] `integrations/__init__.py:57–78` — `PostgreSQLPrimitive`, `SQLitePrimitive`,
+- [x] `integrations/__init__.py:57–78` — `PostgreSQLPrimitive`, `SQLitePrimitive`,
   `ClerkAuthPrimitive`, `Auth0Primitive`, `JWTPrimitive` are listed as exports but the
   stub files only contain `# TODO: Implement`. Either remove them from `__init__.py`
   exports or implement stub classes that satisfy the import contract.
 
 #### 1.2.3 — `platform/agent-coordination` (3 errors)
 
-- [ ] `wrappers/docker_wrapper.py:273–275` — `tags` and `id` accessed on `None`. Add a
+- [x] `wrappers/docker_wrapper.py:273–275` — `tags` and `id` accessed on `None`. Add a
   `None` guard around the Docker image attribute access block.
 
 #### 1.2.4 — `platform/observability` (2 errors)
 
-- [ ] `observability/apm_setup.py:116` — `add_span_processor` called on `None`. Mirror
+- [x] `observability/apm_setup.py:116` — `add_span_processor` called on `None`. Mirror
   the fix in `platform/primitives/apm/setup.py`.
 
 #### 1.2.5 — `platform/agent-context` (7 errors in `.augment/` subdirectory)
 
-- [ ] `agent-context/.augment/context/conversation_manager.py:924–934` — `str | None`
+- [x] `agent-context/.augment/context/conversation_manager.py:924–934` — `str | None`
   declared but `Path` assigned; `str` used where `Path` methods called. Fix type
   declaration to `Path | None` and add `None` guard.
 
@@ -107,7 +107,7 @@ venv path. They do **not** indicate broken code.
 
 #### 1.2.6 — Pyright environment fix (216 false-positive import errors)
 
-- [ ] Update `pyrightconfig.json` to include `.venv/lib/python3.11/site-packages` in
+- [x] Update `pyrightconfig.json` to include `.venv/lib/python3.11/site-packages` in
   `extraPaths` so that installed dev dependencies (pytest, structlog, pydantic, etc.) are
   resolved during type checking without requiring them in every sub-package's `pyproject.toml`.
 
@@ -154,11 +154,11 @@ Current findings:
   package:: tta-kb-automation
 ```
 
-- [ ] Edit `logseq/journals/2024_12_20.md` — fix line 8 (add `#dev-todo` + properties)
-- [ ] Edit `logseq/journals/2024_12_20.md` — fix line 16 (`#ops-todo` → `#dev-todo` + properties)
-- [ ] Edit `logseq/journals/2024_12_20.md` — fix line 17 (add `type::` and `priority::`)
-- [ ] Edit `logseq/journals/2024_12_20.md` — fix line 18 (add `type::` and `priority::`)
-- [ ] Verify: `uv run python scripts/validate-todos.py` → `Compliance rate: 100.0%`
+- [x] Edit `logseq/journals/2024_12_20.md` — fix line 8 (add `#dev-todo` + properties)
+- [x] Edit `logseq/journals/2024_12_20.md` — fix line 16 (`#ops-todo` → `#dev-todo` + properties)
+- [x] Edit `logseq/journals/2024_12_20.md` — fix line 17 (add `type::` and `priority::`)
+- [x] Edit `logseq/journals/2024_12_20.md` — fix line 18 (add `type::` and `priority::`)
+- [x] Verify: `uv run python scripts/validate-todos.py` → `Compliance rate: 100.0%`
 
 ### 2.2 — Audit source-code `# TODO:` comments
 
@@ -179,7 +179,7 @@ unimplemented stubs and should either be:
 | `platform/primitives/src/tta_dev_primitives/knowledge/knowledge_base.py` | 5 | Awaiting MCP tool |
 | `platform/primitives/src/tta_dev_primitives/cli/app.py` | 2 | Template generation helpers |
 
-- [ ] For each file above: either implement the stub or add a corresponding Logseq TODO entry
+- [x] For each file above: either implement the stub or add a corresponding Logseq TODO entry
   with `#dev-todo`, `type::`, `priority::`, and `package::` properties.
 
 ---
