@@ -11,6 +11,9 @@ dependencies = [
     "tta-dev-primitives",
 ]
 
+[tool.uv.sources]
+tta-dev-primitives = { workspace = true }
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
