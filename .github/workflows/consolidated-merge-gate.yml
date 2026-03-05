@@ -128,19 +128,9 @@ jobs:
       - name: Sync dependencies
         run: uv sync --all-extras
 
-      - name: Check for Docker Compose file
-        id: check-docker
-        run: |
-          if [ -f "packages/tta-dev-primitives/docker-compose.integration.yml" ]; then
-            echo "has_docker=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_docker=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Start test services
-        if: steps.check-docker.outputs.has_docker == 'true'
         run: |
-          docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml up -d || true
+          docker compose --profile test up -d || true
           sleep 10
 
       - name: Run integration tests
@@ -153,9 +143,8 @@ jobs:
             --maxfail=3 || echo "Integration tests skipped or failed"
 
       - name: Stop test services
-        if: always() && steps.check-docker.outputs.has_docker == 'true'
-        run: |
-          docker compose -f packages/tta-dev-primitives/docker-compose.integration.yml down || true
+        if: always()
+        run: docker compose --profile test down || true
 
   # Documentation validation
   docs-validation:

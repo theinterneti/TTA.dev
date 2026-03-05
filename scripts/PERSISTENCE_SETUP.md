@@ -11,7 +11,7 @@ This document explains what persists across sessions and how to set up automatic
 
 2. **Configuration Files**
    - `prometheus.yml` - Scrape configurations
-   - `docker-compose.integration.yml` - Infrastructure setup
+   - `docker-compose.yml` - Infrastructure setup (root of repo, profile: `observability`)
    - All scripts in `/scripts` directory
 
 ## What Needs Setup 🔧
@@ -21,13 +21,11 @@ This document explains what persists across sessions and how to set up automatic
 Run these commands each time you open a new session:
 
 ```bash
-# Start observability stack
-cd /home/thein/repos/TTA.dev/packages/tta-dev-primitives
-docker-compose -f docker-compose.integration.yml up -d
+# Start observability stack (run from repo root)
+docker compose --profile observability up -d
 
 # Start agent activity tracker
-cd /home/thein/repos/TTA.dev
-uv run python scripts/agent-activity-tracker-tta.py --workspace /home/thein/repos/TTA.dev --port 8001 &
+uv run python scripts/agent-activity-tracker-tta.py --workspace . --port 8001 &
 ```
 
 ### Option 2: Automatic Startup (Recommended)
@@ -35,8 +33,8 @@ uv run python scripts/agent-activity-tracker-tta.py --workspace /home/thein/repo
 Run the setup script once to configure systemd and Docker restart policies:
 
 ```bash
-# Run setup (requires sudo for systemd)
-/home/thein/repos/TTA.dev/scripts/setup-persistence.sh
+# Run setup from repo root (requires sudo for systemd)
+./scripts/setup-persistence.sh
 ```
 
 This will:
@@ -76,7 +74,7 @@ sudo systemctl disable agent-activity-tracker
 
 ### 2. Docker Restart Policies
 
-**File:** `docker-compose.integration.yml`
+**File:** `docker-compose.yml` (repo root, profile: `observability`)
 
 **Added:** `restart: unless-stopped` to all services:
 - Jaeger (traces)
@@ -136,9 +134,8 @@ View logs from different components:
 # Agent activity tracker (systemd)
 sudo journalctl -u agent-activity-tracker -f
 
-# Docker containers
-cd /home/thein/repos/TTA.dev/packages/tta-dev-primitives
-docker-compose -f docker-compose.integration.yml logs -f
+# Docker containers (run from repo root)
+docker compose --profile observability logs -f
 
 # Specific container
 docker logs -f tta-prometheus
@@ -168,10 +165,10 @@ sudo systemctl restart agent-activity-tracker
 docker ps -a
 
 # View logs
-docker-compose -f docker-compose.integration.yml logs
+docker compose --profile observability logs
 
 # Restart everything
-docker-compose -f docker-compose.integration.yml restart
+docker compose --profile observability restart
 ```
 
 ### Metrics not appearing
@@ -198,9 +195,8 @@ sudo systemctl disable agent-activity-tracker
 sudo rm /etc/systemd/system/agent-activity-tracker.service
 sudo systemctl daemon-reload
 
-# Stop Docker containers (remove restart policies manually from docker-compose.yml first)
-cd /home/thein/repos/TTA.dev/packages/tta-dev-primitives
-docker-compose -f docker-compose.integration.yml down
+# Stop Docker containers (run from repo root)
+docker compose --profile observability down
 ```
 
 ## Notes

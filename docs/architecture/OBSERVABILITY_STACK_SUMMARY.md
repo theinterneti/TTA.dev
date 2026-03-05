@@ -18,7 +18,7 @@
 - Jaeger distributed tracing support
 - Graceful degradation when OTel unavailable
 
-**Docker Compose Stack** (`docker-compose.integration.yml`)
+**Docker Compose Stack** (`docker-compose.yml`, profile `observability`)
 ```
 Services Running:
 ├─ Jaeger UI         → http://localhost:16686 (Trace visualization)
@@ -42,7 +42,7 @@ Services Running:
 ### What We Have vs. What We Need
 
 **Current Workflow (Complex):**
-1. Start Docker stack: `docker-compose -f docker-compose.integration.yml up`
+1. Start Docker stack: `docker compose --profile observability up`
 2. Run application with observability
 3. Open Jaeger in browser (http://localhost:16686)
 4. Search for traces by service name

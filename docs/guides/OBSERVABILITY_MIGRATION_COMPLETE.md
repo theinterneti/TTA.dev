@@ -97,7 +97,7 @@
 
 ```bash
 # Navigate to TTA.dev repo
-cd /home/thein/repos/TTA.dev
+cd /path/to/TTA.dev
 
 # Extract token from your env file
 TOKEN=$(grep GRAFANA_CLOUD_API_KEY ~/.env.tta-dev | cut -d= -f2)
@@ -112,7 +112,7 @@ sudo GRAFANA_CLOUD_TOKEN="$TOKEN" ./scripts/setup-native-observability.sh
 
 ```bash
 # Same as above, but with local Prometheus and Grafana for offline dev
-cd /home/thein/repos/TTA.dev
+cd /path/to/TTA.dev
 TOKEN=$(grep GRAFANA_CLOUD_API_KEY ~/.env.tta-dev | cut -d= -f2)
 
 sudo GRAFANA_CLOUD_TOKEN="$TOKEN" \
@@ -343,9 +343,8 @@ ps aux | sort -rnk 4 | head -10
 sudo systemctl stop alloy
 sudo systemctl disable alloy
 
-# Restart Docker stack
-cd /home/thein/repos/TTA.dev
-docker-compose -f docker-compose.integration.yml up -d
+# Restart Docker stack (run from repo root)
+docker compose --profile observability up -d
 ```
 
 ---
