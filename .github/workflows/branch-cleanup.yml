@@ -1,0 +1,76 @@
+name: Branch Cleanup
+
+on:
+  schedule:
+    # Run every Sunday at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    inputs:
+      delete_closed_pr_branches:
+        description: 'Delete branches whose PRs are merged or closed'
+        required: false
+        default: false
+        type: boolean
+      delete_orphaned_branches:
+        description: 'Delete branches with no PR that are inactive'
+        required: false
+        default: false
+        type: boolean
+      orphan_days:
+        description: 'Minimum days inactive before an orphaned branch is deleted'
+        required: false
+        default: '30'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    name: Clean Up Stale Branches
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Audit branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ORPHAN_DAYS: ${{ github.event.inputs.orphan_days || '30' }}
+        run: |
+          echo "# 🌿 Branch Cleanup Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          python scripts/branch_manager.py audit "$ORPHAN_DAYS" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete closed/merged PR branches
+        if: >
+          github.event.inputs.delete_closed_pr_branches == 'true' ||
+          github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## 🗑️ Deletion: Closed/Merged PR Branches" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          python scripts/branch_manager.py delete-closed-pr-branches >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete orphaned branches
+        if: github.event.inputs.delete_orphaned_branches == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ORPHAN_DAYS: ${{ github.event.inputs.orphan_days || '30' }}
+        run: |
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## 🗑️ Deletion: Orphaned Branches" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          python scripts/branch_manager.py delete-orphaned-branches "$ORPHAN_DAYS" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
