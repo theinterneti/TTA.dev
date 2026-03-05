@@ -212,17 +212,16 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
 
         elif request.get("target_source") is not None:
             target_source_code: str = request["target_source"]  # type: ignore[assignment]
-            if target_source_code is not None:
-                # Use provided source code
-                components.append(
-                    ContextComponent(
-                        name="target",
-                        source_code=target_source_code,
-                        priority=1,
-                        token_count=self._count_tokens(target_source_code),
-                        component_type="target",
-                    )
+            # Use provided source code
+            components.append(
+                ContextComponent(
+                    name="target",
+                    source_code=target_source_code,
+                    priority=1,
+                    token_count=self._count_tokens(target_source_code),
+                    component_type="target",
                 )
+            )
 
         # Layer 3: Testing utilities (for test generation tasks)
         if request.get("task_type") == "test_generation":
