@@ -298,7 +298,9 @@ async def test_complete_llm_routing_workflow():
     context = WorkflowContext(workflow_id="complete-llm-workflow")
 
     # Execute workflow
-    result = await observable_workflow.execute({"prompt": "Test complete workflow"}, context)
+    result = await observable_workflow.execute(
+        {"prompt": "Test complete workflow"}, context
+    )
 
     # Should get a response (from any model)
     assert "response" in result
@@ -353,7 +355,9 @@ async def test_llm_routing_latency_optimization():
     assert duration < 0.1  # Fast LLM should respond quickly
 
 
-@pytest.mark.skipif(not OBSERVABILITY_AVAILABLE, reason="observability_integration not available")
+@pytest.mark.skipif(
+    not OBSERVABILITY_AVAILABLE, reason="observability_integration not available"
+)
 @pytest.mark.asyncio
 async def test_llm_routing_with_full_observability():
     """Test LLM routing with full observability integration."""
@@ -371,7 +375,9 @@ async def test_llm_routing_with_full_observability():
 
     workflow = ObservablePrimitive(router, name="observable_llm_router")
 
-    context = WorkflowContext(workflow_id="observability-test", correlation_id="test-123")
+    context = WorkflowContext(
+        workflow_id="observability-test", correlation_id="test-123"
+    )
 
     result = await workflow.execute({"prompt": "Test with observability"}, context)
 

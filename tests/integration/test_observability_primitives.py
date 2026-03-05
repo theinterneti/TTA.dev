@@ -169,15 +169,21 @@ async def test_observable_primitive_composition():
 # ============================================================================
 
 
-@pytest.mark.skipif(not OBSERVABILITY_AVAILABLE, reason="observability_integration not available")
+@pytest.mark.skipif(
+    not OBSERVABILITY_AVAILABLE, reason="observability_integration not available"
+)
 @pytest.mark.asyncio
 async def test_observability_integration_initialization():
     """Test observability integration initialization."""
-    success = initialize_observability(service_name="test-service", enable_prometheus=False)
+    success = initialize_observability(
+        service_name="test-service", enable_prometheus=False
+    )
     assert isinstance(success, bool)
 
 
-@pytest.mark.skipif(not OBSERVABILITY_AVAILABLE, reason="observability_integration not available")
+@pytest.mark.skipif(
+    not OBSERVABILITY_AVAILABLE, reason="observability_integration not available"
+)
 @pytest.mark.asyncio
 async def test_observability_with_instrumented_primitive():
     """Test observability integration with instrumented primitives."""

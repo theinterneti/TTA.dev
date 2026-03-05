@@ -1,6 +1,7 @@
 """
 
-# Logseq: [[TTA.dev/Platform_tta_dev/Components/Augment/Core/Context/Conversation_manager]]
+# Logseq: [[TTA.dev/Platform_tta_dev/Components/Augment/Core/Context/
+#           Conversation_manager]]
 AI Conversation Context Manager for TTA Development.
 
 This module provides context management for AI-assisted development sessions,
@@ -175,7 +176,9 @@ class InstructionLoader:
             content = file_path.read_text(encoding="utf-8")
 
             # Extract YAML frontmatter (between --- markers)
-            frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
+            frontmatter_match = re.match(
+                r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL
+            )
             if not frontmatter_match:
                 logger.warning(f"No YAML frontmatter found in {file_path.name}")
                 return None
@@ -259,8 +262,10 @@ class InstructionLoader:
         Match file path parts against pattern parts with ** support.
 
         Args:
-            file_parts: File path parts (e.g., ('src', 'player_experience', 'service.py'))
-            pattern_parts: Pattern parts (e.g., ('src', 'player_experience', '**', '*.py'))
+            file_parts: File path parts
+                (e.g., ('src', 'player_experience', 'service.py'))
+            pattern_parts: Pattern parts
+                (e.g., ('src', 'player_experience', '**', '*.py'))
 
         Returns:
             True if file matches pattern, False otherwise
@@ -296,7 +301,9 @@ class InstructionLoader:
                 return False
         return True
 
-    def get_relevant_instructions(self, current_file: str | None = None) -> list[dict[str, Any]]:
+    def get_relevant_instructions(
+        self, current_file: str | None = None
+    ) -> list[dict[str, Any]]:
         """
         Get instructions relevant to the current file context.
 
@@ -319,7 +326,9 @@ class InstructionLoader:
                 relevant.append(parsed)
 
         logger.debug(
-            f"Found {len(relevant)} relevant instructions for file: {current_file or 'global'}"
+            "Found %d relevant instructions for file: %s",
+            len(relevant),
+            current_file or "global",
         )
         return relevant
 
@@ -386,7 +395,9 @@ class MemoryLoader:
             content = file_path.read_text(encoding="utf-8")
 
             # Extract YAML frontmatter (between --- markers)
-            frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL)
+            frontmatter_match = re.match(
+                r"^---\s*\n(.*?)\n---\s*\n(.*)$", content, re.DOTALL
+            )
             if not frontmatter_match:
                 logger.warning(f"No YAML frontmatter found in {file_path.name}")
                 return None
@@ -475,7 +486,8 @@ class MemoryLoader:
 
     def calculate_importance(self, memory: dict[str, Any], relevance: float) -> float:
         """
-        Calculate importance score for a memory based on severity, recency, and relevance.
+        Calculate importance score for a memory based on severity,
+        recency, and relevance.
 
         Args:
             memory: Parsed memory dict
@@ -530,7 +542,8 @@ class MemoryLoader:
             max_memories: Maximum number of memories to return
 
         Returns:
-            List of memory dicts with 'frontmatter', 'content', 'filename', 'category', 'importance'
+            List of memory dicts with 'frontmatter', 'content', 'filename',
+            'category', 'importance'
         """
         memory_files = self.discover_memories()
         scored_memories = []
@@ -630,7 +643,8 @@ class AIConversationContextManager:
 
         Args:
             session_id: Unique identifier for the session
-            max_tokens: Optional token limit for this session (defaults to manager's max_tokens)
+            max_tokens: Optional token limit for this session
+                (defaults to manager's max_tokens)
 
         Returns:
             Created conversation context
@@ -642,7 +656,9 @@ class AIConversationContextManager:
             current_tokens=0,
         )
         self.contexts[session_id] = context
-        logger.info(f"Created new session: {session_id} (max_tokens: {context.max_tokens})")
+        logger.info(
+            f"Created new session: {session_id} (max_tokens: {context.max_tokens})"
+        )
         return context
 
     def add_message(
@@ -975,7 +991,8 @@ class AIConversationContextManager:
 
         Args:
             session_id: Session identifier
-            filepath: Optional custom filepath (defaults to sessions_dir/<session_id>.json)
+            filepath: Optional custom filepath
+                (defaults to sessions_dir/<session_id>.json)
 
         Returns:
             Path to saved file
@@ -1035,7 +1052,8 @@ class AIConversationContextManager:
 TTA (Therapeutic Text Adventure) Architecture Context:
 
 **Core Components:**
-- Multi-agent system: IPA (Input Processor), WBA (World Builder), NGA (Narrative Generator)
+- Multi-agent system: IPA (Input Processor), WBA (World Builder),
+  NGA (Narrative Generator)
 - State Management: Redis (session state), Neo4j (knowledge graphs)
 - Workflow Orchestration: LangGraph integration for complex workflows
 - Component System: Base Component class with lifecycle management
@@ -1070,7 +1088,8 @@ def create_tta_session(
     session_id: str | None = None, current_file: str | None = None
 ) -> tuple[AIConversationContextManager, str]:
     """
-    Create a new TTA development session with standard architecture context and instructions.
+    Create a new TTA development session with standard architecture context
+    and instructions.
 
     This function creates a session and automatically loads:
     1. TTA architecture context (always)
@@ -1112,5 +1131,9 @@ def create_tta_session(
     # Load instructions
     manager.load_instructions(session_id, current_file)
 
-    logger.info(f"Created TTA development session: {session_id} (file: {current_file or 'global'})")
+    logger.info(
+        "Created TTA development session: %s (file: %s)",
+        session_id,
+        current_file or "global",
+    )
     return manager, session_id

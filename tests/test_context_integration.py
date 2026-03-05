@@ -28,7 +28,9 @@ class _StubManager(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
         self._name = name
         self._result_value = result_value
 
-    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
+    async def execute(
+        self, input_data: dict[str, Any], context: WorkflowContext
+    ) -> dict[str, Any]:
         await asyncio.sleep(0.01)
         return {"manager": self._name, "status": self._result_value}
 
@@ -36,7 +38,9 @@ class _StubManager(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
 class _FailingManager(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
     """Manager that always raises."""
 
-    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> dict[str, Any]:
+    async def execute(
+        self, input_data: dict[str, Any], context: WorkflowContext
+    ) -> dict[str, Any]:
         raise RuntimeError("boom")
 
 

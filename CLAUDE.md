@@ -48,9 +48,25 @@ tests/              # Integration tests
 
 - **Package manager:** `uv` always (never `pip`/`poetry`)
 - **Python:** 3.11+ with `str | None` (not `Optional[str]`)
+- **Linting:** Ruff — line length 88, strict mode (`uv run ruff check . --fix`)
+- **Type checking:** Pyright basic mode (`uvx pyright platform/`)
+- **Testing:** pytest AAA pattern, 100% coverage for new code
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
 - **Primitives:** Always use for workflows (never manual retry/timeout loops)
 - **State:** Pass via `WorkflowContext` (never globals)
+
+### ⛔ TODO Management — CI-Blocking Rule
+
+All TODOs must strictly follow the [TODO Management System](docs/agent-guides/todo-management.md).
+You **must** use the `#dev-todo` tag and include `type::`, `priority::`, and `package::` properties.
+**Malformed TODOs will block CI.**
+
+```markdown
+- TODO <description> #dev-todo
+  type:: <bug|implementation|refactor|documentation>
+  priority:: <critical|high|medium|low>
+  package:: <package-name>
+```
 
 Details: [core-conventions](.claude/skills/core-conventions/SKILL.md)
 

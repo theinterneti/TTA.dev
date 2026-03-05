@@ -47,9 +47,9 @@ def example_new_session():
         session_id=session_id,
         role="assistant",
         content="""
-        Excellent strategic thinking! Applying primitives to the development process first
-        is brilliant - it lets us validate patterns in a low-risk environment before
-        product integration.
+        Excellent strategic thinking! Applying primitives to the development
+        process first is brilliant - it lets us validate patterns in a
+        low-risk environment before product integration.
 
         I'll create a comprehensive Phase 1 implementation plan...
         """,
@@ -62,9 +62,9 @@ def example_new_session():
         session_id=session_id,
         role="user",
         content="""
-        Architectural Decision: We'll use hybrid pruning strategy for context management,
-        combining recency and relevance scoring. This preserves both recent context and
-        important historical decisions.
+        Architectural Decision: We'll use hybrid pruning strategy for context
+        management, combining recency and relevance scoring. This preserves
+        both recent context and important historical decisions.
         """,
         importance=1.0,
         metadata={
@@ -150,7 +150,10 @@ def example_context_pruning():
         manager.add_message(
             session_id=session_id,
             role="user" if i % 2 == 0 else "assistant",
-            content=f"Message {i}: This is a test message to demonstrate context pruning. " * 5,
+            content=(
+                f"Message {i}: This is a test message to demonstrate context pruning. "
+            )
+            * 5,
             importance=importance,
             metadata={"message_number": i},
         )
@@ -217,15 +220,21 @@ def example_metadata_usage():
     # Query messages by metadata
     context = manager.contexts[session_id]
 
-    task_requests = [msg for msg in context.messages if msg.metadata.get("type") == "task_request"]
+    task_requests = [
+        msg for msg in context.messages if msg.metadata.get("type") == "task_request"
+    ]
     for _msg in task_requests:
         pass
 
-    high_priority = [msg for msg in task_requests if msg.metadata.get("priority") == "high"]
+    high_priority = [
+        msg for msg in task_requests if msg.metadata.get("priority") == "high"
+    ]
     for _msg in high_priority:
         pass
 
-    phase1_tasks = [msg for msg in task_requests if msg.metadata.get("phase") == "phase1"]
+    phase1_tasks = [
+        msg for msg in task_requests if msg.metadata.get("phase") == "phase1"
+    ]
     sum(msg.metadata.get("estimated_days", 0) for msg in phase1_tasks)
 
     return manager, session_id
