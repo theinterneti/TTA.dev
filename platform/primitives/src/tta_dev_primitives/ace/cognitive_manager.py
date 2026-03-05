@@ -64,12 +64,6 @@ except ImportError:
     logger.warning("LLM integration not available - using mock implementation")
 
 
-class ACEInput(TypedDict):
-    """Input for ACE-enabled primitives."""
-
-    task: str
-
-
 class ACEInputOptional(TypedDict, total=False):
     """Optional input for ACE-enabled primitives."""
 
@@ -77,6 +71,12 @@ class ACEInputOptional(TypedDict, total=False):
     language: str  # Optional: Programming language (default: python)
     expected_output: str  # Optional: Expected result for learning
     max_iterations: int  # Optional: Max refinement iterations (default: 3)
+
+
+class ACEInput(ACEInputOptional):
+    """Input for ACE-enabled primitives."""
+
+    task: str
 
 
 class ACEOutput(TypedDict):
