@@ -11,6 +11,12 @@ from .circuit_breaker import (
     with_retry,
     with_retry_async,
 )
+from .circuit_breaker_primitive import (
+    CircuitBreakerConfig,
+    CircuitBreakerError,
+    CircuitBreakerPrimitive,
+    CircuitState,
+)
 from .compensation import CompensationStrategy, SagaPrimitive
 from .fallback import FallbackPrimitive, FallbackStrategy
 from .retry import RetryPrimitive, RetryStrategy
@@ -19,6 +25,10 @@ from .timeout import TimeoutError, TimeoutPrimitive
 __all__ = [
     # Circuit breaker and error classification (from dev-primitives)
     "CircuitBreaker",
+    "CircuitBreakerConfig",
+    "CircuitBreakerError",
+    "CircuitBreakerPrimitive",
+    "CircuitState",
     "ErrorCategory",
     "ErrorSeverity",
     "RetryConfig",
