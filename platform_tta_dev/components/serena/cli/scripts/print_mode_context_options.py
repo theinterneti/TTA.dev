@@ -1,4 +1,5 @@
-# Logseq: [[TTA.dev/Platform_tta_dev/Components/Serena/Cli/Scripts/Print_mode_context_options]]
+# Logseq: [[TTA.dev/Platform_tta_dev/Components/Serena/Cli/Scripts/
+#           Print_mode_context_options]]
 from serena.config.context_mode import SerenaAgentContext, SerenaAgentMode
 
 if __name__ == "__main__":

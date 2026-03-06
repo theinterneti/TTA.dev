@@ -456,8 +456,8 @@ async def readiness():
 ## Resources
 
 ### TTA Documentation
-- Component Maturity: `docs/development/COMPONENT_MATURITY_WORKFLOW.md`
-- Integrated Workflow: `docs/development/integrated-workflow-design.md`
+- Component Maturity: `docs/guides/development/COMPONENT_MATURITY_WORKFLOW.md`
+- Integrated Workflow: `docs/guides/development/integrated-workflow-design.md`
 - Quality Gates: `scripts/workflow/quality_gates.py`
 
 ### External Resources

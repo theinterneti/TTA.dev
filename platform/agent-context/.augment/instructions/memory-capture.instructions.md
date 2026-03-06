@@ -401,7 +401,7 @@ Templates ensure consistency and prevent missing required sections.
 - **Memory System README**: `.augment/memory/README.md`
 - **Memory Template**: `.augment/memory/templates/memory.template.md`
 - **Context Manager**: `.augment/context/conversation_manager.py`
-- **Session Guide**: `docs/development/agentic-primitives-session-guide.md`
+- **Session Guide**: `docs/guides/development/agentic-primitives-session-guide.md`
 
 ---
 

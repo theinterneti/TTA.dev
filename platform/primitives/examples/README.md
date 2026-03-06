@@ -345,7 +345,7 @@ uv run pytest examples/ -v
 - Review the [main package README](../README.md) for detailed API documentation
 - Check the [tests directory](../tests/) for more usage patterns
 - Read the [architecture documentation](../../../docs/architecture/Overview.md)
-- Explore [coding standards](../../../docs/development/CodingStandards.md)
+- Explore [coding standards](../../../docs/guides/development/CodingStandards.md)
 
 ## Contributing Examples
 

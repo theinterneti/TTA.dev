@@ -1,202 +1,68 @@
 # TTA.dev Agent Instructions
 
-**Primary Hub for AI Agent Discovery and Guidance**
+Universal entry point for all AI agents working in this repository.
 
----
+Boundary Rules: Write all project documentation, status updates, and notes exclusively to docs/kb-exports/. Never create or modify .md files in the project root or source directories unless explicitly asked to
 
-## 🎯 Quick Start for AI Agents
+## What is TTA.dev?
 
-Welcome to TTA.dev! This file is your entry point for understanding and working with this codebase.
+A Python monorepo providing composable workflow primitives, observability, and multi-agent coordination for building reliable AI applications.
 
-### What is TTA.dev?
-
-TTA.dev is a production-ready **AI development toolkit** providing:
-
-- **Agentic primitives** for building reliable AI workflows
-- **Composable patterns** with type-safe operators (`>>`, `|`)
-- **Built-in observability** with OpenTelemetry integration
-- **Multi-package monorepo** with focused, reusable components
-
-### 🛠️ MCP Tool Registry
-
-For a complete list of available tools (Context7, AI Toolkit, Grafana, etc.), see:
-[`MCP_TOOL_REGISTRY.md`](MCP_TOOL_REGISTRY.md)
-
-### 🔍 Pre-Task: Search for Context First (MANDATORY)
-
-**Before executing any significant task**, query the TTA-notes KB via MCP:
+## Repo Layout
 
 ```
-Tool: tta-notes-kb → search_kb("<topic you're about to work on>")
-Tool: tta-notes-kb → get_high_priority_todos()
+platform/           # Core packages
+├── primitives/     # tta-dev-primitives — core workflows
+├── observability/  # tta-observability-integration
+├── agent-context/  # universal-agent-context
+├── agent-coordination/
+├── integrations/
+├── documentation/
+└── kb-automation/
+apps/               # User-facing applications
+templates/          # Vibe coding starter templates
+docs/               # Architecture, guides, agent docs
+tests/              # Integration tests
+scripts/            # Automation and validation
 ```
 
-This surfaces prior decisions, known issues, and outstanding work that may affect your approach.
+## Agent Skills (Tier 2)
 
-### 📝 Post-Task: Document Your Work (MANDATORY)
+Load these dynamically based on your current task:
 
-After completing any significant task, use the `create-atomic-note` skill:
+| Skill | When to Use |
+|-------|-------------|
+| [build-test-verify](.claude/skills/build-test-verify/SKILL.md) | Building, testing, linting, verifying code |
+| [git-commit](.claude/skills/git-commit/SKILL.md) | Making git commits |
+| [create-pull-request](.claude/skills/create-pull-request/SKILL.md) | Creating or updating PRs |
+| [core-conventions](.claude/skills/core-conventions/SKILL.md) | Writing or reviewing Python code |
+| [self-review-checklist](.claude/skills/self-review-checklist/SKILL.md) | Pre-merge self-review |
+| [sdd-workflow](.claude/skills/sdd-workflow/SKILL.md) | Building new features (SDD process) |
 
-1. Read `.claude/skills/create-atomic-note/SKILL.md` for the full template
-2. Create `docs/kb-exports/YYYY-MM-DD_<slug>.md` — one topic, one file
-3. Required YAML frontmatter: `type`, `priority`, `status`, `tags`, `source_agent`, `date`, `related_files`
+## Agent Guides (Tier 3)
 
-The `TTA-notes` repo ingests `docs/kb-exports/` periodically.
+Deep reference — load only when a skill's instructions are insufficient:
 
-### 📋 TODO Management
+| Guide | Content |
+|-------|---------|
+| [testing-architecture](docs/agent-guides/testing-architecture.md) | Full testing standards, markers, CI pipeline, MockPrimitive API |
+| [primitives-patterns](docs/agent-guides/primitives-patterns.md) | Composition operators, all primitives, recovery & performance patterns |
+| [python-standards](docs/agent-guides/python-standards.md) | Type hints, naming, imports, docstrings, error handling |
+| [sdd-constitution](docs/agent-guides/sdd-constitution.md) | Complete SDD Constitution §1-§4 |
+| [observability-guide](docs/agent-guides/observability-guide.md) | OpenTelemetry tracing, metrics, context propagation |
+| [todo-management](docs/agent-guides/todo-management.md) | Logseq TODOs, tags, properties, validation |
 
-Record TODOs as atomic notes with `type: todo` in `docs/kb-exports/`. Tag convention:
+## Key References
 
-- `dev-todo` - Development work (building TTA.dev itself)
-- `learning-todo` - User education (tutorials, flashcards, exercises)
-- `template-todo` - Reusable patterns (for agents/users)
-- `ops-todo` - Infrastructure (deployment, monitoring)
+- [Getting Started](GETTING_STARTED.md) — Setup and first workflow
+- [Primitives Catalog](PRIMITIVES_CATALOG.md) — Complete API reference
+- [MCP Tool Registry](MCP_TOOL_REGISTRY.md) — Available MCP tools
+- [Hindsight Memory](docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md) — Cross-agent persistent memory
 
-### 🧠 Hindsight Memory Architecture
+## Agent-Specific Config
 
-**CRITICAL:** All TTA.dev agents (worktree agents, sub-agents, external integrations) must use the Hindsight memory system for persistent, cross-session learning.
-
-**What is Hindsight?** A unified memory architecture enabling agents to:
-- **Learn from failures** - Never repeat the same mistakes
-- **Share knowledge** - Discoveries by one agent benefit all agents
-- **Persist across sessions** - Memory survives restarts and context resets
-- **Scale with the codebase** - Memory banks organize knowledge by domain
-
-**Quick Start:**
-```text
-.hindsight/
-├── config.yaml           # Memory bank configuration
-├── banks/
-│   ├── tta-dev/         # TTA.dev core concepts and patterns
-│   ├── user-repo/        # User's target repository knowledge
-│   └── session/          # Current session learnings
-└── index/                # Semantic search index
-```
-
-**Memory Categories:**
-| Category | When to Write | Example |
-|----------|---------------|---------|
-| `implementation-failures` | After debugging issues | Import errors, config mistakes |
-| `successful-patterns` | After solving problems | Effective test patterns, API usage |
-| `architectural-decisions` | After design choices | Why we chose primitives over raw async |
-| `codebase-insights` | After indexing repos | Module structure, key entry points |
-
-**For Detailed Guide:** [`docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md`](docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md)
-
----
-
-### 🎯 Agent Context & Tooling
-
-For GitHub Copilot users, comprehensive instructions are available in [`.github/copilot-instructions.md`](.github/copilot-instructions.md), including:
-
-- Package manager requirements (uv)
-- Python version and type hints (3.11+)
-- Testing standards and examples
-- Code style and formatting rules
-- Security practices
-- Documentation standards
-- TTA.dev primitives patterns
-- TODO management with Logseq
-- Development workflow
-- Copilot toolsets (VS Code)
-
-**Available Copilot Toolsets** (use with `@workspace #toolset-name`):
-
-| Toolset | Purpose |
-|---------|---------|
-| `#tta-package-dev` | Package development (primitives, orchestration) |
-| `#tta-testing` | Testing workflows (pytest, validation) |
-| `#tta-observability` | Tracing, metrics, Prometheus/Grafana |
-| `#tta-agent-dev` | Agent development with AI Toolkit |
-| `#tta-docs` | Documentation and knowledge base |
-| `#tta-pr-review` | Pull request review workflow |
-| `#tta-validation` | Quality checks and validation |
-
-**Full toolset definitions:** [`.vscode/copilot-toolsets.jsonc`](.vscode/copilot-toolsets.jsonc)
-
-Additionally, context-specific modular instructions are in `.github/instructions/` for tests, scripts, documentation, and package source.
-
-### ⚡ Before You Code: Primitive Usage Rules
-
-**CRITICAL:** When working on TTA.dev, **ALWAYS use primitives** for workflow patterns. Refer to the `.clinerules` file for detailed guidance on primitive usage, anti-patterns, and code quality standards.
-
-## Repository Structure
-
-```text
-TTA.dev/
-├── .hindsight/              # 🧠 Hindsight Memory System
-│   ├── config.yaml          # Memory bank configuration
-│   └── banks/               # Organized memory storage
-│       ├── tta-dev/        # TTA.dev patterns and learnings
-│       └── session/         # Current session memories
-├── platform/
-│   ├── primitives/          # ✅ Core workflow primitives (tta-dev-primitives)
-│   ├── observability/       # ✅ OpenTelemetry integration (tta-observability-integration)
-│   ├── agent-context/       # ✅ Agent context management (universal-agent-context)
-│   ├── agent-coordination/  # ✅ Multi-agent orchestration
-│   ├── integrations/        # ✅ Pre-built integrations
-│   ├── documentation/       # ✅ Docs automation
-│   └── kb-automation/       # ✅ Knowledge base maintenance
-├── templates/               # 🚀 Vibe Coding Templates (Start Here)
-│   ├── basic-agent/         # Simple agent with cache/retry
-│   └── workflow/            # Multi-step workflow
-├── apps/                    # User-facing applications
-│   └── observability-ui/    # VS Code observability dashboard
-├── data/
-│   └── ace_playbooks/       # 🧠 ACE Agent Playbooks (Learned Strategies)
-├── docs/                    # Comprehensive documentation
-│   └── agents/              # Agent-specific docs
-│       └── HINDSIGHT_MEMORY_ARCHITECTURE.md  # Memory system guide
-├── scripts/                 # Automation and validation scripts
-└── tests/                   # Integration tests
-```
-
-## Core Concept: Primitives
-
-TTA.dev provides composable primitives. Always use them instead of manual async orchestration.
-
-```python
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive
-from tta_dev_primitives.performance import CachePrimitive
-
-# Compose with operators
-workflow = (
-    CachePrimitive(ttl=3600) >>    # Sequential: >>
-    RetryPrimitive(max_retries=3) >>
-    process_data
-)
-
-# Execute
-context = WorkflowContext(workflow_id="demo")
-result = await workflow.execute(input_data, context)
-```
-
-## Available Primitives
-
-| Category | Primitives |
-|----------|-----------|
-| **Core** | `SequentialPrimitive`, `ParallelPrimitive`, `RouterPrimitive` |
-| **Recovery** | `RetryPrimitive`, `FallbackPrimitive`, `TimeoutPrimitive` |
-| **Performance** | `CachePrimitive`, `MemoryPrimitive` |
-| **Collaboration** | `GitCollaborationPrimitive` |
-| **Adaptive** | `AdaptiveRetryPrimitive` |
-| **Testing** | `MockPrimitive` |
-
-## Documentation
-
-- [Getting Started](GETTING_STARTED.md) - Setup and first workflow
-- [Primitives Catalog](PRIMITIVES_CATALOG.md) - Complete API reference
-- [Package README](platform/primitives/README.md) - Detailed docs
-
-## Anti-Patterns
-
-| ❌ Don't | ✅ Do |
-|---------|------|
-| `try/except` with retry logic | `RetryPrimitive` |
-| `asyncio.wait_for()` | `TimeoutPrimitive` |
-| Manual caching dicts | `CachePrimitive` |
-| `pip install` | `uv add` |
-
-
-
+| Agent | Config |
+|-------|--------|
+| Claude Code | [`CLAUDE.md`](CLAUDE.md) (primary agent) |
+| GitHub Copilot | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) |
+| Copilot path-based rules | [`.github/instructions/`](.github/instructions/) |

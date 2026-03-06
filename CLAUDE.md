@@ -1,99 +1,88 @@
 # TTA.dev — Claude Code (Main Agent)
 
-This is the root CLAUDE.md for the TTA.dev monorepo. Claude Code is the **primary/main agent** for this repository. Other agents (Cline, GitHub Copilot, Augment CLI, Gemini) are secondary and should be deferred to Claude Code's decisions on architecture and standards.
+Claude Code is the **primary agent** for this repository. Other agents defer to Claude Code's decisions on architecture and standards. The owner is the sole developer.
 
-The owner is the **sole developer**. All code is original work.
+## SDD Mandate
 
----
-
-## What is TTA.dev?
-
-A production-ready **AI development toolkit** — a Python monorepo providing composable workflow primitives, observability, multi-agent coordination, and integrations for building reliable AI applications.
+**No implementation code before a signed-off spec.** Follow the [sdd-workflow](.claude/skills/sdd-workflow/SKILL.md) skill for the 4-phase process (`/specify` → `/plan` → `/tasks` → `/implement`). Full constitution: [docs/agent-guides/sdd-constitution.md](docs/agent-guides/sdd-constitution.md).
 
 ## Repo Layout
 
 ```
-TTA.dev/
-├── platform/              # Core packages (7 packages)
-│   ├── primitives/        # tta-dev-primitives v1.3.0 — core workflows
-│   ├── observability/     # tta-observability-integration v1.0.0
-│   ├── agent-context/     # universal-agent-context v1.0.0
-│   ├── agent-coordination/# tta-agent-coordination (active dev)
-│   ├── integrations/      # tta-dev-integrations v0.1.0
-│   └── agent-coordination/# tta-agent-coordination (active dev)
-├── apps/                  # observability-ui, n8n, streamlit-mvp
-├── templates/             # Vibe coding templates
-├── docs/                  # Architecture, guides, agent docs
-│   └── kb-exports/        # Atomic notes — ingested by TTA-notes KB
-├── tests/                 # Integration tests
-├── scripts/               # Automation and validation scripts
-├── data/ace_playbooks/    # ACE agent playbooks
-├── .hindsight/            # Cross-agent persistent memory
-├── .cline/                # Cline agent config
-├── .augment/              # Augment CLI agent config
-└── .github/               # CI/CD + Copilot instructions
+platform/           # Core packages
+├── primitives/     # tta-dev-primitives — core workflows
+├── observability/  # tta-observability-integration
+├── agent-context/  # universal-agent-context
+├── agent-coordination/
+├── integrations/
+├── documentation/
+└── kb-automation/
+apps/               # User-facing applications
+docs/               # Architecture, guides, agent docs
+tests/              # Integration tests
 ```
 
-## Non-Negotiable Standards
+## Agent Skills (Tier 2)
 
-- **Package manager:** `uv` always. Never `pip` or `poetry`.
-- **Python:** 3.11+ — use `str | None` not `Optional[str]`, `dict[str, Any]` not `Dict`
-- **Formatter:** Ruff at 100-char line length (`uv run ruff format .`)
-- **Linter:** Ruff (`uv run ruff check . --fix`)
-- **Type checker:** Pyright basic mode (`uvx pyright platform/`)
-- **Tests:** pytest + pytest-asyncio; `@pytest.mark.asyncio` on async tests; 100% coverage for new code
-- **Commits:** Conventional Commits — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
-- **No global state:** pass data through `WorkflowContext`
+| Skill | When to Use |
+|-------|-------------|
+| [build-test-verify](.claude/skills/build-test-verify/SKILL.md) | Build, test, lint, verify |
+| [git-commit](.claude/skills/git-commit/SKILL.md) | Making commits |
+| [create-pull-request](.claude/skills/create-pull-request/SKILL.md) | Creating PRs |
+| [core-conventions](.claude/skills/core-conventions/SKILL.md) | Writing/reviewing Python code |
+| [self-review-checklist](.claude/skills/self-review-checklist/SKILL.md) | Pre-merge review |
+| [sdd-workflow](.claude/skills/sdd-workflow/SKILL.md) | New feature development |
 
-## Core Pattern: Primitive Composition
+## Agent Guides (Tier 3)
 
-```python
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive
-from tta_dev_primitives.performance import CachePrimitive
+| Guide | Content |
+|-------|---------|
+| [testing-architecture](docs/agent-guides/testing-architecture.md) | Testing standards, CI pipeline |
+| [primitives-patterns](docs/agent-guides/primitives-patterns.md) | Composition, all primitives |
+| [python-standards](docs/agent-guides/python-standards.md) | Types, naming, imports |
+| [sdd-constitution](docs/agent-guides/sdd-constitution.md) | Full SDD §1-§4 |
+| [observability-guide](docs/agent-guides/observability-guide.md) | OpenTelemetry integration |
+| [todo-management](docs/agent-guides/todo-management.md) | Logseq TODOs, tags |
 
-workflow = CachePrimitive(ttl=3600) >> RetryPrimitive(max_retries=3) >> process_data
+## Non-Negotiable Standards (Quick Reference)
 
-result = await workflow.execute(input_data, WorkflowContext(workflow_id="demo"))
+- **Package manager:** `uv` always (never `pip`/`poetry`)
+- **Python:** 3.11+ with `str | None` (not `Optional[str]`)
+- **Linting:** Ruff — line length 88, strict mode (`uv run ruff check . --fix`)
+- **Type checking:** Pyright basic mode (`uvx pyright platform/`)
+- **Testing:** pytest AAA pattern, 100% coverage for new code
+- **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
+- **Primitives:** Always use for workflows (never manual retry/timeout loops)
+- **State:** Pass via `WorkflowContext` (never globals)
+
+### ⛔ TODO Management — CI-Blocking Rule
+
+All TODOs must strictly follow the [TODO Management System](docs/agent-guides/todo-management.md).
+You **must** use the `#dev-todo` tag and include `type::`, `priority::`, and `package::` properties.
+**Malformed TODOs will block CI.**
+
+```markdown
+- TODO <description> #dev-todo
+  type:: <bug|implementation|refactor|documentation>
+  priority:: <critical|high|medium|low>
+  package:: <package-name>
 ```
 
-**Anti-patterns** — never write these manually:
-- `try/except` retry loops → use `RetryPrimitive`
-- `asyncio.wait_for()` → use `TimeoutPrimitive`
-- Manual cache dicts → use `CachePrimitive`
+Details: [core-conventions](.claude/skills/core-conventions/SKILL.md)
 
-## Quality Gate (run before every commit)
+## Key References
 
-```bash
-uv run ruff format .
-uv run ruff check . --fix
-uvx pyright platform/
-uv run pytest -v
-```
-
-## TODO Management
-
-All TODOs go in `docs/kb-exports/` as atomic notes (`type: todo`). Use the `create-atomic-note` skill (`.claude/skills/create-atomic-note/SKILL.md`).
-Tags: `dev-todo`, `learning-todo`, `template-todo`, `ops-todo`
+- [AGENTS.md](AGENTS.md) — Universal agent guidance
+- [PRIMITIVES_CATALOG.md](PRIMITIVES_CATALOG.md) — Full API reference
+- [GETTING_STARTED.md](GETTING_STARTED.md) — Quick start
+- [MCP_TOOL_REGISTRY.md](MCP_TOOL_REGISTRY.md) — Available MCP tools
 
 ## Multi-Agent Context
 
-| Agent | Role | Config |
-|-------|------|--------|
-| **Claude Code** | **Main agent — primary decision maker** | `CLAUDE.md` (this file) |
-| Cline | Secondary — fast iteration | `.cline/instructions.md`, `.clinerules` |
-| GitHub Copilot | Autocomplete + toolsets | `.github/copilot-instructions.md` |
-| Augment CLI | Context management | `.augment/` |
-| Gemini | Sub-agent tasks | `platform/agent-context/GEMINI.md` |
+| Agent | Config |
+|-------|--------|
+| **Claude Code** | `CLAUDE.md` (this file) |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Copilot path rules | `.github/instructions/` |
 
-Cross-agent memory lives in `.hindsight/`. Claude Code's own persistent memory is at `~/.claude/projects/-home-thein-repos-TTA-dev/memory/`.
-
-## Key Reference Files
-
-- `AGENTS.md` — universal agent guidance (all agents read this)
-- `PRIMITIVES_CATALOG.md` — full API reference
-- `GETTING_STARTED.md` — quick start
-- `docs/architecture/Overview.md` — system architecture
-- `.cline/instructions.md` — Cline-specific instructions
-- `MCP_TOOL_REGISTRY.md` — available MCP tools
-- `.claude/skills/create-atomic-note/SKILL.md` — post-task documentation workflow
+Cross-agent memory: `.hindsight/` — see [Hindsight Memory](docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md).

@@ -245,7 +245,7 @@ PR #109: docs: Add comprehensive MCP server reference documentation
 Adds complete reference docs for all 14 MCP servers used in TTA.dev
 
 ## Changes
-- Created docs/mcp-references/ with API refs for each server
+- Created docs/reference/mcp-references/ with API refs for each server
 - Added integration guides
 - Documented Context7, E2B, GitHub, Grafana, and more
 

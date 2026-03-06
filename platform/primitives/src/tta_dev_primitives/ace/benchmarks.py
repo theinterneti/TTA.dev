@@ -228,12 +228,9 @@ class BenchmarkSuite:
             execution_time = time.time() - start_time
 
             # Validate result
-            patterns_found = self._check_patterns(
-                result.get("code_generated", ""), task.expected_patterns
-            )
-            validation_passed = self._validate_criteria(
-                result.get("code_generated", ""), task.validation_criteria
-            )
+            code_generated = result.get("code_generated") or ""
+            patterns_found = self._check_patterns(code_generated, task.expected_patterns)
+            validation_passed = self._validate_criteria(code_generated, task.validation_criteria)
 
             return BenchmarkResult(
                 task_id=task.id,

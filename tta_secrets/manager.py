@@ -1,7 +1,8 @@
 """
 Secure secrets management for TTA.dev
 
-This module provides centralized, secure handling of API keys and sensitive configuration.
+This module provides centralized, secure handling of API keys and
+sensitive configuration.
 It follows 2024-2025 best practices including:
 - Environment variable validation
 - API key format validation
@@ -45,7 +46,9 @@ class SecretsManager:
         self._vault_client: VaultSecretsClient | None = None
 
         # Determine if Vault should be enabled
-        self._vault_enabled = enable_vault if enable_vault is not None else self._should_use_vault()
+        self._vault_enabled = (
+            enable_vault if enable_vault is not None else self._should_use_vault()
+        )
 
         # Initialize Vault client if needed
         if self._vault_enabled and VAULT_AVAILABLE:
@@ -54,7 +57,9 @@ class SecretsManager:
                 self._logger.info("Vault client initialized for production secrets")
             except Exception as e:
                 self._logger.warning(
-                    f"Failed to initialize Vault client, falling back to environment: {e}"
+                    "Failed to initialize Vault client, falling back"
+                    " to environment: %s",
+                    e,
                 )
                 self._vault_enabled = False
 
@@ -94,7 +99,9 @@ class SecretsManager:
 
         if missing_secrets:
             source = "Vault" if self._vault_enabled else "environment"
-            raise ValueError(f"Required secrets not found in {source}: {missing_secrets}")
+            raise ValueError(
+                f"Required secrets not found in {source}: {missing_secrets}"
+            )
 
         if invalid_secrets:
             raise ValueError(f"Invalid secret formats: {invalid_secrets}")
@@ -134,7 +141,9 @@ class SecretsManager:
                     return value
                 except (ValueError, RuntimeError):
                     # Vault failed, fall through to environment
-                    self._logger.debug(f"Vault retrieval failed for {key}, trying environment")
+                    self._logger.debug(
+                        f"Vault retrieval failed for {key}, trying environment"
+                    )
 
         # Environment fallback
         return os.getenv(key)

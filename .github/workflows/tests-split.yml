@@ -57,8 +57,7 @@ jobs:
 
       - name: Start Docker services for integration tests
         run: |
-          cd platform/primitives
-          docker compose -f docker-compose.integration.yml up -d
+          docker compose --profile test up -d
           sleep 10  # Wait for services to be ready
 
       - name: Run integration tests
@@ -68,6 +67,4 @@ jobs:
 
       - name: Stop Docker services
         if: always()
-        run: |
-          cd platform/primitives
-          docker compose -f docker-compose.integration.yml down -v
+        run: docker compose --profile test down -v

@@ -1,5 +1,5 @@
 # TTA.dev Hindsight Memory Configuration
-# See docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md for details
+# See docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md for details
 
 version: "1.0"
 

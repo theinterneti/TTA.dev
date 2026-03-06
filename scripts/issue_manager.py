@@ -10,6 +10,7 @@ Features:
 - Smart issue labeling and assignment
 - Auto-milestone assignment based on issue content
 - Progress tracking and reporting
+- Issue audit: detect stale, duplicate, and potentially resolved issues
 - Integration with lazy_dev.py for seamless workflow
 
 Usage:
@@ -17,13 +18,18 @@ Usage:
     ./scripts/issue_manager.py create-milestones
     ./scripts/issue_manager.py assign-milestone <issue-number>
     ./scripts/issue_manager.py progress
+    ./scripts/issue_manager.py audit
+    ./scripts/issue_manager.py close-stale [days]
+    ./scripts/issue_manager.py close-duplicates
+    ./scripts/issue_manager.py label-unlabeled
 """
 
 import json
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -190,7 +196,14 @@ class IssueManager:
 
             try:
                 subprocess.run(
-                    ["gh", "issue", "edit", str(issue_number), "--add-label", ",".join(labels_to_add)],
+                    [
+                        "gh",
+                        "issue",
+                        "edit",
+                        str(issue_number),
+                        "--add-label",
+                        ",".join(labels_to_add),
+                    ],
                     check=True,
                     capture_output=True,
                 )
@@ -252,7 +265,13 @@ class IssueManager:
                 # Escape double quotes in milestone title for jq
                 milestone_title_escaped = milestone["title"].replace('"', '\\"')
                 result = subprocess.run(
-                    ["gh", "api", f"/repos/{self.repo}/milestones", "--jq", f'.[] | select(.title == "{milestone_title_escaped}") | .number'],
+                    [
+                        "gh",
+                        "api",
+                        f"/repos/{self.repo}/milestones",
+                        "--jq",
+                        f'.[] | select(.title == "{milestone_title_escaped}") | .number',
+                    ],
                     capture_output=True,
                     text=True,
                 )
@@ -394,11 +413,318 @@ class IssueManager:
 
         return "\n".join(lines)
 
+    def _list_open_issues(self) -> list[Issue]:
+        """Fetch all open issues from the repository."""
+        issues: list[Issue] = []
+        page = 1
+        while True:
+            try:
+                result = subprocess.run(
+                    [
+                        "gh",
+                        "issue",
+                        "list",
+                        "--repo",
+                        self.repo,
+                        "--state",
+                        "open",
+                        "--limit",
+                        "100",
+                        "--json",
+                        "number,title,body,labels,state,milestone,assignees,createdAt,updatedAt",
+                        "--jq",
+                        ".",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                    encoding="utf-8",
+                )
+                data = json.loads(result.stdout) if result.stdout else []
+                for item in data:
+                    issues.append(
+                        Issue(
+                            number=item.get("number", 0),
+                            title=item.get("title", ""),
+                            body=item.get("body", "") or "",
+                            labels=[lb["name"] for lb in item.get("labels", [])],
+                            state=item.get("state", "OPEN"),
+                            milestone=(
+                                item["milestone"]["title"] if item.get("milestone") else None
+                            ),
+                            assignees=[a["login"] for a in item.get("assignees", [])],
+                            created_at=item.get("createdAt", ""),
+                            updated_at=item.get("updatedAt", ""),
+                        )
+                    )
+                break  # gh issue list returns all matching in one call
+            except (subprocess.CalledProcessError, json.JSONDecodeError):
+                break
+            page += 1
+        return issues
+
+    def _detect_duplicates(self, issues: list[Issue]) -> list[tuple[Issue, Issue]]:
+        """Detect issues that are likely duplicates based on title similarity."""
+        from difflib import SequenceMatcher
+
+        duplicates: list[tuple[Issue, Issue]] = []
+        threshold = 0.85
+        for i, a in enumerate(issues):
+            for b in issues[i + 1 :]:
+                title_a = re.sub(r"[^a-z0-9 ]", "", a.title.lower()).strip()
+                title_b = re.sub(r"[^a-z0-9 ]", "", b.title.lower()).strip()
+                ratio = SequenceMatcher(None, title_a, title_b).ratio()
+                if ratio >= threshold:
+                    duplicates.append((a, b))
+        return duplicates
+
+    def _detect_stale(self, issues: list[Issue], stale_days: int = 90) -> list[Issue]:
+        """Detect issues that have had no activity for *stale_days*."""
+        cutoff = datetime.now(UTC) - timedelta(days=stale_days)
+        stale: list[Issue] = []
+        for issue in issues:
+            updated = issue.updated_at
+            if not updated:
+                stale.append(issue)
+                continue
+            try:
+                updated_dt = datetime.fromisoformat(updated.replace("Z", "+00:00"))
+                if updated_dt < cutoff:
+                    stale.append(issue)
+            except ValueError:
+                stale.append(issue)
+        return stale
+
+    def _detect_potentially_resolved(self, issues: list[Issue]) -> list[Issue]:
+        """Detect issues whose title mentions a path that already exists.
+
+        This is a heuristic: an issue is flagged if *any* referenced path
+        exists, even when the issue mentions multiple deliverables.  Manual
+        verification is still required before closing.
+        """
+        repo_root = Path(__file__).resolve().parent.parent
+        resolved: list[Issue] = []
+        pattern = re.compile(r"create\s+`?([a-zA-Z0-9_./-]+/?)`?", re.IGNORECASE)
+        for issue in issues:
+            content = f"{issue.title} {issue.body}"
+            matches = pattern.findall(content)
+            if any((repo_root / match).exists() for match in matches):
+                resolved.append(issue)
+        return resolved
+
+    def audit(self, stale_days: int = 90) -> None:
+        """Run a comprehensive issue audit and print a report."""
+
+        def _trunc(text: str, width: int = 65) -> str:
+            return text if len(text) <= width else text[: width - 3] + "..."
+
+        print("\n🔍 Issue Audit Report")
+        print("=" * 80)
+        print(f"Generated: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}")
+        print(f"Staleness threshold: {stale_days} days\n")
+
+        issues = self._list_open_issues()
+        if not issues:
+            print("No open issues found (or unable to fetch issues).")
+            return
+
+        print(f"📋 Total open issues: {len(issues)}\n")
+
+        # --- Duplicates ---
+        duplicates = self._detect_duplicates(issues)
+        print("-" * 80)
+        print(f"🔁 Duplicate Issues ({len(duplicates)} pair(s) found)\n")
+        if duplicates:
+            for a, b in duplicates:
+                print(f'  #{a.number} ↔ #{b.number}  "{_trunc(a.title, 60)}"')
+            print("\n  ➡️  Action: close the duplicate and reference the original in a comment.\n")
+        else:
+            print("  None detected.\n")
+
+        # --- Stale ---
+        stale = self._detect_stale(issues, stale_days)
+        exempt_labels = {"pinned", "priority: critical", "priority: high", "production-readiness"}
+        actionable_stale = [i for i in stale if not set(i.labels) & exempt_labels]
+        print("-" * 80)
+        print(
+            f"⏰ Stale Issues — no activity for {stale_days}+ days "
+            f"({len(actionable_stale)} actionable, {len(stale)} total)\n"
+        )
+        for issue in actionable_stale:
+            labels = ", ".join(issue.labels) if issue.labels else "none"
+            print(f"  #{issue.number:>4}  {_trunc(issue.title)}")
+            print(f"         Labels: {labels}  |  Updated: {issue.updated_at[:10]}")
+        if actionable_stale:
+            print(
+                "\n  ➡️  Action: review each issue — close if no longer "
+                "relevant, or comment to keep alive.\n"
+            )
+        else:
+            print("  None detected.\n")
+
+        # --- Potentially Resolved ---
+        resolved = self._detect_potentially_resolved(issues)
+        print("-" * 80)
+        print(f"✅ Potentially Resolved Issues ({len(resolved)} found)\n")
+        for issue in resolved:
+            print(f"  #{issue.number:>4}  {_trunc(issue.title, 70)}")
+        if resolved:
+            print("\n  ➡️  Action: verify completion and close with a summary comment.\n")
+        else:
+            print("  None detected.\n")
+
+        # --- Issues without labels ---
+        unlabeled = [i for i in issues if not i.labels]
+        print("-" * 80)
+        print(f"🏷️  Unlabeled Issues ({len(unlabeled)} found)\n")
+        for issue in unlabeled:
+            print(f"  #{issue.number:>4}  {_trunc(issue.title, 70)}")
+        if unlabeled:
+            print(
+                "\n  ➡️  Action: add appropriate labels or run "
+                "`issue_manager.py auto-label <number>`.\n"
+            )
+        else:
+            print("  None detected.\n")
+
+        # --- Summary ---
+        print("=" * 80)
+        print("📊 Audit Summary\n")
+        print(f"  Total open issues:       {len(issues)}")
+        print(f"  Duplicate pairs:         {len(duplicates)}")
+        print(f"  Stale (actionable):      {len(actionable_stale)}")
+        print(f"  Potentially resolved:    {len(resolved)}")
+        print(f"  Unlabeled:               {len(unlabeled)}")
+        cleanup = len(duplicates) + len(actionable_stale) + len(resolved)
+        print(f"  Estimated cleanup:       ~{cleanup} issues")
+        print()
+
+    # ------------------------------------------------------------------
+    # Write operations — require GH_TOKEN with issues:write permission
+    # ------------------------------------------------------------------
+
+    def _close_issue(self, number: int, comment: str) -> bool:
+        """Close an issue with a comment explaining why."""
+        try:
+            subprocess.run(
+                [
+                    "gh",
+                    "issue",
+                    "comment",
+                    str(number),
+                    "--repo",
+                    self.repo,
+                    "--body",
+                    comment,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                [
+                    "gh",
+                    "issue",
+                    "close",
+                    str(number),
+                    "--repo",
+                    self.repo,
+                    "--reason",
+                    "not planned",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"  ❌ Failed to close #{number}: {e.stderr or 'unknown error'}", file=sys.stderr)
+            return False
+
+    def close_stale(self, stale_days: int = 90) -> None:
+        """Close stale issues that have had no activity."""
+        issues = self._list_open_issues()
+        stale = self._detect_stale(issues, stale_days)
+        exempt_labels = {
+            "pinned",
+            "priority: critical",
+            "priority: high",
+            "production-readiness",
+        }
+        actionable = [i for i in stale if not set(i.labels) & exempt_labels]
+
+        if not actionable:
+            print("No actionable stale issues found.")
+            return
+
+        print(f"Closing {len(actionable)} stale issues (>{stale_days} days)...\n")
+        closed = 0
+        for issue in actionable:
+            comment = (
+                f"🤖 **Automated issue audit**\n\n"
+                f"This issue has had no activity for over {stale_days} days "
+                f"and does not carry a high-priority or production-readiness "
+                f"label.\n\nClosing as stale. "
+                f"Please reopen if this work is still needed."
+            )
+            if self._close_issue(issue.number, comment):
+                print(f"  ✅ Closed #{issue.number}: {issue.title[:60]}")
+                closed += 1
+
+        print(f"\n🎉 Closed {closed}/{len(actionable)} stale issues.")
+
+    def close_duplicates(self) -> None:
+        """Close duplicate issues, keeping the lower-numbered original."""
+        issues = self._list_open_issues()
+        duplicates = self._detect_duplicates(issues)
+
+        if not duplicates:
+            print("No duplicate issues found.")
+            return
+
+        print(f"Closing {len(duplicates)} duplicate issue(s)...\n")
+        closed = 0
+        for original, dupe in duplicates:
+            comment = (
+                f"🤖 **Automated issue audit**\n\n"
+                f"This issue appears to be a duplicate of #{original.number}.\n\n"
+                f"Closing in favor of the original. "
+                f"Please reopen if this is intentionally distinct."
+            )
+            if self._close_issue(dupe.number, comment):
+                print(f"  ✅ Closed #{dupe.number} (duplicate of #{original.number})")
+                closed += 1
+
+        print(f"\n🎉 Closed {closed}/{len(duplicates)} duplicate issues.")
+
+    def label_unlabeled(self) -> None:
+        """Auto-label all unlabeled open issues."""
+        issues = self._list_open_issues()
+        unlabeled = [i for i in issues if not i.labels]
+
+        if not unlabeled:
+            print("No unlabeled issues found.")
+            return
+
+        print(f"Auto-labeling {len(unlabeled)} unlabeled issues...\n")
+        labeled = 0
+        for issue in unlabeled:
+            if self.auto_label(issue.number):
+                labeled += 1
+
+        print(f"\n🎉 Labeled {labeled}/{len(unlabeled)} issues.")
+
     def show_progress(self) -> None:
         """Show milestone progress dashboard."""
         try:
             result = subprocess.run(
-                ["gh", "api", f"/repos/{self.repo}/milestones", "--jq", ".[] | {title, open_issues, closed_issues, state, due_on}"],
+                [
+                    "gh",
+                    "api",
+                    f"/repos/{self.repo}/milestones",
+                    "--jq",
+                    ".[] | {title, open_issues, closed_issues, state, due_on}",
+                ],
                 capture_output=True,
                 text=True,
                 check=True,
@@ -490,6 +816,24 @@ def main():
 
     elif command == "progress":
         manager.show_progress()
+        sys.exit(0)
+
+    elif command == "audit":
+        stale_days = int(sys.argv[2]) if len(sys.argv) >= 3 else 90
+        manager.audit(stale_days)
+        sys.exit(0)
+
+    elif command == "close-stale":
+        stale_days = int(sys.argv[2]) if len(sys.argv) >= 3 else 90
+        manager.close_stale(stale_days)
+        sys.exit(0)
+
+    elif command == "close-duplicates":
+        manager.close_duplicates()
+        sys.exit(0)
+
+    elif command == "label-unlabeled":
+        manager.label_unlabeled()
         sys.exit(0)
 
     else:

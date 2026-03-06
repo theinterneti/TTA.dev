@@ -207,8 +207,9 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
         before executing the provided code.
         """
         # Update available servers from input if provided
-        if input_data.get("available_servers"):
-            self.available_servers = input_data["available_servers"]
+        servers = input_data.get("available_servers")
+        if servers is not None:
+            self.available_servers = servers
 
         # Update skills setting if provided
         if "enable_skills" in input_data:
@@ -222,9 +223,9 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
             result = await super()._execute_impl(input_data, context)
 
             # Enhance result with MCP context
-            enhanced_result = dict(result)
-            enhanced_result["mcp_servers"] = self.available_servers
-            enhanced_result["skills_enabled"] = self.enable_skills
+            enhanced_result: CodeOutput = dict(result)  # type: ignore[assignment]
+            enhanced_result["mcp_servers"] = self.available_servers  # type: ignore[typeddict-unknown-key]
+            enhanced_result["skills_enabled"] = self.enable_skills  # type: ignore[typeddict-unknown-key]
 
             return enhanced_result
 
@@ -261,7 +262,7 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
         await self._setup_workspace_directory(workspace_data)
 
         logger.info(
-            f"MCP environment setup complete: {len(self.available_servers)} servers, "
+            f"MCP environment setup complete: {len(self.available_servers or [])} servers, "
             f"skills={'enabled' if self.enable_skills else 'disabled'}"
         )
 
@@ -277,7 +278,7 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
         filesystem["mcp_client.py"] = self._generate_mcp_client_code()
 
         # Generate server directories and tools
-        for server_name in self.available_servers:
+        for server_name in self.available_servers or []:
             if server_name not in self.mcp_servers_config:
                 logger.warning(f"Unknown MCP server: {server_name}")
                 continue
@@ -286,7 +287,8 @@ class MCPCodeExecutionPrimitive(CodeExecutionPrimitive):
             server_base = f"servers/{server_name}"
 
             # Generate tool files
-            for tool in server_config["tools"]:
+            tools = server_config.get("tools", [])
+            for tool in tools:
                 tool_file = f"{server_base}/{tool['name']}.py"
                 filesystem[tool_file] = self._generate_tool_code(server_name, tool)
 

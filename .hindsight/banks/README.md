@@ -44,4 +44,4 @@ tags: [tag1, tag2]
 
 ## Usage
 
-See [HINDSIGHT_MEMORY_ARCHITECTURE.md](../../docs/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md) for full documentation.
+See [HINDSIGHT_MEMORY_ARCHITECTURE.md](../../docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md) for full documentation.

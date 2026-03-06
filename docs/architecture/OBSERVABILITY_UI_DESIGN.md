@@ -293,7 +293,7 @@ packages/tta-observability-ui/
 ### Phase 4: Polish & Documentation (Week 4)
 
 **Deliverables:**
-- [x] Documentation in `docs/observability/UI_GUIDE.md`
+- [x] Documentation in `docs/guides/observability/UI_GUIDE.md`
 - [x] Update AGENTS.md with new features
 - [x] Example workflows showing UI usage
 - [x] Performance optimization
@@ -432,7 +432,7 @@ tta-observability-ui start
 - [[TTA.dev/Observability]] - Observability overview
 - [[tta-observability-integration]] - OpenTelemetry integration
 - [[InstrumentedPrimitive]] - Primitive tracing
-- `docs/integration/observability-integration.md` - Integration guide
+- `docs/guides/integration/observability-integration.md` - Integration guide
 
 ---
 

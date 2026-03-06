@@ -336,7 +336,7 @@ python .augment/context/cli.py show session-name
 - **GEMINI.md** - Gemini CLI sub-agent context file
 - **.github/copilot-instructions.md** - GitHub Copilot specific instructions
 - **CLAUDE.md** - Claude-specific instructions and context
-- **docs/development/** - Detailed development guides and workflows
+- **docs/guides/development/** - Detailed development guides and workflows
 - **specs/** - Component and feature specifications
 
 ---

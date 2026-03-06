@@ -310,7 +310,7 @@ GRAFANA_CLOUD_REGION # Your region (prod-us-east-0)
 
 ```bash
 # Keep Docker running
-docker-compose -f docker-compose.integration.yml up -d
+docker compose --profile observability up -d
 
 # Install Alloy
 sudo ./scripts/setup-native-observability.sh
@@ -323,7 +323,7 @@ sudo ./scripts/setup-native-observability.sh
 
 ```bash
 # Stop Docker
-docker-compose -f docker-compose.integration.yml down
+docker compose --profile observability down
 
 # Verify Alloy is running
 sudo systemctl status alloy

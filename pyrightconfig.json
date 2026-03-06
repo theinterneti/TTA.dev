@@ -14,13 +14,15 @@
     "**/venv"
   ],
   "extraPaths": [
+    ".venv/lib/python3.11/site-packages",
     "platform/primitives/src",
     "platform/observability/src",
     "platform/agent-context/src",
     "platform/agent-coordination/src",
     "platform/kb-automation/src",
     "platform/documentation/src",
-    "platform/integrations/src"
+    "platform/integrations/src",
+    "platform/skills/src"
   ],
   "venvPath": ".",
   "venv": ".venv",

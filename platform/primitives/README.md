@@ -291,10 +291,12 @@ tta-dev-primitives/
 │   └── integration/       # 18 integration tests with real backends
 ├── examples/              # Usage examples
 ├── scripts/               # Helper scripts (integration-test-env.sh)
-├── docker-compose.integration.yml  # Integration test environment
 ├── pyproject.toml         # Package configuration
 └── apm.yml                # APM metadata
 ```
+
+> **Note:** The Docker Compose configuration for integration tests lives in the repo root as
+> `docker-compose.yml` (profile `test`). See [Integration Testing](#integration-testing) below.
 
 ## Testing
 

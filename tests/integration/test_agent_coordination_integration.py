@@ -96,13 +96,22 @@ async def test_handoff_with_memory_persistence():
     store_decision = AgentMemoryPrimitive(
         operation="store", memory_key="processed_data", memory_scope="workflow"
     )
-    handoff = AgentHandoffPrimitive(target_agent="analyzer", handoff_strategy="immediate")
+    handoff = AgentHandoffPrimitive(
+        target_agent="analyzer", handoff_strategy="immediate"
+    )
     analyzer = AnalyzerAgent()
-    retrieve_decision = AgentMemoryPrimitive(operation="retrieve", memory_key="processed_data")
+    retrieve_decision = AgentMemoryPrimitive(
+        operation="retrieve", memory_key="processed_data"
+    )
 
     # Build workflow
     workflow = (
-        processor >> prepare_mem >> store_decision >> handoff >> analyzer >> retrieve_decision
+        processor
+        >> prepare_mem
+        >> store_decision
+        >> handoff
+        >> analyzer
+        >> retrieve_decision
     )
 
     # Execute
@@ -138,7 +147,9 @@ async def test_memory_shared_across_agents():
     workflow = agent1 >> prepare_mem >> store >> agent2 >> retrieve
 
     # Execute
-    context = WorkflowContext(workflow_id="memory-sharing-test", session_id="test-session")
+    context = WorkflowContext(
+        workflow_id="memory-sharing-test", session_id="test-session"
+    )
 
     result = await workflow.execute({"data": "shared"}, context)
 
@@ -192,7 +203,8 @@ async def test_coordination_with_memory_aggregate():
             == f"{agent_name} analysis complete"
         )
         assert (
-            result["memory_value"]["agent_results"][agent_name]["agent"] == f"analyzer_{agent_name}"
+            result["memory_value"]["agent_results"][agent_name]["agent"]
+            == f"analyzer_{agent_name}"
         )
 
     # Verify all agents executed (coordination metadata stored in context)
@@ -268,7 +280,9 @@ async def test_complete_multi_agent_workflow():
         target_agent="decision_maker", handoff_strategy="immediate"
     )
     decision_maker = DecisionMakerAgent()
-    retrieve_initial = AgentMemoryPrimitive(operation="retrieve", memory_key="initial_data")
+    retrieve_initial = AgentMemoryPrimitive(
+        operation="retrieve", memory_key="initial_data"
+    )
 
     # Build complete workflow
     workflow = (
@@ -282,7 +296,9 @@ async def test_complete_multi_agent_workflow():
     )
 
     # Execute
-    context = WorkflowContext(workflow_id="complete-workflow", session_id="test-session")
+    context = WorkflowContext(
+        workflow_id="complete-workflow", session_id="test-session"
+    )
     context.metadata["current_agent"] = "processor"
 
     result = await workflow.execute({"data": "test_data"}, context)
@@ -309,7 +325,9 @@ async def test_complete_multi_agent_workflow():
 async def test_parallel_coordination_performance():
     """Test that parallel coordination is actually faster than sequential."""
     # Create slow agents
-    slow_agents = {f"agent{i}": DataProcessorAgent(processing_time=0.1) for i in range(5)}
+    slow_agents = {
+        f"agent{i}": DataProcessorAgent(processing_time=0.1) for i in range(5)
+    }
 
     # Parallel execution
     coordinator = AgentCoordinationPrimitive(
@@ -325,7 +343,9 @@ async def test_parallel_coordination_performance():
     parallel_duration = time.perf_counter() - start
 
     # Parallel should take roughly 0.1s (not 0.5s for sequential)
-    assert parallel_duration < 0.3, f"Parallel execution too slow: {parallel_duration:.2f}s"
+    assert parallel_duration < 0.3, (
+        f"Parallel execution too slow: {parallel_duration:.2f}s"
+    )
     assert result["coordination_metadata"]["successful_agents"] == 5
 
 
@@ -349,7 +369,9 @@ async def test_coordination_first_strategy_performance():
         "slow": DelayedAgent("slow", 0.5),
     }
 
-    coordinator = AgentCoordinationPrimitive(agent_primitives=agents, coordination_strategy="first")
+    coordinator = AgentCoordinationPrimitive(
+        agent_primitives=agents, coordination_strategy="first"
+    )
 
     context = WorkflowContext(workflow_id="first-strategy-test")
 

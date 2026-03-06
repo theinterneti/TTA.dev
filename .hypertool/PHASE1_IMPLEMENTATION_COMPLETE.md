@@ -283,14 +283,14 @@ npm install @toolprint/hypertool-mcp@latest --save-dev
 ## 📚 Documentation References
 
 ### Created Documentation
-1. **Strategic Integration:** [`docs/mcp/HYPERTOOL_STRATEGIC_INTEGRATION.md`](../../docs/mcp/HYPERTOOL_STRATEGIC_INTEGRATION.md)
-2. **Architecture Diagrams:** [`docs/mcp/HYPERTOOL_ARCHITECTURE_DIAGRAMS.md`](../../docs/mcp/HYPERTOOL_ARCHITECTURE_DIAGRAMS.md)
-3. **Executive Summary:** [`docs/mcp/HYPERTOOL_EXECUTIVE_SUMMARY.md`](../../docs/mcp/HYPERTOOL_EXECUTIVE_SUMMARY.md)
-4. **Integration Plan:** [`docs/mcp/HYPERTOOL_INTEGRATION_PLAN.md`](../../docs/mcp/HYPERTOOL_INTEGRATION_PLAN.md)
-5. **Quick Start Guide:** [`docs/mcp/HYPERTOOL_QUICKSTART.md`](../../docs/mcp/HYPERTOOL_QUICKSTART.md)
-6. **Comparison Analysis:** [`docs/mcp/HYPERTOOL_COMPARISON.md`](../../docs/mcp/HYPERTOOL_COMPARISON.md)
-7. **Discovery Summary:** [`docs/mcp/HYPERTOOL_DISCOVERY.md`](../../docs/mcp/HYPERTOOL_DISCOVERY.md)
-8. **Documentation Index:** [`docs/mcp/HYPERTOOL_INDEX.md`](../../docs/mcp/HYPERTOOL_INDEX.md)
+1. **Strategic Integration:** [`docs/reference/mcp/HYPERTOOL_STRATEGIC_INTEGRATION.md`](../../docs/reference/mcp/HYPERTOOL_STRATEGIC_INTEGRATION.md)
+2. **Architecture Diagrams:** [`docs/reference/mcp/HYPERTOOL_ARCHITECTURE_DIAGRAMS.md`](../../docs/reference/mcp/HYPERTOOL_ARCHITECTURE_DIAGRAMS.md)
+3. **Executive Summary:** [`docs/reference/mcp/HYPERTOOL_EXECUTIVE_SUMMARY.md`](../../docs/reference/mcp/HYPERTOOL_EXECUTIVE_SUMMARY.md)
+4. **Integration Plan:** [`docs/reference/mcp/HYPERTOOL_INTEGRATION_PLAN.md`](../../docs/reference/mcp/HYPERTOOL_INTEGRATION_PLAN.md)
+5. **Quick Start Guide:** [`docs/reference/mcp/HYPERTOOL_QUICKSTART.md`](../../docs/reference/mcp/HYPERTOOL_QUICKSTART.md)
+6. **Comparison Analysis:** [`docs/reference/mcp/HYPERTOOL_COMPARISON.md`](../../docs/reference/mcp/HYPERTOOL_COMPARISON.md)
+7. **Discovery Summary:** [`docs/reference/mcp/HYPERTOOL_DISCOVERY.md`](../../docs/reference/mcp/HYPERTOOL_DISCOVERY.md)
+8. **Documentation Index:** [`docs/reference/mcp/HYPERTOOL_INDEX.md`](../../docs/reference/mcp/HYPERTOOL_INDEX.md)
 9. **Implementation README:** [`.hypertool/README.md`](.hypertool/README.md) ← You are here
 
 ### External Resources
@@ -370,7 +370,7 @@ npm install @toolprint/hypertool-mcp@latest --save-dev
 **Next Phase:** Integration with Chat Modes (Week 2)
 **Team Review:** Recommended before proceeding to Phase 2
 
-**Questions?** See [HYPERTOOL_INDEX.md](../../docs/mcp/HYPERTOOL_INDEX.md) for navigation.
+**Questions?** See [HYPERTOOL_INDEX.md](../../docs/reference/mcp/HYPERTOOL_INDEX.md) for navigation.
 
 
 ---

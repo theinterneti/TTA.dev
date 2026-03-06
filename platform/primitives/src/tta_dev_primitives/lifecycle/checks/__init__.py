@@ -3,6 +3,9 @@
 This module provides ready-to-use validation checks organized by type:
 - generic: Language-agnostic checks (README, LICENSE, structure)
 - python: Python-specific checks (pytest, ruff, pyright)
+- documentation: Documentation quality checks (sections, changelog, examples)
+- git: Git repository state checks (clean tree, branch, remote)
+- security: Security checks (secrets, dependencies, vulnerabilities)
 
 ## Extending for Other Languages
 
@@ -39,6 +42,12 @@ JEST_TESTS_PASS = ValidationCheck(
 Then import and export your checks from this `__init__.py` file.
 """
 
+from tta_dev_primitives.lifecycle.checks.documentation import (
+    HAS_CHANGELOG,
+    HAS_DOCSTRINGS,
+    HAS_EXAMPLES,
+    HAS_README_SECTIONS,
+)
 from tta_dev_primitives.lifecycle.checks.generic import (
     HAS_LICENSE,
     HAS_PACKAGE_MANIFEST,
@@ -46,11 +55,22 @@ from tta_dev_primitives.lifecycle.checks.generic import (
     HAS_SRC_DIRECTORY,
     HAS_TESTS_DIRECTORY,
 )
+from tta_dev_primitives.lifecycle.checks.git import (
+    ON_CORRECT_BRANCH,
+    REMOTE_UP_TO_DATE,
+    VERSION_BUMPED,
+    WORKING_TREE_CLEAN,
+)
 from tta_dev_primitives.lifecycle.checks.python import (
     FORMAT_CHECK_PASSES,
     LINT_PASSES,
     TESTS_PASS,
     TYPE_CHECK_PASSES,
+)
+from tta_dev_primitives.lifecycle.checks.security import (
+    DEPENDENCIES_UP_TO_DATE,
+    NO_KNOWN_VULNERABILITIES,
+    NO_SECRETS_IN_CODE,
 )
 
 __all__ = [
@@ -65,4 +85,18 @@ __all__ = [
     "TYPE_CHECK_PASSES",
     "LINT_PASSES",
     "FORMAT_CHECK_PASSES",
+    # Documentation checks
+    "HAS_README_SECTIONS",
+    "HAS_CHANGELOG",
+    "HAS_EXAMPLES",
+    "HAS_DOCSTRINGS",
+    # Git checks
+    "WORKING_TREE_CLEAN",
+    "ON_CORRECT_BRANCH",
+    "REMOTE_UP_TO_DATE",
+    "VERSION_BUMPED",
+    # Security checks
+    "NO_SECRETS_IN_CODE",
+    "DEPENDENCIES_UP_TO_DATE",
+    "NO_KNOWN_VULNERABILITIES",
 ]

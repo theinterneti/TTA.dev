@@ -1,11 +1,23 @@
 """TTA Dev Primitives - Production-quality workflow primitives for AI applications.
 
+Core primitives are exported directly from this package:
+    WorkflowPrimitive, WorkflowContext, LambdaPrimitive,
+    SequentialPrimitive, ParallelPrimitive, ConditionalPrimitive, RouterPrimitive,
+    RetryPrimitive, FallbackPrimitive, TimeoutPrimitive, CompensationPrimitive,
+    CachePrimitive, MockPrimitive, GitCollaborationPrimitive.
+
+Extension modules (ace, adaptive, analysis, apm, benchmarking, knowledge,
+lifecycle, orchestration, research, speckit) are accessible via their original
+import paths or through the ``extensions`` namespace::
+
+    from tta_dev_primitives.extensions import EXTENSION_MODULES
+    from tta_dev_primitives.extensions import adaptive
+
 KB Safety: All primitives follow the one-way sync architecture (Code → KB only).
 See docs/architecture/KB_SAFETY_ARCHITECTURE.md for details.
 """
 
-# Core primitives
-# Collaboration primitives
+# ── Core: collaboration ─────────────────────────────────────────────────
 from .collaboration import (
     AgentIdentity,
     CommitFrequencyPolicy,
@@ -13,25 +25,27 @@ from .collaboration import (
     IntegrationFrequency,
     MergeStrategy,
 )
+
+# ── Core: control flow ──────────────────────────────────────────────────
 from .core.base import LambdaPrimitive, WorkflowContext, WorkflowPrimitive
 from .core.conditional import ConditionalPrimitive
 from .core.parallel import ParallelPrimitive
 from .core.routing import RouterPrimitive
 from .core.sequential import SequentialPrimitive
 
-# Performance primitives
+# ── Core: performance ───────────────────────────────────────────────────
 from .performance.cache import CachePrimitive
 
-# Persistence primitives
+# ── Core: persistence ───────────────────────────────────────────────────
 from .persistence import AbstractRepository, AbstractUnitOfWork, FakeUnitOfWork
 
-# Recovery primitives
+# ── Core: recovery ──────────────────────────────────────────────────────
 from .recovery.compensation import CompensationPrimitive, CompensationStrategy
 from .recovery.fallback import FallbackPrimitive
 from .recovery.retry import RetryPrimitive, RetryStrategy
 from .recovery.timeout import TimeoutPrimitive
 
-# Testing primitives
+# ── Core: testing ───────────────────────────────────────────────────────
 from .testing.mocks import MockPrimitive
 
 __all__ = [

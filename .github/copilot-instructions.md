@@ -26,20 +26,20 @@ uv run ruff check . --fix   # Lint code
 - Python 3.11+ required
 - Type hints: `str | None` not `Optional[str]`
 - Dicts: `dict[str, Any]` not `Dict[str, Any]`
-- Type check: `uvx pyright platform/`
+- Type check: `uvx pyright platform/` (basic mode)
+
+## Code Style
+
+- Formatter: Ruff (line length **88**, strict mode)
+- Docstrings: Google style
+- All public functions must have docstrings
 
 ## Testing
 
 - Framework: pytest with AAA pattern (Arrange, Act, Assert)
 - Async tests: `@pytest.mark.asyncio`
 - Mocking: `MockPrimitive` from `tta_dev_primitives.testing`
-- Coverage: 80% minimum, 100% for new code
-
-## Code Style
-
-- Formatter: Ruff (100 char line length)
-- Docstrings: Google style
-- All public functions must have docstrings
+- Coverage: 80% minimum, **100% for new code**
 
 ## Workflow Primitives
 
@@ -53,6 +53,21 @@ workflow = CachePrimitive(ttl=3600) >> RetryPrimitive(max_retries=3) >> process
 for attempt in range(3):  # Never do this
     try: ...
 ```
+
+## ⛔ TODO Management — CI-Blocking Rule
+
+All TODOs must strictly follow the [TODO Management System](../docs/agent-guides/todo-management.md).
+You **must** use the `#dev-todo` tag and include `type::`, `priority::`, and `package::` properties.
+**Malformed TODOs will block CI.**
+
+```markdown
+- TODO <description> #dev-todo
+  type:: <bug|implementation|refactor|documentation>
+  priority:: <critical|high|medium|low>
+  package:: <package-name>
+```
+
+TODOs without all required properties will fail the `validate-todos` CI step.
 
 ## Security
 
@@ -69,7 +84,8 @@ for attempt in range(3):  # Never do this
 | Format | `uv run ruff format .` |
 | Lint | `uv run ruff check . --fix` |
 | Type check | `uvx pyright platform/` |
-| All checks | Run format, lint, typecheck, test in sequence |
+| Validate TODOs | `uv run python scripts/validate-todos.py` |
+| All checks | Run format, lint, typecheck, test, validate-todos in sequence |
 
 ## Documentation
 

@@ -12,12 +12,14 @@ prerelease-mode = "if-necessary"
 
 [manifest]
 members = [
+    "python-pathway",
     "tta-agent-coordination",
     "tta-dev-integrations",
     "tta-dev-primitives",
     "tta-dolt-primitives",
     "tta-observability-integration",
     "tta-observability-ui",
+    "tta-skill-primitives",
     "universal-agent-context",
 ]
 
@@ -32,9 +34,15 @@ dev = [
     { name = "pytest", specifier = ">=8.0.0" },
     { name = "pytest-asyncio", specifier = ">=0.24.0" },
     { name = "pytest-cov", specifier = ">=4.1.0" },
+    { name = "pytest-flakefinder", specifier = ">=1.1.0" },
     { name = "pytest-mock", specifier = ">=3.14.0" },
+    { name = "pytest-profiling", specifier = ">=1.7.0" },
+    { name = "pytest-split", specifier = ">=0.9.0" },
     { name = "pytest-timeout", specifier = ">=2.2.0" },
+    { name = "pytest-unused-fixtures", specifier = ">=0.1.0" },
+    { name = "pytest-xdist", specifier = ">=3.5.0" },
     { name = "ruff", specifier = ">=0.8.0" },
+    { name = "tenacity", specifier = ">=8.2.0" },
 ]
 
 [[package]]
@@ -775,6 +783,15 @@ wheels = [
 ]
 
 [[package]]
+name = "execnet"
+version = "2.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bf/89/780e11f9588d9e7128a3f87788354c7946a9cbb1401ad38a48c4db9a4f07/execnet-2.1.2.tar.gz", hash = "sha256:63d83bfdd9a23e35b9c6a3261412324f964c2ec8dcd8d3c6916ee9373e0befcd", size = 166622, upload-time = "2025-11-12T09:56:37.75Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ab/84/02fc1827e8cdded4aa65baef11296a9bbe595c474f0d6d758af082d849fd/execnet-2.1.2-py3-none-any.whl", hash = "sha256:67fba928dd5a544b783f6056f449e5e3931a5c378b128bc18501f7ea79e296ec", size = 40708, upload-time = "2025-11-12T09:56:36.333Z" },
+]
+
+[[package]]
 name = "fastapi"
 version = "0.121.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1043,6 +1060,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e5/7b/adfd75544c415c487b33061fe7ae526165241c1ea133f9a9125a56b39fd8/googleapis_common_protos-1.72.0.tar.gz", hash = "sha256:e55a601c1b32b52d7a3e65f43563e2aa61bcd737998ee672ac9b951cd49319f5", size = 147433, upload-time = "2025-11-06T18:29:24.087Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c4/ab/09169d5a4612a5f92490806649ac8d41e3ec9129c636754575b3553f4ea4/googleapis_common_protos-1.72.0-py3-none-any.whl", hash = "sha256:4299c5a82d5ae1a9702ada957347726b167f9f8d1fc352477702a1e851ff4038", size = 297515, upload-time = "2025-11-06T18:29:13.14Z" },
+]
+
+[[package]]
+name = "gprof2dot"
+version = "2025.4.14"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bb/fd/cad13fa1f7a463a607176432c4affa33ea162f02f58cc36de1d40d3e6b48/gprof2dot-2025.4.14.tar.gz", hash = "sha256:35743e2d2ca027bf48fa7cba37021aaf4a27beeae1ae8e05a50b55f1f921a6ce", size = 39536, upload-time = "2025-04-14T07:21:45.76Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/71/ed/89d760cb25279109b89eb52975a7b5479700d3114a2421ce735bfb2e7513/gprof2dot-2025.4.14-py3-none-any.whl", hash = "sha256:0742e4c0b4409a5e8777e739388a11e1ed3750be86895655312ea7c20bd0090e", size = 37555, upload-time = "2025-04-14T07:21:43.319Z" },
 ]
 
 [[package]]
@@ -2354,6 +2380,18 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-flakefinder"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/53/69c56a93ea057895b5761c5318455804873a6cd9d796d7c55d41c2358125/pytest-flakefinder-1.1.0.tar.gz", hash = "sha256:e2412a1920bdb8e7908783b20b3d57e9dad590cc39a93e8596ffdd493b403e0e", size = 6795, upload-time = "2022-10-26T18:27:54.243Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/33/8b/06787150d0fd0cbd3a8054262b56f91631c7778c1bc91bf4637e47f909ad/pytest_flakefinder-1.1.0-py2.py3-none-any.whl", hash = "sha256:741e0e8eea427052f5b8c89c2b3c3019a50c39a59ce4df6a305a2c2d9ba2bd13", size = 4644, upload-time = "2022-10-26T18:27:52.128Z" },
+]
+
+[[package]]
 name = "pytest-json-report"
 version = "1.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2391,6 +2429,32 @@ wheels = [
 ]
 
 [[package]]
+name = "pytest-profiling"
+version = "1.8.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "gprof2dot" },
+    { name = "pytest" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/44/74/806cafd6f2108d37979ec71e73b2ff7f7db88eabd19d3b79c5d6cc229c36/pytest-profiling-1.8.1.tar.gz", hash = "sha256:3f171fa69d5c82fa9aab76d66abd5f59da69135c37d6ae5bf7557f1b154cb08d", size = 33135, upload-time = "2024-11-29T19:34:13.85Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e3/ac/c428c66241a144617a8af7a28e2e055e1438d23b949b62ac4b401a69fb79/pytest_profiling-1.8.1-py3-none-any.whl", hash = "sha256:3dd8713a96298b42d83de8f5951df3ada3e61b3e5d2a06956684175529e17aea", size = 9929, upload-time = "2024-11-29T19:33:02.111Z" },
+]
+
+[[package]]
+name = "pytest-split"
+version = "0.11.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2f/16/8af4c5f2ceb3640bb1f78dfdf5c184556b10dfe9369feaaad7ff1c13f329/pytest_split-0.11.0.tar.gz", hash = "sha256:8ebdb29cc72cc962e8eb1ec07db1eeb98ab25e215ed8e3216f6b9fc7ce0ec2b5", size = 13421, upload-time = "2026-02-03T09:14:31.469Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ae/a1/d4423657caaa8be9b31e491592b49cebdcfd434d3e74512ce71f6ec39905/pytest_split-0.11.0-py3-none-any.whl", hash = "sha256:899d7c0f5730da91e2daf283860eb73b503259cb416851a65599368849c7f382", size = 11911, upload-time = "2026-02-03T09:14:33.708Z" },
+]
+
+[[package]]
 name = "pytest-timeout"
 version = "2.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2400,6 +2464,31 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ac/82/4c9ecabab13363e72d880f2fb504c5f750433b2b6f16e99f4ec21ada284c/pytest_timeout-2.4.0.tar.gz", hash = "sha256:7e68e90b01f9eff71332b25001f85c75495fc4e3a836701876183c4bcfd0540a", size = 17973, upload-time = "2025-05-05T19:44:34.99Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fa/b6/3127540ecdf1464a00e5a01ee60a1b09175f6913f0644ac748494d9c4b21/pytest_timeout-2.4.0-py3-none-any.whl", hash = "sha256:c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2", size = 14382, upload-time = "2025-05-05T19:44:33.502Z" },
+]
+
+[[package]]
+name = "pytest-unused-fixtures"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/23/12/cd20cc256ef8d7dbc206d3acb3dd99816dafbe5356bed3de0722ff69bc39/pytest_unused_fixtures-0.3.1.tar.gz", hash = "sha256:e7102edf1f2b7d977218fb282bfd1b8879415747e17ef0e9f78a29dcb31cf3a6", size = 6473, upload-time = "2025-12-23T13:56:13.968Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/14/dd/d5bb101ecae4abbe33a256cbca62c5575ad36eb074408f221a053b83f3d5/pytest_unused_fixtures-0.3.1-py3-none-any.whl", hash = "sha256:5455f970aadbebd527930fa767111aba5f484b6c514ac5a37f830669a16832bd", size = 8307, upload-time = "2025-12-23T13:56:13.021Z" },
+]
+
+[[package]]
+name = "pytest-xdist"
+version = "3.8.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "execnet" },
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/78/b4/439b179d1ff526791eb921115fca8e44e596a13efeda518b9d845a619450/pytest_xdist-3.8.0.tar.gz", hash = "sha256:7e578125ec9bc6050861aa93f2d59f1d8d085595d6551c2c90b6f4fad8d3a9f1", size = 88069, upload-time = "2025-07-01T13:30:59.346Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ca/31/d4e37e9e550c2b92a9cbc2e4d0b7420a27224968580b5a447f420847c975/pytest_xdist-3.8.0-py3-none-any.whl", hash = "sha256:202ca578cfeb7370784a8c33d6d05bc6e13b4f25b5053c30a152269fd10f0b88", size = 46396, upload-time = "2025-07-01T13:30:56.632Z" },
 ]
 
 [[package]]
@@ -2439,6 +2528,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f3/87/f44d7c9f274c7ee665a29b885ec97089ec5dc034c7f3fafa03da9e39a09e/python_multipart-0.0.20.tar.gz", hash = "sha256:8dd0cab45b8e23064ae09147625994d090fa46f5b0d1e13af944c331a7fa9d13", size = 37158, upload-time = "2024-12-16T19:45:46.972Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/45/58/38b5afbc1a800eeea951b9285d3912613f2603bdf897a4ab0f4bd7f405fc/python_multipart-0.0.20-py3-none-any.whl", hash = "sha256:8a62d3a8335e06589fe01f2a3e178cdcc632f3fbe0d492ad9ee0ec35aab1f104", size = 24546, upload-time = "2024-12-16T19:45:44.423Z" },
+]
+
+[[package]]
+name = "python-pathway"
+version = "0.1.0"
+source = { editable = "packages/python-pathway" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "tta-dev-primitives" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "tta-dev-primitives", editable = "platform/primitives" },
 ]
 
 [[package]]
@@ -2984,6 +3088,7 @@ dependencies = [
     { name = "pygithub" },
     { name = "pytest-json-report" },
     { name = "tta-dev-primitives" },
+    { name = "universal-agent-context" },
 ]
 
 [package.optional-dependencies]
@@ -3006,6 +3111,7 @@ requires-dist = [
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.11.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
     { name = "tta-dev-primitives", editable = "platform/primitives" },
+    { name = "universal-agent-context", editable = "platform/agent-context" },
 ]
 provides-extras = ["dev"]
 
@@ -3282,6 +3388,40 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
     { name = "sqlalchemy", specifier = ">=2.0.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.24.0" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "tta-skill-primitives"
+version = "0.1.0"
+source = { editable = "platform/skills" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "structlog" },
+    { name = "tta-dev-primitives" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.6.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
+    { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.12.0" },
+    { name = "pyyaml", specifier = ">=6.0.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3.0" },
+    { name = "structlog", specifier = ">=24.1.0" },
+    { name = "tta-dev-primitives", editable = "platform/primitives" },
 ]
 provides-extras = ["dev"]
 

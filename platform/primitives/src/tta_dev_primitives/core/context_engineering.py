@@ -183,11 +183,12 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
         components: list[ContextComponent] = []
 
         # Layer 1: Target class (always priority 1)
-        if request.get("target_class"):
-            target_source = self._extract_source_code(request["target_class"])
+        target_class = request.get("target_class")
+        if target_class is not None:
+            target_source = self._extract_source_code(target_class)
             components.append(
                 ContextComponent(
-                    name=request["target_class"].__name__,
+                    name=target_class.__name__,
                     source_code=target_source,
                     priority=1,
                     token_count=self._count_tokens(target_source),
@@ -196,7 +197,7 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
             )
 
             # Layer 2: Dependencies (priority 2)
-            dependencies = self._discover_dependencies(request["target_class"])
+            dependencies = self._discover_dependencies(target_class)
             for dep_name, dep_class in dependencies.items():
                 dep_source = self._extract_source_code(dep_class)
                 components.append(
@@ -209,14 +210,15 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
                     )
                 )
 
-        elif request.get("target_source"):
+        elif request.get("target_source") is not None:
+            target_source_code: str = request["target_source"]  # type: ignore[assignment]
             # Use provided source code
             components.append(
                 ContextComponent(
                     name="target",
-                    source_code=request["target_source"],
+                    source_code=target_source_code,
                     priority=1,
-                    token_count=self._count_tokens(request["target_source"]),
+                    token_count=self._count_tokens(target_source_code),
                     component_type="target",
                 )
             )
@@ -258,8 +260,8 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
                 pass
 
         # Layer 4: Usage examples (priority 3, optional)
-        if self.include_examples and request.get("target_class"):
-            examples = self._find_usage_examples(request["target_class"])
+        if self.include_examples and target_class is not None:
+            examples = self._find_usage_examples(target_class)
             if examples:
                 components.append(
                     ContextComponent(
@@ -272,8 +274,8 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
                 )
 
         # Layer 5: Documentation (priority 3, optional)
-        if request.get("target_class"):
-            documentation = self._find_documentation(request["target_class"])
+        if target_class is not None:
+            documentation = self._find_documentation(target_class)
             if documentation:
                 components.append(
                     ContextComponent(
@@ -286,8 +288,8 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
                 )
 
         # Layer 6: Related files (priority 3, optional)
-        if request.get("target_class"):
-            related_files = await self._discover_related_files(request["target_class"], context)
+        if target_class is not None:
+            related_files = await self._discover_related_files(target_class, context)
             if related_files:
                 components.append(
                     ContextComponent(
@@ -727,8 +729,9 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
         sections: list[str] = []
 
         # Task section
-        if request.get("task"):
-            sections.append(f"# TASK\n{request['task']}\n")
+        task = request.get("task")
+        if task:
+            sections.append(f"# TASK\n{task}\n")
 
         # Target API section
         target_components = [c for c in components if c.component_type == "target"]

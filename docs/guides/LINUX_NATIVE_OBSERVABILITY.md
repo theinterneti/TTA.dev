@@ -26,7 +26,7 @@ This guide provides a complete migration path from Docker-based observability se
 ### Current Docker-Based Setup
 
 ```yaml
-# docker-compose.integration.yml
+# docker-compose.yml (root, profile: observability)
 services:
   - jaeger (port 16686)
   - prometheus (port 9090)
@@ -423,7 +423,7 @@ Run both Docker and native services simultaneously:
 
 ```bash
 # Stop Docker services
-docker-compose -f docker-compose.integration.yml down
+docker compose --profile observability down
 
 # Ensure Alloy is running
 sudo systemctl status alloy
@@ -576,7 +576,7 @@ alias docker=podman
 alias docker-compose=podman-compose
 
 # Run your docker-compose.yml
-podman-compose -f docker-compose.integration.yml up -d
+podman-compose -f docker-compose.yml --profile observability up -d
 ```
 
 **Benefits:**

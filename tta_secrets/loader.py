@@ -35,7 +35,8 @@ class EnvLoader:
         Load environment variables from .env files
 
         Args:
-            workspace_root: Path to workspace root (defaults to current working directory)
+            workspace_root: Path to workspace root
+                (defaults to current working directory)
             force: Force reload even if already loaded
 
         Returns:
@@ -67,10 +68,14 @@ class EnvLoader:
             home_env = Path.home() / ".env.tta-dev"
             if home_env.exists():
                 logger.info(f"Loading centralized .env from: {home_env}")
-                cls._load_env_file(home_env, override=False)  # Don't override workspace vars
+                cls._load_env_file(
+                    home_env, override=False
+                )  # Don't override workspace vars
             else:
                 logger.warning(f"Centralized .env not found at: {home_env}")
-                logger.info("Run: cp /home/thein/recovered-tta-storytelling/.env ~/.env.tta-dev")
+                logger.info(
+                    "Run: cp /home/thein/recovered-tta-storytelling/.env ~/.env.tta-dev"
+                )
 
             cls._loaded = True
             logger.info("Environment variables loaded successfully")
@@ -99,7 +104,9 @@ class EnvLoader:
 
                     # Parse KEY=VALUE
                     if "=" not in line:
-                        logger.warning(f"Invalid line {line_num} in {env_path}: {line[:50]}")
+                        logger.warning(
+                            f"Invalid line {line_num} in {env_path}: {line[:50]}"
+                        )
                         continue
 
                     key, value = line.split("=", 1)

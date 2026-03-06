@@ -71,7 +71,7 @@ This package ships with its own **specs** and **docs** directories:
 
 For the **current, repo-level integration guide**, also see:
 
-- `docs/integration/observability-integration.md` – End-to-end observability integration documentation for TTA.dev
+- `docs/guides/integration/observability-integration.md` – End-to-end observability integration documentation for TTA.dev
 
 ## Testing
 
