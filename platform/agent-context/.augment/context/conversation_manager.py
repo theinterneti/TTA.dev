@@ -920,18 +920,19 @@ class AIConversationContextManager:
         if not context:
             raise ValueError(f"No context found for session: {session_id}")
 
+        resolved_path: Path
         if filepath is None:
-            filepath = self.sessions_dir / f"{session_id}.json"
+            resolved_path = self.sessions_dir / f"{session_id}.json"
         else:
-            filepath = Path(filepath)
+            resolved_path = Path(filepath)
 
-        filepath.parent.mkdir(parents=True, exist_ok=True)
+        resolved_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with filepath.open("w") as f:
+        with resolved_path.open("w") as f:
             json.dump(context.to_dict(), f, indent=2)
 
-        logger.info(f"Saved session {session_id} to {filepath}")
-        return filepath
+        logger.info(f"Saved session {session_id} to {resolved_path}")
+        return resolved_path
 
     def load_session(self, filepath: str | Path) -> ConversationContext:
         """

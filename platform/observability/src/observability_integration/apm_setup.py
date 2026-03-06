@@ -110,7 +110,7 @@ def initialize_observability(
         # Setup tracing
         _tracer_provider = TracerProvider(resource=resource)
 
-        if enable_console_traces:
+        if enable_console_traces and _tracer_provider is not None:
             # Console exporter for development
             console_processor = BatchSpanProcessor(ConsoleSpanExporter())
             _tracer_provider.add_span_processor(console_processor)

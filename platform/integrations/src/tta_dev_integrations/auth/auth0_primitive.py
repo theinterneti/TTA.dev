@@ -2,9 +2,18 @@
 
 # TODO: Implement Auth0Primitive
 # Auth0 authentication service
-#
-# from tta_dev_integrations.auth.base import AuthPrimitive
-#
-# class Auth0Primitive(AuthPrimitive):
-#     """Auth0 authentication integration."""
-#     pass
+
+from tta_dev_primitives import WorkflowContext
+
+from tta_dev_integrations.auth.base import AuthPrimitive, AuthRequest, AuthResult
+
+
+class Auth0Primitive(AuthPrimitive):
+    """Auth0 authentication integration (stub)."""
+
+    async def _execute_impl(
+        self,
+        input_data: AuthRequest,
+        context: WorkflowContext,
+    ) -> AuthResult:
+        raise NotImplementedError("Auth0Primitive is not yet implemented")

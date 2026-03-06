@@ -13,11 +13,14 @@ Production-ready wrapper around Docker SDK with:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import docker
 from docker.errors import APIError, ContainerError, ImageNotFound, NotFound
 from docker.models.containers import Container
+from docker.models.images import Image
+from docker.models.networks import Network
+from docker.models.volumes import Volume
 from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
 
 
@@ -203,15 +206,18 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         name = params.get("name")
 
         # Run container
-        container: Container = self.client.containers.run(
-            image=image,
-            command=command,
-            detach=detach,
-            remove=remove,
-            environment=environment,
-            volumes=volumes,
-            ports=ports,
-            name=name,
+        container = cast(
+            Container,
+            self.client.containers.run(
+                image=image,
+                command=command,
+                detach=detach,
+                remove=remove,
+                environment=environment,
+                volumes=volumes,
+                ports=ports,
+                name=name,
+            ),
         )
 
         result = {
@@ -235,7 +241,7 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         if "container_id" not in params:
             raise ValueError("Missing required parameter: container_id")
 
-        container = self.client.containers.get(params["container_id"])
+        container = cast(Container, self.client.containers.get(params["container_id"]))
         timeout = params.get("timeout", 10)
 
         container.stop(timeout=timeout)
@@ -248,7 +254,7 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         if "container_id" not in params:
             raise ValueError("Missing required parameter: container_id")
 
-        container = self.client.containers.get(params["container_id"])
+        container = cast(Container, self.client.containers.get(params["container_id"]))
         force = params.get("force", False)
         v = params.get("v", False)  # Remove associated volumes
 
@@ -261,7 +267,10 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         all_containers = params.get("all", False)
         filters = params.get("filters", {})
 
-        containers = self.client.containers.list(all=all_containers, filters=filters)
+        containers = cast(
+            list[Container],
+            self.client.containers.list(all=all_containers, filters=filters),
+        )
 
         container_list = []
         for container in containers:
@@ -271,8 +280,10 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
                     "name": container.name,
                     "status": container.status,
                     "image": container.image.tags[0]
-                    if container.image.tags
-                    else container.image.id,
+                    if container.image is not None and container.image.tags
+                    else (
+                        container.image.id if container.image is not None else "unknown"
+                    ),
                 }
             )
 
@@ -283,7 +294,7 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         if "container_id" not in params:
             raise ValueError("Missing required parameter: container_id")
 
-        container = self.client.containers.get(params["container_id"])
+        container = cast(Container, self.client.containers.get(params["container_id"]))
         timestamps = params.get("timestamps", False)
         tail = params.get("tail", "all")
 
@@ -303,13 +314,16 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         nocache = params.get("nocache", False)
         rm = params.get("rm", True)
 
-        image, build_logs = self.client.images.build(
-            path=path,
-            tag=tag,
-            dockerfile=dockerfile,
-            buildargs=buildargs,
-            nocache=nocache,
-            rm=rm,
+        image, build_logs = cast(
+            tuple[Image, Any],
+            self.client.images.build(
+                path=path,
+                tag=tag,
+                dockerfile=dockerfile,
+                buildargs=buildargs,
+                nocache=nocache,
+                rm=rm,
+            ),
         )
 
         # Process build logs
@@ -323,7 +337,7 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         return {
             "image_id": image.id,
             "tags": image.tags,
-            "size": image.attrs.get("Size", 0),
+            "size": (image.attrs or {}).get("Size", 0),
             "build_logs": "\n".join(log_lines) if log_lines else None,
         }
 
@@ -335,12 +349,12 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         repository = params["repository"]
         tag = params.get("tag", "latest")
 
-        image = self.client.images.pull(repository, tag=tag)
+        image = cast(Image, self.client.images.pull(repository, tag=tag))
 
         return {
             "image_id": image.id,
             "tags": image.tags,
-            "size": image.attrs.get("Size", 0),
+            "size": (image.attrs or {}).get("Size", 0),
         }
 
     def _push_image(self, params: dict[str, Any]) -> dict[str, Any]:
@@ -374,7 +388,10 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         all_images = params.get("all", False)
         filters = params.get("filters", {})
 
-        images = self.client.images.list(name=name, all=all_images, filters=filters)
+        images = cast(
+            list[Image],
+            self.client.images.list(name=name, all=all_images, filters=filters),
+        )
 
         image_list = []
         for image in images:
@@ -382,8 +399,8 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
                 {
                     "id": image.id,
                     "tags": image.tags,
-                    "size": image.attrs.get("Size", 0),
-                    "created": image.attrs.get("Created"),
+                    "size": (image.attrs or {}).get("Size", 0),
+                    "created": (image.attrs or {}).get("Created"),
                 }
             )
 
@@ -396,14 +413,17 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         driver_opts = params.get("driver_opts", {})
         labels = params.get("labels", {})
 
-        volume = self.client.volumes.create(
-            name=name, driver=driver, driver_opts=driver_opts, labels=labels
+        volume = cast(
+            Volume,
+            self.client.volumes.create(
+                name=name, driver=driver, driver_opts=driver_opts, labels=labels
+            ),
         )
 
         return {
             "name": volume.name,
-            "driver": volume.attrs.get("Driver"),
-            "mountpoint": volume.attrs.get("Mountpoint"),
+            "driver": (volume.attrs or {}).get("Driver"),
+            "mountpoint": (volume.attrs or {}).get("Mountpoint"),
         }
 
     def _remove_volume(self, params: dict[str, Any]) -> dict[str, Any]:
@@ -411,7 +431,7 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         if "name" not in params:
             raise ValueError("Missing required parameter: name")
 
-        volume = self.client.volumes.get(params["name"])
+        volume = cast(Volume, self.client.volumes.get(params["name"]))
         force = params.get("force", False)
 
         volume.remove(force=force)
@@ -422,15 +442,15 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         """List volumes."""
         filters = params.get("filters", {})
 
-        volumes = self.client.volumes.list(filters=filters)
+        volumes = cast(list[Volume], self.client.volumes.list(filters=filters))
 
         volume_list = []
         for volume in volumes:
             volume_list.append(
                 {
                     "name": volume.name,
-                    "driver": volume.attrs.get("Driver"),
-                    "mountpoint": volume.attrs.get("Mountpoint"),
+                    "driver": (volume.attrs or {}).get("Driver"),
+                    "mountpoint": (volume.attrs or {}).get("Mountpoint"),
                 }
             )
 
@@ -446,14 +466,17 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         options = params.get("options", {})
         labels = params.get("labels", {})
 
-        network = self.client.networks.create(
-            name=name, driver=driver, options=options, labels=labels
+        network = cast(
+            Network,
+            self.client.networks.create(
+                name=name, driver=driver, options=options, labels=labels
+            ),
         )
 
         return {
             "id": network.id,
             "name": network.name,
-            "driver": network.attrs.get("Driver"),
+            "driver": (network.attrs or {}).get("Driver"),
         }
 
     def _remove_network(self, params: dict[str, Any]) -> dict[str, Any]:
@@ -461,7 +484,7 @@ class DockerSDKWrapper(WorkflowPrimitive[DockerOperation, DockerResult]):
         if "name" not in params:
             raise ValueError("Missing required parameter: name")
 
-        network = self.client.networks.get(params["name"])
+        network = cast(Network, self.client.networks.get(params["name"]))
         network.remove()
 
         return {"name": params["name"], "removed": True}
