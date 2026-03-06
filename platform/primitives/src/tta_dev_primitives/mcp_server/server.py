@@ -50,7 +50,7 @@ def create_server() -> Any:
 
     # ========== TOOLS ==========
 
-    @mcp.tool()
+    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
     async def analyze_code(
         code: str,
         file_path: str = "",
@@ -70,11 +70,20 @@ def create_server() -> Any:
             min_confidence: Minimum confidence threshold (0.0 to 1.0)
 
         Returns:
-            Analysis report with recommendations, including:
-            - detected_patterns: Patterns found in the code
-            - recommendations: List of primitive recommendations with templates
-            - detected_issues: Potential problems found
-            - optimization_opportunities: Ways to improve the code
+            dict: Analysis report with the following structure:
+                {
+                    "detected_patterns": List[str],
+                    "recommendations": List[{
+                        "primitive_name": str,
+                        "confidence_score": float,
+                        "reasoning": str,
+                        "code_template": str,
+                        "import_path": str
+                    }],
+                    "detected_issues": List[str],
+                    "optimization_opportunities": List[str],
+                    "complexity_level": str
+                }
         """
         logger.info(
             "mcp_tool_called",
@@ -90,7 +99,7 @@ def create_server() -> Any:
         )
         return report.to_dict()
 
-    @mcp.tool()
+    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
     async def get_primitive_info(primitive_name: str) -> dict[str, Any]:
         """Get detailed information about a TTA.dev primitive.
 
@@ -101,16 +110,20 @@ def create_server() -> Any:
             primitive_name: Name of the primitive (e.g., "RetryPrimitive")
 
         Returns:
-            Primitive documentation including:
-            - description: What the primitive does
-            - import_path: Python import statement
-            - use_cases: When to use this primitive
-            - templates: Ready-to-use code templates
-            - related_primitives: Primitives that work well together
+            dict: Primitive documentation with the following structure:
+                {
+                    "name": str,
+                    "description": str,
+                    "import_path": str,
+                    "use_cases": List[str],
+                    "templates": List[str],
+                    "related_primitives": List[str],
+                    "category": str
+                }
         """
         return analyzer.get_primitive_info(primitive_name)
 
-    @mcp.tool()
+    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
     async def list_primitives() -> list[dict[str, Any]]:
         """List all available TTA.dev primitives.
 
@@ -118,15 +131,18 @@ def create_server() -> Any:
         and primary use cases.
 
         Returns:
-            List of primitives with:
-            - name: Primitive name
-            - description: Brief description
-            - import_path: Python import
-            - use_cases: Example use cases
+            list[dict]: List of primitives, each with the following structure:
+                [{
+                    "name": str,
+                    "description": str,
+                    "import_path": str,
+                    "use_cases": List[str],
+                    "category": str
+                }]
         """
         return analyzer.list_primitives()
 
-    @mcp.tool()
+    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
     async def search_templates(query: str) -> list[dict[str, Any]]:
         """Search for primitive templates by keyword.
 
@@ -137,14 +153,17 @@ def create_server() -> Any:
             query: Search query (e.g., "retry", "cache", "parallel")
 
         Returns:
-            List of matching templates with:
-            - primitive_name: Which primitive this template is for
-            - match_type: "template" or "example"
-            - match_text: The matching content
+            list[dict]: List of matching templates with structure:
+                [{
+                    "primitive_name": str,
+                    "match_type": str,  # "template" or "example"
+                    "match_text": str,
+                    "relevance_score": float
+                }]
         """
         return analyzer.search_templates(query)
 
-    @mcp.tool()
+    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
     async def get_composition_example(
         primitives: list[str],
     ) -> dict[str, Any]:
@@ -157,10 +176,14 @@ def create_server() -> Any:
             primitives: List of primitive names to compose
 
         Returns:
-            Composition example with:
-            - code: Ready-to-use composition code
-            - explanation: How the composition works
-            - benefits: What this composition provides
+            dict: Composition example with structure:
+                {
+                    "primitives": List[str],
+                    "code": str,
+                    "explanation": str,
+                    "benefits": List[str],
+                    "imports": List[str]
+                }
         """
         if not primitives:
             return {"error": "Provide at least one primitive name"}
@@ -201,6 +224,7 @@ result = await workflow.execute(data, context)
                 "Built-in observability",
                 "Type-safe composition",
             ],
+            "imports": list(set(imports)),
         }
 
     @mcp.tool()
@@ -220,10 +244,14 @@ result = await workflow.execute(data, context)
             function_name: Specific function to wrap (optional, auto-detects if not provided)
 
         Returns:
-            Transformation result including:
-            - transformed_code: The modified code with primitive applied
-            - wrapped_functions: List of functions that were wrapped
-            - diff: Unified diff showing changes
+            dict: Transformation result with structure:
+                {
+                    "transformed_code": str,
+                    "wrapped_functions": List[str],
+                    "diff": str,
+                    "primitive": str,
+                    "error": Optional[str]
+                }
         """
         import difflib
 
@@ -289,10 +317,16 @@ result = await workflow.execute(data, context)
             primitive: Specific primitive to apply (uses top recommendation if not provided)
 
         Returns:
-            Combined result including:
-            - analysis: Full analysis report
-            - transformation: Transformed code (if applicable)
-            - applied_primitive: Which primitive was applied
+            dict: Combined result with structure:
+                {
+                    "analysis": dict,  # Full analysis report
+                    "transformation": Optional[{
+                        "code": str,
+                        "wrapped_functions": List[str]
+                    }],
+                    "applied_primitive": Optional[str],
+                    "message": Optional[str]
+                }
         """
         logger.info(
             "mcp_tool_called",
@@ -344,7 +378,7 @@ result = await workflow.execute(data, context)
                 "message": f"No suitable functions found for {prim_to_apply}",
             }
 
-    @mcp.tool()
+    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
     async def suggest_fixes(
         code: str,
         file_path: str = "",
@@ -361,10 +395,26 @@ result = await workflow.execute(data, context)
             max_suggestions: Maximum number of suggestions to return
 
         Returns:
-            Suggestions including:
-            - issues: Problems found with line numbers
-            - opportunities: Optimization opportunities with line numbers
-            - top_fixes: Top primitive recommendations with ready-to-use code
+            dict: Suggestions with structure:
+                {
+                    "issues": List[{
+                        "description": str,
+                        "lines": List[int]
+                    }],
+                    "opportunities": List[{
+                        "description": str,
+                        "lines": List[int]
+                    }],
+                    "top_fixes": List[{
+                        "primitive": str,
+                        "confidence": str,
+                        "reasoning": str,
+                        "import": str,
+                        "template": str
+                    }],
+                    "complexity": str,
+                    "patterns_found": List[str]
+                }
         """
         import re
 
@@ -434,7 +484,7 @@ result = await workflow.execute(data, context)
             "patterns_found": report.analysis.detected_patterns,
         }
 
-    @mcp.tool()
+    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
     async def detect_anti_patterns(
         code: str,
         file_path: str = "",
@@ -450,11 +500,19 @@ result = await workflow.execute(data, context)
             file_path: Optional file path for context
 
         Returns:
-            Anti-pattern analysis including:
-            - total_issues: Number of anti-patterns found
-            - primitives_needed: List of primitives that should be used
-            - issues: Detailed list with line numbers and suggested fixes
-            - anti_patterns: Categorized anti-patterns with code context
+            dict: Detected anti-patterns with structure:
+                {
+                    "anti_patterns": List[{
+                        "pattern_type": str,
+                        "description": str,
+                        "lines": List[int],
+                        "severity": str,  # "low", "medium", "high"
+                        "recommended_primitive": str,
+                        "fix_template": str
+                    }],
+                    "total_found": int,
+                    "summary": str
+                }
         """
         from tta_dev_primitives.analysis.patterns import PatternDetector
 
@@ -498,12 +556,15 @@ result = await workflow.execute(data, context)
             auto_detect: Auto-detect anti-patterns if no primitive specified
 
         Returns:
-            Rewrite result including:
-            - transformed_code: The rewritten code
-            - changes_made: List of changes applied
-            - imports_added: Required imports
-            - success: Whether rewrite succeeded
-            - diff: Unified diff of changes
+            dict: Rewrite result with structure:
+                {
+                    "transformed_code": str,
+                    "changes_made": List[str],
+                    "imports_added": List[str],
+                    "success": bool,
+                    "error": Optional[str],
+                    "diff": str
+                }
         """
         import difflib
 
