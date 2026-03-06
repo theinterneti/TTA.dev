@@ -40,11 +40,13 @@ class TestTemplateProvider:
     def test_get_template_contains_import(self, provider: TemplateProvider) -> None:
         """Verify template contains import statement."""
         template = provider.get_template("RetryPrimitive")
+        assert template is not None
         assert "from tta_dev_primitives" in template or "import" in template
 
     def test_get_template_contains_primitive_name(self, provider: TemplateProvider) -> None:
         """Verify template contains primitive class name."""
         template = provider.get_template("CachePrimitive")
+        assert template is not None
         assert "Cache" in template
 
     def test_get_template_unknown_returns_empty_or_none(self, provider: TemplateProvider) -> None:
@@ -79,36 +81,43 @@ class TestTemplateProvider:
     def test_retry_template_has_backoff(self, provider: TemplateProvider) -> None:
         """Verify RetryPrimitive template mentions backoff."""
         template = provider.get_template("RetryPrimitive")
+        assert template is not None
         assert "backoff" in template.lower() or "retry" in template.lower()
 
     def test_timeout_template_has_timeout(self, provider: TemplateProvider) -> None:
         """Verify TimeoutPrimitive template mentions timeout."""
         template = provider.get_template("TimeoutPrimitive")
+        assert template is not None
         assert "timeout" in template.lower()
 
     def test_cache_template_has_ttl(self, provider: TemplateProvider) -> None:
         """Verify CachePrimitive template mentions TTL."""
         template = provider.get_template("CachePrimitive")
+        assert template is not None
         assert "ttl" in template.lower() or "cache" in template.lower()
 
     def test_fallback_template_has_fallback(self, provider: TemplateProvider) -> None:
         """Verify FallbackPrimitive template mentions fallback."""
         template = provider.get_template("FallbackPrimitive")
+        assert template is not None
         assert "fallback" in template.lower()
 
     def test_parallel_template_has_parallel(self, provider: TemplateProvider) -> None:
         """Verify ParallelPrimitive template mentions parallel."""
         template = provider.get_template("ParallelPrimitive")
+        assert template is not None
         assert "parallel" in template.lower() or "gather" in template.lower()
 
     def test_sequential_template_has_sequential(self, provider: TemplateProvider) -> None:
         """Verify SequentialPrimitive template mentions sequential."""
         template = provider.get_template("SequentialPrimitive")
+        assert template is not None
         assert "sequential" in template.lower() or "sequence" in template.lower()
 
     def test_router_template_has_routes(self, provider: TemplateProvider) -> None:
         """Verify RouterPrimitive template mentions routes."""
         template = provider.get_template("RouterPrimitive")
+        assert template is not None
         assert "route" in template.lower()
 
     def test_all_templates_are_valid_python(self, provider: TemplateProvider) -> None:

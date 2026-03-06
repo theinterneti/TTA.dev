@@ -22,14 +22,14 @@ from .core.sequential import SequentialPrimitive
 # Performance primitives
 from .performance.cache import CachePrimitive
 
+# Persistence primitives
+from .persistence import AbstractRepository, AbstractUnitOfWork, FakeUnitOfWork
+
 # Recovery primitives
 from .recovery.compensation import CompensationPrimitive, CompensationStrategy
 from .recovery.fallback import FallbackPrimitive
 from .recovery.retry import RetryPrimitive, RetryStrategy
 from .recovery.timeout import TimeoutPrimitive
-
-# Persistence primitives
-from .persistence import AbstractRepository, AbstractUnitOfWork, FakeUnitOfWork
 
 # Testing primitives
 from .testing.mocks import MockPrimitive

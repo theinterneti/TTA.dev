@@ -131,6 +131,7 @@ class TestCodeExecution:
             result = await primitive.execute(input_data, workflow_context)
 
             assert result["success"] is False
+            assert result["error"] is not None
             assert "NameError" in result["error"]
             assert len(result["logs"]) > 0
 

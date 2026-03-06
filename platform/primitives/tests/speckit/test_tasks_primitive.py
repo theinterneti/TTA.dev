@@ -250,6 +250,7 @@ class TestDataModelParsing:
         primitive = TasksPrimitive()
         data_model = primitive._parse_data_model(sample_data_model_file)
 
+        assert data_model is not None
         entities = data_model["entities"]
         assert "User" in entities
         assert "Session" in entities
@@ -573,7 +574,7 @@ class TestCriticalPathIdentification:
         """Test that critical path can be disabled via configuration."""
         primitive = TasksPrimitive(identify_critical_path=False)
 
-        [
+        _tasks = [
             Task(id="T-001", title="Task 1", description="First", phase="P1", hours=10.0),
         ]
 
@@ -641,7 +642,7 @@ class TestParallelStreamIdentification:
         """Test that parallel stream identification can be disabled."""
         primitive = TasksPrimitive(group_parallel_work=False)
 
-        [
+        _tasks = [
             Task(id="T-001", title="Task 1", description="First", phase="P1"),
             Task(id="T-002", title="Task 2", description="Second", phase="P1"),
         ]

@@ -22,6 +22,8 @@
     "platform/documentation/src",
     "platform/integrations/src"
   ],
+  "venvPath": ".",
+  "venv": ".venv",
   "reportMissingImports": true,
   "reportMissingTypeStubs": false,
   "pythonVersion": "3.11",

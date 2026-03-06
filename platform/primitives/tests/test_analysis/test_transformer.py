@@ -55,6 +55,7 @@ class TestCodeTransformer:
         transformer = CodeTransformer()
         result = transformer.transform("def broken(")
         assert not result.success
+        assert result.error is not None
         assert "Syntax error" in result.error
 
     def test_transform_no_changes(self) -> None:
