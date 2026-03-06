@@ -57,8 +57,9 @@ def test_descriptor_extra_fields():
     d = SkillDescriptor(
         name="test",
         description="A test.",
-        custom_field="custom_value",
+        custom_field="custom_value",  # type: ignore[call-arg]
     )
+    assert d.model_extra is not None
     assert d.model_extra.get("custom_field") == "custom_value"
 
 
@@ -72,7 +73,8 @@ def test_metadata_defaults():
 
 def test_metadata_extra_fields():
     """Metadata allows extra fields."""
-    m = SkillMetadata(author="Test", custom="value")
+    m = SkillMetadata(author="Test", custom="value")  # type: ignore[call-arg]
+    assert m.model_extra is not None
     assert m.model_extra.get("custom") == "value"
 
 

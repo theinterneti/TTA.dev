@@ -400,7 +400,7 @@ class TestComposition:
     async def test_sequential_uv_sync_then_run(self) -> None:
         sync_prim = UvSyncPrimitive()
         run_prim = UvRunPrimitive()
-        workflow = sync_prim >> run_prim
+        workflow = sync_prim >> run_prim  # type: ignore[operator]
 
         with (
             patch.object(

@@ -240,7 +240,7 @@ class TestErrorHandling:
         error_primitive = MockPrimitive("ErrorPrimitive", raise_error=True)
 
         timeout = TimeoutPrimitive(
-            primitive=error_primitive,
+            primitive=error_primitive,  # type: ignore[arg-type]
             timeout_seconds=1.0,
         )
 

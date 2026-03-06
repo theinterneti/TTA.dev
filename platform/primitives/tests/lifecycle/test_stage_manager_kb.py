@@ -111,7 +111,7 @@ class TestStageManagerKBIntegration:
                     source="logseq",
                 )
 
-        kb.execute = mock_execute
+        kb.execute = mock_execute  # type: ignore[method-assign]
 
         # Use empty criteria map to avoid pytest recursion timeouts
         manager = StageManager(stage_criteria_map={})
@@ -142,7 +142,7 @@ class TestStageManagerKBIntegration:
             queries.append((query.query_type, query.topic, query.stage))
             return KBResult(pages=[], total_found=0, query_time_ms=0.0, source="fallback")
 
-        kb.execute = mock_execute
+        kb.execute = mock_execute  # type: ignore[method-assign]
 
         # Use empty criteria map to avoid pytest recursion timeouts
         manager = StageManager(stage_criteria_map={})
@@ -189,7 +189,7 @@ class TestStageManagerKBIntegration:
             else:  # common_mistakes
                 return KBResult(pages=[], total_found=0, query_time_ms=0.0, source="fallback")
 
-        kb.execute = mock_execute
+        kb.execute = mock_execute  # type: ignore[method-assign]
 
         # Use empty criteria map to avoid pytest recursion timeouts
         manager = StageManager(stage_criteria_map={})

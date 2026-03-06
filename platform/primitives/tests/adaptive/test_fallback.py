@@ -343,7 +343,7 @@ class TestStrategyParameters:
 
         adaptive = AdaptiveFallbackPrimitive(
             primary=primary_service,
-            fallbacks=custom_fallbacks,
+            fallbacks=custom_fallbacks,  # type: ignore[arg-type]
             learning_mode=LearningMode.ACTIVE,
             min_observations_before_learning=5,
         )
@@ -473,7 +473,7 @@ class TestEdgeCases:
         """Test with only one fallback."""
         single_fallback = {"only_backup": UnreliableService("OnlyBackup")}
 
-        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=single_fallback)
+        adaptive = AdaptiveFallbackPrimitive(primary=primary_service, fallbacks=single_fallback)  # type: ignore[arg-type]
 
         primary_service.fail_next(1)
         result = await adaptive.execute({"id": "test1"}, context)
