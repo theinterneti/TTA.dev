@@ -47,8 +47,6 @@ jobs:
             ["agent-context"]="universal-agent-context"
             ["integrations"]="tta-dev-integrations"
             ["agent-coordination"]="tta-agent-coordination"
-            ["documentation"]="tta-documentation-primitives"
-            ["kb-automation"]="tta-kb-automation"
             ["dolt"]="tta-dolt-primitives"
           )
 

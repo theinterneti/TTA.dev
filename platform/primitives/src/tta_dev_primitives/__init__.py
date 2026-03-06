@@ -36,6 +36,9 @@ from .core.sequential import SequentialPrimitive
 # ── Core: performance ───────────────────────────────────────────────────
 from .performance.cache import CachePrimitive
 
+# ── Core: persistence ───────────────────────────────────────────────────
+from .persistence import AbstractRepository, AbstractUnitOfWork, FakeUnitOfWork
+
 # ── Core: recovery ──────────────────────────────────────────────────────
 from .recovery.compensation import CompensationPrimitive, CompensationStrategy
 from .recovery.fallback import FallbackPrimitive
@@ -69,8 +72,12 @@ __all__ = [
     "RetryPrimitive",
     "RetryStrategy",
     "TimeoutPrimitive",
+    # Persistence primitives
+    "AbstractRepository",
+    "AbstractUnitOfWork",
+    "FakeUnitOfWork",
     # Testing primitives
     "MockPrimitive",
 ]
 
-__version__ = "0.1.0"
+__version__ = "1.3.1"

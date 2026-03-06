@@ -65,9 +65,11 @@ class TestFreeTierResearchPrimitive:
         openai_info = response.providers["openai"]
         assert openai_info.name == "OpenAI API"
         assert openai_info.has_free_tier is True
+        assert openai_info.free_tier_details is not None
         assert "$5" in openai_info.free_tier_details
         assert openai_info.credit_card_required is True
         assert openai_info.setup_url is not None
+        assert openai_info.notes is not None
         assert "ChatGPT" in openai_info.notes  # Web UI vs API confusion
 
     async def test_anthropic_provider_info(self) -> None:
@@ -82,6 +84,7 @@ class TestFreeTierResearchPrimitive:
         assert anthropic_info.name == "Anthropic Claude API"
         assert anthropic_info.has_free_tier is False  # No free API tier
         assert anthropic_info.credit_card_required is True
+        assert anthropic_info.notes is not None
         assert "claude.ai" in anthropic_info.notes  # Web UI is free
 
     async def test_google_gemini_provider_info(self) -> None:
@@ -95,9 +98,11 @@ class TestFreeTierResearchPrimitive:
         gemini_info = response.providers["google-gemini"]
         assert gemini_info.name == "Google Gemini"
         assert gemini_info.has_free_tier is True
+        assert gemini_info.free_tier_details is not None
         assert "1500 RPD" in gemini_info.free_tier_details
         assert gemini_info.credit_card_required is False
         assert gemini_info.expires == "Never"
+        assert gemini_info.notes is not None
         assert "AI Studio" in gemini_info.notes  # AI Studio vs Vertex AI
 
     async def test_openrouter_provider_info(self) -> None:
@@ -111,8 +116,10 @@ class TestFreeTierResearchPrimitive:
         openrouter_info = response.providers["openrouter"]
         assert openrouter_info.name == "OpenRouter BYOK"
         assert openrouter_info.has_free_tier is True
+        assert openrouter_info.free_tier_details is not None
         assert "1M" in openrouter_info.free_tier_details
         assert openrouter_info.credit_card_required is False
+        assert openrouter_info.notes is not None
         assert "BYOK" in openrouter_info.notes  # BYOK explanation
 
     async def test_ollama_provider_info(self) -> None:
@@ -126,6 +133,7 @@ class TestFreeTierResearchPrimitive:
         ollama_info = response.providers["ollama"]
         assert ollama_info.name == "Ollama"
         assert ollama_info.has_free_tier is True
+        assert ollama_info.free_tier_details is not None
         assert "Unlimited" in ollama_info.free_tier_details
         assert ollama_info.credit_card_required is False
         assert ollama_info.expires == "Never"
@@ -143,6 +151,7 @@ class TestFreeTierResearchPrimitive:
         assert "unknown-provider" in response.providers
         unknown_info = response.providers["unknown-provider"]
         assert unknown_info.has_free_tier is False
+        assert unknown_info.notes is not None
         assert "not found" in unknown_info.notes
 
     async def test_changelog_generation(self) -> None:

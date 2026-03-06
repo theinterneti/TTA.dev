@@ -163,6 +163,7 @@ class TestBasicCacheBehavior:
         )
 
         # Override baseline strategy with short TTL
+        assert adaptive.baseline_strategy is not None
         adaptive.baseline_strategy.parameters["ttl_seconds"] = 0.1
 
         # First call - cache miss
@@ -332,6 +333,7 @@ class TestCacheManagement:
         )
 
         # Override with short TTL
+        assert adaptive.baseline_strategy is not None
         adaptive.baseline_strategy.parameters["ttl_seconds"] = 0.1
 
         # Populate cache
