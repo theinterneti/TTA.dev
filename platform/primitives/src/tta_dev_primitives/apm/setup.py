@@ -78,7 +78,8 @@ def setup_apm(
         _tracer_provider.add_span_processor(console_processor)
         logger.info("Console trace export enabled")
 
-    trace.set_tracer_provider(_tracer_provider)
+    if _tracer_provider is not None:
+        trace.set_tracer_provider(_tracer_provider)
     logger.info(f"Tracer initialized for service: {service_name}")
 
     # Setup metrics

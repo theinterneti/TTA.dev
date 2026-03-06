@@ -385,9 +385,9 @@ class CodeExecutionPrimitive(InstrumentedPrimitive[CodeInput, CodeOutput]):
                 close_coro = None
 
                 if hasattr(self._sandbox, "aclose"):
-                    close_coro = self._sandbox.aclose()
+                    close_coro = self._sandbox.aclose()  # pyright: ignore[reportAttributeAccessIssue]
                 elif hasattr(self._sandbox, "close"):
-                    maybe_close = self._sandbox.close()
+                    maybe_close = self._sandbox.close()  # pyright: ignore[reportAttributeAccessIssue]
                     # ``close`` may be sync or async depending on SDK.
                     if asyncio.iscoroutine(maybe_close) or isinstance(maybe_close, asyncio.Future):
                         close_coro = maybe_close

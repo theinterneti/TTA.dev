@@ -7,7 +7,7 @@ Exports all collected metrics from the enhanced metrics collector.
 
 import threading
 from collections.abc import Iterator
-from typing import Any
+from typing import Any, cast
 
 try:
     from prometheus_client import (
@@ -100,7 +100,7 @@ class TTAPrometheusExporter:
             if REGISTRY is None or start_http_server is None:
                 return False
             # Register our custom collector
-            REGISTRY.register(self)
+            REGISTRY.register(cast(Any, self))
 
             # Start HTTP server
             start_http_server(self.port, addr=self.host)
@@ -118,7 +118,7 @@ class TTAPrometheusExporter:
         if self.running:
             try:
                 if REGISTRY is not None:
-                    REGISTRY.unregister(self)
+                    REGISTRY.unregister(cast(Any, self))
             except (KeyError, ValueError):
                 pass  # Already unregistered
             self.running = False
