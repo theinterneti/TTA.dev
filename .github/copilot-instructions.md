@@ -4,6 +4,32 @@
 > While awesome-copilot customizes GitHub Copilot, TTA.dev provides foundational patterns
 > and primitives that make ANY AI coding agent reliable and scale-ready.
 
+## 🔒 Automated Quality Gates (MANDATORY)
+
+**After modifying any code, you MUST run the quality gate hook:**
+
+```bash
+.github/copilot-hooks/post-generation.sh
+```
+
+### Self-Correction Protocol
+
+If quality gates fail:
+
+1. **Capture** - Read the full error output
+2. **Analyze** - Identify the root cause
+3. **Fix** - Apply minimal surgical fixes
+4. **Re-run** - Execute quality gates again
+5. **Iterate** - Repeat steps 2-4 until ALL gates pass
+
+**DO NOT** present results to the user until all quality gates pass cleanly.
+
+### Quality Gate Thresholds
+
+- **Ruff:** All checks must pass
+- **Pyright:** ≤2 real errors (known OpenTelemetry SDK issues)
+- **Pytest:** All non-integration tests must pass
+
 ## Philosophy
 
 1. **Vibe first** - Build fast, ship fast
