@@ -19,7 +19,10 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 
 from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.integrations.e2b_primitive import CodeExecutionPrimitive
+from tta_dev_primitives.integrations.e2b_primitive import (
+    CodeExecutionPrimitive,
+    CodeInput,
+)
 
 
 @pytest.fixture
@@ -100,7 +103,7 @@ class TestCodeExecution:
         ):
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
-            input_data = {"code": "print(21 + 21)"}
+            input_data: CodeInput = {"code": "print(21 + 21)"}
             result = await primitive.execute(input_data, workflow_context)
 
             assert result["success"] is True
@@ -127,7 +130,7 @@ class TestCodeExecution:
         ):
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
-            input_data = {"code": "print(undefined_var)"}
+            input_data: CodeInput = {"code": "print(undefined_var)"}
             result = await primitive.execute(input_data, workflow_context)
 
             assert result["success"] is False
@@ -152,7 +155,7 @@ class TestCodeExecution:
         ):
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
-            input_data = {"code": "while True: pass", "timeout": 1}
+            input_data: CodeInput = {"code": "while True: pass", "timeout": 1}
 
             with pytest.raises(TimeoutError, match="timed out after 1 seconds"):
                 await primitive.execute(input_data, workflow_context)
@@ -174,7 +177,7 @@ class TestCodeExecution:
         ):
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
-            input_data = {
+            input_data: CodeInput = {
                 "code": "import os; print(os.environ.get('TEST_VAR'))",
                 "env_vars": {"TEST_VAR": "test_value"},
             }
@@ -201,7 +204,7 @@ class TestSessionManagement:
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key, session_max_age=1)
 
             # First execution creates sandbox
-            input_data = {"code": "print('first')"}
+            input_data: CodeInput = {"code": "print('first')"}
             await primitive.execute(input_data, workflow_context)
 
             # Wait for session to age
@@ -223,7 +226,7 @@ class TestSessionManagement:
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
             # Create sandbox
-            input_data = {"code": "print('test')"}
+            input_data: CodeInput = {"code": "print('test')"}
             await primitive.execute(input_data, workflow_context)
 
             # Manual cleanup
@@ -241,7 +244,7 @@ class TestSessionManagement:
             new=AsyncMock(return_value=mock_sandbox),
         ):
             async with CodeExecutionPrimitive(api_key=mock_e2b_api_key) as primitive:
-                input_data = {"code": "print('context manager test')"}
+                input_data: CodeInput = {"code": "print('context manager test')"}
                 result = await primitive.execute(input_data, workflow_context)
                 assert result["success"] is True
 
@@ -263,7 +266,7 @@ class TestObservability:
         ):
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
-            input_data = {"code": "print('trace test')"}
+            input_data: CodeInput = {"code": "print('trace test')"}
             result = await primitive.execute(input_data, workflow_context)
 
             # Verify context was used (primitive has InstrumentedPrimitive behavior)
@@ -278,7 +281,7 @@ class TestObservability:
         ):
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
-            input_data = {"code": "import time; time.sleep(0.01)"}
+            input_data: CodeInput = {"code": "import time; time.sleep(0.01)"}
             result = await primitive.execute(input_data, workflow_context)
 
             assert "execution_time" in result
@@ -304,7 +307,7 @@ class TestEdgeCases:
         ):
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
-            input_data = {"code": "x = 1 + 1"}  # No print statement
+            input_data: CodeInput = {"code": "x = 1 + 1"}  # No print statement
             result = await primitive.execute(input_data, workflow_context)
 
             assert result["success"] is True
@@ -322,7 +325,7 @@ class TestEdgeCases:
         ):
             primitive = CodeExecutionPrimitive(api_key=mock_e2b_api_key)
 
-            input_data = {"code": "print('test')"}
+            input_data: CodeInput = {"code": "print('test')"}
             await primitive.execute(input_data, workflow_context)
 
             # Cleanup should not raise even if aclose fails
@@ -358,7 +361,7 @@ def fibonacci(n):
 print(fibonacci(10))
 """
 
-            input_data = {"code": fibonacci_code}
+            input_data: CodeInput = {"code": fibonacci_code}
             result = await primitive.execute(input_data, workflow_context)
 
             assert result["success"] is True
@@ -375,7 +378,7 @@ print(fibonacci(10))
 
             # Execute multiple times
             for i in range(3):
-                input_data = {"code": f"print({i})"}
+                input_data: CodeInput = {"code": f"print({i})"}
                 result = await primitive.execute(input_data, workflow_context)
                 assert result["success"] is True
 
