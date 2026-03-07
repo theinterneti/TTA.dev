@@ -1,0 +1,26 @@
+# Bandit Security Configuration
+# https://bandit.readthedocs.io/
+
+[bandit]
+# Paths to exclude from scanning
+exclude_dirs = [
+    "*/tests/*",
+    "*/.venv/*",
+    "*/node_modules/*",
+    "*/__pycache__/*",
+    "*/dist/*",
+    "*/build/*",
+]
+
+# Tests to run (empty = all tests)
+tests = []
+
+# Tests to skip  
+# B101: assert_used (acceptable in tests with pytest)
+# B404: import_subprocess (too noisy, subprocess is needed)
+# B603: subprocess_without_shell_equals_true (covered by B602/B605)
+skips = ["B101", "B404", "B603"]
+
+[bandit.formatters]
+# Output format
+format = "json"
