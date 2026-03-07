@@ -71,9 +71,6 @@ def __getattr__(name: str):
 __all__ = [
     "initialize_observability",
     "is_observability_enabled",
-    "LangFuseIntegration",
-    "get_langfuse",
-    "initialize_langfuse",
     "AdaptiveSampler",
     "CompositeSampler",
     "ProbabilisticSampler",
