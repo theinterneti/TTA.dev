@@ -65,11 +65,11 @@ uvx pyright platform/
 
 #### Coverage Enforcement
 ```yaml
---cov-fail-under=100
+--cov-fail-under=80
 ```
 - **Before**: Coverage tracked but not enforced
-- **After**: CI fails if coverage drops below 100%
-- **Rationale**: Maintains high code quality baseline
+- **After**: CI fails if coverage drops below 80%
+- **Rationale**: Matches the project baseline defined in `config/codecov.yml`
 
 #### Package Validation
 ```bash
