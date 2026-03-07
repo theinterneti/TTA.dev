@@ -1,0 +1,299 @@
+name: AI Agent Guardrails
+
+# Strict Policy-as-Code enforcement for AI-generated PRs
+# Ensures AI agents follow organizational security and process standards
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  enforce-draft-for-ai:
+    name: Enforce Draft PR for AI Agents
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+    
+    steps:
+      - name: Check if PR is from AI agent
+        id: check-ai
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          echo "PR Author: $PR_AUTHOR"
+          echo "PR Labels: $PR_LABELS"
+          echo "Is Draft: $PR_DRAFT"
+          
+          # Check if author is a bot
+          IS_BOT=false
+          if [[ "$PR_AUTHOR" == *"[bot]"* ]] || [[ "$PR_AUTHOR" == *"bot"* ]]; then
+            IS_BOT=true
+          fi
+          
+          # Check if ai-generated label exists
+          HAS_AI_LABEL=false
+          if echo "$PR_LABELS" | grep -q "ai-generated"; then
+            HAS_AI_LABEL=true
+          fi
+          
+          echo "is_bot=$IS_BOT" >> $GITHUB_OUTPUT
+          echo "has_ai_label=$HAS_AI_LABEL" >> $GITHUB_OUTPUT
+          echo "is_draft=$PR_DRAFT" >> $GITHUB_OUTPUT
+
+      - name: Convert to Draft if AI-generated
+        if: |
+          (steps.check-ai.outputs.is_bot == 'true' || steps.check-ai.outputs.has_ai_label == 'true') &&
+          steps.check-ai.outputs.is_draft == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "🤖 AI-generated PR detected. Converting to draft..."
+          gh pr ready --undo "$PR_NUMBER" --repo "$REPO" || {
+            echo "⚠️  Failed to convert to draft. PR may already be draft or locked."
+            exit 0
+          }
+          echo "✅ PR converted to draft successfully"
+
+      - name: Add comment explaining draft status
+        if: |
+          (steps.check-ai.outputs.is_bot == 'true' || steps.check-ai.outputs.has_ai_label == 'true') &&
+          steps.check-ai.outputs.is_draft == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body "🤖 **AI Agent Guardrail Enforced**
+
+          This PR has been automatically converted to a **Draft** because it was created by an AI agent or has the \`ai-generated\` label.
+
+          **Required Actions:**
+          1. Review all changes thoroughly
+          2. Ensure quality gates pass (linting, type checking, tests)
+          3. Verify no secrets or sensitive data are committed
+          4. Mark as \"Ready for review\" when validation is complete
+
+          **Security Note:** AI-generated PRs require human review before merge."
+
+  provenance-tagging:
+    name: Tag AI-Generated PRs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+    
+    steps:
+      - name: Check branch naming convention
+        id: check-branch
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          echo "Branch: $BRANCH_NAME"
+          
+          # Check if branch starts with copilot/ or agent/
+          IS_AI_BRANCH=false
+          if [[ "$BRANCH_NAME" == copilot/* ]] || [[ "$BRANCH_NAME" == agent/* ]]; then
+            IS_AI_BRANCH=true
+          fi
+          
+          # Check if already labeled
+          HAS_AI_LABEL=false
+          if echo "$PR_LABELS" | grep -q "ai-generated"; then
+            HAS_AI_LABEL=true
+          fi
+          
+          echo "is_ai_branch=$IS_AI_BRANCH" >> $GITHUB_OUTPUT
+          echo "has_ai_label=$HAS_AI_LABEL" >> $GITHUB_OUTPUT
+
+      - name: Apply ai-generated label
+        if: |
+          steps.check-branch.outputs.is_ai_branch == 'true' &&
+          steps.check-branch.outputs.has_ai_label == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "🏷️  Applying 'ai-generated' label to PR..."
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "ai-generated"
+          echo "✅ Label applied successfully"
+
+      - name: Add provenance comment
+        if: |
+          steps.check-branch.outputs.is_ai_branch == 'true' &&
+          steps.check-branch.outputs.has_ai_label == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body "🏷️ **AI Provenance Tagged**
+
+          This PR has been automatically tagged as \`ai-generated\` based on the branch name: \`$BRANCH_NAME\`
+
+          **Provenance Information:**
+          - Branch pattern matched: \`copilot/*\` or \`agent/*\`
+          - Requires enhanced review process
+          - Subject to AI guardrail policies
+
+          Please ensure all quality gates pass before requesting review."
+
+  security-posture:
+    name: Security Posture Report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Audit action pinning
+        id: audit-pinning
+        run: |
+          echo "🔍 Auditing GitHub Actions pinning..."
+          
+          # Find all workflow files
+          WORKFLOWS=$(find .github/workflows -name "*.yml" -o -name "*.yaml" | grep -v "experimental")
+          
+          UNPINNED=()
+          PINNED=()
+          
+          for workflow in $WORKFLOWS; do
+            # Find uses: statements that don't use SHA pinning
+            while IFS= read -r line; do
+              if echo "$line" | grep -q "uses:" && ! echo "$line" | grep -qE "@[a-f0-9]{40}" && ! echo "$line" | grep -q "\.\/"; then
+                UNPINNED+=("$workflow: $line")
+              elif echo "$line" | grep -q "uses:" && echo "$line" | grep -qE "@[a-f0-9]{40}"; then
+                PINNED+=("$workflow: $line")
+              fi
+            done < "$workflow"
+          done
+          
+          echo "### Security Posture Report" > security-report.md
+          echo "" >> security-report.md
+          echo "**Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> security-report.md
+          echo "" >> security-report.md
+          
+          if [ ${#UNPINNED[@]} -gt 0 ]; then
+            echo "⚠️  **UNPINNED ACTIONS FOUND (${#UNPINNED[@]} instances)**" >> security-report.md
+            echo "" >> security-report.md
+            printf '%s\n' "${UNPINNED[@]}" | head -20 >> security-report.md
+            echo "" >> security-report.md
+            echo "has_unpinned=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ **ALL ACTIONS PROPERLY PINNED**" >> security-report.md
+            echo "" >> security-report.md
+            echo "has_unpinned=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "" >> security-report.md
+          echo "**Pinned Actions:** ${#PINNED[@]}" >> security-report.md
+          echo "" >> security-report.md
+          echo "**Recommendation:** Pin all third-party actions to specific commit SHAs for supply chain security." >> security-report.md
+          
+          cat security-report.md
+
+      - name: Check OIDC usage
+        id: audit-oidc
+        run: |
+          echo "🔍 Auditing OIDC usage..."
+          
+          # Check for long-lived secrets in deployment jobs
+          SECRETS=$(grep -r "secrets\." .github/workflows/*.yml | grep -v "GITHUB_TOKEN" | grep -v "github.token" || true)
+          
+          echo "" >> security-report.md
+          echo "---" >> security-report.md
+          echo "" >> security-report.md
+          echo "### OIDC Security Audit" >> security-report.md
+          echo "" >> security-report.md
+          
+          if [ -n "$SECRETS" ]; then
+            echo "⚠️  **Long-lived secrets detected in workflows**" >> security-report.md
+            echo "" >> security-report.md
+            echo '```' >> security-report.md
+            echo "$SECRETS" | head -10 >> security-report.md
+            echo '```' >> security-report.md
+            echo "" >> security-report.md
+            echo "**Recommendation:** Migrate to OIDC for AWS, Azure, GCP deployments." >> security-report.md
+          else
+            echo "✅ **No deployment secrets detected**" >> security-report.md
+            echo "" >> security-report.md
+            echo "All workflows appear to use OIDC or GITHUB_TOKEN only." >> security-report.md
+          fi
+          
+          cat security-report.md
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-posture-report
+          path: security-report.md
+          retention-days: 30
+
+      - name: Fail on unpinned actions
+        if: steps.audit-pinning.outputs.has_unpinned == 'true'
+        run: |
+          echo "❌ SECURITY POLICY VIOLATION: Unpinned actions detected"
+          echo "Please pin all third-party actions to commit SHAs"
+          exit 1
+
+  validate-ai-compliance:
+    name: Validate AI-Generated Code Compliance
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      (contains(github.event.pull_request.labels.*.name, 'ai-generated') ||
+       contains(github.event.pull_request.user.login, '[bot]'))
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check for prohibited patterns
+        run: |
+          echo "🔍 Scanning for prohibited patterns in AI-generated code..."
+          
+          # Check for hardcoded secrets patterns
+          if git diff origin/${{ github.base_ref }}...HEAD | grep -iE "(api_key|secret|password|token).*=.*['\"].*['\"]"; then
+            echo "❌ Potential hardcoded secrets detected!"
+            exit 1
+          fi
+          
+          # Check for TODO without tracking
+          if git diff origin/${{ github.base_ref }}...HEAD | grep -E "TODO|FIXME" | grep -v "#dev-todo"; then
+            echo "⚠️  Untracked TODO/FIXME found. Use #dev-todo instead."
+            exit 1
+          fi
+          
+          echo "✅ No prohibited patterns found"
+
+      - name: Verify quality gates passed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "🔍 Verifying quality gates..."
+          
+          # Check if CI passed
+          CHECKS=$(gh pr checks "$PR_NUMBER" --repo "$REPO" --json state,name --jq '.[] | select(.name | contains("quality") or contains("lint") or contains("type")) | .state')
+          
+          if echo "$CHECKS" | grep -q "FAILURE\|PENDING"; then
+            echo "❌ Quality gates have not passed yet"
+            exit 1
+          fi
+          
+          echo "✅ Quality gates verified"
