@@ -190,3 +190,8 @@ logseq/pages/AI\ Research.md
 
 # Prevent accidental ~ directory
 ~/
+
+# Archive directories (moved to local/)
+_archive/
+**/bak/
+**/backup/
