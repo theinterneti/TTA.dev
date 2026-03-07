@@ -35,67 +35,74 @@ TTA.dev was originally extracted from the **Therapeutic Text Adventure (TTA)** p
 
 ## 📦 Repository Structure
 
-TTA.dev is organized into **platform** infrastructure packages and **apps** for end-user deployments:
+TTA.dev follows a clean, focused architecture with **packages** for distribution and **platform** for development:
 
 ```
 TTA.dev/
-├── platform/              # Infrastructure packages (7)
-│   ├── primitives/        # Core workflow primitives
-│   ├── observability/     # OpenTelemetry integration
-│   ├── agent-context/     # Agent context management
-│   ├── agent-coordination/# Multi-agent orchestration
-│   ├── integrations/      # Pre-built integrations
-│   ├── documentation/     # Docs automation
-│   └── kb-automation/     # Knowledge base maintenance
+├── packages/              # 📦 Publishable Packages
+│   ├── tta-primitives/    # Core workflow primitives (PyPI ready)
+│   ├── tta-observability/ # OpenTelemetry integration
+│   ├── tta-secrets/       # Secure secrets management
+│   └── tta-mcp-server/    # Model Context Protocol server
 │
-├── templates/             # 🚀 Vibe Coding Templates (Start Here)
-│   ├── basic-agent/       # Simple agent with cache/retry
-│   └── workflow/          # Multi-step workflow
+├── platform/              # 🔧 Development Platform (Not Published)
+│   └── (internal development utilities)
 │
-├── apps/                  # User-facing applications (1)
-│   └── observability-ui/  # VS Code observability dashboard
+├── .github/               # 🤖 CI/CD & Agentic Workflows
+│   ├── agents/            # Custom GitHub Copilot agents
+│   ├── skills/            # Reusable agent skills
+│   └── workflows/         # GitHub Actions (YAML + Markdown)
 │
-├── config/                # Configuration files
-├── data/                  # Data artifacts
-│   └── ace_playbooks/     # ACE Agent Playbooks
-├── docs/                  # Documentation
-├── scripts/               # Automation scripts
-└── tests/                 # Integration tests
+├── scripts/               # 🛠️ Automation Scripts
+│   └── ci/                # CI helper scripts
+│
+├── logseq/                # 📚 Knowledge Base (Logseq)
+│   ├── pages/             # Architecture docs & decisions
+│   └── journals/          # Development journal
+│
+└── local/                 # 🏠 Local-Only (Not in Git)
+    └── archive/           # Archived deprecated code
 ```
 
 ---
 
-## 🏗️ Platform Packages
+## 🏗️ Core Packages
 
-### Core Infrastructure (Production-Ready)
+### 1. `tta-primitives` (Production Ready)
 
-#### 1. `tta-dev-primitives` → `platform/primitives/`
-
-Core workflow primitives for building reliable, observable agent workflows.
+Core workflow primitives for building reliable, observable AI agent workflows.
 
 **Features:**
-- 🔀 Router, Cache, Timeout, Retry, Memory primitives
+- 🔀 Composable primitives: Router, Cache, Timeout, Retry, Fallback
 - 🔗 Composition operators (`>>`, `|`)
-- ⚡ Parallel and conditional execution
-- 📊 OpenTelemetry integration
-- 💪 Comprehensive error handling
+- ⚡ Parallel and sequential execution
+- 📊 OpenTelemetry instrumentation built-in
+- 💪 Circuit breakers and recovery patterns
 - 📉 Cost reduction via intelligent caching and routing
 
 **Installation:**
 ```bash
-uv add tta-dev-primitives
+uv add tta-primitives
+# or
+pip install tta-primitives
 ```
 
 **Quick Start:**
-See [`GETTING_STARTED.md`](GETTING_STARTED.md) for a quick start guide.
+```python
+from tta_dev_primitives import RetryPrimitive, CachePrimitive, WorkflowContext
 
-[📚 Full Documentation](platform/primitives/README.md)
+# Build resilient workflows with composable primitives
+workflow = CachePrimitive(ttl=3600) >> RetryPrimitive(max_attempts=3)
+result = await workflow.execute(data, WorkflowContext())
+```
+
+[📚 Full Documentation](packages/tta-primitives/README.md)
 
 ---
 
-#### 2. `tta-observability-integration` → `platform/observability/`
+### 2. `tta-observability` (Production Ready)
 
-OpenTelemetry integration for tracing, metrics, and logging across TTA.dev primitives.
+OpenTelemetry integration for distributed tracing, metrics, and logging.
 
 **Features:**
 - 📊 Automatic OpenTelemetry tracing and metrics
