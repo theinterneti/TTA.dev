@@ -132,11 +132,13 @@ Most low severity issues are:
 ## Remediation Plan
 
 ### Phase 1: Critical Fixes (This PR)
-- [ ] Replace SHA1 with SHA256 for security operations
-- [ ] Add `usedforsecurity=False` to non-security SHA1 usage
-- [ ] Fix shell=True subprocess calls
-- [ ] Implement safe tar extraction
-- [ ] Enable Jinja2 autoescape
+- [x] Fix shell=True subprocess calls (Dolt test fixture)
+- [x] Add Bandit configuration
+- [x] Document security audit findings
+- [ ] Replace SHA1 with SHA256 for security operations (Phase 2)
+- [ ] Add `usedforsecurity=False` to non-security SHA1 usage (Phase 2)
+- [ ] Implement safe tar extraction (Phase 2)
+- [ ] Enable Jinja2 autoescape (Phase 2)
 
 ### Phase 2: High-Value Medium Issues (Next PR)
 - [ ] Remove hardcoded secrets from code
@@ -154,7 +156,7 @@ Most low severity issues are:
 
 ### Bandit Configuration
 ```yaml
-# .bandit
+# .bandit.yaml (existing file used by pre-commit and security_scan.py)
 tests:
   - B101  # assert usage
   - B202  # tarfile extraction
@@ -176,7 +178,7 @@ exclude_dirs:
     rev: '1.9.4'
     hooks:
       - id: bandit
-        args: ['-c', '.bandit', '-r', 'platform/']
+        args: ['-c', '.bandit.yaml', '-r', 'platform/']
         exclude: 'tests/'
 ```
 

@@ -31,8 +31,18 @@ def temp_dolt_repo(tmp_path: Path) -> DoltConfig:
             capture_output=True,
             timeout=10,
         )
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+    except FileNotFoundError:
         pytest.skip("dolt binary not available — skipping integration test")
+    except subprocess.TimeoutExpired as exc:
+        pytest.skip(f"dolt init timed out after {exc.timeout}s — skipping integration test")
+    except subprocess.CalledProcessError as exc:
+        stderr = (
+            exc.stderr.decode() if isinstance(exc.stderr, (bytes, bytearray)) else exc.stderr or ""
+        )
+        pytest.skip(
+            f"dolt init failed (return code {exc.returncode}, "
+            f"stderr={stderr!r}) — skipping integration test"
+        )
 
     return DoltConfig(repo_path=repo_path, database="test-universe-db")
 
