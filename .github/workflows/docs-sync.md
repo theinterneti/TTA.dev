@@ -24,7 +24,7 @@ Act as a Continuous Documentation Agent responsible for keeping documentation sy
 Before any documentation updates, configure observability:
 ```bash
 # Setup OpenTelemetry environment
-eval $(python scripts/ci/setup_otel.py)
+eval "$(python scripts/ci/setup_otel.py)"
 echo "✅ OTEL configured with trace: $TRACEPARENT"
 ```
 

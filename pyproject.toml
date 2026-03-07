@@ -2,17 +2,14 @@
 # This is NOT a buildable package - individual packages are in packages/
 
 [tool.uv.workspace]
-# Active production packages only
+# Consolidated monorepo structure
 members = [
     "packages/python-pathway",
-    "platform/primitives",
-    "platform/skills",
-    "platform/dolt",
-    "platform/integrations",
-    "platform/observability",
+    "packages/tta-primitives",
+    "packages/tta-observability",
+    "packages/tta-core",
+    "apps/platform",
     "apps/observability-ui",
-    "platform/agent-context",
-    "platform/agent-coordination",
 ]
 
 [tool.uv]

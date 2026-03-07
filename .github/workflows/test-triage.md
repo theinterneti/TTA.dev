@@ -22,7 +22,7 @@ Act as an AI Test-Triage Agent with expertise in debugging Python test failures.
 Before any analysis, configure observability:
 ```bash
 # Setup OpenTelemetry environment
-eval $(python scripts/ci/setup_otel.py)
+eval "$(python scripts/ci/setup_otel.py)"
 echo "✅ OTEL configured with trace: $TRACEPARENT"
 ```
 
