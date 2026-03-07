@@ -36,6 +36,9 @@ This package becomes the canonical LangFuse integration because it:
 
 2. Initialize once per application:
    ```python
+   import os
+   from tta_apm_langfuse import LangFuseIntegration
+   
    apm = LangFuseIntegration(
        public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
        secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
@@ -63,7 +66,7 @@ This package becomes the canonical LangFuse integration because it:
 
 ## Deprecation Timeline
 
-- **Immediate:** `platform/observability/langfuse_integration.py` marked deprecated
+- **Immediate:** `platform/observability/src/observability_integration/langfuse_integration.py` marked deprecated
 - **Week 1:** Update all internal code to use `tta_apm_langfuse`
 - **Week 2:** Add deprecation warnings to old module
 - **Month 1:** Remove deprecated module
@@ -82,6 +85,6 @@ This package becomes the canonical LangFuse integration because it:
 - [x] Choose primary implementation
 - [x] Document consolidation plan
 - [ ] Update primitives to use unified integration
-- [ ] Add deprecation warnings
-- [ ] Update documentation
+- [x] Add deprecation warnings
+- [x] Update documentation
 - [ ] Remove deprecated code

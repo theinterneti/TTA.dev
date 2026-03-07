@@ -15,16 +15,6 @@ import os
 import warnings
 from typing import Any
 
-from langfuse import Langfuse, observe  # type: ignore[import-untyped]
-
-warnings.warn(
-    "observability_integration.langfuse_integration is deprecated. "
-    "Use 'tta_apm_langfuse' instead. "
-    "See docs/observability/LANGFUSE_CONSOLIDATION.md for migration guide.",
-    DeprecationWarning,
-    stacklevel=2,
-)
-
 
 class LangFuseIntegration:
     """Integrate TTA.dev primitives with LangFuse for LLM observability."""
@@ -42,13 +32,27 @@ class LangFuseIntegration:
             secret_key: LangFuse secret key (or use LANGFUSE_SECRET_KEY env var)
             host: LangFuse host URL (or use LANGFUSE_HOST env var)
         """
+        warnings.warn(
+            "LangFuseIntegration from observability_integration.langfuse_integration is deprecated. "
+            "Use 'tta_apm_langfuse.LangFuseIntegration' instead. "
+            "See docs/observability/LANGFUSE_CONSOLIDATION.md for migration guide.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        try:
+            from langfuse import Langfuse  # type: ignore[import-untyped]
+        except ImportError as e:
+            raise ImportError(
+                "langfuse package is required but not installed. "
+                "Install with: uv pip install langfuse"
+            ) from e
+
         self.client = Langfuse(
             public_key=public_key or os.getenv("LANGFUSE_PUBLIC_KEY"),
             secret_key=secret_key or os.getenv("LANGFUSE_SECRET_KEY"),
             host=host or os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
         )
 
-    @observe()  # type: ignore[misc]
     async def trace_llm_call(
         self,
         workflow_id: str,
@@ -90,7 +94,6 @@ class LangFuseIntegration:
         }
         return trace_data
 
-    @observe()  # type: ignore[misc]
     async def trace_workflow_stage(
         self,
         workflow_id: str,
@@ -162,6 +165,13 @@ _langfuse_integration: LangFuseIntegration | None = None
 
 def get_langfuse() -> LangFuseIntegration:
     """Get global LangFuse integration instance."""
+    warnings.warn(
+        "get_langfuse() from observability_integration.langfuse_integration is deprecated. "
+        "Use 'tta_apm_langfuse.LangFuseIntegration' instead. "
+        "See docs/observability/LANGFUSE_CONSOLIDATION.md for migration guide.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     global _langfuse_integration
     if _langfuse_integration is None:
         _langfuse_integration = LangFuseIntegration()
@@ -183,6 +193,13 @@ def initialize_langfuse(
     Returns:
         Initialized LangFuse integration
     """
+    warnings.warn(
+        "initialize_langfuse() from observability_integration.langfuse_integration is deprecated. "
+        "Use 'tta_apm_langfuse.LangFuseIntegration' instead. "
+        "See docs/observability/LANGFUSE_CONSOLIDATION.md for migration guide.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     global _langfuse_integration
     _langfuse_integration = LangFuseIntegration(
         public_key=public_key,
