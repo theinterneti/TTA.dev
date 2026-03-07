@@ -66,8 +66,8 @@ class LLMCodeGenerator:
 
         if GENAI_AVAILABLE and self.api_key:
             try:
-                genai.configure(api_key=self.api_key)
-                self.model = genai.GenerativeModel(model_name)
+                genai.configure(api_key=self.api_key)  # type: ignore[attr-defined]
+                self.model = genai.GenerativeModel(model_name)  # type: ignore[attr-defined]
                 logger.info(f"LLM code generator initialized with {model_name}")
             except Exception as e:
                 logger.error(f"Failed to initialize Gemini model: {e}")
