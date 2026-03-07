@@ -45,6 +45,14 @@ from .langfuse_integration import (
     get_langfuse,
     initialize_langfuse,
 )
+from .sampling import (
+    AdaptiveSampler,
+    CompositeSampler,
+    ProbabilisticSampler,
+    SamplingDecision,
+    SamplingStrategy,
+    TailBasedSampler,
+)
 
 __all__ = [
     "initialize_observability",
@@ -52,6 +60,12 @@ __all__ = [
     "LangFuseIntegration",
     "get_langfuse",
     "initialize_langfuse",
+    "AdaptiveSampler",
+    "CompositeSampler",
+    "ProbabilisticSampler",
+    "SamplingDecision",
+    "SamplingStrategy",
+    "TailBasedSampler",
 ]
 
 __version__ = "0.1.0"
