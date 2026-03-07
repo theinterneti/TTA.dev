@@ -27,10 +27,12 @@ def setup_otel_env():
         "OTEL_CONFIGURED": "true",
     }
 
-    # Export to environment
+    # Export to environment (with shell-safe quoting)
     for key, value in config.items():
         os.environ[key] = value
-        print(f"export {key}={value}")
+        # Escape single quotes and wrap in single quotes for shell safety
+        safe_value = str(value).replace("'", "'\\''")
+        print(f"export {key}='{safe_value}'")
 
     print("✅ OTEL environment configured", file=sys.stderr)
 

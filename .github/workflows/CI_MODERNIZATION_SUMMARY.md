@@ -64,14 +64,11 @@ uvx pyright platform/
 ### 3. Test Matrix Enhancements
 
 #### Coverage Enforcement
+
 ```yaml
---cov-fail-under=80
-```
-- **Before**: Coverage tracked but not enforced
-- **After**: CI fails if coverage drops below 80%
-- **Rationale**: Matches the project baseline defined in `config/codecov.yml`
 --cov-fail-under=100
 ```
+
 - **Before**: Coverage tracked but not enforced
 - **After**: CI fails if coverage drops below 100%
 - **Rationale**: Maintains high code quality baseline

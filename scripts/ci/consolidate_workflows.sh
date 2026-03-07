@@ -62,10 +62,11 @@ done
 
 # Move reusable workflows to dedicated directory
 echo "📦 Organizing reusable workflows..."
-for file in reusable-*.yml; do
-    if [ -f "${WORKFLOWS_DIR}/${file}" ]; then
-        new_name=$(echo "$file" | sed 's/reusable-//')
-        mv "${WORKFLOWS_DIR}/${file}" "${WORKFLOWS_DIR}/reusable/${new_name}"
+for file in "${WORKFLOWS_DIR}"/reusable-*.yml; do
+    if [ -f "$file" ]; then
+        filename=$(basename "$file")
+        new_name=$(echo "$filename" | sed 's/reusable-//')
+        mv "$file" "${WORKFLOWS_DIR}/reusable/${new_name}"
     fi
 done
 

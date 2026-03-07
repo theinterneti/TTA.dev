@@ -10,7 +10,7 @@ TEMP_FILE=$(mktemp)
 echo "🔒 Pinning GitHub Actions to commit SHAs..."
 
 # Find all actions/@version patterns in workflow files
-grep -rn "uses:.*@v[0-9]" "$WORKFLOW_DIR" || true > "$TEMP_FILE"
+{ grep -rn "uses:.*@v[0-9]" "$WORKFLOW_DIR" || true; } > "$TEMP_FILE"
 
 if [ ! -s "$TEMP_FILE" ]; then
     echo "✅ All actions already pinned to SHAs"

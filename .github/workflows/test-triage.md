@@ -71,7 +71,7 @@ This workflow activates when:
    ```
    This creates an audit trail with trace_id for observability.
 
-4. **Propose a Fix**
+5. **Propose a Fix**
    - If confidence >= 0.7, create a Draft PR with:
      - The code changes to fix the issue
      - Updated or new tests to prevent regression

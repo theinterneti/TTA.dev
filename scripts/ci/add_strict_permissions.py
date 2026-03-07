@@ -47,9 +47,12 @@ def add_strict_permissions(workflow_path: Path) -> bool:
     
     # Add appropriate top-level permissions
     if needs_write:
-        # Keep job-level write permissions, but add read-only top-level default
-        perm_block = "permissions:\n  contents: read\n\n"
-        print(f"  ✏️  {workflow_path.name} - adding read-only default (jobs have write)")
+        # Build explicit write permissions block for transparency
+        perm_lines = ["permissions:", "  contents: read"]
+        for scope in sorted(write_scopes):
+            perm_lines.append(f"  {scope}: write")
+        perm_block = "\n".join(perm_lines) + "\n\n"
+        print(f"  ✏️  {workflow_path.name} - adding explicit permissions (write: {', '.join(sorted(write_scopes))})")
     else:
         # Add strict read-only permissions
         perm_block = "permissions:\n  contents: read\n\n"
