@@ -1,0 +1,37 @@
+[project]
+name = "tta-apm-langfuse"
+version = "0.1.0"
+description = "LangFuse APM integration for TTA.dev primitives"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langfuse>=2.0.0",
+    "tta-dev-primitives",
+]
+
+[tool.uv.sources]
+tta-dev-primitives = { path = "../../primitives", editable = true }
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.3.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
