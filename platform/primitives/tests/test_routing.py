@@ -86,11 +86,15 @@ async def test_router_tracks_history() -> None:
 
     # First routing
     await router.execute({"route": "a"}, context)
-    assert context.state["routing_history"] == ["a"]
+    assert len(context.state["routing_history"]) == 1
+    assert context.state["routing_history"][0]["route"] == "a"
+    assert context.state["routing_history"][0]["used_default"] is False
 
     # Second routing
     await router.execute({"route": "b"}, context)
-    assert context.state["routing_history"] == ["a", "b"]
+    assert len(context.state["routing_history"]) == 2
+    assert context.state["routing_history"][1]["route"] == "b"
+    assert context.state["routing_history"][1]["used_default"] is False
 
 
 @pytest.mark.asyncio

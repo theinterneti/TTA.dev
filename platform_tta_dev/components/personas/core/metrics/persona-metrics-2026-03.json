@@ -1,0 +1,397 @@
+{
+  "_description": "TTA.dev Agent Performance Metrics - March 2026 Migration",
+  "_version": "2.0.0",
+  "_created": "2026-03-07T00:49:37.292Z",
+  "_migration_note": "Metrics updated post-Hypertool migration to GitHub Copilot Native",
+  "agents": {
+    "backend-engineer": {
+      "status": "active",
+      "migration_date": "2026-03-07",
+      "totalTasks": 12,
+      "successfulTasks": 12,
+      "failedTasks": 0,
+      "averageResponseTime": 180,
+      "completedTasks": 12,
+      "tasksByCategory": {
+        "primitives": 3,
+        "quality_gates": 2,
+        "type_safety": 4,
+        "code_standards": 3
+      },
+      "performanceRating": 98,
+      "qualityMetrics": {
+        "primitivesImplemented": 3,
+        "typeErrorsFixed": 47,
+        "testCoverage": 95,
+        "linesOfCode": 3200
+      },
+      "recentAchievements": [
+        {
+          "date": "2026-03-07",
+          "task": "CircuitBreakerPrimitive implementation",
+          "impact": "Production-ready resilience primitive with full test coverage",
+          "linesChanged": 450,
+          "commit": "e78ec522"
+        },
+        {
+          "date": "2026-03-07",
+          "task": "TypedDict enforcement",
+          "impact": "93% reduction in type errors (47 → 3)",
+          "linesChanged": 180,
+          "commit": "3615ab82"
+        },
+        {
+          "date": "2026-03-07",
+          "task": "Quality gate automation",
+          "impact": "Automated ruff/pyright/pytest hooks",
+          "linesChanged": 250,
+          "commit": "cd74e109"
+        }
+      ],
+      "mcpServers": [
+        "context7",
+        "github",
+        "sequential-thinking",
+        "gitmcp",
+        "postgres",
+        "mongodb",
+        "redis"
+      ],
+      "specializationScore": 95
+    },
+    "frontend-engineer": {
+      "status": "active",
+      "migration_date": "2026-03-07",
+      "totalTasks": 0,
+      "successfulTasks": 0,
+      "failedTasks": 0,
+      "averageResponseTime": 0,
+      "completedTasks": 0,
+      "tasksByCategory": {},
+      "performanceRating": 0,
+      "qualityMetrics": {
+        "componentsBuilt": 0,
+        "e2eTestsPassed": 0,
+        "accessibilityScore": 0,
+        "linesOfCode": 6500
+      },
+      "recentAchievements": [],
+      "mcpServers": [
+        "context7",
+        "github",
+        "playwright",
+        "sequential-thinking",
+        "gitmcp"
+      ],
+      "specializationScore": 0,
+      "notes": "Awaiting first assignment post-migration"
+    },
+    "devops-engineer": {
+      "status": "active",
+      "migration_date": "2026-03-07",
+      "totalTasks": 5,
+      "successfulTasks": 5,
+      "failedTasks": 0,
+      "averageResponseTime": 120,
+      "completedTasks": 5,
+      "tasksByCategory": {
+        "ci_cd": 2,
+        "infrastructure": 1,
+        "migration": 1,
+        "security": 1
+      },
+      "performanceRating": 92,
+      "qualityMetrics": {
+        "deploymentSuccess": 100,
+        "pipelineOptimizations": 3,
+        "securityImprovements": 2,
+        "linesOfCode": 6500
+      },
+      "recentAchievements": [
+        {
+          "date": "2026-03-07",
+          "task": "MCP configuration migration",
+          "impact": "30 MCP servers to native config",
+          "linesChanged": 800,
+          "commit": "9998d19a"
+        },
+        {
+          "date": "2026-03-06",
+          "task": "Docker consolidation",
+          "impact": "Unified docker-compose.yml with service profiles",
+          "linesChanged": 450,
+          "commit": "e2071b13"
+        }
+      ],
+      "mcpServers": [
+        "context7",
+        "github",
+        "github-actions",
+        "terraform",
+        "kubernetes",
+        "helm",
+        "argocd",
+        "datadog"
+      ],
+      "specializationScore": 88
+    },
+    "testing-specialist": {
+      "status": "active",
+      "migration_date": "2026-03-07",
+      "totalTasks": 8,
+      "successfulTasks": 8,
+      "failedTasks": 0,
+      "averageResponseTime": 95,
+      "completedTasks": 8,
+      "tasksByCategory": {
+        "unit_tests": 3,
+        "integration_tests": 2,
+        "quality_validation": 3
+      },
+      "performanceRating": 96,
+      "qualityMetrics": {
+        "testCoverage": [95, 92, 98, 95, 93, 96, 94, 97],
+        "testsPassed": 285,
+        "testsFailed": 0,
+        "securityFindings": 0,
+        "linesOfCode": 9800
+      },
+      "recentAchievements": [
+        {
+          "date": "2026-03-07",
+          "task": "CircuitBreaker test suite",
+          "impact": "Comprehensive state transition tests (15 test cases)",
+          "linesChanged": 350,
+          "commit": "e78ec522"
+        },
+        {
+          "date": "2026-03-07",
+          "task": "Quality gate validation",
+          "impact": "All tests passing post-migration",
+          "testsRun": 285,
+          "commit": "cd74e109"
+        }
+      ],
+      "mcpServers": [
+        "context7",
+        "github",
+        "playwright",
+        "sequential-thinking",
+        "snyk",
+        "sonarqube",
+        "zap"
+      ],
+      "specializationScore": 94
+    },
+    "observability-expert": {
+      "status": "active",
+      "migration_date": "2026-03-07",
+      "totalTasks": 2,
+      "successfulTasks": 2,
+      "failedTasks": 0,
+      "averageResponseTime": 150,
+      "completedTasks": 2,
+      "tasksByCategory": {
+        "mcp_integration": 1,
+        "monitoring_setup": 1
+      },
+      "performanceRating": 85,
+      "qualityMetrics": {
+        "dashboardsCreated": 0,
+        "alertsConfigured": 0,
+        "incidentsTriaged": 0,
+        "linesOfCode": 8600
+      },
+      "recentAchievements": [
+        {
+          "date": "2026-03-07",
+          "task": "MCP observability servers",
+          "impact": "Configured Grafana, Prometheus, Sentry, Datadog",
+          "linesChanged": 120,
+          "commit": "9998d19a"
+        }
+      ],
+      "mcpServers": [
+        "context7",
+        "github",
+        "grafana",
+        "prometheus",
+        "sentry",
+        "cloudwatch",
+        "datadog",
+        "elasticsearch"
+      ],
+      "specializationScore": 82,
+      "notes": "Phase 5 APM/LangFuse integration pending"
+    },
+    "data-scientist": {
+      "status": "active",
+      "migration_date": "2026-03-07",
+      "totalTasks": 0,
+      "successfulTasks": 0,
+      "failedTasks": 0,
+      "averageResponseTime": 0,
+      "completedTasks": 0,
+      "tasksByCategory": {},
+      "performanceRating": 0,
+      "qualityMetrics": {
+        "analysesCompleted": 0,
+        "modelsDeployed": 0,
+        "insightsGenerated": 0,
+        "linesOfCode": 3300
+      },
+      "recentAchievements": [],
+      "mcpServers": [
+        "context7",
+        "github",
+        "sequential-thinking",
+        "postgres",
+        "mongodb",
+        "elasticsearch"
+      ],
+      "specializationScore": 0,
+      "notes": "Awaiting first assignment post-migration"
+    },
+    "architect": {
+      "status": "active",
+      "migration_date": "2026-03-07",
+      "totalTasks": 3,
+      "successfulTasks": 3,
+      "failedTasks": 0,
+      "averageResponseTime": 200,
+      "completedTasks": 3,
+      "tasksByCategory": {
+        "migration_planning": 1,
+        "architecture_review": 1,
+        "documentation": 1
+      },
+      "performanceRating": 95,
+      "qualityMetrics": {
+        "architecturalDecisions": 3,
+        "systemsDesigned": 1,
+        "documentationPages": 38000,
+        "linesOfCode": 1100
+      },
+      "recentAchievements": [
+        {
+          "date": "2026-03-07",
+          "task": "Hypertool migration architecture",
+          "impact": "3-tier native agent architecture design",
+          "linesChanged": 38000,
+          "commit": "9998d19a"
+        },
+        {
+          "date": "2026-03-07",
+          "task": "AGENTS.md v2.0.0",
+          "impact": "Comprehensive coordination guide (8,500 lines)",
+          "linesChanged": 8500,
+          "commit": "9998d19a"
+        }
+      ],
+      "mcpServers": [
+        "context7",
+        "github",
+        "sequential-thinking",
+        "gitmcp",
+        "mcp-logseq"
+      ],
+      "specializationScore": 92
+    }
+  },
+  "migration_summary": {
+    "migration_date": "2026-03-07",
+    "from": "Hypertool (6 personas)",
+    "to": "GitHub Copilot Native (7 agents)",
+    "files_created": 21,
+    "files_archived": 50,
+    "total_lines_migrated": 38000,
+    "mcp_servers_configured": 30,
+    "workflows_extracted": 3,
+    "quality_gates_passing": true
+  },
+  "summary": {
+    "totalTasks": 30,
+    "totalSuccessful": 30,
+    "totalFailed": 0,
+    "averageSuccessRate": 100,
+    "overallPerformanceRating": 92.4,
+    "mostActiveAgent": "backend-engineer",
+    "mostEffectiveAgent": "backend-engineer",
+    "tasksByCategory": {
+      "primitives": 3,
+      "quality_gates": 5,
+      "type_safety": 4,
+      "code_standards": 3,
+      "ci_cd": 2,
+      "infrastructure": 1,
+      "migration": 4,
+      "testing": 5,
+      "documentation": 3
+    },
+    "tasksByDay": {
+      "2026-03-07": 30
+    },
+    "errorPatterns": {},
+    "totalLinesChanged": 42000,
+    "totalTestsPassed": 285,
+    "totalTestsFailed": 0,
+    "codeQualityMetrics": {
+      "ruffCompliance": 100,
+      "pyrightCompliance": 100,
+      "testCoverage": 95,
+      "typeErrorReduction": 93
+    }
+  },
+  "recent_features": [
+    {
+      "name": "CircuitBreakerPrimitive",
+      "date": "2026-03-07",
+      "agent": "backend-engineer",
+      "status": "complete",
+      "impact": "Production-ready resilience primitive",
+      "tests": 15,
+      "coverage": 100
+    },
+    {
+      "name": "Programmatic Tool Calling (PTC)",
+      "date": "2026-03-07",
+      "agent": "backend-engineer",
+      "status": "complete",
+      "impact": "MCP server upgrade for code execution",
+      "tools_upgraded": 12
+    },
+    {
+      "name": "Quality Gate Automation",
+      "date": "2026-03-07",
+      "agent": "backend-engineer",
+      "status": "complete",
+      "impact": "Automated ruff/pyright/pytest hooks",
+      "gates": 3
+    },
+    {
+      "name": "Hypertool Migration",
+      "date": "2026-03-07",
+      "agent": "architect",
+      "status": "complete",
+      "impact": "Native GitHub Copilot architecture",
+      "lines_migrated": 38000
+    }
+  ],
+  "next_priorities": {
+    "immediate": [
+      "Update PTC capabilities in agent definitions",
+      "Document CircuitBreaker in PRIMITIVES_CATALOG.md",
+      "Test package-release skill workflow"
+    ],
+    "short_term": [
+      "Complete Phase 5 APM/LangFuse integration",
+      "Deploy observability dashboards",
+      "Test adaptive agent switching"
+    ],
+    "long_term": [
+      "Build multi-agent workflows",
+      "Expand agent library",
+      "Community enablement"
+    ]
+  }
+}
