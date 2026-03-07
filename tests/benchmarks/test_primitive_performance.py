@@ -36,10 +36,12 @@ def context():
 
 @pytest.fixture
 def simple_op():
-    """Simple operation that returns input."""
+    """Simple operation that doubles the 'value' key."""
 
     async def op(data: dict, ctx: WorkflowContext) -> dict:
-        return {"result": data.get("value", 0) * 2}
+        # Support both 'value' and 'result' keys for chaining
+        val = data.get("value") or data.get("result", 0)
+        return {"value": val * 2, "result": val * 2}
 
     return LambdaPrimitive(op)
 
@@ -356,10 +358,29 @@ class TestComplexWorkflows:
 
     def test_parallel_sequential_mix(self, benchmark, simple_op, context):
         """Benchmark mixed parallel and sequential operations."""
-        # (op1 || op2) >> op3 >> (op4 || op5 || op6)
+
+        # Aggregator to combine parallel results into a dict
+        def make_aggregator():
+            async def aggregate(results: list | dict, ctx: WorkflowContext) -> dict:
+                # Handle both list (from parallel) and dict (from sequential)
+                if isinstance(results, list):
+                    total = sum(r.get("result", 0) for r in results)
+                else:
+                    total = results.get("result", 0)
+                return {"value": total, "result": total}
+
+            return LambdaPrimitive(aggregate)
+
+        # (op1 || op2) >> aggregate1 >> op3 >> aggregate2 >> (op4 || op5 || op6)
         parallel1 = ParallelPrimitive([simple_op, simple_op])
         parallel2 = ParallelPrimitive([simple_op, simple_op, simple_op])
-        workflow = parallel1 >> simple_op >> parallel2
+        workflow = (
+            parallel1
+            >> make_aggregator()
+            >> simple_op
+            >> make_aggregator()
+            >> parallel2
+        )
 
         def run():
             ctx = context()
