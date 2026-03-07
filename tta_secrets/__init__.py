@@ -4,7 +4,7 @@ TTA.dev Secrets Management Module
 Provides secure handling of API keys and sensitive configuration.
 """
 
-from .loader import load_dotenv_if_exists
+from .loader import EnvLoader, get_env, require_env
 from .manager import (
     SecretsManager,
     get_config,
@@ -13,9 +13,11 @@ from .manager import (
 )
 
 __all__ = [
+    "EnvLoader",
     "SecretsManager",
     "get_config",
+    "get_env",
     "get_secrets_manager",
-    "load_dotenv_if_exists",
+    "require_env",
     "validate_secrets",
 ]
