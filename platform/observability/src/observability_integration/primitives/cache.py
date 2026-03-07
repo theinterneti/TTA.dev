@@ -126,9 +126,7 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
             self._hit_rate_gauge = meter.create_observable_gauge(
                 name="cache_hit_rate",
                 description="Cache hit rate (0.0-1.0)",
-                callbacks=[
-                    lambda options: [(get_hit_rate(), {"operation": self.operation_name})]
-                ],  # pyright: ignore[reportArgumentType]
+                callbacks=[lambda options: [(get_hit_rate(), {"operation": self.operation_name})]],  # pyright: ignore[reportArgumentType]
             )
         else:
             self._hits_counter = None

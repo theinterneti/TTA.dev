@@ -60,9 +60,7 @@ class CircuitBreakerError(Exception):
         """Initialize error."""
         self.failure_count = failure_count
         self.last_error = last_error
-        super().__init__(
-            f"Circuit breaker is OPEN after {failure_count} consecutive failures"
-        )
+        super().__init__(f"Circuit breaker is OPEN after {failure_count} consecutive failures")
 
 
 class CircuitBreakerPrimitive(WorkflowPrimitive[Any, Any]):
@@ -228,14 +226,12 @@ class CircuitBreakerPrimitive(WorkflowPrimitive[Any, Any]):
             elif self._state == CircuitState.CLOSED:
                 self._failure_count += 1
                 logger.warning(
-                    f"Circuit breaker failure {self._failure_count}/"
-                    f"{self.config.failure_threshold}"
+                    f"Circuit breaker failure {self._failure_count}/{self.config.failure_threshold}"
                 )
 
                 if self._failure_count >= self.config.failure_threshold:
                     logger.error(
-                        f"Circuit breaker opening after {self._failure_count} "
-                        "consecutive failures"
+                        f"Circuit breaker opening after {self._failure_count} consecutive failures"
                     )
                     self._state = CircuitState.OPEN
 

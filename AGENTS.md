@@ -1,68 +1,260 @@
-# TTA.dev Agent Instructions
+# TTA.dev Multi-Agent Coordination
 
-Universal entry point for all AI agents working in this repository.
-
-Boundary Rules: Write all project documentation, status updates, and notes exclusively to docs/kb-exports/. Never create or modify .md files in the project root or source directories unless explicitly asked to
+> **Universal entry point for all AI agents working in this repository**
 
 ## What is TTA.dev?
 
 A Python monorepo providing composable workflow primitives, observability, and multi-agent coordination for building reliable AI applications.
 
-## Repo Layout
+---
+
+## Quick Reference
+
+| Agent | Use For | Location |
+|-------|---------|----------|
+| **Backend Engineer** | Python primitives, APIs, workflows | [.github/agents/backend-engineer.agent.md](.github/agents/backend-engineer.agent.md) |
+| **Frontend Engineer** | React UI, TypeScript components | [.github/agents/frontend-engineer.agent.md](.github/agents/frontend-engineer.agent.md) |
+| **DevOps Engineer** | CI/CD, infrastructure, deployment | [.github/agents/devops-engineer.agent.md](.github/agents/devops-engineer.agent.md) |
+| **Testing Specialist** | Tests, QA, validation | [.github/agents/testing-specialist.agent.md](.github/agents/testing-specialist.agent.md) |
+| **Observability Expert** | Monitoring, metrics, traces | [.github/agents/observability-expert.agent.md](.github/agents/observability-expert.agent.md) |
+| **Data Scientist** | Analytics, ML, research | [.github/agents/data-scientist.agent.md](.github/agents/data-scientist.agent.md) |
+| **Architect** | System design, patterns | [.github/agents/architect.agent.md](.github/agents/architect.agent.md) |
+
+---
+
+## Repository Structure
 
 ```
-platform/           # Core packages
-├── primitives/     # tta-dev-primitives — core workflows
-├── observability/  # tta-observability-integration
-├── agent-context/  # universal-agent-context
-├── agent-coordination/
-├── integrations/
-├── documentation/
-└── kb-automation/
-apps/               # User-facing applications
-templates/          # Vibe coding starter templates
-docs/               # Architecture, guides, agent docs
-tests/              # Integration tests
-scripts/            # Automation and validation
+TTA.dev/
+├── platform/               # Core packages
+│   ├── primitives/         # tta-dev-primitives (Backend Engineer)
+│   ├── observability/      # Monitoring integration (Observability Expert)
+│   ├── agent-context/      # Universal context (Backend Engineer)
+│   ├── agent-coordination/ # Multi-agent orchestration
+│   ├── integrations/       # External integrations
+│   └── documentation/      # Auto-generated docs
+├── apps/                   # User-facing applications (Frontend Engineer)
+├── .github/
+│   ├── agents/             # Agent definitions (Custom Agents)
+│   ├── skills/             # Multi-agent workflows
+│   └── workflows/          # CI/CD (DevOps Engineer)
+├── tests/                  # Integration tests (Testing Specialist)
+├── monitoring/             # Dashboards and alerts (Observability + DevOps)
+├── docs/                   # Architecture guides, agent docs
+└── scripts/                # Automation scripts
 ```
 
-## Agent Skills (Tier 2)
+---
 
-Load these dynamically based on your current task:
+## Agent Skills (Multi-Agent Workflows)
 
-| Skill | When to Use |
-|-------|-------------|
-| [build-test-verify](.claude/skills/build-test-verify/SKILL.md) | Building, testing, linting, verifying code |
-| [git-commit](.claude/skills/git-commit/SKILL.md) | Making git commits |
-| [create-pull-request](.claude/skills/create-pull-request/SKILL.md) | Creating or updating PRs |
-| [core-conventions](.claude/skills/core-conventions/SKILL.md) | Writing or reviewing Python code |
-| [self-review-checklist](.claude/skills/self-review-checklist/SKILL.md) | Pre-merge self-review |
-| [sdd-workflow](.claude/skills/sdd-workflow/SKILL.md) | Building new features (SDD process) |
+Coordinated workflows involving multiple agents:
 
-## Agent Guides (Tier 3)
+| Skill | Agents | Duration | Use |
+|-------|--------|----------|-----|
+| [package-release](.github/skills/package-release/SKILL.md) | Backend → Testing → DevOps | ~30 min | Release to PyPI |
+| [feature-development](.github/skills/feature-development/SKILL.md) | Backend → Frontend → Testing | 4-6 hr | Full-stack features |
+| [incident-response](.github/skills/incident-response/SKILL.md) | DevOps + Observability | Variable | Production emergencies |
 
-Deep reference — load only when a skill's instructions are insufficient:
+### Single-Agent Skills
+
+Load these for specific tasks:
+
+| Skill | Agent | When to Use |
+|-------|-------|-------------|
+| [build-test-verify](.claude/skills/build-test-verify/SKILL.md) | Any | Building, testing, linting |
+| [git-commit](.claude/skills/git-commit/SKILL.md) | Any | Making git commits |
+| [create-pull-request](.claude/skills/create-pull-request/SKILL.md) | Any | Creating PRs |
+| [core-conventions](.claude/skills/core-conventions/SKILL.md) | Backend Engineer | Python code standards |
+| [self-review-checklist](.claude/skills/self-review-checklist/SKILL.md) | Any | Pre-merge review |
+| [sdd-workflow](.claude/skills/sdd-workflow/SKILL.md) | Backend Engineer | SDD feature process |
+
+---
+
+## Agent Coordination
+
+### Communication Protocols
+
+**1. API Contract Handoff (Backend → Frontend)**
+- Backend creates API, shares OpenAPI schema
+- Frontend generates TypeScript types
+- Both work from shared contract
+
+**2. Quality Gate (Testing → All)**
+- Testing validates all code changes
+- Blocks release if quality gates fail
+- 80%+ coverage, all tests pass, CI green
+
+**3. Deployment Handoff (DevOps → Observability)**
+- DevOps deploys infrastructure
+- Observability configures monitoring
+- Both verify system health
+
+### When to Use Each Agent
+
+| Task Type | Primary Agent | Supporting Agents |
+|-----------|--------------|-------------------|
+| Add primitive | Backend Engineer | Testing Specialist |
+| Build API | Backend Engineer | Testing Specialist |
+| Add UI component | Frontend Engineer | Testing Specialist |
+| Fix CI pipeline | DevOps Engineer | - |
+| Troubleshoot issue | Observability Expert | DevOps Engineer |
+| Analyze data | Data Scientist | - |
+| System design | Architect | All (for input) |
+
+---
+
+## Deep Reference Guides
+
+Load only when agent or skill instructions are insufficient:
 
 | Guide | Content |
 |-------|---------|
-| [testing-architecture](docs/agent-guides/testing-architecture.md) | Full testing standards, markers, CI pipeline, MockPrimitive API |
-| [primitives-patterns](docs/agent-guides/primitives-patterns.md) | Composition operators, all primitives, recovery & performance patterns |
-| [python-standards](docs/agent-guides/python-standards.md) | Type hints, naming, imports, docstrings, error handling |
-| [sdd-constitution](docs/agent-guides/sdd-constitution.md) | Complete SDD Constitution §1-§4 |
-| [observability-guide](docs/agent-guides/observability-guide.md) | OpenTelemetry tracing, metrics, context propagation |
-| [todo-management](docs/agent-guides/todo-management.md) | Logseq TODOs, tags, properties, validation |
+| [testing-architecture](docs/agent-guides/testing-architecture.md) | Testing standards, MockPrimitive, CI pipeline |
+| [primitives-patterns](docs/agent-guides/primitives-patterns.md) | All primitives, composition, recovery patterns |
+| [python-standards](docs/agent-guides/python-standards.md) | Type hints, naming, imports, docstrings |
+| [observability-integration](docs/agent-guides/observability-integration.md) | OpenTelemetry, metrics, tracing |
 
-## Key References
+---
 
-- [Getting Started](GETTING_STARTED.md) — Setup and first workflow
-- [Primitives Catalog](PRIMITIVES_CATALOG.md) — Complete API reference
-- [MCP Tool Registry](MCP_TOOL_REGISTRY.md) — Available MCP tools
-- [Hindsight Memory](docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md) — Cross-agent persistent memory
+## Boundary Rules
 
-## Agent-Specific Config
+**All Agents:**
+- ✅ Write docs to `docs/kb-exports/`
+- ❌ Never create .md files in project root unless explicitly requested
+- ✅ Follow quality gates (ruff, pyright, pytest)
+- ❌ Never commit secrets or credentials
 
-| Agent | Config |
-|-------|--------|
-| Claude Code | [`CLAUDE.md`](CLAUDE.md) (primary agent) |
-| GitHub Copilot | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) |
-| Copilot path-based rules | [`.github/instructions/`](.github/instructions/) |
+**Territory-Specific:**
+- Backend Engineer: ✅ `platform/**/*.py`, ❌ `apps/frontend/**`
+- Frontend Engineer: ✅ `apps/frontend/**`, ❌ `platform/**/*.py`
+- DevOps Engineer: ✅ `.github/workflows/**`, ❌ source code
+- Testing Specialist: ✅ `tests/**`, ❌ infrastructure
+- Observability Expert: ✅ `monitoring/**`, ❌ business logic
+
+---
+
+## Standards
+
+### Code Quality (All Agents)
+
+```bash
+uv run ruff format .        # Format
+uv run ruff check . --fix   # Lint
+uvx pyright platform/       # Type check
+uv run pytest -v            # Test
+```
+
+### Testing (Testing Specialist enforces)
+
+- 80% minimum coverage (100% on new code)
+- AAA pattern (Arrange, Act, Assert)
+- Use `MockPrimitive` for mocking
+- `@pytest.mark.asyncio` for async tests
+
+### Documentation
+
+- Google-style docstrings
+- Update README when features change
+- Document decisions in Logseq
+- Keep CHANGELOG.md current
+
+---
+
+## MCP Server Configuration
+
+Native MCP servers available to agents: [.mcp/config.json](.mcp/config.json)
+
+**Core Servers:**
+- **context7**: Library documentation
+- **github**: Repository operations
+- **playwright**: Browser automation
+- **grafana**: Monitoring and metrics
+- **gitmcp**: Git operations
+- **serena**: Code analysis
+- **sequential-thinking**: Problem decomposition
+- **mcp-logseq**: Knowledge base
+
+---
+
+## Migration Notes
+
+**⚠️ Hypertool Legacy:**  
+This repo has migrated from Hypertool to GitHub Copilot native agents. Legacy configuration archived in `_archive/hypertool/`.
+
+**Changes:**
+- Hypertool personas → `.github/agents/*.agent.md`
+- Hypertool workflows → `.github/skills/*/SKILL.md`
+- Hypertool MCP config → `.mcp/config.json`
+- New coordination model defined in this file
+
+---
+
+## Getting Started
+
+### Invoke an Agent
+
+```bash
+@backend-engineer "create CircuitBreakerPrimitive"
+@frontend-engineer "add user profile page"
+@testing-specialist "validate quality gates"
+```
+
+### Use a Skill
+
+```bash
+@backend-engineer use skill "package-release"
+@backend-engineer use skill "feature-development"
+@devops-engineer use skill "incident-response"
+```
+
+### View Agent Capabilities
+
+```bash
+cat .github/agents/backend-engineer.agent.md
+ls .github/skills/
+```
+
+---
+
+## Examples
+
+**Add Primitive:**
+```
+@backend-engineer "Create RateLimitPrimitive with sliding window algorithm"
+→ Design, implement, test, document
+```
+
+**Build Feature:**
+```
+@backend-engineer use skill "feature-development"
+→ Backend API → Frontend UI → Testing validation
+```
+
+**Handle Incident:**
+```
+@devops-engineer use skill "incident-response"
+→ Detect → Investigate → Mitigate → Resolve → Postmortem
+```
+
+---
+
+## Related Documentation
+
+- [Contributing Guide](CONTRIBUTING.md)
+- [Getting Started](GETTING_STARTED.md)
+- [Primitives Catalog](PRIMITIVES_CATALOG.md)
+- [Vibe Coding Guide](VIBE_CODING.md)
+- [Migration Plan](docs/HYPERTOOL_MIGRATION_PLAN.md)
+- [Persona Status Report](docs/PERSONA_STATUS_REPORT_2026_03.md)
+
+---
+
+**Version:** 2.0.0 (GitHub Copilot Native)  
+**Last Updated:** 2026-03-07  
+**Status:** Active  
+**Previous:** Hypertool-based (archived)
+
+
+---
+**Logseq:** [[TTA.dev/AGENTS]]
