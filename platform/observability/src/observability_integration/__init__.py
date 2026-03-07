@@ -40,10 +40,18 @@ See specs/observability-integration.md for full specification.
 """
 
 from .apm_setup import initialize_observability, is_observability_enabled
+from .langfuse_integration import (
+    LangFuseIntegration,
+    get_langfuse,
+    initialize_langfuse,
+)
 
 __all__ = [
     "initialize_observability",
     "is_observability_enabled",
+    "LangFuseIntegration",
+    "get_langfuse",
+    "initialize_langfuse",
 ]
 
 __version__ = "0.1.0"
