@@ -2,12 +2,17 @@
 
 Comprehensive observability and monitoring integration for the TTA (Therapeutic Text Adventure) platform.
 
+> **⚠️ IMPORTANT - LangFuse Integration Consolidation**  
+> The LangFuse integration previously in this package (`observability_integration.langfuse_integration`) has been **deprecated**.  
+> Use `tta_apm_langfuse` instead. See [LANGFUSE_CONSOLIDATION.md](../../docs/observability/LANGFUSE_CONSOLIDATION.md) for migration guide.
+
 ## Features
 
 - **OpenTelemetry APM Integration**: Distributed tracing and metrics collection
 - **RouterPrimitive**: Route to optimal LLM provider (30% cost savings)
 - **CachePrimitive**: Cache LLM responses (40% cost savings)
 - **TimeoutPrimitive**: Enforce timeouts (prevent hanging workflows)
+- **LangFuse Integration**: Unified LLM observability (via `tta_apm_langfuse` package)
 
 ## Installation
 

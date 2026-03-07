@@ -1,5 +1,9 @@
 """LangFuse integration for LLM observability in TTA.dev workflows.
 
+.. deprecated:: 2026-03-07
+   This module is deprecated. Use ``tta_apm_langfuse`` instead.
+   See docs/observability/LANGFUSE_CONSOLIDATION.md for migration guide.
+
 This module provides LangFuse-based tracking for LLM calls, enabling:
 - Cost and token tracking per workflow
 - Latency and performance monitoring
@@ -8,9 +12,18 @@ This module provides LangFuse-based tracking for LLM calls, enabling:
 """
 
 import os
+import warnings
 from typing import Any
 
 from langfuse import Langfuse, observe  # type: ignore[import-untyped]
+
+warnings.warn(
+    "observability_integration.langfuse_integration is deprecated. "
+    "Use 'tta_apm_langfuse' instead. "
+    "See docs/observability/LANGFUSE_CONSOLIDATION.md for migration guide.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 class LangFuseIntegration:
