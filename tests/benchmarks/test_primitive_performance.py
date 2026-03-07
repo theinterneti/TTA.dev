@@ -18,12 +18,20 @@ from tta_dev_primitives import (
     TimeoutPrimitive,
     WorkflowContext,
 )
+from tta_dev_primitives.recovery.retry import RetryStrategy
+from tta_dev_primitives.recovery.timeout import TimeoutError as PrimitiveTimeoutError
+
+pytestmark = pytest.mark.slow
 
 
 @pytest.fixture
 def context():
-    """Create a workflow context for benchmarks."""
-    return WorkflowContext(workflow_id="benchmark")
+    """Create a fresh workflow context for each benchmark iteration."""
+
+    def _context_factory():
+        return WorkflowContext(workflow_id="benchmark")
+
+    return _context_factory
 
 
 @pytest.fixture
@@ -56,20 +64,27 @@ class TestLambdaPrimitive:
     def test_sync_execution(self, benchmark, simple_op, context):
         """Benchmark synchronous execution overhead."""
 
+        loop = asyncio.new_event_loop()
+
         def run():
-            return asyncio.run(simple_op.execute({"value": 42}, context))
+            ctx = context()
+            return loop.run_until_complete(simple_op.execute({"value": 42}, ctx))
 
         result = benchmark(run)
+        loop.close()
         assert result["result"] == 84
 
-    @pytest.mark.asyncio
-    async def test_async_execution(self, benchmark, simple_op, context):
+    def test_async_execution(self, benchmark, simple_op, context):
         """Benchmark async execution overhead."""
 
-        async def run():
-            return await simple_op.execute({"value": 42}, context)
+        async def op():
+            ctx = context()
+            return await simple_op.execute({"value": 42}, ctx)
 
-        result = await benchmark(run)
+        def run():
+            return asyncio.run(op())
+
+        result = benchmark(run)
         assert result["result"] == 84
 
 
@@ -81,7 +96,8 @@ class TestSequentialPrimitive:
         workflow = simple_op >> simple_op
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 40  # 10 * 2 * 2
@@ -91,7 +107,8 @@ class TestSequentialPrimitive:
         workflow = simple_op >> simple_op >> simple_op >> simple_op >> simple_op
 
         def run():
-            return asyncio.run(workflow.execute({"value": 1}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 1}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 32  # 1 * 2^5
@@ -105,7 +122,8 @@ class TestParallelPrimitive:
         workflow = ParallelPrimitive([simple_op, simple_op])
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         benchmark(run)
 
@@ -114,7 +132,8 @@ class TestParallelPrimitive:
         workflow = ParallelPrimitive([simple_op] * 10)
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         benchmark(run)
 
@@ -123,7 +142,8 @@ class TestParallelPrimitive:
         workflow = ParallelPrimitive([cpu_bound_op] * 50)
 
         def run():
-            return asyncio.run(workflow.execute({"value": 5}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 5}, ctx))
 
         benchmark(run)
 
@@ -133,10 +153,12 @@ class TestRetryPrimitive:
 
     def test_success_first_try(self, benchmark, simple_op, context):
         """Benchmark retry with immediate success."""
-        workflow = RetryPrimitive(simple_op, max_attempts=3)
+        strategy = RetryStrategy(max_retries=3)
+        workflow = RetryPrimitive(simple_op, strategy=strategy)
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 20
@@ -152,14 +174,14 @@ class TestRetryPrimitive:
                 raise ValueError("Simulated failure")
             return {"result": data["value"] * 2}
 
-        workflow = RetryPrimitive(
-            LambdaPrimitive(flaky_op), max_attempts=5, backoff_factor=0.01
-        )
+        strategy = RetryStrategy(max_retries=5, backoff_base=1.01)
+        workflow = RetryPrimitive(LambdaPrimitive(flaky_op), strategy=strategy)
 
         def run():
             nonlocal attempt_count
             attempt_count = 0
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 20
@@ -170,7 +192,11 @@ class TestCachePrimitive:
 
     def test_cache_miss(self, benchmark, cpu_bound_op, context):
         """Benchmark cache miss (full execution)."""
-        workflow = CachePrimitive(cpu_bound_op, ttl=300)
+
+        def cache_key_fn(data: dict, ctx: WorkflowContext) -> str:
+            return f"benchmark-{ctx.workflow_id}"
+
+        workflow = CachePrimitive(cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300)
 
         counter = {"value": 0}
 
@@ -184,13 +210,19 @@ class TestCachePrimitive:
 
     def test_cache_hit(self, benchmark, cpu_bound_op, context):
         """Benchmark cache hit (no execution)."""
-        workflow = CachePrimitive(cpu_bound_op, ttl=300)
+
+        def cache_key_fn(data: dict, ctx: WorkflowContext) -> str:
+            return "benchmark-cached"
+
+        workflow = CachePrimitive(cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300)
 
         # Warm up cache
-        asyncio.run(workflow.execute({"value": 10}, context))
+        ctx = context()
+        asyncio.run(workflow.execute({"value": 10}, ctx))
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert "result" in result
@@ -202,20 +234,21 @@ class TestConditionalPrimitive:
     def test_true_branch(self, benchmark, simple_op, context):
         """Benchmark conditional taking true branch."""
 
-        async def always_true(data: dict, ctx: WorkflowContext) -> bool:
+        def always_true(data: dict, ctx: WorkflowContext) -> bool:
             return True
 
         async def zero_result(data: dict, ctx: WorkflowContext) -> dict:
             return {"result": 0}
 
         workflow = ConditionalPrimitive(
-            condition=LambdaPrimitive(always_true),
-            if_true=simple_op,
-            if_false=LambdaPrimitive(zero_result),
+            condition=always_true,
+            then_primitive=simple_op,
+            else_primitive=LambdaPrimitive(zero_result),
         )
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 20
@@ -223,20 +256,21 @@ class TestConditionalPrimitive:
     def test_false_branch(self, benchmark, simple_op, context):
         """Benchmark conditional taking false branch."""
 
-        async def always_false(data: dict, ctx: WorkflowContext) -> bool:
+        def always_false(data: dict, ctx: WorkflowContext) -> bool:
             return False
 
         async def zero_result(data: dict, ctx: WorkflowContext) -> dict:
             return {"result": 0}
 
         workflow = ConditionalPrimitive(
-            condition=LambdaPrimitive(always_false),
-            if_true=simple_op,
-            if_false=LambdaPrimitive(zero_result),
+            condition=always_false,
+            then_primitive=simple_op,
+            else_primitive=LambdaPrimitive(zero_result),
         )
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 0
@@ -250,7 +284,8 @@ class TestTimeoutPrimitive:
         workflow = TimeoutPrimitive(simple_op, timeout_seconds=5.0)
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 20
@@ -266,8 +301,9 @@ class TestTimeoutPrimitive:
 
         def run():
             try:
-                return asyncio.run(workflow.execute({"value": 10}, context))
-            except TimeoutError:
+                ctx = context()
+                return asyncio.run(workflow.execute({"value": 10}, ctx))
+            except PrimitiveTimeoutError:
                 return {"timed_out": True}
 
         result = benchmark(run)
@@ -284,10 +320,11 @@ class TestFallbackPrimitive:
             return {"result": 0}
 
         fallback_op = LambdaPrimitive(zero_result)
-        workflow = FallbackPrimitive([simple_op, fallback_op])
+        workflow = FallbackPrimitive(primary=simple_op, fallback=fallback_op)
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 20
@@ -298,10 +335,13 @@ class TestFallbackPrimitive:
         async def failing_op(data: dict, ctx: WorkflowContext) -> dict:
             raise ValueError("Primary failed")
 
-        workflow = FallbackPrimitive([LambdaPrimitive(failing_op), simple_op])
+        workflow = FallbackPrimitive(
+            primary=LambdaPrimitive(failing_op), fallback=simple_op
+        )
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         result = benchmark(run)
         assert result["result"] == 20
@@ -318,24 +358,31 @@ class TestComplexWorkflows:
         workflow = parallel1 >> simple_op >> parallel2
 
         def run():
-            return asyncio.run(workflow.execute({"value": 5}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 5}, ctx))
 
         benchmark(run)
 
     def test_retry_with_cache(self, benchmark, cpu_bound_op, context):
         """Benchmark retry wrapping cached operation."""
-        cached = CachePrimitive(cpu_bound_op, ttl=300)
-        workflow = RetryPrimitive(cached, max_attempts=3)
+
+        def cache_key_fn(data: dict, ctx: WorkflowContext) -> str:
+            return f"cache-{data.get('value')}"
+
+        cached = CachePrimitive(cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300)
+        strategy = RetryStrategy(max_retries=3)
+        workflow = RetryPrimitive(cached, strategy=strategy)
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         benchmark(run)
 
     def test_conditional_with_fallback(self, benchmark, simple_op, context):
         """Benchmark conditional with fallback strategies."""
 
-        async def condition(data: dict, ctx: WorkflowContext) -> bool:
+        def condition(data: dict, ctx: WorkflowContext) -> bool:
             return data.get("value", 0) > 5
 
         async def failing_op(data: dict, ctx: WorkflowContext) -> dict:
@@ -344,14 +391,17 @@ class TestComplexWorkflows:
         async def zero_result(data: dict, ctx: WorkflowContext) -> dict:
             return {"result": 0}
 
-        fallback = FallbackPrimitive([LambdaPrimitive(failing_op), simple_op])
+        fallback = FallbackPrimitive(
+            primary=LambdaPrimitive(failing_op), fallback=simple_op
+        )
         workflow = ConditionalPrimitive(
-            condition=LambdaPrimitive(condition),
-            if_true=fallback,
-            if_false=LambdaPrimitive(zero_result),
+            condition=condition,
+            then_primitive=fallback,
+            else_primitive=LambdaPrimitive(zero_result),
         )
 
         def run():
-            return asyncio.run(workflow.execute({"value": 10}, context))
+            ctx = context()
+            return asyncio.run(workflow.execute({"value": 10}, ctx))
 
         benchmark(run)
