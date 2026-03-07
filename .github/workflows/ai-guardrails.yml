@@ -6,8 +6,6 @@ name: AI Agent Guardrails
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
-  pull_request_target:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -18,7 +16,7 @@ jobs:
   enforce-draft-for-ai:
     name: Enforce Draft PR for AI Agents
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
     
     steps:
       - name: Check if PR is from AI agent
@@ -34,9 +32,9 @@ jobs:
           echo "PR Labels: $PR_LABELS"
           echo "Is Draft: $PR_DRAFT"
           
-          # Check if author is a bot
+          # Check if author is a GitHub bot (using explicit [bot] suffix)
           IS_BOT=false
-          if [[ "$PR_AUTHOR" == *"[bot]"* ]] || [[ "$PR_AUTHOR" == *"bot"* ]]; then
+          if [[ "$PR_AUTHOR" == *"[bot]" ]]; then
             IS_BOT=true
           fi
           
@@ -90,7 +88,7 @@ jobs:
   provenance-tagging:
     name: Tag AI-Generated PRs
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+    if: github.event_name == 'pull_request'
     
     steps:
       - name: Check branch naming convention

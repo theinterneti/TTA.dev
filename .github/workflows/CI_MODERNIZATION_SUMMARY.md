@@ -80,10 +80,11 @@ python -c "from tta_dev_primitives import WorkflowPrimitive; print('✅ Package 
 - Catches packaging/dependency issues early
 
 ### 4. Matrix Strategy (Preserved)
-- **Python versions**: 3.11, 3.12
-- **Operating systems**: ubuntu-latest, macos-latest, windows-latest
+- **Python versions**: 3.11, 3.12, 3.13, 3.14 (4 versions)
+- **Operating systems**: ubuntu-latest, macos-latest, windows-latest (3 OS)
 - **Test splitting**: 3 groups for horizontal scaling
-- **Parallel execution**: pytest-xdist for vertical scaling
+- **Total matrix jobs**: 36 (4 Python × 3 OS × 3 splits)
+- **Parallel execution**: pytest-xdist for vertical scaling within each job
 
 ## Benefits
 

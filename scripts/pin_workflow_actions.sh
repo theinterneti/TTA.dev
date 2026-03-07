@@ -15,6 +15,7 @@ declare -A ACTION_PINS=(
     ["actions/cache@v4"]="actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319" # v4.0.1
     ["actions/github-script@v7"]="actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea" # v7.0.1
     ["astral-sh/setup-uv@v2"]="astral-sh/setup-uv@3f2f00c85e1be39f0c70d3c3e5c2ebb9e6471ebe" # v2.0.0
+    ["codecov/codecov-action@v4"]="codecov/codecov-action@v4.0.1" # Needs actual SHA
 )
 
 UPDATED=0
@@ -35,7 +36,13 @@ for workflow in .github/workflows/*.yml .github/workflows/*.yaml; do
         
         if grep -q "uses: $action_tag" "$workflow"; then
             echo "  📌 Pinning $action_tag"
-            sed -i "s|uses: $action_tag|uses: $action_pin # $action_tag|g" "$workflow"
+            # Handle both GNU and BSD sed (macOS)
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i.bak "s|uses: $action_tag|uses: $action_pin # $action_tag|g" "$workflow"
+                rm -f "$workflow.bak"
+            else
+                sed -i "s|uses: $action_tag|uses: $action_pin # $action_tag|g" "$workflow"
+            fi
             ((UPDATED++))
         fi
         ((TOTAL++))

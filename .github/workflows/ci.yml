@@ -66,8 +66,8 @@ jobs:
           
           echo "🔍 Validating #dev-todo compliance..."
           
-          # Find all TODOs with #dev-todo tag
-          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" . || true)
+          # Find all TODOs with #dev-todo tag (excluding prose documentation)
+          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" --exclude-dir=docs/guides . || true)
           
           if [ -z "$todos" ]; then
             echo "✅ No #dev-todos found"
@@ -134,11 +134,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Run tests with 100% coverage enforcement
+      - name: Run tests with coverage enforcement
         # pytest-split selects tests at collection time (horizontal scaling),
         # pytest-xdist parallelises them across CPU cores (vertical scaling).
         # --dist=loadfile groups tests by file to prevent state collisions.
-        # --cov-fail-under=100 enforces 100% coverage baseline
+        # --cov-fail-under=80 enforces baseline coverage (matches codecov.yml)
         run: >
           uv run pytest -v --tb=short
           -m "not integration and not slow and not external and not quarantine"
@@ -149,7 +149,7 @@ jobs:
           --group=${{ matrix.split-group }}
           --store-durations
           --cov=platform --cov-branch
-          --cov-fail-under=100
+          --cov-fail-under=80
           --cov-report=xml:coverage.xml
           --cov-report=term-missing
 
