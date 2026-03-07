@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
@@ -22,9 +23,26 @@ def temp_dolt_repo(tmp_path: Path) -> DoltConfig:
     repo_path = str(tmp_path / "test-universe-db")
     os.makedirs(repo_path, exist_ok=True)
 
-    result = os.system(f"dolt init -d {repo_path} 2>/dev/null")
-    if result != 0:
+    # Use subprocess with shell=False for security
+    try:
+        subprocess.run(
+            ["dolt", "init", "-d", repo_path],
+            check=True,
+            capture_output=True,
+            timeout=10,
+        )
+    except FileNotFoundError:
         pytest.skip("dolt binary not available — skipping integration test")
+    except subprocess.TimeoutExpired as exc:
+        pytest.skip(f"dolt init timed out after {exc.timeout}s — skipping integration test")
+    except subprocess.CalledProcessError as exc:
+        stderr = (
+            exc.stderr.decode() if isinstance(exc.stderr, (bytes, bytearray)) else exc.stderr or ""
+        )
+        pytest.skip(
+            f"dolt init failed (return code {exc.returncode}, "
+            f"stderr={stderr!r}) — skipping integration test"
+        )
 
     return DoltConfig(repo_path=repo_path, database="test-universe-db")
 
