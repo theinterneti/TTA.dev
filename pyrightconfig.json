@@ -7,6 +7,8 @@
   "exclude": [
     "platform/*/examples",
     "platform/primitives/tests/test_integrations.py",
+    "platform/agent-context/.augment",
+    "platform/apm/langfuse",
     "**/__pycache__",
     "**/*.pyc",
     "**/node_modules",

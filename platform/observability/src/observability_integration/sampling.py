@@ -21,9 +21,7 @@ def _hash_to_probability(trace_id: str) -> float:
     Returns:
         Float between 0.0 and 1.0 derived from consistent hash
     """
-    hash_value = int(
-        hashlib.md5(trace_id.encode(), usedforsecurity=False).hexdigest()[:8], 16
-    )
+    hash_value = int(hashlib.md5(trace_id.encode(), usedforsecurity=False).hexdigest()[:8], 16)
     return hash_value / 0xFFFFFFFF
 
 

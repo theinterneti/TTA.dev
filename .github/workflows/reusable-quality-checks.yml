@@ -42,6 +42,8 @@ on:
         description: 'Number of type errors found'
         value: ${{ jobs.quality.outputs.type-errors }}
 
+permissions:
+  contents: read
 jobs:
   quality:
     runs-on: ubuntu-latest

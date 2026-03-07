@@ -120,6 +120,8 @@ class SupabasePrimitive(DatabasePrimitive):
     async def _get_client(self) -> AsyncClient:
         """Get or create Supabase client."""
         if self._client is None:
+            # url and key are guaranteed to be non-None by __init__ validation
+            assert self.url is not None and self.key is not None
             self._client = await create_async_client(self.url, self.key)
         return self._client
 
