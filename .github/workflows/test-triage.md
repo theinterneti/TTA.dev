@@ -9,11 +9,22 @@ permissions:
   issues: write
 tools:
   - github
+env:
+  AGENT_VERSION: "1.0.0"
 ---
 
 # AI Test Triage Agent
 
 Act as an AI Test-Triage Agent with expertise in debugging Python test failures.
+
+## Initialization (Run First!)
+
+Before any analysis, configure observability:
+```bash
+# Setup OpenTelemetry environment
+eval $(python scripts/ci/setup_otel.py)
+echo "✅ OTEL configured with trace: $TRACEPARENT"
+```
 
 ## Trigger Conditions
 
@@ -48,8 +59,20 @@ This workflow activates when:
    }
    ```
 
+4. **Log AI Decision (REQUIRED)**
+   Before proposing any fix, log your decision immutably:
+   ```bash
+   python scripts/ci/ai_decision_logger.py \
+     --agent-name "test-triage-agent" \
+     --action "Propose fix for ${TEST_NAME}" \
+     --confidence ${CONFIDENCE_SCORE} \
+     --rationale "${ROOT_CAUSE_ANALYSIS}" \
+     --metadata '{"pr_number": '${PR_NUMBER}', "failed_tests": ['${FAILED_TESTS}']}'
+   ```
+   This creates an audit trail with trace_id for observability.
+
 4. **Propose a Fix**
-   - If the issue is fixable, create a Draft PR with:
+   - If confidence >= 0.7, create a Draft PR with:
      - The code changes to fix the issue
      - Updated or new tests to prevent regression
      - The JSON rationale in the PR description

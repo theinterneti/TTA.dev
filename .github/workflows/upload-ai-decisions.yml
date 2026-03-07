@@ -1,0 +1,51 @@
+name: Upload AI Decision Artifacts
+
+on:
+  workflow_call:
+    inputs:
+      workflow_name:
+        required: true
+        type: string
+        description: "Name of the calling workflow"
+
+jobs:
+  upload-decisions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Check for AI decision logs
+        id: check-logs
+        run: |
+          if [ -d "ci-ai-decisions" ] && [ "$(ls -A ci-ai-decisions)" ]; then
+            echo "has_logs=true" >> $GITHUB_OUTPUT
+            echo "✅ Found AI decision logs to upload"
+            ls -la ci-ai-decisions/
+          else
+            echo "has_logs=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No AI decision logs found"
+          fi
+      
+      - name: Upload AI decision artifacts
+        if: steps.check-logs.outputs.has_logs == 'true'
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        with:
+          name: ai-decisions-${{ inputs.workflow_name }}-${{ github.run_id }}
+          path: ci-ai-decisions/
+          retention-days: 90
+          if-no-files-found: warn
+      
+      - name: Summary
+        if: steps.check-logs.outputs.has_logs == 'true'
+        run: |
+          echo "## 🤖 AI Decision Logs" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Uploaded decision logs from: ${{ inputs.workflow_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Files:" >> $GITHUB_STEP_SUMMARY
+          ls -1 ci-ai-decisions/ | while read file; do
+            echo "- \`$file\`" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "These logs can be ingested by \`tta-observability-ui\` dashboard." >> $GITHUB_STEP_SUMMARY

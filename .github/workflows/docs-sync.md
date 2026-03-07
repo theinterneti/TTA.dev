@@ -11,11 +11,22 @@ tools:
   - github
   - grep
   - view
+env:
+  AGENT_VERSION: "1.0.0"
 ---
 
 # Continuous Documentation Agent
 
 Act as a Continuous Documentation Agent responsible for keeping documentation synchronized with code changes.
+
+## Initialization (Run First!)
+
+Before any documentation updates, configure observability:
+```bash
+# Setup OpenTelemetry environment
+eval $(python scripts/ci/setup_otel.py)
+echo "✅ OTEL configured with trace: $TRACEPARENT"
+```
 
 ## Trigger Conditions
 
@@ -56,6 +67,15 @@ This workflow runs when:
    - Build workflows: `ExtractAPIPrimitive >> GenerateExamplesPrimitive >> UpdateLogseqPrimitive`
 
 5. **Create Documentation PRs**
+   - BEFORE making changes, log your decision:
+     ```bash
+     python scripts/ci/ai_decision_logger.py \
+       --agent-name "docs-sync-agent" \
+       --action "Update documentation for ${CHANGED_FILES}" \
+       --confidence ${CONFIDENCE_SCORE} \
+       --rationale "${REASON_FOR_UPDATE}" \
+       --metadata '{"commit_sha": "'${GITHUB_SHA}'", "files_changed": ['${FILES}']}'
+     ```
    - If changes are substantial, create a Draft PR for human review
    - For minor updates (typos, formatting), commit directly to `main`
    - Use clear commit messages: `docs: update RetryPrimitive examples`
