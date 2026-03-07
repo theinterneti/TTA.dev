@@ -195,3 +195,30 @@ logseq/pages/AI\ Research.md
 _archive/
 **/bak/
 **/backup/
+local/archive/
+
+# Deprecated applications (archived)
+apps/agent-orchestrator/
+apps/context-engineering/
+apps/mcp-swarm/
+apps/observability-ui/
+
+# Old configurations
+.hypertool/
+docker-compose.yml
+monitoring/
+
+# Outdated documentation
+CONSOLIDATION_PLAN.md
+REPOSITORY_CLEANUP_PLAN.md
+kb_migration_plan.md
+migration_plan.md
+
+# Test artifacts
+htmlcov/
+hello.py
+conftest.py
+
+# Experimental/incomplete
+custom/workflows/
+templates/
