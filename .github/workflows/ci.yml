@@ -66,8 +66,8 @@ jobs:
           
           echo "🔍 Validating #dev-todo compliance..."
           
-          # Find all TODOs with #dev-todo tag (excluding prose documentation)
-          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" --exclude-dir=docs/guides . || true)
+          # Find all TODOs with #dev-todo tag (excluding documentation)
+          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" . | grep -v "^\.\/docs\/" | grep -v "^\.\/\.github\/workflows\/.*\.md" || true)
           
           if [ -z "$todos" ]; then
             echo "✅ No #dev-todos found"
