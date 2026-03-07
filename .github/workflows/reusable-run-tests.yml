@@ -37,6 +37,8 @@ on:
         description: 'Test execution result (success/failure)'
         value: ${{ jobs.test.result }}
 
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest

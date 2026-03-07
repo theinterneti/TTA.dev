@@ -14,6 +14,8 @@ on:
       - 'logseq/pages/**'
       - 'scripts/validate-todos.py'
 
+permissions:
+  contents: read
 jobs:
   validate-todos:
     runs-on: ubuntu-latest

@@ -8,6 +8,8 @@ on:
         type: string
         description: "Name of the calling workflow"
 
+permissions:
+  contents: read
 jobs:
   upload-decisions:
     runs-on: ubuntu-latest
