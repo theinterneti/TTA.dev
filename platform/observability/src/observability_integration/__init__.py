@@ -59,8 +59,14 @@ def __getattr__(name: str):
             get_langfuse,
             initialize_langfuse,
         )
-        return {"LangFuseIntegration": LangFuseIntegration, "get_langfuse": get_langfuse, "initialize_langfuse": initialize_langfuse}[name]
+
+        return {
+            "LangFuseIntegration": LangFuseIntegration,
+            "get_langfuse": get_langfuse,
+            "initialize_langfuse": initialize_langfuse,
+        }[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     "initialize_observability",
