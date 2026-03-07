@@ -143,4 +143,4 @@ git commit -m "rollback: restore archived workflows"
 ---
 
 **Reviewed by:** GitHub Copilot CLI (Principal DevOps Engineer)
-**Approved for merge:** 2026-03-07
+**Summary prepared on:** 2026-03-07

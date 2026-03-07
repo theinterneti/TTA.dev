@@ -48,8 +48,8 @@ TTA.dev/
 │   ├── ci/                     # CI-specific helpers
 │   └── dev/                    # Development tools
 │
-├── .archive/                   # Local-only (gitignored)
-│   └── legacy/                 # Old code for reference
+├── _archive/                   # Version-controlled archive for legacy code
+│   └── legacy/                 # Old code for reference (migrated here)
 │       ├── platform_tta_dev/
 │       └── src/
 │
