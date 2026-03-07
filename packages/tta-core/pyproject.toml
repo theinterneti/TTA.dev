@@ -1,0 +1,18 @@
+[project]
+name = "tta-core"
+version = "0.1.0"
+description = "TTA.dev core integration utilities"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "TTA.dev Team"}
+]
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["integrations"]
