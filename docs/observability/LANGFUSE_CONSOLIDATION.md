@@ -84,7 +84,9 @@ This package becomes the canonical LangFuse integration because it:
 - [x] Identify duplicate implementations
 - [x] Choose primary implementation
 - [x] Document consolidation plan
+- [x] Add deprecation warnings
 - [ ] Update primitives to use unified integration
+<<<<<<< HEAD
 - [x] Add deprecation warnings
 - [x] Update documentation
 - [ ] Remove deprecated code

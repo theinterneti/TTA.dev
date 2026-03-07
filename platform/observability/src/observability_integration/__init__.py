@@ -40,11 +40,27 @@ See specs/observability-integration.md for full specification.
 """
 
 from .apm_setup import initialize_observability, is_observability_enabled
-from .langfuse_integration import (
-    LangFuseIntegration,
-    get_langfuse,
-    initialize_langfuse,
+from .sampling import (
+    AdaptiveSampler,
+    CompositeSampler,
+    ProbabilisticSampler,
+    SamplingDecision,
+    SamplingStrategy,
+    TailBasedSampler,
 )
+
+
+# Lazy import for deprecated module to avoid triggering warning
+def __getattr__(name: str):
+    """Lazy import for deprecated langfuse module."""
+    if name in ("LangFuseIntegration", "get_langfuse", "initialize_langfuse"):
+        from .langfuse_integration import (
+            LangFuseIntegration,
+            get_langfuse,
+            initialize_langfuse,
+        )
+        return {"LangFuseIntegration": LangFuseIntegration, "get_langfuse": get_langfuse, "initialize_langfuse": initialize_langfuse}[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
     "initialize_observability",
@@ -52,6 +68,12 @@ __all__ = [
     "LangFuseIntegration",
     "get_langfuse",
     "initialize_langfuse",
+    "AdaptiveSampler",
+    "CompositeSampler",
+    "ProbabilisticSampler",
+    "SamplingDecision",
+    "SamplingStrategy",
+    "TailBasedSampler",
 ]
 
 __version__ = "0.1.0"
