@@ -5,10 +5,26 @@ while maintaining visibility into important events.
 """
 
 import hashlib
+import threading
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Protocol
+
+
+def _hash_to_probability(trace_id: str) -> float:
+    """Convert trace_id to consistent probability value.
+
+    Args:
+        trace_id: Unique trace identifier
+
+    Returns:
+        Float between 0.0 and 1.0 derived from consistent hash
+    """
+    hash_value = int(
+        hashlib.md5(trace_id.encode(), usedforsecurity=False).hexdigest()[:8], 16
+    )
+    return hash_value / 0xFFFFFFFF
 
 
 class SamplingDecision(Enum):
@@ -59,9 +75,7 @@ class ProbabilisticSampler:
         Returns:
             SamplingDecision based on consistent hash
         """
-        # Use consistent hashing for same trace_id
-        hash_value = int(hashlib.md5(trace_id.encode()).hexdigest()[:8], 16)
-        normalized = hash_value / 0xFFFFFFFF
+        normalized = _hash_to_probability(trace_id)
         return SamplingDecision.SAMPLE if normalized < self.sample_rate else SamplingDecision.DROP
 
 
@@ -104,17 +118,26 @@ class AdaptiveSampler:
 
     Automatically reduces sampling when overhead is high,
     increases when overhead is low.
+
+    Thread-safe for production use with >100K req/day.
     """
 
     min_rate: float = 0.01
     max_rate: float = 1.0
     target_overhead: float = 0.02
+    adjustment_interval: float = 60.0
     current_rate: float = field(init=False)
-    _last_adjustment: float = field(default=0.0, init=False)
-    _adjustment_interval: float = 60.0
+    _last_adjustment: float = field(default=0.0, init=False, repr=False)
+    _lock: threading.Lock = field(default_factory=threading.Lock, init=False, repr=False)
 
     def __post_init__(self):
-        """Initialize current rate to max."""
+        """Initialize and validate parameters."""
+        if not 0.0 <= self.min_rate <= 1.0:
+            raise ValueError(f"min_rate must be 0.0-1.0, got {self.min_rate}")
+        if not 0.0 <= self.max_rate <= 1.0:
+            raise ValueError(f"max_rate must be 0.0-1.0, got {self.max_rate}")
+        if self.min_rate > self.max_rate:
+            raise ValueError(f"min_rate ({self.min_rate}) must be <= max_rate ({self.max_rate})")
         self.current_rate = self.max_rate
 
     def should_sample(self, trace_id: str, context: dict | None = None) -> SamplingDecision:
@@ -132,9 +155,10 @@ class AdaptiveSampler:
             self._maybe_adjust_rate(context["current_overhead"])
 
         # Use probabilistic sampling with current rate
-        hash_value = int(hashlib.md5(trace_id.encode()).hexdigest()[:8], 16)
-        normalized = hash_value / 0xFFFFFFFF
-        return SamplingDecision.SAMPLE if normalized < self.current_rate else SamplingDecision.DROP
+        normalized = _hash_to_probability(trace_id)
+        with self._lock:
+            current = self.current_rate
+        return SamplingDecision.SAMPLE if normalized < current else SamplingDecision.DROP
 
     def _maybe_adjust_rate(self, current_overhead: float) -> None:
         """Adjust sampling rate based on current overhead.
@@ -142,18 +166,19 @@ class AdaptiveSampler:
         Args:
             current_overhead: Current observability overhead (0.0-1.0)
         """
-        now = time.time()
-        if now - self._last_adjustment < self._adjustment_interval:
-            return
+        with self._lock:
+            now = time.time()
+            if now - self._last_adjustment < self.adjustment_interval:
+                return
 
-        if current_overhead > self.target_overhead:
-            # Reduce sampling to lower overhead
-            self.current_rate = max(self.min_rate, self.current_rate * 0.9)
-        elif current_overhead < self.target_overhead * 0.8:
-            # Increase sampling if well below target
-            self.current_rate = min(self.max_rate, self.current_rate * 1.1)
+            if current_overhead > self.target_overhead:
+                # Reduce sampling to lower overhead
+                self.current_rate = max(self.min_rate, self.current_rate * 0.9)
+            elif current_overhead < self.target_overhead * 0.8:
+                # Increase sampling if well below target
+                self.current_rate = min(self.max_rate, self.current_rate * 1.1)
 
-        self._last_adjustment = now
+            self._last_adjustment = now
 
 
 @dataclass

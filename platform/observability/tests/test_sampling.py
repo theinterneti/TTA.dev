@@ -116,7 +116,7 @@ class TestAdaptiveSampler:
     def test_reduces_rate_on_high_overhead(self):
         """Test rate decreases when overhead is high."""
         sampler = AdaptiveSampler(
-            min_rate=0.1, max_rate=1.0, target_overhead=0.02, _adjustment_interval=0.0
+            min_rate=0.1, max_rate=1.0, target_overhead=0.02, adjustment_interval=0.0
         )
         initial_rate = sampler.current_rate
 
@@ -129,7 +129,7 @@ class TestAdaptiveSampler:
     def test_increases_rate_on_low_overhead(self):
         """Test rate increases when overhead is low."""
         sampler = AdaptiveSampler(
-            min_rate=0.1, max_rate=1.0, target_overhead=0.02, _adjustment_interval=0.0
+            min_rate=0.1, max_rate=1.0, target_overhead=0.02, adjustment_interval=0.0
         )
         sampler.current_rate = 0.5  # Start in middle
 
@@ -142,7 +142,7 @@ class TestAdaptiveSampler:
     def test_rate_stays_within_bounds(self):
         """Test rate never goes below min or above max."""
         sampler = AdaptiveSampler(
-            min_rate=0.1, max_rate=0.8, target_overhead=0.02, _adjustment_interval=0.0
+            min_rate=0.1, max_rate=0.8, target_overhead=0.02, adjustment_interval=0.0
         )
 
         # Try to push below min

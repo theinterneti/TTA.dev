@@ -9,6 +9,11 @@ Comprehensive observability and monitoring integration for the TTA (Therapeutic 
 ## Features
 
 - **OpenTelemetry APM Integration**: Distributed tracing and metrics collection
+- **Sampling Strategies**: Reduce overhead while maintaining visibility at scale
+  - **ProbabilisticSampler**: Fixed-rate sampling with consistent hashing
+  - **TailBasedSampler**: Always sample errors and slow requests
+  - **AdaptiveSampler**: Dynamically adjust sampling based on system load
+  - **CompositeSampler**: Combine multiple strategies with OR logic
 - **RouterPrimitive**: Route to optimal LLM provider (30% cost savings)
 - **CachePrimitive**: Cache LLM responses (40% cost savings)
 - **TimeoutPrimitive**: Enforce timeouts (prevent hanging workflows)
@@ -43,6 +48,46 @@ workflow = (
     >> CachePrimitive(narrative_gen, ttl_seconds=3600)
     >> TimeoutPrimitive(timeout_seconds=30)
 )
+```
+
+### Sampling for Production Scale
+
+When running at scale (>100K req/day), use sampling to reduce overhead:
+
+```python
+from observability_integration import (
+    ProbabilisticSampler,
+    TailBasedSampler,
+    AdaptiveSampler,
+    CompositeSampler,
+)
+
+# Sample 10% of requests
+basic_sampler = ProbabilisticSampler(sample_rate=0.1)
+
+# Always sample errors and slow requests
+tail_sampler = TailBasedSampler(
+    always_sample_errors=True,
+    always_sample_slow=True,
+    slow_threshold_ms=1000.0,
+)
+
+# Dynamically adjust sampling based on load
+adaptive_sampler = AdaptiveSampler(
+    min_rate=0.01,  # Sample at least 1%
+    max_rate=1.0,   # Sample up to 100%
+    target_overhead=0.02,  # Target 2% overhead
+    adjustment_interval=60.0,  # Adjust every 60 seconds
+)
+
+# Combine strategies: sample 10% baseline + all errors/slow requests
+composite_sampler = CompositeSampler(
+    strategies=[ProbabilisticSampler(0.1), tail_sampler]
+)
+
+# Use in your observability setup
+decision = composite_sampler.should_sample(trace_id, {"has_error": False, "duration_ms": 250})
+```
 ```
 
 ## Working Examples
