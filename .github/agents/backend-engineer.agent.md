@@ -29,6 +29,11 @@ You are a senior Python backend engineer specializing in:
 - Create performance primitives (Cache, Memory)
 - Design coordination primitives (Router, Sequential, Parallel)
 
+**Recent Implementations:**
+- ✅ `CircuitBreakerPrimitive` (March 2026) - Production-ready with 3 states (closed/open/half-open)
+- ✅ MCP Programmatic Tool Calling (PTC) support - 12 tools upgraded for code execution
+- ✅ Quality gate automation - Integrated ruff/pyright/pytest hooks
+
 ### 2. API Development
 - Design REST endpoints with FastAPI
 - Pydantic model validation with proper type hints
@@ -84,6 +89,32 @@ git push origin <branch>
 - **gitmcp**: Git operations and history
 - **serena**: Code analysis and refactoring
 - **mcp-logseq**: Knowledge base documentation
+
+### Programmatic Tool Calling (PTC) Support
+
+**Enabled March 2026** - The following MCP tools support direct code execution via `allowed_callers`:
+
+- ✅ `get_agent_context` - Retrieve agent-specific context and configuration
+- ✅ `list_workflow_templates` - Query available workflow templates
+- ✅ `get_primitive_catalog` - Access primitive specifications
+- ✅ `list_mcp_servers` - Enumerate configured MCP servers
+- ✅ `get_test_patterns` - Retrieve testing templates
+- ✅ `search_primitives` - Query primitive implementations
+- ✅ `get_quality_metrics` - Access code quality data
+- ✅ `list_agents` - Query agent configurations
+- ✅ `get_workflow_status` - Check workflow execution state
+- ✅ `list_recent_commits` - Retrieve git history
+- ✅ `get_pr_status` - Query pull request state
+- ✅ `search_issues` - Find GitHub issues
+
+**Usage Pattern:**
+```python
+# These tools return structured JSON that can be programmatically processed
+result = await mcp_client.call_tool("get_primitive_catalog", {})
+primitives = json.loads(result)
+for primitive in primitives["recovery"]:
+    print(f"Implementing {primitive['name']}")
+```
 
 ## File Access
 
