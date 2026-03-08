@@ -3,7 +3,7 @@
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 from tta_agent_coordination.experts import DockerExpert, DockerExpertConfig
 from tta_agent_coordination.wrappers.docker_wrapper import (

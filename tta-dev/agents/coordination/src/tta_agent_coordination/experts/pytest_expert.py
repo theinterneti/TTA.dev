@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
 
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
-from tta_dev_primitives.core import RouterPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
+from primitives.core import RouterPrimitive
 from tta_dev_primitives.performance import CachePrimitive
 
 from tta_agent_coordination.wrappers.pytest_wrapper import (
@@ -60,7 +60,7 @@ class PyTestExpert(WorkflowPrimitive[PyTestOperation, PyTestResult]):
 
     Example:
         ```python
-        from tta_dev_primitives import WorkflowContext
+        from primitives import WorkflowContext
 
         # Create expert with caching and routing
         expert = PyTestExpert(

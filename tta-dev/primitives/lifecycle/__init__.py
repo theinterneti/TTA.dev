@@ -18,25 +18,25 @@ Each stage has:
 - Validation rules (prevent mistakes)
 """
 
-from tta_dev_primitives.lifecycle.stage import (
+from primitives.lifecycle.stage import (
     DevelopmentStage,
     Stage,
     StageTransitionError,
 )
-from tta_dev_primitives.lifecycle.stage_criteria import (
+from primitives.lifecycle.stage_criteria import (
     StageCriteria,
     StageReadiness,
     TransitionResult,
 )
-from tta_dev_primitives.lifecycle.stage_manager import StageManager, StageRequest
-from tta_dev_primitives.lifecycle.stages import (
+from primitives.lifecycle.stage_manager import StageManager, StageRequest
+from primitives.lifecycle.stages import (
     DEPLOYMENT_TO_PRODUCTION,
     EXPERIMENTATION_TO_TESTING,
     STAGE_CRITERIA_MAP,
     STAGING_TO_DEPLOYMENT,
     TESTING_TO_STAGING,
 )
-from tta_dev_primitives.lifecycle.validation import (
+from primitives.lifecycle.validation import (
     ReadinessCheckPrimitive,
     ReadinessCheckResult,
     Severity,

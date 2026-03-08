@@ -9,7 +9,7 @@ from typing import Any
 import httpx
 from pydantic import BaseModel, Field
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class OpenRouterRequest(BaseModel):
@@ -47,8 +47,8 @@ class OpenRouterPrimitive(WorkflowPrimitive[OpenRouterRequest, OpenRouterRespons
 
     Example:
         ```python
-        from tta_dev_primitives.integrations import OpenRouterPrimitive
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.integrations import OpenRouterPrimitive
+        from primitives.core.base import WorkflowContext
 
         # Create primitive (free DeepSeek R1 access)
         llm = OpenRouterPrimitive(

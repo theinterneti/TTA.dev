@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
-from tta_dev_primitives.recovery import FallbackPrimitive, TimeoutPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
+from primitives.recovery import FallbackPrimitive, TimeoutPrimitive
 
 from tta_agent_coordination.wrappers.docker_wrapper import (
     DockerConfig,
@@ -54,7 +54,7 @@ class DockerExpert(WorkflowPrimitive[DockerOperation, DockerResult]):
 
     Example:
         ```python
-        from tta_dev_primitives import WorkflowContext
+        from primitives import WorkflowContext
 
         # Create expert with automatic fallback and timeouts
         expert = DockerExpert(

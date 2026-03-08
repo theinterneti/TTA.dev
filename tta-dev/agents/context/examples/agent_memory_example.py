@@ -7,7 +7,7 @@ across agents and workflow steps.
 
 import asyncio
 
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
 
 from universal_agent_context.primitives import AgentMemoryPrimitive
 

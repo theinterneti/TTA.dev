@@ -18,7 +18,7 @@ IMPORTANT: All fixtures use actual DockerExpert API structure:
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 from tta_agent_coordination.experts.docker_expert import DockerResult
 from tta_agent_coordination.managers.infrastructure_manager import (

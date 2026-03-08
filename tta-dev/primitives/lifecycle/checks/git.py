@@ -16,8 +16,8 @@ import re
 import subprocess
 from pathlib import Path
 
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.lifecycle.validation import Severity, ValidationCheck
+from primitives.core.base import WorkflowContext
+from primitives.lifecycle.validation import Severity, ValidationCheck
 
 
 async def check_working_tree_clean(project_path: Path, context: WorkflowContext) -> bool:

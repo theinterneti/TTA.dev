@@ -4,7 +4,7 @@ This module provides primitives for querying the Logseq knowledge base
 to retrieve contextual guidance, best practices, and examples.
 """
 
-from tta_dev_primitives.knowledge.knowledge_base import (
+from primitives.knowledge.knowledge_base import (
     KBPage,
     KBQuery,
     KBResult,

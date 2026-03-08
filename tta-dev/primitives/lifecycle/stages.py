@@ -4,7 +4,7 @@ This module defines the entry and exit criteria for transitioning
 between lifecycle stages, along with recommended actions.
 """
 
-from tta_dev_primitives.lifecycle.checks import (
+from primitives.lifecycle.checks import (
     DEPENDENCIES_UP_TO_DATE,
     FORMAT_CHECK_PASSES,
     HAS_CHANGELOG,
@@ -22,8 +22,8 @@ from tta_dev_primitives.lifecycle.checks import (
     VERSION_BUMPED,
     WORKING_TREE_CLEAN,
 )
-from tta_dev_primitives.lifecycle.stage import Stage
-from tta_dev_primitives.lifecycle.stage_criteria import StageCriteria
+from primitives.lifecycle.stage import Stage
+from primitives.lifecycle.stage_criteria import StageCriteria
 
 # Experimentation → Testing
 EXPERIMENTATION_TO_TESTING = StageCriteria(

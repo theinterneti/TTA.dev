@@ -13,9 +13,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
 from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives.recovery import RetryPrimitive
+from primitives.recovery import RetryPrimitive
 
 from tta_agent_coordination.wrappers.github_wrapper import (
     GitHubAPIWrapper,
@@ -60,7 +60,7 @@ class GitHubExpert(WorkflowPrimitive[GitHubOperation, GitHubResult]):
 
     Example:
         ```python
-        from tta_dev_primitives import WorkflowContext
+        from primitives import WorkflowContext
 
         # Create expert with automatic retry and caching
         expert = GitHubExpert(
@@ -114,7 +114,7 @@ class GitHubExpert(WorkflowPrimitive[GitHubOperation, GitHubResult]):
         self._wrapper = GitHubAPIWrapper(config=self.config.github_config)
 
         # Wrap with retry primitive for rate limiting
-        from tta_dev_primitives.recovery.retry import RetryStrategy
+        from primitives.recovery.retry import RetryStrategy
 
         retry_strategy = RetryStrategy(
             max_retries=self.config.max_retries,

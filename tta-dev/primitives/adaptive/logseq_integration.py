@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from tta_dev_primitives.adaptive.base import (
+from primitives.adaptive.base import (
     LearningStrategy,
     StrategyMetrics,
 )

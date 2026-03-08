@@ -8,8 +8,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.observability.instrumented_primitive import (
+from primitives import WorkflowContext
+from primitives.observability.instrumented_primitive import (
     InstrumentedPrimitive,
 )
 

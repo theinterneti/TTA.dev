@@ -18,7 +18,7 @@ Requirements:
 import asyncio
 import os
 
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 from tta_agent_coordination.managers import (
     CICDManager,

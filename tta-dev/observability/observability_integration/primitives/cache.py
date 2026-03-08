@@ -14,7 +14,7 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from tta_dev_primitives.core.base import (
+from primitives.core.base import (
     WorkflowContext,
     WorkflowPrimitive,
 )

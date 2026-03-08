@@ -22,8 +22,8 @@ class TemplateProvider:
         """Initialize with template definitions."""
         self.templates: dict[str, dict[str, Any]] = {
             "RetryPrimitive": {
-                "basic": """from tta_dev_primitives.recovery import RetryPrimitive
-from tta_dev_primitives import WorkflowContext
+                "basic": """from primitives.recovery import RetryPrimitive
+from primitives import WorkflowContext
 
 # Wrap your function with retry logic
 retry = RetryPrimitive(
@@ -37,8 +37,8 @@ retry = RetryPrimitive(
 # Execute with automatic retry
 context = WorkflowContext(workflow_id="retry-example")
 result = await retry.execute(data, context)""",
-                "with_composition": """from tta_dev_primitives.recovery import RetryPrimitive, TimeoutPrimitive
-from tta_dev_primitives import WorkflowContext
+                "with_composition": """from primitives.recovery import RetryPrimitive, TimeoutPrimitive
+from primitives import WorkflowContext
 
 # Compose timeout + retry
 workflow = (
@@ -56,8 +56,8 @@ result = await workflow.execute(data, context)""",
                 ],
             },
             "TimeoutPrimitive": {
-                "basic": """from tta_dev_primitives.recovery import TimeoutPrimitive
-from tta_dev_primitives import WorkflowContext
+                "basic": """from primitives.recovery import TimeoutPrimitive
+from primitives import WorkflowContext
 
 # Add timeout protection
 timeout = TimeoutPrimitive(
@@ -68,8 +68,8 @@ timeout = TimeoutPrimitive(
 
 context = WorkflowContext(workflow_id="timeout-example")
 result = await timeout.execute(data, context)""",
-                "with_fallback": """from tta_dev_primitives.recovery import TimeoutPrimitive, FallbackPrimitive
-from tta_dev_primitives import WorkflowContext
+                "with_fallback": """from primitives.recovery import TimeoutPrimitive, FallbackPrimitive
+from primitives import WorkflowContext
 
 # Timeout with fallback
 protected = FallbackPrimitive(
@@ -87,7 +87,7 @@ result = await protected.execute(data, context)""",
             },
             "CachePrimitive": {
                 "basic": """from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 # Cache expensive operations
 cached = CachePrimitive(
@@ -99,7 +99,7 @@ cached = CachePrimitive(
 context = WorkflowContext(workflow_id="cached-llm")
 result = await cached.execute(prompt, context)  # Cached on second call""",
                 "with_custom_key": """from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 # Custom cache key function
 def make_cache_key(data, ctx):
@@ -120,8 +120,8 @@ result = await cached.execute({"model": "gpt-4", "prompt": "Hello"}, context)"""
                 ],
             },
             "FallbackPrimitive": {
-                "basic": """from tta_dev_primitives.recovery import FallbackPrimitive
-from tta_dev_primitives import WorkflowContext
+                "basic": """from primitives.recovery import FallbackPrimitive
+from primitives import WorkflowContext
 
 # Graceful degradation with fallbacks
 fallback = FallbackPrimitive(
@@ -131,8 +131,8 @@ fallback = FallbackPrimitive(
 
 context = WorkflowContext(workflow_id="resilient-llm")
 result = await fallback.execute(prompt, context)""",
-                "multi_provider": """from tta_dev_primitives.recovery import FallbackPrimitive, RetryPrimitive
-from tta_dev_primitives import WorkflowContext
+                "multi_provider": """from primitives.recovery import FallbackPrimitive, RetryPrimitive
+from primitives import WorkflowContext
 
 # Multi-provider with retry per provider
 fallback = FallbackPrimitive(
@@ -152,7 +152,7 @@ result = await fallback.execute(data, context)""",
                 ],
             },
             "ParallelPrimitive": {
-                "basic": """from tta_dev_primitives import ParallelPrimitive, WorkflowContext
+                "basic": """from primitives import ParallelPrimitive, WorkflowContext
 
 # Execute multiple operations concurrently
 parallel = ParallelPrimitive([
@@ -164,7 +164,7 @@ parallel = ParallelPrimitive([
 context = WorkflowContext(workflow_id="parallel-fetch")
 results = await parallel.execute(user_id, context)
 # results = [user_data, recommendations, analytics]""",
-                "with_operator": """from tta_dev_primitives import WorkflowContext
+                "with_operator": """from primitives import WorkflowContext
 
 # Use | operator for parallel composition
 workflow = fetch_user | fetch_recs | fetch_analytics
@@ -178,7 +178,7 @@ results = await workflow.execute(user_id, context)""",
                 ],
             },
             "SequentialPrimitive": {
-                "basic": """from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+                "basic": """from primitives import SequentialPrimitive, WorkflowContext
 
 # Execute operations in sequence
 workflow = SequentialPrimitive([
@@ -189,7 +189,7 @@ workflow = SequentialPrimitive([
 
 context = WorkflowContext(workflow_id="pipeline")
 result = await workflow.execute(data, context)""",
-                "with_operator": """from tta_dev_primitives import WorkflowContext
+                "with_operator": """from primitives import WorkflowContext
 
 # Use >> operator for sequential composition
 workflow = validate >> process >> save >> notify
@@ -203,8 +203,8 @@ result = await workflow.execute(data, context)""",
                 ],
             },
             "RouterPrimitive": {
-                "basic": """from tta_dev_primitives.core import RouterPrimitive
-from tta_dev_primitives import WorkflowContext
+                "basic": """from primitives.core import RouterPrimitive
+from primitives import WorkflowContext
 
 def select_provider(data, ctx):
     if data.get("priority") == "quality":
@@ -225,8 +225,8 @@ router = RouterPrimitive(
 
 context = WorkflowContext(workflow_id="smart-router")
 result = await router.execute({"prompt": "Hello", "priority": "quality"}, context)""",
-                "cost_based": """from tta_dev_primitives.core import RouterPrimitive
-from tta_dev_primitives import WorkflowContext
+                "cost_based": """from primitives.core import RouterPrimitive
+from primitives import WorkflowContext
 
 def cost_aware_routing(data, ctx):
     estimated_tokens = len(data["prompt"].split()) * 1.3
@@ -245,8 +245,8 @@ router = RouterPrimitive(
                 ],
             },
             "CircuitBreakerPrimitive": {
-                "basic": """from tta_dev_primitives.recovery import CircuitBreakerPrimitive
-from tta_dev_primitives import WorkflowContext
+                "basic": """from primitives.recovery import CircuitBreakerPrimitive
+from primitives import WorkflowContext
 
 # Protect against cascade failures
 protected = CircuitBreakerPrimitive(

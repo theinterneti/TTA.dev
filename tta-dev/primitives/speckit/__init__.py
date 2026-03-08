@@ -10,7 +10,7 @@ specification workflows:
 - ValidationGatePrimitive: Enforce human approval gates
 
 Usage:
-    from tta_dev_primitives.speckit import (
+    from primitives.speckit import (
         SpecifyPrimitive,
         ClarifyPrimitive,
         PlanPrimitive,
@@ -33,11 +33,11 @@ Usage:
     )
 """
 
-from tta_dev_primitives.speckit.clarify_primitive import ClarifyPrimitive
-from tta_dev_primitives.speckit.plan_primitive import PlanPrimitive
-from tta_dev_primitives.speckit.specify_primitive import SpecifyPrimitive
-from tta_dev_primitives.speckit.tasks_primitive import Task, TasksPrimitive
-from tta_dev_primitives.speckit.validation_gate_primitive import (
+from primitives.speckit.clarify_primitive import ClarifyPrimitive
+from primitives.speckit.plan_primitive import PlanPrimitive
+from primitives.speckit.specify_primitive import SpecifyPrimitive
+from primitives.speckit.tasks_primitive import Task, TasksPrimitive
+from primitives.speckit.validation_gate_primitive import (
     ValidationGatePrimitive,
 )
 

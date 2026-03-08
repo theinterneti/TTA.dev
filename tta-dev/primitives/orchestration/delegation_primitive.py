@@ -8,7 +8,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class DelegationRequest(BaseModel):
@@ -55,9 +55,9 @@ class DelegationPrimitive(WorkflowPrimitive[DelegationRequest, DelegationRespons
 
     Example:
         ```python
-        from tta_dev_primitives.orchestration import DelegationPrimitive
-        from tta_dev_primitives.integrations import GoogleAIStudioPrimitive
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.orchestration import DelegationPrimitive
+        from primitives.integrations import GoogleAIStudioPrimitive
+        from primitives.core.base import WorkflowContext
 
         # Create delegation primitive with Gemini Pro executor
         delegation = DelegationPrimitive(
@@ -166,11 +166,11 @@ class DelegationPrimitive(WorkflowPrimitive[DelegationRequest, DelegationRespons
             Request object compatible with executor
         """
         # Import request types dynamically to avoid circular imports
-        from tta_dev_primitives.integrations.google_ai_studio_primitive import (
+        from primitives.integrations.google_ai_studio_primitive import (
             GoogleAIStudioRequest,
         )
-        from tta_dev_primitives.integrations.groq_primitive import GroqRequest
-        from tta_dev_primitives.integrations.openrouter_primitive import OpenRouterRequest
+        from primitives.integrations.groq_primitive import GroqRequest
+        from primitives.integrations.openrouter_primitive import OpenRouterRequest
 
         # Determine executor type and create appropriate request
         executor_type = type(executor).__name__

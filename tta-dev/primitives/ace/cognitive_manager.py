@@ -11,8 +11,8 @@ This module provides the foundation for primitives that:
 
 Example:
     ```python
-    from tta_dev_primitives.ace import SelfLearningCodePrimitive
-    from tta_dev_primitives import WorkflowContext
+    from primitives.ace import SelfLearningCodePrimitive
+    from primitives import WorkflowContext
 
     # Create a primitive that learns from code execution
     learner = SelfLearningCodePrimitive()
@@ -43,12 +43,12 @@ import logging
 from pathlib import Path
 from typing import Any, TypedDict, cast
 
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.integrations.e2b_primitive import (
+from primitives.core.base import WorkflowContext
+from primitives.integrations.e2b_primitive import (
     CodeExecutionPrimitive,
     CodeOutput,
 )
-from tta_dev_primitives.observability import InstrumentedPrimitive
+from primitives.observability import InstrumentedPrimitive
 
 from .code_processing import process_generated_code
 

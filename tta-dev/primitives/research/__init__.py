@@ -9,7 +9,7 @@ All research primitives follow the WorkflowPrimitive interface for consistent
 composition and observability.
 """
 
-from tta_dev_primitives.research.free_tier_research import (
+from primitives.research.free_tier_research import (
     FreeTierResearchPrimitive,
     FreeTierResearchRequest,
     FreeTierResearchResponse,

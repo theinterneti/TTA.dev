@@ -71,7 +71,7 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
 
     Example:
         ```python
-        from tta_dev_primitives.core.context_engineering import (
+        from primitives.core.context_engineering import (
             ContextEngineeringPrimitive,
             ContextRequest,
         )

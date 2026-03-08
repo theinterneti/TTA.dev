@@ -10,7 +10,7 @@ Architecture: Layer 2 (Domain Management) - Orchestrates Layer 3 experts
 from dataclasses import dataclass, field
 from typing import Any
 
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 from tta_dev_primitives.apm.instrumented import APMWorkflowPrimitive
 
 from ..experts.docker_expert import DockerExpert, DockerOperation

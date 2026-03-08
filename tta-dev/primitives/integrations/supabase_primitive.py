@@ -8,7 +8,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 from supabase import Client, create_client
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class SupabaseRequest(BaseModel):
@@ -41,8 +41,8 @@ class SupabasePrimitive(WorkflowPrimitive[SupabaseRequest, SupabaseResponse]):
 
     Example:
         ```python
-        from tta_dev_primitives.integrations import SupabasePrimitive
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.integrations import SupabasePrimitive
+        from primitives.core.base import WorkflowContext
 
         # Create primitive
         db = SupabasePrimitive(

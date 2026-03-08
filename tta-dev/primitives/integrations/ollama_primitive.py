@@ -8,7 +8,7 @@ from typing import Any
 from ollama import AsyncClient
 from pydantic import BaseModel, Field
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class OllamaRequest(BaseModel):
@@ -44,8 +44,8 @@ class OllamaPrimitive(WorkflowPrimitive[OllamaRequest, OllamaResponse]):
 
     Example:
         ```python
-        from tta_dev_primitives.integrations import OllamaPrimitive
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.integrations import OllamaPrimitive
+        from primitives.core.base import WorkflowContext
 
         # Create primitive
         llm = OllamaPrimitive(model="llama3.2")

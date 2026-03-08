@@ -9,7 +9,7 @@ from typing import Any
 import httpx
 from pydantic import BaseModel, Field
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class TogetherAIRequest(BaseModel):
@@ -46,8 +46,8 @@ class TogetherAIPrimitive(WorkflowPrimitive[TogetherAIRequest, TogetherAIRespons
 
     Example:
         ```python
-        from tta_dev_primitives.integrations import TogetherAIPrimitive
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.integrations import TogetherAIPrimitive
+        from primitives.core.base import WorkflowContext
 
         # Create primitive ($25 free credits)
         llm = TogetherAIPrimitive(

@@ -8,7 +8,7 @@ from typing import Any
 from openai import AsyncOpenAI
 from pydantic import BaseModel, Field
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class OpenAIRequest(BaseModel):
@@ -39,8 +39,8 @@ class OpenAIPrimitive(WorkflowPrimitive[OpenAIRequest, OpenAIResponse]):
 
     Example:
         ```python
-        from tta_dev_primitives.integrations import OpenAIPrimitive
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.integrations import OpenAIPrimitive
+        from primitives.core.base import WorkflowContext
 
         # Create primitive
         llm = OpenAIPrimitive(model="gpt-4o-mini")

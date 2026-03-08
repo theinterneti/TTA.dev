@@ -1878,18 +1878,18 @@ class CodeTransformer:
     def __init__(self) -> None:
         """Initialize the transformer."""
         self._import_map = {
-            "RetryPrimitive": "from tta_dev_primitives.recovery import RetryPrimitive",
-            "TimeoutPrimitive": "from tta_dev_primitives.recovery import TimeoutPrimitive",
-            "FallbackPrimitive": "from tta_dev_primitives.recovery import FallbackPrimitive",
+            "RetryPrimitive": "from primitives.recovery import RetryPrimitive",
+            "TimeoutPrimitive": "from primitives.recovery import TimeoutPrimitive",
+            "FallbackPrimitive": "from primitives.recovery import FallbackPrimitive",
             "CachePrimitive": "from tta_dev_primitives.performance import CachePrimitive",
-            "ParallelPrimitive": "from tta_dev_primitives import ParallelPrimitive",
-            "SequentialPrimitive": "from tta_dev_primitives import SequentialPrimitive",
-            "RouterPrimitive": "from tta_dev_primitives.core import RouterPrimitive",
-            "CircuitBreakerPrimitive": "from tta_dev_primitives.recovery import CircuitBreakerPrimitive",
-            "CompensationPrimitive": "from tta_dev_primitives.recovery import CompensationPrimitive",
+            "ParallelPrimitive": "from primitives import ParallelPrimitive",
+            "SequentialPrimitive": "from primitives import SequentialPrimitive",
+            "RouterPrimitive": "from primitives.core import RouterPrimitive",
+            "CircuitBreakerPrimitive": "from primitives.recovery import CircuitBreakerPrimitive",
+            "CompensationPrimitive": "from primitives.recovery import CompensationPrimitive",
             "MemoryPrimitive": "from tta_dev_primitives.performance import MemoryPrimitive",
-            "DelegationPrimitive": "from tta_dev_primitives.orchestration import DelegationPrimitive",
-            "AdaptivePrimitive": "from tta_dev_primitives.adaptive import AdaptivePrimitive",
+            "DelegationPrimitive": "from primitives.orchestration import DelegationPrimitive",
+            "AdaptivePrimitive": "from primitives.adaptive import AdaptivePrimitive",
         }
 
     def transform(
@@ -1922,7 +1922,7 @@ class CodeTransformer:
 
         changes_made = []
         imports_needed = set()
-        imports_needed.add("from tta_dev_primitives import WorkflowContext")
+        imports_needed.add("from primitives import WorkflowContext")
 
         # Determine which transformations to apply
         if primitive:

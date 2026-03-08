@@ -15,8 +15,8 @@ import re
 import subprocess
 from pathlib import Path
 
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.lifecycle.validation import Severity, ValidationCheck
+from primitives.core.base import WorkflowContext
+from primitives.lifecycle.validation import Severity, ValidationCheck
 
 # Patterns that may indicate hardcoded secrets
 _SECRET_PATTERNS = [

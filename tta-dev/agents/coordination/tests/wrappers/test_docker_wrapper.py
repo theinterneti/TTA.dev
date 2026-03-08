@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from docker.errors import APIError, ImageNotFound, NotFound
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 from tta_agent_coordination.wrappers.docker_wrapper import (
     DockerConfig,
