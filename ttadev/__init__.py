@@ -9,7 +9,12 @@ from ttadev.observability.auto_instrument import auto_initialize
 def initialize_observability() -> None:
     """Initialize observability for TTA.dev.
 
-    This function must be called explicitly by applications that want
-    observability (e.g., tracing, metrics) to be enabled.
+    Call this once at application startup to enable tracing and metrics.
+    Safe to call multiple times; subsequent calls are no-ops.
+
+    Example::
+
+        import ttadev
+        ttadev.initialize_observability()
     """
     auto_initialize()
