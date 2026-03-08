@@ -1,60 +1,36 @@
-"""Demo: Markdown-based observability in action."""
-
+"""Demo: Markdown observability in action."""
 import asyncio
-import time
+from ttadev.primitives.core.base import WorkflowPrimitive, WorkflowContext
 
-from ttadev.observability.markdown_logger import log_agent_activity, log_primitive_usage, log_workflow_start
-from ttadev.primitives.adaptive.base import WorkflowContext
-from ttadev.primitives.adaptive import SequentialPrimitive
-from ttadev.primitives.adaptive import RetryPrimitive
-
-
-async def process_data(data: dict, ctx: WorkflowContext) -> dict:
-    """Simulate data processing."""
-    start = time.time()
-    await asyncio.sleep(0.1)  # Simulate work
-    result = {"processed": data.get("value", 0) * 2}
-    duration = (time.time() - start) * 1000
+class GreetPrimitive(WorkflowPrimitive[str, str]):
+    """Simple greeting primitive."""
     
-    log_primitive_usage("DataProcessor", data, result, duration)
-    return result
+    async def _execute(self, name: str, context: WorkflowContext) -> str:
+        return f"Hello, {name}!"
 
+class ProcessPrimitive(WorkflowPrimitive[str, str]):
+    """Processing primitive."""
+    
+    async def _execute(self, data: str, context: WorkflowContext) -> str:
+        return data.upper()
 
 async def main():
-    """Run observability demo."""
-    print("🔍 Running markdown observability demo...\n")
-    
-    # Log agent startup
-    log_agent_activity(
-        "DemoAgent",
-        "startup",
-        {"version": "1.0.0", "capabilities": ["data_processing", "retry_logic"]}
-    )
+    print("🎯 Running TTA.dev with Markdown Observability...")
+    print("📝 Check .tta/logs/ for auto-generated activity logs\n")
     
     # Create workflow
-    context = WorkflowContext(workflow_id="demo-001", metadata={"user": "demo", "env": "dev"})
-    log_workflow_start("demo-001", "DataProcessingWorkflow", context)
+    workflow = GreetPrimitive() >> ProcessPrimitive()
+    context = WorkflowContext(workflow_id="demo-workflow")
     
-    # Execute workflow with primitives
-    workflow = RetryPrimitive(
-        SequentialPrimitive(process_data),
-        max_attempts=3
-    )
+    # Execute multiple times
+    for name in ["Alice", "Bob", "Charlie"]:
+        result = await workflow.execute(name, context)
+        print(f"   Result: {result}")
     
-    result = await workflow.execute({"value": 42}, context)
-    
-    log_agent_activity(
-        "DemoAgent",
-        "workflow_completed",
-        {"workflow_id": "demo-001", "result": result, "status": "success"}
-    )
-    
-    print(f"✅ Result: {result}\n")
-    print("📊 Observability logs written to .tta/logs/")
-    print("   - workflows.md")
-    print("   - primitives.md")
-    print("   - agents.md")
-
+    print("\n✅ Done! Check these files:")
+    print("   - .tta/logs/primitives.md")
+    print("   - .tta/logs/activity-2026-03-08.md")
+    print("   - .tta/logs/INDEX.md")
 
 if __name__ == "__main__":
     asyncio.run(main())
