@@ -12,11 +12,9 @@ prerelease-mode = "if-necessary"
 
 [manifest]
 members = [
-    "python-pathway",
     "tta-core",
     "tta-dev-primitives",
     "tta-observability-integration",
-    "tta-platform-app",
 ]
 
 [manifest.dependency-groups]
@@ -2316,21 +2314,6 @@ wheels = [
 ]
 
 [[package]]
-name = "python-pathway"
-version = "0.1.0"
-source = { editable = "packages/python-pathway" }
-dependencies = [
-    { name = "pydantic" },
-    { name = "tta-dev-primitives" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "tta-dev-primitives", editable = "packages/tta-primitives" },
-]
-
-[[package]]
 name = "pywin32"
 version = "311"
 source = { registry = "https://pypi.org/simple" }
@@ -2945,17 +2928,6 @@ requires-dist = [
     { name = "tta-dev-primitives", editable = "packages/tta-primitives" },
 ]
 provides-extras = ["dev"]
-
-[[package]]
-name = "tta-platform-app"
-version = "0.1.0"
-source = { editable = "apps/platform" }
-dependencies = [
-    { name = "tta-dev-primitives" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "tta-dev-primitives", editable = "packages/tta-primitives" }]
 
 [[package]]
 name = "typer"

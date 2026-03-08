@@ -1,5 +1,0 @@
-# Logseq: [[TTA.dev/Platform_tta_dev/Components/Serena/Mcp/Server]]
-from serena.cli import start_mcp_server
-
-if __name__ == "__main__":
-    start_mcp_server()
