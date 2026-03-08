@@ -13,14 +13,16 @@ try:
     OPENTELEMETRY_AVAILABLE = True
 except ImportError:
     OPENTELEMETRY_AVAILABLE = False
+    TracerProvider = None  # type: ignore
+    MeterProvider = None  # type: ignore
     logging.warning(
         "OpenTelemetry not installed. Install with: pip install tta-workflow-primitives[apm]"
     )
 
 logger = logging.getLogger(__name__)
 
-_tracer_provider: TracerProvider | None = None
-_meter_provider: MeterProvider | None = None
+_tracer_provider: "TracerProvider | None" = None  # type: ignore
+_meter_provider: "MeterProvider | None" = None  # type: ignore
 _initialized = False
 
 
@@ -30,7 +32,7 @@ def setup_apm(
     enable_prometheus: bool = True,
     enable_console: bool = False,
     prometheus_port: int = 9464,
-) -> tuple[TracerProvider | None, MeterProvider | None]:
+) -> tuple[object | None, object | None]:
     """Setup OpenTelemetry APM for workflow primitives.
 
     Args:
