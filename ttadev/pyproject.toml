@@ -1,5 +1,5 @@
 [project]
-name = "tta-dev"
+name = "ttadev"
 version = "0.1.0"
 description = "Batteries-included workflow primitives and observability for AI coding agents"
 readme = "README.md"
@@ -34,12 +34,12 @@ langfuse = [
     "langfuse>=2.0.0",
 ]
 all = [
-    "tta-dev[dev,langfuse]",
+    "ttadev[dev,langfuse]",
 ]
 
 [project.scripts]
-tta-dev = "tta_dev.cli:main"
-tta-dev-ui = "tta_dev.ui.web.app:main"
+ttadev = "ttadev.cli:main"
+ttadev-ui = "ttadev.ui.observability_server:main"
 
 [build-system]
 requires = ["hatchling"]
