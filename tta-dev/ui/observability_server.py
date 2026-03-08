@@ -360,6 +360,31 @@ async def get_dashboard():
     )
 
 
+@app.post("/api/spans")
+async def receive_span(span_data: dict[str, Any]):
+    """
+    Receive a span from instrumented primitives.
+    
+    This endpoint allows primitives to push their telemetry data
+    directly to the dashboard for real-time visualization.
+    """
+    try:
+        collector.add_span(span_data)
+        
+        # Broadcast to connected WebSocket clients
+        if active_connections:
+            message = json.dumps({"type": "new_span", "span": span_data})
+            for connection in active_connections:
+                try:
+                    await connection.send_text(message)
+                except Exception:
+                    pass  # Client disconnected
+        
+        return {"status": "ok", "trace_id": span_data.get("trace_id")}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for real-time metrics."""
