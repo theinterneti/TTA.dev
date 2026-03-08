@@ -17,8 +17,8 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.lifecycle import (
+from ttadev.core.base import WorkflowContext
+from ttadev.lifecycle import (
     DEPLOYMENT_TO_PRODUCTION,
     EXPERIMENTATION_TO_TESTING,
     STAGE_CRITERIA_MAP,
@@ -38,7 +38,7 @@ from tta_dev_primitives.lifecycle import (
     ValidationPrimitive,
     ValidationResult,
 )
-from tta_dev_primitives.lifecycle.checks import (
+from ttadev.lifecycle.checks import (
     DEPENDENCIES_UP_TO_DATE,
     FORMAT_CHECK_PASSES,
     HAS_CHANGELOG,
@@ -1221,7 +1221,7 @@ class TestAllChecksImportable:
 
     def test_total_check_count(self) -> None:
         """Test we have the expected number of checks (20 total)."""
-        from tta_dev_primitives.lifecycle import checks
+        from ttadev.lifecycle import checks
 
         all_names = checks.__all__
         assert len(all_names) == 20

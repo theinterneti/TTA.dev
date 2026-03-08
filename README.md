@@ -1,51 +1,42 @@
 # TTA.dev
 
-**Batteries-included AI workflow framework with built-in observability**
+> **Transform any idea into a production-ready AI-native application with built-in observability.**
 
-## Quick Start
+TTA.dev (Test-Time Adaptation) provides composable primitives and workflows that make AI coding agents reliable, observable, and production-ready.
+
+## ⚡ 30-Second Quick Start
 
 ```bash
-# 1. Clone and setup
-git clone https://github.com/theinterneti/TTA.dev
+# 1. Clone and setup (installs in editable mode)
+git clone https://github.com/theinterneti/TTA.dev.git
 cd TTA.dev
 ./setup.sh
 
-# 2. Activate environment
-source .venv/bin/activate
+# 2. Point your AI agent at the repo - it will:
+#    - See AGENTS.md and start using TTA.dev patterns
+#    - Auto-instrument all primitives with observability
+#    - Display activity in real-time dashboard
 
-# 3. Start observability UI
-uv run uvicorn tta-dev.ui.observability_server:app --port 5001
-
-# 4. Run demo
-uv run python demo_working_tta.py
+# 3. Open the dashboard (auto-starts on first primitive use)
+open http://localhost:8000
 ```
 
-Visit http://localhost:5001 to see your workflows in real-time!
+**That's it!** Your AI agent now has enterprise-grade reliability and observability.
 
-## What You Get
+## 🎯 What You Get
 
-✅ **Workflow Primitives** - Retry, timeout, cache, circuit breaker, fallback  
-✅ **Built-in Observability** - Auto-instrumented tracing with live UI  
-✅ **Production Ready** - Sampling, error tracking, performance metrics  
-✅ **AI-Native** - Works with any AI coding agent (Claude, Copilot, Cline)
+- **🔄 Resilient Workflows**: Retry, timeout, circuit breaker, fallback primitives
+- **📊 Built-in Observability**: Zero-config dashboard showing all agent activity  
+- **🤖 AI-Native**: Works with Claude, Copilot, Cline, or any coding agent
+- **🚀 Batteries Included**: No external services, databases, or complex setup
 
-## Architecture
+## 📚 Learn More
 
-```
-tta-dev/
-├── primitives/      # Workflow building blocks
-├── observability/   # Auto-instrumentation
-├── ui/             # Live dashboard
-├── agents/         # AI agent configurations
-├── skills/         # Reusable workflows
-└── integrations/   # LLM providers (Ollama, OpenRouter, etc.)
-```
-
-## Documentation
-
-- [User Journey](USER_JOURNEY.md) - Complete walkthrough
-- [Primitives Catalog](PRIMITIVES_CATALOG.md) - API reference
-- [Contributing](CONTRIBUTING.md) - Development guide
+- [**Getting Started Guide**](GETTING_STARTED.md) - Complete step-by-step walkthrough
+- [**User Journey**](USER_JOURNEY.md) - See the full experience
+- [**Primitives Catalog**](PRIMITIVES_CATALOG.md) - All available primitives & API reference
+- [**Agent Instructions**](AGENTS.md) - How AI agents use TTA.dev
+- [**Contributing**](CONTRIBUTING.md) - Development guide
 
 ## License
 

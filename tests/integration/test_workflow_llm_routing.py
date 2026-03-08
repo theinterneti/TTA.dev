@@ -14,10 +14,10 @@ import asyncio
 from typing import Any
 
 import pytest
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
-from tta_dev_primitives.core.routing import RouterPrimitive
-from tta_dev_primitives.observability.tracing import ObservablePrimitive
-from tta_dev_primitives.recovery import FallbackPrimitive, RetryPrimitive
+from ttadev import WorkflowContext, WorkflowPrimitive
+from ttadev.core.routing import RouterPrimitive
+from ttadev.observability.tracing import ObservablePrimitive
+from ttadev.recovery import FallbackPrimitive, RetryPrimitive
 
 # Optional: observability integration
 try:
@@ -233,7 +233,7 @@ async def test_llm_router_with_retry():
     fast_llm.call_count = 1  # Start at 1 so first call (which becomes 2) fails
 
     # Wrap in retry (API uses RetryStrategy object)
-    from tta_dev_primitives.recovery.retry import RetryStrategy
+    from ttadev.recovery.retry import RetryStrategy
 
     retrying_llm = RetryPrimitive(
         primitive=fast_llm, strategy=RetryStrategy(max_retries=3, backoff_base=1.0)
@@ -271,7 +271,7 @@ async def test_complete_llm_routing_workflow():
     cached = CachedResponse()
 
     # Build routing logic with retry
-    from tta_dev_primitives.recovery.retry import RetryStrategy
+    from ttadev.recovery.retry import RetryStrategy
 
     fast_with_retry = RetryPrimitive(
         primitive=fast_llm, strategy=RetryStrategy(max_retries=2, backoff_base=2.0)
