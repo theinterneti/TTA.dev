@@ -1,14 +1,15 @@
 """Batteries-included observability dashboard for TTA.dev.
 
-This auto-starting web dashboard displays:
-- Real-time workflow traces
-- Primitive execution metrics
-- Agent activity logs
-- System health
+This web dashboard provides:
+- Recent workflow traces (last 100)
+- Aggregate primitive execution metrics
+- Basic service health check information
 """
 
+# ruff: noqa: E501
 import asyncio
-from datetime import datetime
+from collections import deque
+from datetime import UTC, datetime
 from typing import Any
 
 from aiohttp import web
@@ -17,17 +18,20 @@ from aiohttp import web
 class ObservabilityDashboard:
     """Auto-starting observability dashboard."""
 
-    def __init__(self, host: str = "localhost", port: int = 8080):
+    def __init__(self, host: str = "localhost", port: int = 8080, max_traces: int = 100):
         self.host = host
         self.port = port
         self.app = web.Application()
-        self.traces: list[dict[str, Any]] = []
+        self.traces: deque[dict[str, Any]] = deque(maxlen=max_traces)
         self.metrics: dict[str, Any] = {
             "total_workflows": 0,
             "successful_workflows": 0,
             "failed_workflows": 0,
             "avg_duration_ms": 0.0,
+            "total_duration_ms": 0.0,  # Running total for O(1) avg calculation
         }
+        self._runner: web.AppRunner | None = None
+        self._site: web.TCPSite | None = None
         self._setup_routes()
 
     def _setup_routes(self):
@@ -44,7 +48,7 @@ class ObservabilityDashboard:
 
     async def handle_traces(self, request: web.Request) -> web.Response:
         """Return recent traces as JSON."""
-        return web.json_response({"traces": self.traces[-100:]})
+        return web.json_response({"traces": list(self.traces)})
 
     async def handle_metrics(self, request: web.Request) -> web.Response:
         """Return current metrics as JSON."""
@@ -52,7 +56,9 @@ class ObservabilityDashboard:
 
     async def handle_health(self, request: web.Request) -> web.Response:
         """Health check endpoint."""
-        return web.json_response({"status": "healthy", "timestamp": datetime.utcnow().isoformat()})
+        return web.json_response(
+            {"status": "healthy", "timestamp": datetime.now(UTC).isoformat()}
+        )
 
     def _generate_dashboard_html(self) -> str:
         """Generate the dashboard HTML with embedded CSS and JS."""
@@ -180,26 +186,55 @@ class ObservabilityDashboard:
                 const data = await response.json();
                 const container = document.getElementById('traces-container');
 
-                if (data.traces.length === 0) {
+                if (!data.traces || data.traces.length === 0) {
                     return;
                 }
 
-                container.innerHTML = data.traces.map(trace => {
+                // Clear container safely
+                container.textContent = '';
+
+                // Build DOM nodes to prevent XSS
+                const fragment = document.createDocumentFragment();
+
+                data.traces.forEach(trace => {
                     const statusClass = trace.status === 'error' ? 'error' : 'success';
                     const statusText = trace.status === 'error' ? 'ERROR' : 'SUCCESS';
-                    return `
-                        <div class="trace-item ${statusClass} fade-in">
-                            <div class="trace-header">
-                                <span class="trace-id">${trace.trace_id}</span>
-                                <span class="trace-status status-${statusClass}">${statusText}</span>
-                            </div>
-                            <div class="trace-duration">⏱️ ${trace.duration_ms.toFixed(2)}ms</div>
-                            <div style="margin-top: 10px; color: #9ca3af; font-size: 14px;">
-                                ${new Date(trace.timestamp).toLocaleString()}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+
+                    const traceItem = document.createElement('div');
+                    traceItem.className = `trace-item ${statusClass} fade-in`;
+
+                    const header = document.createElement('div');
+                    header.className = 'trace-header';
+
+                    const idSpan = document.createElement('span');
+                    idSpan.className = 'trace-id';
+                    idSpan.textContent = String(trace.trace_id);
+
+                    const statusSpan = document.createElement('span');
+                    statusSpan.className = `trace-status status-${statusClass}`;
+                    statusSpan.textContent = statusText;
+
+                    header.appendChild(idSpan);
+                    header.appendChild(statusSpan);
+
+                    const durationDiv = document.createElement('div');
+                    durationDiv.className = 'trace-duration';
+                    durationDiv.textContent = `⏱️ ${Number(trace.duration_ms).toFixed(2)}ms`;
+
+                    const timestampDiv = document.createElement('div');
+                    timestampDiv.style.marginTop = '10px';
+                    timestampDiv.style.color = '#9ca3af';
+                    timestampDiv.style.fontSize = '14px';
+                    timestampDiv.textContent = new Date(trace.timestamp).toLocaleString();
+
+                    traceItem.appendChild(header);
+                    traceItem.appendChild(durationDiv);
+                    traceItem.appendChild(timestampDiv);
+
+                    fragment.appendChild(traceItem);
+                });
+
+                container.appendChild(fragment);
             } catch (error) {
                 console.error('Failed to fetch traces:', error);
             }
@@ -220,12 +255,19 @@ class ObservabilityDashboard:
 
     async def start(self):
         """Start the dashboard server."""
-        runner = web.AppRunner(self.app)
-        await runner.setup()
-        site = web.TCPSite(runner, self.host, self.port)
-        await site.start()
+        self._runner = web.AppRunner(self.app)
+        await self._runner.setup()
+        self._site = web.TCPSite(self._runner, self.host, self.port)
+        await self._site.start()
         print(f"🚀 TTA.dev Observability Dashboard running at http://{self.host}:{self.port}")
         print("Press Ctrl+C to stop")
+
+    async def stop(self):
+        """Stop the dashboard server gracefully."""
+        if self._site:
+            await self._site.stop()
+        if self._runner:
+            await self._runner.cleanup()
 
     def record_trace(self, trace_id: str, duration_ms: float, status: str = "success"):
         """Record a workflow trace."""
@@ -234,20 +276,21 @@ class ObservabilityDashboard:
                 "trace_id": trace_id,
                 "duration_ms": duration_ms,
                 "status": status,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
         )
 
-        # Update metrics
+        # Update metrics in O(1) time
         self.metrics["total_workflows"] += 1
         if status == "success":
             self.metrics["successful_workflows"] += 1
         else:
             self.metrics["failed_workflows"] += 1
 
-        # Update average duration
-        total = sum(t["duration_ms"] for t in self.traces)
-        self.metrics["avg_duration_ms"] = total / len(self.traces)
+        # Update average duration using running total
+        total_workflows = self.metrics["total_workflows"]
+        self.metrics["total_duration_ms"] += duration_ms
+        self.metrics["avg_duration_ms"] = self.metrics["total_duration_ms"] / total_workflows
 
 
 async def main():

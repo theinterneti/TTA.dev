@@ -4,17 +4,16 @@
 
 ## Features
 
-- 🚀 **Auto-starting** - No configuration needed
+- 🚀 **Auto-starting** - Minimal configuration needed
 - 📊 **Real-time metrics** - Total/successful/failed workflows, avg duration
 - 🔍 **Live traces** - See every primitive execution as it happens
 - 🎨 **Beautiful UI** - Dark mode dashboard with auto-refresh
-- 🔌 **Zero dependencies** - Single Python file, runs anywhere
 
 ## Quick Start
 
 ```bash
-# Run the demo
-python3 tta-dev/observability/dashboard/demo.py
+# Run the demo (uses uv to manage dependencies)
+uv run python tta-dev/observability/dashboard/demo.py
 ```
 
 Open http://localhost:8080 in your browser and watch the magic! ✨
@@ -22,23 +21,48 @@ Open http://localhost:8080 in your browser and watch the magic! ✨
 ## Usage in Your Code
 
 ```python
-from tta_dev.observability.dashboard import ObservabilityDashboard
-from tta_dev.primitives import RetryPrimitive, WorkflowContext
+import asyncio
+import time
 
-# Start the dashboard
-dashboard = ObservabilityDashboard()
-await dashboard.start()
+from ttadev.observability.dashboard import ObservabilityDashboard
+from ttadev.primitives.core import WorkflowContext, LambdaPrimitive
+from ttadev.primitives.recovery import RetryPrimitive, RetryStrategy
 
-# Use TTA.dev primitives as normal
-workflow = RetryPrimitive(my_task, max_attempts=3)
-ctx = WorkflowContext(workflow_id="my-workflow")
 
-# Execute and record the trace
-start = time.time()
-result = await workflow.execute(data, ctx)
-duration_ms = (time.time() - start) * 1000
+async def my_task(data: dict, ctx: WorkflowContext) -> str:
+    """Example async task."""
+    await asyncio.sleep(0.1)
+    return "ok"
 
-dashboard.record_trace(ctx.workflow_id, duration_ms, "success")
+
+async def main() -> None:
+    # Start the dashboard
+    dashboard = ObservabilityDashboard()
+    await dashboard.start()
+
+    # Use TTA.dev primitives as normal
+    task_primitive = LambdaPrimitive(my_task)
+    workflow = RetryPrimitive(
+        task_primitive,
+        strategy=RetryStrategy(max_attempts=3),
+    )
+    ctx = WorkflowContext(workflow_id="my-workflow")
+
+    # Execute and record the trace
+    data = {"input": "value"}
+    start = time.time()
+    result = await workflow.execute(data, ctx)
+    duration_ms = (time.time() - start) * 1000
+
+    dashboard.record_trace(ctx.workflow_id, duration_ms, "success")
+    print("Result:", result)
+
+    # Cleanup
+    await dashboard.stop()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ## API Endpoints
@@ -50,12 +74,13 @@ dashboard.record_trace(ctx.workflow_id, duration_ms, "success")
 
 ## Architecture
 
-The dashboard is a single-file Python application using:
-- **aiohttp** for async web server
-- **Embedded HTML/CSS/JS** for zero-dependency deployment
+The dashboard uses:
+- **aiohttp** for async web server (dependency declared in pyproject.toml)
+- **Embedded HTML/CSS/JS** for simplified deployment
 - **Auto-refresh** every 2 seconds for real-time updates
+- **deque with maxlen** to cap memory usage at 100 traces
 
-No external databases, no complex setup - just run it!
+Requires `aiohttp>=3.9.0` - install via `uv sync` or `pip install aiohttp`.
 
 ## Future Enhancements
 
