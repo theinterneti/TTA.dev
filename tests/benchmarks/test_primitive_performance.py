@@ -8,7 +8,7 @@ Save baseline: uv run pytest tests/benchmarks/ --benchmark-save=baseline
 import asyncio
 
 import pytest
-from ttadev import (
+from ttadev.primitives import (
     CachePrimitive,
     ConditionalPrimitive,
     FallbackPrimitive,
@@ -18,8 +18,8 @@ from ttadev import (
     TimeoutPrimitive,
     WorkflowContext,
 )
-from ttadev.recovery.retry import RetryStrategy
-from ttadev.recovery.timeout import TimeoutError as PrimitiveTimeoutError
+from ttadev.primitives.recovery.retry import RetryStrategy
+from ttadev.primitives.recovery.timeout import TimeoutError as PrimitiveTimeoutError
 
 pytestmark = pytest.mark.slow
 

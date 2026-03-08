@@ -8,8 +8,8 @@ TTA.dev comes with **zero-configuration observability** out of the box. Every pr
 
 ```bash
 # Terminal 1: Start the observability server
-cd tta-dev
-uv run python ui/observability_server.py
+cd TTA.dev
+uv run python ttadev/ui/observability_server.py
 ```
 
 Visit **http://localhost:8000** in your browser.
@@ -18,7 +18,7 @@ Visit **http://localhost:8000** in your browser.
 
 ```bash
 # Terminal 2: Run any TTA.dev workflow
-uv run python examples/simple_demo.py
+uv run python ttadev/examples/simple_demo.py
 ```
 
 **Watch the magic happen!** The dashboard automatically updates with:

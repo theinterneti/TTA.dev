@@ -9,12 +9,12 @@ import asyncio
 import time
 
 import pytest
-from ttadev import WorkflowContext, WorkflowPrimitive
-from ttadev.observability import InstrumentedPrimitive
-from ttadev.observability.enhanced_collector import (
+from ttadev.primitives import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.observability import InstrumentedPrimitive
+from ttadev.primitives.observability.enhanced_collector import (
     get_enhanced_metrics_collector,
 )
-from ttadev.observability.tracing import ObservablePrimitive
+from ttadev.primitives.observability.tracing import ObservablePrimitive
 
 # Try to import observability_integration (optional)
 try:
