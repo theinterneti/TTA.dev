@@ -1,52 +1,62 @@
-# TTA.dev - AI Development Toolkit
+# TTA.dev - Batteries-Included Workflow Primitives for AI Agents
 
-**Production-ready agentic primitives and workflow patterns for building reliable AI applications.**
+**Clone, point your CLI agent, and start building reliable AI applications immediately.**
 
 [![CI](https://github.com/theinterneti/TTA.dev/workflows/CI/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
-[![Quality](https://github.com/theinterneti/TTA.dev/workflows/Quality%20Checks/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
-[![TODO Compliance](https://github.com/theinterneti/TTA.dev/workflows/TODO%20Compliance%20Validation/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Type checked: Pyright](https://img.shields.io/badge/type%20checked-pyright-blue.svg)](https://github.com/microsoft/pyright)
 
 ---
 
-## 🎯 What is TTA.dev?
+## 🚀 Quick Start (30 seconds)
 
-TTA.dev is a curated collection of **battle-tested, production-ready** components for building reliable AI applications. Every component here has:
+```bash
+# 1. Clone
+git clone https://github.com/theinterneti/TTA.dev
+cd TTA.dev
 
-- ✅ 100% test coverage
-- ✅ Real-world production usage
-- ✅ Comprehensive documentation
-- ✅ Zero known critical bugs
+# 2. Setup (one command)
+./setup.sh
 
-**Philosophy:** Only proven code enters this repository.
+# 3. Point your CLI agent (Copilot/Claude/Cline) at this directory
+# Your agent auto-detects AGENTS.md and starts using TTA.dev primitives!
+
+# 4. (Optional) View observability dashboard
+tta-dev-ui  # Opens at http://localhost:8501
+```
+
+**That's it!** TTA.dev is now powering your agent with production-ready primitives.
 
 ---
 
-## 🤝 Relationship to TTA (The Game)
+## 🎯 What is TTA.dev?
 
-TTA.dev was originally extracted from the **Therapeutic Text Adventure (TTA)** project.
+TTA.dev makes AI coding agents **reliable and production-ready** by providing:
 
-- **TTA.dev (This Repo):** The reusable DevOps, infrastructure, and agentic primitives.
-- **TTA (Game Repo):** The narrative storytelling game built on top of this platform.
+✅ **Workflow Primitives** - Retry, timeout, circuit breaker, caching, parallelization  
+✅ **Auto-Discovery** - CLI agents detect `AGENTS.md` and use primitives automatically  
+✅ **Batteries-Included Observability** - Self-hosted dashboard that grows with your project  
+✅ **Zero Config** - Works out of the box after `./setup.sh`
+
+**The Vision:** Clone the repo → Agent detects it → Build reliable AI apps
 
 ---
 
 ## 📦 Repository Structure
 
-TTA.dev follows a clean, focused architecture with **packages** for distribution and **platform** for development:
-
 ```
 TTA.dev/
-├── packages/              # 📦 Publishable Packages
-│   ├── tta-primitives/    # Core workflow primitives (PyPI ready)
-│   ├── tta-observability/ # OpenTelemetry integration
-│   ├── tta-secrets/       # Secure secrets management
-│   └── tta-mcp-server/    # Model Context Protocol server
+├── setup.sh               # One-command setup
+├── AGENTS.md              # Auto-detected by CLI agents
+├── USER_JOURNEY.md        # End-to-end walkthrough
 │
-├── platform/              # 🔧 Development Platform (Not Published)
-│   └── (internal development utilities)
+├── tta-dev/               # Unified Package (Batteries Included)
+│   ├── primitives/        # Core workflow primitives
+│   ├── observability/     # Built-in APM and tracing
+│   ├── agents/            # Multi-agent coordination
+│   ├── ui/                # Self-hosted observability dashboard
+│   └── pyproject.toml     # Single source of truth
 │
 ├── .github/               # 🤖 CI/CD & Agentic Workflows
 │   ├── agents/            # Custom GitHub Copilot agents
