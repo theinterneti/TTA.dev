@@ -14,10 +14,10 @@ cd TTA.dev
 source .venv/bin/activate
 
 # 3. Start observability UI
-python -m tta-dev.ui.app
+uv run uvicorn tta-dev.ui.observability_server:app --port 5001
 
 # 4. Run demo
-python demo_working_tta.py
+uv run python demo_working_tta.py
 ```
 
 Visit http://localhost:5001 to see your workflows in real-time!
