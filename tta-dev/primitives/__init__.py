@@ -10,8 +10,8 @@ Extension modules (ace, adaptive, analysis, apm, benchmarking, knowledge,
 lifecycle, orchestration, research, speckit) are accessible via their original
 import paths or through the ``extensions`` namespace::
 
-    from tta_dev_primitives.extensions import EXTENSION_MODULES
-    from tta_dev_primitives.extensions import adaptive
+    from primitives.extensions import EXTENSION_MODULES
+    from primitives.extensions import adaptive
 
 KB Safety: All primitives follow the one-way sync architecture (Code → KB only).
 See docs/architecture/KB_SAFETY_ARCHITECTURE.md for details.

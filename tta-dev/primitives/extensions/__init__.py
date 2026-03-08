@@ -12,13 +12,13 @@ Extension modules live here for structured discovery:
 .. code-block:: python
 
     # Discover all extensions
-    from tta_dev_primitives.extensions import EXTENSION_MODULES
+    from primitives.extensions import EXTENSION_MODULES
 
     # Import a specific extension (original path still works)
-    from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive
+    from primitives.adaptive import AdaptiveRetryPrimitive
 
     # Or via the extensions namespace
-    from tta_dev_primitives.extensions import adaptive
+    from primitives.extensions import adaptive
 
 Extension Categories:
     **Agent Code Execution (ace)**
@@ -76,7 +76,7 @@ EXTENSION_MODULES: dict[str, str] = {
 def __getattr__(name: str) -> Any:
     """Lazy-load extension modules on attribute access.
 
-    Enables ``from tta_dev_primitives.extensions import adaptive``
+    Enables ``from primitives.extensions import adaptive``
     without importing all extensions at startup.
     """
     if name in EXTENSION_MODULES:

@@ -6,10 +6,10 @@ the ``>>`` and ``|`` operators.
 
 Example:
     ```python
-    from tta_dev_primitives.package_managers import (
+    from primitives.package_managers import (
         UvSyncPrimitive, UvSyncInput,
     )
-    from tta_dev_primitives import WorkflowContext
+    from primitives import WorkflowContext
 
     prim = UvSyncPrimitive()
     result = await prim.execute(

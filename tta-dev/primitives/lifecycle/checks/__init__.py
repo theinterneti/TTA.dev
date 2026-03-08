@@ -15,8 +15,8 @@ following this pattern:
 ```python
 # lifecycle/checks/javascript.py
 from pathlib import Path
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.lifecycle.validation import Severity, ValidationCheck
+from primitives.core.base import WorkflowContext
+from primitives.lifecycle.validation import Severity, ValidationCheck
 
 async def check_jest_tests_pass(project_path: Path, context: WorkflowContext) -> bool:
     \"\"\"Check if Jest tests pass.\"\"\"
@@ -42,32 +42,32 @@ JEST_TESTS_PASS = ValidationCheck(
 Then import and export your checks from this `__init__.py` file.
 """
 
-from tta_dev_primitives.lifecycle.checks.documentation import (
+from primitives.lifecycle.checks.documentation import (
     HAS_CHANGELOG,
     HAS_DOCSTRINGS,
     HAS_EXAMPLES,
     HAS_README_SECTIONS,
 )
-from tta_dev_primitives.lifecycle.checks.generic import (
+from primitives.lifecycle.checks.generic import (
     HAS_LICENSE,
     HAS_PACKAGE_MANIFEST,
     HAS_README,
     HAS_SRC_DIRECTORY,
     HAS_TESTS_DIRECTORY,
 )
-from tta_dev_primitives.lifecycle.checks.git import (
+from primitives.lifecycle.checks.git import (
     ON_CORRECT_BRANCH,
     REMOTE_UP_TO_DATE,
     VERSION_BUMPED,
     WORKING_TREE_CLEAN,
 )
-from tta_dev_primitives.lifecycle.checks.python import (
+from primitives.lifecycle.checks.python import (
     FORMAT_CHECK_PASSES,
     LINT_PASSES,
     TESTS_PASS,
     TYPE_CHECK_PASSES,
 )
-from tta_dev_primitives.lifecycle.checks.security import (
+from primitives.lifecycle.checks.security import (
     DEPENDENCIES_UP_TO_DATE,
     NO_KNOWN_VULNERABILITIES,
     NO_SECRETS_IN_CODE,

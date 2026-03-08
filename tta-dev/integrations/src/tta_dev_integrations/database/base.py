@@ -4,7 +4,7 @@ from abc import abstractmethod
 from typing import Any
 
 from pydantic import BaseModel
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
 
 
 class DatabaseQuery(BaseModel):

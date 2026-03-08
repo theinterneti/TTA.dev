@@ -24,7 +24,7 @@ class AdaptiveFallbackPrimitive(AdaptivePrimitive[Any, Any]):
 
     Example:
         ```python
-        from tta_dev_primitives.adaptive import AdaptiveFallbackPrimitive, LearningMode
+        from primitives.adaptive import AdaptiveFallbackPrimitive, LearningMode
 
         adaptive_fallback = AdaptiveFallbackPrimitive(
             primary=openai_api,

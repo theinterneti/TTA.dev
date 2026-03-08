@@ -31,7 +31,7 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
 
     Example:
         ```python
-        from tta_dev_primitives.adaptive import (
+        from primitives.adaptive import (
             AdaptiveCachePrimitive,
             LogseqStrategyIntegration,
             LearningMode

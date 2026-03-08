@@ -29,8 +29,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Protocol, TypeVar
 
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.observability import InstrumentedPrimitive
+from primitives.core.base import WorkflowContext
+from primitives.observability import InstrumentedPrimitive
 
 logger = logging.getLogger(__name__)
 

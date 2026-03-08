@@ -17,7 +17,7 @@ import subprocess
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 from tta_agent_coordination.wrappers.pytest_wrapper import (
     PyTestCLIWrapper,

@@ -3,7 +3,7 @@
 # TODO: Implement PostgreSQLPrimitive
 # Direct PostgreSQL database access via asyncpg
 
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 from tta_dev_integrations.database.base import (
     DatabasePrimitive,

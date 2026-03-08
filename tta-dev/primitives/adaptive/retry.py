@@ -20,7 +20,7 @@ import random
 from dataclasses import dataclass
 from typing import Any
 
-from tta_dev_primitives.core.base import WorkflowContext
+from primitives.core.base import WorkflowContext
 
 from .base import AdaptivePrimitive, LearningMode, LearningStrategy
 

@@ -3,7 +3,7 @@
 # TODO: Implement Auth0Primitive
 # Auth0 authentication service
 
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 from tta_dev_integrations.auth.base import AuthPrimitive, AuthRequest, AuthResult
 

@@ -35,7 +35,7 @@ def inject_trace_context(context: WorkflowContext) -> WorkflowContext:
 
     Example:
         ```python
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.core.base import WorkflowContext
 
         # At workflow entry point (e.g., HTTP handler)
         context = WorkflowContext(workflow_id="process-123")

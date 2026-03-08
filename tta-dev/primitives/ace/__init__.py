@@ -17,8 +17,8 @@ Classes:
 
 Example:
     ```python
-    from tta_dev_primitives.ace import SelfLearningCodePrimitive
-    from tta_dev_primitives import WorkflowContext
+    from primitives.ace import SelfLearningCodePrimitive
+    from primitives import WorkflowContext
 
     # Create a self-learning code primitive
     learner = SelfLearningCodePrimitive()

@@ -19,7 +19,7 @@ Example::
 
 from typing import Any
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 from universal_agent_context.primitives import (
     AgentCoordinationPrimitive,
     AgentHandoffPrimitive,

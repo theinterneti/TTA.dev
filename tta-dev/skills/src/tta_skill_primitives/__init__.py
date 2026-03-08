@@ -7,7 +7,7 @@ discoverable capabilities. Built on TTA workflow primitives, skills inherit
 Usage:
     ```python
     from tta_skill_primitives import Skill, SkillDescriptor, SkillRegistry
-    from tta_dev_primitives import WorkflowContext
+    from primitives import WorkflowContext
 
     class CodeReviewSkill(Skill[str, dict]):
         descriptor = SkillDescriptor(

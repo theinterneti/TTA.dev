@@ -8,8 +8,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.observability.instrumented_primitive import (
+from primitives.core.base import WorkflowContext
+from primitives.observability.instrumented_primitive import (
     InstrumentedPrimitive,
 )
 
@@ -61,11 +61,11 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
 
     Example:
         ```python
-        from tta_dev_primitives.knowledge import (
+        from primitives.knowledge import (
             KnowledgeBasePrimitive,
             KBQuery,
         )
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.core.base import WorkflowContext
 
         # Create KB primitive
         kb = KnowledgeBasePrimitive(logseq_available=True)

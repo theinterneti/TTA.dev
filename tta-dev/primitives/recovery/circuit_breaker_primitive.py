@@ -80,8 +80,8 @@ class CircuitBreakerPrimitive(WorkflowPrimitive[Any, Any]):
 
     Example:
         ```python
-        from tta_dev_primitives import CircuitBreakerPrimitive, WorkflowContext
-        from tta_dev_primitives.recovery.circuit_breaker_primitive import (
+        from primitives import CircuitBreakerPrimitive, WorkflowContext
+        from primitives.recovery.circuit_breaker_primitive import (
             CircuitBreakerConfig,
         )
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from tta_dev_primitives import MockPrimitive, WorkflowContext
+from primitives import MockPrimitive, WorkflowContext
 
 from tta_skill_primitives import Skill, SkillDescriptor, SkillMetadata, SkillStatus
 

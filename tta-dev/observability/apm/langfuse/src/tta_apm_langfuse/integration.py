@@ -11,7 +11,7 @@ from typing import Any
 
 from langfuse import Langfuse
 from langfuse.decorators import langfuse_context, observe
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class LangFuseIntegration:
@@ -23,7 +23,7 @@ class LangFuseIntegration:
     Example:
         ```python
         from tta_apm_langfuse import LangFuseIntegration
-        from tta_dev_primitives import SequentialPrimitive
+        from primitives import SequentialPrimitive
 
         # Initialize integration
         apm = LangFuseIntegration(

@@ -1,7 +1,7 @@
 """Tests for agent coordination primitives."""
 
 import pytest
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 from universal_agent_context.primitives import (
     AgentCoordinationPrimitive,

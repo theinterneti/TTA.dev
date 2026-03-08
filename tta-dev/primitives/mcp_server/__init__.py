@@ -21,6 +21,6 @@ Usage:
     }
 """
 
-from tta_dev_primitives.mcp_server.server import create_server, run_server
+from primitives.mcp_server.server import create_server, run_server
 
 __all__ = ["run_server", "create_server"]

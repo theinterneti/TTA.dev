@@ -16,7 +16,7 @@ except ImportError:
 
 from pydantic import BaseModel, Field
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class GroqRequest(BaseModel):
@@ -54,8 +54,8 @@ class GroqPrimitive(WorkflowPrimitive[GroqRequest, GroqResponse]):
 
     Example:
         ```python
-        from tta_dev_primitives.integrations import GroqPrimitive
-        from tta_dev_primitives.core.base import WorkflowContext
+        from primitives.integrations import GroqPrimitive
+        from primitives.core.base import WorkflowContext
 
         # Create primitive (ultra-fast free inference)
         llm = GroqPrimitive(

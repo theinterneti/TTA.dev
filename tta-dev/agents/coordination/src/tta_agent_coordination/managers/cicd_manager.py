@@ -8,7 +8,7 @@ This manager orchestrates complete CI/CD workflows by coordinating:
 Example usage:
     ```python
     from tta_agent_coordination.managers import CICDManager, CICDManagerConfig
-    from tta_dev_primitives import WorkflowContext
+    from primitives import WorkflowContext
 
     config = CICDManagerConfig(
         github_token="your-token",
@@ -30,7 +30,7 @@ Example usage:
 from dataclasses import dataclass, field
 from typing import Any
 
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 from tta_dev_primitives.apm.instrumented import APMWorkflowPrimitive
 
 from tta_agent_coordination.experts import (

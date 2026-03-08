@@ -6,8 +6,8 @@ architectural decisions and important context across agent interactions.
 
 from typing import Any
 
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.observability import InstrumentedPrimitive
+from primitives.core.base import WorkflowContext
+from primitives.observability import InstrumentedPrimitive
 
 
 class AgentMemoryPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):

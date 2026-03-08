@@ -6,8 +6,8 @@ managing their outputs and ensuring proper synchronization.
 
 from typing import Any
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
-from tta_dev_primitives.observability import InstrumentedPrimitive
+from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from primitives.observability import InstrumentedPrimitive
 
 
 class AgentCoordinationPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):

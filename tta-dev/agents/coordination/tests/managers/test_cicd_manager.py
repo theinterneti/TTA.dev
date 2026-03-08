@@ -14,7 +14,7 @@ Comprehensive test coverage for:
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from tta_dev_primitives import WorkflowContext
+from primitives import WorkflowContext
 
 from tta_agent_coordination.managers import CICDManager, CICDManagerConfig
 from tta_agent_coordination.managers.cicd_manager import CICDOperation

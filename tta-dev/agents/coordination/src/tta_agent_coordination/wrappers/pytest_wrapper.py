@@ -20,7 +20,7 @@ from pathlib import Path
 from subprocess import TimeoutExpired
 from typing import Any
 
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
 
 
 @dataclass

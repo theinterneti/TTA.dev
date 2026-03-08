@@ -21,7 +21,7 @@ from docker.models.containers import Container
 from docker.models.images import Image
 from docker.models.networks import Network
 from docker.models.volumes import Volume
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
 
 
 @dataclass

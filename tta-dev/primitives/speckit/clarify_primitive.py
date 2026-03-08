@@ -8,8 +8,8 @@ and updating the specification until target coverage is reached.
 from pathlib import Path
 from typing import Any
 
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.observability import InstrumentedPrimitive
+from primitives import WorkflowContext
+from primitives.observability import InstrumentedPrimitive
 
 
 class ClarifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):

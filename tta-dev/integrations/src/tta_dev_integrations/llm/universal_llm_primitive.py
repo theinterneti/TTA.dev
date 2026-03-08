@@ -24,7 +24,7 @@ from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
 
 
 class UserBudgetProfile(str, Enum):
@@ -130,8 +130,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
     - Empirical model selection
 
     Example:
-        >>> from tta_dev_primitives.integrations import UniversalLLMPrimitive
-        >>> from tta_dev_primitives.integrations.budget import UserBudgetProfile
+        >>> from primitives.integrations import UniversalLLMPrimitive
+        >>> from primitives.integrations.budget import UserBudgetProfile
         >>>
         >>> llm = UniversalLLMPrimitive(
         ...     coder="auto",

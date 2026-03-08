@@ -18,7 +18,7 @@ from github import Auth, Github, GithubException, RateLimitExceededException
 from github.GithubObject import NotSet
 from github.PullRequest import PullRequest
 from github.Repository import Repository
-from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
+from primitives import WorkflowContext, WorkflowPrimitive
 
 
 @dataclass

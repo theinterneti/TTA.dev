@@ -9,9 +9,9 @@ Key primitives:
 - MultiModelWorkflow: Orchestrate multiple models in a workflow
 """
 
-from tta_dev_primitives.orchestration.delegation_primitive import DelegationPrimitive
-from tta_dev_primitives.orchestration.multi_model_workflow import MultiModelWorkflow
-from tta_dev_primitives.orchestration.task_classifier_primitive import (
+from primitives.orchestration.delegation_primitive import DelegationPrimitive
+from primitives.orchestration.multi_model_workflow import MultiModelWorkflow
+from primitives.orchestration.task_classifier_primitive import (
     TaskClassifierPrimitive,
 )
 

@@ -13,12 +13,12 @@ Key Components:
 
 Example - Basic Adaptive Retry:
     ```python
-    from tta_dev_primitives.adaptive import (
+    from primitives.adaptive import (
         AdaptiveRetryPrimitive,
         LearningMode,
         LogseqStrategyIntegration
     )
-    from tta_dev_primitives.core.base import WorkflowContext
+    from primitives.core.base import WorkflowContext
 
     # Create Logseq integration for automatic knowledge base persistence
     logseq = LogseqStrategyIntegration("my_service")
@@ -47,8 +47,8 @@ Example - Basic Adaptive Retry:
 
 Example - Custom Adaptive Primitive:
     ```python
-    from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode
-    from tta_dev_primitives.core.base import WorkflowContext
+    from primitives.adaptive import AdaptivePrimitive, LearningMode
+    from primitives.core.base import WorkflowContext
 
     class AdaptiveCachePrimitive(AdaptivePrimitive[dict, dict]):
         \"\"\"Cache primitive that learns optimal TTL and size.\"\"\"

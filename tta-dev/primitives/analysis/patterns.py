@@ -7,7 +7,7 @@ opportunities for TTA.dev primitives.
 import re
 from typing import Any
 
-from tta_dev_primitives.analysis.models import CodeAnalysisResult
+from primitives.analysis.models import CodeAnalysisResult
 
 
 class PatternDetector:

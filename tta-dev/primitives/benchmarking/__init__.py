@@ -16,7 +16,7 @@ Features:
 - Integration with CI/CD for continuous validation
 
 Usage:
-    from tta_dev_primitives.benchmarking import BenchmarkSuite, BenchmarkRunner
+    from primitives.benchmarking import BenchmarkSuite, BenchmarkRunner
 
     # Create benchmark suite
     suite = BenchmarkSuite()
@@ -46,8 +46,8 @@ from typing import Any, Protocol
 import numpy as np  # type: ignore[import-untyped]
 from scipy import stats  # type: ignore[import-untyped]
 
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.integrations.e2b_primitive import CodeExecutionPrimitive
+from primitives.core.base import WorkflowContext
+from primitives.integrations.e2b_primitive import CodeExecutionPrimitive
 
 
 class BenchmarkCategory(Enum):

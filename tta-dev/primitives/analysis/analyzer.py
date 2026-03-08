@@ -11,15 +11,15 @@ from typing import Any
 
 import structlog
 
-from tta_dev_primitives.analysis.matcher import PrimitiveMatcher
-from tta_dev_primitives.analysis.models import (
+from primitives.analysis.matcher import PrimitiveMatcher
+from primitives.analysis.models import (
     AnalysisReport,
     CodeAnalysisResult,
     PrimitiveRecommendation,
     RecommendationContext,
 )
-from tta_dev_primitives.analysis.patterns import PatternDetector
-from tta_dev_primitives.analysis.templates import TemplateProvider
+from primitives.analysis.patterns import PatternDetector
+from primitives.analysis.templates import TemplateProvider
 
 logger = structlog.get_logger("tta_dev.analysis")
 

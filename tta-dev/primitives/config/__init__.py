@@ -13,7 +13,7 @@ Configuration files are loaded from (in priority order):
 4. Default values
 """
 
-from tta_dev_primitives.config.analysis_config import (
+from primitives.config.analysis_config import (
     AnalysisSettings,
     BenchmarkSettings,
     MCPSettings,
@@ -29,7 +29,7 @@ from tta_dev_primitives.config.analysis_config import (
     merge_cli_options,
     save_config,
 )
-from tta_dev_primitives.config.orchestration_config import (
+from primitives.config.orchestration_config import (
     ExecutorConfig,
     FallbackStrategy,
     OrchestrationConfig,
