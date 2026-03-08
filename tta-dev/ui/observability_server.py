@@ -236,7 +236,51 @@ async def health_check():
 @app.on_event("startup")
 async def startup_event():
     """Start background tasks on server startup."""
+    # Load historical data from database
+    await load_historical_data()
+    # Start demo trace generator
     asyncio.create_task(generate_demo_traces())
+
+
+async def load_historical_data():
+    """Load historical traces from persistent storage on startup."""
+    try:
+        from observability.collector import trace_collector
+        
+        print("📊 Loading historical traces from database...")
+        recent_spans = trace_collector.get_recent_spans(limit=100)
+        
+        if recent_spans:
+            print(f"✅ Loaded {len(recent_spans)} historical spans")
+            # Group spans by trace_id
+            traces_by_id = defaultdict(list)
+            for span in recent_spans:
+                traces_by_id[span.get("trace_id", "default")].append(span)
+            
+            # Convert to trace format
+            for trace_id, spans in traces_by_id.items():
+                trace_start = min(s["start_time"] for s in spans)
+                trace_end = max(s["end_time"] for s in spans)
+                duration = (trace_end - trace_start) * 1000
+                
+                has_error = any(s.get("status") == "error" for s in spans)
+                
+                trace_collector_instance.completed_traces.append({
+                    "trace_id": trace_id,
+                    "start_time": trace_start,
+                    "end_time": trace_end,
+                    "duration_ms": duration,
+                    "status": "error" if has_error else "ok",
+                    "spans": spans
+                })
+            
+            print(f"✅ Reconstructed {len(traces_by_id)} historical traces")
+        else:
+            print("ℹ️  No historical data found - starting fresh")
+            
+    except Exception as e:
+        print(f"⚠️  Failed to load historical data: {e}")
+        print("   Continuing with empty state...")
 
 
 async def generate_demo_traces():
