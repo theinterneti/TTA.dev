@@ -222,3 +222,6 @@ conftest.py
 # Experimental/incomplete
 custom/workflows/
 templates/
+
+# TTA observability logs
+.tta/
