@@ -9,8 +9,8 @@ import time
 import traceback
 from typing import Any, Callable, TypeVar
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
-from observability.collector import trace_collector
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.observability.collector import trace_collector
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -126,7 +126,7 @@ def auto_instrument_primitives() -> None:
         result = await workflow.execute(data, context)  # Automatically traced!
         ```
     """
-    from primitives.core.base import WorkflowPrimitive
+    from ttadev.primitives.core.base import WorkflowPrimitive
     
     # Get all primitive subclasses
     def get_all_subclasses(cls):

@@ -24,7 +24,13 @@ class TraceCollector:
         self.dashboard_url = "http://localhost:8000"
         self._session: aiohttp.ClientSession | None = None
         self.db_path = Path(db_path)
-        self._init_db()
+        self._initialized = False
+
+    def initialize(self):
+        """Initialize the trace collector (idempotent)."""
+        if not self._initialized:
+            self._init_db()
+            self._initialized = True
 
     def _init_db(self):
         """Initialize SQLite database for persistent storage."""
