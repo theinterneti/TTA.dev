@@ -116,6 +116,47 @@ class TraceCollector:
 collector = TraceCollector()
 
 
+def load_traces_from_db():
+    """Load existing traces from SQLite database."""
+    import sqlite3
+    
+    db_path = Path(".tta/traces.db")
+    if not db_path.exists():
+        print("ℹ️  No database found, starting fresh")
+        return
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Load all spans
+    cursor.execute("""
+        SELECT trace_id, span_name, primitive_type, start_time, end_time, 
+               duration_ms, status, attributes
+        FROM spans
+        ORDER BY start_time DESC
+        LIMIT 100
+    """)
+    
+    rows = cursor.fetchall()
+    print(f"📊 Loading {len(rows)} spans from database...")
+    
+    for row in rows:
+        span_data = {
+            "trace_id": row[0],
+            "name": row[1],
+            "primitive_type": row[2],
+            "start_time": row[3],
+            "end_time": row[4],
+            "duration_ms": row[5],
+            "status": row[6],
+            "attributes": json.loads(row[7]) if row[7] else {}
+        }
+        collector.add_span(span_data)
+    
+    conn.close()
+    print(f"✓ Loaded {len(collector.completed_traces)} traces from database")
+
+
 async def fetch_live_metrics(data: dict, ctx: WorkflowContext) -> dict:
     """Fetch REAL live workflow metrics from collected traces."""
     # Get tracer to create a span for this operation
@@ -323,5 +364,8 @@ if __name__ == "__main__":
     print("🔌 WebSocket: ws://localhost:8000/ws")
     print("🏥 Health: http://localhost:8000/health")
     print("\n✅ Built with TTA.dev primitives!")
+    
+    # Load existing traces from database
+    load_traces_from_db()
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
