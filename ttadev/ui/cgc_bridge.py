@@ -7,12 +7,13 @@ from pathlib import Path
 def query_cgc_graph():
     """Query CGC MCP for graph data and format for d3.js visualization."""
     try:
-        # Use uv to run cgc query
+        # Use uv to run cgc query - just list Python files
         result = subprocess.run(
-            ["uv", "run", "cgc", "query", "--format", "json", "list all files"],
+            ["uv", "run", "--python", "3.12", "cgc", "query", "list all Python files in this project"],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
+            cwd="/home/thein/repos/TTA.dev"
         )
         
         if result.returncode != 0:

@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from ttadev.observability.agent_tracker import get_tracker
 from ttadev.ui.cgc_client import query_cgc_structure
+from ttadev.ui.cgc_bridge import query_cgc_graph
 
 # Dashboard HTML file
 DASHBOARD_FILE = Path(__file__).parent / "dashboard.html"
@@ -373,6 +374,10 @@ async def start_server():
     app.router.add_get("/api/active_agents", handle_api_active_agents)
     app.router.add_get("/api/agent_actions", handle_api_agent_actions)
     app.router.add_get("/api/cgc_graph", handle_api_cgc_graph)
+    app.router.add_get("/api/cgc/graph", handle_api_cgc_graph)  # Alternative path
+    app.router.add_get("/api/cgc/primitives", handle_api_cgc_graph)
+    app.router.add_get("/api/cgc/agents", handle_api_cgc_graph)
+    app.router.add_get("/api/cgc/stats", handle_api_cgc_graph)
     app.router.add_get("/ws", handle_websocket)
     
     # Serve static files
