@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TTA.dev Observability Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -556,39 +557,14 @@
             container.innerHTML = '<div class="loading pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Loading ' + viewType + ' view...</div>';
             
             try {
-                const response = await fetch(`/api/codegraph/${viewType}`);
-                const graphData = await response.json();
-                renderCodeGraph(graphData, viewType);
+                // Initialize D3 graph if not already done
+                if (!window.codeGraphInstance) {
+                    window.codeGraphInstance = new CodeGraph('graphContainer');
+                }
+                await window.codeGraphInstance.loadGraph(viewType);
             } catch (error) {
                 container.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align: center;">Failed to load graph: ${error.message}</div>`;
             }
-        }
-        
-        function renderCodeGraph(data, viewType) {
-            const container = document.getElementById('graphContainer');
-            
-            // Simple visualization for now - will enhance with D3.js or vis.js later
-            let html = `<div style="padding: 20px; overflow-y: auto; height: 100%;">`;
-            html += `<h3 style="color: #667eea; margin-bottom: 15px;">${viewType.charAt(0).toUpperCase() + viewType.slice(1)} View</h3>`;
-            
-            if (data.nodes) {
-                html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
-                data.nodes.forEach(node => {
-                    html += `
-                        <div style="background: #1a1f3a; padding: 15px; border-radius: 6px; border-left: 3px solid #667eea;">
-                            <div style="font-weight: bold; margin-bottom: 5px;">${node.name}</div>
-                            <div style="font-size: 0.8em; opacity: 0.7;">${node.type || 'module'}</div>
-                            ${node.dependencies ? `<div style="margin-top: 8px; font-size: 0.75em; opacity: 0.6;">→ ${node.dependencies.length} dependencies</div>` : ''}
-                        </div>
-                    `;
-                });
-                html += '</div>';
-            } else {
-                html += `<pre style="background: #1a1f3a; padding: 15px; border-radius: 6px; overflow-x: auto; font-size: 0.85em;">${JSON.stringify(data, null, 2)}</pre>`;
-            }
-            
-            html += '</div>';
-            container.innerHTML = html;
         }
         
         // Connect on load
@@ -606,5 +582,6 @@
             }
         }, 5000);
     </script>
+    <script src="/static/js/code-graph.js"></script>
 </body>
 </html>
