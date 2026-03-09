@@ -315,7 +315,7 @@
     
     <div class="dashboard-grid">
         <!-- Metrics Panel -->
-        <div class="panel">
+        <div id="stats" class="panel">
             <h2>📊 Live Metrics</h2>
             <div class="metric-card">
                 <div class="metric-label">Total Workflows</div>
@@ -338,7 +338,7 @@
         <!-- Agents Panel -->
         <div class="panel">
             <h2>🤖 Active Agents</h2>
-            <div id="agentsPanel" class="loading pulse">
+            <div id="agentActivity" class="loading pulse">
                 Loading agents...
             </div>
         </div>
@@ -346,7 +346,8 @@
         <!-- Primitives Panel -->
         <div class="panel">
             <h2>⚙️ Primitives Catalog</h2>
-            <div id="primitivesPanel" class="loading pulse">
+            <input type="text" id="searchPrimitives" placeholder="Search primitives..." style="width: 100%; padding: 10px; margin-bottom: 15px; background: #252d4a; border: 1px solid #3a4666; border-radius: 5px; color: #e0e6ed;">
+            <div id="primitivesCatalog" class="loading pulse">
                 Loading primitives...
             </div>
         </div>
@@ -354,7 +355,7 @@
         <!-- Workflows Panel -->
         <div class="panel">
             <h2>🔄 Workflow Registry</h2>
-            <div id="workflowsPanel" class="loading pulse">
+            <div id="workflowRegistry" class="loading pulse">
                 Loading workflows...
             </div>
         </div>
@@ -364,12 +365,14 @@
     <div class="panel" style="margin-bottom: 30px;">
         <h2>🕸️ Codebase Architecture (CodeGraphContext)</h2>
         <div id="codeGraphPanel">
-            <div id="graphContainer" style="width: 100%; height: 600px; background: #252d4a; border-radius: 8px; position: relative;">
+            <div id="codeGraph" style="width: 100%; height: 600px; background: #252d4a; border-radius: 8px; position: relative;">
                 <div class="loading pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                     Loading code graph...
                 </div>
             </div>
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="fitGraph" onclick="fitGraphView()" class="graph-btn">Fit View</button>
+                <button id="resetGraph" onclick="resetGraphView()" class="graph-btn">Reset</button>
                 <button onclick="loadGraphView('architecture')" class="graph-btn">Architecture View</button>
                 <button onclick="loadGraphView('dependencies')" class="graph-btn">Dependencies</button>
                 <button onclick="loadGraphView('primitives')" class="graph-btn">Primitives Map</button>
@@ -471,7 +474,7 @@
                 }
             });
             
-            const panel = document.getElementById('primitivesPanel');
+            const panel = document.getElementById('primitivesCatalog');
             
             if (primitivesUsage.size === 0) {
                 panel.innerHTML = '<div class="empty-state">No primitives used yet</div>';
@@ -687,7 +690,7 @@
         }
         
         async function renderAgents(agents) {
-            const panel = document.getElementById('agentsPanel');
+            const panel = document.getElementById('agentActivity');
             
             // Fetch real-time agent activity
             try {
@@ -776,7 +779,7 @@
         const primitivesPerPage = 20;
         
         function renderPrimitivesCatalog(primitives) {
-            const panel = document.getElementById('primitivesPanel');
+            const panel = document.getElementById('primitivesCatalog');
             
             if (!primitives || primitives.length === 0) {
                 panel.innerHTML = '<div class="empty-state">No primitives found</div>';
@@ -827,7 +830,7 @@
         }
         
         function renderWorkflows(workflows) {
-            const panel = document.getElementById('workflowsPanel');
+            const panel = document.getElementById('workflowRegistry');
             
             if (!workflows || workflows.length === 0) {
                 panel.innerHTML = '<div class="empty-state">No workflows registered</div>';
@@ -965,14 +968,28 @@
             }
         }
         
+        function fitGraphView() {
+            if (window.codeGraphInstance && window.codeGraphInstance.simulation) {
+                // Fit the graph to view
+                window.codeGraphInstance.simulation.alpha(0.3).restart();
+            }
+        }
+        
+        function resetGraphView() {
+            if (window.codeGraphInstance) {
+                // Reset zoom and position
+                loadGraphView('architecture');
+            }
+        }
+        
         async function loadGraphView(viewType) {
-            const container = document.getElementById('graphContainer');
+            const container = document.getElementById('codeGraph');
             container.innerHTML = '<div class="loading pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Loading ' + viewType + ' view...</div>';
             
             try {
                 // Initialize D3 graph if not already done
                 if (!window.codeGraphInstance) {
-                    window.codeGraphInstance = new CodeGraph('graphContainer');
+                    window.codeGraphInstance = new CodeGraph('codeGraph');
                 }
                 await window.codeGraphInstance.loadGraph(viewType);
             } catch (error) {
@@ -983,6 +1000,19 @@
         // Connect on load
         connectWebSocket();
         loadInventoryData();
+        
+        // Add search functionality
+        const searchBox = document.getElementById('searchPrimitives');
+        if (searchBox) {
+            searchBox.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const primitives = document.querySelectorAll('#primitivesCatalog .primitive-item');
+                primitives.forEach(prim => {
+                    const text = prim.textContent.toLowerCase();
+                    prim.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
         
         // Load default graph view
         setTimeout(() => loadGraphView('architecture'), 1000);
