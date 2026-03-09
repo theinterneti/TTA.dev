@@ -187,8 +187,46 @@ async def handle_api_primitives(request):
 
 async def handle_api_workflows(request):
     """API endpoint for registered workflows."""
-    # TODO: Scan for workflow definitions
+    workflows_dir = Path("/home/thein/repos/TTA.dev/.github/workflows")
     workflows = []
+    
+    # Scan for GitHub Actions workflows
+    if workflows_dir.exists():
+        for wf_file in workflows_dir.glob("*.yml"):
+            try:
+                workflows.append({
+                    "name": wf_file.stem,
+                    "file": str(wf_file.name),
+                    "type": "github_action"
+                })
+            except:
+                pass
+        
+        for wf_file in workflows_dir.glob("*.md"):
+            try:
+                workflows.append({
+                    "name": wf_file.stem,
+                    "file": str(wf_file.name),
+                    "type": "agentic_workflow"
+                })
+            except:
+                pass
+    
+    # Scan for Python workflow definitions
+    examples_dir = Path("/home/thein/repos/TTA.dev/examples")
+    if examples_dir.exists():
+        for py_file in examples_dir.glob("*.py"):
+            try:
+                with open(py_file) as f:
+                    content = f.read()
+                    if "workflow" in content.lower() or "primitive" in content.lower():
+                        workflows.append({
+                            "name": py_file.stem,
+                            "file": str(py_file.name),
+                            "type": "example_workflow"
+                        })
+            except:
+                pass
     
     response = web.json_response(workflows)
     response.headers['Access-Control-Allow-Origin'] = '*'
@@ -212,6 +250,26 @@ async def handle_api_agent_actions(request):
     recent_actions = tracker.get_recent_actions(limit=limit)
     
     response = web.json_response(recent_actions)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+async def handle_api_codegraph(request):
+    """API endpoint for CodeGraphContext data."""
+    cgc_file = Path("/home/thein/repos/TTA.dev/.cgc/graph.json")
+    
+    if cgc_file.exists():
+        try:
+            with open(cgc_file) as f:
+                graph_data = json.load(f)
+                response = web.json_response(graph_data)
+                response.headers['Access-Control-Allow-Origin'] = '*'
+                return response
+        except Exception as e:
+            print(f"Error reading CGC graph: {e}")
+    
+    # Return empty graph if file doesn't exist
+    response = web.json_response({"nodes": [], "edges": []})
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
@@ -298,6 +356,7 @@ async def start_server():
     app.router.add_get("/api/agents", handle_api_agents)
     app.router.add_get("/api/primitives", handle_api_primitives)
     app.router.add_get("/api/workflows", handle_api_workflows)
+    app.router.add_get("/api/codegraph", handle_api_codegraph)
     app.router.add_get("/api/active_agents", handle_api_active_agents)
     app.router.add_get("/api/agent_actions", handle_api_agent_actions)
     app.router.add_get("/ws", handle_websocket)
