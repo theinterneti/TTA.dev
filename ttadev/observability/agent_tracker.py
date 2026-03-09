@@ -1,107 +1,139 @@
-"""Agent activity tracking for observability dashboard."""
+"""
+Agent Activity Tracker - Real-time tracking of AI agent actions.
+
+Tracks:
+- Provider (GitHub Copilot, OpenRouter, Ollama)
+- Model (Claude Sonnet 4.5, GPT-4, etc.)
+- TTA Agent (backend-engineer, architect, or none)
+- User (session owner)
+- Actions (tool calls, code changes, etc.)
+"""
 
 import json
-import asyncio
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from opentelemetry import trace
+import threading
 
-tracer = trace.get_tracer(__name__)
-
-
-class AgentActivityTracker:
-    """Track agent activities for the observability dashboard."""
+class AgentTracker:
+    """Tracks AI agent activity in real-time."""
     
-    def __init__(self, log_dir: Path | None = None):
-        """Initialize agent activity tracker.
+    def __init__(self, data_dir: Path | None = None):
+        self.data_dir = data_dir or Path(".observability/agents")
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        self.current_session_file = self.data_dir / "current_session.jsonl"
+        self.agents_registry = self.data_dir / "agents_registry.json"
+        self._lock = threading.Lock()
         
-        Args:
-            log_dir: Directory to store agent activity logs
-        """
-        self.log_dir = log_dir or Path(".ttadev/observability")
-        self.log_dir.mkdir(parents=True, exist_ok=True)
-        self.log_file = self.log_dir / "agent_activity.jsonl"
-    
-    async def track_agent_action(
+    def track_agent_action(
         self,
-        agent_name: str,
-        action: str,
-        context: dict[str, Any] | None = None
+        provider: str,
+        model: str,
+        action_type: str,
+        action_data: dict[str, Any],
+        tta_agent: str | None = None,
+        user: str | None = None,
     ) -> None:
-        """Track an agent action.
-        
-        Args:
-            agent_name: Name of the agent performing the action
-            action: Description of the action
-            context: Additional context about the action
-        """
-        with tracer.start_as_current_span(f"agent.{agent_name}.{action}") as span:
-            span.set_attribute("agent.name", agent_name)
-            span.set_attribute("agent.action", action)
-            
-            activity = {
+        """Track a single agent action."""
+        with self._lock:
+            action_record = {
                 "timestamp": datetime.utcnow().isoformat(),
-                "agent_name": agent_name,
-                "action": action,
-                "context": context or {},
-                "trace_id": format(span.get_span_context().trace_id, "032x"),
-                "span_id": format(span.get_span_context().span_id, "016x")
+                "provider": provider,
+                "model": model,
+                "tta_agent": tta_agent,
+                "user": user or "unknown",
+                "action_type": action_type,
+                "action_data": action_data,
             }
             
-            # Append to JSONL file
-            with open(self.log_file, "a") as f:
-                f.write(json.dumps(activity) + "\n")
-    
-    def get_recent_activity(self, limit: int = 50) -> list[dict[str, Any]]:
-        """Get recent agent activities.
-        
-        Args:
-            limit: Maximum number of activities to return
+            # Append to session log
+            with open(self.current_session_file, "a") as f:
+                f.write(json.dumps(action_record) + "\n")
             
-        Returns:
-            List of recent activities
-        """
-        if not self.log_file.exists():
+            # Update agent registry
+            self._update_registry(provider, model, tta_agent)
+    
+    def _update_registry(self, provider: str, model: str, tta_agent: str | None) -> None:
+        """Update the agents registry with active agents."""
+        registry = {}
+        if self.agents_registry.exists():
+            with open(self.agents_registry) as f:
+                registry = json.load(f)
+        
+        agent_key = f"{provider}:{model}"
+        if agent_key not in registry:
+            registry[agent_key] = {
+                "provider": provider,
+                "model": model,
+                "first_seen": datetime.utcnow().isoformat(),
+                "tta_agents_used": [],
+                "action_count": 0,
+            }
+        
+        registry[agent_key]["last_seen"] = datetime.utcnow().isoformat()
+        registry[agent_key]["action_count"] += 1
+        
+        if tta_agent and tta_agent not in registry[agent_key]["tta_agents_used"]:
+            registry[agent_key]["tta_agents_used"].append(tta_agent)
+        
+        with open(self.agents_registry, "w") as f:
+            json.dump(registry, f, indent=2)
+    
+    def get_active_agents(self, since_minutes: int = 5) -> list[dict[str, Any]]:
+        """Get agents active in the last N minutes."""
+        cutoff = time.time() - (since_minutes * 60)
+        
+        if not self.agents_registry.exists():
             return []
         
-        activities = []
-        with open(self.log_file, "r") as f:
-            for line in f:
-                try:
-                    activities.append(json.loads(line))
-                except json.JSONDecodeError:
-                    continue
+        with open(self.agents_registry) as f:
+            registry = json.load(f)
         
-        # Return most recent first
-        return activities[-limit:][::-1]
+        active = []
+        for agent_key, agent_data in registry.items():
+            last_seen = datetime.fromisoformat(agent_data["last_seen"]).timestamp()
+            if last_seen >= cutoff:
+                active.append(agent_data)
+        
+        return active
     
-    def get_agent_summary(self) -> dict[str, Any]:
-        """Get summary of agent activities.
+    def get_recent_actions(self, limit: int = 100) -> list[dict[str, Any]]:
+        """Get recent agent actions."""
+        if not self.current_session_file.exists():
+            return []
         
-        Returns:
-            Summary statistics by agent
-        """
-        activities = self.get_recent_activity(limit=1000)
+        with open(self.current_session_file) as f:
+            lines = f.readlines()
         
-        summary = {}
-        for activity in activities:
-            agent_name = activity["agent_name"]
-            if agent_name not in summary:
-                summary[agent_name] = {
-                    "total_actions": 0,
-                    "recent_actions": [],
-                    "last_seen": None
-                }
-            
-            summary[agent_name]["total_actions"] += 1
-            summary[agent_name]["last_seen"] = activity["timestamp"]
-            
-            if len(summary[agent_name]["recent_actions"]) < 10:
-                summary[agent_name]["recent_actions"].append({
-                    "action": activity["action"],
-                    "timestamp": activity["timestamp"],
-                    "context": activity["context"]
-                })
-        
-        return summary
+        # Get last N lines
+        recent_lines = lines[-limit:] if len(lines) > limit else lines
+        return [json.loads(line) for line in recent_lines]
+
+# Global tracker instance
+_tracker: AgentTracker | None = None
+
+def get_tracker() -> AgentTracker:
+    """Get the global agent tracker instance."""
+    global _tracker
+    if _tracker is None:
+        _tracker = AgentTracker()
+    return _tracker
+
+def track_action(
+    provider: str,
+    model: str,
+    action_type: str,
+    action_data: dict[str, Any],
+    tta_agent: str | None = None,
+    user: str | None = None,
+) -> None:
+    """Convenience function to track an agent action."""
+    get_tracker().track_agent_action(
+        provider=provider,
+        model=model,
+        action_type=action_type,
+        action_data=action_data,
+        tta_agent=tta_agent,
+        user=user,
+    )

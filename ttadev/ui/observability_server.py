@@ -4,6 +4,12 @@ import asyncio
 from pathlib import Path
 from aiohttp import web
 import aiohttp
+import sys
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from ttadev.observability.agent_tracker import get_tracker
 
 # Dashboard HTML file
 DASHBOARD_FILE = Path(__file__).parent / "dashboard.html"
@@ -189,6 +195,27 @@ async def handle_api_workflows(request):
     return response
 
 
+async def handle_api_active_agents(request):
+    """API endpoint for currently active agents."""
+    tracker = get_tracker()
+    active_agents = tracker.get_active_agents(since_minutes=5)
+    
+    response = web.json_response(active_agents)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
+async def handle_api_agent_actions(request):
+    """API endpoint for recent agent actions."""
+    tracker = get_tracker()
+    limit = int(request.query.get('limit', 100))
+    recent_actions = tracker.get_recent_actions(limit=limit)
+    
+    response = web.json_response(recent_actions)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
 async def handle_websocket(request):
     """WebSocket handler for real-time updates."""
     ws = web.WebSocketResponse()
@@ -271,6 +298,8 @@ async def start_server():
     app.router.add_get("/api/agents", handle_api_agents)
     app.router.add_get("/api/primitives", handle_api_primitives)
     app.router.add_get("/api/workflows", handle_api_workflows)
+    app.router.add_get("/api/active_agents", handle_api_active_agents)
+    app.router.add_get("/api/agent_actions", handle_api_agent_actions)
     app.router.add_get("/ws", handle_websocket)
     
     runner = web.AppRunner(app)
