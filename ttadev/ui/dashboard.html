@@ -384,7 +384,7 @@
     <!-- Recent Traces -->
     <div class="panel">
         <h2>📜 Recent Traces</h2>
-        <div id="tracesPanel" class="empty-state">
+        <div id="recentTraces" class="empty-state">
             <p>No traces yet. Workflows will appear here automatically.</p>
         </div>
     </div>
@@ -508,7 +508,7 @@
         }
         
         function renderTraces() {
-            const panel = document.getElementById('tracesPanel');
+            const panel = document.getElementById('recentTraces');
             const traces = Array.from(tracesMap.values()).slice(-20).reverse();
             
             if (traces.length === 0) {
