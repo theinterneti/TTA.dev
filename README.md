@@ -17,7 +17,8 @@ cd TTA.dev
 #    - Auto-instrument all primitives with observability
 #    - Display activity in real-time dashboard
 
-# 3. Open the dashboard (auto-starts on first primitive use)
+# 3. Start the dashboard server, then open:
+uv run python ttadev/ui/observability_server.py &
 open http://localhost:8000
 ```
 

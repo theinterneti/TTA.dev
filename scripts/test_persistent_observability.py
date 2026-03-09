@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
+"""Test persistent observability by generating and retrieving spans.
+
+Run from the repository root:
+    uv run python scripts/test_persistent_observability.py
+"""
+
 import asyncio
 import sys
+from pathlib import Path
 
-sys.path.insert(0, '.')
+# Add ttadev/ to path so observability modules are importable
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "ttadev"))
 
 from observability.collector import trace_collector
 

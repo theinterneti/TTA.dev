@@ -7,7 +7,7 @@ Tests multi-agent workflows with handoff, memory, and coordination primitives.
 import asyncio
 
 import pytest
-from ttadev import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives import WorkflowContext, WorkflowPrimitive
 from universal_agent_context.primitives import (
     AgentCoordinationPrimitive,
     AgentHandoffPrimitive,

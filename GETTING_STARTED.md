@@ -64,7 +64,10 @@ Point Cline at the TTA.dev directory. It will read `AGENTS.md` and start using p
 Let's verify everything is working by running a demo workflow:
 
 ```bash
-# Run the demo (it will auto-start the observability dashboard)
+# Start the observability server
+uv run python ttadev/ui/observability_server.py &
+
+# Run the demo
 uv run python examples/demo_workflow.py
 ```
 
@@ -86,9 +89,12 @@ from ttadev.primitives import RetryPrimitive, TimeoutPrimitive
 TTA.dev automatically:
 - Initialized OpenTelemetry tracing
 - Started the file-based span exporter
-- Launched the observability dashboard (on first use)
 
-**No manual setup required!**
+To enable the observability dashboard, start the server explicitly:
+
+```bash
+uv run python ttadev/ui/observability_server.py
+```
 
 ### The Observability Dashboard
 
@@ -109,7 +115,7 @@ Let's build a simple workflow that fetches data with retries and caching:
 # my_workflow.py
 import asyncio
 from ttadev.primitives import RetryPrimitive, CachePrimitive, TimeoutPrimitive
-from ttadev.core import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
 
 async def fetch_data(url: str, ctx: WorkflowContext) -> dict:
     """Simulate API call"""
@@ -208,7 +214,7 @@ resilient_workflow = FallbackPrimitive(
 
 ```bash
 # Manually start the dashboard
-uv run python ttadev/observability/server.py
+uv run python ttadev/ui/observability_server.py
 ```
 
 ### Import Errors?
