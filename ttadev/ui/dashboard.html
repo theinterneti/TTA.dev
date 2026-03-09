@@ -253,6 +253,34 @@
             line-height: 1.4;
         }
         
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pagination-controls button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        
+        .pagination-controls button:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+        
+        .pagination-controls button:disabled {
+            background: #4a5568;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
         .graph-btn {
             background: #667eea;
             color: white;
@@ -378,14 +406,16 @@
                 reconnectAttempts = 0;
             };
             
-            ws.onmessage = (event) => {
+            function parseMessage(event) {
                 try {
                     const data = JSON.parse(event.data);
                     handleMessage(data);
                 } catch (error) {
                     console.error('Failed to parse message:', error);
                 }
-            };
+            }
+            
+            ws.onmessage = parseMessage;
             
             ws.onclose = () => {
                 console.log('WebSocket closed');
@@ -714,6 +744,9 @@
             }
         }
         
+        let currentPrimitivesPage = 1;
+        const primitivesPerPage = 20;
+        
         function renderPrimitivesCatalog(primitives) {
             const panel = document.getElementById('primitivesPanel');
             
@@ -722,16 +755,43 @@
                 return;
             }
             
-            panel.innerHTML = `<div style="margin-bottom: 10px; opacity: 0.7;">Available: ${primitives.length} primitive(s)</div>`;
-            primitives.forEach(prim => {
+            const totalPages = Math.ceil(primitives.length / primitivesPerPage);
+            const startIdx = (currentPrimitivesPage - 1) * primitivesPerPage;
+            const endIdx = startIdx + primitivesPerPage;
+            const pageData = primitives.slice(startIdx, endIdx);
+            
+            panel.innerHTML = `
+                <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="opacity: 0.7;">Showing ${startIdx + 1}-${Math.min(endIdx, primitives.length)} of ${primitives.length} primitive(s)</div>
+                    <div class="pagination-controls">
+                        <button ${currentPrimitivesPage === 1 ? 'disabled' : ''} onclick="changePrimitivesPage(${currentPrimitivesPage - 1})">← Prev</button>
+                        <span style="margin: 0 10px;">Page ${currentPrimitivesPage}/${totalPages}</span>
+                        <button ${currentPrimitivesPage === totalPages ? 'disabled' : ''} onclick="changePrimitivesPage(${currentPrimitivesPage + 1})">Next →</button>
+                    </div>
+                </div>
+                <div id="primitivesList"></div>
+            `;
+            
+            const listContainer = document.getElementById('primitivesList');
+            pageData.forEach(prim => {
                 const div = document.createElement('div');
                 div.className = 'primitive-item';
                 div.innerHTML = `
                     <div class="item-header">⚙️ ${prim.name}</div>
                     <div class="item-description">${prim.description || 'Core primitive'}</div>
+                    ${prim.module ? `<div style="opacity: 0.6; font-size: 0.85em; margin-top: 4px;">📦 ${prim.module}</div>` : ''}
                 `;
-                panel.appendChild(div);
+                listContainer.appendChild(div);
             });
+        }
+        
+        function changePrimitivesPage(page) {
+            currentPrimitivesPage = page;
+            // Re-fetch and render
+            fetch('/api/primitives')
+                .then(r => r.json())
+                .then(data => renderPrimitivesCatalog(data.primitives))
+                .catch(err => console.error('Failed to load primitives:', err));
         }
         
         function renderWorkflows(workflows) {
