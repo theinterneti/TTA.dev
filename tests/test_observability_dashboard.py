@@ -1,13 +1,55 @@
 """Automated tests for observability dashboard using Playwright."""
 import asyncio
+import multiprocessing
 import pytest
+import time
 from playwright.async_api import async_playwright, expect
 import json
 from pathlib import Path
 
 
+def run_server():
+    """Run the observability server in a separate process."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from ttadev.ui import observability_server
+    observability_server.main()
+
+
+@pytest.fixture(scope="module")
+def server():
+    """Start the observability server for all tests in this module."""
+    # Start server in separate process
+    proc = multiprocessing.Process(target=run_server, daemon=True)
+    proc.start()
+    
+    # Wait for server to be ready
+    import socket
+    for _ in range(50):  # Wait up to 5 seconds
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            result = sock.connect_ex(('localhost', 8000))
+            sock.close()
+            if result == 0:
+                time.sleep(0.5)  # Extra time for full initialization
+                break
+        except:
+            pass
+        time.sleep(0.1)
+    else:
+        proc.terminate()
+        pytest.fail("Server failed to start within 5 seconds")
+    
+    yield
+    
+    # Cleanup
+    proc.terminate()
+    proc.join(timeout=5)
+
+
 @pytest.mark.asyncio
-async def test_dashboard_loads():
+async def test_dashboard_loads(server):
     """Test that dashboard loads and displays basic elements."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -28,7 +70,7 @@ async def test_dashboard_loads():
 
 
 @pytest.mark.asyncio
-async def test_websocket_connection():
+async def test_websocket_connection(server):
     """Test WebSocket connection status."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -47,7 +89,7 @@ async def test_websocket_connection():
 
 
 @pytest.mark.asyncio
-async def test_primitives_catalog_pagination():
+async def test_primitives_catalog_pagination(server):
     """Test primitives catalog shows all items with pagination."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -71,7 +113,7 @@ async def test_primitives_catalog_pagination():
 
 
 @pytest.mark.asyncio
-async def test_search_functionality():
+async def test_search_functionality(server):
     """Test search box filters primitives."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -97,7 +139,7 @@ async def test_search_functionality():
 
 
 @pytest.mark.asyncio
-async def test_code_graph_loads():
+async def test_code_graph_loads(server):
     """Test CGC code graph visualization loads."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -117,7 +159,7 @@ async def test_code_graph_loads():
 
 
 @pytest.mark.asyncio
-async def test_trace_details_modal():
+async def test_trace_details_modal(server):
     """Test that clicking a trace opens details modal."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -146,7 +188,7 @@ async def test_trace_details_modal():
 
 
 @pytest.mark.asyncio
-async def test_agent_activity_tracking():
+async def test_agent_activity_tracking(server):
     """Test agent activity panel shows provider/model/agent info."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
@@ -171,7 +213,7 @@ async def test_agent_activity_tracking():
 
 
 @pytest.mark.asyncio  
-async def test_workflow_registry():
+async def test_workflow_registry(server):
     """Test workflow registry displays registered workflows."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
