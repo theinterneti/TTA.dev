@@ -289,6 +289,160 @@ async def track_agent_activity(activity_data: dict[str, Any]):
     return {"status": "ok"}
 
 
+@app.get("/api/traces")
+async def get_traces():
+    """Get all traces with full span details from database."""
+    import sqlite3
+    from collections import defaultdict
+    
+    db_path = Path(".tta/traces.db")
+    if not db_path.exists():
+        return {"traces": []}
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Get all spans grouped by trace_id
+    cursor.execute("""
+        SELECT trace_id, span_name, primitive_type, start_time, end_time,
+               duration_ms, status, attributes
+        FROM spans
+        ORDER BY start_time DESC
+        LIMIT 1000
+    """)
+    
+    spans_by_trace = defaultdict(list)
+    for row in cursor.fetchall():
+        trace_id, span_name, primitive_type, start_time, end_time, duration_ms, status, attrs = row
+        span = {
+            "name": span_name,
+            "primitive_type": primitive_type,
+            "start_time": start_time,
+            "end_time": end_time,
+            "duration_ms": duration_ms,
+            "status": status,
+            "attributes": json.loads(attrs) if attrs else {}
+        }
+        spans_by_trace[trace_id].append(span)
+    
+    # Convert to trace format with hierarchy
+    traces = []
+    for trace_id, spans in spans_by_trace.items():
+        if spans:
+            trace = {
+                "trace_id": trace_id,
+                "start_time": min(s["start_time"] for s in spans),
+                "end_time": max(s["end_time"] for s in spans),
+                "duration_ms": sum(s["duration_ms"] for s in spans),
+                "status": "error" if any(s["status"] == "error" for s in spans) else "ok",
+                "span_count": len(spans),
+                "spans": spans,
+                "primitive_types": list(set(s["primitive_type"] for s in spans)),
+                "error_message": next((s.get("attributes", {}).get("error.message") 
+                                      for s in spans if s["status"] == "error"), None)
+            }
+            traces.append(trace)
+    
+    conn.close()
+    return {"traces": traces, "total": len(traces)}
+
+
+@app.get("/api/traces/{trace_id}")
+async def get_trace_details(trace_id: str):
+    """Get detailed information for a single trace."""
+    import sqlite3
+    
+    db_path = Path(".tta/traces.db")
+    if not db_path.exists():
+        return {"error": "Database not found"}
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT span_name, primitive_type, start_time, end_time,
+               duration_ms, status, attributes
+        FROM spans
+        WHERE trace_id = ?
+        ORDER BY start_time ASC
+    """, (trace_id,))
+    
+    spans = []
+    for row in cursor.fetchall():
+        span = {
+            "name": row[0],
+            "primitive_type": row[1],
+            "start_time": row[2],
+            "end_time": row[3],
+            "duration_ms": row[4],
+            "status": row[5],
+            "attributes": json.loads(row[6]) if row[6] else {}
+        }
+        spans.append(span)
+    
+    conn.close()
+    
+    if not spans:
+        return {"error": "Trace not found"}
+    
+    return {
+        "trace_id": trace_id,
+        "spans": spans,
+        "span_count": len(spans),
+        "total_duration_ms": sum(s["duration_ms"] for s in spans),
+        "status": "error" if any(s["status"] == "error" for s in spans) else "ok"
+    }
+
+
+@app.get("/api/workflows")
+async def get_workflows():
+    """Get workflow inventory from database."""
+    import sqlite3
+    from collections import Counter
+    
+    db_path = Path(".tta/traces.db")
+    if not db_path.exists():
+        return {"workflows": []}
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Get unique workflow patterns
+    cursor.execute("""
+        SELECT trace_id, GROUP_CONCAT(primitive_type, ' -> ') as workflow_pattern,
+               COUNT(*) as step_count,
+               SUM(duration_ms) as total_duration,
+               MAX(CASE WHEN status = 'error' THEN 1 ELSE 0 END) as has_error
+        FROM spans
+        GROUP BY trace_id
+        ORDER BY MIN(start_time) DESC
+        LIMIT 100
+    """)
+    
+    workflows = []
+    pattern_counts = Counter()
+    
+    for row in cursor.fetchall():
+        trace_id, pattern, step_count, duration, has_error = row
+        workflows.append({
+            "trace_id": trace_id,
+            "pattern": pattern,
+            "step_count": step_count,
+            "duration_ms": duration,
+            "status": "error" if has_error else "ok"
+        })
+        pattern_counts[pattern] += 1
+    
+    conn.close()
+    
+    return {
+        "workflows": workflows,
+        "total": len(workflows),
+        "unique_patterns": len(pattern_counts),
+        "common_patterns": dict(pattern_counts.most_common(10))
+    }
+
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
