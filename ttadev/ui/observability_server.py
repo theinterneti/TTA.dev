@@ -3,10 +3,14 @@ import json
 import asyncio
 from pathlib import Path
 from aiohttp import web
+import aiohttp
 
 # Dashboard HTML file
 DASHBOARD_FILE = Path(__file__).parent / "dashboard.html"
 TRACES_DIR = Path.home() / ".tta" / "traces"
+
+# WebSocket connections
+websocket_connections = set()
 
 
 async def handle_dashboard(request):
@@ -20,6 +24,7 @@ async def handle_api_traces(request):
     """API endpoint for trace data."""
     traces = []
     
+    # Read individual JSON trace files
     if TRACES_DIR.exists():
         for trace_file in sorted(TRACES_DIR.glob("*.json"), reverse=True)[:100]:  # Limit to 100 most recent
             try:
@@ -28,6 +33,38 @@ async def handle_api_traces(request):
                     traces.append(trace)
             except Exception as e:
                 print(f"Error reading {trace_file}: {e}")
+    
+    # Also read OpenTelemetry JSONL traces
+    jsonl_file = Path(".observability/traces.jsonl")
+    if jsonl_file.exists():
+        try:
+            with open(jsonl_file) as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            span = json.loads(line)
+                            # Convert OpenTelemetry span to our trace format
+                            trace = {
+                                "trace_id": span["trace_id"],
+                                "timestamp": span["start_time"],
+                                "activity_type": "primitive_execution",
+                                "provider": "ttadev",
+                                "model": "primitives",
+                                "agent": span["attributes"].get("primitive.type", "unknown"),
+                                "user": "system",
+                                "details": {
+                                    "primitive": span["name"],
+                                    "duration_ns": span["duration_ns"],
+                                    "status": span["status"]["status_code"],
+                                    "attributes": span["attributes"]
+                                }
+                            }
+                            traces.append(trace)
+                        except json.JSONDecodeError:
+                            pass
+        except Exception as e:
+            print(f"Error reading JSONL traces: {e}")
     
     # Add CORS headers
     response = web.json_response(traces)
@@ -152,6 +189,77 @@ async def handle_api_workflows(request):
     return response
 
 
+async def handle_websocket(request):
+    """WebSocket handler for real-time updates."""
+    ws = web.WebSocketResponse()
+    await ws.prepare(request)
+    
+    websocket_connections.add(ws)
+    print(f"✓ WebSocket client connected. Total connections: {len(websocket_connections)}")
+    
+    try:
+        # Send initial connection confirmation
+        await ws.send_json({"type": "connected", "message": "Connected to TTA.dev observability"})
+        
+        # Keep connection alive and listen for messages
+        async for msg in ws:
+            if msg.type == aiohttp.WSMsgType.TEXT:
+                # Handle ping/pong for keep-alive
+                if msg.data == 'ping':
+                    await ws.send_str('pong')
+            elif msg.type == aiohttp.WSMsgType.ERROR:
+                print(f'WebSocket error: {ws.exception()}')
+    finally:
+        websocket_connections.discard(ws)
+        print(f"✓ WebSocket client disconnected. Total connections: {len(websocket_connections)}")
+    
+    return ws
+
+
+async def broadcast_to_websockets(data):
+    """Broadcast data to all connected WebSocket clients."""
+    if not websocket_connections:
+        return
+    
+    dead_connections = set()
+    for ws in websocket_connections:
+        try:
+            await ws.send_json(data)
+        except:
+            dead_connections.add(ws)
+    
+    # Clean up dead connections
+    websocket_connections.difference_update(dead_connections)
+
+
+async def watch_traces():
+    """Watch for new trace files and broadcast to WebSocket clients."""
+    last_traces = set()
+    
+    while True:
+        try:
+            if TRACES_DIR.exists():
+                current_traces = set(TRACES_DIR.glob("*.json"))
+                new_traces = current_traces - last_traces
+                
+                for trace_file in new_traces:
+                    try:
+                        with open(trace_file) as f:
+                            trace = json.load(f)
+                            await broadcast_to_websockets({
+                                "type": "new_trace",
+                                "trace": trace
+                            })
+                    except Exception as e:
+                        print(f"Error reading new trace {trace_file}: {e}")
+                
+                last_traces = current_traces
+        except Exception as e:
+            print(f"Error watching traces: {e}")
+        
+        await asyncio.sleep(1)  # Check for new traces every second
+
+
 async def start_server():
     """Start the observability dashboard server."""
     app = web.Application()
@@ -163,6 +271,7 @@ async def start_server():
     app.router.add_get("/api/agents", handle_api_agents)
     app.router.add_get("/api/primitives", handle_api_primitives)
     app.router.add_get("/api/workflows", handle_api_workflows)
+    app.router.add_get("/ws", handle_websocket)
     
     runner = web.AppRunner(app)
     await runner.setup()
@@ -171,6 +280,10 @@ async def start_server():
     
     print("✓ Observability dashboard running at http://0.0.0.0:8000")
     print(f"✓ Watching traces in: {TRACES_DIR}")
+    print("✓ WebSocket endpoint available at ws://0.0.0.0:8000/ws")
+    
+    # Start trace watcher in background
+    asyncio.create_task(watch_traces())
     
     # Keep running
     while True:

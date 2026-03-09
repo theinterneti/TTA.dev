@@ -60,7 +60,7 @@ class FileSpanExporter(SpanExporter):
 
 def setup_tracing(service_name: str = "tta-workflow") -> None:
     """
-    Setup OpenTelemetry tracing with file-based export.
+    Setup OpenTelemetry tracing with file-based export and auto-instrumentation.
 
     Args:
         service_name: Name of the service for traces
@@ -81,6 +81,9 @@ def setup_tracing(service_name: str = "tta-workflow") -> None:
     provider.add_span_processor(processor)
     
     trace.set_tracer_provider(provider)
+    
+    # Auto-instrument all primitives
+    _auto_instrument_primitives()
 
 
 class ObservablePrimitive(WorkflowPrimitive[Any, Any]):
@@ -170,27 +173,40 @@ class ObservablePrimitive(WorkflowPrimitive[Any, Any]):
                     )
 
                     raise
-        else:
-            # No tracing, just execute with metrics
+
+
+def _auto_instrument_primitives() -> None:
+    """Auto-instrument all WorkflowPrimitive subclasses with tracing."""
+    if not TRACING_AVAILABLE:
+        return
+    
+    import functools
+    
+    tracer = trace.get_tracer(__name__)
+    original_execute = WorkflowPrimitive.execute
+    
+    @functools.wraps(original_execute)
+    async def instrumented_execute(self, input_data: Any, context: WorkflowContext) -> Any:
+        """Wrapped execute with automatic tracing."""
+        primitive_name = self.__class__.__name__
+        
+        with tracer.start_as_current_span(
+            primitive_name,
+            attributes={
+                "primitive.type": primitive_name,
+                "workflow.id": context.workflow_id,
+                "workflow.correlation_id": context.correlation_id,
+            }
+        ) as span:
             try:
-                result = await self.primitive.execute(input_data, context)
-                duration_ms = (time.time() - start_time) * 1000
-
-                from .metrics import get_metrics_collector
-
-                metrics = get_metrics_collector()
-                metrics.record_execution(self.name, duration_ms, success=True)
-
+                result = await original_execute(self, input_data, context)
+                span.set_status(Status(StatusCode.OK))
                 return result
-
             except Exception as e:
-                duration_ms = (time.time() - start_time) * 1000
-
-                from .metrics import get_metrics_collector
-
-                metrics = get_metrics_collector()
-                metrics.record_execution(
-                    self.name, duration_ms, success=False, error_type=type(e).__name__
-                )
-
+                span.set_status(Status(StatusCode.ERROR, str(e)))
+                span.record_exception(e)
                 raise
+    
+    # Monkey-patch the base class
+    WorkflowPrimitive.execute = instrumented_execute
+
