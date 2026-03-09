@@ -14,7 +14,7 @@ from tta_agent_coordination.context_integration import (
     AgentMemoryPrimitive,
     CoordinatedManagerWorkflow,
 )
-from ttadev.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 # ---------------------------------------------------------------------------
 # Helpers

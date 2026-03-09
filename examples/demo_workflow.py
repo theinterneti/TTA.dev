@@ -13,7 +13,7 @@ Then open: http://localhost:8000
 
 import asyncio
 from ttadev.primitives import RetryPrimitive, CachePrimitive, TimeoutPrimitive
-from ttadev.core import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
 
 
 async def fetch_user_data(user_id: str, ctx: WorkflowContext) -> dict:

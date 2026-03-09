@@ -12,10 +12,10 @@ sys.path.insert(
     0, str(Path(__file__).parent / "packages" / "tta-dev-primitives" / "src")
 )
 
-from ttadev import WorkflowContext
-from ttadev.core.base import WorkflowPrimitive
-from ttadev.performance.cache import CachePrimitive
-from ttadev.recovery.retry import RetryPrimitive, RetryStrategy
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.core.base import WorkflowPrimitive
+from ttadev.primitives.performance.cache import CachePrimitive
+from ttadev.primitives.recovery.retry import RetryPrimitive, RetryStrategy
 
 
 class DataProcessorPrimitive(WorkflowPrimitive[dict, dict]):

@@ -12,10 +12,10 @@ Demonstrates:
 import asyncio
 
 import pytest
-from ttadev import WorkflowContext, WorkflowPrimitive
-from ttadev.core.parallel import ParallelPrimitive
-from ttadev.core.sequential import SequentialPrimitive
-from ttadev.observability.tracing import ObservablePrimitive
+from ttadev.primitives import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.parallel import ParallelPrimitive
+from ttadev.primitives.core.sequential import SequentialPrimitive
+from ttadev.primitives.observability.tracing import ObservablePrimitive
 
 # ============================================================================
 # Data Processing Primitives
