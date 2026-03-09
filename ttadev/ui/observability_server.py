@@ -274,6 +274,118 @@ async def health_check():
         return {"status": "healthy", "service": "tta-dev-observability"}
 
 
+@app.get("/api/agents")
+async def get_agents():
+    """Get all configured agents from .github/agents/"""
+    import glob
+    
+    agents = []
+    agent_files = glob.glob(".github/agents/*.agent.md")
+    
+    for agent_file in agent_files:
+        try:
+            with open(agent_file, 'r') as f:
+                content = f.read()
+                # Parse frontmatter
+                if content.startswith('---'):
+                    parts = content.split('---', 2)
+                    if len(parts) >= 3:
+                        import yaml
+                        try:
+                            frontmatter = yaml.safe_load(parts[1])
+                            agents.append({
+                                "name": frontmatter.get("name", Path(agent_file).stem),
+                                "description": frontmatter.get("description", ""),
+                                "tools": frontmatter.get("tools", []),
+                                "file": agent_file
+                            })
+                        except:
+                            pass
+        except Exception as e:
+            print(f"Failed to load agent {agent_file}: {e}")
+    
+    return agents
+
+
+@app.get("/api/primitives")
+async def get_primitives():
+    """Get all available TTA.dev primitives."""
+    primitives = [
+        {"name": "RetryPrimitive", "description": "Automatic retry with exponential backoff", "category": "recovery"},
+        {"name": "CircuitBreakerPrimitive", "description": "Circuit breaker pattern for fault tolerance", "category": "recovery"},
+        {"name": "FallbackPrimitive", "description": "Fallback to alternative on failure", "category": "recovery"},
+        {"name": "TimeoutPrimitive", "description": "Enforce execution timeouts", "category": "recovery"},
+        {"name": "CachePrimitive", "description": "Result caching with TTL", "category": "optimization"},
+        {"name": "ParallelPrimitive", "description": "Execute operations in parallel", "category": "composition"},
+        {"name": "SequentialPrimitive", "description": "Execute operations sequentially", "category": "composition"},
+        {"name": "ConditionalPrimitive", "description": "Conditional execution based on predicate", "category": "control"},
+        {"name": "RouterPrimitive", "description": "Route to different primitives", "category": "control"},
+        {"name": "LambdaPrimitive", "description": "Wrap any function as primitive", "category": "core"},
+    ]
+    return primitives
+
+
+@app.get("/api/workflows")
+async def get_workflows():
+    """Get all registered workflows."""
+    # For now, scan for workflow files
+    import glob
+    
+    workflows = []
+    workflow_files = glob.glob("examples/**/*.py", recursive=True) + glob.glob("ttadev/workflows/*.py", recursive=True)
+    
+    for wf_file in workflow_files:
+        workflows.append({
+            "name": Path(wf_file).stem,
+            "description": f"Workflow from {wf_file}",
+            "file": wf_file
+        })
+    
+    return workflows[:10]  # Limit to 10 for now
+
+
+@app.get("/api/codegraph/{view_type}")
+async def get_code_graph(view_type: str):
+    """Get code graph visualization data from CGC."""
+    # This will query the CGC MCP server
+    # For now, return mock data - will integrate with actual CGC later
+    
+    if view_type == "architecture":
+        return {
+            "nodes": [
+                {"name": "ttadev.primitives", "type": "package", "dependencies": []},
+                {"name": "ttadev.observability", "type": "package", "dependencies": ["primitives"]},
+                {"name": "ttadev.ui", "type": "package", "dependencies": ["observability"]},
+            ]
+        }
+    elif view_type == "dependencies":
+        return {
+            "nodes": [
+                {"name": "fastapi", "type": "external", "dependencies": []},
+                {"name": "opentelemetry", "type": "external", "dependencies": []},
+                {"name": "ttadev", "type": "internal", "dependencies": ["fastapi", "opentelemetry"]},
+            ]
+        }
+    elif view_type == "primitives":
+        return {
+            "nodes": [
+                {"name": "WorkflowPrimitive", "type": "base"},
+                {"name": "RetryPrimitive", "type": "recovery"},
+                {"name": "CircuitBreakerPrimitive", "type": "recovery"},
+                {"name": "ParallelPrimitive", "type": "composition"},
+            ]
+        }
+    elif view_type == "agents":
+        return {
+            "nodes": [
+                {"name": "backend-engineer", "type": "agent"},
+                {"name": "architect", "type": "agent"},
+            ]
+        }
+    
+    return {"nodes": []}
+
+
 @app.on_event("startup")
 async def startup_event():
     """Start background tasks on server startup."""
