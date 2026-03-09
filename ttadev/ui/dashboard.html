@@ -858,14 +858,87 @@
             async loadGraph(viewType) {
                 const container = document.getElementById(this.containerId);
                 
-                // Fetch graph data from CGC
-                const response = await fetch(`/api/codegraph/${viewType}`);
+                // Fetch graph data from CGC based on view type
+                let apiEndpoint;
+                switch(viewType) {
+                    case 'primitives':
+                        apiEndpoint = '/api/cgc/primitives';
+                        break;
+                    case 'agents':
+                        apiEndpoint = '/api/cgc/agents';
+                        break;
+                    case 'dependencies':
+                    case 'architecture':
+                    default:
+                        apiEndpoint = '/api/cgc/stats';
+                }
+                
+                const response = await fetch(apiEndpoint);
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                const graphData = await response.json();
+                const data = await response.json();
+                
+                // Convert CGC data to graph format
+                const graphData = this.convertToGraphData(data, viewType);
                 this.renderGraph(container, graphData);
+            }
+            
+            convertToGraphData(data, viewType) {
+                // Convert CGC response to D3 graph format
+                if (viewType === 'primitives' && data.results) {
+                    const nodes = [];
+                    const edges = [];
+                    const nodeMap = new Map();
+                    
+                    // Process nodes from Cypher results
+                    data.results.forEach(result => {
+                        if (result.c && !nodeMap.has(result.c.name)) {
+                            nodes.push({
+                                id: result.c.name,
+                                label: result.c.name,
+                                type: 'primitive'
+                            });
+                            nodeMap.set(result.c.name, nodes.length - 1);
+                        }
+                        
+                        if (result.related && !nodeMap.has(result.related.name)) {
+                            nodes.push({
+                                id: result.related.name,
+                                label: result.related.name,
+                                type: 'class'
+                            });
+                            nodeMap.set(result.related.name, nodes.length - 1);
+                        }
+                        
+                        if (result.r && result.c && result.related) {
+                            edges.push({
+                                source: result.c.name,
+                                target: result.related.name,
+                                type: result.r.type
+                            });
+                        }
+                    });
+                    
+                    return { nodes, edges };
+                }
+                
+                // Default fallback: create demo graph
+                return {
+                    nodes: [
+                        { id: 'TTA.dev', label: 'TTA.dev Core', type: 'root' },
+                        { id: 'primitives', label: 'Primitives', type: 'module' },
+                        { id: 'agents', label: 'Agents', type: 'module' },
+                        { id: 'workflows', label: 'Workflows', type: 'module' }
+                    ],
+                    edges: [
+                        { source: 'TTA.dev', target: 'primitives' },
+                        { source: 'TTA.dev', target: 'agents' },
+                        { source: 'TTA.dev', target: 'workflows' },
+                        { source: 'workflows', target: 'primitives' }
+                    ]
+                };
             }
             
             renderGraph(container, data) {

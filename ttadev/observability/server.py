@@ -7,6 +7,7 @@ from typing import Any
 
 from aiohttp import web
 from ttadev.observability.collector import TraceCollector
+from ttadev.observability.cgc_integration import CGCIntegration
 
 
 class ObservabilityServer:
@@ -20,6 +21,7 @@ class ObservabilityServer:
             port: Port to listen on
         """
         self.collector = collector or TraceCollector()
+        self.cgc = CGCIntegration()
         self.port = port
         self.app = web.Application()
         self.runner: web.AppRunner | None = None
@@ -29,6 +31,10 @@ class ObservabilityServer:
         # Setup routes
         self.app.router.add_get("/", self._handle_dashboard)
         self.app.router.add_get("/api/traces", self._handle_api_traces)
+        self.app.router.add_get("/api/cgc/stats", self._handle_cgc_stats)
+        self.app.router.add_get("/api/cgc/primitives", self._handle_cgc_primitives)
+        self.app.router.add_get("/api/cgc/agents", self._handle_cgc_agents)
+        self.app.router.add_get("/api/cgc/workflows", self._handle_cgc_workflows)
         self.app.router.add_get("/ws", self._handle_websocket)
     
     async def start(self) -> None:
@@ -107,6 +113,38 @@ class ObservabilityServer:
         """API endpoint to get all traces."""
         traces = self.collector.get_all_traces()
         return web.json_response({"traces": traces})
+    
+    async def _handle_cgc_stats(self, request: web.Request) -> web.Response:
+        """API endpoint for CGC repository statistics."""
+        try:
+            stats = await self.cgc.get_repository_stats()
+            return web.json_response(stats)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
+    
+    async def _handle_cgc_primitives(self, request: web.Request) -> web.Response:
+        """API endpoint for CGC primitives graph."""
+        try:
+            graph = await self.cgc.get_primitives_graph()
+            return web.json_response(graph)
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
+    
+    async def _handle_cgc_agents(self, request: web.Request) -> web.Response:
+        """API endpoint for CGC agent files."""
+        try:
+            agents = await self.cgc.get_agent_files()
+            return web.json_response({"agents": agents})
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
+    
+    async def _handle_cgc_workflows(self, request: web.Request) -> web.Response:
+        """API endpoint for CGC workflow files."""
+        try:
+            workflows = await self.cgc.get_workflow_files()
+            return web.json_response({"workflows": workflows})
+        except Exception as e:
+            return web.json_response({"error": str(e)}, status=500)
     
     async def _handle_websocket(self, request: web.Request) -> web.WebSocketResponse:
         """Handle WebSocket connections."""
