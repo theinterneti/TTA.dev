@@ -12,7 +12,7 @@ import uuid
 from typing import Any
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -26,6 +26,7 @@ except ImportError:
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
+
     env_path = Path(__file__).parent.parent.parent / ".env"
     load_dotenv(dotenv_path=env_path)
     print(f"✅ Loaded environment variables from: {env_path}")
@@ -34,13 +35,16 @@ except ImportError:
     print("⚠️  Falling back to system environment variables")
 
 # Add packages to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../packages/tta-dev-primitives/src"))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(__file__), "../../packages/tta-dev-primitives/src")
+)
 
 # Import TTA.dev primitives
 try:
     from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
     from tta_dev_primitives.recovery import RetryPrimitive, RetryStrategy
     from tta_dev_primitives.performance import CachePrimitive
+
     TTA_PRIMITIVES_AVAILABLE = True
     print("✅ TTA.dev primitives loaded")
 except ImportError as e:
@@ -66,6 +70,7 @@ except ImportError:
 
 # Primitive classes
 if TTA_PRIMITIVES_AVAILABLE:
+
     class GeminiLLMPrimitive(WorkflowPrimitive):
         """Gemini LLM primitive that uses google-generativeai SDK directly."""
 
@@ -94,11 +99,11 @@ if TTA_PRIMITIVES_AVAILABLE:
                     prompt,
                     generation_config={
                         "temperature": temperature,
-                        "max_output_tokens": max_tokens
-                    }
+                        "max_output_tokens": max_tokens,
+                    },
                 )
 
-                text = response.text if hasattr(response, 'text') else str(response)
+                text = response.text if hasattr(response, "text") else str(response)
 
                 # Estimate tokens and cost
                 prompt_tokens = len(prompt.split()) * 1.3
@@ -107,16 +112,15 @@ if TTA_PRIMITIVES_AVAILABLE:
 
                 cost_per_1m_input = 0.15
                 cost_per_1m_output = 0.60
-                estimated_cost = (
-                    (prompt_tokens / 1_000_000 * cost_per_1m_input) +
-                    (completion_tokens / 1_000_000 * cost_per_1m_output)
+                estimated_cost = (prompt_tokens / 1_000_000 * cost_per_1m_input) + (
+                    completion_tokens / 1_000_000 * cost_per_1m_output
                 )
 
                 return {
                     "response": text,
                     "model_used": self.model_name,
                     "tokens_used": total_tokens,
-                    "estimated_cost_usd": round(estimated_cost, 6)
+                    "estimated_cost_usd": round(estimated_cost, 6),
                 }
 
             except Exception as e:
@@ -132,7 +136,7 @@ if TTA_PRIMITIVES_AVAILABLE:
                 "response": f"[MOCK] Analysis of: {prompt[:100]}... This is a simulated response for testing purposes.",
                 "model_used": "mock-llm",
                 "tokens_used": 50,
-                "estimated_cost_usd": 0.0
+                "estimated_cost_usd": 0.0,
             }
 
 else:
@@ -145,6 +149,7 @@ else:
     class WorkflowPrimitive:
         def __init__(self):
             pass
+
         async def execute(self, input_data: dict, context: Any) -> dict:
             return {"response": "TTA primitives not available", "model_used": "none"}
 
@@ -157,11 +162,12 @@ else:
         async def execute(self, input_data: dict, context: Any) -> dict:
             return {"response": "Mock response", "model_used": "mock"}
 
+
 # Initialize FastAPI app
 app = FastAPI(
     title="TTA.dev API - Production Ready",
     description="Real AI analysis with TTA.dev workflow primitives",
-    version="2.0.0"
+    version="2.0.0",
 )
 
 # CORS middleware
@@ -173,11 +179,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Request/Response Models
 class AnalyzeRequest(BaseModel):
     prompt: str = Field(..., description="Analysis prompt or question")
-    context: dict[str, Any] = Field(default_factory=dict, description="Additional context data")
-    temperature: float = Field(default=0.7, ge=0.0, le=1.0, description="Creativity level")
+    context: dict[str, Any] = Field(
+        default_factory=dict, description="Additional context data"
+    )
+    temperature: float = Field(
+        default=0.7, ge=0.0, le=1.0, description="Creativity level"
+    )
+
 
 class AnalyzeResponse(BaseModel):
     success: bool
@@ -190,11 +202,13 @@ class AnalyzeResponse(BaseModel):
     tokens_used: int = 0
     estimated_cost_usd: float = 0.0
 
+
 class HealthResponse(BaseModel):
     status: str
     gemini_available: bool
     primitives_loaded: bool
     version: str
+
 
 # Initialize workflow primitives
 print("🔧 Applying TTA.dev primitives...")
@@ -211,19 +225,17 @@ if TTA_PRIMITIVES_AVAILABLE:
     # Layer 1: Cache
     cached_llm = CachePrimitive(
         primitive=llm_primitive,
-        cache_key_fn=lambda data, ctx: f"{data.get('prompt', '')}:{data.get('temperature', 0.7)}",
-        ttl_seconds=3600.0  # 1 hour
+        cache_key_fn=lambda data, ctx: (
+            f"{data.get('prompt', '')}:{data.get('temperature', 0.7)}"
+        ),
+        ttl_seconds=3600.0,  # 1 hour
     )
     print("  ✅ CachePrimitive (1 hour TTL)")
 
     # Layer 2: Retry
     resilient_llm = RetryPrimitive(
         primitive=cached_llm,
-        strategy=RetryStrategy(
-            max_retries=3,
-            backoff_base=2.0,
-            jitter=True
-        )
+        strategy=RetryStrategy(max_retries=3, backoff_base=2.0, jitter=True),
     )
     print("  ✅ RetryPrimitive (3 retries, exponential backoff)")
 
@@ -232,6 +244,7 @@ else:
     workflow_primitive = llm_primitive
 
 print("✅ Production primitives active")
+
 
 # API Endpoints
 @app.get("/", response_model=dict)
@@ -249,14 +262,15 @@ async def root():
             "LRU Cache (1 hour TTL)",
             "Exponential Backoff Retry",
             "Cost Tracking & Token Estimation",
-            "Structured Error Responses"
+            "Structured Error Responses",
         ],
         "endpoints": {
             "health": "/health",
             "analyze": "/api/v1/analyze",
-            "github": "/api/v1/github/analyze"
-        }
+            "github": "/api/v1/github/analyze",
+        },
     }
+
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
@@ -265,8 +279,9 @@ async def health_check():
         status="healthy",
         gemini_available=GEMINI_AVAILABLE,
         primitives_loaded=TTA_PRIMITIVES_AVAILABLE,
-        version="2.0.0"
+        version="2.0.0",
     )
+
 
 @app.post("/api/v1/analyze", response_model=AnalyzeResponse)
 async def analyze_text(request: AnalyzeRequest):
@@ -274,19 +289,12 @@ async def analyze_text(request: AnalyzeRequest):
     start_time = time.time()
 
     # Create workflow context
-    context = WorkflowContext(
-        correlation_id=str(uuid.uuid4()),
-        data=request.context
-    )
+    context = WorkflowContext(correlation_id=str(uuid.uuid4()), data=request.context)
 
     try:
         # Execute workflow
         result = await workflow_primitive.execute(
-            {
-                "prompt": request.prompt,
-                "temperature": request.temperature
-            },
-            context
+            {"prompt": request.prompt, "temperature": request.temperature}, context
         )
 
         execution_time = (time.time() - start_time) * 1000
@@ -298,7 +306,7 @@ async def analyze_text(request: AnalyzeRequest):
             model_used=result.get("model_used", "unknown"),
             correlation_id=context.correlation_id,
             tokens_used=result.get("tokens_used", 0),
-            estimated_cost_usd=result.get("estimated_cost_usd", 0.0)
+            estimated_cost_usd=result.get("estimated_cost_usd", 0.0),
         )
 
     except Exception as e:
@@ -309,8 +317,9 @@ async def analyze_text(request: AnalyzeRequest):
             error=str(e),
             execution_time_ms=execution_time,
             model_used="error",
-            correlation_id=context.correlation_id
+            correlation_id=context.correlation_id,
         )
+
 
 @app.post("/api/v1/github/analyze")
 async def analyze_github_repo(request: dict):
@@ -319,18 +328,19 @@ async def analyze_github_repo(request: dict):
     prompt = f"""
     Analyze this GitHub repository:
 
-    Name: {request.get('name', 'Unknown')}
-    Description: {request.get('description', 'No description')}
-    Language: {request.get('language', 'Unknown')}
-    Stars: {request.get('stargazers_count', 0)}
-    Forks: {request.get('forks_count', 0)}
-    Issues: {request.get('open_issues_count', 0)}
+    Name: {request.get("name", "Unknown")}
+    Description: {request.get("description", "No description")}
+    Language: {request.get("language", "Unknown")}
+    Stars: {request.get("stargazers_count", 0)}
+    Forks: {request.get("forks_count", 0)}
+    Issues: {request.get("open_issues_count", 0)}
 
     Provide a brief analysis of the repository's health and activity.
     """
 
     analyze_request = AnalyzeRequest(prompt=prompt)
     return await analyze_text(analyze_request)
+
 
 # Startup message
 print("\n" + "=" * 60)
@@ -341,9 +351,4 @@ print(f"Primitives: {'✅ ACTIVE' if TTA_PRIMITIVES_AVAILABLE else '❌ INACTIVE
 print("=" * 60)
 
 if __name__ == "__main__":
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        reload=False
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)

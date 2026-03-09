@@ -51,7 +51,9 @@ def test_model(model_name):
 
         # Format prompt based on model type
         if "qwen" in model_name.lower():
-            full_prompt = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
+            full_prompt = (
+                f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
+            )
         else:
             full_prompt = f"User: {prompt}\n\nAssistant: "
 

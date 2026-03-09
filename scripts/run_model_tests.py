@@ -79,12 +79,17 @@ async def run_all_tests(
     # Save general results
     general_output_file = os.path.join(output_dir, "general_evaluation_results.json")
     with open(general_output_file, "w") as f:
-        json.dump({"results": general_results, "analysis": general_analysis}, f, indent=2)
+        json.dump(
+            {"results": general_results, "analysis": general_analysis}, f, indent=2
+        )
 
     logger.info(f"General evaluation results saved to {general_output_file}")
 
     # Add to report
-    report["tests"]["general"] = {"results": general_results, "analysis": general_analysis}
+    report["tests"]["general"] = {
+        "results": general_results,
+        "analysis": general_analysis,
+    }
 
     # Run structured output tests
     logger.info("Running structured output tests...")
@@ -94,7 +99,11 @@ async def run_all_tests(
     # Save structured output results
     structured_output_file = os.path.join(output_dir, "structured_output_results.json")
     with open(structured_output_file, "w") as f:
-        json.dump({"results": structured_results, "analysis": structured_analysis}, f, indent=2)
+        json.dump(
+            {"results": structured_results, "analysis": structured_analysis},
+            f,
+            indent=2,
+        )
 
     logger.info(f"Structured output results saved to {structured_output_file}")
 
@@ -144,7 +153,9 @@ async def run_all_tests(
         overall_scores[model] = overall_score
 
     # Sort models by overall score
-    sorted_models = sorted(overall_scores.keys(), key=lambda m: overall_scores[m], reverse=True)
+    sorted_models = sorted(
+        overall_scores.keys(), key=lambda m: overall_scores[m], reverse=True
+    )
 
     # Store overall ranking
     for i, model in enumerate(sorted_models):
@@ -178,7 +189,9 @@ def print_comprehensive_report(report: dict[str, Any]):
     print(f"Models evaluated: {', '.join(report['models'])}")
 
     print("\n----- OVERALL RANKING -----")
-    for model, ranking in sorted(report["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
+    for model, ranking in sorted(
+        report["overall_ranking"].items(), key=lambda x: x[1]["rank"]
+    ):
         print(f"{ranking['rank']}. {model} (Score: {ranking['score']:.2f})")
         print(
             f"   General: {ranking['general_score']:.2f}, Structured: {ranking['structured_score']:.2f}, Tool: {ranking['tool_score']:.2f}"
@@ -228,7 +241,8 @@ def print_comprehensive_report(report: dict[str, Any]):
 
     # Get the top model overall
     top_model = next(
-        iter(sorted(report["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None)
+        iter(sorted(report["overall_ranking"].items(), key=lambda x: x[1]["rank"])),
+        (None, None),
     )[0]
 
     # Get the top model for each category
@@ -244,7 +258,9 @@ def print_comprehensive_report(report: dict[str, Any]):
     top_structured = next(
         iter(
             sorted(
-                report["tests"]["structured_output"]["analysis"]["overall_ranking"].items(),
+                report["tests"]["structured_output"]["analysis"][
+                    "overall_ranking"
+                ].items(),
                 key=lambda x: x[1]["rank"],
             )
         ),

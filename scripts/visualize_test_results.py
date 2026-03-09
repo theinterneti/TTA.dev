@@ -103,7 +103,9 @@ def create_performance_dataframe(results: dict[str, Any]) -> pd.DataFrame:
                 row.update(
                     {
                         "tool_mentions": test_result.get("tool_mentions", 0),
-                        "has_tool_reference": test_result.get("has_tool_reference", False),
+                        "has_tool_reference": test_result.get(
+                            "has_tool_reference", False
+                        ),
                     }
                 )
             elif prompt_type == "creative":
@@ -148,7 +150,9 @@ def plot_speed_comparison(df: pd.DataFrame, output_dir: str):
 
     # Create a pivot table for easier plotting
     pivot_df = speed_df.pivot_table(
-        index="model", columns=["quantization", "temperature"], values="tokens_per_second"
+        index="model",
+        columns=["quantization", "temperature"],
+        values="tokens_per_second",
     )
 
     # Plot
@@ -176,7 +180,9 @@ def plot_memory_usage(df: pd.DataFrame, output_dir: str):
     plt.figure(figsize=(14, 8))
 
     # Calculate average memory usage for each model and configuration
-    memory_df = df.groupby(["model", "quantization"])["memory_usage_mb"].mean().reset_index()
+    memory_df = (
+        df.groupby(["model", "quantization"])["memory_usage_mb"].mean().reset_index()
+    )
 
     # Create a pivot table for easier plotting
     pivot_df = memory_df.pivot_table(
@@ -208,10 +214,14 @@ def plot_temperature_effect(df: pd.DataFrame, output_dir: str):
     plt.figure(figsize=(14, 8))
 
     # Calculate average metrics for each temperature
-    temp_df = df.groupby(["model", "temperature"])["tokens_per_second"].mean().reset_index()
+    temp_df = (
+        df.groupby(["model", "temperature"])["tokens_per_second"].mean().reset_index()
+    )
 
     # Plot
-    sns.lineplot(data=temp_df, x="temperature", y="tokens_per_second", hue="model", marker="o")
+    sns.lineplot(
+        data=temp_df, x="temperature", y="tokens_per_second", hue="model", marker="o"
+    )
     plt.title("Effect of Temperature on Generation Speed")
     plt.ylabel("Tokens per Second")
     plt.xlabel("Temperature")
@@ -231,7 +241,13 @@ def plot_temperature_effect(df: pd.DataFrame, output_dir: str):
     )
 
     plt.figure(figsize=(14, 8))
-    sns.lineplot(data=creative_df, x="temperature", y="lexical_diversity", hue="model", marker="o")
+    sns.lineplot(
+        data=creative_df,
+        x="temperature",
+        y="lexical_diversity",
+        hue="model",
+        marker="o",
+    )
     plt.title("Effect of Temperature on Lexical Diversity (Creative Tasks)")
     plt.ylabel("Lexical Diversity")
     plt.xlabel("Temperature")
@@ -275,7 +291,10 @@ def plot_task_performance(df: pd.DataFrame, output_dir: str):
 
     # Tool use mentions
     tool_df = (
-        df[df["prompt_type"] == "tool_use"].groupby("model")["tool_mentions"].mean().reset_index()
+        df[df["prompt_type"] == "tool_use"]
+        .groupby("model")["tool_mentions"]
+        .mean()
+        .reset_index()
     )
 
     plt.figure(figsize=(14, 8))
@@ -359,9 +378,13 @@ def plot_radar_chart(analysis: dict[str, Any], output_dir: str):
         values = [
             perf["speed"]["avg_tokens_per_second"]
             / MAX_TOKENS_PER_SECOND,  # Normalize by max tokens/s
-            1 - (perf["memory"]["avg_model_size_mb"] / 2000),  # Inverse, assuming 2GB is max
+            1
+            - (
+                perf["memory"]["avg_model_size_mb"] / 2000
+            ),  # Inverse, assuming 2GB is max
             perf["capabilities"]["structured_output"]["success_rate"],
-            perf["capabilities"]["tool_use"]["avg_tool_mentions"] / 5,  # Assuming 5 mentions is max
+            perf["capabilities"]["tool_use"]["avg_tool_mentions"]
+            / 5,  # Assuming 5 mentions is max
             perf["capabilities"]["creativity"]["avg_lexical_diversity"],
             perf["capabilities"]["reasoning"]["avg_reasoning_score"] / 3,  # Max is 3
         ]
@@ -619,7 +642,9 @@ def main():
     parser = argparse.ArgumentParser(description="Visualize model test results.")
     parser.add_argument("--results", required=True, help="Path to results JSON file")
     parser.add_argument("--analysis", help="Path to analysis JSON file (optional)")
-    parser.add_argument("--output-dir", help="Directory to save visualizations (optional)")
+    parser.add_argument(
+        "--output-dir", help="Directory to save visualizations (optional)"
+    )
     args = parser.parse_args()
 
     # Set up output directory

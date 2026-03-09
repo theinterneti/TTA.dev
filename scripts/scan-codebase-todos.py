@@ -106,7 +106,9 @@ class CodebaseScanner:
         }
 
         # TODO patterns
-        self.todo_pattern = re.compile(r"(TODO|FIXME|XXX|HACK|NOTE|BUG)[\s:]*(.+)", re.IGNORECASE)
+        self.todo_pattern = re.compile(
+            r"(TODO|FIXME|XXX|HACK|NOTE|BUG)[\s:]*(.+)", re.IGNORECASE
+        )
 
     def scan(self) -> ScanResult:
         """Scan codebase for TODOs."""
@@ -174,7 +176,9 @@ class CodebaseScanner:
                             line_number=i + 1,
                             todo_text=line.strip(),
                             context=context,
-                            file_type=file_path.suffix[1:] if file_path.suffix else "txt",
+                            file_type=file_path.suffix[1:]
+                            if file_path.suffix
+                            else "txt",
                             category=category,
                         )
                     )

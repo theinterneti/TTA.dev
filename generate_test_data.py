@@ -43,7 +43,7 @@ test_workflows = [
             ("Validate", "ConditionalPrimitive", 0.2, "success"),
             ("Transform", "MapPrimitive", 1.2, "success"),
             ("Save", "LambdaPrimitive", 0.8, "success"),
-        ]
+        ],
     },
     {
         "trace_id": "test-002",
@@ -52,7 +52,7 @@ test_workflows = [
             ("Authenticate", "LambdaPrimitive", 0.3, "success"),
             ("CallAPI", "RetryPrimitive", 2.5, "success"),
             ("ParseResponse", "LambdaPrimitive", 0.4, "success"),
-        ]
+        ],
     },
     {
         "trace_id": "test-003",
@@ -61,8 +61,8 @@ test_workflows = [
             ("Setup", "LambdaPrimitive", 0.2, "success"),
             ("ProcessData", "CircuitBreakerPrimitive", 1.0, "error"),
             ("Cleanup", "FallbackPrimitive", 0.5, "success"),
-        ]
-    }
+        ],
+    },
 ]
 
 for workflow in test_workflows:
@@ -70,27 +70,32 @@ for workflow in test_workflows:
     for span_name, primitive_type, duration, status in workflow["primitives"]:
         start_time = now + offset
         end_time = start_time + duration
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             INSERT INTO spans 
             (trace_id, span_name, primitive_type, start_time, end_time, duration_ms, status, attributes)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            workflow["trace_id"],
-            span_name,
-            primitive_type,
-            start_time,
-            end_time,
-            duration * 1000,
-            status,
-            json.dumps({
-                "workflow": workflow["workflow"],
-                "agent": "test-agent",
-                "input_size": 1024,
-                "output_size": 2048
-            })
-        ))
-        
+        """,
+            (
+                workflow["trace_id"],
+                span_name,
+                primitive_type,
+                start_time,
+                end_time,
+                duration * 1000,
+                status,
+                json.dumps(
+                    {
+                        "workflow": workflow["workflow"],
+                        "agent": "test-agent",
+                        "input_size": 1024,
+                        "output_size": 2048,
+                    }
+                ),
+            ),
+        )
+
         offset += duration
 
 conn.commit()

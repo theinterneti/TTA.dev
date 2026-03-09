@@ -111,7 +111,9 @@ def validate_docstring_with_llm(
                 },
                 {
                     "role": "user",
-                    "content": VALIDATION_PROMPT.format(signature=signature, docstring=docstring),
+                    "content": VALIDATION_PROMPT.format(
+                        signature=signature, docstring=docstring
+                    ),
                 },
             ],
             temperature=0.0,
@@ -180,7 +182,9 @@ def main() -> int:
         for func_name, signature, docstring in functions:
             total_functions += 1
 
-            result = validate_docstring_with_llm(client, func_name, signature, docstring)
+            result = validate_docstring_with_llm(
+                client, func_name, signature, docstring
+            )
 
             recommendation = result.get("recommendation", "Unknown")
             score = result.get("overall_score", 0)

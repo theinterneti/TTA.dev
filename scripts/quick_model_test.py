@@ -87,12 +87,17 @@ async def test_model(model_name: str) -> dict[str, Any]:
 
         start_time = time.time()
         response = llm_client.generate(
-            prompt=speed_test["prompt"], model=model_name, temperature=0.2, max_tokens=100
+            prompt=speed_test["prompt"],
+            model=model_name,
+            temperature=0.2,
+            max_tokens=100,
         )
         end_time = time.time()
 
         duration = end_time - start_time
-        tokens_per_second = speed_test["expected_tokens"] / duration if duration > 0 else 0
+        tokens_per_second = (
+            speed_test["expected_tokens"] / duration if duration > 0 else 0
+        )
 
         results["tests"]["speed"] = {
             "duration": duration,
@@ -100,7 +105,9 @@ async def test_model(model_name: str) -> dict[str, Any]:
             "response": response,
         }
 
-        logger.info(f"  Speed test completed in {duration:.2f}s ({tokens_per_second:.2f} tokens/s)")
+        logger.info(
+            f"  Speed test completed in {duration:.2f}s ({tokens_per_second:.2f} tokens/s)"
+        )
 
         # Test structured output
         logger.info(f"Testing {model_name} on structured output...")
@@ -190,7 +197,11 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
         models = TARGET_MODELS
 
     # Prepare results dictionary
-    results = {"models": models, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "results": []}
+    results = {
+        "models": models,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "results": [],
+    }
 
     # Run tests
     for model in models:
@@ -254,8 +265,14 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
         # Store model performance
         analysis["model_performance"][model] = {
-            "speed": {"duration": speed_duration, "tokens_per_second": tokens_per_second},
-            "structured_output": {"duration": structured_duration, "is_valid_json": is_valid_json},
+            "speed": {
+                "duration": speed_duration,
+                "tokens_per_second": tokens_per_second,
+            },
+            "structured_output": {
+                "duration": structured_duration,
+                "is_valid_json": is_valid_json,
+            },
             "tool_use": {"duration": tool_duration, "tool_mentioned": tool_mentioned},
         }
 
@@ -307,7 +324,9 @@ def print_analysis(analysis: dict[str, Any]):
     print(f"Models evaluated: {', '.join(analysis['models'])}")
 
     print("\n----- OVERALL RANKING -----")
-    for model, ranking in sorted(analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
+    for model, ranking in sorted(
+        analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]
+    ):
         print(f"{ranking['rank']}. {model} (Score: {ranking['score']:.2f})")
 
     print("\n----- MODEL PERFORMANCE -----")
@@ -320,7 +339,9 @@ def print_analysis(analysis: dict[str, Any]):
 
         # Speed metrics
         speed = perf["speed"]
-        print(f"  Speed: {speed['tokens_per_second']:.2f} tokens/s ({speed['duration']:.2f}s)")
+        print(
+            f"  Speed: {speed['tokens_per_second']:.2f} tokens/s ({speed['duration']:.2f}s)"
+        )
 
         # Structured output metrics
         structured = perf["structured_output"]
@@ -342,7 +363,8 @@ def print_analysis(analysis: dict[str, Any]):
 
     # Get the top model overall
     top_model = next(
-        iter(sorted(analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"])), (None, None)
+        iter(sorted(analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"])),
+        (None, None),
     )[0]
 
     if top_model:
@@ -356,7 +378,9 @@ def print_analysis(analysis: dict[str, Any]):
                 if m in analysis["model_performance"]
                 and "error" not in analysis["model_performance"][m]
             ],
-            key=lambda m: analysis["model_performance"][m]["speed"]["tokens_per_second"],
+            key=lambda m: analysis["model_performance"][m]["speed"][
+                "tokens_per_second"
+            ],
         )
 
         best_structured = [
@@ -379,7 +403,9 @@ def print_analysis(analysis: dict[str, Any]):
         print(
             f"Models with valid structured output: {', '.join(best_structured) if best_structured else 'None'}"
         )
-        print(f"Models with correct tool use: {', '.join(best_tool) if best_tool else 'None'}")
+        print(
+            f"Models with correct tool use: {', '.join(best_tool) if best_tool else 'None'}"
+        )
 
         # Print specific use case recommendations
         print("\nRecommended models by use case:")

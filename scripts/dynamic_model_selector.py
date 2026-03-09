@@ -66,7 +66,9 @@ def load_analysis(analysis_file: str) -> dict[str, Any]:
 def get_latest_analysis_file() -> str | None:
     """Get the most recent analysis file in the results directory."""
     try:
-        analysis_files = [f for f in os.listdir(RESULTS_DIR) if f.endswith("_analysis.json")]
+        analysis_files = [
+            f for f in os.listdir(RESULTS_DIR) if f.endswith("_analysis.json")
+        ]
         if not analysis_files:
             return None
 
@@ -185,8 +187,12 @@ def select_model_for_task(
         "selected_model": best_model,
         "recommended_config": best_config,
         "performance": {
-            "speed": get_value_from_nested_dict(model_details, "speed.avg_tokens_per_second"),
-            "memory": get_value_from_nested_dict(model_details, "memory.avg_model_size_mb"),
+            "speed": get_value_from_nested_dict(
+                model_details, "speed.avg_tokens_per_second"
+            ),
+            "memory": get_value_from_nested_dict(
+                model_details, "memory.avg_model_size_mb"
+            ),
             "structured_output": get_value_from_nested_dict(
                 model_details, "capabilities.structured_output.success_rate"
             ),
@@ -200,7 +206,9 @@ def select_model_for_task(
                 model_details, "capabilities.reasoning.avg_reasoning_score"
             ),
         },
-        "alternatives": [model for model, _ in valid_models[1:3]],  # Next 2 best alternatives
+        "alternatives": [
+            model for model, _ in valid_models[1:3]
+        ],  # Next 2 best alternatives
     }
 
 
@@ -327,7 +335,9 @@ def main():
         help="Agent type",
     )
     parser.add_argument("--max-memory", type=int, help="Maximum memory in MB")
-    parser.add_argument("--min-speed", type=float, help="Minimum speed in tokens/second")
+    parser.add_argument(
+        "--min-speed", type=float, help="Minimum speed in tokens/second"
+    )
     args = parser.parse_args()
 
     # Get analysis file
@@ -359,7 +369,10 @@ def main():
     # Select model
     if args.agent:
         selection = get_model_config_for_agent(
-            analysis, args.agent, memory_constraint=args.max_memory, speed_constraint=args.min_speed
+            analysis,
+            args.agent,
+            memory_constraint=args.max_memory,
+            speed_constraint=args.min_speed,
         )
     elif args.task:
         selection = select_model_for_task(analysis, args.task, constraints)

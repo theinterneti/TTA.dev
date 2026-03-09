@@ -96,7 +96,9 @@ class PAFComplianceValidator:
                 result = self.paf.validate_file_size(py_file, lines)
 
                 if not result.is_valid:
-                    violations.append(f"  • {py_file.relative_to(project_root)}: {lines} lines")
+                    violations.append(
+                        f"  • {py_file.relative_to(project_root)}: {lines} lines"
+                    )
                     self._record_result(f"File Size: {py_file.name}", result)
 
             except Exception:
@@ -212,8 +214,12 @@ class PAFComplianceValidator:
 
 def main() -> int:
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Validate PAF compliance across the project")
-    parser.add_argument("--strict", action="store_true", help="Treat warnings as errors")
+    parser = argparse.ArgumentParser(
+        description="Validate PAF compliance across the project"
+    )
+    parser.add_argument(
+        "--strict", action="store_true", help="Treat warnings as errors"
+    )
 
     args = parser.parse_args()
 

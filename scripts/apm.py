@@ -18,20 +18,20 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("apm")
 
 APM_FILE = "apm.yml"
 APM_SEARCH_PATHS = [APM_FILE, "config/apm.yml"]
 
+
 def load_apm_config():
     """Load configuration from apm.yml."""
     for path in APM_SEARCH_PATHS:
         if os.path.exists(path):
             try:
-                with open(path, 'r', encoding='utf-8') as f:
+                with open(path, "r", encoding="utf-8") as f:
                     return yaml.safe_load(f)
             except yaml.YAMLError as e:
                 logger.error(f"Error parsing '{path}': {e}")
@@ -39,6 +39,7 @@ def load_apm_config():
 
     logger.error(f"Configuration file not found. Searched: {APM_SEARCH_PATHS}")
     sys.exit(1)
+
 
 def run_script(script_name: str, extra_args: list):
     """Run a script defined in apm.yml."""
@@ -71,6 +72,7 @@ def run_script(script_name: str, extra_args: list):
         logger.error(f"Script failed with exit code {e.returncode}")
         sys.exit(e.returncode)
 
+
 def list_scripts():
     """List available scripts."""
     config = load_apm_config()
@@ -79,6 +81,7 @@ def list_scripts():
     for name, cmd in scripts.items():
         print(f"  {name:<25} : {cmd}")
 
+
 def main():
     parser = argparse.ArgumentParser(description="Agent Package Manager (APM)")
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
@@ -86,7 +89,9 @@ def main():
     # Run command
     run_parser = subparsers.add_parser("run", help="Run a script")
     run_parser.add_argument("script", help="Name of the script to run")
-    run_parser.add_argument("args", nargs=argparse.REMAINDER, help="Arguments for the script")
+    run_parser.add_argument(
+        "args", nargs=argparse.REMAINDER, help="Arguments for the script"
+    )
 
     # List command
     subparsers.add_parser("list", help="List available scripts")
@@ -99,6 +104,7 @@ def main():
         list_scripts()
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

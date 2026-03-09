@@ -14,7 +14,7 @@ import json
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List
 
 # Worktree configuration
 WORKTREES = {
@@ -151,7 +151,9 @@ def generate_sync_report(results: Dict[str, Dict]) -> str:
 
     if total_new + total_updated + total_logseq > 0:
         report.append("Action Required:")
-        report.append(f"  → Review {total_new + total_updated} patterns in .worktree/coordination/")
+        report.append(
+            f"  → Review {total_new + total_updated} patterns in .worktree/coordination/"
+        )
         if total_logseq > 0:
             report.append(f"  → Check {total_logseq} Logseq pages for integration")
     else:

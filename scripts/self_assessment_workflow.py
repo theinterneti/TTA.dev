@@ -38,8 +38,9 @@ class SelfAssessmentWorkflow:
         # Create caching for expensive operations
         self.cached_analyzer = CachePrimitive(
             primitive=self.code_analyzer,
-            cache_key_fn=lambda data,
-            ctx: f"analysis:{data.get('type', 'default')}:{data.get('path', 'global')}",
+            cache_key_fn=lambda data, ctx: (
+                f"analysis:{data.get('type', 'default')}:{data.get('path', 'global')}"
+            ),
             ttl_seconds=300.0,  # 5 minute cache
         )
 

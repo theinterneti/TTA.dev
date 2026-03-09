@@ -13,7 +13,6 @@ import asyncio
 import logging
 import sys
 import os
-from pathlib import Path
 
 # Add repo root to path to import scripts
 sys.path.append(os.getcwd())
@@ -21,18 +20,22 @@ sys.path.append(os.path.join(os.getcwd(), "platform/primitives/src"))
 
 from tta_dev_primitives.ace import BenchmarkSuite
 from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.ace.cognitive_manager import ACEInput, ACEOutput, SelfLearningCodePrimitive
+from tta_dev_primitives.ace.cognitive_manager import (
+    ACEInput,
+    ACEOutput,
+    SelfLearningCodePrimitive,
+)
 
 # Import the coordinator logic
 # Add current directory to path to allow importing coordinator
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
-import coordinator
 from coordinator import execute_task
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("validate_phase4")
+
 
 class AutonomousDevWrapper(SelfLearningCodePrimitive):
     """Wrapper for the Autonomous Dev Coordinator to fit ACE Benchmark interface."""
@@ -41,8 +44,9 @@ class AutonomousDevWrapper(SelfLearningCodePrimitive):
         super().__init__()
         # Override metrics if needed, but base class has them
 
-
-    async def execute(self, input_data: ACEInput, context: WorkflowContext) -> ACEOutput:
+    async def execute(
+        self, input_data: ACEInput, context: WorkflowContext
+    ) -> ACEOutput:
         """Executes the task using the coordinator."""
         task = input_data["task"]
         logger.info(f"🧪 Benchmarking Task: {task}")
@@ -61,7 +65,7 @@ class AutonomousDevWrapper(SelfLearningCodePrimitive):
                 "strategies_learned": 0,
                 "playbook_size": 0,
                 "improvement_score": 0.0,
-                "learning_summary": "Autonomous execution completed."
+                "learning_summary": "Autonomous execution completed.",
             }
         except Exception as e:
             logger.error(f"Execution failed: {e}")
@@ -72,8 +76,9 @@ class AutonomousDevWrapper(SelfLearningCodePrimitive):
                 "strategies_learned": 0,
                 "playbook_size": 0,
                 "improvement_score": 0.0,
-                "learning_summary": f"Failed: {e}"
+                "learning_summary": f"Failed: {e}",
             }
+
 
 async def run_validation():
     print("🚀 Validating Phase 4: Autonomous Feature Development")
@@ -87,7 +92,9 @@ async def run_validation():
 
     # Filter for a subset of tasks to save time/tokens
     # Let's pick one easy and one medium task
-    suite.tasks = [t for t in suite.tasks if t.id in ["easy_fibonacci", "medium_binary_search"]]
+    suite.tasks = [
+        t for t in suite.tasks if t.id in ["easy_fibonacci", "medium_binary_search"]
+    ]
 
     print(f"📋 Running {len(suite.tasks)} benchmark tasks...")
 
@@ -116,9 +123,12 @@ async def run_validation():
     print(f"Total Passed: {passed}/{len(results)}")
 
     if passed == len(results):
-        print("\n🎉 Phase 4 Validation Successful! The Autonomous Agent produces valid code.")
+        print(
+            "\n🎉 Phase 4 Validation Successful! The Autonomous Agent produces valid code."
+        )
     else:
         print("\n⚠️ Phase 4 Validation Failed. Check logs.")
+
 
 if __name__ == "__main__":
     asyncio.run(run_validation())

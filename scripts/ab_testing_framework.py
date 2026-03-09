@@ -7,7 +7,7 @@ they work effectively across multiple AI agents and models.
 
 import asyncio
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from tta_dev_primitives import WorkflowContext
 from tta_dev_primitives.integrations import CodeExecutionPrimitive
@@ -27,7 +27,9 @@ class A_B_TestRunner(InstrumentedPrimitive[Dict, Dict]):
         super().__init__(name="a_b_test_runner")
         self.executor = CodeExecutionPrimitive(default_timeout=60)
 
-    async def _execute_impl(self, input_data: Dict, context: WorkflowContext) -> Dict[str, Any]:
+    async def _execute_impl(
+        self, input_data: Dict, context: WorkflowContext
+    ) -> Dict[str, Any]:
         """
         Executes a single A/B test case.
         """
@@ -150,7 +152,9 @@ asyncio.run(test())
     logger.info("A/B testing complete.")
     logger.info("Results:")
     for result in results:
-        logger.info(f"  - {result['test_name']}: {'Success' if result['success'] else 'Failure'}")
+        logger.info(
+            f"  - {result['test_name']}: {'Success' if result['success'] else 'Failure'}"
+        )
         if not result["success"]:
             logger.error(f"    Error: {result['error']}")
 

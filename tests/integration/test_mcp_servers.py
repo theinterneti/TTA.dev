@@ -185,7 +185,9 @@ def test_knowledge_server_mcp_handshake(knowledge_server):
 
     # Send the handshake
     try:
-        response = requests.post(f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake)
+        response = requests.post(
+            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake
+        )
         assert response.status_code == 200
 
         # Parse the response
@@ -209,7 +211,9 @@ def test_agent_tool_server_mcp_handshake(agent_tool_server):
 
     # Send the handshake
     try:
-        response = requests.post(f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake)
+        response = requests.post(
+            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake
+        )
         assert response.status_code == 200
 
         # Parse the response
@@ -233,7 +237,9 @@ def test_knowledge_server_list_resources(knowledge_server):
 
     # Send the handshake
     try:
-        response = requests.post(f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake)
+        response = requests.post(
+            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake
+        )
         assert response.status_code == 200
 
         # Get the session ID
@@ -284,7 +290,9 @@ def test_agent_tool_server_list_tools(agent_tool_server):
 
     # Send the handshake
     try:
-        response = requests.post(f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake)
+        response = requests.post(
+            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake
+        )
         assert response.status_code == 200
 
         # Get the session ID
@@ -335,7 +343,9 @@ def test_knowledge_server_read_resource(knowledge_server):
 
     # Send the handshake
     try:
-        response = requests.post(f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake)
+        response = requests.post(
+            f"http://localhost:{KNOWLEDGE_SERVER_PORT}/mcp", json=handshake
+        )
         assert response.status_code == 200
 
         # Get the session ID
@@ -383,7 +393,9 @@ def test_agent_tool_server_call_tool(agent_tool_server):
 
     # Send the handshake
     try:
-        response = requests.post(f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake)
+        response = requests.post(
+            f"http://localhost:{AGENT_TOOL_SERVER_PORT}/mcp", json=handshake
+        )
         assert response.status_code == 200
 
         # Get the session ID

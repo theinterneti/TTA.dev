@@ -17,12 +17,12 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("ci_pr_review")
 
 PROMPT_FILE = ".github/prompts/pr-review.prompt.md"
+
 
 def get_git_diff(target_branch="main"):
     """Get the git diff between target branch and current HEAD."""
@@ -39,9 +39,12 @@ def get_git_diff(target_branch="main"):
         logger.error(f"Failed to get git diff: {e}")
         return None
 
+
 def main():
     parser = argparse.ArgumentParser(description="Run CI PR Review")
-    parser.add_argument("--target-branch", default="main", help="Target branch for diff")
+    parser.add_argument(
+        "--target-branch", default="main", help="Target branch for diff"
+    )
     args = parser.parse_args()
 
     if not os.path.exists(PROMPT_FILE):
@@ -82,7 +85,8 @@ def main():
     # For now, let's write a temp file.
 
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as tmp:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as tmp:
         tmp.write(combined_content)
         tmp_path = tmp.name
 
@@ -98,6 +102,7 @@ def main():
     finally:
         os.remove(tmp_path)
         logger.info("Cleaned up temporary file.")
+
 
 if __name__ == "__main__":
     main()

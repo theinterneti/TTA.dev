@@ -45,7 +45,14 @@ def calculate_expected_tests(results):
 
 def generate_report():
     """Generate the visualization report."""
-    cmd = ["python3", VISUALIZATION_SCRIPT, "--results", RESULTS_FILE, "--output-dir", OUTPUT_DIR]
+    cmd = [
+        "python3",
+        VISUALIZATION_SCRIPT,
+        "--results",
+        RESULTS_FILE,
+        "--output-dir",
+        OUTPUT_DIR,
+    ]
 
     try:
         subprocess.run(cmd, check=True)

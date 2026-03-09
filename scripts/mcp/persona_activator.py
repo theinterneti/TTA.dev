@@ -178,9 +178,7 @@ class PersonaActivator:
         context = self.analyze_workspace_context()
         selected_persona = self.select_persona(context)
         mcp_tools = (
-            self.get_persona_mcp_tools(selected_persona)
-            if selected_persona
-            else []
+            self.get_persona_mcp_tools(selected_persona) if selected_persona else []
         )
         personas_md = self.parse_agents_md()
 

@@ -126,7 +126,11 @@ async def main():
 
     all_broken = result["broken_links"]
     valid_links_data = result.get("valid_links", [])
-    valid_count = len(valid_links_data) if isinstance(valid_links_data, list) else valid_links_data
+    valid_count = (
+        len(valid_links_data)
+        if isinstance(valid_links_data, list)
+        else valid_links_data
+    )
 
     # Filter out false positives
     real_broken = []
@@ -146,7 +150,9 @@ async def main():
     print(f"  ⚠️  REAL broken links: {len(real_broken)}")
 
     print("\n🔍 False Positive Breakdown:")
-    for reason, links in sorted(false_positives.items(), key=lambda x: len(x[1]), reverse=True):
+    for reason, links in sorted(
+        false_positives.items(), key=lambda x: len(x[1]), reverse=True
+    ):
         print(f"  {reason}: {len(links)} links")
 
     # Group real broken links by source and target
@@ -181,7 +187,9 @@ async def main():
 
         f.write("FALSE POSITIVE BREAKDOWN\n")
         f.write("=" * 80 + "\n\n")
-        for reason, links in sorted(false_positives.items(), key=lambda x: len(x[1]), reverse=True):
+        for reason, links in sorted(
+            false_positives.items(), key=lambda x: len(x[1]), reverse=True
+        ):
             f.write(f"{reason}: {len(links)} links\n")
         f.write("\n")
 
@@ -200,7 +208,9 @@ async def main():
         f.write("MOST COMMONLY MISSING PAGES (Create Priority)\n")
         f.write("=" * 80 + "\n\n")
         for i, (target, sources) in enumerate(sorted_targets[:30], 1):
-            f.write(f"{i}. {target} (referenced by {len(sources)} pages - HIGH IMPACT)\n")
+            f.write(
+                f"{i}. {target} (referenced by {len(sources)} pages - HIGH IMPACT)\n"
+            )
             for source in sorted(set(sources))[:10]:  # Show first 10 unique sources
                 count = sources.count(source)
                 f.write(f"   <- {source} ({count}x)\n")

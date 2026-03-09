@@ -159,7 +159,10 @@ class IssueManager:
         labels_to_add = []
 
         # Category detection (using actual repo labels)
-        if any(kw in content for kw in ["trace", "metric", "observability", "telemetry", "otel"]):
+        if any(
+            kw in content
+            for kw in ["trace", "metric", "observability", "telemetry", "otel"]
+        ):
             labels_to_add.append("observability")
         if any(kw in content for kw in ["test", "coverage", "pytest", "testing"]):
             labels_to_add.append("testing")
@@ -207,7 +210,9 @@ class IssueManager:
                     check=True,
                     capture_output=True,
                 )
-                print(f"✅ Auto-labeled issue #{issue_number}: {', '.join(labels_to_add)}")
+                print(
+                    f"✅ Auto-labeled issue #{issue_number}: {', '.join(labels_to_add)}"
+                )
                 return True
             except subprocess.CalledProcessError as e:
                 print(f"Error adding labels: {e.stderr}", file=sys.stderr)
@@ -301,7 +306,10 @@ class IssueManager:
                 created_count += 1
 
             except subprocess.CalledProcessError as e:
-                print(f"Error creating milestone {milestone['title']}: {e.stderr}", file=sys.stderr)
+                print(
+                    f"Error creating milestone {milestone['title']}: {e.stderr}",
+                    file=sys.stderr,
+                )
 
         if created_count > 0:
             print(f"\n🎉 Created {created_count} new milestones")
@@ -323,7 +331,9 @@ class IssueManager:
         content = f"{issue.title} {issue.body} {' '.join(issue.labels)}".lower()
         milestone_title = None
 
-        if "primitive" in content and any(kw in content for kw in ["new", "feature", "add"]):
+        if "primitive" in content and any(
+            kw in content for kw in ["new", "feature", "add"]
+        ):
             milestone_title = "Phase 4: Advanced Features"
         elif "observability" in content:
             milestone_title = "Phase 2: Observability Integration"
@@ -337,11 +347,20 @@ class IssueManager:
         if milestone_title:
             try:
                 subprocess.run(
-                    ["gh", "issue", "edit", str(issue_number), "--milestone", milestone_title],
+                    [
+                        "gh",
+                        "issue",
+                        "edit",
+                        str(issue_number),
+                        "--milestone",
+                        milestone_title,
+                    ],
                     check=True,
                     capture_output=True,
                 )
-                print(f"✅ Assigned issue #{issue_number} to milestone: {milestone_title}")
+                print(
+                    f"✅ Assigned issue #{issue_number} to milestone: {milestone_title}"
+                )
                 return True
             except subprocess.CalledProcessError as e:
                 print(f"Error assigning milestone: {e.stderr}", file=sys.stderr)
@@ -450,7 +469,9 @@ class IssueManager:
                             labels=[lb["name"] for lb in item.get("labels", [])],
                             state=item.get("state", "OPEN"),
                             milestone=(
-                                item["milestone"]["title"] if item.get("milestone") else None
+                                item["milestone"]["title"]
+                                if item.get("milestone")
+                                else None
                             ),
                             assignees=[a["login"] for a in item.get("assignees", [])],
                             created_at=item.get("createdAt", ""),
@@ -537,13 +558,20 @@ class IssueManager:
         if duplicates:
             for a, b in duplicates:
                 print(f'  #{a.number} ↔ #{b.number}  "{_trunc(a.title, 60)}"')
-            print("\n  ➡️  Action: close the duplicate and reference the original in a comment.\n")
+            print(
+                "\n  ➡️  Action: close the duplicate and reference the original in a comment.\n"
+            )
         else:
             print("  None detected.\n")
 
         # --- Stale ---
         stale = self._detect_stale(issues, stale_days)
-        exempt_labels = {"pinned", "priority: critical", "priority: high", "production-readiness"}
+        exempt_labels = {
+            "pinned",
+            "priority: critical",
+            "priority: high",
+            "production-readiness",
+        }
         actionable_stale = [i for i in stale if not set(i.labels) & exempt_labels]
         print("-" * 80)
         print(
@@ -569,7 +597,9 @@ class IssueManager:
         for issue in resolved:
             print(f"  #{issue.number:>4}  {_trunc(issue.title, 70)}")
         if resolved:
-            print("\n  ➡️  Action: verify completion and close with a summary comment.\n")
+            print(
+                "\n  ➡️  Action: verify completion and close with a summary comment.\n"
+            )
         else:
             print("  None detected.\n")
 
@@ -638,7 +668,10 @@ class IssueManager:
             )
             return True
         except subprocess.CalledProcessError as e:
-            print(f"  ❌ Failed to close #{number}: {e.stderr or 'unknown error'}", file=sys.stderr)
+            print(
+                f"  ❌ Failed to close #{number}: {e.stderr or 'unknown error'}",
+                file=sys.stderr,
+            )
             return False
 
     def close_stale(self, stale_days: int = 90) -> None:
@@ -759,7 +792,9 @@ class IssueManager:
 
                     print(f"\n{status_icon} {title}")
                     print(f"   Progress: [{bar}] {progress:.1f}%")
-                    print(f"   Issues: {closed_issues}/{total} completed ({open_issues} open)")
+                    print(
+                        f"   Issues: {closed_issues}/{total} completed ({open_issues} open)"
+                    )
                     if due_date and due_date != "No deadline":
                         due = datetime.fromisoformat(due_date.replace("Z", "+00:00"))
                         print(f"   Due: {due.strftime('%Y-%m-%d')}")

@@ -125,7 +125,9 @@ async def test_performance_comparison():
     print("Testing ML template (tta-ml-minimal)...")
     start_time = time.time()
 
-    ml_executor = CodeExecutionPrimitive(template_id="tta-ml-minimal", default_timeout=60)
+    ml_executor = CodeExecutionPrimitive(
+        template_id="tta-ml-minimal", default_timeout=60
+    )
 
     context = WorkflowContext(trace_id="perf-test-ml")
 
@@ -147,7 +149,9 @@ async def test_performance_comparison():
         await ml_executor.cleanup()
 
     print("📊 Results:")
-    print(f"   ML Template: {ml_time:.2f}s ({'✅ SUCCESS' if ml_success else '❌ FAILED'})")
+    print(
+        f"   ML Template: {ml_time:.2f}s ({'✅ SUCCESS' if ml_success else '❌ FAILED'})"
+    )
 
     if ml_success:
         print("🚀 ML template ready for production use!")

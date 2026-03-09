@@ -75,7 +75,9 @@ async def main():
 
     # Execute workflow
     print("\n3. Executing workflow...")
-    context = WorkflowContext(workflow_id="test-workflow-001", correlation_id="test-001")
+    context = WorkflowContext(
+        workflow_id="test-workflow-001", correlation_id="test-001"
+    )
 
     result = await workflow.execute({"input": "test"}, context)
     print(f"   ✅ Workflow executed: {result}")

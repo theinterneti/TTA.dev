@@ -74,7 +74,9 @@ def create_performance_dataframe(results: dict[str, Any]) -> pd.DataFrame:
                 row.update(
                     {
                         "tool_mentions": test_data.get("tool_mentions", 0),
-                        "has_tool_reference": test_data.get("has_tool_reference", False),
+                        "has_tool_reference": test_data.get(
+                            "has_tool_reference", False
+                        ),
                     }
                 )
             elif test_type == "creative":
@@ -105,7 +107,9 @@ def plot_speed_comparison(df: pd.DataFrame, output_dir: str):
     plt.figure(figsize=(12, 8))
 
     # Group by model and quantization, and calculate mean speed
-    speed_data = df.groupby(["model", "quantization"])["tokens_per_second"].mean().reset_index()
+    speed_data = (
+        df.groupby(["model", "quantization"])["tokens_per_second"].mean().reset_index()
+    )
 
     # Create the plot
     sns.barplot(x="model", y="tokens_per_second", hue="quantization", data=speed_data)
@@ -127,7 +131,9 @@ def plot_memory_usage(df: pd.DataFrame, output_dir: str):
     plt.figure(figsize=(12, 8))
 
     # Group by model and quantization, and calculate mean memory usage
-    memory_data = df.groupby(["model", "quantization"])["memory_usage_mb"].mean().reset_index()
+    memory_data = (
+        df.groupby(["model", "quantization"])["memory_usage_mb"].mean().reset_index()
+    )
 
     # Create the plot
     sns.barplot(x="model", y="memory_usage_mb", hue="quantization", data=memory_data)
@@ -146,7 +152,10 @@ def plot_memory_usage(df: pd.DataFrame, output_dir: str):
 
 def plot_temperature_effect(df: pd.DataFrame, output_dir: str):
     """Plot the effect of temperature on different metrics."""
-    metrics = {"tokens_per_second": "Generation Speed", "lexical_diversity": "Lexical Diversity"}
+    metrics = {
+        "tokens_per_second": "Generation Speed",
+        "lexical_diversity": "Lexical Diversity",
+    }
 
     for metric, metric_name in metrics.items():
         if metric == "lexical_diversity":
@@ -158,7 +167,9 @@ def plot_temperature_effect(df: pd.DataFrame, output_dir: str):
         plt.figure(figsize=(12, 8))
 
         # Group by model and temperature, and calculate mean of the metric
-        temp_data = metric_df.groupby(["model", "temperature"])[metric].mean().reset_index()
+        temp_data = (
+            metric_df.groupby(["model", "temperature"])[metric].mean().reset_index()
+        )
 
         # Create the plot
         sns.lineplot(x="temperature", y=metric, hue="model", marker="o", data=temp_data)
@@ -170,7 +181,9 @@ def plot_temperature_effect(df: pd.DataFrame, output_dir: str):
         plt.tight_layout()
 
         # Save the plot
-        plt.savefig(os.path.join(output_dir, f"temperature_effect_{metric}.png"), dpi=300)
+        plt.savefig(
+            os.path.join(output_dir, f"temperature_effect_{metric}.png"), dpi=300
+        )
         plt.close()
 
 
@@ -215,10 +228,16 @@ def plot_flash_attention_comparison(df: pd.DataFrame, output_dir: str):
     plt.figure(figsize=(12, 8))
 
     # Group by model and flash_attention, and calculate mean speed
-    flash_data = df.groupby(["model", "flash_attention"])["tokens_per_second"].mean().reset_index()
+    flash_data = (
+        df.groupby(["model", "flash_attention"])["tokens_per_second"]
+        .mean()
+        .reset_index()
+    )
 
     # Create the plot
-    sns.barplot(x="model", y="tokens_per_second", hue="flash_attention", data=flash_data)
+    sns.barplot(
+        x="model", y="tokens_per_second", hue="flash_attention", data=flash_data
+    )
 
     # Customize the plot
     plt.title("Effect of Flash Attention on Generation Speed", fontsize=16)
@@ -257,9 +276,11 @@ def create_radar_chart(analysis: dict[str, Any], output_dir: str):
             perf["speed"]["avg_tokens_per_second"],
             -perf["memory"]["avg_model_size_mb"],  # Negative because smaller is better
             perf["capabilities"]["structured_output"]["success_rate"],
-            perf["capabilities"]["tool_use"]["avg_tool_mentions"] / 5,  # Normalize to 0-1 range
+            perf["capabilities"]["tool_use"]["avg_tool_mentions"]
+            / 5,  # Normalize to 0-1 range
             perf["capabilities"]["creativity"]["avg_lexical_diversity"],
-            perf["capabilities"]["reasoning"]["avg_reasoning_score"] / 3,  # Normalize to 0-1 range
+            perf["capabilities"]["reasoning"]["avg_reasoning_score"]
+            / 3,  # Normalize to 0-1 range
         ]
         data.append(model_data)
 
@@ -485,7 +506,9 @@ def create_html_report(results_file: str, analysis_file: str, charts_dir: str):
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description="Visualization Tool for Model Test Results")
+    parser = argparse.ArgumentParser(
+        description="Visualization Tool for Model Test Results"
+    )
     parser.add_argument("--results", required=True, help="Path to results JSON file")
     parser.add_argument(
         "--analysis",

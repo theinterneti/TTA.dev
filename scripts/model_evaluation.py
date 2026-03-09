@@ -221,7 +221,9 @@ async def evaluate_model(
             )
             # Check if response is valid JSON
             try:
-                json_response = json.loads(response) if isinstance(response, str) else response
+                json_response = (
+                    json.loads(response) if isinstance(response, str) else response
+                )
                 result["is_valid_json"] = True
                 result["json_response"] = json_response
             except json.JSONDecodeError:
@@ -263,7 +265,9 @@ async def evaluate_model(
             if "expected_tools" in test_case:
                 # Check if the expected tools are mentioned in the response
                 expected_tools = test_case["expected_tools"]
-                tools_mentioned = all(tool.lower() in response.lower() for tool in expected_tools)
+                tools_mentioned = all(
+                    tool.lower() in response.lower() for tool in expected_tools
+                )
                 result["tools_mentioned"] = tools_mentioned
                 result["expected_tools"] = expected_tools
 
@@ -272,7 +276,9 @@ async def evaluate_model(
                 import re
 
                 tool_match = re.search(r"<tool>(.*?)</tool>", response)
-                params_match = re.search(r"<parameters>(.*?)</parameters>", response, re.DOTALL)
+                params_match = re.search(
+                    r"<parameters>(.*?)</parameters>", response, re.DOTALL
+                )
 
                 if tool_match and params_match:
                     tool_name = tool_match.group(1).strip()
@@ -300,7 +306,9 @@ async def evaluate_model(
     return result
 
 
-async def run_evaluations(models: list[str] = None, categories: list[str] = None) -> dict[str, Any]:
+async def run_evaluations(
+    models: list[str] = None, categories: list[str] = None
+) -> dict[str, Any]:
     """
     Run evaluations on specified models and test categories.
 
@@ -389,14 +397,18 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
             continue
 
         # Calculate success rate
-        success_rate = sum(1 for r in model_results if r["success"]) / len(model_results)
+        success_rate = sum(1 for r in model_results if r["success"]) / len(
+            model_results
+        )
 
         # Calculate average duration
         durations = [r["duration"] for r in model_results if r["success"]]
         avg_duration = sum(durations) / len(durations) if durations else 0
 
         # Calculate average tokens per second (for speed tests)
-        speed_results = [r for r in model_results if r["category"] == "speed" and r["success"]]
+        speed_results = [
+            r for r in model_results if r["category"] == "speed" and r["success"]
+        ]
         avg_tokens_per_second = (
             sum(r["tokens_per_second"] for r in speed_results) / len(speed_results)
             if speed_results
@@ -405,7 +417,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
         # Calculate structured output success rate
         structured_results = [
-            r for r in model_results if r["category"] == "structured_output" and r["success"]
+            r
+            for r in model_results
+            if r["category"] == "structured_output" and r["success"]
         ]
         json_valid_rate = (
             sum(1 for r in structured_results if r.get("is_valid_json", False))
@@ -415,17 +429,23 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         )
 
         # Calculate tool use success rate
-        tool_results = [r for r in model_results if r["category"] == "tool_use" and r["success"]]
+        tool_results = [
+            r for r in model_results if r["category"] == "tool_use" and r["success"]
+        ]
         tool_success_rate = 0
         if tool_results:
-            tool_mentions = sum(1 for r in tool_results if r.get("tools_mentioned", False))
+            tool_mentions = sum(
+                1 for r in tool_results if r.get("tools_mentioned", False)
+            )
             tool_calls = sum(
                 1
                 for r in tool_results
                 if r.get("correct_tool", False) and r.get("correct_parameters", False)
             )
             tool_success_rate = (
-                (tool_mentions + tool_calls) / (len(tool_results) * 2) if tool_results else 0
+                (tool_mentions + tool_calls) / (len(tool_results) * 2)
+                if tool_results
+                else 0
             )
 
         # Store model performance
@@ -448,11 +468,13 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         # Calculate success rate by model
         model_success = {}
         for model in models:
-            model_category_results = [r for r in category_results if r["model"] == model]
+            model_category_results = [
+                r for r in category_results if r["model"] == model
+            ]
             if model_category_results:
-                success_rate = sum(1 for r in model_category_results if r["success"]) / len(
-                    model_category_results
-                )
+                success_rate = sum(
+                    1 for r in model_category_results if r["success"]
+                ) / len(model_category_results)
                 model_success[model] = success_rate
 
         # Store category performance
@@ -484,11 +506,16 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         ranking_scores[model] = score
 
     # Sort models by score
-    sorted_models = sorted(ranking_scores.keys(), key=lambda m: ranking_scores[m], reverse=True)
+    sorted_models = sorted(
+        ranking_scores.keys(), key=lambda m: ranking_scores[m], reverse=True
+    )
 
     # Store overall ranking
     for i, model in enumerate(sorted_models):
-        analysis["overall_ranking"][model] = {"rank": i + 1, "score": ranking_scores[model]}
+        analysis["overall_ranking"][model] = {
+            "rank": i + 1,
+            "score": ranking_scores[model],
+        }
 
     return analysis
 
@@ -506,7 +533,9 @@ def print_analysis(analysis: dict[str, Any]):
     print(f"Categories tested: {', '.join(analysis['categories'])}")
 
     print("\n----- OVERALL RANKING -----")
-    for model, ranking in sorted(analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
+    for model, ranking in sorted(
+        analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]
+    ):
         print(f"{ranking['rank']}. {model} (Score: {ranking['score']:.2f})")
 
     print("\n----- MODEL PERFORMANCE -----")

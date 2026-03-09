@@ -17,23 +17,21 @@ import tempfile
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("ci_self_heal")
 
 PROMPT_FILE = ".github/prompts/fix-test-failure.prompt.md"
 
+
 def run_tests():
     """Runs pytest and returns (exit_code, output)."""
     logger.info("Running tests...")
     result = subprocess.run(
-        ["uv", "run", "pytest", "-v"],
-        capture_output=True,
-        text=True,
-        check=False
+        ["uv", "run", "pytest", "-v"], capture_output=True, text=True, check=False
     )
     return result.returncode, result.stdout + "\n" + result.stderr
+
 
 def run_agent_fix(failure_log):
     """Invokes the agent to fix the failure."""
@@ -50,7 +48,7 @@ def run_agent_fix(failure_log):
     # Combine prompt and failure log
     full_prompt = f"{prompt_content}\n\n## Test Failure Log\n```\n{failure_log}\n```\n\n## Instruction\nPlease analyze the log above and fix the code."
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as tmp:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as tmp:
         tmp.write(full_prompt)
         tmp_path = tmp.name
 
@@ -64,6 +62,7 @@ def run_agent_fix(failure_log):
         return False
     finally:
         os.remove(tmp_path)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Run CI Self-Healing")
@@ -88,8 +87,9 @@ def main():
                 sys.exit(1)
         else:
             logger.error("Max attempts reached. Self-healing failed.")
-            print(output) # Print failure log to stdout for CI
+            print(output)  # Print failure log to stdout for CI
             sys.exit(exit_code)
+
 
 if __name__ == "__main__":
     main()

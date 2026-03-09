@@ -28,7 +28,10 @@ print()
 async def fetch_data(data: dict, ctx: WorkflowContext) -> dict:
     """Simulates fetching data from an API."""
     await asyncio.sleep(0.5)  # Simulate network call
-    return {"status": "success", "message": f"Fetched data for: {data.get('query', 'unknown')}"}
+    return {
+        "status": "success",
+        "message": f"Fetched data for: {data.get('query', 'unknown')}",
+    }
 
 
 async def process_data(data: dict, ctx: WorkflowContext) -> dict:

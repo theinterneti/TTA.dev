@@ -11,6 +11,7 @@ import sys
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
+
 def test_legacy_vs_new_approach():
     """Test both legacy os.getenv() and new tta_secrets approaches."""
     print("🔒 TTA.dev Secrets Integration Test")
@@ -35,7 +36,13 @@ def test_legacy_vs_new_approach():
     # Test 2: New tta_secrets approach
     print("\n📋 Test 2: New tta_secrets approach")
     try:
-        from tta_secrets import get_gemini_api_key, get_github_token, get_e2b_key, get_n8n_key, get_config
+        from tta_secrets import (
+            get_gemini_api_key,
+            get_github_token,
+            get_e2b_key,
+            get_n8n_key,
+            get_config,
+        )
 
         gemini_key = get_gemini_api_key()
         github_token = get_github_token()
@@ -73,6 +80,7 @@ def test_legacy_vs_new_approach():
     try:
         # Test vault import
         from tta_secrets.vault_client import VaultSecretsClient
+
         print("✅ Vault client import successful")
 
         # Test vault client creation (will fail without proper config, but should be graceful)
@@ -80,7 +88,9 @@ def test_legacy_vs_new_approach():
             vault = VaultSecretsClient()  # This will fail without proper config
             print("❌ Vault client creation should have failed without proper config")
         except (ValueError, ImportError) as e:
-            print(f"✅ Vault client creation failed gracefully as expected: {type(e).__name__}")
+            print(
+                f"✅ Vault client creation failed gracefully as expected: {type(e).__name__}"
+            )
 
     except ImportError as e:
         print(f"❌ Vault import failed (missing hvac?): {e}")
@@ -96,14 +106,14 @@ def test_legacy_vs_new_approach():
         print(f"Vault enabled in dev: {dev_manager._vault_enabled}")
 
         # Test production detection
-        os.environ['ENVIRONMENT'] = 'production'
+        os.environ["ENVIRONMENT"] = "production"
         prod_manager = SecretsManager()
         print(f"Production environment detected: {prod_manager.get_environment()}")
         print(f"Vault would be enabled in prod: {prod_manager._vault_enabled}")
 
         # Restore environment
-        if 'ENVIRONMENT' in os.environ:
-            del os.environ['ENVIRONMENT']
+        if "ENVIRONMENT" in os.environ:
+            del os.environ["ENVIRONMENT"]
 
     except Exception as e:
         print(f"❌ Environment detection failed: {e}")

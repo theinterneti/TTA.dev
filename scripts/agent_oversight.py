@@ -14,7 +14,6 @@ Usage:
 """
 
 import json
-import os
 import subprocess
 import sys
 from datetime import datetime
@@ -147,7 +146,12 @@ class AgentOversight:
         # Remove notification
         Path(commit["notification_file"]).unlink()
 
-        print(colored(f"✅ Approved commit {commit['commit'][:8]} from {commit['agent']}", "GREEN"))
+        print(
+            colored(
+                f"✅ Approved commit {commit['commit'][:8]} from {commit['agent']}",
+                "GREEN",
+            )
+        )
 
     def reject_commit(self, commit_id: str, reason: str = ""):
         """Reject a commit."""
@@ -168,7 +172,12 @@ class AgentOversight:
         # Remove notification
         Path(commit["notification_file"]).unlink()
 
-        print(colored(f"❌ Rejected commit {commit['commit'][:8]} from {commit['agent']}", "RED"))
+        print(
+            colored(
+                f"❌ Rejected commit {commit['commit'][:8]} from {commit['agent']}",
+                "RED",
+            )
+        )
         print(f"Reason: {reason}")
 
     def _log_review(self, commit: dict[str, Any], decision: str):

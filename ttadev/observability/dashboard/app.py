@@ -56,9 +56,7 @@ class ObservabilityDashboard:
 
     async def handle_health(self, request: web.Request) -> web.Response:
         """Health check endpoint."""
-        return web.json_response(
-            {"status": "healthy", "timestamp": datetime.now(UTC).isoformat()}
-        )
+        return web.json_response({"status": "healthy", "timestamp": datetime.now(UTC).isoformat()})
 
     def _generate_dashboard_html(self) -> str:
         """Generate the dashboard HTML with embedded CSS and JS."""

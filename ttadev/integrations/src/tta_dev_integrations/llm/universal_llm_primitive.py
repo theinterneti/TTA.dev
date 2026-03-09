@@ -23,8 +23,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
 from primitives import WorkflowContext, WorkflowPrimitive
+from pydantic import BaseModel, Field
 
 
 class UserBudgetProfile(str, Enum):

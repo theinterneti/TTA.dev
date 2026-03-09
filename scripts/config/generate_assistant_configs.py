@@ -40,7 +40,9 @@ from tta_dev_primitives import (
 class PathSpecificRule(BaseModel):
     """Represents a path-specific instruction rule."""
 
-    source_file: str = Field(..., description="Source markdown file in universal-instructions")
+    source_file: str = Field(
+        ..., description="Source markdown file in universal-instructions"
+    )
     apply_to: str = Field(..., description="Glob pattern for files this applies to")
     description: str = Field(..., description="Brief description of the rule")
 
@@ -50,13 +52,19 @@ class ToolConfig(BaseModel):
 
     name: str = Field(..., description="Tool name (copilot, cline, cursor, augment)")
     output_dir: str = Field(..., description="Output directory for generated files")
-    repository_wide_file: str | None = Field(None, description="Repository-wide instructions file")
+    repository_wide_file: str | None = Field(
+        None, description="Repository-wide instructions file"
+    )
     # Note: agent_instructions_file removed - AGENTS.md is now workspace-wide hub
-    path_specific_dir: str | None = Field(None, description="Directory for path-specific rules")
+    path_specific_dir: str | None = Field(
+        None, description="Directory for path-specific rules"
+    )
     path_specific_extension: str = Field(
         ".md", description="File extension for path-specific files"
     )
-    frontmatter_format: str = Field("yaml", description="Frontmatter format (yaml, none)")
+    frontmatter_format: str = Field(
+        "yaml", description="Frontmatter format (yaml, none)"
+    )
 
 
 # ============================================================================
@@ -85,7 +93,9 @@ class ReadFilePrimitive(WorkflowPrimitive[Path, str]):
 class WriteFilePrimitive(WorkflowPrimitive[dict[str, Any], Path]):
     """Write content to a file."""
 
-    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> Path:
+    async def execute(
+        self, input_data: dict[str, Any], context: WorkflowContext
+    ) -> Path:
         """
         Write content to file.
 
@@ -111,7 +121,9 @@ class WriteFilePrimitive(WorkflowPrimitive[dict[str, Any], Path]):
 class ReadYAMLPrimitive(WorkflowPrimitive[Path, dict[str, Any]]):
     """Read YAML configuration file."""
 
-    async def execute(self, input_data: Path, context: WorkflowContext) -> dict[str, Any]:
+    async def execute(
+        self, input_data: Path, context: WorkflowContext
+    ) -> dict[str, Any]:
         """
         Read YAML file and parse to dict.
 
@@ -146,7 +158,12 @@ class CombineCorePrimitive(WorkflowPrimitive[list[str], str]):
             Combined markdown content
         """
         sections = []
-        titles = ["Project Overview", "Architecture", "Development Workflow", "Quality Standards"]
+        titles = [
+            "Project Overview",
+            "Architecture",
+            "Development Workflow",
+            "Quality Standards",
+        ]
 
         for title, content in zip(titles, input_data, strict=False):
             sections.append(f"# {title}\n\n{content}")
@@ -190,7 +207,9 @@ class AddFrontmatterPrimitive(WorkflowPrimitive[dict[str, Any], str]):
         super().__init__()
         self.format_type = format_type
 
-    async def execute(self, input_data: dict[str, Any], context: WorkflowContext) -> str:
+    async def execute(
+        self, input_data: dict[str, Any], context: WorkflowContext
+    ) -> str:
         """
         Add frontmatter to content.
 
@@ -272,7 +291,9 @@ class GenerateRepositoryWidePrimitive(WorkflowPrimitive[ToolConfig, Path]):
         # Write output
         writer = WriteFilePrimitive()
         output_path = Path(input_data.output_dir) / input_data.repository_wide_file
-        result = await writer.execute({"path": output_path, "content": combined}, context)
+        result = await writer.execute(
+            {"path": output_path, "content": combined}, context
+        )
 
         return result
 
@@ -379,7 +400,9 @@ The `.universal-instructions/` directory contains:
         # Write to workspace root
         output_path = input_data / "AGENTS.md"
         writer = WriteFilePrimitive()
-        result = await writer.execute({"path": output_path, "content": combined_content}, context)
+        result = await writer.execute(
+            {"path": output_path, "content": combined_content}, context
+        )
 
         return result
 
@@ -507,12 +530,16 @@ The content in this file is generated from:
         # Write to workspace root
         output_path = input_data / "CLAUDE.md"
         writer = WriteFilePrimitive()
-        result = await writer.execute({"path": output_path, "content": combined_content}, context)
+        result = await writer.execute(
+            {"path": output_path, "content": combined_content}, context
+        )
 
         return result
 
 
-class GeneratePathSpecificPrimitive(WorkflowPrimitive[tuple[ToolConfig, PathSpecificRule], Path]):
+class GeneratePathSpecificPrimitive(
+    WorkflowPrimitive[tuple[ToolConfig, PathSpecificRule], Path]
+):
     """Generate a single path-specific instruction file."""
 
     def __init__(self, universal_dir: Path):
@@ -551,13 +578,23 @@ class GeneratePathSpecificPrimitive(WorkflowPrimitive[tuple[ToolConfig, PathSpec
         # Add frontmatter if needed
         frontmatter_adder = AddFrontmatterPrimitive(tool_config.frontmatter_format)
         content_with_frontmatter = await frontmatter_adder.execute(
-            {"content": content, "apply_to": rule.apply_to, "description": rule.description},
+            {
+                "content": content,
+                "apply_to": rule.apply_to,
+                "description": rule.description,
+            },
             context,
         )
 
         # Write output
-        output_filename = Path(rule.source_file).stem + tool_config.path_specific_extension
-        output_path = Path(tool_config.output_dir) / tool_config.path_specific_dir / output_filename
+        output_filename = (
+            Path(rule.source_file).stem + tool_config.path_specific_extension
+        )
+        output_path = (
+            Path(tool_config.output_dir)
+            / tool_config.path_specific_dir
+            / output_filename
+        )
         writer = WriteFilePrimitive()
         result = await writer.execute(
             {"path": output_path, "content": content_with_frontmatter}, context
@@ -581,7 +618,9 @@ class GenerateAllPathSpecificPrimitive(WorkflowPrimitive[ToolConfig, list[Path]]
         self.universal_dir = universal_dir
         self.rules = rules
 
-    async def execute(self, input_data: ToolConfig, context: WorkflowContext) -> list[Path]:
+    async def execute(
+        self, input_data: ToolConfig, context: WorkflowContext
+    ) -> list[Path]:
         """
         Generate all path-specific files.
 
@@ -606,7 +645,9 @@ class GenerateAllPathSpecificPrimitive(WorkflowPrimitive[ToolConfig, list[Path]]
 class GenerateToolConfigPrimitive(WorkflowPrimitive[ToolConfig, dict[str, Any]]):
     """Generate all configuration files for a specific tool."""
 
-    def __init__(self, universal_dir: Path, rules: list[PathSpecificRule], workspace_root: Path):
+    def __init__(
+        self, universal_dir: Path, rules: list[PathSpecificRule], workspace_root: Path
+    ):
         """
         Initialize with universal directory and rules.
 
@@ -620,7 +661,9 @@ class GenerateToolConfigPrimitive(WorkflowPrimitive[ToolConfig, dict[str, Any]])
         self.rules = rules
         self.workspace_root = workspace_root
 
-    async def execute(self, input_data: ToolConfig, context: WorkflowContext) -> dict[str, Any]:
+    async def execute(
+        self, input_data: ToolConfig, context: WorkflowContext
+    ) -> dict[str, Any]:
         """
         Generate all config files for a tool.
 
@@ -652,7 +695,9 @@ class GenerateToolConfigPrimitive(WorkflowPrimitive[ToolConfig, dict[str, Any]])
 
         return {
             "tool": input_data.name,
-            "repository_wide": str(repo_file) if repo_file and repo_file != Path() else None,
+            "repository_wide": str(repo_file)
+            if repo_file and repo_file != Path()
+            else None,
             "path_specific": [str(p) for p in path_files if p and p != Path()],
         }
 
@@ -732,7 +777,9 @@ async def generate_configs(tool_name: str, workspace_root: Path) -> dict[str, An
         tool_config = ToolConfig(**config_data)
 
         # Generate all files for this tool
-        generator = GenerateToolConfigPrimitive(universal_dir, path_rules, workspace_root)
+        generator = GenerateToolConfigPrimitive(
+            universal_dir, path_rules, workspace_root
+        )
         result = await generator.execute(tool_config, context)
         results[tool] = result
 

@@ -197,7 +197,9 @@ STRUCTURED_OUTPUT_TESTS = [
 ]
 
 
-async def test_structured_output(model_name: str, test_case: dict[str, Any]) -> dict[str, Any]:
+async def test_structured_output(
+    model_name: str, test_case: dict[str, Any]
+) -> dict[str, Any]:
     """
     Test a model's structured output capabilities.
 
@@ -212,7 +214,9 @@ async def test_structured_output(model_name: str, test_case: dict[str, Any]) -> 
     llm_client = get_llm_client()
 
     # Create messages
-    system_prompt = test_case.get("system_prompt", "You are a structured data assistant.")
+    system_prompt = test_case.get(
+        "system_prompt", "You are a structured data assistant."
+    )
     user_prompt = test_case.get("user_prompt", "")
     schema = test_case.get("schema", {})
 
@@ -254,7 +258,9 @@ async def test_structured_output(model_name: str, test_case: dict[str, Any]) -> 
 
         # Check if response is valid JSON
         try:
-            json_response = json.loads(response) if isinstance(response, str) else response
+            json_response = (
+                json.loads(response) if isinstance(response, str) else response
+            )
             result["is_valid_json"] = True
             result["json_response"] = json_response
 
@@ -358,7 +364,11 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
         models = TARGET_MODELS
 
     # Prepare results dictionary
-    results = {"models": models, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "results": []}
+    results = {
+        "models": models,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "results": [],
+    }
 
     # Run tests
     for model in models:
@@ -367,7 +377,9 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
         model_results = []
 
         for test_case in STRUCTURED_OUTPUT_TESTS:
-            logger.info(f"  Test: {test_case['name']} (Complexity: {test_case['complexity']})")
+            logger.info(
+                f"  Test: {test_case['name']} (Complexity: {test_case['complexity']})"
+            )
 
             # Run test
             result = await test_structured_output(model, test_case)
@@ -386,13 +398,15 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
                 logger.error(f"    Failed: {result.get('error', 'Unknown error')}")
 
         # Calculate model statistics
-        success_rate = sum(1 for r in model_results if r["success"]) / len(model_results)
-        json_valid_rate = sum(1 for r in model_results if r.get("is_valid_json", False)) / len(
+        success_rate = sum(1 for r in model_results if r["success"]) / len(
             model_results
         )
-        avg_conformance = sum(r.get("schema_conformance", 0) for r in model_results) / len(
-            model_results
-        )
+        json_valid_rate = sum(
+            1 for r in model_results if r.get("is_valid_json", False)
+        ) / len(model_results)
+        avg_conformance = sum(
+            r.get("schema_conformance", 0) for r in model_results
+        ) / len(model_results)
         avg_duration = sum(r["duration"] for r in model_results if r["success"]) / sum(
             1 for r in model_results if r["success"]
         )
@@ -437,19 +451,25 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
             continue
 
         # Calculate success rate
-        success_rate = sum(1 for r in model_results if r["success"]) / len(model_results)
-
-        # Calculate JSON valid rate
-        json_valid_rate = sum(1 for r in model_results if r.get("is_valid_json", False)) / len(
+        success_rate = sum(1 for r in model_results if r["success"]) / len(
             model_results
         )
 
+        # Calculate JSON valid rate
+        json_valid_rate = sum(
+            1 for r in model_results if r.get("is_valid_json", False)
+        ) / len(model_results)
+
         # Calculate average schema conformance
         conformance_values = [
-            r.get("schema_conformance", 0) for r in model_results if r.get("is_valid_json", False)
+            r.get("schema_conformance", 0)
+            for r in model_results
+            if r.get("is_valid_json", False)
         ]
         avg_conformance = (
-            sum(conformance_values) / len(conformance_values) if conformance_values else 0
+            sum(conformance_values) / len(conformance_values)
+            if conformance_values
+            else 0
         )
 
         # Calculate average duration
@@ -459,7 +479,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         # Calculate performance by complexity
         complexity_performance = {}
         for complexity in ["low", "medium", "high"]:
-            complexity_results = [r for r in model_results if r.get("complexity") == complexity]
+            complexity_results = [
+                r for r in model_results if r.get("complexity") == complexity
+            ]
             if complexity_results:
                 complexity_valid_rate = sum(
                     1 for r in complexity_results if r.get("is_valid_json", False)
@@ -471,7 +493,10 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
                 )
                 complexity_conformance /= (
                     sum(1 for r in complexity_results if r.get("is_valid_json", False))
-                    if sum(1 for r in complexity_results if r.get("is_valid_json", False)) > 0
+                    if sum(
+                        1 for r in complexity_results if r.get("is_valid_json", False)
+                    )
+                    > 0
                     else 1
                 )
 
@@ -491,7 +516,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
     # Analyze performance by complexity
     for complexity in ["low", "medium", "high"]:
-        complexity_results = [r for r in all_results if r.get("complexity") == complexity]
+        complexity_results = [
+            r for r in all_results if r.get("complexity") == complexity
+        ]
 
         # Skip if no results for this complexity
         if not complexity_results:
@@ -500,7 +527,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         # Calculate performance by model
         model_performance = {}
         for model in models:
-            model_complexity_results = [r for r in complexity_results if r["model"] == model]
+            model_complexity_results = [
+                r for r in complexity_results if r["model"] == model
+            ]
             if model_complexity_results:
                 valid_rate = sum(
                     1 for r in model_complexity_results if r.get("is_valid_json", False)
@@ -511,15 +540,29 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
                     if r.get("is_valid_json", False)
                 )
                 conformance /= (
-                    sum(1 for r in model_complexity_results if r.get("is_valid_json", False))
-                    if sum(1 for r in model_complexity_results if r.get("is_valid_json", False)) > 0
+                    sum(
+                        1
+                        for r in model_complexity_results
+                        if r.get("is_valid_json", False)
+                    )
+                    if sum(
+                        1
+                        for r in model_complexity_results
+                        if r.get("is_valid_json", False)
+                    )
+                    > 0
                     else 1
                 )
 
-                model_performance[model] = {"valid_rate": valid_rate, "conformance": conformance}
+                model_performance[model] = {
+                    "valid_rate": valid_rate,
+                    "conformance": conformance,
+                }
 
         # Store complexity performance
-        analysis["complexity_performance"][complexity] = {"model_performance": model_performance}
+        analysis["complexity_performance"][complexity] = {
+            "model_performance": model_performance
+        }
 
     # Calculate overall ranking
     ranking_scores = {}
@@ -540,7 +583,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         # Calculate complexity scores
         complexity_scores = {}
         for complexity, comp_perf in perf["complexity_performance"].items():
-            complexity_scores[complexity] = comp_perf["valid_rate"] * comp_perf["conformance"] * 10
+            complexity_scores[complexity] = (
+                comp_perf["valid_rate"] * comp_perf["conformance"] * 10
+            )
 
         # Get average complexity score, weighted by difficulty
         complexity_weights = {"low": 0.2, "medium": 0.3, "high": 0.5}
@@ -561,11 +606,16 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         ranking_scores[model] = score
 
     # Sort models by score
-    sorted_models = sorted(ranking_scores.keys(), key=lambda m: ranking_scores[m], reverse=True)
+    sorted_models = sorted(
+        ranking_scores.keys(), key=lambda m: ranking_scores[m], reverse=True
+    )
 
     # Store overall ranking
     for i, model in enumerate(sorted_models):
-        analysis["overall_ranking"][model] = {"rank": i + 1, "score": ranking_scores[model]}
+        analysis["overall_ranking"][model] = {
+            "rank": i + 1,
+            "score": ranking_scores[model],
+        }
 
     return analysis
 
@@ -582,7 +632,9 @@ def print_analysis(analysis: dict[str, Any]):
     print(f"Models evaluated: {', '.join(analysis['models'])}")
 
     print("\n----- OVERALL RANKING -----")
-    for model, ranking in sorted(analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
+    for model, ranking in sorted(
+        analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]
+    ):
         print(f"{ranking['rank']}. {model} (Score: {ranking['score']:.2f})")
 
     print("\n----- MODEL PERFORMANCE -----")
@@ -604,7 +656,7 @@ def print_analysis(analysis: dict[str, Any]):
         print(f"\n{complexity.upper()}:")
         for model, model_perf in sorted(
             perf["model_performance"].items(),
-            key=lambda x: (x[1]["valid_rate"] * x[1]["conformance"]),
+            key=lambda x: x[1]["valid_rate"] * x[1]["conformance"],
             reverse=True,
         ):
             print(
@@ -614,7 +666,9 @@ def print_analysis(analysis: dict[str, Any]):
 
 async def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description="Test models on structured output capabilities")
+    parser = argparse.ArgumentParser(
+        description="Test models on structured output capabilities"
+    )
     parser.add_argument(
         "--models",
         nargs="+",

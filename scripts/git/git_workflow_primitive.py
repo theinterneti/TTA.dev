@@ -33,7 +33,6 @@ import asyncio
 import subprocess
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
 
 class GitAction(Enum):
@@ -83,7 +82,9 @@ def get_git_context() -> GitContext:
     staged = run_git(["diff", "--cached", "--name-only"])
 
     # Check if ahead/behind remote
-    ahead_behind = run_git(["rev-list", "--left-right", "--count", f"HEAD...origin/{current_branch}"])
+    ahead_behind = run_git(
+        ["rev-list", "--left-right", "--count", f"HEAD...origin/{current_branch}"]
+    )
     ahead, behind = (0, 0)
     if ahead_behind:
         parts = ahead_behind.split()
@@ -219,7 +220,10 @@ def fallback_git_workflow(ctx: GitContext) -> tuple[GitAction, str]:
     reasons.append("Cannot merge: either has changes or already on main")
 
     # Fallback: Manual intervention
-    return (GitAction.NO_ACTION, f"Manual intervention needed. Reasons: {'; '.join(reasons)}")
+    return (
+        GitAction.NO_ACTION,
+        f"Manual intervention needed. Reasons: {'; '.join(reasons)}",
+    )
 
 
 # ============================================================================
@@ -269,7 +273,7 @@ def visualize_decision(ctx: GitContext, action: GitAction, reason: str):
     print("🌳 Git Workflow Decision Tree (TTA.dev Primitive Pattern)")
     print("=" * 60)
 
-    print(f"\n📊 Context:")
+    print("\n📊 Context:")
     print(f"   Branch: {ctx.current_branch}")
     print(f"   Has changes: {ctx.has_changes}")
     print(f"   Has staged: {ctx.has_staged}")

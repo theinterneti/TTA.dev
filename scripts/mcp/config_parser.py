@@ -172,7 +172,9 @@ class MCPConfigParser:
 
         return preferred[:3]  # Top 3 preferred servers
 
-    def generate_configs(self, output_vscode: bool = True, output_cline: bool = True) -> None:
+    def generate_configs(
+        self, output_vscode: bool = True, output_cline: bool = True
+    ) -> None:
         """Generate configuration files for agents."""
         # Parse Hypertool configuration
         servers = self.parse_hypertool_config()
@@ -255,7 +257,9 @@ def main():
     """CLI interface for MCP configuration parser."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Parse and convert MCP server configurations")
+    parser = argparse.ArgumentParser(
+        description="Parse and convert MCP server configurations"
+    )
     parser.add_argument(
         "--workspace",
         type=Path,
@@ -297,7 +301,9 @@ def main():
     elif args.generate:
         output_vscode = not args.cline_only
         output_cline = not args.vscode_only
-        config_parser.generate_configs(output_vscode=output_vscode, output_cline=output_cline)
+        config_parser.generate_configs(
+            output_vscode=output_vscode, output_cline=output_cline
+        )
     else:
         # Default: parse and display current configuration
         servers = config_parser.parse_hypertool_config()

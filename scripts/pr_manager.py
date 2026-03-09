@@ -310,7 +310,9 @@ class PRManager:
             if check.get("conclusion") in ["FAILURE", "CANCELLED", "TIMED_OUT"]
         ]
         if failed_checks:
-            recommendations.append(f"❌ {len(failed_checks)} failing check(s) - fix before merge")
+            recommendations.append(
+                f"❌ {len(failed_checks)} failing check(s) - fix before merge"
+            )
 
         return recommendations if recommendations else ["✨ Looking good!"]
 
@@ -406,7 +408,9 @@ class PRManager:
         print(f"  Newest PR: {min_age} days")
 
         # Activity analysis
-        staleness_values = [self.calculate_pr_staleness(pr["updatedAt"]).days for pr in prs]
+        staleness_values = [
+            self.calculate_pr_staleness(pr["updatedAt"]).days for pr in prs
+        ]
         avg_staleness = sum(staleness_values) / len(staleness_values)
         stale_count = sum(1 for s in staleness_values if s >= 7)
 
@@ -416,7 +420,9 @@ class PRManager:
 
         # Review status
         approved = sum(1 for pr in prs if pr.get("reviewDecision") == "APPROVED")
-        changes_requested = sum(1 for pr in prs if pr.get("reviewDecision") == "CHANGES_REQUESTED")
+        changes_requested = sum(
+            1 for pr in prs if pr.get("reviewDecision") == "CHANGES_REQUESTED"
+        )
         no_review = sum(1 for pr in prs if pr.get("reviewDecision") is None)
 
         print("\n👥 Review Status:")
@@ -514,7 +520,9 @@ class PRManager:
         issues_found = False
 
         # Check for very old PRs
-        old_prs = [pr for pr in prs if self.calculate_pr_age(pr["createdAt"]).days >= 30]
+        old_prs = [
+            pr for pr in prs if self.calculate_pr_age(pr["createdAt"]).days >= 30
+        ]
         if old_prs:
             issues_found = True
             print(f"\n⚠️ Very Old PRs ({len(old_prs)}):")
@@ -523,16 +531,22 @@ class PRManager:
                 print(f"  #{pr['number']}: {pr['title']} ({age} days old)")
 
         # Check for stale PRs
-        stale_prs = [pr for pr in prs if self.calculate_pr_staleness(pr["updatedAt"]).days >= 14]
+        stale_prs = [
+            pr for pr in prs if self.calculate_pr_staleness(pr["updatedAt"]).days >= 14
+        ]
         if stale_prs:
             issues_found = True
             print(f"\n🕸️ Very Stale PRs ({len(stale_prs)}):")
             for pr in stale_prs:
                 staleness = self.calculate_pr_staleness(pr["updatedAt"]).days
-                print(f"  #{pr['number']}: {pr['title']} (no activity for {staleness} days)")
+                print(
+                    f"  #{pr['number']}: {pr['title']} (no activity for {staleness} days)"
+                )
 
         # Check for approved but not merged
-        approved_not_merged = [pr for pr in prs if pr.get("reviewDecision") == "APPROVED"]
+        approved_not_merged = [
+            pr for pr in prs if pr.get("reviewDecision") == "APPROVED"
+        ]
         if approved_not_merged:
             issues_found = True
             print(f"\n✅ Approved but Not Merged ({len(approved_not_merged)}):")
@@ -540,16 +554,22 @@ class PRManager:
                 print(f"  #{pr['number']}: {pr['title']}")
 
         # Check for PRs with many changes requested
-        changes_requested = [pr for pr in prs if pr.get("reviewDecision") == "CHANGES_REQUESTED"]
+        changes_requested = [
+            pr for pr in prs if pr.get("reviewDecision") == "CHANGES_REQUESTED"
+        ]
         if changes_requested:
             issues_found = True
             print(f"\n🔧 Changes Requested ({len(changes_requested)}):")
             for pr in changes_requested:
                 staleness = self.calculate_pr_staleness(pr["updatedAt"]).days
-                print(f"  #{pr['number']}: {pr['title']} (last activity {staleness}d ago)")
+                print(
+                    f"  #{pr['number']}: {pr['title']} (last activity {staleness}d ago)"
+                )
 
         # Check for very large PRs
-        large_prs = [pr for pr in prs if pr.get("additions", 0) + pr.get("deletions", 0) > 1000]
+        large_prs = [
+            pr for pr in prs if pr.get("additions", 0) + pr.get("deletions", 0) > 1000
+        ]
         if large_prs:
             issues_found = True
             print(f"\n📏 Very Large PRs ({len(large_prs)}):")
@@ -600,12 +620,16 @@ class PRManager:
         # Display recommendations
         if merge_ready:
             print(f"\n🚀 Ready to Merge ({len(merge_ready)}):")
-            for pr in sorted(merge_ready, key=lambda p: self.prioritize_pr(p), reverse=True):
+            for pr in sorted(
+                merge_ready, key=lambda p: self.prioritize_pr(p), reverse=True
+            ):
                 print(f"  ✅ Merge PR #{pr['number']}: {pr['title']}")
 
         if needs_review:
             print(f"\n👀 Needs Review ({len(needs_review)}):")
-            for pr in sorted(needs_review, key=lambda p: self.prioritize_pr(p), reverse=True):
+            for pr in sorted(
+                needs_review, key=lambda p: self.prioritize_pr(p), reverse=True
+            ):
                 age = self.calculate_pr_age(pr["createdAt"]).days
                 print(f"  👥 Review PR #{pr['number']}: {pr['title']} ({age}d old)")
 
@@ -613,13 +637,17 @@ class PRManager:
             print(f"\n🔧 Needs Changes ({len(needs_changes)}):")
             for pr in needs_changes:
                 staleness = self.calculate_pr_staleness(pr["updatedAt"]).days
-                print(f"  📝 Follow up on PR #{pr['number']}: {pr['title']} (waiting {staleness}d)")
+                print(
+                    f"  📝 Follow up on PR #{pr['number']}: {pr['title']} (waiting {staleness}d)"
+                )
 
         if consider_closing:
             print(f"\n🗑️ Consider Closing ({len(consider_closing)}):")
             for pr in consider_closing:
                 staleness = self.calculate_pr_staleness(pr["updatedAt"]).days
-                print(f"  ⏹️ Close PR #{pr['number']}: {pr['title']} (inactive {staleness}d)")
+                print(
+                    f"  ⏹️ Close PR #{pr['number']}: {pr['title']} (inactive {staleness}d)"
+                )
 
         print("\n" + "=" * 80)
 

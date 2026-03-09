@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description="Visualization Tool for Model Test Results")
+    parser = argparse.ArgumentParser(
+        description="Visualization Tool for Model Test Results"
+    )
     parser.add_argument("--results", required=True, help="Path to results JSON file")
     parser.add_argument(
         "--analysis",

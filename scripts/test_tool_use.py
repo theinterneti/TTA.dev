@@ -108,7 +108,11 @@ Available tools:
 - get_company_info(company_name: str): Get information about a company
 - convert_currency(amount: float, from_currency: str, to_currency: str): Convert between currencies""",
         "user_prompt": "I want to invest $5000 in Apple stock. Can you tell me the current price and calculate how much it might be worth in 10 years assuming a 7% annual return? Also, I need some basic information about Apple as a company.",
-        "expected_tools": ["get_stock_price", "calculate_investment", "get_company_info"],
+        "expected_tools": [
+            "get_stock_price",
+            "calculate_investment",
+            "get_company_info",
+        ],
         "complexity": "high",
     },
     {
@@ -167,7 +171,9 @@ async def test_tool_use(model_name: str, test_case: dict[str, Any]) -> dict[str,
     llm_client = get_llm_client()
 
     # Create messages
-    system_prompt = test_case.get("system_prompt", "You are an assistant that can use tools.")
+    system_prompt = test_case.get(
+        "system_prompt", "You are an assistant that can use tools."
+    )
     user_prompt = test_case.get("user_prompt", "")
 
     # Prepare result dictionary
@@ -236,7 +242,9 @@ async def test_tool_use(model_name: str, test_case: dict[str, Any]) -> dict[str,
 
                     # Compare with expected tool call
                     expected = test_case["expected_tool_call"]
-                    result["correct_tool"] = tool_name.lower() == expected["tool"].lower()
+                    result["correct_tool"] = (
+                        tool_name.lower() == expected["tool"].lower()
+                    )
 
                     # Check parameters
                     expected_params = expected["parameters"]
@@ -258,7 +266,9 @@ async def test_tool_use(model_name: str, test_case: dict[str, Any]) -> dict[str,
                     result["params_correct"] = params_correct
                     result["missing_params"] = missing_params
                     result["incorrect_params"] = incorrect_params
-                    result["overall_correct"] = result["correct_tool"] and params_correct
+                    result["overall_correct"] = (
+                        result["correct_tool"] and params_correct
+                    )
 
                 except json.JSONDecodeError:
                     result["tool_call_error"] = "Invalid JSON in parameters"
@@ -333,7 +343,11 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
         models = TARGET_MODELS
 
     # Prepare results dictionary
-    results = {"models": models, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "results": []}
+    results = {
+        "models": models,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "results": [],
+    }
 
     # Run tests
     for model in models:
@@ -342,7 +356,9 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
         model_results = []
 
         for test_case in TOOL_USE_TESTS:
-            logger.info(f"  Test: {test_case['name']} (Complexity: {test_case['complexity']})")
+            logger.info(
+                f"  Test: {test_case['name']} (Complexity: {test_case['complexity']})"
+            )
 
             # Run test
             result = await test_tool_use(model, test_case)
@@ -358,7 +374,9 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
                         f"    Tools mentioned: {result['tools_mentioned_count']}/{result['tools_expected_count']} ({result['tools_mentioned_rate'] * 100:.1f}%)"
                     )
                 elif "overall_correct" in result:
-                    correct_str = "Correct" if result["overall_correct"] else "Incorrect"
+                    correct_str = (
+                        "Correct" if result["overall_correct"] else "Incorrect"
+                    )
                     logger.info(
                         f"    Tool call: {correct_str}, Duration: {result['duration']:.2f}s"
                     )
@@ -372,12 +390,15 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
                 logger.error(f"    Failed: {result.get('error', 'Unknown error')}")
 
         # Calculate model statistics
-        success_rate = sum(1 for r in model_results if r["success"]) / len(model_results)
+        success_rate = sum(1 for r in model_results if r["success"]) / len(
+            model_results
+        )
 
         # Tool mention rate
         tool_mention_results = [r for r in model_results if "tools_mentioned_rate" in r]
         avg_tool_mention_rate = (
-            sum(r["tools_mentioned_rate"] for r in tool_mention_results) / len(tool_mention_results)
+            sum(r["tools_mentioned_rate"] for r in tool_mention_results)
+            / len(tool_mention_results)
             if tool_mention_results
             else 0
         )
@@ -394,7 +415,8 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
         # Multiple tool calls
         multi_tool_results = [r for r in model_results if "tool_calls_match_rate" in r]
         avg_tool_calls_match_rate = (
-            sum(r["tool_calls_match_rate"] for r in multi_tool_results) / len(multi_tool_results)
+            sum(r["tool_calls_match_rate"] for r in multi_tool_results)
+            / len(multi_tool_results)
             if multi_tool_results
             else 0
         )
@@ -411,7 +433,9 @@ async def run_tests(models: list[str] = None) -> dict[str, Any]:
         logger.info(f"    Success Rate: {success_rate * 100:.1f}%")
         logger.info(f"    Avg Tool Mention Rate: {avg_tool_mention_rate * 100:.1f}%")
         logger.info(f"    Tool Call Correct Rate: {tool_call_correct_rate * 100:.1f}%")
-        logger.info(f"    Avg Tool Calls Match Rate: {avg_tool_calls_match_rate * 100:.1f}%")
+        logger.info(
+            f"    Avg Tool Calls Match Rate: {avg_tool_calls_match_rate * 100:.1f}%"
+        )
         logger.info(f"    Avg Duration: {avg_duration:.2f}s")
 
     return results
@@ -448,12 +472,15 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
             continue
 
         # Calculate success rate
-        success_rate = sum(1 for r in model_results if r["success"]) / len(model_results)
+        success_rate = sum(1 for r in model_results if r["success"]) / len(
+            model_results
+        )
 
         # Tool mention rate
         tool_mention_results = [r for r in model_results if "tools_mentioned_rate" in r]
         avg_tool_mention_rate = (
-            sum(r["tools_mentioned_rate"] for r in tool_mention_results) / len(tool_mention_results)
+            sum(r["tools_mentioned_rate"] for r in tool_mention_results)
+            / len(tool_mention_results)
             if tool_mention_results
             else 0
         )
@@ -470,7 +497,8 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         # Multiple tool calls
         multi_tool_results = [r for r in model_results if "tool_calls_match_rate" in r]
         avg_tool_calls_match_rate = (
-            sum(r["tool_calls_match_rate"] for r in multi_tool_results) / len(multi_tool_results)
+            sum(r["tool_calls_match_rate"] for r in multi_tool_results)
+            / len(multi_tool_results)
             if multi_tool_results
             else 0
         )
@@ -482,19 +510,24 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         # Calculate performance by complexity
         complexity_performance = {}
         for complexity in ["low", "medium", "high"]:
-            complexity_results = [r for r in model_results if r.get("complexity") == complexity]
+            complexity_results = [
+                r for r in model_results if r.get("complexity") == complexity
+            ]
             if complexity_results:
                 # Success rate for this complexity
-                complexity_success_rate = sum(1 for r in complexity_results if r["success"]) / len(
-                    complexity_results
-                )
+                complexity_success_rate = sum(
+                    1 for r in complexity_results if r["success"]
+                ) / len(complexity_results)
 
                 # Tool metrics for this complexity
                 complexity_tool_mention_results = [
                     r for r in complexity_results if "tools_mentioned_rate" in r
                 ]
                 complexity_tool_mention_rate = (
-                    sum(r["tools_mentioned_rate"] for r in complexity_tool_mention_results)
+                    sum(
+                        r["tools_mentioned_rate"]
+                        for r in complexity_tool_mention_results
+                    )
                     / len(complexity_tool_mention_results)
                     if complexity_tool_mention_results
                     else 0
@@ -504,7 +537,11 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
                     r for r in complexity_results if "overall_correct" in r
                 ]
                 complexity_tool_call_rate = (
-                    sum(1 for r in complexity_tool_call_results if r.get("overall_correct", False))
+                    sum(
+                        1
+                        for r in complexity_tool_call_results
+                        if r.get("overall_correct", False)
+                    )
                     / len(complexity_tool_call_results)
                     if complexity_tool_call_results
                     else 0
@@ -528,7 +565,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
     # Analyze performance by complexity
     for complexity in ["low", "medium", "high"]:
-        complexity_results = [r for r in all_results if r.get("complexity") == complexity]
+        complexity_results = [
+            r for r in all_results if r.get("complexity") == complexity
+        ]
 
         # Skip if no results for this complexity
         if not complexity_results:
@@ -537,12 +576,14 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         # Calculate performance by model
         model_performance = {}
         for model in models:
-            model_complexity_results = [r for r in complexity_results if r["model"] == model]
+            model_complexity_results = [
+                r for r in complexity_results if r["model"] == model
+            ]
             if model_complexity_results:
                 # Success rate for this model at this complexity
-                model_success_rate = sum(1 for r in model_complexity_results if r["success"]) / len(
-                    model_complexity_results
-                )
+                model_success_rate = sum(
+                    1 for r in model_complexity_results if r["success"]
+                ) / len(model_complexity_results)
 
                 # Tool metrics for this model at this complexity
                 model_tool_mention_results = [
@@ -559,7 +600,11 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
                     r for r in model_complexity_results if "overall_correct" in r
                 ]
                 model_tool_call_rate = (
-                    sum(1 for r in model_tool_call_results if r.get("overall_correct", False))
+                    sum(
+                        1
+                        for r in model_tool_call_results
+                        if r.get("overall_correct", False)
+                    )
                     / len(model_tool_call_results)
                     if model_tool_call_results
                     else 0
@@ -572,7 +617,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
                 }
 
         # Store complexity performance
-        analysis["complexity_performance"][complexity] = {"model_performance": model_performance}
+        analysis["complexity_performance"][complexity] = {
+            "model_performance": model_performance
+        }
 
     # Calculate overall ranking
     ranking_scores = {}
@@ -622,11 +669,16 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
         ranking_scores[model] = score
 
     # Sort models by score
-    sorted_models = sorted(ranking_scores.keys(), key=lambda m: ranking_scores[m], reverse=True)
+    sorted_models = sorted(
+        ranking_scores.keys(), key=lambda m: ranking_scores[m], reverse=True
+    )
 
     # Store overall ranking
     for i, model in enumerate(sorted_models):
-        analysis["overall_ranking"][model] = {"rank": i + 1, "score": ranking_scores[model]}
+        analysis["overall_ranking"][model] = {
+            "rank": i + 1,
+            "score": ranking_scores[model],
+        }
 
     return analysis
 
@@ -643,7 +695,9 @@ def print_analysis(analysis: dict[str, Any]):
     print(f"Models evaluated: {', '.join(analysis['models'])}")
 
     print("\n----- OVERALL RANKING -----")
-    for model, ranking in sorted(analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]):
+    for model, ranking in sorted(
+        analysis["overall_ranking"].items(), key=lambda x: x[1]["rank"]
+    ):
         print(f"{ranking['rank']}. {model} (Score: {ranking['score']:.2f})")
 
     print("\n----- MODEL PERFORMANCE -----")
@@ -652,7 +706,9 @@ def print_analysis(analysis: dict[str, Any]):
         print(f"  Success Rate: {perf['success_rate'] * 100:.1f}%")
         print(f"  Avg Tool Mention Rate: {perf['avg_tool_mention_rate'] * 100:.1f}%")
         print(f"  Tool Call Correct Rate: {perf['tool_call_correct_rate'] * 100:.1f}%")
-        print(f"  Avg Tool Calls Match Rate: {perf['avg_tool_calls_match_rate'] * 100:.1f}%")
+        print(
+            f"  Avg Tool Calls Match Rate: {perf['avg_tool_calls_match_rate'] * 100:.1f}%"
+        )
         print(f"  Avg Duration: {perf['avg_duration']:.2f}s")
 
         print("  Performance by Complexity:")
@@ -666,7 +722,9 @@ def print_analysis(analysis: dict[str, Any]):
         print(f"\n{complexity.upper()}:")
         for model, model_perf in sorted(
             perf["model_performance"].items(),
-            key=lambda x: (x[1]["tool_call_correct_rate"] + x[1]["tool_mention_rate"]) / 2,
+            key=lambda x: (
+                (x[1]["tool_call_correct_rate"] + x[1]["tool_mention_rate"]) / 2
+            ),
             reverse=True,
         ):
             print(

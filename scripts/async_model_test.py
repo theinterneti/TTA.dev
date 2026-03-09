@@ -40,7 +40,9 @@ try:
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
-    logger.warning("Transformers library not available. Some functionality will be limited.")
+    logger.warning(
+        "Transformers library not available. Some functionality will be limited."
+    )
     TRANSFORMERS_AVAILABLE = False
 
 # Get model cache directory from environment or use default
@@ -159,7 +161,9 @@ class AsyncModelTester:
             quant_config = None
             if quantization != "none" and quantization in QUANTIZATION_CONFIGS:
                 try:
-                    quant_config = BitsAndBytesConfig(**QUANTIZATION_CONFIGS[quantization])
+                    quant_config = BitsAndBytesConfig(
+                        **QUANTIZATION_CONFIGS[quantization]
+                    )
                 except Exception as e:
                     logger.warning(f"Failed to create quantization config: {e}")
                     logger.warning("Continuing without quantization")
@@ -330,7 +334,9 @@ class AsyncModelTester:
                     for temperature in temperatures:
                         # Skip flash attention for CPU-only setups
                         if use_flash_attention and not torch.cuda.is_available():
-                            logger.info("Skipping flash attention test as CUDA is not available")
+                            logger.info(
+                                "Skipping flash attention test as CUDA is not available"
+                            )
                             continue
 
                         test_configs.append(
@@ -432,9 +438,9 @@ class AsyncModelTester:
                 analysis["prompt_type_performance"][prompt_type][model_name][
                     "tokens_per_second"
                 ].append(test_result["tokens_per_second"])
-                analysis["prompt_type_performance"][prompt_type][model_name]["duration"].append(
-                    test_result["duration"]
-                )
+                analysis["prompt_type_performance"][prompt_type][model_name][
+                    "duration"
+                ].append(test_result["duration"])
 
                 analysis["model_performance"][model_name]["tokens_per_second"].append(
                     test_result["tokens_per_second"]
@@ -443,7 +449,8 @@ class AsyncModelTester:
         # Calculate averages
         for model_name, performance in analysis["model_performance"].items():
             performance["avg_tokens_per_second"] = (
-                sum(performance["tokens_per_second"]) / len(performance["tokens_per_second"])
+                sum(performance["tokens_per_second"])
+                / len(performance["tokens_per_second"])
                 if performance["tokens_per_second"]
                 else 0
             )
@@ -461,7 +468,8 @@ class AsyncModelTester:
         for prompt_type, models in analysis["prompt_type_performance"].items():
             for model_name, performance in models.items():
                 performance["avg_tokens_per_second"] = (
-                    sum(performance["tokens_per_second"]) / len(performance["tokens_per_second"])
+                    sum(performance["tokens_per_second"])
+                    / len(performance["tokens_per_second"])
                     if performance["tokens_per_second"]
                     else 0
                 )
@@ -545,10 +553,17 @@ async def main():
         help="Flash attention settings to test",
     )
     parser.add_argument(
-        "--temperatures", nargs="+", type=float, default=[0.7], help="Temperature settings to test"
+        "--temperatures",
+        nargs="+",
+        type=float,
+        default=[0.7],
+        help="Temperature settings to test",
     )
     parser.add_argument(
-        "--max-concurrent", type=int, default=1, help="Maximum number of concurrent tests"
+        "--max-concurrent",
+        type=int,
+        default=1,
+        help="Maximum number of concurrent tests",
     )
     parser.add_argument("--output", help="Output file for results")
     args = parser.parse_args()
@@ -561,9 +576,13 @@ async def main():
         model_cache_dir = Path(MODEL_CACHE_DIR)
         if model_cache_dir.exists():
             model_dirs = [
-                d for d in model_cache_dir.iterdir() if d.is_dir() and d.name.startswith("models--")
+                d
+                for d in model_cache_dir.iterdir()
+                if d.is_dir() and d.name.startswith("models--")
             ]
-            args.models = [d.name.replace("models--", "").replace("--", "/") for d in model_dirs]
+            args.models = [
+                d.name.replace("models--", "").replace("--", "/") for d in model_dirs
+            ]
             logger.info(f"Found models in cache: {args.models}")
         else:
             logger.error(f"Model cache directory {MODEL_CACHE_DIR} does not exist")

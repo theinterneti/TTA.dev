@@ -182,7 +182,10 @@ class BranchManager:
             date_str = result.stdout.strip().strip('"')
             return datetime.fromisoformat(date_str.replace("Z", "+00:00"))
         except Exception as exc:
-            print(f"Warning: could not fetch commit date for {sha}: {exc}", file=sys.stderr)
+            print(
+                f"Warning: could not fetch commit date for {sha}: {exc}",
+                file=sys.stderr,
+            )
             return datetime.now(UTC) - timedelta(days=9999)
 
     # ------------------------------------------------------------------
@@ -305,7 +308,13 @@ class BranchManager:
         for b in targets:
             try:
                 subprocess.run(
-                    ["gh", "api", "-X", "DELETE", f"repos/{self.repo}/git/refs/heads/{b.name}"],
+                    [
+                        "gh",
+                        "api",
+                        "-X",
+                        "DELETE",
+                        f"repos/{self.repo}/git/refs/heads/{b.name}",
+                    ],
                     capture_output=True,
                     text=True,
                     check=True,
@@ -320,11 +329,16 @@ class BranchManager:
 
     def delete_orphaned_branches(self, days: int = 30) -> None:
         """Delete branches with no PR that have been inactive for ≥ days."""
-        print(f"Scanning for orphaned branches inactive for ≥ {days} days…\n", file=sys.stderr)
+        print(
+            f"Scanning for orphaned branches inactive for ≥ {days} days…\n",
+            file=sys.stderr,
+        )
         infos = self.analyse_branches(days)
         now = datetime.now(UTC)
         targets = [
-            b for b in infos if b.pr_state is None and (now - b.last_commit_date).days >= days
+            b
+            for b in infos
+            if b.pr_state is None and (now - b.last_commit_date).days >= days
         ]
 
         if not targets:
@@ -337,7 +351,13 @@ class BranchManager:
         for b in targets:
             try:
                 subprocess.run(
-                    ["gh", "api", "-X", "DELETE", f"repos/{self.repo}/git/refs/heads/{b.name}"],
+                    [
+                        "gh",
+                        "api",
+                        "-X",
+                        "DELETE",
+                        f"repos/{self.repo}/git/refs/heads/{b.name}",
+                    ],
                     capture_output=True,
                     text=True,
                     check=True,

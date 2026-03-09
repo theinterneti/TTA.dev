@@ -112,7 +112,9 @@ def main():
     print(
         f"Default template: {'✅ WORKS' if default_success else '❌ FAILED'} ({default_time:.2f}s)"
     )
-    print(f"ML template:      {'✅ WORKS' if ml_success else '❌ FAILED'} ({ml_time:.2f}s)")
+    print(
+        f"ML template:      {'✅ WORKS' if ml_success else '❌ FAILED'} ({ml_time:.2f}s)"
+    )
 
     if default_success and ml_success:
         improvement = default_time / ml_time if ml_time > 0 else 1

@@ -20,8 +20,7 @@ import tempfile
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("coordinator")
 
@@ -32,8 +31,9 @@ PLANNER_PROMPT = os.path.join(PROMPTS_DIR, "planner.prompt.md")
 ROLE_PROMPT_MAP = {
     "coder": os.path.join(PROMPTS_DIR, "feature-implementation.prompt.md"),
     "tester": os.path.join(PROMPTS_DIR, "generate-tests.prompt.md"),
-    "writer": os.path.join(PROMPTS_DIR, "documentation.prompt.md"), # Placeholder
+    "writer": os.path.join(PROMPTS_DIR, "documentation.prompt.md"),  # Placeholder
 }
+
 
 def run_agent(prompt_path, context_content):
     """Runs the agent with the given prompt and context."""
@@ -44,7 +44,7 @@ def run_agent(prompt_path, context_content):
 
     full_prompt = f"{base_prompt}\n\n## Context\n{context_content}\n\n## IMPORTANT INSTRUCTION\nPlease output the code you generate in markdown code blocks (e.g. ```python ... ```). Do not assume tools are available."
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as tmp:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as tmp:
         tmp.write(full_prompt)
         tmp_path = tmp.name
 
@@ -69,6 +69,7 @@ def run_agent(prompt_path, context_content):
     finally:
         os.remove(tmp_path)
 
+
 def execute_task(task):
     """Executes the task and returns the generated code (if any)."""
     if not os.path.exists(PLANNER_PROMPT):
@@ -90,7 +91,7 @@ def execute_task(task):
         if "```json" in clean_json:
             clean_json = clean_json.split("```json")[1].split("```")[0]
         elif "```" in clean_json:
-             clean_json = clean_json.split("```")[1].split("```")[0]
+            clean_json = clean_json.split("```")[1].split("```")[0]
 
         plan = json.loads(clean_json)
         steps = plan.get("plan", [])
@@ -129,9 +130,14 @@ def execute_task(task):
             if role == "coder":
                 # Extract code blocks
                 import re
+
                 # More robust regex for code blocks
-                code_blocks = re.findall(r"```(?:\w+)?\s*(.*?)```", step_response, re.DOTALL)
-                logger.info(f"Extracted {len(code_blocks)} code blocks from Step {step_id}")
+                code_blocks = re.findall(
+                    r"```(?:\w+)?\s*(.*?)```", step_response, re.DOTALL
+                )
+                logger.info(
+                    f"Extracted {len(code_blocks)} code blocks from Step {step_id}"
+                )
                 for block in code_blocks:
                     generated_code.append(block.strip())
 
@@ -141,9 +147,11 @@ def execute_task(task):
                 for filepath in context_files:
                     if os.path.exists(filepath) and os.path.isfile(filepath):
                         try:
-                            with open(filepath, 'r') as f:
+                            with open(filepath, "r") as f:
                                 content = f.read()
-                                logger.info(f"Read content from {filepath} ({len(content)} chars)")
+                                logger.info(
+                                    f"Read content from {filepath} ({len(content)} chars)"
+                                )
                                 generated_code.append(content)
                         except Exception as e:
                             logger.warning(f"Failed to read {filepath}: {e}")
@@ -155,12 +163,14 @@ def execute_task(task):
     logger.info("🎉 Coordination Complete.")
     return "\n\n".join(generated_code)
 
+
 def main():
     parser = argparse.ArgumentParser(description="Run Agent Coordinator")
     parser.add_argument("task", help="The high-level task description")
     args = parser.parse_args()
 
     execute_task(args.task)
+
 
 if __name__ == "__main__":
     main()

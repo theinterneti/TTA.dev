@@ -6,7 +6,6 @@ This module provides a global singleton collector that:
 3. Ensures data is never lost even if dashboard is offline
 """
 
-import asyncio
 import json
 import sqlite3
 from collections import defaultdict
@@ -37,7 +36,7 @@ class TraceCollector:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        
+
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS spans (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,17 +51,17 @@ class TraceCollector:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        
+
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_spans_trace_id 
             ON spans(trace_id)
         """)
-        
+
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_spans_created_at 
             ON spans(created_at DESC)
         """)
-        
+
         conn.commit()
         conn.close()
 
@@ -77,23 +76,26 @@ class TraceCollector:
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
-            cursor.execute("""
+
+            cursor.execute(
+                """
                 INSERT INTO spans 
                 (trace_id, span_name, primitive_type, start_time, end_time, 
                  duration_ms, status, attributes)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                span_data.get("trace_id", "default"),
-                span_data.get("name", "unknown"),
-                span_data.get("attributes", {}).get("primitive.type", "unknown"),
-                span_data.get("start_time", 0),
-                span_data.get("end_time", 0),
-                span_data.get("duration_ms", 0),
-                span_data.get("status", "unknown"),
-                json.dumps(span_data.get("attributes", {}))
-            ))
-            
+            """,
+                (
+                    span_data.get("trace_id", "default"),
+                    span_data.get("name", "unknown"),
+                    span_data.get("attributes", {}).get("primitive.type", "unknown"),
+                    span_data.get("start_time", 0),
+                    span_data.get("end_time", 0),
+                    span_data.get("duration_ms", 0),
+                    span_data.get("status", "unknown"),
+                    json.dumps(span_data.get("attributes", {})),
+                ),
+            )
+
             conn.commit()
             conn.close()
         except Exception as e:
@@ -114,7 +116,7 @@ class TraceCollector:
         """
         # Always persist to database first (critical path)
         self._persist_span(span_data)
-        
+
         # Add to in-memory buffer
         trace_id = span_data.get("trace_id", "default")
         self.spans_by_trace[trace_id].append(span_data)
@@ -136,28 +138,33 @@ class TraceCollector:
         """Get recent spans from database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT trace_id, span_name, primitive_type, start_time, end_time,
                    duration_ms, status, attributes
             FROM spans
             ORDER BY created_at DESC
             LIMIT ?
-        """, (limit,))
-        
+        """,
+            (limit,),
+        )
+
         spans = []
         for row in cursor.fetchall():
-            spans.append({
-                "trace_id": row[0],
-                "name": row[1],
-                "primitive_type": row[2],
-                "start_time": row[3],
-                "end_time": row[4],
-                "duration_ms": row[5],
-                "status": row[6],
-                "attributes": json.loads(row[7])
-            })
-        
+            spans.append(
+                {
+                    "trace_id": row[0],
+                    "name": row[1],
+                    "primitive_type": row[2],
+                    "start_time": row[3],
+                    "end_time": row[4],
+                    "duration_ms": row[5],
+                    "status": row[6],
+                    "attributes": json.loads(row[7]),
+                }
+            )
+
         conn.close()
         return spans
 

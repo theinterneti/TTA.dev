@@ -18,7 +18,9 @@ from aiohttp import web
 class ObservabilityDashboard:
     """Auto-starting observability dashboard."""
 
-    def __init__(self, host: str = "localhost", port: int = 8080, max_traces: int = 100):
+    def __init__(
+        self, host: str = "localhost", port: int = 8080, max_traces: int = 100
+    ):
         self.host = host
         self.port = port
         self.app = web.Application()
@@ -259,7 +261,9 @@ class ObservabilityDashboard:
         await self._runner.setup()
         self._site = web.TCPSite(self._runner, self.host, self.port)
         await self._site.start()
-        print(f"🚀 TTA.dev Observability Dashboard running at http://{self.host}:{self.port}")
+        print(
+            f"🚀 TTA.dev Observability Dashboard running at http://{self.host}:{self.port}"
+        )
         print("Press Ctrl+C to stop")
 
     async def stop(self):
@@ -290,7 +294,9 @@ class ObservabilityDashboard:
         # Update average duration using running total
         total_workflows = self.metrics["total_workflows"]
         self.metrics["total_duration_ms"] += duration_ms
-        self.metrics["avg_duration_ms"] = self.metrics["total_duration_ms"] / total_workflows
+        self.metrics["avg_duration_ms"] = (
+            self.metrics["total_duration_ms"] / total_workflows
+        )
 
 
 async def main():

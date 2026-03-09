@@ -257,7 +257,9 @@ class CodeAnalysisEngine:
                     line_number=node.lineno,
                     description="Bare except clause found",
                     suggestion="Specify the exception type to catch",
-                    code_snippet=lines[node.lineno - 1] if node.lineno <= len(lines) else "",
+                    code_snippet=lines[node.lineno - 1]
+                    if node.lineno <= len(lines)
+                    else "",
                     context={"node_type": type(node).__name__},
                 )
                 issues.append(issue)
@@ -265,8 +267,12 @@ class CodeAnalysisEngine:
             # Detect empty except blocks
             if isinstance(node, ast.ExceptHandler):
                 try:
-                    body_lines = lines[node.lineno : node.end_lineno] if node.end_lineno else []
-                    if any(line.strip() for line in body_lines[1:]):  # Skip the 'except' line
+                    body_lines = (
+                        lines[node.lineno : node.end_lineno] if node.end_lineno else []
+                    )
+                    if any(
+                        line.strip() for line in body_lines[1:]
+                    ):  # Skip the 'except' line
                         pass  # Has content
                     else:
                         issue = CodeIssue(
@@ -287,7 +293,9 @@ class CodeAnalysisEngine:
 
         return issues
 
-    def _analyze_pattern_issues(self, file_path: Path, lines: list[str]) -> list[CodeIssue]:
+    def _analyze_pattern_issues(
+        self, file_path: Path, lines: list[str]
+    ) -> list[CodeIssue]:
         """Analyze file for pattern-based issues."""
         issues = []
 
@@ -328,7 +336,9 @@ class CodeAnalysisEngine:
 
         return issues
 
-    def detect_architectural_patterns(self, context: ProjectContext) -> list[ArchitectureDetection]:
+    def detect_architectural_patterns(
+        self, context: ProjectContext
+    ) -> list[ArchitectureDetection]:
         """Detect architectural patterns in the project."""
         detections = []
 
@@ -336,7 +346,9 @@ class CodeAnalysisEngine:
         file_structure = context.file_structure
 
         # Microservice detection
-        web_files = sum(1 for ext in [".py"] if ext in file_structure.get("file_types", {}))
+        web_files = sum(
+            1 for ext in [".py"] if ext in file_structure.get("file_types", {})
+        )
         if web_files > 0:
             # Look for web framework indicators
             framework_indicators = 0
@@ -354,7 +366,9 @@ class CodeAnalysisEngine:
                     confidence=framework_indicators,
                     file_path="project_root",
                     evidence=[f"Framework confidence: {framework_indicators}"],
-                    context={"frameworks": [f.framework.value for f in context.frameworks]},
+                    context={
+                        "frameworks": [f.framework.value for f in context.frameworks]
+                    },
                 )
                 detections.append(detection)
 
@@ -573,7 +587,9 @@ class MultiModalAnalyzer:
         patterns["coding_style"]["pattern_distribution"] = dict(Counter(pattern_types))
 
         # Framework preferences based on detected frameworks
-        patterns["framework_preferences"] = [f.framework.value for f in context.frameworks]
+        patterns["framework_preferences"] = [
+            f.framework.value for f in context.frameworks
+        ]
 
         # Complexity tolerance based on project stage and patterns
         complexity_factors = [
@@ -581,10 +597,14 @@ class MultiModalAnalyzer:
             len(context.patterns) / 100,  # Normalize pattern count
             context.file_structure.get("depth", 0) / 10,  # Normalize depth
         ]
-        patterns["complexity_tolerance"] = sum(complexity_factors) / len(complexity_factors)
+        patterns["complexity_tolerance"] = sum(complexity_factors) / len(
+            complexity_factors
+        )
 
         # Error handling style based on detected error patterns
-        error_patterns = [p for p in context.patterns if p.pattern_type == "error_patterns"]
+        error_patterns = [
+            p for p in context.patterns if p.pattern_type == "error_patterns"
+        ]
         if len(error_patterns) > 10:
             patterns["error_handling_style"] = "comprehensive"
         elif len(error_patterns) > 5:
@@ -596,7 +616,10 @@ class MultiModalAnalyzer:
         doc_quality_factors = [
             len(doc_context.get("todos", [])) / 10,  # Lower is better
             len(doc_context.get("known_issues", [])) / 20,  # Lower is better
-            1.0 - (len(doc_context.get("performance_concerns", [])) / 50),  # Lower is better
+            1.0
+            - (
+                len(doc_context.get("performance_concerns", [])) / 50
+            ),  # Lower is better
         ]
         patterns["documentation_quality"] = max(
             0.0, min(1.0, sum(doc_quality_factors) / len(doc_quality_factors))
@@ -694,7 +717,9 @@ class IntelligentSuggestionEngine:
             all_issues.extend(self.code_analyzer.analyze_file_issues(file_path))
 
         # Detect architectural patterns
-        architecture_detections = self.code_analyzer.detect_architectural_patterns(context)
+        architecture_detections = self.code_analyzer.detect_architectural_patterns(
+            context
+        )
 
         # Identify performance bottlenecks
         bottlenecks = self.code_analyzer.identify_performance_bottlenecks(all_issues)
@@ -703,12 +728,16 @@ class IntelligentSuggestionEngine:
         doc_context = self.multi_modal_analyzer.analyze_documentation_context()
 
         # Analyze team patterns
-        team_patterns = self.multi_modal_analyzer.analyze_team_patterns(context, doc_context)
+        team_patterns = self.multi_modal_analyzer.analyze_team_patterns(
+            context, doc_context
+        )
 
         # Generate suggestions based on issues
         for issue in all_issues:
             if issue.severity > 0.3:  # Only suggest for significant issues
-                suggestions.extend(self._suggest_for_issue(issue, context, team_patterns))
+                suggestions.extend(
+                    self._suggest_for_issue(issue, context, team_patterns)
+                )
 
         # Generate suggestions based on bottlenecks
         for bottleneck in bottlenecks:
@@ -719,7 +748,9 @@ class IntelligentSuggestionEngine:
             suggestions.extend(self._suggest_for_architecture(detection, context))
 
         # Generate suggestions based on project characteristics
-        suggestions.extend(self._suggest_for_project_characteristics(context, team_patterns))
+        suggestions.extend(
+            self._suggest_for_project_characteristics(context, team_patterns)
+        )
 
         # Remove duplicates and rank by confidence
         unique_suggestions = self._deduplicate_suggestions(suggestions)
@@ -765,7 +796,9 @@ class IntelligentSuggestionEngine:
                         "line_number": issue.line_number,
                         "issue_severity": issue.severity,
                     },
-                    code_example=self._get_primitive_example(primitive, context.language),
+                    code_example=self._get_primitive_example(
+                        primitive, context.language
+                    ),
                     benefits=self._get_primitive_benefits(primitive),
                     implementation_steps=self._get_implementation_steps(primitive),
                     related_issues=[f"{issue.file_path}:{issue.line_number}"],
@@ -794,7 +827,9 @@ class IntelligentSuggestionEngine:
             ],
         }
 
-        primitives = bottleneck_mappings.get(bottleneck.bottleneck_type, ["cache_primitive"])
+        primitives = bottleneck_mappings.get(
+            bottleneck.bottleneck_type, ["cache_primitive"]
+        )
 
         for primitive in primitives:
             suggestion = Suggestion(
@@ -833,7 +868,9 @@ class IntelligentSuggestionEngine:
             reason = "Microservices benefit from routing and orchestration"
         elif detection.pattern == ArchitecturePattern.LAYERED_ARCHITECTURE:
             primitives = ["sequential_primitive", "fallback_primitive"]
-            reason = "Layered architectures need sequential processing and error handling"
+            reason = (
+                "Layered architectures need sequential processing and error handling"
+            )
         elif detection.pattern == ArchitecturePattern.EVENT_DRIVEN:
             primitives = ["parallel_primitive", "fallback_primitive"]
             reason = "Event-driven systems need parallel processing and fault tolerance"
@@ -886,7 +923,9 @@ class IntelligentSuggestionEngine:
                         "stage": context.stage.value,
                         "complexity_score": context.complexity_score,
                     },
-                    code_example=self._get_primitive_example(primitive, context.language),
+                    code_example=self._get_primitive_example(
+                        primitive, context.language
+                    ),
                     benefits=self._get_primitive_benefits(primitive),
                     implementation_steps=self._get_implementation_steps(primitive),
                     related_issues=[],
@@ -908,7 +947,9 @@ class IntelligentSuggestionEngine:
                         "complexity_score": context.complexity_score,
                         "pattern_count": len(context.patterns),
                     },
-                    code_example=self._get_primitive_example(primitive, context.language),
+                    code_example=self._get_primitive_example(
+                        primitive, context.language
+                    ),
                     benefits=self._get_primitive_benefits(primitive),
                     implementation_steps=self._get_implementation_steps(primitive),
                     related_issues=[],
@@ -924,7 +965,9 @@ class IntelligentSuggestionEngine:
                 confidence=0.7,
                 reason="Django projects benefit from caching for database query optimization",
                 context={"framework_preference": "django"},
-                code_example=self._get_primitive_example("cache_primitive", context.language),
+                code_example=self._get_primitive_example(
+                    "cache_primitive", context.language
+                ),
                 benefits=self._get_primitive_benefits("cache_primitive"),
                 implementation_steps=self._get_implementation_steps("cache_primitive"),
                 related_issues=[],
@@ -1127,7 +1170,9 @@ result = await router.execute(context, request_data)
             ],
         )
 
-    def _deduplicate_suggestions(self, suggestions: list[Suggestion]) -> list[Suggestion]:
+    def _deduplicate_suggestions(
+        self, suggestions: list[Suggestion]
+    ) -> list[Suggestion]:
         """Remove duplicate suggestions based on primitive and context."""
         seen = set()
         unique_suggestions = []
@@ -1151,7 +1196,10 @@ result = await router.execute(context, request_data)
             if "complexity_score" in suggestion.context:
                 context_boost += suggestion.context["complexity_score"] * 0.1
 
-            if "stage" in suggestion.context and suggestion.context["stage"] == "production":
+            if (
+                "stage" in suggestion.context
+                and suggestion.context["stage"] == "production"
+            ):
                 context_boost += 0.2
 
             if "framework_preference" in suggestion.context:
@@ -1184,7 +1232,9 @@ def create_suggestion_engine(project_path: str) -> IntelligentSuggestionEngine:
     return IntelligentSuggestionEngine(project_path)
 
 
-def get_context_aware_suggestions(project_path: str, context: ProjectContext) -> list[Suggestion]:
+def get_context_aware_suggestions(
+    project_path: str, context: ProjectContext
+) -> list[Suggestion]:
     """Get suggestions for a project with given context."""
     engine = create_suggestion_engine(project_path)
     return engine.generate_suggestions(context)

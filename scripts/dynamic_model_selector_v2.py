@@ -35,9 +35,13 @@ def main():
         help="Path to analysis JSON file (if not provided, will use the most recent one)",
     )
     parser.add_argument("--task", choices=list(TASK_TYPES.keys()), help="Task type")
-    parser.add_argument("--agent", choices=list(AGENT_TASK_MAPPING.keys()), help="Agent type")
+    parser.add_argument(
+        "--agent", choices=list(AGENT_TASK_MAPPING.keys()), help="Agent type"
+    )
     parser.add_argument("--max-memory", type=int, help="Maximum memory in MB")
-    parser.add_argument("--min-speed", type=float, help="Minimum speed in tokens/second")
+    parser.add_argument(
+        "--min-speed", type=float, help="Minimum speed in tokens/second"
+    )
     args = parser.parse_args()
 
     # Create model selector
@@ -72,7 +76,10 @@ def main():
     # Select model
     if args.agent:
         selection = selector.get_model_config_for_agent(
-            analysis, args.agent, memory_constraint=args.max_memory, speed_constraint=args.min_speed
+            analysis,
+            args.agent,
+            memory_constraint=args.max_memory,
+            speed_constraint=args.min_speed,
         )
     elif args.task:
         selection = selector.select_model_for_task(analysis, args.task, constraints)

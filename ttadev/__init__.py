@@ -3,20 +3,21 @@
 __version__ = "0.1.0"
 
 # Auto-initialize observability
-from ttadev.observability.auto_instrument import setup_observability
-setup_observability()
+from ttadev.observability.auto_instrument import auto_initialize
+
+auto_initialize()
 
 # Export main primitives
 from ttadev.primitives.core import (
-    WorkflowPrimitive,
     LambdaPrimitive,
-    SequentialPrimitive,
     ParallelPrimitive,
+    SequentialPrimitive,
+    WorkflowPrimitive,
 )
 from ttadev.primitives.recovery import (
-    RetryPrimitive,
-    FallbackPrimitive,
     CircuitBreakerPrimitive,
+    FallbackPrimitive,
+    RetryPrimitive,
 )
 
 __all__ = [

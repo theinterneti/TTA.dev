@@ -60,7 +60,9 @@ def parse_args():
         default=["all"],
         help="Servers to start (default: all)",
     )
-    start_parser.add_argument("--wait", action="store_true", help="Wait for servers to start")
+    start_parser.add_argument(
+        "--wait", action="store_true", help="Wait for servers to start"
+    )
 
     # Stop command
     stop_parser = subparsers.add_parser("stop", help="Stop MCP servers")
@@ -102,7 +104,11 @@ def get_server_types(server_names: list[str]) -> list[MCPServerType]:
         List of MCPServerType enum values
     """
     if "all" in server_names:
-        return [MCPServerType.BASIC, MCPServerType.AGENT_TOOL, MCPServerType.KNOWLEDGE_RESOURCE]
+        return [
+            MCPServerType.BASIC,
+            MCPServerType.AGENT_TOOL,
+            MCPServerType.KNOWLEDGE_RESOURCE,
+        ]
 
     server_types = []
     for name in server_names:
@@ -117,7 +123,9 @@ def get_server_types(server_names: list[str]) -> list[MCPServerType]:
 
 
 def start_servers(
-    server_manager: MCPServerManager, server_types: list[MCPServerType], wait: bool = False
+    server_manager: MCPServerManager,
+    server_types: list[MCPServerType],
+    wait: bool = False,
 ) -> None:
     """
     Start MCP servers.
@@ -142,7 +150,9 @@ def start_servers(
             logger.error(f"Failed to start {server_type} server")
 
 
-def stop_servers(server_manager: MCPServerManager, server_types: list[MCPServerType]) -> None:
+def stop_servers(
+    server_manager: MCPServerManager, server_types: list[MCPServerType]
+) -> None:
     """
     Stop MCP servers.
 
@@ -177,7 +187,11 @@ def check_server_status(server_manager: MCPServerManager) -> None:
     """
     logger.info("Checking MCP server status...")
 
-    server_types = [MCPServerType.BASIC, MCPServerType.AGENT_TOOL, MCPServerType.KNOWLEDGE_RESOURCE]
+    server_types = [
+        MCPServerType.BASIC,
+        MCPServerType.AGENT_TOOL,
+        MCPServerType.KNOWLEDGE_RESOURCE,
+    ]
 
     for server_type in server_types:
         running = server_manager.is_server_running(server_type)

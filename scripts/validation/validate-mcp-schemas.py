@@ -49,7 +49,9 @@ def validate_tool_schema(tool_name: str, schema: dict[str, Any]) -> bool:
     # Check description clarity (basic heuristics)
     description = schema.get("description", "")
     if len(description) < 20:
-        print(f"⚠️  Tool '{tool_name}' has short description (may not be clear to agents)")
+        print(
+            f"⚠️  Tool '{tool_name}' has short description (may not be clear to agents)"
+        )
 
     return True
 

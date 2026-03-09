@@ -92,8 +92,7 @@ class N8nSetupEngine:
         logger.info("🔑 Verifying GitHub API connectivity...")
 
         github_token = (
-            os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
-            or "ghp_YOUR_GITHUB_TOKEN_HERE"
+            os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN") or "ghp_YOUR_GITHUB_TOKEN_HERE"
         )
 
         async def test_github_api():

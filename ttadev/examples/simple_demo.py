@@ -2,13 +2,13 @@
 """Simple demo showcasing TTA.dev primitives with observability."""
 
 import asyncio
+
 from primitives import (
-    SequentialPrimitive,
-    ParallelPrimitive,
+    LambdaPrimitive,
     RetryPrimitive,
     RetryStrategy,
+    SequentialPrimitive,
     WorkflowContext,
-    LambdaPrimitive,
 )
 
 
@@ -37,46 +37,44 @@ async def enrich_profile(data: dict, ctx: WorkflowContext) -> dict:
 async def main():
     """Run simple instrumented demo."""
     print("🚀 TTA.dev Simple Demo - Watch the observability dashboard!\n")
-    
+
     # Create workflow with different primitive types
     print("📊 Building workflow...")
     print("  1. Fetch user data")
     print("  2. Fetch settings data")
     print("  3. Enrich combined profile")
     print()
-    
+
     # Step 1: Fetch user
     fetch_user_step = LambdaPrimitive(fetch_user)
-    
+
     # Step 2: Fetch settings (with retry for resilience)
     fetch_settings_step = RetryPrimitive(
         LambdaPrimitive(fetch_settings),
         strategy=RetryStrategy(max_retries=3, backoff_base=2.0),
     )
-    
+
     # Step 3: Enrich profile
     enrich_step = LambdaPrimitive(enrich_profile)
-    
+
     # Combine into sequential workflow
-    workflow = SequentialPrimitive(
-        [fetch_user_step, fetch_settings_step, enrich_step]
-    )
-    
+    workflow = SequentialPrimitive([fetch_user_step, fetch_settings_step, enrich_step])
+
     # Execute
     print("⚡ Executing workflow...")
     print("=" * 60)
-    
+
     ctx = WorkflowContext(workflow_id="simple_demo")
     result = await workflow.execute({"user_id": 12345}, ctx)
-    
+
     print("=" * 60)
-    print(f"\n✅ Workflow completed!")
+    print("\n✅ Workflow completed!")
     print(f"📊 Result: {result}")
-    print(f"\n🔍 Check http://localhost:8000 to see:")
-    print(f"   - Sequential workflow execution")
-    print(f"   - Retry instrumentation")
-    print(f"   - Timing and duration for each step")
-    print(f"   - Full trace tree")
+    print("\n🔍 Check http://localhost:8000 to see:")
+    print("   - Sequential workflow execution")
+    print("   - Retry instrumentation")
+    print("   - Timing and duration for each step")
+    print("   - Full trace tree")
 
 
 if __name__ == "__main__":

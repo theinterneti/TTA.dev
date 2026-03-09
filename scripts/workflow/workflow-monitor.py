@@ -166,7 +166,11 @@ class WorkflowMonitor:
         return alerts
 
     def compare_workflows(
-        self, v1_workflow: str, v2_workflow: str, days: int, alert_threshold: float = 0.10
+        self,
+        v1_workflow: str,
+        v2_workflow: str,
+        days: int,
+        alert_threshold: float = 0.10,
     ) -> ComparisonReport:
         """Compare v1 and v2 workflows over specified time period"""
         since = datetime.now() - timedelta(days=days)
@@ -195,7 +199,9 @@ class WorkflowMonitor:
         unique_failures = self.find_unique_failures(v1_runs, v2_runs)
 
         # Generate alerts
-        alerts = self.generate_alerts(performance_delta, unique_failures, alert_threshold)
+        alerts = self.generate_alerts(
+            performance_delta, unique_failures, alert_threshold
+        )
 
         return ComparisonReport(
             date=datetime.now().strftime("%Y-%m-%d"),
@@ -247,7 +253,9 @@ class WorkflowMonitor:
             md.append("## 🚨 Unique v2 Failures\n")
             md.append("PRs that failed in v2 but passed in v1:\n")
             for failure in report.unique_v2_failures:
-                md.append(f"- PR #{failure.pr_number}: [{failure.run_id}]({failure.url})")
+                md.append(
+                    f"- PR #{failure.pr_number}: [{failure.run_id}]({failure.url})"
+                )
             md.append("")
 
         # Recent runs
@@ -256,14 +264,18 @@ class WorkflowMonitor:
         for run in report.v1_runs[:5]:
             status_emoji = "✅" if run.conclusion == "success" else "❌"
             pr_info = f"PR #{run.pr_number}" if run.pr_number else run.branch
-            md.append(f"- {status_emoji} [{pr_info}]({run.url}) - {run.duration_seconds}s")
+            md.append(
+                f"- {status_emoji} [{pr_info}]({run.url}) - {run.duration_seconds}s"
+            )
         md.append("")
 
         md.append("### v2 Workflow\n")
         for run in report.v2_runs[:5]:
             status_emoji = "✅" if run.conclusion == "success" else "❌"
             pr_info = f"PR #{run.pr_number}" if run.pr_number else run.branch
-            md.append(f"- {status_emoji} [{pr_info}]({run.url}) - {run.duration_seconds}s")
+            md.append(
+                f"- {status_emoji} [{pr_info}]({run.url}) - {run.duration_seconds}s"
+            )
         md.append("")
 
         # Recommendations
@@ -275,7 +287,9 @@ class WorkflowMonitor:
             md.append("- ⚠️  Investigate alerts before proceeding")
             md.append("- ⚠️  Consider extending parallel execution period")
             if report.unique_v2_failures:
-                md.append("- 🚨 **Do not** proceed to Phase 3.2 until unique failures are resolved")
+                md.append(
+                    "- 🚨 **Do not** proceed to Phase 3.2 until unique failures are resolved"
+                )
         md.append("")
 
         md.append("---\n")
@@ -285,7 +299,9 @@ class WorkflowMonitor:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Monitor and compare GitHub Actions workflows")
+    parser = argparse.ArgumentParser(
+        description="Monitor and compare GitHub Actions workflows"
+    )
     parser.add_argument(
         "--days", type=int, default=1, help="Number of days to analyze (default: 1)"
     )
@@ -329,7 +345,9 @@ def main():
     monitor = WorkflowMonitor(github_token, args.repo)
 
     # Generate comparison report
-    print(f"Comparing {args.v1_workflow} vs {args.v2_workflow} over last {args.days} day(s)...")
+    print(
+        f"Comparing {args.v1_workflow} vs {args.v2_workflow} over last {args.days} day(s)..."
+    )
     report = monitor.compare_workflows(
         args.v1_workflow, args.v2_workflow, args.days, args.alert_threshold
     )

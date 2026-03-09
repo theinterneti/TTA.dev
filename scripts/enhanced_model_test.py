@@ -131,8 +131,19 @@ def evaluate_json_quality(text: str) -> dict[str, Any]:
 
 def evaluate_tool_use(text: str) -> dict[str, Any]:
     """Evaluate tool use in the response."""
-    tool_keywords = ["weather", "restaurant", "search", "find", "lookup", "api", "function", "tool"]
-    tool_mentions = sum(1 for keyword in tool_keywords if keyword.lower() in text.lower())
+    tool_keywords = [
+        "weather",
+        "restaurant",
+        "search",
+        "find",
+        "lookup",
+        "api",
+        "function",
+        "tool",
+    ]
+    tool_mentions = sum(
+        1 for keyword in tool_keywords if keyword.lower() in text.lower()
+    )
 
     return {"tool_mentions": tool_mentions, "has_tool_reference": tool_mentions > 0}
 
@@ -287,7 +298,9 @@ def test_model(
                     with torch.backends.cuda.sdp_kernel(
                         enable_flash=True, enable_math=False, enable_mem_efficient=False
                     ):
-                        outputs = model.generate(input_ids, generation_config=gen_config)
+                        outputs = model.generate(
+                            input_ids, generation_config=gen_config
+                        )
                 else:
                     outputs = model.generate(input_ids, generation_config=gen_config)
 
@@ -400,7 +413,9 @@ def run_model_tests(
 
                     # Skip flash attention for CPU-only setups
                     if use_flash_attention and not torch.cuda.is_available():
-                        logger.info("Skipping flash attention test as CUDA is not available")
+                        logger.info(
+                            "Skipping flash attention test as CUDA is not available"
+                        )
                         continue
 
                     # Run test
@@ -522,10 +537,13 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
                     "success_rate": np.mean(
                         [
                             1
-                            if result["tests"].get("structured_output", {}).get("is_valid", False)
+                            if result["tests"]
+                            .get("structured_output", {})
+                            .get("is_valid", False)
                             else 0
                             for result in model_test_results
-                            if "tests" in result and "structured_output" in result["tests"]
+                            if "tests" in result
+                            and "structured_output" in result["tests"]
                         ]
                     ),
                 },
@@ -541,7 +559,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
                 "creativity": {
                     "avg_lexical_diversity": np.mean(
                         [
-                            result["tests"].get("creative", {}).get("lexical_diversity", 0)
+                            result["tests"]
+                            .get("creative", {})
+                            .get("lexical_diversity", 0)
                             for result in model_test_results
                             if "tests" in result and "creative" in result["tests"]
                         ]
@@ -550,7 +570,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
                 "reasoning": {
                     "avg_reasoning_score": np.mean(
                         [
-                            result["tests"].get("reasoning", {}).get("reasoning_score", 0)
+                            result["tests"]
+                            .get("reasoning", {})
+                            .get("reasoning_score", 0)
                             for result in model_test_results
                             if "tests" in result and "reasoning" in result["tests"]
                         ]
@@ -576,7 +598,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
             )
             for result in model_test_results
         ]
-        best_configs["speed"] = max(speed_results, key=lambda x: x[1])[0] if speed_results else None
+        best_configs["speed"] = (
+            max(speed_results, key=lambda x: x[1])[0] if speed_results else None
+        )
 
         # Best for memory efficiency
         if any(
@@ -594,16 +618,24 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
         # Best for structured output
         structured_results = [
-            (result["config"], result["tests"].get("structured_output", {}).get("is_valid", False))
+            (
+                result["config"],
+                result["tests"].get("structured_output", {}).get("is_valid", False),
+            )
             for result in model_test_results
             if "tests" in result and "structured_output" in result["tests"]
         ]
         valid_structured = [r for r in structured_results if r[1]]
-        best_configs["structured_output"] = valid_structured[0][0] if valid_structured else None
+        best_configs["structured_output"] = (
+            valid_structured[0][0] if valid_structured else None
+        )
 
         # Best for tool use
         tool_results = [
-            (result["config"], result["tests"].get("tool_use", {}).get("tool_mentions", 0))
+            (
+                result["config"],
+                result["tests"].get("tool_use", {}).get("tool_mentions", 0),
+            )
             for result in model_test_results
             if "tests" in result and "tool_use" in result["tests"]
         ]
@@ -613,17 +645,25 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
 
         # Best for creativity
         creativity_results = [
-            (result["config"], result["tests"].get("creative", {}).get("lexical_diversity", 0))
+            (
+                result["config"],
+                result["tests"].get("creative", {}).get("lexical_diversity", 0),
+            )
             for result in model_test_results
             if "tests" in result and "creative" in result["tests"]
         ]
         best_configs["creativity"] = (
-            max(creativity_results, key=lambda x: x[1])[0] if creativity_results else None
+            max(creativity_results, key=lambda x: x[1])[0]
+            if creativity_results
+            else None
         )
 
         # Best for reasoning
         reasoning_results = [
-            (result["config"], result["tests"].get("reasoning", {}).get("reasoning_score", 0))
+            (
+                result["config"],
+                result["tests"].get("reasoning", {}).get("reasoning_score", 0),
+            )
             for result in model_test_results
             if "tests" in result and "reasoning" in result["tests"]
         ]
@@ -648,7 +688,9 @@ def analyze_results(results: dict[str, Any]) -> dict[str, Any]:
     # Find best model for each task
     for model, performance in analysis["model_performance"].items():
         # Add to task lists with scores
-        tasks["speed_critical"].append((model, performance["speed"]["avg_tokens_per_second"]))
+        tasks["speed_critical"].append(
+            (model, performance["speed"]["avg_tokens_per_second"])
+        )
         tasks["memory_constrained"].append(
             (model, -performance["memory"]["avg_model_size_mb"])
         )  # Negative for sorting

@@ -7,6 +7,7 @@ This demonstrates the basics:
 - Chaining them with >> operator
 - Observing execution in the dashboard
 """
+
 import asyncio
 import sys
 from pathlib import Path
@@ -30,13 +31,13 @@ async def exclaim(message: str, ctx: WorkflowContext) -> str:
 async def main():
     # Build the workflow
     workflow = LambdaPrimitive(greet) >> LambdaPrimitive(exclaim)
-    
+
     # Execute with observability
     context = WorkflowContext(workflow_id="hello-world")
     result = await workflow.execute("World", context)
-    
+
     print(f"\n✨ Result: {result}")
-    print(f"🔍 View trace at: http://localhost:8000\n")
+    print("🔍 View trace at: http://localhost:8000\n")
 
 
 if __name__ == "__main__":

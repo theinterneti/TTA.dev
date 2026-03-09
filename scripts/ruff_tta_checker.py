@@ -159,7 +159,9 @@ class TTAChecker(ast.NodeVisitor):
 
         return has_try_except and (has_break or is_range_loop)
 
-    def _has_expensive_operations(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    def _has_expensive_operations(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef
+    ) -> bool:
         """Check if function has operations that might benefit from caching."""
         # Look for LLM calls, API calls, database queries
         expensive_patterns = [
@@ -184,7 +186,8 @@ class TTAChecker(ast.NodeVisitor):
                         return True
                 if isinstance(child.func, ast.Name):
                     if any(
-                        pattern in child.func.id.lower() for pattern in expensive_patterns
+                        pattern in child.func.id.lower()
+                        for pattern in expensive_patterns
                     ):
                         return True
         return False
@@ -222,7 +225,9 @@ def check_file(filepath: Path) -> list[dict[str, Any]]:
         ]
 
 
-def check_packages(packages_dir: Path = Path("packages")) -> dict[str, list[dict[str, Any]]]:
+def check_packages(
+    packages_dir: Path = Path("packages"),
+) -> dict[str, list[dict[str, Any]]]:
     """Check all Python files in packages directory."""
     results = {}
 

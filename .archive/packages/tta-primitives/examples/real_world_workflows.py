@@ -30,9 +30,9 @@ async def customer_support_workflow():
 
     # Define primitives
     validate_input = LambdaPrimitive(
-        lambda x, ctx: {**x, "validated": True}
-        if x.get("message")
-        else {"error": "No message provided"}
+        lambda x, ctx: (
+            {**x, "validated": True} if x.get("message") else {"error": "No message provided"}
+        )
     )
 
     # Cache with 1-hour TTL

@@ -89,7 +89,9 @@ def visualize_results(results, output_dir=None):
     for model_name, results_list in model_results.items():
         # Calculate average load time
         load_times = [
-            result["model_load_time"] for result in results_list if "model_load_time" in result
+            result["model_load_time"]
+            for result in results_list
+            if "model_load_time" in result
         ]
         avg_load_time = sum(load_times) / len(load_times) if load_times else 0
 
@@ -130,7 +132,9 @@ def visualize_results(results, output_dir=None):
             for result in results_list
             if "memory" in result and "model_size_mb" in result["memory"]
         ]
-        avg_memory_usage = sum(memory_usages) / len(memory_usages) if memory_usages else 0
+        avg_memory_usage = (
+            sum(memory_usages) / len(memory_usages) if memory_usages else 0
+        )
 
         # Use short model name for display
         short_name = model_name.split("/")[-1]
@@ -198,7 +202,10 @@ def visualize_results(results, output_dir=None):
     plt.xlabel("Prompt Type")
     plt.ylabel("Tokens per Second")
     plt.xticks(
-        index + bar_width * (len(model_prompt_tps) - 1) / 2, prompt_types, rotation=45, ha="right"
+        index + bar_width * (len(model_prompt_tps) - 1) / 2,
+        prompt_types,
+        rotation=45,
+        ha="right",
     )
     plt.legend()
     plt.tight_layout()

@@ -5,6 +5,7 @@ Parallel Processing Example - Speed Up Your Workflows
 Process multiple items concurrently and watch them execute
 in parallel on the dashboard timeline!
 """
+
 import asyncio
 import sys
 from pathlib import Path
@@ -24,18 +25,18 @@ async def process_item(item: dict, ctx: WorkflowContext) -> dict:
 async def main():
     # Create parallel processor
     processor = ParallelPrimitive(LambdaPrimitive(process_item))
-    
+
     # Process 5 items concurrently
     items = [{"id": i, "value": i * 10} for i in range(1, 6)]
-    
+
     context = WorkflowContext(workflow_id="parallel-example")
     results = await processor.execute(items, context)
-    
+
     print("\n✨ Results:")
     for result in results:
         print(f"  Item {result['id']}: {result['value']}")
-    
-    print(f"\n🔍 View parallel execution at: http://localhost:8000\n")
+
+    print("\n🔍 View parallel execution at: http://localhost:8000\n")
 
 
 if __name__ == "__main__":

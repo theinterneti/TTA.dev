@@ -27,7 +27,9 @@ logger = logging.getLogger(__name__)
 # Get Hugging Face token from environment
 HF_TOKEN = os.getenv("HF_TOKEN")
 if not HF_TOKEN:
-    logger.warning("HF_TOKEN not found in environment. Some models may not be accessible.")
+    logger.warning(
+        "HF_TOKEN not found in environment. Some models may not be accessible."
+    )
 
 # Define the target models we want to acquire
 TARGET_MODELS = {
@@ -59,7 +61,9 @@ TARGET_MODELS = {
 }
 
 # Get model cache directory from environment or use default
-MODEL_CACHE_DIR = os.getenv("MODEL_CACHE_DIR", str(Path(__file__).parent.parent / ".model_cache"))
+MODEL_CACHE_DIR = os.getenv(
+    "MODEL_CACHE_DIR", str(Path(__file__).parent.parent / ".model_cache")
+)
 
 
 def load_model_configs(config_file="model_configs.json"):
@@ -146,9 +150,13 @@ def download_model(model_name, quantization="4bit", force_download=False):
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description="Download and set up models from Hugging Face")
+    parser = argparse.ArgumentParser(
+        description="Download and set up models from Hugging Face"
+    )
     parser.add_argument(
-        "--config", default="model_configs.json", help="Path to model configuration file"
+        "--config",
+        default="model_configs.json",
+        help="Path to model configuration file",
     )
     parser.add_argument(
         "--model",
@@ -162,7 +170,9 @@ def main():
 
     # Check if HF_TOKEN is set
     if not HF_TOKEN:
-        logger.error("HF_TOKEN not set in environment. Some models may not be accessible.")
+        logger.error(
+            "HF_TOKEN not set in environment. Some models may not be accessible."
+        )
 
     # If using config file
     if args.model == "config":
@@ -191,7 +201,9 @@ def main():
             if download_model(model_name, model_info["quantization"], args.force):
                 success_count += 1
 
-        logger.info(f"Downloaded {success_count}/{len(TARGET_MODELS)} models successfully.")
+        logger.info(
+            f"Downloaded {success_count}/{len(TARGET_MODELS)} models successfully."
+        )
     else:
         # Download specific target model
         model_info = TARGET_MODELS[args.model]

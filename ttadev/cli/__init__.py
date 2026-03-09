@@ -23,17 +23,17 @@ def main():
     print("  PRIMITIVES_CATALOG.md - Complete primitive reference")
     print("  GETTING_STARTED.md - Setup walkthrough")
     print()
-    
+
     repo_root = Path(__file__).parent.parent.parent
     agents_md = repo_root / "AGENTS.md"
-    
+
     if agents_md.exists():
         print("✅ AGENTS.md detected - your CLI agent can use TTA.dev primitives")
     else:
         print("⚠️  AGENTS.md not found - creating it now...")
         create_agents_md(repo_root)
         print("✅ Created AGENTS.md")
-    
+
     print()
     print("For more info: https://github.com/theinterneti/TTA.dev")
 
@@ -91,7 +91,7 @@ CLI agents (GitHub Copilot, Claude, Cline) automatically detect this file and kn
 - `GETTING_STARTED.md` - Setup guide
 - `USER_JOURNEY.md` - End-to-end walkthrough
 """
-    
+
     (repo_root / "AGENTS.md").write_text(content)
 
 

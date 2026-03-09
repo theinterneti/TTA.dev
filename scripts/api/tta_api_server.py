@@ -4,14 +4,13 @@ TTA.dev API Server
 FastAPI server exposing TTA.dev primitives for n8n and other integrations
 """
 
-import asyncio
 import os
 import sys
 from typing import Any
 import uuid
 import time
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -25,10 +24,16 @@ except ImportError:
 # Import TTA.dev primitives (optional - using mock for demo)
 try:
     # Add parent directory to path to avoid conflicts
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../packages/tta-dev-primitives/src'))
+    sys.path.insert(
+        0,
+        os.path.join(
+            os.path.dirname(__file__), "../../packages/tta-dev-primitives/src"
+        ),
+    )
     from tta_dev_primitives import WorkflowContext
     from tta_dev_primitives.recovery import RetryPrimitive
     from tta_dev_primitives.performance import CachePrimitive
+
     TTA_PRIMITIVES_AVAILABLE = True
 except ImportError as e:
     print(f"⚠️ Warning: TTA primitives not available: {e}")
@@ -44,14 +49,17 @@ except ImportError as e:
     class RetryPrimitive:
         def __init__(self, primitive=None, **kwargs):
             self.primitive = primitive
+
         async def execute(self, input_data, context):
             return await self.primitive.execute(input_data, context)
 
     class CachePrimitive:
         def __init__(self, primitive=None, **kwargs):
             self.primitive = primitive
+
         async def execute(self, input_data, context):
             return await self.primitive.execute(input_data, context)
+
 
 # Gemini integration (if available)
 GEMINI_AVAILABLE = False  # Set to True when you configure Gemini API key
@@ -60,7 +68,7 @@ GEMINI_AVAILABLE = False  # Set to True when you configure Gemini API key
 app = FastAPI(
     title="TTA.dev API",
     description="Production-ready API exposing TTA.dev workflow primitives",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # CORS middleware for n8n and web access
@@ -72,19 +80,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Request/Response Models
 class AnalyzeRequest(BaseModel):
     """Request to analyze repository or text data"""
+
     prompt: str = Field(..., description="Analysis prompt or question")
-    context: dict[str, Any] = Field(default_factory=dict, description="Additional context data")
+    context: dict[str, Any] = Field(
+        default_factory=dict, description="Additional context data"
+    )
     model: str = Field(default="gemini-1.5-flash", description="LLM model to use")
-    temperature: float = Field(default=0.7, ge=0.0, le=1.0, description="Creativity level")
+    temperature: float = Field(
+        default=0.7, ge=0.0, le=1.0, description="Creativity level"
+    )
     use_cache: bool = Field(default=True, description="Enable caching")
     max_retries: int = Field(default=3, ge=0, le=10, description="Retry attempts")
 
 
 class AnalyzeResponse(BaseModel):
     """Response from analysis"""
+
     success: bool
     response: str | None = None
     error: str | None = None
@@ -96,6 +111,7 @@ class AnalyzeResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     """API health check response"""
+
     status: str
     gemini_available: bool
     primitives_loaded: bool
@@ -138,6 +154,7 @@ Next steps:
             "tokens_used": len(prompt.split()) * 2,  # Rough estimate
         }
 
+
 # Initialize the workflow (without TTA primitives for now - using direct call)
 llm_primitive = SimpleLLMPrimitive()
 
@@ -165,7 +182,7 @@ async def health_check():
         status="healthy",
         gemini_available=GEMINI_AVAILABLE,
         primitives_loaded=True,
-        version="1.0.0"
+        version="1.0.0",
     )
 
 
@@ -195,8 +212,7 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
     try:
         # Execute with primitives (mock for demo)
         result = await llm_primitive.execute(
-            {"prompt": request.prompt, "context": request.context},
-            context
+            {"prompt": request.prompt, "context": request.context}, context
         )
 
         # Calculate metrics
@@ -209,7 +225,7 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
             execution_time_ms=execution_time_ms,
             cache_hit=False,
             model_used=result.get("model_used", "mock"),
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
     except Exception as e:
@@ -221,8 +237,10 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
             execution_time_ms=execution_time_ms,
             cache_hit=False,
             model_used="none",
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
+
+
 @app.post("/api/v1/github/analyze")
 async def analyze_github_repo(
     repo_url: str,

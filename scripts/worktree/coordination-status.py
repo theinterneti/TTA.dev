@@ -13,7 +13,7 @@ Shows:
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 WORKTREES = {
     "orchestrator": Path("/home/thein/repos/TTA.dev"),
@@ -58,8 +58,11 @@ def count_patterns_in_dir(directory: Path) -> Dict[str, int]:
 
     # Simple heuristic: files with "critical" or "security" are high priority
     high_priority = sum(
-        1 for p in patterns
-        if any(keyword in p.name.lower() for keyword in ["critical", "security", "urgent"])
+        1
+        for p in patterns
+        if any(
+            keyword in p.name.lower() for keyword in ["critical", "security", "urgent"]
+        )
     )
 
     return {
@@ -160,20 +163,28 @@ def display_status():
     recommendations = []
 
     if total_pending > 10:
-        recommendations.append("→ High review backlog! Review patterns in .worktree/coordination/")
+        recommendations.append(
+            "→ High review backlog! Review patterns in .worktree/coordination/"
+        )
 
     if total_pending > 0:
         recommendations.append("→ Review pending patterns before next integration")
 
     if not sync_status or not sync_status.get("last_sync"):
-        recommendations.append("→ Run sync-learnings.py --sync-all to get latest patterns")
+        recommendations.append(
+            "→ Run sync-learnings.py --sync-all to get latest patterns"
+        )
     elif sync_status.get("last_sync"):
         last_sync_dt = datetime.fromisoformat(sync_status["last_sync"])
         if datetime.now() - last_sync_dt > timedelta(hours=24):
-            recommendations.append("→ Sync is stale (>24h). Run sync-learnings.py --sync-all")
+            recommendations.append(
+                "→ Sync is stale (>24h). Run sync-learnings.py --sync-all"
+            )
 
     if queue_counts["total"] > 0:
-        recommendations.append(f"→ {queue_counts['total']} patterns ready for integration")
+        recommendations.append(
+            f"→ {queue_counts['total']} patterns ready for integration"
+        )
 
     if not recommendations:
         recommendations.append("✓ All systems operational!")

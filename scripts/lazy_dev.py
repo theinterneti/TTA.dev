@@ -33,6 +33,7 @@ REPO_ROOT = Path(__file__).parent.parent
 
 class WorkType(Enum):
     """Type of work being done."""
+
     FEATURE = "feature"
     FIX = "fix"
     DOCS = "docs"
@@ -44,6 +45,7 @@ class WorkType(Enum):
 @dataclass
 class RepoState:
     """Current repository state."""
+
     current_branch: str
     main_branch: str
     has_changes: bool
@@ -73,10 +75,10 @@ class LazyDevManager:
                 capture_output=True,
                 text=True,
                 check=check,
-                cwd=self.repo_root
+                cwd=self.repo_root,
             )
             return result.stdout.strip()
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             if check:
                 raise
             return ""
@@ -89,10 +91,10 @@ class LazyDevManager:
                 capture_output=True,
                 text=True,
                 check=check,
-                cwd=self.repo_root
+                cwd=self.repo_root,
             )
             return result.stdout.strip()
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             if check:
                 raise
             return ""
@@ -101,7 +103,9 @@ class LazyDevManager:
         """Get current repository state."""
         current_branch = self.run_git("branch", "--show-current")
         # Detect main branch from remote, fallback to "main" if detection fails
-        symbolic_ref = self.run_git("symbolic-ref", "refs/remotes/origin/HEAD", check=False)
+        symbolic_ref = self.run_git(
+            "symbolic-ref", "refs/remotes/origin/HEAD", check=False
+        )
         if symbolic_ref.startswith("refs/remotes/origin/"):
             main_branch = symbolic_ref.split("/")[-1]
         else:
@@ -112,9 +116,11 @@ class LazyDevManager:
 
         # Check ahead/behind
         ahead_behind = self.run_git(
-            "rev-list", "--left-right", "--count",
+            "rev-list",
+            "--left-right",
+            "--count",
             f"HEAD...origin/{current_branch}",
-            check=False
+            check=False,
         )
         ahead, behind = 0, 0
         if ahead_behind:
@@ -124,19 +130,27 @@ class LazyDevManager:
 
         # Get open PRs
         pr_json = self.run_gh(
-            "pr", "list",
-            "--repo", self.repo,
-            "--json", "number,title,state,author",
-            "--limit", "20"
+            "pr",
+            "list",
+            "--repo",
+            self.repo,
+            "--json",
+            "number,title,state,author",
+            "--limit",
+            "20",
         )
         open_prs = json.loads(pr_json) if pr_json else []
 
         # Get open issues
         issue_json = self.run_gh(
-            "issue", "list",
-            "--repo", self.repo,
-            "--json", "number,title,state,author",
-            "--limit", "20"
+            "issue",
+            "list",
+            "--repo",
+            self.repo,
+            "--json",
+            "number,title,state,author",
+            "--limit",
+            "20",
         )
         open_issues = json.loads(issue_json) if issue_json else []
 
@@ -148,7 +162,7 @@ class LazyDevManager:
             is_ahead=ahead > 0,
             is_behind=behind > 0,
             open_prs=open_prs,
-            open_issues=open_issues
+            open_issues=open_issues,
         )
 
     # ========================================================================
@@ -200,10 +214,7 @@ class LazyDevManager:
         files = self.run_git("diff", "--name-only", f"origin/main...{branch}")
 
         # Get commit messages
-        commits = self.run_git(
-            "log", f"origin/main..{branch}",
-            "--pretty=format:- %s"
-        )
+        commits = self.run_git("log", f"origin/main..{branch}", "--pretty=format:- %s")
 
         # Use gh copilot to generate description
         prompt = f"""Generate a concise PR description for:
@@ -231,10 +242,7 @@ Format as:
         try:
             # Try using gh copilot suggest
             description = self.run_gh(
-                "copilot", "suggest",
-                "-t", "git",
-                prompt,
-                check=False
+                "copilot", "suggest", "-t", "git", prompt, check=False
             )
             if description:
                 return description
@@ -248,7 +256,7 @@ Format as:
 
 ## Changes
 
-{commits if commits else '- Implementation changes'}
+{commits if commits else "- Implementation changes"}
 
 ## Files Modified
 
@@ -290,12 +298,17 @@ Format as:
         # Create PR
         print("   Creating PR...")
         pr_url = self.run_gh(
-            "pr", "create",
-            "--repo", self.repo,
-            "--title", title,
-            "--body", description,
+            "pr",
+            "create",
+            "--repo",
+            self.repo,
+            "--title",
+            title,
+            "--body",
+            description,
             *(["--draft"] if draft else []),
-            "--base", state.main_branch
+            "--base",
+            state.main_branch,
         )
 
         # Extract PR number
@@ -333,14 +346,13 @@ Work together to ensure this PR meets all quality standards.
 """
 
         print(f"   Adding collaboration comment with: {mentions}")
-        self.run_gh(
-            "pr", "comment", str(pr_number),
-            "--body", comment
-        )
+        self.run_gh("pr", "comment", str(pr_number), "--body", comment)
 
         print(f"✅ Collaboration started! Agents will respond in PR #{pr_number}")
 
-    async def collaborate_on_issue(self, issue_number: int, task: str, agents: list[str] = None):
+    async def collaborate_on_issue(
+        self, issue_number: int, task: str, agents: list[str] = None
+    ):
         """Assign agents to work on an issue."""
         if agents is None:
             agents = ["copilot"]
@@ -352,9 +364,12 @@ Work together to ensure this PR meets all quality standards.
             # Use gh issue develop for copilot
             if agent == "copilot":
                 self.run_gh(
-                    "issue", "develop", str(issue_number),
-                    "--name", f"fix/{issue_number}-{task[:20]}",
-                    check=False
+                    "issue",
+                    "develop",
+                    str(issue_number),
+                    "--name",
+                    f"fix/{issue_number}-{task[:20]}",
+                    check=False,
                 )
 
         # Add comment with task details
@@ -366,10 +381,7 @@ Task: {task}
 Please work together on this issue. Create a branch, implement the solution, and open a PR when ready.
 """
 
-        self.run_gh(
-            "issue", "comment", str(issue_number),
-            "--body", comment
-        )
+        self.run_gh("issue", "comment", str(issue_number), "--body", comment)
 
         print(f"✅ Agents assigned to issue #{issue_number}")
 
@@ -400,9 +412,9 @@ Please work together on this issue. Create a branch, implement the solution, and
         print()
 
         if state.is_ahead:
-            print(f"   ⬆️  Ahead of remote (unpushed commits)")
+            print("   ⬆️  Ahead of remote (unpushed commits)")
         if state.is_behind:
-            print(f"   ⬇️  Behind remote (need to pull)")
+            print("   ⬇️  Behind remote (need to pull)")
         print()
 
         print(f"📋 Open PRs: {len(state.open_prs)}")
@@ -445,9 +457,13 @@ Please work together on this issue. Create a branch, implement the solution, and
                 print("\nWork type:")
                 for i, wt in enumerate(WorkType, 1):
                     print(f"  {i}. {wt.value}")
-                type_choice = input("Choose type (or press enter for 'feature'): ").strip()
+                type_choice = input(
+                    "Choose type (or press enter for 'feature'): "
+                ).strip()
 
-                if type_choice.isdigit() and 1 <= int(type_choice) <= len(list(WorkType)):
+                if type_choice.isdigit() and 1 <= int(type_choice) <= len(
+                    list(WorkType)
+                ):
                     work_type = list(WorkType)[int(type_choice) - 1]
                 else:
                     work_type = WorkType.FEATURE
@@ -455,7 +471,10 @@ Please work together on this issue. Create a branch, implement the solution, and
                 await self.create_branch(desc, work_type)
 
             elif choice == "2":
-                title = input("PR title (or press enter for auto-generate): ").strip() or None
+                title = (
+                    input("PR title (or press enter for auto-generate): ").strip()
+                    or None
+                )
                 draft = input("Create as draft? (y/n): ").strip().lower() == "y"
                 await self.create_pr(title, draft)
 
@@ -474,7 +493,9 @@ Please work together on this issue. Create a branch, implement the solution, and
             elif choice == "6":
                 state = self.get_repo_state()
                 if state.has_changes or state.has_staged or state.is_ahead:
-                    self.run_git("push", "-u", "origin", state.current_branch, check=False)
+                    self.run_git(
+                        "push", "-u", "origin", state.current_branch, check=False
+                    )
                     print("✅ Pushed!")
                 else:
                     print("ℹ️  Nothing to push")
@@ -518,7 +539,9 @@ async def main():
 
         else:
             print(f"Unknown command: {command}")
-            print("Try: status, work-on, pr, collaborate, or no arguments for interactive mode")
+            print(
+                "Try: status, work-on, pr, collaborate, or no arguments for interactive mode"
+            )
             sys.exit(1)
 
 

@@ -10,7 +10,6 @@ Manages:
 """
 
 import subprocess
-import sys
 from datetime import datetime
 from typing import Any
 from pathlib import Path
@@ -25,10 +24,7 @@ class GitManager:
     def run_git(self, *args: str) -> tuple[int, str, str]:
         """Run git command and return (returncode, stdout, stderr)."""
         result = subprocess.run(
-            ["git"] + list(args),
-            cwd=self.repo_path,
-            capture_output=True,
-            text=True
+            ["git"] + list(args), cwd=self.repo_path, capture_output=True, text=True
         )
         return result.returncode, result.stdout, result.stderr
 
@@ -57,7 +53,9 @@ class GitManager:
         status["stashes"] = [s.strip() for s in stashes.split("\n") if s.strip()]
 
         # Behind/ahead of remote
-        _, tracking, _ = self.run_git("rev-list", "--left-right", "--count", "HEAD...@{u}")
+        _, tracking, _ = self.run_git(
+            "rev-list", "--left-right", "--count", "HEAD...@{u}"
+        )
         if tracking.strip():
             ahead, behind = tracking.strip().split("\t")
             status["ahead"] = int(ahead)
@@ -79,7 +77,9 @@ class GitManager:
 
     def get_merged_branches(self, target: str = "main") -> list[str]:
         """Get branches that have been merged into target."""
-        _, output, _ = self.run_git("branch", "--merged", target, "--format=%(refname:short)")
+        _, output, _ = self.run_git(
+            "branch", "--merged", target, "--format=%(refname:short)"
+        )
         branches = [b.strip() for b in output.split("\n") if b.strip()]
         # Exclude main, current branch, and protected branches
         protected = {target, "main", "develop", "master"}
@@ -104,12 +104,14 @@ class GitManager:
             _, info, _ = self.run_git("stash", "show", ref, "--stat")
             _, date_str, _ = self.run_git("show", "-s", "--format=%ci", ref)
 
-            stashes.append({
-                "ref": ref,
-                "message": line.split(":", 1)[1].strip() if ":" in line else "",
-                "date": date_str.strip(),
-                "stats": info.strip(),
-            })
+            stashes.append(
+                {
+                    "ref": ref,
+                    "message": line.split(":", 1)[1].strip() if ":" in line else "",
+                    "date": date_str.strip(),
+                    "stats": info.strip(),
+                }
+            )
 
         return stashes
 
@@ -160,26 +162,26 @@ class GitManager:
 
         print(f"\n📍 Current Branch: {status['current_branch']}")
 
-        if status['behind'] > 0:
+        if status["behind"] > 0:
             print(f"⚠️  Behind remote by {status['behind']} commit(s)")
-        if status['ahead'] > 0:
+        if status["ahead"] > 0:
             print(f"📤 Ahead of remote by {status['ahead']} commit(s)")
 
-        print(f"\n📝 Working Directory:")
+        print("\n📝 Working Directory:")
         print(f"   - Untracked: {len(status['untracked'])} file(s)")
         print(f"   - Modified:  {len(status['modified'])} file(s)")
         print(f"   - Staged:    {len(status['staged'])} file(s)")
         print(f"   - Stashes:   {len(status['stashes'])} stash(es)")
 
-        if status['untracked']:
-            print(f"\n📄 Untracked Files:")
-            for f in status['untracked'][:5]:
+        if status["untracked"]:
+            print("\n📄 Untracked Files:")
+            for f in status["untracked"][:5]:
                 print(f"   - {f}")
-            if len(status['untracked']) > 5:
+            if len(status["untracked"]) > 5:
                 print(f"   ... and {len(status['untracked']) - 5} more")
 
-        if status['stashes']:
-            print(f"\n💾 Stashes:")
+        if status["stashes"]:
+            print("\n💾 Stashes:")
             stashes = self.analyze_stashes()
             for stash in stashes[:3]:
                 print(f"   {stash['ref']}: {stash['message']}")
@@ -192,7 +194,7 @@ class GitManager:
         merged_branches = self.get_merged_branches()
         experimental = self.clean_experimental_branches(dry_run=True)
 
-        print(f"\n🌿 Branches:")
+        print("\n🌿 Branches:")
         print(f"   - Total local: {len(all_branches)}")
         print(f"   - Merged:      {len(merged_branches)}")
         print(f"   - Experimental:{len(experimental)}")
@@ -207,47 +209,49 @@ class GitManager:
         status = self.get_status()
 
         # Handle untracked files
-        if status['untracked']:
+        if status["untracked"]:
             print(f"\n📄 Found {len(status['untracked'])} untracked file(s)")
             response = input("Would you like to review them? (y/n): ").lower()
 
-            if response == 'y':
-                for f in status['untracked']:
+            if response == "y":
+                for f in status["untracked"]:
                     print(f"\n📄 {f}")
-                    action = input("Action? (a)dd, (i)gnore, (d)elete, (s)kip: ").lower()
+                    action = input(
+                        "Action? (a)dd, (i)gnore, (d)elete, (s)kip: "
+                    ).lower()
 
-                    if action == 'a':
+                    if action == "a":
                         self.run_git("add", f)
                         print(f"✅ Added {f}")
-                    elif action == 'i':
+                    elif action == "i":
                         # Add to .gitignore
                         with open(self.repo_path / ".gitignore", "a") as gitignore:
                             gitignore.write(f"\n{f}\n")
-                        print(f"✅ Added to .gitignore")
-                    elif action == 'd':
+                        print("✅ Added to .gitignore")
+                    elif action == "d":
                         (self.repo_path / f).unlink()
                         print(f"✅ Deleted {f}")
 
         # Handle stashes
-        if status['stashes']:
+        if status["stashes"]:
             print(f"\n💾 Found {len(status['stashes'])} stash(es)")
             stashes = self.analyze_stashes()
 
             for stash in stashes:
                 print(f"\n{stash['ref']}: {stash['message']}")
                 print(f"Date: {stash['date']}")
-                print(stash['stats'][:200])
+                print(stash["stats"][:200])
 
                 action = input("Action? (a)pply, (d)rop, (k)eep: ").lower()
 
-                if action == 'a':
-                    code, _, err = self.run_git("stash", "apply", stash['ref'])
+                if action == "a":
+                    code, _, err = self.run_git("stash", "apply", stash["ref"])
                     if code == 0:
                         print(f"✅ Applied {stash['ref']}")
                     else:
                         print(f"❌ Error: {err}")
-                elif action == 'd':
-                    self.run_git("stash", "drop", stash['ref'])
+                elif action == "d":
+                    self.run_git("stash", "drop", stash["ref"])
                     print(f"✅ Dropped {stash['ref']}")
 
         # Handle branches
@@ -256,7 +260,7 @@ class GitManager:
             print(f"\n🌿 Found {len(merged)} merged branch(es)")
             response = input("Delete all merged branches? (y/n): ").lower()
 
-            if response == 'y':
+            if response == "y":
                 for branch in merged:
                     self.run_git("branch", "-d", branch)
                     print(f"✅ Deleted {branch}")
@@ -267,16 +271,16 @@ class GitManager:
             print("Examples:", experimental[:5])
             response = input("Delete all experimental branches? (y/n): ").lower()
 
-            if response == 'y':
+            if response == "y":
                 self.clean_experimental_branches(dry_run=False)
                 print(f"✅ Deleted {len(experimental)} branches")
 
         # Sync with remote
-        if status['behind'] > 0:
+        if status["behind"] > 0:
             print(f"\n⚠️  Your branch is {status['behind']} commit(s) behind remote")
             response = input("Pull latest changes? (y/n): ").lower()
 
-            if response == 'y':
+            if response == "y":
                 if self.sync_with_remote():
                     print("✅ Synced with remote")
 
@@ -295,10 +299,16 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="TTA.dev Git Repository Manager")
-    parser.add_argument("command", choices=["status", "cleanup", "backup", "sync"],
-                       help="Command to execute")
-    parser.add_argument("--dry-run", action="store_true",
-                       help="Show what would be done without doing it")
+    parser.add_argument(
+        "command",
+        choices=["status", "cleanup", "backup", "sync"],
+        help="Command to execute",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without doing it",
+    )
 
     args = parser.parse_args()
 
@@ -320,7 +330,7 @@ def main():
 
     elif args.command == "sync":
         status = manager.get_status()
-        if status['behind'] > 0:
+        if status["behind"] > 0:
             manager.sync_with_remote()
         else:
             print("✅ Already up to date")

@@ -23,7 +23,9 @@ logger = logging.getLogger(__name__)
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Start MCP servers for the TTA project")
+    parser = argparse.ArgumentParser(
+        description="Start MCP servers for the TTA project"
+    )
 
     parser.add_argument(
         "--servers",
@@ -41,7 +43,10 @@ def parse_args():
     parser.add_argument("--wait", action="store_true", help="Wait for servers to start")
 
     parser.add_argument(
-        "--timeout", type=int, default=5, help="Timeout in seconds for waiting (default: 5)"
+        "--timeout",
+        type=int,
+        default=5,
+        help="Timeout in seconds for waiting (default: 5)",
     )
 
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")

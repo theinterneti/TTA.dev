@@ -8,7 +8,6 @@ Hypertool persona references, token budgets, and MCP server configurations.
 
 import re
 from pathlib import Path
-from typing import Dict, List
 
 # Persona mapping based on chatmode name patterns
 PERSONA_MAPPINGS = {
@@ -16,7 +15,14 @@ PERSONA_MAPPINGS = {
     "tta-backend-engineer": {
         "token_budget": 2000,
         "patterns": ["backend", "api", "database", "python", "async", "architect"],
-        "mcp_servers": ["context7", "github", "sequential-thinking", "gitmcp", "serena", "mcp-logseq"],
+        "mcp_servers": [
+            "context7",
+            "github",
+            "sequential-thinking",
+            "gitmcp",
+            "serena",
+            "mcp-logseq",
+        ],
         "restricted_paths": ["packages/**/frontend/**", "**/node_modules/**"],
     },
     # Frontend Engineering (1800 tokens)
@@ -29,22 +35,50 @@ PERSONA_MAPPINGS = {
     # DevOps Engineering (1800 tokens)
     "tta-devops-engineer": {
         "token_budget": 1800,
-        "patterns": ["devops", "deploy", "docker", "kubernetes", "ci-cd", "infrastructure"],
+        "patterns": [
+            "devops",
+            "deploy",
+            "docker",
+            "kubernetes",
+            "ci-cd",
+            "infrastructure",
+        ],
         "mcp_servers": ["github", "gitmcp", "serena", "grafana"],
         "restricted_paths": ["packages/**/src/**/*.py", "packages/**/frontend/**"],
     },
     # Testing Specialist (1500 tokens)
     "tta-testing-specialist": {
         "token_budget": 1500,
-        "patterns": ["qa", "test", "quality", "integration", "e2e", "performance-test", "security-test"],
+        "patterns": [
+            "qa",
+            "test",
+            "quality",
+            "integration",
+            "e2e",
+            "performance-test",
+            "security-test",
+        ],
         "mcp_servers": ["context7", "playwright", "github", "gitmcp"],
         "restricted_paths": ["packages/**/frontend/**", "**/node_modules/**"],
     },
     # Observability Expert (2000 tokens)
     "tta-observability-expert": {
         "token_budget": 2000,
-        "patterns": ["observability", "monitoring", "metrics", "trace", "prometheus", "grafana"],
-        "mcp_servers": ["context7", "grafana", "github", "sequential-thinking", "serena"],
+        "patterns": [
+            "observability",
+            "monitoring",
+            "metrics",
+            "trace",
+            "prometheus",
+            "grafana",
+        ],
+        "mcp_servers": [
+            "context7",
+            "grafana",
+            "github",
+            "sequential-thinking",
+            "serena",
+        ],
         "restricted_paths": ["packages/**/frontend/**", "**/node_modules/**"],
     },
     # Data Scientist (1700 tokens)
@@ -87,7 +121,7 @@ def has_hypertool_frontmatter(content: str) -> bool:
 
 def extract_existing_frontmatter(content: str) -> tuple[str | None, str]:
     """Extract existing YAML frontmatter and body content."""
-    frontmatter_pattern = r'^---\n(.*?)\n---\n(.*)$'
+    frontmatter_pattern = r"^---\n(.*?)\n---\n(.*)$"
     match = re.match(frontmatter_pattern, content, re.DOTALL)
 
     if match:
@@ -95,7 +129,9 @@ def extract_existing_frontmatter(content: str) -> tuple[str | None, str]:
     return None, content
 
 
-def create_hypertool_frontmatter(persona: str, existing_frontmatter: str | None = None) -> str:
+def create_hypertool_frontmatter(
+    persona: str, existing_frontmatter: str | None = None
+) -> str:
     """Create Hypertool frontmatter YAML."""
     config = PERSONA_MAPPINGS[persona]
 
@@ -105,18 +141,20 @@ def create_hypertool_frontmatter(persona: str, existing_frontmatter: str | None 
     # Preserve existing frontmatter fields if any
     if existing_frontmatter:
         # Parse existing fields
-        for line in existing_frontmatter.split('\n'):
-            if line.strip() and not line.strip().startswith('hypertool_'):
+        for line in existing_frontmatter.split("\n"):
+            if line.strip() and not line.strip().startswith("hypertool_"):
                 frontmatter.append(line)
 
     # Add Hypertool configuration
-    frontmatter.extend([
-        f"hypertool_persona: {persona}",
-        f"persona_token_budget: {config['token_budget']}",
-        "tools_via_hypertool: true",
-        "security:",
-        "  restricted_paths:",
-    ])
+    frontmatter.extend(
+        [
+            f"hypertool_persona: {persona}",
+            f"persona_token_budget: {config['token_budget']}",
+            "tools_via_hypertool: true",
+            "security:",
+            "  restricted_paths:",
+        ]
+    )
 
     for path in config["restricted_paths"]:
         frontmatter.append(f'    - "{path}"')
@@ -125,7 +163,7 @@ def create_hypertool_frontmatter(persona: str, existing_frontmatter: str | None 
     for server in config["mcp_servers"]:
         frontmatter.append(f"    - {server}")
 
-    return '\n'.join(frontmatter)
+    return "\n".join(frontmatter)
 
 
 def add_persona_to_header(content: str, persona: str) -> str:
@@ -133,7 +171,7 @@ def add_persona_to_header(content: str, persona: str) -> str:
     config = PERSONA_MAPPINGS[persona]
 
     # Find the first header with role/description
-    pattern = r'(# [^\n]+\n\n\*\*Role[^\n]*\n[^\n]+\n[^\n]+)'
+    pattern = r"(# [^\n]+\n\n\*\*Role[^\n]*\n[^\n]+\n[^\n]+)"
 
     def replace_header(match):
         header = match.group(1)
@@ -149,7 +187,7 @@ def add_persona_to_header(content: str, persona: str) -> str:
             }
             icon = persona_icons.get(persona, "🎭")
             persona_name = persona.replace("tta-", "").replace("-", " ").title()
-            header += f'\n**Persona:** {icon} TTA {persona_name} ({config["token_budget"]} tokens via Hypertool)'
+            header += f"\n**Persona:** {icon} TTA {persona_name} ({config['token_budget']} tokens via Hypertool)"
         return header
 
     return re.sub(pattern, replace_header, content)
@@ -181,7 +219,9 @@ def update_chatmode_file(filepath: Path, dry_run: bool = False) -> bool:
         new_content = f"---\n{hypertool_fm}\n---\n{body}"
 
         if dry_run:
-            print(f"📝 {filepath.name} → {persona} ({PERSONA_MAPPINGS[persona]['token_budget']} tokens)")
+            print(
+                f"📝 {filepath.name} → {persona} ({PERSONA_MAPPINGS[persona]['token_budget']} tokens)"
+            )
             return True
         else:
             filepath.write_text(new_content)
@@ -197,9 +237,19 @@ def main():
     """Main entry point."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Update chatmode files with Hypertool frontmatter")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be updated without making changes")
-    parser.add_argument("--path", default="packages/universal-agent-context", help="Path to search for chatmodes")
+    parser = argparse.ArgumentParser(
+        description="Update chatmode files with Hypertool frontmatter"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be updated without making changes",
+    )
+    parser.add_argument(
+        "--path",
+        default="packages/universal-agent-context",
+        help="Path to search for chatmodes",
+    )
     args = parser.parse_args()
 
     # Find all chatmode files
@@ -220,7 +270,9 @@ def main():
         else:
             skipped += 1
 
-    print(f"\n{'Dry run' if args.dry_run else 'Summary'}: {updated} files would be updated, {skipped} skipped")
+    print(
+        f"\n{'Dry run' if args.dry_run else 'Summary'}: {updated} files would be updated, {skipped} skipped"
+    )
 
 
 if __name__ == "__main__":
