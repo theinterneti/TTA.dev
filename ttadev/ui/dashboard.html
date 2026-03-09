@@ -83,23 +83,38 @@
             margin-bottom: 10px;
             border-left: 4px solid #667eea;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
         }
         
         .trace-item:hover {
             transform: translateX(5px);
             background: #2d3556;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
         }
         
         .trace-item.error {
             border-left-color: #ef4444;
         }
         
+        .trace-item.expanded {
+            background: #2d3556;
+        }
+        
+        .trace-detail {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #3d4563;
+        }
+        
+        .trace-item.expanded .trace-detail {
+            display: block;
+        }
+        
         .trace-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
         }
         
         .trace-id {
@@ -126,6 +141,51 @@
             margin-top: 10px;
             padding-top: 10px;
             border-top: 1px solid #3d4563;
+        }
+        
+        .workflow-hierarchy {
+            margin: 10px 0;
+            padding: 10px;
+            background: #1a1f3a;
+            border-radius: 6px;
+        }
+        
+        .hierarchy-level {
+            margin-left: 20px;
+            padding: 5px;
+            border-left: 2px solid #667eea;
+        }
+        
+        .span-timeline {
+            position: relative;
+            height: 40px;
+            margin: 5px 0;
+            background: #1a1f3a;
+            border-radius: 4px;
+        }
+        
+        .span-bar {
+            position: absolute;
+            height: 30px;
+            top: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            color: white;
+            font-size: 0.8em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .span-bar.parallel {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+        
+        .span-bar.error {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
         }
         
         .span-item {
@@ -433,40 +493,145 @@
         function createTraceElement(trace) {
             const div = document.createElement('div');
             div.className = `trace-item ${trace.status === 'error' ? 'error' : ''}`;
+            div.onclick = () => toggleTraceExpansion(div);
             
             const statusIcon = trace.status === 'error' ? '❌' : '✅';
             const statusClass = trace.status === 'error' ? 'status-error' : 'status-success';
             
-            const spansInfo = trace.spans ? 
-                `<div class="trace-info">
-                    <span>Spans: ${trace.spans.length}</span>
-                    <span>Primitives: ${new Set(trace.spans.map(s => extractPrimitiveType(s.name))).size}</span>
-                </div>` : '';
+            // Analyze workflow hierarchy
+            const hierarchy = analyzeWorkflowHierarchy(trace);
+            const primitiveTypes = trace.spans ? new Set(trace.spans.map(s => extractPrimitiveType(s.name))) : new Set();
             
-            const spansHtml = trace.spans ? 
-                `<div class="trace-detail">
-                    ${trace.spans.map(span => `
-                        <div class="span-item">
-                            <span class="span-name">${span.name}</span>
-                            <span style="float: right; opacity: 0.7;">${(span.duration_ms || 0).toFixed(2)}ms</span>
-                        </div>
-                    `).join('')}
-                </div>` : '';
+            // Build timeline visualization
+            const timelineHtml = trace.spans ? buildSpanTimeline(trace) : '';
             
             div.innerHTML = `
                 <div class="trace-header">
                     <div>
                         <span class="${statusClass}">${statusIcon}</span>
                         <span class="trace-id">${trace.trace_id}</span>
+                        <span style="margin-left: 10px; opacity: 0.6; font-size: 0.9em;">
+                            ${new Date(trace.start_time || Date.now()).toLocaleTimeString()}
+                        </span>
                     </div>
                     <div class="trace-duration">${(trace.duration_ms || 0).toFixed(2)}ms</div>
                 </div>
-                ${spansInfo}
-                ${spansHtml}
-                ${trace.error_message ? `<div style="color: #ef4444; margin-top: 10px;">Error: ${trace.error_message}</div>` : ''}
+                <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85em; opacity: 0.8;">
+                    <span>📊 ${trace.spans ? trace.spans.length : 0} spans</span>
+                    <span>⚙️ ${primitiveTypes.size} primitives</span>
+                    <span>📈 ${hierarchy.depth} levels deep</span>
+                </div>
+                
+                <div class="trace-detail">
+                    ${hierarchy.html}
+                    
+                    <h4 style="margin-top: 15px; margin-bottom: 10px; color: #667eea;">Execution Timeline</h4>
+                    ${timelineHtml}
+                    
+                    ${trace.error_message ? `
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; border-radius: 4px;">
+                            <strong style="color: #ef4444;">Error:</strong> ${trace.error_message}
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 15px; font-size: 0.85em; opacity: 0.6;">
+                        Click to collapse
+                    </div>
+                </div>
             `;
             
             return div;
+        }
+        
+        function toggleTraceExpansion(element) {
+            element.classList.toggle('expanded');
+        }
+        
+        function analyzeWorkflowHierarchy(trace) {
+            if (!trace.spans || trace.spans.length === 0) {
+                return { depth: 0, html: '<div class="empty-state">No spans</div>' };
+            }
+            
+            // Group spans by parent
+            const spansByParent = new Map();
+            trace.spans.forEach(span => {
+                const parentId = span.parent_span_id || 'root';
+                if (!spansByParent.has(parentId)) {
+                    spansByParent.set(parentId, []);
+                }
+                spansByParent.get(parentId).push(span);
+            });
+            
+            // Build hierarchy HTML
+            function buildLevel(parentId, level) {
+                const children = spansByParent.get(parentId) || [];
+                if (children.length === 0) return '';
+                
+                return children.map(span => {
+                    const primitiveType = extractPrimitiveType(span.name);
+                    const hasChildren = spansByParent.has(span.span_id);
+                    
+                    return `
+                        <div class="hierarchy-level">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <span class="primitive-badge">${primitiveType}</span>
+                                    <span style="margin-left: 8px; opacity: 0.8;">${span.name}</span>
+                                </div>
+                                <span style="opacity: 0.6; font-size: 0.9em;">${(span.duration_ms || 0).toFixed(2)}ms</span>
+                            </div>
+                            ${hasChildren ? buildLevel(span.span_id, level + 1) : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            const html = `
+                <h4 style="margin-bottom: 10px; color: #667eea;">Workflow Hierarchy</h4>
+                <div class="workflow-hierarchy">
+                    ${buildLevel('root', 0)}
+                </div>
+            `;
+            
+            // Calculate max depth
+            function getMaxDepth(parentId, currentDepth) {
+                const children = spansByParent.get(parentId) || [];
+                if (children.length === 0) return currentDepth;
+                return Math.max(...children.map(c => getMaxDepth(c.span_id, currentDepth + 1)));
+            }
+            
+            const depth = getMaxDepth('root', 1);
+            
+            return { depth, html };
+        }
+        
+        function buildSpanTimeline(trace) {
+            if (!trace.spans || trace.spans.length === 0) return '<div class="empty-state">No timeline data</div>';
+            
+            const startTime = Math.min(...trace.spans.map(s => s.start_time || Date.now()));
+            const totalDuration = trace.duration_ms || 1;
+            
+            // Detect parallel execution
+            const timeline = trace.spans.map(span => {
+                const spanStart = span.start_time || startTime;
+                const relativeStart = spanStart - startTime;
+                const duration = span.duration_ms || 0;
+                const leftPercent = (relativeStart / totalDuration) * 100;
+                const widthPercent = (duration / totalDuration) * 100;
+                
+                const primitiveType = extractPrimitiveType(span.name);
+                const statusClass = span.status === 'error' ? 'error' : '';
+                
+                return `
+                    <div class="span-timeline">
+                        <div class="span-bar ${statusClass}" style="left: ${leftPercent}%; width: ${widthPercent}%;">
+                            ${primitiveType}: ${duration.toFixed(1)}ms
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            return `<div style="position: relative;">${timeline}</div>`;
         }
         
         // Load static inventory data on startup
