@@ -80,16 +80,16 @@ async def test_search_functionality():
         await page.goto("http://localhost:8000")
         await page.wait_for_timeout(1000)
         
-        # Get initial count
-        initial_count = await page.locator("#primitivesCatalog .primitive-item").count()
+        # Get initial visible count
+        initial_count = await page.locator("#primitivesCatalog .primitive-item:visible").count()
         
         # Search for specific primitive
         search_box = page.locator("#searchPrimitives")
         await search_box.fill("Retry")
         await page.wait_for_timeout(500)
         
-        # Check filtered results
-        filtered_count = await page.locator("#primitivesCatalog .primitive-item").count()
+        # Check filtered results (only visible)
+        filtered_count = await page.locator("#primitivesCatalog .primitive-item:visible").count()
         assert filtered_count < initial_count, "Search should filter results"
         assert filtered_count > 0, "Should find RetryPrimitive"
         
