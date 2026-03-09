@@ -81,3 +81,8 @@ __all__ = [
 ]
 
 __version__ = "1.3.1"
+
+# Auto-setup observability on import
+from .observability.tracing import setup_tracing
+
+setup_tracing()

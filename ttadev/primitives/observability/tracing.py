@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import json
+import os
 import time
+from pathlib import Path
 from typing import Any
 
 try:
     from opentelemetry import trace
     from opentelemetry.trace import Status, StatusCode
+    from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
+    from opentelemetry.sdk.trace import ReadableSpan
 
     TRACING_AVAILABLE = True
 except ImportError:
@@ -16,9 +21,46 @@ except ImportError:
 from ..core.base import WorkflowContext, WorkflowPrimitive
 
 
+class FileSpanExporter(SpanExporter):
+    """Export spans to a JSONL file."""
+
+    def __init__(self, file_path: str = ".observability/traces.jsonl"):
+        self.file_path = Path(file_path)
+        self.file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def export(self, spans: list[ReadableSpan]) -> SpanExportResult:
+        """Export spans to file."""
+        try:
+            with open(self.file_path, "a") as f:
+                for span in spans:
+                    span_dict = {
+                        "trace_id": format(span.context.trace_id, "032x"),
+                        "span_id": format(span.context.span_id, "016x"),
+                        "name": span.name,
+                        "start_time": span.start_time,
+                        "end_time": span.end_time,
+                        "duration_ns": span.end_time - span.start_time if span.end_time else 0,
+                        "attributes": dict(span.attributes) if span.attributes else {},
+                        "status": {
+                            "status_code": span.status.status_code.name if span.status else "UNSET",
+                            "description": span.status.description if span.status else "",
+                        },
+                        "parent_span_id": format(span.parent.span_id, "016x") if span.parent else None,
+                    }
+                    f.write(json.dumps(span_dict) + "\n")
+            return SpanExportResult.SUCCESS
+        except Exception as e:
+            print(f"Error exporting spans: {e}")
+            return SpanExportResult.FAILURE
+
+    def shutdown(self) -> None:
+        """Shutdown exporter."""
+        pass
+
+
 def setup_tracing(service_name: str = "tta-workflow") -> None:
     """
-    Setup OpenTelemetry tracing.
+    Setup OpenTelemetry tracing with file-based export.
 
     Args:
         service_name: Name of the service for traces
@@ -28,12 +70,16 @@ def setup_tracing(service_name: str = "tta-workflow") -> None:
 
     from opentelemetry.sdk.resources import Resource
     from opentelemetry.sdk.trace import TracerProvider
-    from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
     resource = Resource.create({"service.name": service_name})
     provider = TracerProvider(resource=resource)
-    processor = BatchSpanProcessor(ConsoleSpanExporter())
+    
+    # Add file-based exporter
+    file_exporter = FileSpanExporter()
+    processor = BatchSpanProcessor(file_exporter)
     provider.add_span_processor(processor)
+    
     trace.set_tracer_provider(provider)
 
 
