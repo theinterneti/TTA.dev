@@ -1,0 +1,9 @@
+{
+  "trace_id": "broadcast-test",
+  "spans": [
+    {
+      "name": "broadcast_span"
+    }
+  ],
+  "timestamp": "2026-03-09T21:11:28.482098+00:00Z"
+}

@@ -1,0 +1,14 @@
+{
+  "trace_id": "test-123",
+  "spans": [
+    {
+      "name": "test_span",
+      "start_time": "2026-03-09T21:00:00Z",
+      "end_time": "2026-03-09T21:00:01Z",
+      "attributes": {
+        "test": "value"
+      }
+    }
+  ],
+  "timestamp": "2026-03-09T21:11:27.468319+00:00Z"
+}

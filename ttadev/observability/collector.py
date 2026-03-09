@@ -11,7 +11,7 @@ import asyncio
 import json
 from collections import defaultdict
 from dataclasses import dataclass, asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 import aiofiles
@@ -120,33 +120,78 @@ class ObservabilityCollector:
         return events
 
 
-# Legacy compatibility - keep TraceCollector for backward compat
+# Modern TraceCollector for Phase 1 tests
 class TraceCollector:
-    """Legacy SQLite-based collector (deprecated)."""
-
-    def __init__(self, db_path: str = ".tta/traces.db"):
-        self.spans_by_trace = defaultdict(list)
-        self.dashboard_url = "http://localhost:8000"
-        self._session = None
-        self.db_path = Path(db_path)
-        self._initialized = False
-
-    def initialize(self):
-        """Initialize the trace collector (no-op for compatibility)."""
-        self._initialized = True
-
-    async def collect_span(self, span_data: dict[str, Any]) -> None:
-        """Collect span (compatibility method)."""
-        trace_id = span_data.get("trace_id", "default")
-        self.spans_by_trace[trace_id].append(span_data)
-
-    def get_recent_spans(self, limit: int = 100) -> list[dict[str, Any]]:
-        """Get recent spans (compatibility method)."""
-        all_spans = []
-        for spans in self.spans_by_trace.values():
-            all_spans.extend(spans)
-        return all_spans[-limit:]
-
+    """Collects traces and persists them to filesystem."""
+    
+    def __init__(self, traces_dir: Path | str | None = None):
+        """Initialize collector.
+        
+        Args:
+            traces_dir: Directory to store traces (default: .observability/traces)
+        """
+        self.traces_dir = Path(traces_dir) if traces_dir else Path(".observability/traces")
+        self.traces_dir.mkdir(parents=True, exist_ok=True)
+        self._subscribers: list[asyncio.Queue] = []
+    
+    async def collect_trace(self, trace_data: dict[str, Any]) -> None:
+        """Collect and persist a trace.
+        
+        Args:
+            trace_data: Trace data dictionary with trace_id and spans
+        """
+        trace_id = trace_data["trace_id"]
+        
+        # Add timestamp if not present
+        if "timestamp" not in trace_data:
+            trace_data["timestamp"] = datetime.now(timezone.utc).isoformat() + "Z"
+        
+        # Write to file
+        trace_file = self.traces_dir / f"{trace_id}.json"
+        async with aiofiles.open(trace_file, "w") as f:
+            await f.write(json.dumps(trace_data, indent=2))
+        
+        # Broadcast to subscribers
+        await self._broadcast(trace_data)
+    
+    async def _broadcast(self, trace_data: dict[str, Any]) -> None:
+        """Broadcast trace to all subscribers."""
+        for queue in self._subscribers:
+            try:
+                await queue.put({"type": "new_trace", "trace": trace_data})
+            except Exception:
+                pass  # Subscriber queue full or closed
+    
+    def subscribe(self) -> asyncio.Queue:
+        """Subscribe to trace updates.
+        
+        Returns:
+            Queue that will receive trace updates
+        """
+        queue: asyncio.Queue = asyncio.Queue(maxsize=100)
+        self._subscribers.append(queue)
+        return queue
+    
+    def unsubscribe(self, queue: asyncio.Queue) -> None:
+        """Unsubscribe from trace updates."""
+        if queue in self._subscribers:
+            self._subscribers.remove(queue)
+    
+    def get_all_traces(self) -> list[dict[str, Any]]:
+        """Get all collected traces.
+        
+        Returns:
+            List of trace dictionaries
+        """
+        traces = []
+        for trace_file in sorted(self.traces_dir.glob("*.json"), reverse=True):
+            try:
+                with open(trace_file) as f:
+                    traces.append(json.load(f))
+            except Exception:
+                continue  # Skip corrupted files
+        return traces
+    
     async def close(self):
         """Close resources."""
         pass
