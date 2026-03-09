@@ -11,10 +11,21 @@ Tracks:
 
 import json
 import time
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 import threading
+
+
+@dataclass
+class AgentContext:
+    """Context for tracking agent execution."""
+    provider: str  # "github_copilot", "openrouter", "ollama"
+    model: str  # "claude-sonnet-4.5", "gpt-4", etc.
+    agent_role: str | None  # "backend-engineer", "architect", or None
+    user: str  # "thein", etc.
+
 
 class AgentTracker:
     """Tracks AI agent activity in real-time."""
@@ -53,6 +64,22 @@ class AgentTracker:
             
             # Update agent registry
             self._update_registry(provider, model, tta_agent)
+    
+    def log_activity(
+        self,
+        activity_type: str,
+        context: AgentContext,
+        details: dict[str, Any]
+    ) -> None:
+        """Log an activity with full agent context."""
+        self.track_agent_action(
+            provider=context.provider,
+            model=context.model,
+            action_type=activity_type,
+            action_data=details,
+            tta_agent=context.agent_role,
+            user=context.user
+        )
     
     def _update_registry(self, provider: str, model: str, tta_agent: str | None) -> None:
         """Update the agents registry with active agents."""

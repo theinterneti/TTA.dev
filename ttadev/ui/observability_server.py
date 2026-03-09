@@ -10,6 +10,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from ttadev.observability.agent_tracker import get_tracker
+from ttadev.ui.cgc_bridge import query_cgc_graph
 
 # Dashboard HTML file
 DASHBOARD_FILE = Path(__file__).parent / "dashboard.html"
@@ -256,22 +257,17 @@ async def handle_api_agent_actions(request):
 
 async def handle_api_codegraph(request):
     """API endpoint for CodeGraphContext data."""
-    cgc_file = Path("/home/thein/repos/TTA.dev/.cgc/graph.json")
-    
-    if cgc_file.exists():
-        try:
-            with open(cgc_file) as f:
-                graph_data = json.load(f)
-                response = web.json_response(graph_data)
-                response.headers['Access-Control-Allow-Origin'] = '*'
-                return response
-        except Exception as e:
-            print(f"Error reading CGC graph: {e}")
-    
-    # Return empty graph if file doesn't exist
-    response = web.json_response({"nodes": [], "edges": []})
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response
+    try:
+        # Query CGC MCP for graph data
+        graph_data = query_cgc_graph()
+        response = web.json_response(graph_data)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    except Exception as e:
+        print(f"Error getting CGC graph: {e}")
+        response = web.json_response({"nodes": [], "edges": [], "error": str(e)})
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
 
 
 async def handle_websocket(request):
@@ -382,5 +378,10 @@ async def start_server():
         await asyncio.sleep(3600)
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for tta-observe command."""
     asyncio.run(start_server())
+
+
+if __name__ == "__main__":
+    main()
