@@ -28,5 +28,8 @@ __all__ = [
     "RetryPrimitive",
     "FallbackPrimitive",
     "CircuitBreakerPrimitive",
-    "setup_observability",
+    "auto_initialize",
 ]
+
+# Export auto_initialize under stable public name
+setup_observability = auto_initialize

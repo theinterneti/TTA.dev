@@ -3,11 +3,12 @@
 
 import asyncio
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "/home/thein/repos/TTA.dev/tta-dev")
+# Add repo root to path (portable across machines)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from primitives.lambda_primitive import LambdaPrimitive
-from primitives.sequential import SequentialPrimitive
+from ttadev.primitives.core import LambdaPrimitive, SequentialPrimitive
 from primitives.base import WorkflowContext
 
 

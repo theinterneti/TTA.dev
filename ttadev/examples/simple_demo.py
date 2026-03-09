@@ -51,7 +51,7 @@ async def main():
     # Step 2: Fetch settings (with retry for resilience)
     fetch_settings_step = RetryPrimitive(
         LambdaPrimitive(fetch_settings),
-        strategy=RetryStrategy(max_retries=3, backoff_base=2.0),
+        strategy=RetryStrategy(max_attempts=3, backoff_factor=2.0),
     )
 
     # Step 3: Enrich profile

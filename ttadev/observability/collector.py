@@ -6,13 +6,14 @@ This module provides a global singleton collector that:
 3. Ensures data is never lost even if dashboard is offline
 """
 
+import asyncio
 import json
-import sqlite3
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
 import aiohttp
+import aiosqlite
 
 
 class TraceCollector:
@@ -32,8 +33,10 @@ class TraceCollector:
             self._initialized = True
 
     def _init_db(self):
-        """Initialize SQLite database for persistent storage."""
+        """Initialize SQLite database for persistent storage (sync init only)."""
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        # Use synchronous sqlite3 for initialization only
+        import sqlite3
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
@@ -71,33 +74,29 @@ class TraceCollector:
             self._session = aiohttp.ClientSession()
         return self._session
 
-    def _persist_span(self, span_data: dict[str, Any]) -> None:
-        """Persist span to SQLite database."""
+    async def _persist_span(self, span_data: dict[str, Any]) -> None:
+        """Persist span to SQLite database asynchronously."""
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-
-            cursor.execute(
-                """
-                INSERT INTO spans 
-                (trace_id, span_name, primitive_type, start_time, end_time, 
-                 duration_ms, status, attributes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-                (
-                    span_data.get("trace_id", "default"),
-                    span_data.get("name", "unknown"),
-                    span_data.get("attributes", {}).get("primitive.type", "unknown"),
-                    span_data.get("start_time", 0),
-                    span_data.get("end_time", 0),
-                    span_data.get("duration_ms", 0),
-                    span_data.get("status", "unknown"),
-                    json.dumps(span_data.get("attributes", {})),
-                ),
-            )
-
-            conn.commit()
-            conn.close()
+            async with aiosqlite.connect(self.db_path) as conn:
+                await conn.execute(
+                    """
+                    INSERT INTO spans 
+                    (trace_id, span_name, primitive_type, start_time, end_time, 
+                     duration_ms, status, attributes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                    (
+                        span_data.get("trace_id", "default"),
+                        span_data.get("name", "unknown"),
+                        span_data.get("attributes", {}).get("primitive.type", "unknown"),
+                        span_data.get("start_time", 0),
+                        span_data.get("end_time", 0),
+                        span_data.get("duration_ms", 0),
+                        span_data.get("status", "unknown"),
+                        json.dumps(span_data.get("attributes", {})),
+                    ),
+                )
+                await conn.commit()
         except Exception as e:
             print(f"Warning: Failed to persist span to database: {e}")
 
@@ -114,8 +113,8 @@ class TraceCollector:
                 - status: "ok" or "error"
                 - attributes: Dict of span attributes
         """
-        # Always persist to database first (critical path)
-        self._persist_span(span_data)
+        # Always persist to database first (critical path) - now async
+        await self._persist_span(span_data)
 
         # Add to in-memory buffer
         trace_id = span_data.get("trace_id", "default")

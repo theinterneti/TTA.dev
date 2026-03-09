@@ -13,7 +13,7 @@
 
 ```bash
 # Run the demo (uses uv to manage dependencies)
-uv run python tta-dev/observability/dashboard/demo.py
+uv run python -m ttadev.observability.dashboard.demo
 ```
 
 Open http://localhost:8080 in your browser and watch the magic! ✨

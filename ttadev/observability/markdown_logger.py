@@ -40,16 +40,16 @@ This directory contains auto-generated logs of TTA.dev usage.
         file = self.log_dir / "primitives.md"
         timestamp = datetime.now().isoformat()
 
-        # Append to primitives log
+        # Append to primitives log using append mode (safe for concurrent writes)
         entry = f"\n## {primitive_name}\n"
         entry += f"- **Time**: {timestamp}\n"
         entry += f"- **Context**: {context.get('workflow_id', 'N/A')}\n"
 
-        if file.exists():
-            content = file.read_text()
-            file.write_text(content + entry)
-        else:
-            file.write_text(f"# Primitives Used\n{entry}")
+        if not file.exists():
+            file.write_text(f"# Primitives Used\n")
+        
+        with open(file, "a") as f:
+            f.write(entry)
 
     def log_workflow_execution(self, workflow_name: str, status: str, duration_ms: float):
         """Log workflow execution."""
@@ -92,11 +92,11 @@ This directory contains auto-generated logs of TTA.dev usage.
         for key, value in details.items():
             entry += f"- **{key}**: {value}\n"
 
-        if file.exists():
-            content = file.read_text()
-            file.write_text(content + entry)
-        else:
-            file.write_text(f"# Activity Log - {date}\n{entry}")
+        if not file.exists():
+            file.write_text(f"# Activity Log - {date}\n")
+        
+        with open(file, "a") as f:
+            f.write(entry)
 
 
 # Global singleton

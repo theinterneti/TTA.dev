@@ -91,9 +91,12 @@ class N8nSetupEngine:
         """Verify GitHub API connectivity with fallback"""
         logger.info("🔑 Verifying GitHub API connectivity...")
 
-        github_token = (
-            os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN") or "ghp_YOUR_GITHUB_TOKEN_HERE"
-        )
+        github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
+        if not github_token:
+            raise ValueError(
+                "GITHUB_PERSONAL_ACCESS_TOKEN environment variable must be set. "
+                "Get a token at https://github.com/settings/tokens"
+            )
 
         async def test_github_api():
             async with aiohttp.ClientSession() as session:
