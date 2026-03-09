@@ -34,12 +34,16 @@ from primitives.recovery.circuit_breaker_primitive import (
     CircuitBreakerConfig,
 )
 from observability.observability_integration import initialize_observability
+from observability.agent_tracker import AgentActivityTracker
 
 # Initialize TTA.dev observability (self-instrumenting!)
 initialize_observability(
     service_name="tta-observability-dashboard",
     enable_prometheus=False,  # Keep it simple for demo
 )
+
+# Initialize agent activity tracker
+agent_tracker = AgentActivityTracker()
 
 app = FastAPI(title="TTA.dev Observability Dashboard")
 
@@ -265,6 +269,26 @@ async def get_metrics():
     return await metrics_workflow.execute({}, ctx)
 
 
+@app.get("/api/agent_activity")
+async def get_agent_activity():
+    """Get recent agent activity."""
+    return {
+        "recent_activity": agent_tracker.get_recent_activity(limit=50),
+        "agent_summary": agent_tracker.get_agent_summary()
+    }
+
+
+@app.post("/api/agent_activity")
+async def track_agent_activity(activity_data: dict[str, Any]):
+    """Track an agent action."""
+    await agent_tracker.track_agent_action(
+        agent_name=activity_data.get("agent_name", "unknown"),
+        action=activity_data.get("action", ""),
+        context=activity_data.get("context", {})
+    )
+    return {"status": "ok"}
+
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
@@ -347,43 +371,56 @@ async def get_workflows():
 @app.get("/api/codegraph/{view_type}")
 async def get_code_graph(view_type: str):
     """Get code graph visualization data from CGC."""
-    # This will query the CGC MCP server
-    # For now, return mock data - will integrate with actual CGC later
+    # Return graph data in D3-compatible format (nodes + edges)
     
     if view_type == "architecture":
         return {
             "nodes": [
-                {"name": "ttadev.primitives", "type": "package", "dependencies": []},
-                {"name": "ttadev.observability", "type": "package", "dependencies": ["primitives"]},
-                {"name": "ttadev.ui", "type": "package", "dependencies": ["observability"]},
+                {"id": "primitives", "label": "ttadev.primitives", "type": "package"},
+                {"id": "observability", "label": "ttadev.observability", "type": "package"},
+                {"id": "ui", "label": "ttadev.ui", "type": "package"},
+            ],
+            "edges": [
+                {"source": "observability", "target": "primitives"},
+                {"source": "ui", "target": "observability"},
             ]
         }
     elif view_type == "dependencies":
         return {
             "nodes": [
-                {"name": "fastapi", "type": "external", "dependencies": []},
-                {"name": "opentelemetry", "type": "external", "dependencies": []},
-                {"name": "ttadev", "type": "internal", "dependencies": ["fastapi", "opentelemetry"]},
+                {"id": "fastapi", "label": "fastapi", "type": "external"},
+                {"id": "opentelemetry", "label": "opentelemetry", "type": "external"},
+                {"id": "ttadev", "label": "ttadev", "type": "internal"},
+            ],
+            "edges": [
+                {"source": "ttadev", "target": "fastapi"},
+                {"source": "ttadev", "target": "opentelemetry"},
             ]
         }
     elif view_type == "primitives":
         return {
             "nodes": [
-                {"name": "WorkflowPrimitive", "type": "base"},
-                {"name": "RetryPrimitive", "type": "recovery"},
-                {"name": "CircuitBreakerPrimitive", "type": "recovery"},
-                {"name": "ParallelPrimitive", "type": "composition"},
+                {"id": "workflow", "label": "WorkflowPrimitive", "type": "base"},
+                {"id": "retry", "label": "RetryPrimitive", "type": "recovery"},
+                {"id": "circuit_breaker", "label": "CircuitBreakerPrimitive", "type": "recovery"},
+                {"id": "parallel", "label": "ParallelPrimitive", "type": "composition"},
+            ],
+            "edges": [
+                {"source": "retry", "target": "workflow"},
+                {"source": "circuit_breaker", "target": "workflow"},
+                {"source": "parallel", "target": "workflow"},
             ]
         }
     elif view_type == "agents":
         return {
             "nodes": [
-                {"name": "backend-engineer", "type": "agent"},
-                {"name": "architect", "type": "agent"},
-            ]
+                {"id": "backend", "label": "backend-engineer", "type": "agent"},
+                {"id": "architect", "label": "architect", "type": "agent"},
+            ],
+            "edges": []
         }
     
-    return {"nodes": []}
+    return {"nodes": [], "edges": []}
 
 
 @app.on_event("startup")
