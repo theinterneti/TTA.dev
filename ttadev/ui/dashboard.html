@@ -792,7 +792,7 @@
             panel.innerHTML = `
                 <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="opacity: 0.7;">Showing ${startIdx + 1}-${Math.min(endIdx, primitives.length)} of ${primitives.length} primitive(s)</div>
-                    <div class="pagination-controls">
+                    <div class="pagination pagination-controls">
                         <button ${currentPrimitivesPage === 1 ? 'disabled' : ''} onclick="changePrimitivesPage(${currentPrimitivesPage - 1})">← Prev</button>
                         <span style="margin: 0 10px;">Page ${currentPrimitivesPage}/${totalPages}</span>
                         <button ${currentPrimitivesPage === totalPages ? 'disabled' : ''} onclick="changePrimitivesPage(${currentPrimitivesPage + 1})">Next →</button>
@@ -831,7 +831,7 @@
             const panel = document.getElementById('workflowRegistry');
             
             if (!workflows || workflows.length === 0) {
-                panel.innerHTML = '<div class="empty-state">No workflows registered</div>';
+                panel.innerHTML = '<div style="margin-bottom: 10px; opacity: 0.7;">Registered: 0 workflow(s)</div><div class="empty-state">No workflows registered yet</div>';
                 return;
             }
             
