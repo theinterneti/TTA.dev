@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from ttadev.observability.agent_tracker import get_tracker
-from ttadev.ui.cgc_bridge import query_cgc_graph
+from ttadev.ui.cgc_client import query_cgc_structure
 
 # Dashboard HTML file
 DASHBOARD_FILE = Path(__file__).parent / "dashboard.html"
@@ -341,6 +341,23 @@ async def watch_traces():
         await asyncio.sleep(1)  # Check for new traces every second
 
 
+async def handle_api_cgc_graph(request):
+    """API endpoint for CGC code graph data."""
+    try:
+        graph_data = query_cgc_structure()
+        
+        if "error" in graph_data:
+            response = web.json_response({"success": False, "error": graph_data["error"]}, status=500)
+        else:
+            response = web.json_response({"success": True, "graph": graph_data})
+    except Exception as e:
+        print(f"Error querying CGC: {e}")
+        response = web.json_response({"success": False, "error": str(e)}, status=500)
+    
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
 async def start_server():
     """Start the observability dashboard server."""
     app = web.Application()
@@ -355,6 +372,7 @@ async def start_server():
     app.router.add_get("/api/codegraph", handle_api_codegraph)
     app.router.add_get("/api/active_agents", handle_api_active_agents)
     app.router.add_get("/api/agent_actions", handle_api_agent_actions)
+    app.router.add_get("/api/cgc_graph", handle_api_cgc_graph)
     app.router.add_get("/ws", handle_websocket)
     
     # Serve static files
