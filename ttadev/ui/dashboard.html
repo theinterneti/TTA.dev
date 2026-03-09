@@ -797,10 +797,12 @@
                         <button ${currentPrimitivesPage === totalPages ? 'disabled' : ''} onclick="changePrimitivesPage(${currentPrimitivesPage + 1})">Next →</button>
                     </div>
                 </div>
-                <div id="primitivesList"></div>
             `;
             
-            const listContainer = document.getElementById('primitivesList');
+            // Create primitives list container
+            const listContainer = document.createElement('div');
+            listContainer.id = 'primitivesList';
+            
             pageData.forEach(prim => {
                 const div = document.createElement('div');
                 div.className = 'primitive-item';
@@ -811,6 +813,8 @@
                 `;
                 listContainer.appendChild(div);
             });
+            
+            panel.appendChild(listContainer);
         }
         
         function changePrimitivesPage(page) {
@@ -818,7 +822,7 @@
             // Re-fetch and render
             fetch('/api/primitives')
                 .then(r => r.json())
-                .then(data => renderPrimitivesCatalog(data.primitives))
+                .then(data => renderPrimitivesCatalog(Array.isArray(data) ? data : data.primitives))
                 .catch(err => console.error('Failed to load primitives:', err));
         }
         

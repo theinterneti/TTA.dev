@@ -302,6 +302,10 @@ async def start_server():
     app.router.add_get("/api/agent_actions", handle_api_agent_actions)
     app.router.add_get("/ws", handle_websocket)
     
+    # Serve static files
+    static_dir = Path(__file__).parent / "static"
+    app.router.add_static("/static", static_dir)
+    
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", 8000)
