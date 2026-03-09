@@ -296,6 +296,106 @@
             background: #764ba2;
         }
         
+        .trace-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: #1a1f3a;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        
+        .modal-close:hover {
+            color: #ef4444;
+        }
+        
+        .trace-hierarchy-detail {
+            background: #252d4a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .chain-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #1a1f3a;
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+        }
+        
+        .trace-spans {
+            margin-top: 20px;
+        }
+        
+        .span-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: #252d4a;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .span-duration {
+            float: right;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .span-type {
+            margin-left: 10px;
+            padding: 2px 8px;
+            background: #667eea;
+            border-radius: 10px;
+            font-size: 0.85em;
+        }
+        
+        .trace-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .trace-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .trace-hierarchy {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+        }
+        
+        .hierarchy-item {
+            font-size: 0.9em;
+            margin: 3px 0;
+            color: #94a3b8;
+        }
+        
         .item-count {
             display: inline-block;
             background: #764ba2;
@@ -395,6 +495,35 @@
         const maxReconnectAttempts = 5;
         const tracesMap = new Map();
         const primitivesUsage = new Map();
+        
+        // Load initial traces from API
+        async function loadInitialTraces() {
+            try {
+                const response = await fetch('/api/traces');
+                const traces = await response.json();
+                console.log(`✅ Loaded ${traces.length} initial traces`);
+                traces.forEach(trace => {
+                    // Convert activity logs to trace format
+                    if (trace.activity_type) {
+                        addTrace({
+                            trace_id: trace.trace_id,
+                            start_time: trace.timestamp,
+                            status: 'success',
+                            duration_ms: 0,
+                            spans: [{
+                                name: `${trace.activity_type}`,
+                                span_id: trace.trace_id,
+                                attributes: trace.details
+                            }]
+                        });
+                    } else {
+                        addTrace(trace);
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Failed to load initial traces:', error);
+            }
+        }
         
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -525,51 +654,47 @@
         
         function createTraceElement(trace) {
             const div = document.createElement('div');
-            div.className = `trace-item ${trace.status === 'error' ? 'error' : ''}`;
-            div.onclick = () => toggleTraceExpansion(div);
+            div.className = `trace-card trace-item ${trace.status === 'error' ? 'error' : ''}`;
+            div.onclick = (e) => {
+                e.stopPropagation();
+                showTraceDetails(trace.trace_id);
+            };
             
             const statusIcon = trace.status === 'error' ? '❌' : '✅';
             const statusClass = trace.status === 'error' ? 'status-error' : 'status-success';
             
-            // Analyze workflow hierarchy
-            const hierarchy = analyzeWorkflowHierarchy(trace);
-            const primitiveTypes = trace.spans ? new Set(trace.spans.map(s => extractPrimitiveType(s.name))) : new Set();
+            // Extract metadata from trace
+            const provider = trace.spans?.[0]?.attributes?.provider || 'unknown';
+            const model = trace.spans?.[0]?.attributes?.model || 'unknown';
+            const agent = trace.spans?.[0]?.attributes?.agent || 'none';
             
-            // Build timeline visualization
-            const timelineHtml = trace.spans ? buildSpanTimeline(trace) : '';
+            const primitiveTypes = trace.spans ? new Set(trace.spans.map(s => extractPrimitiveType(s.name))) : new Set();
             
             div.innerHTML = `
                 <div class="trace-header">
                     <div>
                         <span class="${statusClass}">${statusIcon}</span>
-                        <span class="trace-id">${trace.trace_id}</span>
+                        <span class="trace-id">${trace.trace_id.substring(0, 12)}...</span>
                         <span style="margin-left: 10px; opacity: 0.6; font-size: 0.9em;">
                             ${new Date(trace.start_time || Date.now()).toLocaleTimeString()}
                         </span>
                     </div>
                     <div class="trace-duration">${(trace.duration_ms || 0).toFixed(2)}ms</div>
                 </div>
+                
+                <div class="trace-hierarchy">
+                    <div class="hierarchy-item">📡 Provider: <strong>${provider}</strong></div>
+                    <div class="hierarchy-item">🤖 Model: <strong>${model}</strong></div>
+                    <div class="hierarchy-item">🎭 Agent: <strong>${agent}</strong></div>
+                </div>
+                
                 <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85em; opacity: 0.8;">
                     <span>📊 ${trace.spans ? trace.spans.length : 0} spans</span>
                     <span>⚙️ ${primitiveTypes.size} primitives</span>
-                    <span>📈 ${hierarchy.depth} levels deep</span>
                 </div>
                 
-                <div class="trace-detail">
-                    ${hierarchy.html}
-                    
-                    <h4 style="margin-top: 15px; margin-bottom: 10px; color: #667eea;">Execution Timeline</h4>
-                    ${timelineHtml}
-                    
-                    ${trace.error_message ? `
-                        <div style="margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; border-radius: 4px;">
-                            <strong style="color: #ef4444;">Error:</strong> ${trace.error_message}
-                        </div>
-                    ` : ''}
-                    
-                    <div style="margin-top: 15px; font-size: 0.85em; opacity: 0.6;">
-                        Click to collapse
-                    </div>
+                <div style="margin-top: 10px; font-size: 0.85em; opacity: 0.6; text-align: center;">
+                    Click for details
                 </div>
             `;
             
@@ -1053,6 +1178,96 @@
             }
         }
         
+        function showTraceDetails(traceId) {
+            const trace = tracesMap.get(traceId);
+            if (!trace) {
+                console.error('Trace not found:', traceId);
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'trace-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+            
+            // Extract metadata
+            const provider = trace.spans?.[0]?.attributes?.provider || 'unknown';
+            const model = trace.spans?.[0]?.attributes?.model || 'unknown';
+            const agent = trace.spans?.[0]?.attributes?.agent || 'none';
+            const workflow = trace.spans?.[0]?.attributes?.workflow || 'direct execution';
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h2>📊 Trace Details</h2>
+                    <div style="font-family: monospace; font-size: 0.9em; color: #94a3b8; margin: 10px 0;">
+                        ${traceId}
+                    </div>
+                    
+                    <div class="trace-hierarchy-detail">
+                        <h3 style="margin-top: 0;">🎯 Execution Chain</h3>
+                        <div class="chain-item">📡 <strong>Provider:</strong> ${provider}</div>
+                        <div class="chain-item">🤖 <strong>Model:</strong> ${model}</div>
+                        <div class="chain-item">🎭 <strong>Agent Role:</strong> ${agent}</div>
+                        <div class="chain-item">⚙️ <strong>Workflow:</strong> ${workflow}</div>
+                        <div class="chain-item">⏱️ <strong>Duration:</strong> ${(trace.duration_ms || 0).toFixed(2)}ms</div>
+                        <div class="chain-item">📊 <strong>Status:</strong> <span class="status-${trace.status}">${trace.status || 'unknown'}</span></div>
+                    </div>
+                    
+                    <div class="trace-spans">
+                        <h3>🔹 Primitives & Spans (${trace.spans?.length || 0})</h3>
+                        ${renderSpanHierarchy(trace.spans || [])}
+                    </div>
+                    
+                    ${trace.error_message ? `
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; border-radius: 4px;">
+                            <strong style="color: #ef4444;">❌ Error:</strong><br/>
+                            <code style="display: block; margin-top: 10px; color: #ef4444;">${trace.error_message}</code>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function renderSpanHierarchy(spans) {
+            if (!spans || spans.length === 0) {
+                return '<div class="empty-state">No spans recorded</div>';
+            }
+            
+            // Build a map for parent-child relationships
+            const spanMap = new Map(spans.map(s => [s.span_id, s]));
+            const roots = spans.filter(s => !s.parent_id || !spanMap.has(s.parent_id));
+            
+            function renderSpan(span, depth = 0) {
+                const duration = span.end_time && span.start_time 
+                    ? ((span.end_time - span.start_time) * 1000).toFixed(2)
+                    : '0.00';
+                    
+                const primitiveType = span.attributes?.primitive_type || extractPrimitiveType(span.name);
+                const children = spans.filter(s => s.parent_id === span.span_id);
+                
+                let html = `
+                    <div class="span-item" style="margin-left: ${depth * 20}px">
+                        <span style="color: #667eea;">🔹</span> 
+                        <strong>${span.name}</strong>
+                        ${primitiveType !== span.name ? `<span class="span-type">${primitiveType}</span>` : ''}
+                        <span class="span-duration">${duration}ms</span>
+                    </div>
+                `;
+                
+                children.forEach(child => {
+                    html += renderSpan(child, depth + 1);
+                });
+                
+                return html;
+            }
+            
+            return roots.map(span => renderSpan(span)).join('');
+        }
+        
         async function loadGraphView(viewType) {
             const container = document.getElementById('codeGraph');
             container.innerHTML = '<div class="loading pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Loading ' + viewType + ' view...</div>';
@@ -1071,6 +1286,7 @@
         // Connect on load
         connectWebSocket();
         loadInventoryData();
+        loadInitialTraces();
         
         // Add search functionality
         const searchBox = document.getElementById('searchPrimitives');
