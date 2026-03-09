@@ -116,6 +116,47 @@ class TraceCollector:
 collector = TraceCollector()
 
 
+def load_traces_from_db():
+    """Load existing traces from SQLite database."""
+    import sqlite3
+    
+    db_path = Path(".tta/traces.db")
+    if not db_path.exists():
+        print("ℹ️  No database found, starting fresh")
+        return
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Load all spans
+    cursor.execute("""
+        SELECT trace_id, span_name, primitive_type, start_time, end_time, 
+               duration_ms, status, attributes
+        FROM spans
+        ORDER BY start_time DESC
+        LIMIT 100
+    """)
+    
+    rows = cursor.fetchall()
+    print(f"📊 Loading {len(rows)} spans from database...")
+    
+    for row in rows:
+        span_data = {
+            "trace_id": row[0],
+            "name": row[1],
+            "primitive_type": row[2],
+            "start_time": row[3],
+            "end_time": row[4],
+            "duration_ms": row[5],
+            "status": row[6],
+            "attributes": json.loads(row[7]) if row[7] else {}
+        }
+        collector.add_span(span_data)
+    
+    conn.close()
+    print(f"✓ Loaded {len(collector.completed_traces)} traces from database")
+
+
 async def fetch_live_metrics(data: dict, ctx: WorkflowContext) -> dict:
     """Fetch REAL live workflow metrics from collected traces."""
     # Get tracer to create a span for this operation
@@ -165,199 +206,13 @@ metrics_workflow = CircuitBreakerPrimitive(
 
 @app.get("/")
 async def get_dashboard():
-    """Serve the observability dashboard."""
+    """Serve the enhanced observability dashboard."""
+    dashboard_path = Path(__file__).parent / "dashboard.html"
     return HTMLResponse(
-        content="""
-<!DOCTYPE html>
-<html>
-<head>
-    <title>TTA.dev Observability Dashboard</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #0a0e27;
-            color: #e0e6ed;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-        h1 {
-            margin: 0;
-            font-size: 2.5em;
-        }
-        .subtitle {
-            opacity: 0.9;
-            margin-top: 10px;
-        }
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .metric-card {
-            background: #1a1f3a;
-            border: 1px solid #2d3561;
-            border-radius: 8px;
-            padding: 20px;
-        }
-        .metric-card h3 {
-            margin: 0 0 15px 0;
-            color: #667eea;
-        }
-        .metric-value {
-            font-size: 2em;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .metric-label {
-            opacity: 0.7;
-            font-size: 0.9em;
-        }
-        .status {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
-        .status-operational {
-            background: #10b981;
-            color: white;
-        }
-        .footer {
-            text-align: center;
-            opacity: 0.6;
-            margin-top: 50px;
-        }
-        #live-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .trace-item {
-            padding: 10px;
-            margin: 5px 0;
-            background: #0f1525;
-            border-left: 3px solid #667eea;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-        .trace-item.error {
-            border-left-color: #ef4444;
-        }
-        .trace-item.success {
-            border-left-color: #10b981;
-        }
-        .trace-id {
-            opacity: 0.7;
-            font-size: 0.85em;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>🚀 TTA.dev Observability Dashboard</h1>
-        <div class="subtitle">
-            <span id="live-indicator"></span>
-            Real-time monitoring powered by TTA.dev primitives
-        </div>
-    </div>
-
-    <div id="status-banner">
-        <span class="status status-operational">● OPERATIONAL</span>
-    </div>
-
-    <div class="metrics-grid" id="metrics">
-        <div class="metric-card">
-            <h3>📊 Workflows</h3>
-            <div class="metric-value" id="total-workflows">0</div>
-            <div class="metric-label">Total Executed</div>
-        </div>
-        <div class="metric-card">
-            <h3>⚡ Active</h3>
-            <div class="metric-value" id="active-workflows">0</div>
-            <div class="metric-label">Currently Running</div>
-        </div>
-        <div class="metric-card">
-            <h3>✅ Completed</h3>
-            <div class="metric-value" id="completed-workflows">0</div>
-            <div class="metric-label">Successfully Finished</div>
-        </div>
-        <div class="metric-card">
-            <h3>⏱️ Performance</h3>
-            <div class="metric-value" id="avg-duration">0</div>
-            <div class="metric-label">Average Duration (ms)</div>
-        </div>
-    </div>
-
-    <div class="metric-card" style="margin-bottom: 30px;">
-        <h3>🔍 Recent Traces</h3>
-        <div id="recent-traces">
-            <p style="opacity: 0.5;">Waiting for traces...</p>
-        </div>
-    </div>
-
-    <div class="footer">
-        <p>Built with TTA.dev primitives: CircuitBreaker + Retry + LambdaPrimitive</p>
-        <p>Last updated: <span id="last-update">-</span></p>
-    </div>
-
-    <script>
-        const ws = new WebSocket(`ws://${window.location.host}/ws`);
-        
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            
-            if (data.workflows) {
-                document.getElementById('total-workflows').textContent = data.workflows.total;
-                document.getElementById('active-workflows').textContent = data.workflows.active;
-                document.getElementById('completed-workflows').textContent = data.workflows.completed;
-            }
-            
-            if (data.performance) {
-                document.getElementById('avg-duration').textContent = 
-                    data.performance.avg_duration_ms.toFixed(1);
-            }
-            
-            // Display recent traces
-            if (data.recent_traces && data.recent_traces.length > 0) {
-                const tracesHtml = data.recent_traces.map(t => `
-                    <div class="trace-item ${t.status}">
-                        <strong>${t.status === 'success' ? '✅' : '❌'} ${t.span_count} spans</strong> 
-                        | ${t.duration_ms.toFixed(2)}ms
-                        <div class="trace-id">Trace: ${t.trace_id.toString(16).substring(0, 16)}...</div>
-                    </div>
-                `).join('');
-                document.getElementById('recent-traces').innerHTML = tracesHtml;
-            }
-            
-            document.getElementById('last-update').textContent = new Date(data.timestamp).toLocaleString();
-        };
-        
-        ws.onclose = () => {
-            document.getElementById('status-banner').innerHTML = 
-                '<span class="status" style="background: #ef4444;">● DISCONNECTED</span>';
-        };
-    </script>
-</body>
-</html>
-    """,
-        status_code=200,
+        content=dashboard_path.read_text(),
     )
+
+
 
 
 @app.post("/api/spans")
@@ -422,7 +277,51 @@ async def health_check():
 @app.on_event("startup")
 async def startup_event():
     """Start background tasks on server startup."""
+    # Load historical data from database
+    await load_historical_data()
+    # Start demo trace generator
     asyncio.create_task(generate_demo_traces())
+
+
+async def load_historical_data():
+    """Load historical traces from persistent storage on startup."""
+    try:
+        from observability.collector import trace_collector
+        
+        print("📊 Loading historical traces from database...")
+        recent_spans = trace_collector.get_recent_spans(limit=100)
+        
+        if recent_spans:
+            print(f"✅ Loaded {len(recent_spans)} historical spans")
+            # Group spans by trace_id
+            traces_by_id = defaultdict(list)
+            for span in recent_spans:
+                traces_by_id[span.get("trace_id", "default")].append(span)
+            
+            # Convert to trace format
+            for trace_id, spans in traces_by_id.items():
+                trace_start = min(s["start_time"] for s in spans)
+                trace_end = max(s["end_time"] for s in spans)
+                duration = (trace_end - trace_start) * 1000
+                
+                has_error = any(s.get("status") == "error" for s in spans)
+                
+                trace_collector_instance.completed_traces.append({
+                    "trace_id": trace_id,
+                    "start_time": trace_start,
+                    "end_time": trace_end,
+                    "duration_ms": duration,
+                    "status": "error" if has_error else "ok",
+                    "spans": spans
+                })
+            
+            print(f"✅ Reconstructed {len(traces_by_id)} historical traces")
+        else:
+            print("ℹ️  No historical data found - starting fresh")
+            
+    except Exception as e:
+        print(f"⚠️  Failed to load historical data: {e}")
+        print("   Continuing with empty state...")
 
 
 async def generate_demo_traces():
@@ -465,5 +364,8 @@ if __name__ == "__main__":
     print("🔌 WebSocket: ws://localhost:8000/ws")
     print("🏥 Health: http://localhost:8000/health")
     print("\n✅ Built with TTA.dev primitives!")
+    
+    # Load existing traces from database
+    load_traces_from_db()
 
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -26,7 +26,7 @@ class TestPrimitiveAdoption:
         return Path("platform/primitives/src")
 
     def test_examples_import_primitives(self, examples_dir: Path):
-        """Verify all examples import from tta_dev_primitives."""
+        """Verify all examples import from ttadev."""
         if not examples_dir.exists():
             pytest.skip(f"Examples directory not found: {examples_dir}")
 

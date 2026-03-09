@@ -9,8 +9,8 @@ import time
 import traceback
 from typing import Any, Callable, TypeVar
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
-from observability.collector import trace_collector
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.observability.collector import trace_collector
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -116,7 +116,7 @@ def auto_instrument_primitives() -> None:
     
     Example:
         ```python
-        from tta-dev.observability.auto_instrument import auto_instrument_primitives
+        from ttadev.observability.auto_instrument import auto_instrument_primitives
         
         # At application startup
         auto_instrument_primitives()
@@ -126,7 +126,7 @@ def auto_instrument_primitives() -> None:
         result = await workflow.execute(data, context)  # Automatically traced!
         ```
     """
-    from primitives.core.base import WorkflowPrimitive
+    from ttadev.primitives.core.base import WorkflowPrimitive
     
     # Get all primitive subclasses
     def get_all_subclasses(cls):
@@ -151,6 +151,34 @@ def auto_instrument_primitives() -> None:
             instrumented_count += 1
     
     print(f"🔍 Auto-instrumented {instrumented_count} primitives for observability")
+
+
+def auto_initialize() -> None:
+    """
+    Zero-config initialization of TTA.dev observability.
+    
+    Called automatically when ttadev is imported.
+    Sets up file-based trace collection and auto-instruments all primitives.
+    """
+    import os
+    
+    # Only auto-initialize if not disabled
+    if os.getenv("TTADEV_NO_AUTO_INSTRUMENT") == "1":
+        return
+    
+    # Initialize trace collector (file-based, no services needed)
+    try:
+        from ttadev.observability.collector import trace_collector
+        trace_collector.initialize()
+    except Exception as e:
+        print(f"⚠️  Failed to initialize observability: {e}")
+        return
+    
+    # Auto-instrument all primitives
+    try:
+        auto_instrument_primitives()
+    except Exception as e:
+        print(f"⚠️  Failed to auto-instrument primitives: {e}")
 
 
 # Convenience function for manual instrumentation

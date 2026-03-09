@@ -1,499 +1,236 @@
 # Getting Started with TTA.dev
 
-> **For Vibe Coders:** Check out [VIBE_CODING.md](VIBE_CODING.md) for the fastest way to start building with AI agents.
+Welcome! This guide walks you through setting up TTA.dev and building your first AI-native application with built-in observability.
 
-**Build fast with AI. Scale with confidence when you go viral.**
+## Prerequisites
 
-## The Vibe Coder's Journey
+- **Python 3.11+** (we support 3.11, 3.12, 3.13, 3.14)
+- **Git**
+- **An AI coding agent** (Claude Desktop, GitHub Copilot CLI, Cline, etc.)
 
-```
-1. VIBE        → You + AI = App exists 🎉
-2. SHIP        → It works! Push it live
-3. TRACTION    → Users arriving... add CachePrimitive (save 💰)
-4. SCALING     → Going viral! Full primitives + observability
-```
+That's it! No databases, no external services, no complex configuration.
 
-## Quick Start (5 minutes)
-
-### 🚀 Start with a Template
-
-The easiest way to start is using our pre-built templates:
-
-1.  **Basic Agent**: `cp -r templates/basic-agent my-agent`
-2.  **Workflow**: `cp -r templates/workflow my-workflow`
-
-See [VIBE_CODING.md](VIBE_CODING.md) for details.
-
-### Manual Installation
-
-If you prefer to build from scratch:
+## Step 1: Clone and Setup (2 minutes)
 
 ```bash
-# Install with uv (recommended)
-uv add tta-dev-primitives
+# Clone the repository
+git clone https://github.com/theinterneti/TTA.dev.git
+cd TTA.dev
+
+# Run the setup script (installs dependencies via uv)
+./setup.sh
 ```
 
-### Your First Workflow
+The setup script will:
+- Install `uv` (fast Python package manager) if needed
+- Create a virtual environment
+- Install TTA.dev in editable mode
+- Verify the installation
+
+## Step 2: Point Your AI Agent at TTA.dev
+
+TTA.dev works through your AI coding agent. The agent reads our configuration files and automatically starts using the primitives.
+
+### For GitHub Copilot CLI:
+
+```bash
+# Already configured! Just start using it:
+cd TTA.dev
+# Copilot will read .github/copilot-instructions.md and AGENTS.md
+```
+
+### For Claude Desktop (via MCP):
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "ttadev": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "ttadev.mcp_server"],
+      "cwd": "/path/to/TTA.dev"
+    }
+  }
+}
+```
+
+### For Cline:
+
+Point Cline at the TTA.dev directory. It will read `AGENTS.md` and start using patterns.
+
+## Step 3: Verify Observability Works
+
+Let's verify everything is working by running a demo workflow:
+
+```bash
+# Run the demo (it will auto-start the observability dashboard)
+uv run python examples/demo_workflow.py
+```
+
+You should see:
+1. Terminal output showing the workflow executing
+2. A browser tab opening to `http://localhost:8000`
+3. The dashboard displaying real-time traces
+
+## Understanding What Just Happened
+
+### Auto-Instrumentation
+
+When you imported TTA.dev primitives:
 
 ```python
-from tta_dev_primitives import (
-    CachePrimitive,
-    RouterPrimitive,
-    RetryPrimitive,
-    WorkflowContext
-)
-
-# Define your processing function
-async def process_with_llm(data: dict, context: WorkflowContext) -> dict:
-    # Your LLM call here
-    return {"result": "processed"}
-
-# Compose workflow with operators
-workflow = (
-    CachePrimitive(ttl=3600) >>      # Cache for 1 hour
-    RouterPrimitive(tier="balanced") >> # Smart model selection
-    RetryPrimitive(max_attempts=3) >>   # Retry on failure
-    process_with_llm
-)
-
-# Execute
-context = WorkflowContext(trace_id="request-123")
-result = await workflow.execute({"input": "Hello"}, context)
+from ttadev.primitives import RetryPrimitive, TimeoutPrimitive
 ```
 
-### 3. See Results
+TTA.dev automatically:
+- Initialized OpenTelemetry tracing
+- Started the file-based span exporter
+- Launched the observability dashboard (on first use)
 
-Your workflow now has:
-- ✅ Automatic caching (30-40% cost reduction)
-- ✅ Smart routing to appropriate models
-- ✅ Retry logic for transient failures
-- ✅ Full observability with traces
+**No manual setup required!**
 
-## Core Concepts
+### The Observability Dashboard
 
-### Primitives
+Open `http://localhost:8000` to see:
 
-Small, composable building blocks for workflows:
+- **Live Traces**: Every workflow execution in real-time
+- **Primitive Usage**: Which primitives are being used
+- **Performance Metrics**: Duration, success/failure rates
+- **Error Tracking**: Stack traces and error details
 
-- **Router**: Choose models based on tier (fast/balanced/quality)
-- **Cache**: LRU caching with TTL to reduce costs
-- **Retry**: Exponential backoff for reliability
-- **Timeout**: Circuit breaker pattern
-- **Fallback**: Graceful degradation
+The dashboard reads from `.observability/traces/` (auto-created markdown files).
 
-### Composition
+## Step 4: Build Your First Workflow
 
-Combine primitives using operators:
+Let's build a simple workflow that fetches data with retries and caching:
 
 ```python
-# Sequential: Execute in order
-workflow = step1 >> step2 >> step3
+# my_workflow.py
+import asyncio
+from ttadev.primitives import RetryPrimitive, CachePrimitive, TimeoutPrimitive
+from ttadev.core import WorkflowContext
 
-# Parallel: Execute concurrently
-workflow = step1 | step2 | step3
+async def fetch_data(url: str, ctx: WorkflowContext) -> dict:
+    """Simulate API call"""
+    print(f"Fetching {url}...")
+    await asyncio.sleep(0.5)
+    return {"data": "success", "url": url}
 
-# Conditional: Branch based on data
-workflow = router >> (fast_path if simple else complex_path)
+async def main():
+    # Build resilient workflow with primitives
+    workflow = (
+        TimeoutPrimitive(timeout_seconds=5.0)
+        >> CachePrimitive(ttl=60)
+        >> RetryPrimitive(max_attempts=3)
+    )
+    
+    # Execute with context
+    ctx = WorkflowContext(workflow_id="my-first-workflow")
+    result = await workflow.execute("https://api.example.com/data", ctx)
+    
+    print(f"Result: {result}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
-### Context
+Run it:
 
-Every execution has context for tracing and correlation:
-
-```python
-context = WorkflowContext(
-    trace_id="abc-123",
-    correlation_id="request-456",
-    metadata={"user_id": "user123"}
-)
+```bash
+uv run python my_workflow.py
 ```
+
+Watch the observability dashboard - you'll see:
+- TimeoutPrimitive wrapping the execution
+- CachePrimitive checking for cached results
+- RetryPrimitive handling any failures
+- Full trace timeline with durations
+
+## Step 5: Let Your AI Agent Build With TTA.dev
+
+Now the magic happens. Tell your AI agent:
+
+> "Build me a web scraper that retries on failure, caches results, and times out after 10 seconds. Use TTA.dev primitives."
+
+The agent will:
+1. Read `AGENTS.md` and understand TTA.dev patterns
+2. Use primitives like RetryPrimitive, CachePrimitive, TimeoutPrimitive
+3. Auto-instrument everything with observability
+4. You can watch it work in real-time on the dashboard!
 
 ## Common Patterns
 
-### Pattern 1: Cached LLM Pipeline
+### Pattern 1: Resilient API Calls
 
 ```python
-from tta_dev_primitives import CachePrimitive, RouterPrimitive
+from ttadev.primitives import RetryPrimitive, CircuitBreakerPrimitive, TimeoutPrimitive
 
-async def analyze_text(text: str) -> dict:
-    workflow = (
-        CachePrimitive(ttl=3600) >>
-        RouterPrimitive(tier="balanced") >>
-        llm_analyzer
-    )
-
-    return await workflow.execute(
-        {"text": text},
-        WorkflowContext()
-    )
-```
-
-### Pattern 2: Resilient API Call
-
-```python
-from tta_dev_primitives import RetryPrimitive, TimeoutPrimitive, FallbackPrimitive
-
-workflow = (
-    TimeoutPrimitive(seconds=10) >>
-    RetryPrimitive(max_attempts=3, backoff_factor=2.0) >>
-    FallbackPrimitive(
-        primary=expensive_api,
-        fallback=cheap_api
-    )
+# Protect against flaky APIs
+api_workflow = (
+    CircuitBreakerPrimitive(failure_threshold=5, timeout_seconds=60)
+    >> TimeoutPrimitive(timeout_seconds=10.0)
+    >> RetryPrimitive(max_attempts=3, backoff_factor=2.0)
 )
 ```
 
-### Pattern 3: Parallel Processing
+### Pattern 2: Caching Expensive Operations
 
 ```python
-from tta_dev_primitives import ParallelPrimitive
+from ttadev.primitives import CachePrimitive
 
-# Fetch data from multiple sources concurrently
-workflow = ParallelPrimitive([
-    fetch_user_profile,
-    fetch_recommendations,
-    fetch_analytics
-])
-
-results = await workflow.execute({"user_id": 123}, context)
+# Cache for 1 hour
+cached_workflow = CachePrimitive(ttl=3600) >> expensive_operation
 ```
 
-### Pattern 4: Conversational Memory
+### Pattern 3: Fallback Strategies
 
 ```python
-from tta_dev_primitives.performance import MemoryPrimitive
+from ttadev.primitives import FallbackPrimitive
 
-# Zero-setup conversational memory (no Docker/Redis required)
-memory = MemoryPrimitive(max_size=100)
-
-async def handle_conversation(user_input: str) -> str:
-    # Store user message
-    await memory.add(
-        f"user_{timestamp}",
-        {"role": "user", "content": user_input, "timestamp": timestamp}
-    )
-
-    # Search conversation history for context
-    history = await memory.search(keywords=user_input.split()[:3])
-
-    # Generate response with context
-    response = await llm_generate(user_input, history)
-
-    # Store assistant response
-    await memory.add(
-        f"assistant_{timestamp}",
-        {"role": "assistant", "content": response, "timestamp": timestamp}
-    )
-
-    return response
-
-# Multi-turn conversation
-response1 = await handle_conversation("What is a primitive?")
-response2 = await handle_conversation("Can you give me an example?")  # Has context from turn 1
-
-# Optional: Enable Redis for persistence and scaling
-memory_persistent = MemoryPrimitive(
-    redis_url="redis://localhost:6379",
-    enable_redis=True
+# Try primary, fall back to secondary
+resilient_workflow = FallbackPrimitive(
+    primary=primary_api_call,
+    fallback=backup_api_call
 )
-# Same API, enhanced backend - automatic fallback if Redis unavailable
-```
-
-**Benefits:**
-
-- ✅ **Zero Setup**: Works immediately without Docker or Redis
-- ✅ **Hybrid Architecture**: Automatic upgrade to Redis if available
-- ✅ **Graceful Degradation**: Falls back to in-memory if Redis fails
-- ✅ **Search**: Keyword search across conversation history
-- ✅ **LRU Eviction**: Built-in memory management
-
-**Use Cases:**
-
-- Multi-turn conversational agents
-- Task context spanning operations
-- Agent memory and recall
-- Personalization based on history
-
-### Pattern 5: Self-Improving Workflows
-
-```python
-from tta_dev_primitives.adaptive import (
-    AdaptiveRetryPrimitive,
-    LogseqStrategyIntegration,
-    LearningMode
-)
-
-# Zero-setup self-improving retry (no manual tuning required)
-logseq = LogseqStrategyIntegration("my_app")
-adaptive_retry = AdaptiveRetryPrimitive(
-    target_primitive=unreliable_api,
-    logseq_integration=logseq,
-    enable_auto_persistence=True,
-    learning_mode=LearningMode.ACTIVE
-)
-
-# Learning happens automatically from execution patterns
-result = await adaptive_retry.execute(data, context)
-
-# Check what was learned
-for name, strategy in adaptive_retry.strategies.items():
-    print(f"{name}: {strategy.metrics.success_rate:.1%} success")
-
-# Strategies automatically saved to logseq/pages/Strategies/
-```
-
-**Benefits:**
-
-- ✅ **Automatic Learning**: Learns optimal retry parameters without manual tuning
-- ✅ **Context-Aware**: Different strategies for production/staging/dev
-- ✅ **Production-Safe**: Circuit breakers and validation prevent bad strategies
-- ✅ **Knowledge Base**: Strategies persist to Logseq for sharing
-- ✅ **Observable**: Full OpenTelemetry integration
-
-**Use Cases:**
-
-- Unreliable external APIs needing adaptive retry strategies
-- Services with varying load patterns across contexts
-- Teams wanting to share learned strategies via knowledge base
-- Production systems requiring automatic optimization
-
-## Cost Optimization
-
-### Smart Caching
-
-```python
-# Cache reduces redundant LLM calls by 30-40%
-cache = CachePrimitive(
-    ttl=3600,              # 1 hour
-    max_size=1000,         # Max 1000 entries
-    context_aware=True     # Include context in cache key
-)
-```
-
-### Tiered Routing
-
-```python
-# Route to appropriate model based on complexity
-router = RouterPrimitive(
-    tier="fast",      # Use cheaper, faster model
-    # tier="balanced" # Balance cost and quality
-    # tier="quality"  # Use best model for hard tasks
-)
-```
-
-## Observability
-
-### OpenTelemetry Integration
-
-```python
-from opentelemetry import trace
-from tta_dev_primitives import WorkflowContext
-
-# Context automatically propagates traces
-tracer = trace.get_tracer(__name__)
-
-with tracer.start_as_current_span("my_operation") as span:
-    context = WorkflowContext(
-        trace_id=span.get_span_context().trace_id
-    )
-    result = await workflow.execute(data, context)
-```
-
-### Structured Logging
-
-```python
-import logging
-
-logger = logging.getLogger(__name__)
-
-# Context provides correlation IDs
-logger.info(
-    "Workflow completed",
-    extra={
-        "trace_id": context.trace_id,
-        "duration_ms": duration,
-        "cache_hit": True
-    }
-)
-```
-
-## Testing
-
-### Testing Your Workflows
-
-```python
-from tta_dev_primitives.testing import MockPrimitive, create_test_context
-
-async def test_my_workflow():
-    # Use mocks for testing
-    mock_llm = MockPrimitive(
-        response={"result": "test response"}
-    )
-
-    workflow = cache >> mock_llm >> processor
-
-    context = create_test_context(trace_id="test-123")
-    result = await workflow.execute({"input": "test"}, context)
-
-    assert result["result"] == "processed test response"
-    assert mock_llm.call_count == 1
 ```
 
 ## Next Steps
 
-### 🎓 Structured Learning
+- **Explore Primitives**: Check [PRIMITIVES_CATALOG.md](PRIMITIVES_CATALOG.md) for all available primitives
+- **Read User Journey**: See [USER_JOURNEY.md](USER_JOURNEY.md) for the complete experience
+- **Join Community**: Open issues, contribute primitives, share your workflows
+- **Build Something**: Use TTA.dev to build your AI-native application!
 
-**Learning Paths:** [`TTA.dev Learning Paths`](logseq/pages/TTA.dev___Learning%20Paths.md) - Follow structured sequences from beginner to expert
+## Troubleshooting
 
-**Interactive Learning:** [`Learning TTA Primitives`](logseq/pages/Learning%20TTA%20Primitives.md) - Flashcards and exercises for mastering concepts
-
-**Knowledge Base:** [`docs/_archive/knowledge-base/README.md`](docs/_archive/knowledge-base/README.md) - Navigate between documentation and knowledge systems
-
-### 📋 Task Management
-
-**TODO System:** [`TODO Management System`](logseq/pages/TODO%20Management%20System.md) - Central dashboard for all project tasks
-
-Add tasks to today's journal: `logseq/journals/YYYY_MM_DD.md`
-
-### Learn More
-
-- 📚 [Architecture Overview](docs/architecture/Overview.md) - Understand the design
-- 🎯 [Coding Standards](docs/guides/development/CodingStandards.md) - Best practices
-- 🔧 [MCP Integration](MCP_SERVERS.md) - Model Context Protocol
-- 📦 [Package README](platform/primitives/README.md) - Detailed docs
-
-### Production Examples
-
-**Start here!** 5 validated, working examples ready to run:
-
-| Example | What It Shows | Use When |
-|---------|---------------|----------|
-| [**RAG Workflow**](platform/primitives/examples/rag_workflow.py) | Caching + Fallback + Retry | Building document retrieval systems |
-| [**Agentic RAG**](platform/primitives/examples/agentic_rag_workflow.py) | Router + Grading + Validation | Production RAG with quality controls |
-| [**Cost Tracking**](platform/primitives/examples/cost_tracking_workflow.py) | Budget Enforcement + Metrics | Managing LLM API costs |
-| [**Streaming**](platform/primitives/examples/streaming_workflow.py) | AsyncIterator + Buffering | Real-time response streaming |
-| [**Multi-Agent**](platform/primitives/examples/multi_agent_workflow.py) | Coordinator + Parallel Execution | Complex agent orchestration |
-| [**Memory Workflow**](platform/primitives/examples/memory_workflow.py) | Conversational Memory + Search | Multi-turn conversations with context |
-
-**Quick Start:**
+### Dashboard Not Starting?
 
 ```bash
-# Run any example
-uv run python platform/primitives/examples/rag_workflow.py
-
-# Or explore all examples
-ls platform/primitives/examples/
+# Manually start the dashboard
+uv run python ttadev/observability/server.py
 ```
 
-**Implementation Guide:** [`platform/primitives/examples/PHASE3_EXAMPLES_COMPLETE.md`](platform/primitives/examples/PHASE3_EXAMPLES_COMPLETE.md) - Comprehensive documentation including:
-- Complete implementation details for all examples
-- InstrumentedPrimitive pattern guide
-- Test results and validation
-- Production usage recommendations
+### Import Errors?
 
-### Additional Examples
-
-More patterns in the examples directory:
-- [Basic workflows](platform/primitives/examples/basic_workflow.py) - Foundation patterns
-- [Composition patterns](platform/primitives/examples/composition.py) - Combining primitives
-- [Error handling](platform/primitives/examples/error_handling.py) - Recovery patterns
-- [Observability](platform/primitives/examples/observability.py) - Tracing and metrics
-
-### Get Help
-
-- 📖 Documentation: See `docs/` directory
-- 💻 Examples: See `platform/primitives/examples/`
-- 🐛 Issues: Open an issue on GitHub
-- 💬 Discussions: GitHub Discussions
-
-## Cline Integration
-
-TTA.dev provides a powerful Cline integration to streamline development and enforce best practices. For detailed information on Cline hooks, VS Code configuration, and TTA.dev primitives exposed as MCP tools, refer to [`CLINE_INTEGRATION_GUIDE.md`](CLINE_INTEGRATION_GUIDE.md).
-
-## Advanced Topics
-
-### Custom Primitives
-
-Create your own primitives:
-
-```python
-from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
-
-class CustomPrimitive(WorkflowPrimitive):
-    """Your custom primitive."""
-
-    async def _execute(
-        self,
-        data: dict,
-        context: WorkflowContext
-    ) -> dict:
-        # Your implementation
-        return processed_data
+```bash
+# Reinstall in editable mode
+uv pip install -e .
 ```
 
-### Performance Tuning
+### Agent Not Using Primitives?
 
-Tips for optimal performance:
+Make sure your agent can read:
+- `.github/copilot-instructions.md` (for Copilot)
+- `AGENTS.md` (general agent guidance)
+- `PRIMITIVES_CATALOG.md` (primitive reference)
 
-1. **Use caching aggressively** - Cache at multiple levels
-2. **Choose appropriate tiers** - Use fast tier for simple tasks
-3. **Parallel execution** - Run independent operations concurrently
-4. **Monitor metrics** - Track cache hit rate, latency, costs
-5. **Profile before optimizing** - Measure to find bottlenecks
+## Support
 
-### Production Checklist
-
-Before deploying:
-
-- [ ] All tests passing with 100% coverage
-- [ ] Observability configured (traces, logs, metrics)
-- [ ] Error handling tested for all failure modes
-- [ ] Caching strategy validated
-- [ ] Performance benchmarked
-- [ ] Security review completed
-- [ ] Documentation updated
-
-## Philosophy
-
-### Production-First
-
-Every component is battle-tested and production-ready:
-- Comprehensive test coverage
-- Real-world usage validation
-- Performance optimized
-- Well documented
-
-### Composable
-
-Build complex workflows from simple primitives:
-- Single Responsibility Principle
-- Clear interfaces
-- Operator-based composition
-- Mix and match freely
-
-### Observable
-
-Understand what's happening:
-- OpenTelemetry integration
-- Structured logging
-- Trace propagation
-- Performance metrics
-
-## Contributing
-
-Interested in contributing? Check out:
-- [Coding Standards](docs/guides/development/CodingStandards.md)
-- [Architecture Overview](docs/architecture/Overview.md)
-- Existing examples and tests
+- **Issues**: https://github.com/theinterneti/TTA.dev/issues
+- **Discussions**: https://github.com/theinterneti/TTA.dev/discussions
+- **Documentation**: All markdown files in the root directory
 
 ---
 
-**Ready to build?** Start with the [quick start](#quick-start-5-minutes) above or explore the [examples](platform/primitives/examples/).
-
----
-
-**Last Updated:** 2025-11-10
-
-
----
-**Logseq:** [[TTA.dev/Getting_started]]
+**Welcome to TTA.dev!** 🚀 Build something amazing.
