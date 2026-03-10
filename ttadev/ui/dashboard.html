@@ -410,7 +410,7 @@
     <div class="header">
         <h1>🔭 TTA.dev Observability</h1>
         <p class="subtitle">Real-time monitoring of workflows, primitives & agents</p>
-        <div id="connectionStatus" class="connection-status disconnected">Disconnected</div>
+        <div id="connection-status" class="connection-status disconnected">Disconnected</div>
     </div>
     
     <div class="dashboard-grid">
@@ -527,7 +527,7 @@
         
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}/ws`;
+            const wsUrl = `${protocol}//${window.location.hostname}:8001`;
             
             ws = new WebSocket(wsUrl);
             
@@ -1315,3 +1315,184 @@
     <script src="/static/js/code-graph.js"></script>
 </body>
 </html>
+
+<script>
+// Real-time WebSocket Connection
+let ws = null;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+
+function connectWebSocket() {
+    const wsUrl = `ws://${window.location.host}/ws`;
+    console.log('Connecting to WebSocket:', wsUrl);
+    
+    ws = new WebSocket(wsUrl);
+    
+    ws.onopen = () => {
+        console.log('✓ WebSocket connected');
+        reconnectAttempts = 0;
+        updateConnectionStatus(true);
+    };
+    
+    ws.onmessage = (event) => {
+        try {
+            const message = JSON.parse(event.data);
+            handleWebSocketMessage(message);
+        } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+        }
+    };
+    
+    ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        updateConnectionStatus(false);
+    };
+    
+    ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        updateConnectionStatus(false);
+        
+        // Attempt reconnect
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            reconnectAttempts++;
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+            console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
+            setTimeout(connectWebSocket, delay);
+        }
+    };
+}
+
+function handleWebSocketMessage(message) {
+    if (message.type === 'trace') {
+        addTraceToList(message.data);
+        updateStats();
+    }
+}
+
+function addTraceToList(trace) {
+    const tracesList = document.getElementById('traces-list');
+    if (!tracesList) return;
+    
+    const traceEl = createTraceElement(trace);
+    
+    // Add to top with fade-in animation
+    traceEl.style.opacity = '0';
+    tracesList.insertBefore(traceEl, tracesList.firstChild);
+    
+    setTimeout(() => {
+        traceEl.style.transition = 'opacity 0.3s';
+        traceEl.style.opacity = '1';
+    }, 10);
+    
+    // Keep only last 50 traces
+    while (tracesList.children.length > 50) {
+        tracesList.removeChild(tracesList.lastChild);
+    }
+}
+
+function createTraceElement(trace) {
+    const div = document.createElement('div');
+    div.className = 'trace-item';
+    div.onclick = () => showTraceDetails(trace);
+    
+    const status = trace.status || 'success';
+    const statusClass = status === 'error' ? 'error' : 'success';
+    
+    div.innerHTML = `
+        <div class="trace-header">
+            <span class="trace-id">${trace.trace_id || 'unknown'}</span>
+            <span class="trace-status status-${statusClass}">${status}</span>
+        </div>
+        <div class="trace-meta">
+            <span>Duration: ${(trace.duration_ms || 0).toFixed(2)}ms</span>
+            <span>Spans: ${(trace.spans || []).length}</span>
+            <span>${new Date(trace.start_time).toLocaleString()}</span>
+        </div>
+    `;
+    
+    return div;
+}
+
+function updateConnectionStatus(connected) {
+    const statusEl = document.getElementById('connection-status');
+    if (!statusEl) return;
+    
+    if (connected) {
+        statusEl.textContent = '● Connected';
+        statusEl.className = 'status-connected';
+    } else {
+        statusEl.textContent = '○ Disconnected';
+        statusEl.className = 'status-disconnected';
+    }
+}
+
+// Initialize WebSocket on page load
+document.addEventListener('DOMContentLoaded', () => {
+    connectWebSocket();
+    
+    // Heartbeat to keep connection alive
+    setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send('ping');
+        }
+    }, 30000); // Every 30 seconds
+});
+</script>
+
+<style>
+.status-connected {
+    color: #4ade80;
+}
+
+.status-disconnected {
+    color: #f87171;
+}
+
+.trace-item {
+    padding: 1rem;
+    background: #1e293b;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.trace-item:hover {
+    background: #334155;
+    transform: translateX(4px);
+}
+
+.trace-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.trace-id {
+    font-family: monospace;
+    color: #60a5fa;
+}
+
+.trace-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.status-success {
+    background: #166534;
+    color: #4ade80;
+}
+
+.status-error {
+    background: #7f1d1d;
+    color: #f87171;
+}
+
+.trace-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+</style>

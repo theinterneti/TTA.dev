@@ -30,32 +30,33 @@ class ExecutionContext:
     def detect_current(cls) -> "ExecutionContext":
         """Auto-detect current execution context from environment."""
         
-        # Detect provider
-        provider = "unknown"
-        if os.getenv("GITHUB_COPILOT"):
-            provider = "github-copilot"
-        elif os.getenv("OPENROUTER_API_KEY"):
+        # Detect provider - GitHub Copilot sets GITHUB_ACTIONS when running in CLI
+        provider = "github-copilot"  # Default assumption in TTA.dev context
+        if os.getenv("OPENROUTER_API_KEY"):
             provider = "openrouter"
         elif os.getenv("OLLAMA_HOST"):
             provider = "ollama"
+        elif os.getenv("ANTHROPIC_API_KEY") and not os.getenv("GITHUB_COPILOT"):
+            provider = "anthropic-direct"
         
-        # Detect model (example patterns)
-        model = os.getenv("MODEL_NAME", "unknown")
-        if "claude" in model.lower():
-            model = "claude-sonnet-4.5"  # or parse version
+        # Detect model - for Copilot CLI, Claude Sonnet 4.5 is default
+        model = os.getenv("MODEL_NAME", "claude-sonnet-4.5")
         
         # Detect user
         user = os.getenv("USER", os.getenv("USERNAME", "unknown"))
         
-        # Agent is set explicitly by workflows, not auto-detected
+        # Detect TTA agent role from environment (set by agent wrappers)
+        agent = os.getenv("TTA_AGENT_ROLE")
         
         return cls(
             provider=provider,
             model=model,
             user=user,
+            agent=agent,
             attributes={
                 "hostname": os.uname().nodename if hasattr(os, "uname") else "unknown",
                 "pid": os.getpid(),
+                "detected_at": datetime.now().isoformat(),
             }
         )
     
