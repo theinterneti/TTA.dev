@@ -31,23 +31,27 @@ class PrimitiveUsageChecker(ast.NodeVisitor):
 
     def add_error(self, node: ast.AST, message: str, suggestion: str = ""):
         """Add an error with line number."""
-        self.errors.append({
-            "line": node.lineno,
-            "col": node.col_offset,
-            "message": message,
-            "suggestion": suggestion,
-            "severity": "error"
-        })
+        self.errors.append(
+            {
+                "line": node.lineno,
+                "col": node.col_offset,
+                "message": message,
+                "suggestion": suggestion,
+                "severity": "error",
+            }
+        )
 
     def add_warning(self, node: ast.AST, message: str, suggestion: str = ""):
         """Add a warning with line number."""
-        self.warnings.append({
-            "line": node.lineno,
-            "col": node.col_offset,
-            "message": message,
-            "suggestion": suggestion,
-            "severity": "warning"
-        })
+        self.warnings.append(
+            {
+                "line": node.lineno,
+                "col": node.col_offset,
+                "message": message,
+                "suggestion": suggestion,
+                "severity": "warning",
+            }
+        )
 
     def visit_Call(self, node: ast.Call) -> None:
         """Check function calls for anti-patterns."""
@@ -57,7 +61,7 @@ class PrimitiveUsageChecker(ast.NodeVisitor):
                 node,
                 "Direct asyncio.gather() usage detected",
                 "Use ParallelPrimitive or | operator instead:\n"
-                "  workflow = primitive1 | primitive2 | primitive3"
+                "  workflow = primitive1 | primitive2 | primitive3",
             )
 
         # Check for asyncio.create_task()
@@ -65,7 +69,7 @@ class PrimitiveUsageChecker(ast.NodeVisitor):
             self.add_warning(
                 node,
                 "Direct asyncio.create_task() usage detected",
-                "Use ParallelPrimitive for concurrent execution"
+                "Use ParallelPrimitive for concurrent execution",
             )
 
         # Check for asyncio.wait_for()
@@ -74,7 +78,7 @@ class PrimitiveUsageChecker(ast.NodeVisitor):
                 node,
                 "Direct asyncio.wait_for() usage detected",
                 "Use TimeoutPrimitive instead:\n"
-                "  TimeoutPrimitive(primitive=..., timeout_seconds=...)"
+                "  TimeoutPrimitive(primitive=..., timeout_seconds=...)",
             )
 
         self.generic_visit(node)
@@ -87,7 +91,7 @@ class PrimitiveUsageChecker(ast.NodeVisitor):
                 node,
                 "Manual retry loop detected",
                 "Use RetryPrimitive instead:\n"
-                "  RetryPrimitive(primitive=..., max_retries=3, backoff_strategy='exponential')"
+                "  RetryPrimitive(primitive=..., max_retries=3, backoff_strategy='exponential')",
             )
 
         self.generic_visit(node)
@@ -99,7 +103,7 @@ class PrimitiveUsageChecker(ast.NodeVisitor):
             self.add_warning(
                 node,
                 f"Function '{node.name}' appears to manually orchestrate async operations",
-                "Consider using SequentialPrimitive (>>) or ParallelPrimitive (|)"
+                "Consider using SequentialPrimitive (>>) or ParallelPrimitive (|)",
             )
 
         self.generic_visit(node)
@@ -129,10 +133,7 @@ class PrimitiveUsageChecker(ast.NodeVisitor):
     def _has_manual_orchestration(self, node: ast.AsyncFunctionDef) -> bool:
         """Check if function manually orchestrates async operations."""
         # Count await statements
-        await_count = sum(
-            1 for child in ast.walk(node)
-            if isinstance(child, ast.Await)
-        )
+        await_count = sum(1 for child in ast.walk(node) if isinstance(child, ast.Await))
 
         # If multiple awaits in sequence, might be manual orchestration
         # This is a heuristic - not perfect
@@ -173,7 +174,7 @@ def validate_file(file_path: Path, verbose: bool = False) -> tuple[int, int]:
         print(f"\n❌ {rel_path}:")
         for error in checker.errors:
             print(f"  Line {error['line']}: {error['message']}")
-            if error['suggestion']:
+            if error["suggestion"]:
                 print(f"    → {error['suggestion']}")
 
     # Report warnings
@@ -182,12 +183,11 @@ def validate_file(file_path: Path, verbose: bool = False) -> tuple[int, int]:
             print(f"\n⚠️  {rel_path}:")
         for warning in checker.warnings:
             print(f"  Line {warning['line']}: {warning['message']}")
-            if warning['suggestion']:
-                for line in warning['suggestion'].split('\n'):
+            if warning["suggestion"]:
+                for line in warning["suggestion"].split("\n"):
                     print(f"    → {line}")
 
     return (len(checker.errors), len(checker.warnings))
-
 
 
 def should_skip_file(file_path: Path) -> bool:
@@ -248,7 +248,7 @@ def validate_packages(verbose: bool = False) -> tuple[int, int]:
 
     # Print summary
     print("\n" + "=" * 60)
-    print(f"📊 Validation Summary:")
+    print("📊 Validation Summary:")
     print(f"   Files checked: {files_checked}")
     print(f"   Errors: {total_errors}")
     print(f"   Warnings: {total_warnings}")

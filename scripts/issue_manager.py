@@ -192,7 +192,7 @@ class IssueManager:
         if labels_to_add:
             # Remove existing labels that conflict
             existing = set(issue.labels)
-            new_labels = existing.union(set(labels_to_add))
+            labels_to_add = list(set(labels_to_add) - existing)
 
             try:
                 subprocess.run(
@@ -392,7 +392,7 @@ class IssueManager:
         # Build the Logseq block
         # Format: - TODO Title #tags
         # Filter out P-labels for tags to avoid redundancy with priority property
-        tags = [f"#{l}" for l in issue.labels if not l.startswith("P")]
+        tags = [f"#{label}" for label in issue.labels if not label.startswith("P")]
         tags_str = " ".join(tags)
 
         lines = [

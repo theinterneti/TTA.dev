@@ -23,11 +23,11 @@ _package_dir = _script_dir.parent / "packages" / "tta-dev-primitives" / "src"
 if _package_dir.exists():
     sys.path.insert(0, str(_package_dir))
 
-import yaml
-from pydantic import BaseModel, Field
+import yaml  # noqa: E402
+from pydantic import BaseModel, Field  # noqa: E402
 
 # When running from uv, this will work after: uv pip install -e packages/tta-dev-primitives
-from tta_dev_primitives import (
+from tta_dev_primitives import (  # noqa: E402
     WorkflowContext,
     WorkflowPrimitive,
 )

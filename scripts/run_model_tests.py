@@ -26,12 +26,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import the test scripts
-from scripts.model_evaluation import analyze_results as analyze_general_results
-from scripts.model_evaluation import run_evaluations as run_general_evaluations
-from scripts.test_structured_output import analyze_results as analyze_structured_results
-from scripts.test_structured_output import run_tests as run_structured_tests
-from scripts.test_tool_use import analyze_results as analyze_tool_results
-from scripts.test_tool_use import run_tests as run_tool_tests
+from scripts.model_evaluation import analyze_results as analyze_general_results  # noqa: E402, I001
+from scripts.model_evaluation import run_evaluations as run_general_evaluations  # noqa: E402
+from scripts.test_structured_output import analyze_results as analyze_structured_results  # noqa: E402
+from scripts.test_structured_output import run_tests as run_structured_tests  # noqa: E402
+from scripts.test_tool_use import analyze_results as analyze_tool_results  # noqa: E402
+from scripts.test_tool_use import run_tests as run_tool_tests  # noqa: E402
 
 # Target models to evaluate
 TARGET_MODELS = [

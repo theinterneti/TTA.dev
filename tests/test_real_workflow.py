@@ -8,9 +8,7 @@ from pathlib import Path
 import pytest
 
 # Add packages to path
-sys.path.insert(
-    0, str(Path(__file__).parent / "packages" / "tta-dev-primitives" / "src")
-)
+sys.path.insert(0, str(Path(__file__).parent / "packages" / "tta-dev-primitives" / "src"))
 
 from ttadev.primitives import WorkflowContext
 from ttadev.primitives.core.base import WorkflowPrimitive

@@ -12,6 +12,7 @@ Demonstrates:
 import asyncio
 
 import pytest
+
 from ttadev.primitives import WorkflowContext, WorkflowPrimitive
 from ttadev.primitives.core.parallel import ParallelPrimitive
 from ttadev.primitives.core.sequential import SequentialPrimitive
@@ -112,9 +113,7 @@ async def test_sequential_pipeline_with_observability():
     pipeline = validator >> enricher >> transformer
 
     # Execute
-    context = WorkflowContext(
-        workflow_id="observable-pipeline", correlation_id="test-123"
-    )
+    context = WorkflowContext(workflow_id="observable-pipeline", correlation_id="test-123")
     input_data = {"data": ["foo", "bar"]}
 
     result = await pipeline.execute(input_data, context)
@@ -294,9 +293,7 @@ async def test_parallel_performance_benefit():
     seq_duration = time.time() - start
 
     # Parallel execution
-    par_workflow = ParallelPrimitive(
-        [SlowProcessor(), SlowProcessor(), SlowProcessor()]
-    )
+    par_workflow = ParallelPrimitive([SlowProcessor(), SlowProcessor(), SlowProcessor()])
     context = WorkflowContext(workflow_id="par-perf")
 
     start = time.time()
@@ -352,9 +349,7 @@ async def test_complete_data_pipeline():
     pipeline = validator >> parallel_stage >> merger
 
     # Execute
-    context = WorkflowContext(
-        workflow_id="complete-pipeline", correlation_id="pipeline-123"
-    )
+    context = WorkflowContext(workflow_id="complete-pipeline", correlation_id="pipeline-123")
     input_data = {"data": ["alpha", "beta", "gamma"]}
 
     result = await pipeline.execute(input_data, context)

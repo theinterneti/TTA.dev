@@ -5,6 +5,7 @@ Retry Pattern Example - Handling Failures Gracefully
 Shows how to handle transient failures with exponential backoff.
 Watch the retries in real-time on the dashboard!
 """
+
 import asyncio
 import random
 import sys
@@ -27,20 +28,18 @@ async def flaky_api_call(data: dict, ctx: WorkflowContext) -> dict:
 async def main():
     # Wrap the flaky operation with retry logic
     resilient_api = RetryPrimitive(
-        primitive=LambdaPrimitive(flaky_api_call),
-        max_attempts=5,
-        backoff_factor=2.0
+        primitive=LambdaPrimitive(flaky_api_call), max_attempts=5, backoff_factor=2.0
     )
-    
+
     context = WorkflowContext(workflow_id="retry-example")
-    
+
     try:
         result = await resilient_api.execute({"user_id": 123}, context)
         print(f"\n✅ Success: {result}")
     except Exception as e:
         print(f"\n❌ Failed after retries: {e}")
-    
-    print(f"🔍 View retries at: http://localhost:8000\n")
+
+    print("🔍 View retries at: http://localhost:8000\n")
 
 
 if __name__ == "__main__":

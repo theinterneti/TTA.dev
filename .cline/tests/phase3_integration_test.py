@@ -373,7 +373,7 @@ function DataComponent() {
 
         # Step 3: Optimize workflow execution
         tasks = [
-            Task(
+            Task(  # noqa: F821
                 id=str(uuid.uuid4()),
                 name="analyze_context",
                 type="code_analysis",
@@ -383,7 +383,7 @@ function DataComponent() {
                 context={"context": str(context)},
                 input_data=code_sample,
             ),
-            Task(
+            Task(  # noqa: F821
                 id=str(uuid.uuid4()),
                 name="generate_suggestions",
                 type="suggestion",
@@ -755,7 +755,7 @@ class TestPhase3QualityValidation:
         # Suggestion generation performance
         start_time = time.time()
         engine = create_tool_aware_engine()
-        suggestions = await engine.generate_suggestions(
+        await engine.generate_suggestions(
             context=context, code_context="sample code", user_intent="performance test"
         )
         suggestion_time = time.time() - start_time

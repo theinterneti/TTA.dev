@@ -4,16 +4,15 @@ Production TTA.dev API Server with Real AI Integration
 Includes: Gemini LLM, TTA.dev Primitives (Cache, Retry, Fallback)
 """
 
+import asyncio
 import os
 import sys
 import time
-import asyncio
 import uuid
-from typing import Any
-from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -27,6 +26,7 @@ except ImportError:
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
+
     # Load from TTA.dev root directory
     env_path = Path(__file__).parent.parent.parent / ".env"
     load_dotenv(dotenv_path=env_path)
@@ -42,14 +42,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../packages/tta-r
 # Import TTA.dev primitives
 try:
     from tta_dev_primitives import WorkflowContext, WorkflowPrimitive
-    from tta_dev_primitives.recovery import RetryPrimitive, RetryStrategy, FallbackPrimitive
     from tta_dev_primitives.performance import CachePrimitive
+    from tta_dev_primitives.recovery import RetryPrimitive, RetryStrategy
+
     TTA_PRIMITIVES_AVAILABLE = True
     print("✅ TTA.dev primitives loaded")
 
     # Import Gemini SDK
     try:
         import google.generativeai as genai
+
         GEMINI_AVAILABLE = True
         print("✅ Gemini API key found")
     except ImportError:
@@ -84,14 +86,11 @@ try:
                 response = await asyncio.to_thread(
                     self.model.generate_content,
                     prompt,
-                    generation_config={
-                        "temperature": temperature,
-                        "max_output_tokens": max_tokens
-                    }
+                    generation_config={"temperature": temperature, "max_output_tokens": max_tokens},
                 )
 
                 # Extract text
-                text = response.text if hasattr(response, 'text') else str(response)
+                text = response.text if hasattr(response, "text") else str(response)
 
                 # Estimate tokens (rough approximation)
                 prompt_tokens = len(prompt.split()) * 1.3
@@ -101,16 +100,15 @@ try:
                 # Estimate cost (Gemini Flash pricing)
                 cost_per_1m_input = 0.15  # $0.15 per 1M input tokens
                 cost_per_1m_output = 0.60  # $0.60 per 1M output tokens
-                estimated_cost = (
-                    (prompt_tokens / 1_000_000 * cost_per_1m_input) +
-                    (completion_tokens / 1_000_000 * cost_per_1m_output)
+                estimated_cost = (prompt_tokens / 1_000_000 * cost_per_1m_input) + (
+                    completion_tokens / 1_000_000 * cost_per_1m_output
                 )
 
                 return {
                     "response": text,
                     "model_used": self.model_name,
                     "tokens_used": total_tokens,
-                    "estimated_cost_usd": round(estimated_cost, 6)
+                    "estimated_cost_usd": round(estimated_cost, 6),
                 }
 
             except Exception as e:
@@ -126,7 +124,7 @@ try:
                 "response": f"[MOCK] Analysis of: {prompt[:100]}... This is a simulated response for testing purposes.",
                 "model_used": "mock-llm",
                 "tokens_used": 50,
-                "estimated_cost_usd": 0.0
+                "estimated_cost_usd": 0.0,
             }
 
 except ImportError as e:
@@ -141,11 +139,17 @@ except ImportError as e:
 
     class WorkflowPrimitive:
         """Mock WorkflowPrimitive for when tta-dev-primitives not available."""
+
         def __init__(self):
             pass
 
         async def execute(self, input_data: dict, context: Any) -> dict:
-            return {"response": "TTA primitives not available", "model_used": "none", "tokens_used": 0, "estimated_cost_usd": 0.0}
+            return {
+                "response": "TTA primitives not available",
+                "model_used": "none",
+                "tokens_used": 0,
+                "estimated_cost_usd": 0.0,
+            }
 
     class GeminiLLMPrimitive(WorkflowPrimitive):
         def __init__(self, model_name: str = "gemini-2.5-flash"):
@@ -154,7 +158,13 @@ except ImportError as e:
 
     class MockLLMPrimitive(WorkflowPrimitive):
         async def execute(self, input_data: dict, context: Any) -> dict:
-            return {"response": "Mock response", "model_used": "mock", "tokens_used": 50, "estimated_cost_usd": 0.0}
+            return {
+                "response": "Mock response",
+                "model_used": "mock",
+                "tokens_used": 50,
+                "estimated_cost_usd": 0.0,
+            }
+
 
 # Import Gemini directly (not using tta-rebuild)
 GEMINI_AVAILABLE = False
@@ -176,7 +186,7 @@ except ImportError:
 app = FastAPI(
     title="TTA.dev API - Production Ready",
     description="Real AI analysis with TTA.dev workflow primitives",
-    version="2.0.0"
+    version="2.0.0",
 )
 
 # CORS middleware
@@ -192,6 +202,7 @@ app.add_middleware(
 # Request/Response Models
 class AnalyzeRequest(BaseModel):
     """Request to analyze repository or text data"""
+
     prompt: str = Field(..., description="Analysis prompt or question")
     context: dict[str, Any] = Field(default_factory=dict, description="Additional context data")
     model: str = Field(default="gemini-1.5-flash", description="LLM model to use")
@@ -202,6 +213,7 @@ class AnalyzeRequest(BaseModel):
 
 class AnalyzeResponse(BaseModel):
     """Response from analysis"""
+
     success: bool
     response: str | None = None
     error: str | None = None
@@ -215,6 +227,7 @@ class AnalyzeResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     """API health check response"""
+
     status: str
     gemini_available: bool
     primitives_loaded: bool
@@ -280,18 +293,13 @@ if TTA_PRIMITIVES_AVAILABLE and GEMINI_AVAILABLE:
     cached_llm = CachePrimitive(
         primitive=llm_primitive,
         cache_key_fn=lambda data, ctx: f"{data.get('prompt', '')}:{data.get('temperature', 0.7)}",
-        ttl_seconds=3600.0  # 1 hour cache
+        ttl_seconds=3600.0,  # 1 hour cache
     )
     print("  ✅ CachePrimitive (1 hour TTL)")
 
     # Layer 2: Retry (resilience)
     resilient_llm = RetryPrimitive(
-        primitive=cached_llm,
-        strategy=RetryStrategy(
-            max_retries=3,
-            backoff_base=2.0,
-            jitter=True
-        )
+        primitive=cached_llm, strategy=RetryStrategy(max_retries=3, backoff_base=2.0, jitter=True)
     )
     print("  ✅ RetryPrimitive (3 retries, exponential backoff)")
 
@@ -314,7 +322,7 @@ async def root():
         gemini_available=GEMINI_AVAILABLE,
         primitives_loaded=TTA_PRIMITIVES_AVAILABLE,
         version="2.0.0",
-        cache_enabled=CACHE_ENABLED
+        cache_enabled=CACHE_ENABLED,
     )
 
 
@@ -346,9 +354,9 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
             {
                 "prompt": request.prompt,
                 "temperature": request.temperature,
-                "context": request.context
+                "context": request.context,
             },
-            context
+            context,
         )
 
         execution_time_ms = (time.time() - start_time) * 1000
@@ -361,7 +369,7 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
             model_used=result.get("model_used", request.model),
             correlation_id=correlation_id,
             tokens_used=result.get("tokens_used", 0),
-            estimated_cost_usd=result.get("estimated_cost_usd", 0.0)
+            estimated_cost_usd=result.get("estimated_cost_usd", 0.0),
         )
 
     except Exception as e:
@@ -372,7 +380,7 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
             error=str(e),
             execution_time_ms=execution_time_ms,
             model_used=request.model,
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
 
@@ -391,14 +399,14 @@ async def analyze_github_repo(request: AnalyzeRequest) -> AnalyzeResponse:
 {request.prompt}
 
 Repository Data:
-- Name: {repo_data.get('full_name', 'N/A')}
-- Stars: {repo_data.get('stargazers_count', 0)}
-- Forks: {repo_data.get('forks_count', 0)}
-- Open Issues: {repo_data.get('open_issues_count', 0)}
-- Language: {repo_data.get('language', 'N/A')}
-- Description: {repo_data.get('description', 'N/A')}
-- Created: {repo_data.get('created_at', 'N/A')}
-- Updated: {repo_data.get('updated_at', 'N/A')}
+- Name: {repo_data.get("full_name", "N/A")}
+- Stars: {repo_data.get("stargazers_count", 0)}
+- Forks: {repo_data.get("forks_count", 0)}
+- Open Issues: {repo_data.get("open_issues_count", 0)}
+- Language: {repo_data.get("language", "N/A")}
+- Description: {repo_data.get("description", "N/A")}
+- Created: {repo_data.get("created_at", "N/A")}
+- Updated: {repo_data.get("updated_at", "N/A")}
 
 Provide detailed analysis in a structured format.
 """.strip()
@@ -410,7 +418,7 @@ Provide detailed analysis in a structured format.
         model=request.model,
         temperature=request.temperature,
         use_cache=request.use_cache,
-        max_retries=request.max_retries
+        max_retries=request.max_retries,
     )
 
     return await analyze(enhanced_request)
@@ -422,40 +430,36 @@ async def list_primitives():
     primitives = []
 
     if TTA_PRIMITIVES_AVAILABLE:
-        primitives.append({
-            "name": "CachePrimitive",
-            "enabled": CACHE_ENABLED,
-            "description": "LRU cache with 1 hour TTL",
-            "config": {"ttl_seconds": 3600, "max_size": 1000}
-        })
-        primitives.append({
-            "name": "RetryPrimitive",
-            "enabled": CACHE_ENABLED,
-            "description": "Exponential backoff retry",
-            "config": {"max_retries": 3, "strategy": "exponential"}
-        })
+        primitives.append(
+            {
+                "name": "CachePrimitive",
+                "enabled": CACHE_ENABLED,
+                "description": "LRU cache with 1 hour TTL",
+                "config": {"ttl_seconds": 3600, "max_size": 1000},
+            }
+        )
+        primitives.append(
+            {
+                "name": "RetryPrimitive",
+                "enabled": CACHE_ENABLED,
+                "description": "Exponential backoff retry",
+                "config": {"max_retries": 3, "strategy": "exponential"},
+            }
+        )
 
-    return {
-        "primitives": primitives,
-        "total_enabled": len([p for p in primitives if p["enabled"]])
-    }
+    return {"primitives": primitives, "total_enabled": len([p for p in primitives if p["enabled"]])}
 
 
 if __name__ == "__main__":
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🚀 TTA.dev API Server - Production Ready")
-    print("="*60)
+    print("=" * 60)
     print(f"Gemini: {'✅ ENABLED' if GEMINI_AVAILABLE else '❌ DISABLED (using mock)'}")
     print(f"Primitives: {'✅ ACTIVE' if TTA_PRIMITIVES_AVAILABLE else '❌ INACTIVE'}")
     print(f"Cache: {'✅ ENABLED' if CACHE_ENABLED else '❌ DISABLED'}")
-    print("="*60)
+    print("=" * 60)
     print("\n📍 Starting server on http://localhost:8000")
     print("📖 API docs: http://localhost:8000/docs")
     print("\n")
 
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

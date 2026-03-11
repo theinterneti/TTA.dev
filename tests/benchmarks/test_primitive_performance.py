@@ -8,6 +8,7 @@ Save baseline: uv run pytest tests/benchmarks/ --benchmark-save=baseline
 import asyncio
 
 import pytest
+
 from ttadev.primitives import (
     CachePrimitive,
     ConditionalPrimitive,
@@ -196,9 +197,7 @@ class TestCachePrimitive:
         def cache_key_fn(data: dict, ctx: WorkflowContext) -> str:
             return f"benchmark-{ctx.workflow_id}"
 
-        workflow = CachePrimitive(
-            cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300
-        )
+        workflow = CachePrimitive(cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300)
 
         counter = {"value": 0}
 
@@ -216,9 +215,7 @@ class TestCachePrimitive:
         def cache_key_fn(data: dict, ctx: WorkflowContext) -> str:
             return "benchmark-cached"
 
-        workflow = CachePrimitive(
-            cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300
-        )
+        workflow = CachePrimitive(cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300)
 
         # Warm up cache
         ctx = context()
@@ -339,9 +336,7 @@ class TestFallbackPrimitive:
         async def failing_op(data: dict, ctx: WorkflowContext) -> dict:
             raise ValueError("Primary failed")
 
-        workflow = FallbackPrimitive(
-            primary=LambdaPrimitive(failing_op), fallback=simple_op
-        )
+        workflow = FallbackPrimitive(primary=LambdaPrimitive(failing_op), fallback=simple_op)
 
         def run():
             ctx = context()
@@ -373,9 +368,7 @@ class TestComplexWorkflows:
         def cache_key_fn(data: dict, ctx: WorkflowContext) -> str:
             return f"cache-{data.get('value')}"
 
-        cached = CachePrimitive(
-            cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300
-        )
+        cached = CachePrimitive(cpu_bound_op, cache_key_fn=cache_key_fn, ttl_seconds=300)
         strategy = RetryStrategy(max_retries=3)
         workflow = RetryPrimitive(cached, strategy=strategy)
 
@@ -397,9 +390,7 @@ class TestComplexWorkflows:
         async def zero_result(data: dict, ctx: WorkflowContext) -> dict:
             return {"result": 0}
 
-        fallback = FallbackPrimitive(
-            primary=LambdaPrimitive(failing_op), fallback=simple_op
-        )
+        fallback = FallbackPrimitive(primary=LambdaPrimitive(failing_op), fallback=simple_op)
         workflow = ConditionalPrimitive(
             condition=condition,
             then_primitive=fallback,

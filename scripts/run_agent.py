@@ -13,28 +13,30 @@ Environment Variables:
                        Options: "gemini", "cline", "gh-copilot"
 """
 
-import os
-import sys
 import argparse
-import subprocess
 import logging
+import os
+import subprocess
+import sys
 from typing import List, Optional
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("run_agent")
+
 
 def get_runtime() -> str:
     """Get the configured agentic runtime."""
     return os.environ.get("TTA_AGENT_RUNTIME", "gemini").lower()
 
+
 def get_gemini_model() -> str:
     """Get the configured Gemini model."""
     # Default to Gemini 2.5 Flash for speed and performance
     return os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+
 
 def build_gemini_command(prompt_path: str, extra_args: List[str]) -> tuple[List[str], str]:
     """Build command for Gemini CLI."""
@@ -61,7 +63,7 @@ def build_gemini_command(prompt_path: str, extra_args: List[str]) -> tuple[List[
     # Gemini supports reading from stdin.
 
     try:
-        with open(prompt_path, 'r') as f:
+        with open(prompt_path, "r") as f:
             prompt_content = f.read()
     except FileNotFoundError:
         logger.error(f"Prompt file not found: {prompt_path}")
@@ -75,10 +77,11 @@ def build_gemini_command(prompt_path: str, extra_args: List[str]) -> tuple[List[
     # Return command and content to pipe
     return cmd, prompt_content
 
+
 def build_cline_command(prompt_path: str, extra_args: List[str]) -> tuple[List[str], str]:
     """Build command for Cline CLI."""
     try:
-        with open(prompt_path, 'r') as f:
+        with open(prompt_path, "r") as f:
             prompt_content = f.read()
     except FileNotFoundError:
         logger.error(f"Prompt file not found: {prompt_path}")
@@ -88,14 +91,17 @@ def build_cline_command(prompt_path: str, extra_args: List[str]) -> tuple[List[s
     cmd = ["cline", "--yolo"] + extra_args
     return cmd, prompt_content
 
-def build_gh_copilot_command(prompt_path: str, extra_args: List[str]) -> tuple[List[str], Optional[str]]:
+
+def build_gh_copilot_command(
+    prompt_path: str, extra_args: List[str]
+) -> tuple[List[str], Optional[str]]:
     """Build command for GitHub Copilot CLI."""
     # gh copilot suggest is mainly for shell commands.
     # It doesn't support full agentic file editing workflows usually.
     # We'll implement a basic 'suggest' wrapper.
 
     try:
-        with open(prompt_path, 'r') as f:
+        with open(prompt_path, "r") as f:
             prompt_content = f.read()
     except FileNotFoundError:
         logger.error(f"Prompt file not found: {prompt_path}")
@@ -105,14 +111,19 @@ def build_gh_copilot_command(prompt_path: str, extra_args: List[str]) -> tuple[L
     # It expects arguments. We might hit ARG_MAX here, but for 'suggest' it's usually short.
     # If prompt is long, this is the wrong tool.
 
-    logger.warning("GitHub Copilot CLI is limited to shell suggestions and may not support full agentic workflows.")
+    logger.warning(
+        "GitHub Copilot CLI is limited to shell suggestions and may not support full agentic workflows."
+    )
     cmd = ["gh", "copilot", "suggest", "-t", "shell", prompt_content]
     return cmd, None
+
 
 def main():
     parser = argparse.ArgumentParser(description="Run an agentic workflow.")
     parser.add_argument("--prompt", "-p", required=True, help="Path to the prompt markdown file.")
-    parser.add_argument("extra_args", nargs=argparse.REMAINDER, help="Extra arguments for the runtime.")
+    parser.add_argument(
+        "extra_args", nargs=argparse.REMAINDER, help="Extra arguments for the runtime."
+    )
 
     args = parser.parse_args()
 
@@ -152,6 +163,7 @@ def main():
         logger.error(f"Runtime executable '{cmd[0]}' not found in PATH.")
         logger.info("Please install the runtime or check your TTA_AGENT_RUNTIME setting.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -225,3 +225,12 @@ templates/
 
 # TTA observability logs
 .tta/
+
+# Runtime observability data — ephemeral, never commit
+.observability/traces/
+.observability/agents/
+.observability/*.jsonl
+
+# Local MCP config (machine-specific paths)
+.mcp.json
+mcp.json

@@ -5,13 +5,12 @@ TTA Knowledge MCP Server
 Exposes tools to search the TTA.dev documentation.
 """
 
-import os
-import sys
 import json
-import glob
 import subprocess
+import sys
 
 # Basic MCP Protocol Implementation (stdio)
+
 
 def list_tools():
     return {
@@ -21,17 +20,13 @@ def list_tools():
                 "description": "Search the TTA.dev documentation for a query string.",
                 "inputSchema": {
                     "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "The search query."
-                        }
-                    },
-                    "required": ["query"]
-                }
+                    "properties": {"query": {"type": "string", "description": "The search query."}},
+                    "required": ["query"],
+                },
             }
         ]
     }
+
 
 def search_docs(query):
     # Simple grep search
@@ -45,6 +40,7 @@ def search_docs(query):
         return output if output else "No results found."
     except Exception as e:
         return f"Error searching docs: {e}"
+
 
 def handle_request(request):
     method = request.get("method")
@@ -63,12 +59,11 @@ def handle_request(request):
             return {
                 "jsonrpc": "2.0",
                 "id": id,
-                "result": {
-                    "content": [{"type": "text", "text": result}]
-                }
+                "result": {"content": [{"type": "text", "text": result}]},
             }
 
     return {"jsonrpc": "2.0", "id": id, "error": {"code": -32601, "message": "Method not found"}}
+
 
 def main():
     # Read from stdin, write to stdout
@@ -85,6 +80,7 @@ def main():
             # Log error to stderr
             sys.stderr.write(f"Error: {e}\n")
             sys.stderr.flush()
+
 
 if __name__ == "__main__":
     main()

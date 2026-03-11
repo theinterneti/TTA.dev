@@ -202,10 +202,7 @@ class TestPRManager:
         now = datetime.now(UTC)
         sample_pr_data["updatedAt"] = (now - timedelta(days=10)).isoformat()
         recommendations = manager.get_recommendations(sample_pr_data)
-        assert any(
-            "activity" in rec.lower() or "stale" in rec.lower()
-            for rec in recommendations
-        )
+        assert any("activity" in rec.lower() or "stale" in rec.lower() for rec in recommendations)
 
     def test_get_recommendations_large_pr(self, manager, sample_pr_data):
         """Test recommendations for large PR."""

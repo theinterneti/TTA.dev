@@ -3,48 +3,47 @@
 
 import re
 from pathlib import Path
-from typing import Any
 
 import yaml
 
 
 def add_strict_permissions(workflow_path: Path) -> bool:
     """Add strict permissions block to a workflow file.
-    
+
     Args:
         workflow_path: Path to the workflow YAML file
-        
+
     Returns:
         True if file was modified, False otherwise
     """
     content = workflow_path.read_text()
-    
+
     # Skip if already has top-level permissions
-    if re.search(r'^permissions:\s*$', content, re.MULTILINE):
+    if re.search(r"^permissions:\s*$", content, re.MULTILINE):
         print(f"  ✓ {workflow_path.name} already has permissions")
         return False
-    
+
     # Parse YAML to understand structure
     try:
         data = yaml.safe_load(content)
     except yaml.YAMLError as e:
         print(f"  ⚠️  {workflow_path.name} - YAML parse error: {e}")
         return False
-    
+
     # Determine if any jobs need write permissions
     needs_write = False
     write_scopes: set[str] = set()
-    
-    if isinstance(data, dict) and 'jobs' in data:
-        for job_name, job_config in data['jobs'].items():
+
+    if isinstance(data, dict) and "jobs" in data:
+        for job_name, job_config in data["jobs"].items():
             if isinstance(job_config, dict):
-                job_perms = job_config.get('permissions', {})
+                job_perms = job_config.get("permissions", {})
                 if isinstance(job_perms, dict):
                     for scope, level in job_perms.items():
-                        if level == 'write':
+                        if level == "write":
                             needs_write = True
                             write_scopes.add(scope)
-    
+
     # Add appropriate top-level permissions
     if needs_write:
         # Build explicit write permissions block for transparency
@@ -52,51 +51,53 @@ def add_strict_permissions(workflow_path: Path) -> bool:
         for scope in sorted(write_scopes):
             perm_lines.append(f"  {scope}: write")
         perm_block = "\n".join(perm_lines) + "\n\n"
-        print(f"  ✏️  {workflow_path.name} - adding explicit permissions (write: {', '.join(sorted(write_scopes))})")
+        print(
+            f"  ✏️  {workflow_path.name} - adding explicit permissions (write: {', '.join(sorted(write_scopes))})"
+        )
     else:
         # Add strict read-only permissions
         perm_block = "permissions:\n  contents: read\n\n"
         print(f"  ✏️  {workflow_path.name} - adding strict read-only")
-    
+
     # Insert after name/on but before jobs
-    lines = content.split('\n')
+    lines = content.split("\n")
     insert_idx = 0
-    
+
     # Find where to insert (after 'on:' block)
     in_on_block = False
     for i, line in enumerate(lines):
-        if line.startswith('on:'):
+        if line.startswith("on:"):
             in_on_block = True
-        elif in_on_block and line and not line.startswith(' ') and not line.startswith('\t'):
+        elif in_on_block and line and not line.startswith(" ") and not line.startswith("\t"):
             insert_idx = i
             break
-    
+
     if insert_idx > 0:
         lines.insert(insert_idx, perm_block.rstrip())
-        new_content = '\n'.join(lines)
+        new_content = "\n".join(lines)
         workflow_path.write_text(new_content)
         return True
-    
+
     print(f"  ⚠️  {workflow_path.name} - couldn't find insertion point")
     return False
 
 
 def main() -> None:
     """Process all workflow files."""
-    workflows_dir = Path('.github/workflows')
-    
+    workflows_dir = Path(".github/workflows")
+
     print("🔒 Adding Strict Permissions to GitHub Actions Workflows")
     print("=" * 60)
-    
-    workflow_files = list(workflows_dir.glob('*.yml')) + list(workflows_dir.glob('*.yaml'))
-    workflow_files = [f for f in workflow_files if not f.is_relative_to(workflows_dir / '_archive')]
-    
+
+    workflow_files = list(workflows_dir.glob("*.yml")) + list(workflows_dir.glob("*.yaml"))
+    workflow_files = [f for f in workflow_files if not f.is_relative_to(workflows_dir / "_archive")]
+
     modified_count = 0
-    
+
     for workflow_path in sorted(workflow_files):
         if add_strict_permissions(workflow_path):
             modified_count += 1
-    
+
     print()
     print(f"✅ Modified {modified_count}/{len(workflow_files)} workflows")
     print()
@@ -107,5 +108,5 @@ def main() -> None:
     print("  4. Commit and push")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

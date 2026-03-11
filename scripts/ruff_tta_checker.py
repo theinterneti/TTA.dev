@@ -177,15 +177,10 @@ class TTAChecker(ast.NodeVisitor):
         for child in ast.walk(node):
             if isinstance(child, ast.Call):
                 if isinstance(child.func, ast.Attribute):
-                    if any(
-                        pattern in child.func.attr.lower()
-                        for pattern in expensive_patterns
-                    ):
+                    if any(pattern in child.func.attr.lower() for pattern in expensive_patterns):
                         return True
                 if isinstance(child.func, ast.Name):
-                    if any(
-                        pattern in child.func.id.lower() for pattern in expensive_patterns
-                    ):
+                    if any(pattern in child.func.id.lower() for pattern in expensive_patterns):
                         return True
         return False
 

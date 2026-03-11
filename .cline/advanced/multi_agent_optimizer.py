@@ -316,8 +316,8 @@ class AgentOrchestrator:
     def _adaptive_selection(self, task: Task, agents: list[Agent]) -> Agent:
         """Adaptive agent selection using all factors."""
         # Use a combination of all strategies
-        skill_score = self._skill_based_selection(task, agents)
-        context_score = self._context_aware_selection(task, agents)
+        self._skill_based_selection(task, agents)
+        self._context_aware_selection(task, agents)
         load_score = self._load_balanced_selection(task, agents)
 
         # Weighted combination
@@ -649,7 +649,7 @@ class AdvancedWorkflowEngine:
                     if not agent:
                         raise RuntimeError(f"No available agent for task {task.name}")
 
-                    result = await self._execute_task(agent, task)
+                    await self._execute_task(agent, task)
                     retry_count = 0  # Reset on success
                     break
 

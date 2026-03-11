@@ -333,7 +333,7 @@ def plot_radar_chart(analysis: dict[str, Any], output_dir: str):
     ]
 
     # Number of categories
-    N = len(categories)
+    N = len(categories)  # noqa: N806
 
     # Create angle for each category
     angles = [n / float(N) * 2 * np.pi for n in range(N)]

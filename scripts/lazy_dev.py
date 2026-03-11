@@ -33,6 +33,7 @@ REPO_ROOT = Path(__file__).parent.parent
 
 class WorkType(Enum):
     """Type of work being done."""
+
     FEATURE = "feature"
     FIX = "fix"
     DOCS = "docs"
@@ -44,6 +45,7 @@ class WorkType(Enum):
 @dataclass
 class RepoState:
     """Current repository state."""
+
     current_branch: str
     main_branch: str
     has_changes: bool
@@ -73,10 +75,10 @@ class LazyDevManager:
                 capture_output=True,
                 text=True,
                 check=check,
-                cwd=self.repo_root
+                cwd=self.repo_root,
             )
             return result.stdout.strip()
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             if check:
                 raise
             return ""
@@ -85,14 +87,10 @@ class LazyDevManager:
         """Run gh CLI command and return output."""
         try:
             result = subprocess.run(
-                ["gh"] + list(args),
-                capture_output=True,
-                text=True,
-                check=check,
-                cwd=self.repo_root
+                ["gh"] + list(args), capture_output=True, text=True, check=check, cwd=self.repo_root
             )
             return result.stdout.strip()
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             if check:
                 raise
             return ""
@@ -112,9 +110,7 @@ class LazyDevManager:
 
         # Check ahead/behind
         ahead_behind = self.run_git(
-            "rev-list", "--left-right", "--count",
-            f"HEAD...origin/{current_branch}",
-            check=False
+            "rev-list", "--left-right", "--count", f"HEAD...origin/{current_branch}", check=False
         )
         ahead, behind = 0, 0
         if ahead_behind:
@@ -124,19 +120,27 @@ class LazyDevManager:
 
         # Get open PRs
         pr_json = self.run_gh(
-            "pr", "list",
-            "--repo", self.repo,
-            "--json", "number,title,state,author",
-            "--limit", "20"
+            "pr",
+            "list",
+            "--repo",
+            self.repo,
+            "--json",
+            "number,title,state,author",
+            "--limit",
+            "20",
         )
         open_prs = json.loads(pr_json) if pr_json else []
 
         # Get open issues
         issue_json = self.run_gh(
-            "issue", "list",
-            "--repo", self.repo,
-            "--json", "number,title,state,author",
-            "--limit", "20"
+            "issue",
+            "list",
+            "--repo",
+            self.repo,
+            "--json",
+            "number,title,state,author",
+            "--limit",
+            "20",
         )
         open_issues = json.loads(issue_json) if issue_json else []
 
@@ -148,7 +152,7 @@ class LazyDevManager:
             is_ahead=ahead > 0,
             is_behind=behind > 0,
             open_prs=open_prs,
-            open_issues=open_issues
+            open_issues=open_issues,
         )
 
     # ========================================================================
@@ -200,10 +204,7 @@ class LazyDevManager:
         files = self.run_git("diff", "--name-only", f"origin/main...{branch}")
 
         # Get commit messages
-        commits = self.run_git(
-            "log", f"origin/main..{branch}",
-            "--pretty=format:- %s"
-        )
+        commits = self.run_git("log", f"origin/main..{branch}", "--pretty=format:- %s")
 
         # Use gh copilot to generate description
         prompt = f"""Generate a concise PR description for:
@@ -230,12 +231,7 @@ Format as:
 
         try:
             # Try using gh copilot suggest
-            description = self.run_gh(
-                "copilot", "suggest",
-                "-t", "git",
-                prompt,
-                check=False
-            )
+            description = self.run_gh("copilot", "suggest", "-t", "git", prompt, check=False)
             if description:
                 return description
         except Exception:
@@ -248,7 +244,7 @@ Format as:
 
 ## Changes
 
-{commits if commits else '- Implementation changes'}
+{commits if commits else "- Implementation changes"}
 
 ## Files Modified
 
@@ -290,12 +286,17 @@ Format as:
         # Create PR
         print("   Creating PR...")
         pr_url = self.run_gh(
-            "pr", "create",
-            "--repo", self.repo,
-            "--title", title,
-            "--body", description,
+            "pr",
+            "create",
+            "--repo",
+            self.repo,
+            "--title",
+            title,
+            "--body",
+            description,
             *(["--draft"] if draft else []),
-            "--base", state.main_branch
+            "--base",
+            state.main_branch,
         )
 
         # Extract PR number
@@ -333,10 +334,7 @@ Work together to ensure this PR meets all quality standards.
 """
 
         print(f"   Adding collaboration comment with: {mentions}")
-        self.run_gh(
-            "pr", "comment", str(pr_number),
-            "--body", comment
-        )
+        self.run_gh("pr", "comment", str(pr_number), "--body", comment)
 
         print(f"✅ Collaboration started! Agents will respond in PR #{pr_number}")
 
@@ -352,9 +350,12 @@ Work together to ensure this PR meets all quality standards.
             # Use gh issue develop for copilot
             if agent == "copilot":
                 self.run_gh(
-                    "issue", "develop", str(issue_number),
-                    "--name", f"fix/{issue_number}-{task[:20]}",
-                    check=False
+                    "issue",
+                    "develop",
+                    str(issue_number),
+                    "--name",
+                    f"fix/{issue_number}-{task[:20]}",
+                    check=False,
                 )
 
         # Add comment with task details
@@ -366,10 +367,7 @@ Task: {task}
 Please work together on this issue. Create a branch, implement the solution, and open a PR when ready.
 """
 
-        self.run_gh(
-            "issue", "comment", str(issue_number),
-            "--body", comment
-        )
+        self.run_gh("issue", "comment", str(issue_number), "--body", comment)
 
         print(f"✅ Agents assigned to issue #{issue_number}")
 
@@ -400,9 +398,9 @@ Please work together on this issue. Create a branch, implement the solution, and
         print()
 
         if state.is_ahead:
-            print(f"   ⬆️  Ahead of remote (unpushed commits)")
+            print("   ⬆️  Ahead of remote (unpushed commits)")
         if state.is_behind:
-            print(f"   ⬇️  Behind remote (need to pull)")
+            print("   ⬇️  Behind remote (need to pull)")
         print()
 
         print(f"📋 Open PRs: {len(state.open_prs)}")

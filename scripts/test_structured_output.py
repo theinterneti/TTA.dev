@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Import the LLM client
-from src.models.llm_client import get_llm_client
+from src.models.llm_client import get_llm_client  # noqa: E402
 
 # Target models to evaluate
 TARGET_MODELS = [
@@ -284,7 +284,7 @@ def validate_against_schema(data: Any, schema: dict[str, Any]) -> float:
         conformance: Schema conformance score (0.0 to 1.0)
     """
     try:
-        from jsonschema import Draft7Validator, ValidationError, validate
+        from jsonschema import Draft7Validator
 
         # Create validator
         validator = Draft7Validator(schema)
@@ -604,7 +604,7 @@ def print_analysis(analysis: dict[str, Any]):
         print(f"\n{complexity.upper()}:")
         for model, model_perf in sorted(
             perf["model_performance"].items(),
-            key=lambda x: (x[1]["valid_rate"] * x[1]["conformance"]),
+            key=lambda x: x[1]["valid_rate"] * x[1]["conformance"],
             reverse=True,
         ):
             print(

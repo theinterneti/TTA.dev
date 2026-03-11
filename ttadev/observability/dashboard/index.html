@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTA.dev Observability Dashboard</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <header id="app-header">
+    <!-- Rendered by app.js -->
+  </header>
+
+  <div id="app-layout">
+    <nav id="session-tree">
+      <!-- Rendered by session-tree.js -->
+    </nav>
+
+    <main id="session-detail">
+      <!-- Rendered by session-detail.js -->
+    </main>
+
+    <aside id="span-detail" hidden>
+      <!-- Rendered by span-detail.js -->
+    </aside>
+  </div>
+
+  <section id="cgc-graph-section">
+    <!-- Rendered by cgc-graph.js -->
+  </section>
+
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

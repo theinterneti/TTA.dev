@@ -1,192 +1,237 @@
 """Automated tests for observability dashboard using Playwright."""
-import asyncio
+
+import multiprocessing
+import time
+from pathlib import Path
+
 import pytest
 from playwright.async_api import async_playwright, expect
-import json
-from pathlib import Path
+
+
+def run_server():
+    """Run the observability server in a separate process."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from ttadev.ui import observability_server
+
+    observability_server.main()
+
+
+@pytest.fixture(scope="module")
+def server():
+    """Start the observability server for all tests in this module."""
+    # Start server in separate process
+    proc = multiprocessing.Process(target=run_server, daemon=True)
+    proc.start()
+
+    # Wait for server to be ready
+    import socket
+
+    for _ in range(50):  # Wait up to 5 seconds
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            result = sock.connect_ex(("localhost", 8000))
+            sock.close()
+            if result == 0:
+                time.sleep(0.5)  # Extra time for full initialization
+                break
+        except Exception:
+            pass
+        time.sleep(0.1)
+    else:
+        proc.terminate()
+        pytest.fail("Server failed to start within 5 seconds")
+
+    yield
+
+    # Cleanup
+    proc.terminate()
+    proc.join(timeout=5)
 
 
 @pytest.mark.asyncio
-async def test_dashboard_loads():
+async def test_dashboard_loads(server):
     """Test that dashboard loads and displays basic elements."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        
+
         await page.goto("http://localhost:8000")
-        
+
         # Check title
         await expect(page).to_have_title("TTA.dev Observability")
-        
+
         # Check main sections exist
         await expect(page.locator("#stats")).to_be_visible()
         await expect(page.locator("#primitivesCatalog")).to_be_visible()
         await expect(page.locator("#workflowRegistry")).to_be_visible()
         await expect(page.locator("#recentTraces")).to_be_visible()
-        
+
         await browser.close()
 
 
 @pytest.mark.asyncio
-async def test_websocket_connection():
+async def test_websocket_connection(server):
     """Test WebSocket connection status."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        
+
         await page.goto("http://localhost:8000")
-        
+
         # Wait for WebSocket connection
         await page.wait_for_timeout(2000)
-        
+
         # Check connection status
         status = await page.locator("#connectionStatus").text_content()
         assert "Connected" in status or "Connecting" in status
-        
+
         await browser.close()
 
 
 @pytest.mark.asyncio
-async def test_primitives_catalog_pagination():
+async def test_primitives_catalog_pagination(server):
     """Test primitives catalog shows all items with pagination."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        
+
         await page.goto("http://localhost:8000")
         await page.wait_for_timeout(1000)
-        
+
         # Check primitives are loaded
         primitives = await page.locator("#primitivesCatalog .primitive-item").count()
         assert primitives > 0, "No primitives loaded"
-        
+
         # Check pagination controls exist if needed
         total_text = await page.locator("#primitivesCatalog").text_content()
         if "68" in total_text:  # We know there are 68 primitives
             # Check if pagination exists
             pagination = await page.locator(".pagination").count()
             assert pagination > 0, "Pagination should exist for 68 items"
-        
+
         await browser.close()
 
 
 @pytest.mark.asyncio
-async def test_search_functionality():
+async def test_search_functionality(server):
     """Test search box filters primitives."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        
+
         await page.goto("http://localhost:8000")
         await page.wait_for_timeout(1000)
-        
-        # Get initial count
-        initial_count = await page.locator("#primitivesCatalog .primitive-item").count()
-        
+
+        # Get initial visible count
+        initial_count = await page.locator("#primitivesCatalog .primitive-item:visible").count()
+
         # Search for specific primitive
         search_box = page.locator("#searchPrimitives")
         await search_box.fill("Retry")
         await page.wait_for_timeout(500)
-        
-        # Check filtered results
-        filtered_count = await page.locator("#primitivesCatalog .primitive-item").count()
+
+        # Check filtered results (only visible)
+        filtered_count = await page.locator("#primitivesCatalog .primitive-item:visible").count()
         assert filtered_count < initial_count, "Search should filter results"
         assert filtered_count > 0, "Should find RetryPrimitive"
-        
+
         await browser.close()
 
 
 @pytest.mark.asyncio
-async def test_code_graph_loads():
+async def test_code_graph_loads(server):
     """Test CGC code graph visualization loads."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        
+
         await page.goto("http://localhost:8000")
         await page.wait_for_timeout(2000)
-        
+
         # Check graph container exists
         await expect(page.locator("#codeGraph")).to_be_visible()
-        
+
         # Check graph controls exist
         await expect(page.locator("#fitGraph")).to_be_visible()
         await expect(page.locator("#resetGraph")).to_be_visible()
-        
+
         await browser.close()
 
 
 @pytest.mark.asyncio
-async def test_trace_details_modal():
+async def test_trace_details_modal(server):
     """Test that clicking a trace opens details modal."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        
+
         await page.goto("http://localhost:8000")
         await page.wait_for_timeout(2000)
-        
+
         # Check if any traces exist
         traces = await page.locator("#recentTraces .trace-item").count()
-        
+
         if traces > 0:
             # Click first trace
             await page.locator("#recentTraces .trace-item").first.click()
             await page.wait_for_timeout(500)
-            
+
             # Check modal appears
             modal = page.locator("#traceModal")
             await expect(modal).to_be_visible()
-            
+
             # Check close button works
             await page.locator(".close-modal").click()
             await expect(modal).to_be_hidden()
-        
+
         await browser.close()
 
 
 @pytest.mark.asyncio
-async def test_agent_activity_tracking():
+async def test_agent_activity_tracking(server):
     """Test agent activity panel shows provider/model/agent info."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        
+
         await page.goto("http://localhost:8000")
         await page.wait_for_timeout(1000)
-        
+
         # Check agent activity section exists
         await expect(page.locator("#agentActivity")).to_be_visible()
-        
+
         # If there's agent activity, verify structure
         agents = await page.locator("#agentActivity .agent-card").count()
         if agents > 0:
             first_agent = page.locator("#agentActivity .agent-card").first
-            
+
             # Check it has provider/model/agent info
             text = await first_agent.text_content()
             assert "Provider:" in text or "Model:" in text
-        
+
         await browser.close()
 
 
-@pytest.mark.asyncio  
-async def test_workflow_registry():
+@pytest.mark.asyncio
+async def test_workflow_registry(server):
     """Test workflow registry displays registered workflows."""
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         page = await browser.new_page()
-        
+
         await page.goto("http://localhost:8000")
         await page.wait_for_timeout(1000)
-        
+
         # Check workflow registry exists
         await expect(page.locator("#workflowRegistry")).to_be_visible()
-        
+
         # Check for registered workflows text
         registry_text = await page.locator("#workflowRegistry").text_content()
         assert "Registered:" in registry_text
-        
+
         await browser.close()
 
 

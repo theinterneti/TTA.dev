@@ -26,7 +26,7 @@ async def fetch_data(data: dict, ctx: WorkflowContext) -> dict:
 
 async def enrich_data(data: dict, ctx: WorkflowContext) -> dict:
     """Enrich the data with additional info."""
-    print(f"  ✨ Enriching data...")
+    print("  ✨ Enriching data...")
     await asyncio.sleep(0.05)  # Simulate processing
     data["timestamp"] = time.time()
     data["enriched"] = True
@@ -36,7 +36,7 @@ async def enrich_data(data: dict, ctx: WorkflowContext) -> dict:
 
 async def format_response(data: dict, ctx: WorkflowContext) -> dict:
     """Format the final response."""
-    print(f"  📝 Formatting response...")
+    print("  📝 Formatting response...")
     await asyncio.sleep(0.02)  # Simulate formatting
     message = f"{data['greeting']} (User: {data['user_id']}, Time: {data['timestamp']:.0f})"
     ctx.checkpoint("response_formatted")
@@ -49,43 +49,45 @@ async def main():
     print("=" * 60)
     print("📊 Dashboard: http://localhost:8000")
     print()
-    
+
     # Enable auto-instrumentation for all primitives
     print("🔍 Auto-instrumenting primitives...")
     auto_instrument_primitives()
     print()
-    
+
     # Build workflow with resilience primitives
     fetch = LambdaPrimitive(fetch_data, name="FetchData")
     enrich = LambdaPrimitive(enrich_data, name="EnrichData")
     format_step = LambdaPrimitive(format_response, name="FormatResponse")
-    
+
     # Add retry capability to fetch step
     resilient_fetch = RetryPrimitive(
         fetch,
         strategy=RetryStrategy(max_attempts=3, backoff_multiplier=2.0),
         name="ResilientFetch",
     )
-    
+
     # Compose workflow: resilient_fetch >> enrich >> format
-    workflow = SequentialPrimitive([
-        resilient_fetch,
-        enrich,
-        format_step,
-    ])
-    
+    workflow = SequentialPrimitive(
+        [
+            resilient_fetch,
+            enrich,
+            format_step,
+        ]
+    )
+
     # Execute workflow with observability context
     context = WorkflowContext(
         workflow_id="hello-world-demo",
         session_id="demo-session",
         tags={"environment": "demo", "version": "1.0"},
-        metadata={"demo": True}
+        metadata={"demo": True},
     )
-    
+
     print("⚙️  Executing instrumented workflow...")
     print()
     result = await workflow.execute({"name": "TTA.dev User"}, context)
-    
+
     print()
     print("✅ Workflow complete!")
     print(f"📝 Result: {result['message']}")

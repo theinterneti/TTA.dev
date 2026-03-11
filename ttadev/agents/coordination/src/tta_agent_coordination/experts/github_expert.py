@@ -14,8 +14,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from primitives import WorkflowContext, WorkflowPrimitive
-from tta_dev_primitives.performance import CachePrimitive
 from primitives.recovery import RetryPrimitive
+from tta_dev_primitives.performance import CachePrimitive
 
 from tta_agent_coordination.wrappers.github_wrapper import (
     GitHubAPIWrapper,

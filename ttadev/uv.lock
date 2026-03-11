@@ -1470,7 +1470,7 @@ wheels = [
 ]
 
 [[package]]
-name = "tta-dev"
+name = "ttadev"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -1524,7 +1524,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
-    { name = "tta-dev", extras = ["dev", "langfuse"], marker = "extra == 'all'" },
+    { name = "ttadev", extras = ["dev", "langfuse"], marker = "extra == 'all'" },
     { name = "uvicorn", specifier = ">=0.24.0" },
     { name = "websockets", specifier = ">=12.0" },
 ]

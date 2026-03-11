@@ -13,7 +13,7 @@ Shows:
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 WORKTREES = {
     "orchestrator": Path("/home/thein/repos/TTA.dev"),
@@ -58,7 +58,8 @@ def count_patterns_in_dir(directory: Path) -> Dict[str, int]:
 
     # Simple heuristic: files with "critical" or "security" are high priority
     high_priority = sum(
-        1 for p in patterns
+        1
+        for p in patterns
         if any(keyword in p.name.lower() for keyword in ["critical", "security", "urgent"])
     )
 

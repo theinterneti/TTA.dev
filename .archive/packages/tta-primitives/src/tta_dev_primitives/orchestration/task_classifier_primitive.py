@@ -6,7 +6,7 @@ the most appropriate model for execution.
 # See: [[TTA.dev/Primitives/TaskClassifierPrimitive]]
 """
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
-class TaskComplexity(str, Enum):
+class TaskComplexity(StrEnum):
     """Task complexity levels."""
 
     SIMPLE = "simple"  # Simple queries, factual questions

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TTA.dev Observability Dashboard</title>
+    <title>TTA.dev Observability</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -296,6 +296,106 @@
             background: #764ba2;
         }
         
+        .trace-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: #1a1f3a;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        
+        .modal-close:hover {
+            color: #ef4444;
+        }
+        
+        .trace-hierarchy-detail {
+            background: #252d4a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .chain-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #1a1f3a;
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+        }
+        
+        .trace-spans {
+            margin-top: 20px;
+        }
+        
+        .span-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: #252d4a;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .span-duration {
+            float: right;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .span-type {
+            margin-left: 10px;
+            padding: 2px 8px;
+            background: #667eea;
+            border-radius: 10px;
+            font-size: 0.85em;
+        }
+        
+        .trace-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .trace-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .trace-hierarchy {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+        }
+        
+        .hierarchy-item {
+            font-size: 0.9em;
+            margin: 3px 0;
+            color: #94a3b8;
+        }
+        
         .item-count {
             display: inline-block;
             background: #764ba2;
@@ -310,12 +410,12 @@
     <div class="header">
         <h1>🔭 TTA.dev Observability</h1>
         <p class="subtitle">Real-time monitoring of workflows, primitives & agents</p>
-        <div id="connectionStatus" class="connection-status disconnected">Disconnected</div>
+        <div id="connection-status" class="connection-status disconnected">Disconnected</div>
     </div>
     
     <div class="dashboard-grid">
         <!-- Metrics Panel -->
-        <div class="panel">
+        <div id="stats" class="panel">
             <h2>📊 Live Metrics</h2>
             <div class="metric-card">
                 <div class="metric-label">Total Workflows</div>
@@ -338,7 +438,7 @@
         <!-- Agents Panel -->
         <div class="panel">
             <h2>🤖 Active Agents</h2>
-            <div id="agentsPanel" class="loading pulse">
+            <div id="agentActivity" class="loading pulse">
                 Loading agents...
             </div>
         </div>
@@ -346,7 +446,8 @@
         <!-- Primitives Panel -->
         <div class="panel">
             <h2>⚙️ Primitives Catalog</h2>
-            <div id="primitivesPanel" class="loading pulse">
+            <input type="text" id="searchPrimitives" placeholder="Search primitives..." style="width: 100%; padding: 10px; margin-bottom: 15px; background: #252d4a; border: 1px solid #3a4666; border-radius: 5px; color: #e0e6ed;">
+            <div id="primitivesCatalog" class="loading pulse">
                 Loading primitives...
             </div>
         </div>
@@ -354,7 +455,7 @@
         <!-- Workflows Panel -->
         <div class="panel">
             <h2>🔄 Workflow Registry</h2>
-            <div id="workflowsPanel" class="loading pulse">
+            <div id="workflowRegistry" class="loading pulse">
                 Loading workflows...
             </div>
         </div>
@@ -364,12 +465,14 @@
     <div class="panel" style="margin-bottom: 30px;">
         <h2>🕸️ Codebase Architecture (CodeGraphContext)</h2>
         <div id="codeGraphPanel">
-            <div id="graphContainer" style="width: 100%; height: 600px; background: #252d4a; border-radius: 8px; position: relative;">
+            <div id="codeGraph" style="width: 100%; height: 600px; background: #252d4a; border-radius: 8px; position: relative;">
                 <div class="loading pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
                     Loading code graph...
                 </div>
             </div>
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="fitGraph" onclick="fitGraphView()" class="graph-btn">Fit View</button>
+                <button id="resetGraph" onclick="resetGraphView()" class="graph-btn">Reset</button>
                 <button onclick="loadGraphView('architecture')" class="graph-btn">Architecture View</button>
                 <button onclick="loadGraphView('dependencies')" class="graph-btn">Dependencies</button>
                 <button onclick="loadGraphView('primitives')" class="graph-btn">Primitives Map</button>
@@ -381,7 +484,7 @@
     <!-- Recent Traces -->
     <div class="panel">
         <h2>📜 Recent Traces</h2>
-        <div id="tracesPanel" class="empty-state">
+        <div id="recentTraces" class="empty-state">
             <p>No traces yet. Workflows will appear here automatically.</p>
         </div>
     </div>
@@ -393,6 +496,54 @@
         const tracesMap = new Map();
         const primitivesUsage = new Map();
         
+        // Load initial traces from API
+        async function loadInitialTraces() {
+            try {
+                const response = await fetch('/api/traces');
+                const traces = await response.json();
+                console.log(`✅ Loaded ${traces.length} initial traces`);
+                traces.forEach(trace => {
+                    // Convert activity logs to trace format
+                    if (trace.activity_type) {
+                        addTrace({
+                            trace_id: trace.trace_id,
+                            start_time: trace.timestamp,
+                            timestamp: trace.timestamp,
+                            status: 'success',
+                            duration_ms: trace.details?.duration_ns ? trace.details.duration_ns / 1e6 : 0,
+                            duration_ns: trace.details?.duration_ns || 0,
+                            provider: trace.provider,
+                            model: trace.model,
+                            agent: trace.agent,
+                            spans: [{
+                                name: `${trace.activity_type}`,
+                                span_id: trace.trace_id,
+                                attributes: {
+                                    ...trace.details,
+                                    provider: trace.provider,
+                                    model: trace.model,
+                                    agent: trace.agent
+                                }
+                            }]
+                        });
+                    } else {
+                        // OpenTelemetry trace format
+                        addTrace({
+                            ...trace,
+                            duration_ms: trace.duration_ns ? trace.duration_ns / 1e6 : 0,
+                            spans: trace.spans || [{
+                                name: trace.name,
+                                span_id: trace.span_id,
+                                attributes: trace.attributes
+                            }]
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Failed to load initial traces:', error);
+            }
+        }
+        
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -401,8 +552,8 @@
             
             ws.onopen = () => {
                 console.log('✅ WebSocket connected');
-                document.getElementById('connectionStatus').textContent = 'Connected';
-                document.getElementById('connectionStatus').className = 'connection-status connected';
+                document.getElementById('connection-status').textContent = 'Connected';
+                document.getElementById('connection-status').className = 'connection-status connected';
                 reconnectAttempts = 0;
             };
             
@@ -419,8 +570,8 @@
             
             ws.onclose = () => {
                 console.log('WebSocket closed');
-                document.getElementById('connectionStatus').textContent = 'Disconnected';
-                document.getElementById('connectionStatus').className = 'connection-status disconnected';
+                document.getElementById('connection-status').textContent = 'Disconnected';
+                document.getElementById('connection-status').className = 'connection-status disconnected';
                 
                 if (reconnectAttempts < maxReconnectAttempts) {
                     reconnectAttempts++;
@@ -471,7 +622,7 @@
                 }
             });
             
-            const panel = document.getElementById('primitivesPanel');
+            const panel = document.getElementById('primitivesCatalog');
             
             if (primitivesUsage.size === 0) {
                 panel.innerHTML = '<div class="empty-state">No primitives used yet</div>';
@@ -505,7 +656,7 @@
         }
         
         function renderTraces() {
-            const panel = document.getElementById('tracesPanel');
+            const panel = document.getElementById('recentTraces');
             const traces = Array.from(tracesMap.values()).slice(-20).reverse();
             
             if (traces.length === 0) {
@@ -522,51 +673,54 @@
         
         function createTraceElement(trace) {
             const div = document.createElement('div');
-            div.className = `trace-item ${trace.status === 'error' ? 'error' : ''}`;
-            div.onclick = () => toggleTraceExpansion(div);
+            div.className = `trace-card trace-item ${trace.status === 'error' ? 'error' : ''}`;
+            div.onclick = (e) => {
+                e.stopPropagation();
+                showTraceDetails(trace.trace_id);
+            };
             
             const statusIcon = trace.status === 'error' ? '❌' : '✅';
             const statusClass = trace.status === 'error' ? 'status-error' : 'status-success';
             
-            // Analyze workflow hierarchy
-            const hierarchy = analyzeWorkflowHierarchy(trace);
+            // Extract metadata from trace
+            const provider = trace.spans?.[0]?.attributes?.provider || trace.provider || 'unknown';
+            const model = trace.spans?.[0]?.attributes?.model || trace.model || 'unknown';
+            const agent = trace.spans?.[0]?.attributes?.agent || trace.agent || 'none';
+            
             const primitiveTypes = trace.spans ? new Set(trace.spans.map(s => extractPrimitiveType(s.name))) : new Set();
             
-            // Build timeline visualization
-            const timelineHtml = trace.spans ? buildSpanTimeline(trace) : '';
+            // Parse timestamp (handles ISO strings, nanoseconds, and milliseconds)
+            let timestamp = trace.start_time || trace.timestamp || Date.now();
+            if (typeof timestamp === 'number' && timestamp > 1e15) {
+                // Nanosecond timestamp - convert to milliseconds
+                timestamp = Math.floor(timestamp / 1e6);
+            }
             
             div.innerHTML = `
                 <div class="trace-header">
                     <div>
                         <span class="${statusClass}">${statusIcon}</span>
-                        <span class="trace-id">${trace.trace_id}</span>
+                        <span class="trace-id">${trace.trace_id.substring(0, 12)}...</span>
                         <span style="margin-left: 10px; opacity: 0.6; font-size: 0.9em;">
-                            ${new Date(trace.start_time || Date.now()).toLocaleTimeString()}
+                            ${new Date(timestamp).toLocaleTimeString()}
                         </span>
                     </div>
-                    <div class="trace-duration">${(trace.duration_ms || 0).toFixed(2)}ms</div>
+                    <div class="trace-duration">${(trace.duration_ms || trace.duration_ns / 1e6 || 0).toFixed(2)}ms</div>
                 </div>
+                
+                <div class="trace-hierarchy">
+                    <div class="hierarchy-item">📡 Provider: <strong>${provider}</strong></div>
+                    <div class="hierarchy-item">🤖 Model: <strong>${model}</strong></div>
+                    <div class="hierarchy-item">🎭 Agent: <strong>${agent}</strong></div>
+                </div>
+                
                 <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85em; opacity: 0.8;">
                     <span>📊 ${trace.spans ? trace.spans.length : 0} spans</span>
                     <span>⚙️ ${primitiveTypes.size} primitives</span>
-                    <span>📈 ${hierarchy.depth} levels deep</span>
                 </div>
                 
-                <div class="trace-detail">
-                    ${hierarchy.html}
-                    
-                    <h4 style="margin-top: 15px; margin-bottom: 10px; color: #667eea;">Execution Timeline</h4>
-                    ${timelineHtml}
-                    
-                    ${trace.error_message ? `
-                        <div style="margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; border-radius: 4px;">
-                            <strong style="color: #ef4444;">Error:</strong> ${trace.error_message}
-                        </div>
-                    ` : ''}
-                    
-                    <div style="margin-top: 15px; font-size: 0.85em; opacity: 0.6;">
-                        Click to collapse
-                    </div>
+                <div style="margin-top: 10px; font-size: 0.85em; opacity: 0.6; text-align: center;">
+                    Click for details
                 </div>
             `;
             
@@ -687,7 +841,7 @@
         }
         
         async function renderAgents(agents) {
-            const panel = document.getElementById('agentsPanel');
+            const panel = document.getElementById('agentActivity');
             
             // Fetch real-time agent activity
             try {
@@ -746,8 +900,6 @@
                 }
                 
                 panel.innerHTML = html;
-                    panel.appendChild(div);
-                });
                 
                 // Refresh agent activity every 5 seconds
                 setTimeout(() => renderAgents(agents), 5000);
@@ -776,7 +928,7 @@
         const primitivesPerPage = 20;
         
         function renderPrimitivesCatalog(primitives) {
-            const panel = document.getElementById('primitivesPanel');
+            const panel = document.getElementById('primitivesCatalog');
             
             if (!primitives || primitives.length === 0) {
                 panel.innerHTML = '<div class="empty-state">No primitives found</div>';
@@ -791,16 +943,18 @@
             panel.innerHTML = `
                 <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="opacity: 0.7;">Showing ${startIdx + 1}-${Math.min(endIdx, primitives.length)} of ${primitives.length} primitive(s)</div>
-                    <div class="pagination-controls">
+                    <div class="pagination pagination-controls">
                         <button ${currentPrimitivesPage === 1 ? 'disabled' : ''} onclick="changePrimitivesPage(${currentPrimitivesPage - 1})">← Prev</button>
                         <span style="margin: 0 10px;">Page ${currentPrimitivesPage}/${totalPages}</span>
                         <button ${currentPrimitivesPage === totalPages ? 'disabled' : ''} onclick="changePrimitivesPage(${currentPrimitivesPage + 1})">Next →</button>
                     </div>
                 </div>
-                <div id="primitivesList"></div>
             `;
             
-            const listContainer = document.getElementById('primitivesList');
+            // Create primitives list container
+            const listContainer = document.createElement('div');
+            listContainer.id = 'primitivesList';
+            
             pageData.forEach(prim => {
                 const div = document.createElement('div');
                 div.className = 'primitive-item';
@@ -811,6 +965,8 @@
                 `;
                 listContainer.appendChild(div);
             });
+            
+            panel.appendChild(listContainer);
         }
         
         function changePrimitivesPage(page) {
@@ -818,15 +974,15 @@
             // Re-fetch and render
             fetch('/api/primitives')
                 .then(r => r.json())
-                .then(data => renderPrimitivesCatalog(data.primitives))
+                .then(data => renderPrimitivesCatalog(Array.isArray(data) ? data : data.primitives))
                 .catch(err => console.error('Failed to load primitives:', err));
         }
         
         function renderWorkflows(workflows) {
-            const panel = document.getElementById('workflowsPanel');
+            const panel = document.getElementById('workflowRegistry');
             
             if (!workflows || workflows.length === 0) {
-                panel.innerHTML = '<div class="empty-state">No workflows registered</div>';
+                panel.innerHTML = '<div style="margin-bottom: 10px; opacity: 0.7;">Registered: 0 workflow(s)</div><div class="empty-state">No workflows registered yet</div>';
                 return;
             }
             
@@ -842,133 +998,118 @@
             });
         }
         
-        // CodeGraph visualization class
-        class CodeGraph {
-            constructor(containerId) {
-                this.containerId = containerId;
-                this.svg = null;
-                this.simulation = null;
-            }
-            
-            async loadGraph(viewType) {
-                const container = document.getElementById(this.containerId);
-                
-                // Fetch graph data from CGC
-                const response = await fetch(`/api/codegraph/${viewType}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const graphData = await response.json();
-                this.renderGraph(container, graphData);
-            }
-            
-            renderGraph(container, data) {
-                // Clear container
-                container.innerHTML = '';
-                
-                // Create SVG
-                const width = container.clientWidth;
-                const height = 600;
-                
-                const svg = d3.select(`#${this.containerId}`)
-                    .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                    .style('background', '#0f1419');
-                
-                // Create force simulation
-                const simulation = d3.forceSimulation(data.nodes)
-                    .force('link', d3.forceLink(data.edges).id(d => d.id).distance(100))
-                    .force('charge', d3.forceManyBody().strength(-300))
-                    .force('center', d3.forceCenter(width / 2, height / 2))
-                    .force('collision', d3.forceCollide().radius(30));
-                
-                // Draw edges
-                const links = svg.append('g')
-                    .selectAll('line')
-                    .data(data.edges)
-                    .enter().append('line')
-                    .attr('stroke', '#4a5568')
-                    .attr('stroke-width', 2)
-                    .attr('stroke-opacity', 0.6);
-                
-                // Draw nodes
-                const nodes = svg.append('g')
-                    .selectAll('circle')
-                    .data(data.nodes)
-                    .enter().append('circle')
-                    .attr('r', 8)
-                    .attr('fill', d => this.getNodeColor(d.type))
-                    .call(d3.drag()
-                        .on('start', (event, d) => {
-                            if (!event.active) simulation.alphaTarget(0.3).restart();
-                            d.fx = d.x;
-                            d.fy = d.y;
-                        })
-                        .on('drag', (event, d) => {
-                            d.fx = event.x;
-                            d.fy = event.y;
-                        })
-                        .on('end', (event, d) => {
-                            if (!event.active) simulation.alphaTarget(0);
-                            d.fx = null;
-                            d.fy = null;
-                        }));
-                
-                // Add labels
-                const labels = svg.append('g')
-                    .selectAll('text')
-                    .data(data.nodes)
-                    .enter().append('text')
-                    .text(d => d.label || d.id)
-                    .attr('font-size', 10)
-                    .attr('fill', '#e0e6ed')
-                    .attr('dx', 12)
-                    .attr('dy', 4);
-                
-                // Update positions on simulation tick
-                simulation.on('tick', () => {
-                    links
-                        .attr('x1', d => d.source.x)
-                        .attr('y1', d => d.source.y)
-                        .attr('x2', d => d.target.x)
-                        .attr('y2', d => d.target.y);
-                    
-                    nodes
-                        .attr('cx', d => d.x)
-                        .attr('cy', d => d.y);
-                    
-                    labels
-                        .attr('x', d => d.x)
-                        .attr('y', d => d.y);
-                });
-                
-                this.svg = svg;
-                this.simulation = simulation;
-            }
-            
-            getNodeColor(type) {
-                const colors = {
-                    'primitive': '#10b981',
-                    'workflow': '#3b82f6',
-                    'agent': '#8b5cf6',
-                    'function': '#f59e0b',
-                    'class': '#ef4444',
-                    'module': '#6366f1'
-                };
-                return colors[type] || '#6b7280';
+        function fitGraphView() {
+            if (window.codeGraphInstance && window.codeGraphInstance.simulation) {
+                // Fit the graph to view
+                window.codeGraphInstance.simulation.alpha(0.3).restart();
             }
         }
         
+        function resetGraphView() {
+            if (window.codeGraphInstance) {
+                // Reset zoom and position
+                loadGraphView('architecture');
+            }
+        }
+        
+        function showTraceDetails(traceId) {
+            const trace = tracesMap.get(traceId);
+            if (!trace) {
+                console.error('Trace not found:', traceId);
+                return;
+            }
+            
+            const modal = document.createElement('div');
+            modal.className = 'trace-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+            
+            // Extract metadata
+            const provider = trace.spans?.[0]?.attributes?.provider || 'unknown';
+            const model = trace.spans?.[0]?.attributes?.model || 'unknown';
+            const agent = trace.spans?.[0]?.attributes?.agent || 'none';
+            const workflow = trace.spans?.[0]?.attributes?.workflow || 'direct execution';
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h2>📊 Trace Details</h2>
+                    <div style="font-family: monospace; font-size: 0.9em; color: #94a3b8; margin: 10px 0;">
+                        ${traceId}
+                    </div>
+                    
+                    <div class="trace-hierarchy-detail">
+                        <h3 style="margin-top: 0;">🎯 Execution Chain</h3>
+                        <div class="chain-item">📡 <strong>Provider:</strong> ${provider}</div>
+                        <div class="chain-item">🤖 <strong>Model:</strong> ${model}</div>
+                        <div class="chain-item">🎭 <strong>Agent Role:</strong> ${agent}</div>
+                        <div class="chain-item">⚙️ <strong>Workflow:</strong> ${workflow}</div>
+                        <div class="chain-item">⏱️ <strong>Duration:</strong> ${(trace.duration_ms || 0).toFixed(2)}ms</div>
+                        <div class="chain-item">📊 <strong>Status:</strong> <span class="status-${trace.status}">${trace.status || 'unknown'}</span></div>
+                    </div>
+                    
+                    <div class="trace-spans">
+                        <h3>🔹 Primitives & Spans (${trace.spans?.length || 0})</h3>
+                        ${renderSpanHierarchy(trace.spans || [])}
+                    </div>
+                    
+                    ${trace.error_message ? `
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; border-radius: 4px;">
+                            <strong style="color: #ef4444;">❌ Error:</strong><br/>
+                            <code style="display: block; margin-top: 10px; color: #ef4444;">${trace.error_message}</code>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function renderSpanHierarchy(spans) {
+            if (!spans || spans.length === 0) {
+                return '<div class="empty-state">No spans recorded</div>';
+            }
+            
+            // Build a map for parent-child relationships
+            const spanMap = new Map(spans.map(s => [s.span_id, s]));
+            const roots = spans.filter(s => !s.parent_id || !spanMap.has(s.parent_id));
+            
+            function renderSpan(span, depth = 0) {
+                const duration = span.end_time && span.start_time 
+                    ? ((span.end_time - span.start_time) * 1000).toFixed(2)
+                    : '0.00';
+                    
+                const primitiveType = span.attributes?.primitive_type || extractPrimitiveType(span.name);
+                const children = spans.filter(s => s.parent_id === span.span_id);
+                
+                let html = `
+                    <div class="span-item" style="margin-left: ${depth * 20}px">
+                        <span style="color: #667eea;">🔹</span> 
+                        <strong>${span.name}</strong>
+                        ${primitiveType !== span.name ? `<span class="span-type">${primitiveType}</span>` : ''}
+                        <span class="span-duration">${duration}ms</span>
+                    </div>
+                `;
+                
+                children.forEach(child => {
+                    html += renderSpan(child, depth + 1);
+                });
+                
+                return html;
+            }
+            
+            return roots.map(span => renderSpan(span)).join('');
+        }
+        
         async function loadGraphView(viewType) {
-            const container = document.getElementById('graphContainer');
+            const container = document.getElementById('codeGraph');
             container.innerHTML = '<div class="loading pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Loading ' + viewType + ' view...</div>';
             
             try {
                 // Initialize D3 graph if not already done
                 if (!window.codeGraphInstance) {
-                    window.codeGraphInstance = new CodeGraph('graphContainer');
+                    window.codeGraphInstance = new CodeGraph('codeGraph');
                 }
                 await window.codeGraphInstance.loadGraph(viewType);
             } catch (error) {
@@ -979,6 +1120,20 @@
         // Connect on load
         connectWebSocket();
         loadInventoryData();
+        loadInitialTraces();
+        
+        // Add search functionality
+        const searchBox = document.getElementById('searchPrimitives');
+        if (searchBox) {
+            searchBox.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const primitives = document.querySelectorAll('#primitivesCatalog .primitive-item');
+                primitives.forEach(prim => {
+                    const text = prim.textContent.toLowerCase();
+                    prim.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
         
         // Load default graph view
         setTimeout(() => loadGraphView('architecture'), 1000);

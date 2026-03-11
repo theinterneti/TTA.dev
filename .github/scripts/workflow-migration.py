@@ -21,9 +21,7 @@ DEPRECATED_WORKFLOWS = {
     "pr-validation-v2.yml": "consolidated-pr-validation.yml",
     "merge-validation.yml": "consolidated-merge-gate.yml",
     "merge-validation-v2.yml": "consolidated-merge-gate.yml",
-    "ci.yml": (
-        "consolidated-pr-validation.yml + consolidated-platform-compatibility.yml"
-    ),
+    "ci.yml": ("consolidated-pr-validation.yml + consolidated-platform-compatibility.yml"),
     "quality-check.yml": "consolidated-pr-validation.yml + consolidated-merge-gate.yml",
     "orchestration-pr-review.yml": "consolidated-ai-review.yml",
     "gemini-dispatch.yml": "consolidated-ai-review.yml",
@@ -121,11 +119,7 @@ def show_migration_status() -> None:
         print(f"  • {workflow}")
 
     print("\n" + "=" * 60)
-    total = (
-        len(workflows["consolidated"])
-        + len(workflows["deprecated"])
-        + len(workflows["active"])
-    )
+    total = len(workflows["consolidated"]) + len(workflows["deprecated"]) + len(workflows["active"])
     print(f"\nTotal workflows: {total}")
     print(f"Consolidated: {len(workflows['consolidated'])}")
     print(f"Deprecated: {len(workflows['deprecated'])}")
@@ -194,11 +188,7 @@ def check_workflow_runs(limit: int = 10) -> None:
             duration_min = duration_ms / 1000 / 60 if duration_ms else 0
 
             status_icon = (
-                "✅"
-                if conclusion == "success"
-                else "❌"
-                if conclusion == "failure"
-                else "⏭️"
+                "✅" if conclusion == "success" else "❌" if conclusion == "failure" else "⏭️"
             )
 
             print(f"  {status_icon} {name}")
@@ -212,9 +202,7 @@ def check_workflow_runs(limit: int = 10) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="GitHub Actions Workflow Migration Helper"
-    )
+    parser = argparse.ArgumentParser(description="GitHub Actions Workflow Migration Helper")
 
     parser.add_argument(
         "command",

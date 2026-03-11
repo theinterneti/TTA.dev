@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Import the LLM client
-from src.models.llm_client import get_llm_client
+from src.models.llm_client import get_llm_client  # noqa: E402
 
 # Target models to evaluate
 TARGET_MODELS = [

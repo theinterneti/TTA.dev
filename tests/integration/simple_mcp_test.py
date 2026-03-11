@@ -13,9 +13,7 @@ import time
 import requests
 
 # Add the project root to the Python path
-sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Add the examples directory to the Python path
 examples_path = os.path.join(
@@ -66,9 +64,7 @@ mcp.run('sse')
     timeout = 15  # seconds
     while True:
         try:
-            response = requests.get(
-                f"http://localhost:{KNOWLEDGE_SERVER_PORT}/sse", timeout=1
-            )
+            response = requests.get(f"http://localhost:{KNOWLEDGE_SERVER_PORT}/sse", timeout=1)
             if response.status_code == 200:
                 print("Server is ready!")
                 break
@@ -161,9 +157,7 @@ def test_knowledge_server():
                     print("Knowledge Resource server is running!")
                     return True
                 else:
-                    print(
-                        f"Knowledge Resource server returned status code {response.status_code}"
-                    )
+                    print(f"Knowledge Resource server returned status code {response.status_code}")
                     return False
             except requests.exceptions.ConnectionError as e:
                 print(f"Could not connect to Knowledge Resource server: {e}")
@@ -222,9 +216,7 @@ def test_agent_tool_server():
                     print("Agent Tool server is running!")
                     return True
                 else:
-                    print(
-                        f"Agent Tool server returned status code {response.status_code}"
-                    )
+                    print(f"Agent Tool server returned status code {response.status_code}")
                     return False
             except requests.exceptions.ConnectionError as e:
                 print(f"Could not connect to Agent Tool server: {e}")
@@ -268,9 +260,7 @@ def main():
 
     # Print the results
     print("\nResults:")
-    print(
-        f"Knowledge Resource server: {'SUCCESS' if knowledge_server_success else 'FAILURE'}"
-    )
+    print(f"Knowledge Resource server: {'SUCCESS' if knowledge_server_success else 'FAILURE'}")
     print(f"Agent Tool server: {'SUCCESS' if agent_tool_server_success else 'FAILURE'}")
 
     # Return success if both tests passed

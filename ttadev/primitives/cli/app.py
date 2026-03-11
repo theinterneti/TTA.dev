@@ -1139,9 +1139,7 @@ def _generate_compensation_transformation(code: str, targets: list[dict], info: 
         elif line.strip() and not line.startswith("#") and import_idx > 0:
             break
 
-    import_path = info.get(
-        "import_path", "from primitives.recovery import CompensationPrimitive"
-    )
+    import_path = info.get("import_path", "from primitives.recovery import CompensationPrimitive")
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1257,9 +1255,7 @@ def _generate_timeout_transformation(code: str, targets: list[dict], info: dict)
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get(
-        "import_path", "from primitives.recovery import TimeoutPrimitive"
-    )
+    import_path = info.get("import_path", "from primitives.recovery import TimeoutPrimitive")
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1310,9 +1306,7 @@ def _generate_fallback_transformation(code: str, targets: list[dict], info: dict
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get(
-        "import_path", "from primitives.recovery import FallbackPrimitive"
-    )
+    import_path = info.get("import_path", "from primitives.recovery import FallbackPrimitive")
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1424,9 +1418,7 @@ def _generate_circuit_breaker_transformation(code: str, targets: list[dict], inf
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get(
-        "import_path", "from primitives.recovery import CircuitBreakerPrimitive"
-    )
+    import_path = info.get("import_path", "from primitives.recovery import CircuitBreakerPrimitive")
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1824,9 +1816,7 @@ def _generate_adaptive_transformation(code: str, targets: list[dict], info: dict
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get(
-        "import_path", "from primitives.adaptive import AdaptivePrimitive"
-    )
+    import_path = info.get("import_path", "from primitives.adaptive import AdaptivePrimitive")
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")

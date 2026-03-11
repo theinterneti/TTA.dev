@@ -71,8 +71,7 @@ class VaultSecretsClient:
         """
         if not HVAC_AVAILABLE:
             raise ImportError(
-                "HashiCorp Vault client requires 'hvac' package."
-                " Install with: uv add hvac"
+                "HashiCorp Vault client requires 'hvac' package. Install with: uv add hvac"
             )
 
         self.vault_url = vault_url or self._get_vault_url()
@@ -98,9 +97,7 @@ class VaultSecretsClient:
 
             # Verify connection and authentication
             if self._client.is_authenticated():
-                logger.info(
-                    f"Successfully authenticated with Vault at {self.vault_url}"
-                )
+                logger.info(f"Successfully authenticated with Vault at {self.vault_url}")
                 self._log_vault_health()
             else:
                 raise ValueError("Failed to authenticate with Vault")
@@ -122,9 +119,7 @@ class VaultSecretsClient:
         token = get_env("VAULT_TOKEN") or get_env("VAULT_TOKEN_FILE")
 
         if not token:
-            raise ValueError(
-                "VAULT_TOKEN or VAULT_TOKEN_FILE environment variable required"
-            )
+            raise ValueError("VAULT_TOKEN or VAULT_TOKEN_FILE environment variable required")
 
         # Check if token is a file path
         if token and not token.startswith("hvs.") and not token.startswith("hvb."):
@@ -199,9 +194,7 @@ class VaultSecretsClient:
                     )
                     raise RuntimeError(f"Vault access failed: {e}") from e
 
-                logger.warning(
-                    f"Vault request failed (attempt {attempt + 1}), retrying: {e}"
-                )
+                logger.warning(f"Vault request failed (attempt {attempt + 1}), retrying: {e}")
                 import time
 
                 time.sleep(0.5 * (2**attempt))  # Exponential backoff
@@ -245,9 +238,7 @@ class VaultSecretsClient:
             )
 
             keys = response.get("data", {}).get("keys", [])
-            return [
-                key.rstrip("/") for key in keys if key != ""
-            ]  # Remove trailing slashes
+            return [key.rstrip("/") for key in keys if key != ""]  # Remove trailing slashes
 
         except hvac.exceptions.InvalidPath:
             return []  # No secrets found
