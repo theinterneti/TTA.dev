@@ -1,6 +1,6 @@
 /**
  * session-tree.js — Sessions sidebar component.
- * Renders the list of sessions newest-first with live indicator.
+ * Renders "All Sessions" at top + per-session items newest-first.
  */
 
 export class SessionTree {
@@ -20,22 +20,40 @@ export class SessionTree {
     try {
       this.sessions = await this.app.fetchJSON('/api/v2/sessions');
       this._render();
-      // Auto-select the most recent (first) session
-      if (this.sessions.length > 0) {
-        this._select(this.sessions[0].id);
-      }
-    } catch (e) {
+      // Default to "All Sessions" — shows everything across all agents
+      this._select('all');
+    } catch {
       this.el.innerHTML = `<div class="empty-state" style="padding:20px;font-size:.85em;">Could not load sessions</div>`;
     }
   }
 
   _render() {
     this.el.innerHTML = `<div class="sidebar-heading">Sessions</div>`;
+
+    // "All Sessions" virtual entry — always first
+    const allItem = this._makeAllItem();
+    this.el.appendChild(allItem);
+
     if (this.sessions.length === 0) {
       this.el.innerHTML += `<div style="padding:12px 16px;font-size:.85em;color:var(--text-muted)">No sessions yet</div>`;
       return;
     }
     this.sessions.forEach(s => this.el.appendChild(this._makeItem(s)));
+  }
+
+  _makeAllItem() {
+    const div = document.createElement('div');
+    div.className = 'session-item session-all';
+    div.dataset.id = 'all';
+    div.innerHTML = `
+      <span class="session-dot" style="background:var(--accent);box-shadow:0 0 6px var(--accent)"></span>
+      <div class="session-info">
+        <div class="session-tool">🌐 All Sessions</div>
+        <div class="session-meta">${this.sessions.length} session${this.sessions.length !== 1 ? 's' : ''}</div>
+      </div>
+    `;
+    div.addEventListener('click', () => this._select('all'));
+    return div;
   }
 
   _makeItem(session) {
@@ -68,14 +86,18 @@ export class SessionTree {
 
   _prependSession(session) {
     this.sessions.unshift(session);
+    // Update the "all" item's session count
+    const allItem = this.el.querySelector('[data-id="all"] .session-meta');
+    if (allItem) allItem.textContent = `${this.sessions.length} sessions`;
+    // Insert new session item after the "all" item
+    const allEl = this.el.querySelector('[data-id="all"]');
     const item = this._makeItem(session);
-    const heading = this.el.querySelector('.sidebar-heading');
-    if (heading) {
-      this.el.insertBefore(item, heading.nextSibling);
+    if (allEl?.nextSibling) {
+      this.el.insertBefore(item, allEl.nextSibling);
     } else {
-      this.el.prepend(item);
+      this.el.appendChild(item);
     }
-    this._select(session.id);
+    // Don't auto-switch away from current selection
   }
 
   _markEnded(id) {

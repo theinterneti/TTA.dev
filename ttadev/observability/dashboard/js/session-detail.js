@@ -1,5 +1,9 @@
 /**
  * session-detail.js — Main panel: Provider → Model → Agent → Workflow tree + live metrics.
+ *
+ * Modes:
+ *   id === 'all'  — aggregate all spans from all sessions (multi-agent view)
+ *   id === <uuid> — filtered to a single session
  */
 
 export class SessionDetail {
@@ -7,6 +11,7 @@ export class SessionDetail {
     this.el = el;
     this.app = app;
     this.currentId = null;
+    this.allMode = false;
     this.spans = [];
   }
 
@@ -14,8 +19,14 @@ export class SessionDetail {
     this._renderEmpty();
     this.app.on('sessionSelected', (id) => this._loadSession(id));
     this.app.on('spanAdded', (msg) => {
-      if (msg.session_id === this.currentId) {
-        this.spans.push(msg.span);
+      // In allMode accept every span; in session mode accept only matching spans
+      if (this.allMode || msg.session_id === this.currentId) {
+        const span = { ...msg.span };
+        if (this.allMode) {
+          span._session_id   = msg.session_id;
+          span._session_tool = msg.session_tool || 'unknown';
+        }
+        this.spans.push(span);
         this._render();
       }
     });
@@ -23,8 +34,21 @@ export class SessionDetail {
 
   async _loadSession(id) {
     this.currentId = id;
+    this.allMode   = id === 'all';
+
+    if (this.allMode) {
+      try {
+        this.spans = await this.app.fetchJSON('/api/v2/spans');
+        this.app.updateSessionBadge('All Sessions');
+        this._render();
+      } catch {
+        this.el.innerHTML = `<div class="empty-state">Failed to load spans</div>`;
+      }
+      return;
+    }
+
     try {
-      const [session, spans] = await Promise.all([
+      const [, spans] = await Promise.all([
         this.app.fetchJSON(`/api/v2/sessions/${id}`),
         this.app.fetchJSON(`/api/v2/sessions/${id}/spans`),
       ]);
@@ -41,16 +65,18 @@ export class SessionDetail {
 
     const tree    = this._buildTree();
     const metrics = this._buildMetrics();
-    // Preserve filter text across re-renders caused by live span updates
     const prevFilter = this.el.querySelector('.span-filter')?.value || '';
+    const heading = this.allMode ? 'All Sessions' : `Session ${this.currentId.substring(0, 8)}`;
 
     this.el.innerHTML = `
-      <div class="panel-heading">Session ${this.currentId.substring(0, 8)}</div>
+      <div class="panel-heading">${heading}</div>
       ${this._renderMetrics(metrics)}
       <div class="provider-tree">${this._renderTree(tree)}</div>
       <div class="span-list">
         <div class="span-list-header">
-          <div class="panel-heading" style="margin-bottom:0;">Recent Spans (${this.spans.length})</div>
+          <div class="panel-heading" style="margin-bottom:0;">
+            ${this.allMode ? 'Live Spans' : 'Recent Spans'} (${this.spans.length})
+          </div>
           <input class="span-filter" type="search" placeholder="Filter spans…" value="${prevFilter}">
         </div>
         <div class="span-rows"></div>
@@ -59,13 +85,15 @@ export class SessionDetail {
 
     // Wire filter
     const filterInput = this.el.querySelector('.span-filter');
-    const rowsEl = this.el.querySelector('.span-rows');
-    const renderRows = (q) => {
+    const rowsEl      = this.el.querySelector('.span-rows');
+    const renderRows  = (q) => {
       const lq = q.toLowerCase();
-      const visible = this.spans.slice(-100).reverse()
-        .filter(s => !lq || s.name?.toLowerCase().includes(lq)
-                          || s.provider?.toLowerCase().includes(lq)
-                          || s.primitive_type?.toLowerCase().includes(lq));
+      const visible = this.spans.slice(-200).reverse()
+        .filter(s => !lq
+          || s.name?.toLowerCase().includes(lq)
+          || s.provider?.toLowerCase().includes(lq)
+          || s.primitive_type?.toLowerCase().includes(lq)
+          || s._session_tool?.toLowerCase().includes(lq));
       rowsEl.innerHTML = visible.map(s => this._renderSpanRow(s)).join('');
       rowsEl.querySelectorAll('.span-row').forEach(row => {
         row.addEventListener('click', () => {
@@ -102,6 +130,7 @@ export class SessionDetail {
     let errors = 0;
     let totalMs = 0;
     let cacheHits = 0, cacheMisses = 0;
+    const agentTools = new Set();
 
     for (const span of this.spans) {
       if (span.status === 'error') errors++;
@@ -112,12 +141,13 @@ export class SessionDetail {
       const hit = span.attributes?.['tta.cache.hit'];
       if (hit === true)  cacheHits++;
       if (hit === false) cacheMisses++;
+      if (span._session_tool && span._session_tool !== 'unknown') agentTools.add(span._session_tool);
     }
 
-    return { primCounts, errors, totalMs, cacheHits, cacheMisses };
+    return { primCounts, errors, totalMs, cacheHits, cacheMisses, agentTools };
   }
 
-  _renderMetrics({ primCounts, errors, totalMs, cacheHits, cacheMisses }) {
+  _renderMetrics({ primCounts, errors, totalMs, cacheHits, cacheMisses, agentTools }) {
     const prims = Object.entries(primCounts)
       .sort((a, b) => b[1] - a[1])
       .map(([name, count]) => `<span class="metric-chip">⚙️ ${name} <span class="value">×${count}</span></span>`)
@@ -132,9 +162,14 @@ export class SessionDetail {
       ? `<span class="metric-chip" style="color:var(--error)">❌ Errors <span class="value" style="color:var(--error)">${errors}</span></span>`
       : '';
 
+    const agentChips = this.allMode
+      ? [...agentTools].map(t => `<span class="metric-chip">🤖 ${t}</span>`).join('')
+      : '';
+
     return `
       <div class="live-metrics">
         <span class="metric-chip">📊 Spans <span class="value">${this.spans.length}</span></span>
+        ${agentChips}
         ${prims}
         ${cacheChip}
         ${errChip}
@@ -173,6 +208,8 @@ export class SessionDetail {
       ? `<span class="span-prim">${span.primitive_type}</span>` : '';
     const badge  = span.provider
       ? `<span class="span-provider" data-provider="${this._providerKey(span.provider)}">${this._providerShort(span.provider)}</span>` : '';
+    const agentBadge = this.allMode && span._session_tool
+      ? `<span class="span-agent" title="Session ${span._session_id}">${this._toolIcon(span._session_tool)}</span>` : '';
     const dur    = (span.duration_ms && span.duration_ms > 0)
       ? `${span.duration_ms.toFixed(1)}ms` : '—';
     const time   = span.started_at ? new Date(span.started_at).toLocaleTimeString() : '';
@@ -180,6 +217,7 @@ export class SessionDetail {
     return `
       <div class="span-row${isErr ? ' error' : ''}" data-span-id="${span.span_id}">
         <span class="span-icon ${isErr ? 'err' : ''}">${icon}</span>
+        ${agentBadge}
         <span class="span-name">${span.name}</span>
         ${badge}
         ${prim}
@@ -187,6 +225,11 @@ export class SessionDetail {
         <span class="span-time">${time}</span>
       </div>
     `;
+  }
+
+  _toolIcon(tool) {
+    const icons = { 'claude-code': '🤖', 'copilot': '✈️', 'cline': '🔧', 'unknown': '❓' };
+    return icons[tool] || '❓';
   }
 
   _providerKey(provider) {

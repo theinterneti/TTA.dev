@@ -390,6 +390,16 @@ details pre { background: var(--bg-card); padding: 10px; border-radius: 4px; fon
 }
 .cgc-unavailable code { background: var(--bg-card); padding: 4px 10px; border-radius: 4px; font-size: 0.9em; }
 
+/* "All Sessions" sidebar item */
+.session-all .session-tool { color: var(--accent); }
+
+/* Agent tool badge on span rows (shown in All Sessions mode) */
+.span-agent {
+  font-size: 0.85em;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
 /* ------------------------------------------------------------------ Shared utilities */
 .badge {
   display: inline-block;

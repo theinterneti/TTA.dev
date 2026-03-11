@@ -84,6 +84,7 @@ class ObservabilityServer:
         self.app.router.add_get("/api/v2/sessions", self._v2_sessions)
         self.app.router.add_get("/api/v2/sessions/current", self._v2_session_current)
         # NOTE: /sessions/current must be registered BEFORE /sessions/{id}
+        self.app.router.add_get("/api/v2/spans", self._v2_all_spans)
         self.app.router.add_get("/api/v2/sessions/{id}/spans", self._v2_session_spans)
         self.app.router.add_get("/api/v2/sessions/{id}", self._v2_session_detail)
         self.app.router.add_get("/api/v2/cgc/live", self._v2_cgc_live)
@@ -175,6 +176,19 @@ class ObservabilityServer:
         spans = self._session_mgr.get_session_spans(session_id)
         summary = _build_provider_summary(spans)
         return web.json_response({**asdict(session), "provider_summary": summary})
+
+    async def _v2_all_spans(self, request: web.Request) -> web.Response:
+        """Return all spans across all sessions, newest first, with session metadata."""
+        sessions = self._session_mgr.list_sessions()
+        all_spans: list[dict[str, Any]] = []
+        for session in sessions:
+            for span in self._session_mgr.get_session_spans(session.id):
+                d = asdict(span)
+                d["_session_id"] = session.id
+                d["_session_tool"] = session.agent_tool
+                all_spans.append(d)
+        all_spans.sort(key=lambda s: s.get("started_at") or "", reverse=True)
+        return web.json_response(all_spans[:1000])
 
     async def _v2_session_spans(self, request: web.Request) -> web.Response:
         session_id = request.match_info["id"]
@@ -445,6 +459,7 @@ class ObservabilityServer:
                     msg = {
                         "type": "span_added",
                         "session_id": current.id,
+                        "session_tool": current.agent_tool,
                         "span": asdict(span),
                     }
                     for ws in list(self._websockets):
