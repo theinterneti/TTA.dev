@@ -454,12 +454,31 @@ class ObservabilityServer:
                 new_spans.extend(self._ingest_agent_tracker())
 
                 for span in new_spans:
-                    self._session_mgr.add_span(current.id, span)
+                    # Route to agent-specific session when the span carries an
+                    # agent_id; fall back to the current session for older spans.
+                    if span.agent_id:
+                        target = self._session_mgr.get_or_create_agent_session(
+                            span.agent_id, span.agent_tool or "unknown"
+                        )
+                        if target.id != current.id:
+                            # Notify the frontend if we just discovered a new agent
+                            if not self._session_mgr.get_session_spans(target.id):
+                                for ws in list(self._websockets):
+                                    try:
+                                        await ws.send_json(
+                                            {"type": "session_start", "session": asdict(target)}
+                                        )
+                                    except Exception:
+                                        self._websockets.discard(ws)
+                    else:
+                        target = current
+
+                    self._session_mgr.add_span(target.id, span)
                     # Broadcast to WebSocket clients
                     msg = {
                         "type": "span_added",
-                        "session_id": current.id,
-                        "session_tool": current.agent_tool,
+                        "session_id": target.id,
+                        "session_tool": target.agent_tool,
                         "span": asdict(span),
                     }
                     for ws in list(self._websockets):

@@ -3,9 +3,38 @@
 from __future__ import annotations
 
 import json
+import os
 import time
+import uuid
 from pathlib import Path
 from typing import Any
+
+# ---------------------------------------------------------------------------
+# Stable per-process agent identity — generated once at import time.
+# Every span written by this process carries these two fields so the
+# observability server can route spans to the right session automatically.
+# ---------------------------------------------------------------------------
+_AGENT_ID: str = os.environ.get("TTA_AGENT_ID") or str(uuid.uuid4())
+_AGENT_TOOL: str | None = None
+
+
+def _get_agent_tool() -> str:
+    """Detect the agent tool running in this process (cached after first call)."""
+    global _AGENT_TOOL
+    if _AGENT_TOOL is not None:
+        return _AGENT_TOOL
+    override = os.environ.get("TTA_AGENT_TOOL")
+    if override:
+        _AGENT_TOOL = override
+    elif os.environ.get("CLAUDECODE") or os.environ.get("CLAUDE_CODE_ENTRYPOINT"):
+        _AGENT_TOOL = "claude-code"
+    elif "vscode" in os.environ.get("TERM_PROGRAM", "").lower():
+        _AGENT_TOOL = "copilot"
+    elif os.environ.get("CLINE"):
+        _AGENT_TOOL = "cline"
+    else:
+        _AGENT_TOOL = "unknown"
+    return _AGENT_TOOL
 
 try:
     from opentelemetry import trace
@@ -39,6 +68,10 @@ class FileSpanExporter(SpanExporter):
                         "start_time": span.start_time,
                         "end_time": span.end_time,
                         "duration_ns": span.end_time - span.start_time if span.end_time else 0,
+                        # Agent identity — stable per process, used by the observability
+                        # server to route this span to the correct session automatically.
+                        "tta_agent_id": _AGENT_ID,
+                        "tta_agent_tool": _get_agent_tool(),
                         "attributes": dict(span.attributes) if span.attributes else {},
                         "status": {
                             "status_code": span.status.status_code.name if span.status else "UNSET",

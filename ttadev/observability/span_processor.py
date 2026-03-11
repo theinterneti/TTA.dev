@@ -29,6 +29,10 @@ class ProcessedSpan:
     duration_ms: float
     status: str  # "success" | "error" | "running"
     attributes: dict[str, Any] = field(default_factory=dict)
+    # Agent identity — set by FileSpanExporter; used to route span to correct session.
+    # None on older spans (pre-identity); server falls back to current session.
+    agent_id: str | None = None
+    agent_tool: str | None = None
 
 
 # Name-fragment → primitive class name (checked in order, case-insensitive)
@@ -120,6 +124,8 @@ class SpanProcessor:
             duration_ms=duration_ns / 1_000_000,
             status=status,
             attributes=attrs,
+            agent_id=raw.get("tta_agent_id"),
+            agent_tool=raw.get("tta_agent_tool"),
         )
 
     def from_activity_log(self, raw: dict[str, Any]) -> ProcessedSpan:

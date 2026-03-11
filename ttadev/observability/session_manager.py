@@ -26,6 +26,9 @@ class Session:
     agent_tool: str  # "claude-code" | "copilot" | "cline" | "unknown"
     project_path: str
     hostname: str
+    # Stable per-process identifier from FileSpanExporter._AGENT_ID.
+    # None for sessions created before agent identity was introduced.
+    agent_id: str | None = None
 
 
 class SessionManager:
@@ -84,6 +87,36 @@ class SessionManager:
                 continue
         sessions.sort(key=lambda s: s.started_at, reverse=True)
         return sessions
+
+    def get_or_create_agent_session(self, agent_id: str, agent_tool: str) -> Session:
+        """Return the existing session for this agent_id, or create a new one.
+
+        Called by the ingestion loop when a span carries a tta_agent_id that
+        doesn't match any known session.  Creating happens at most once per
+        unique agent_id — subsequent calls return the cached session.
+        """
+        # Fast path: scan in-memory sessions first
+        for meta_file in self._sessions_dir.glob("*.json"):
+            try:
+                data = json.loads(meta_file.read_text())
+                if data.get("agent_id") == agent_id:
+                    return Session(**data)
+            except Exception:
+                continue
+
+        # Not found — create a new session for this agent
+        session = Session(
+            id=str(uuid.uuid4()),
+            started_at=datetime.now(UTC).isoformat(),
+            ended_at=None,
+            agent_tool=agent_tool,
+            project_path=str(Path.cwd()),
+            hostname=socket.gethostname(),
+            agent_id=agent_id,
+        )
+        self._persist_session(session)
+        self._span_dir(session.id).mkdir(parents=True, exist_ok=True)
+        return session
 
     def get_session(self, session_id: str) -> Session | None:
         """Return a specific session by ID, or None."""
