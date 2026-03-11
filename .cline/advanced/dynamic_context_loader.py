@@ -644,7 +644,7 @@ class AdaptiveLearningSystem:
 
         profile = self.user_profiles[developer_id]
         primitive = interaction["primitive_suggested"]
-        outcome = interaction["outcome"]
+        interaction["outcome"]
         feedback = interaction["feedback"]
 
         # Update usage patterns
@@ -1015,7 +1015,7 @@ def create_context_loader(project_path: str, developer_id: str = "default") -> D
 def quick_context_analysis(project_path: str) -> dict[str, Any]:
     """Perform a quick context analysis and return insights."""
     loader = create_context_loader(project_path)
-    context = loader.load_context()
+    loader.load_context()
     return loader.get_context_insights()
 
 

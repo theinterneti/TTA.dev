@@ -154,7 +154,7 @@ class PersonaActivator:
         with open(self.hypertool_config) as f:
             config = json.load(f)
 
-        servers = config.get("mcpServers", {})
+        config.get("mcpServers", {})
 
         # Persona-specific tool mapping
         persona_tools = {
@@ -177,11 +177,7 @@ class PersonaActivator:
         """
         context = self.analyze_workspace_context()
         selected_persona = self.select_persona(context)
-        mcp_tools = (
-            self.get_persona_mcp_tools(selected_persona)
-            if selected_persona
-            else []
-        )
+        mcp_tools = self.get_persona_mcp_tools(selected_persona) if selected_persona else []
         personas_md = self.parse_agents_md()
 
         return {
@@ -231,9 +227,7 @@ def main():
     """CLI interface for persona activator."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Automatically select and activate agent persona"
-    )
+    parser = argparse.ArgumentParser(description="Automatically select and activate agent persona")
     parser.add_argument(
         "--workspace",
         type=Path,

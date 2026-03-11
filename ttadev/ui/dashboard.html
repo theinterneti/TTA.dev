@@ -508,16 +508,35 @@
                         addTrace({
                             trace_id: trace.trace_id,
                             start_time: trace.timestamp,
+                            timestamp: trace.timestamp,
                             status: 'success',
-                            duration_ms: 0,
+                            duration_ms: trace.details?.duration_ns ? trace.details.duration_ns / 1e6 : 0,
+                            duration_ns: trace.details?.duration_ns || 0,
+                            provider: trace.provider,
+                            model: trace.model,
+                            agent: trace.agent,
                             spans: [{
                                 name: `${trace.activity_type}`,
                                 span_id: trace.trace_id,
-                                attributes: trace.details
+                                attributes: {
+                                    ...trace.details,
+                                    provider: trace.provider,
+                                    model: trace.model,
+                                    agent: trace.agent
+                                }
                             }]
                         });
                     } else {
-                        addTrace(trace);
+                        // OpenTelemetry trace format
+                        addTrace({
+                            ...trace,
+                            duration_ms: trace.duration_ns ? trace.duration_ns / 1e6 : 0,
+                            spans: trace.spans || [{
+                                name: trace.name,
+                                span_id: trace.span_id,
+                                attributes: trace.attributes
+                            }]
+                        });
                     }
                 });
             } catch (error) {
@@ -527,14 +546,14 @@
         
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.hostname}:8001`;
+            const wsUrl = `${protocol}//${window.location.host}/ws`;
             
             ws = new WebSocket(wsUrl);
             
             ws.onopen = () => {
                 console.log('✅ WebSocket connected');
-                document.getElementById('connectionStatus').textContent = 'Connected';
-                document.getElementById('connectionStatus').className = 'connection-status connected';
+                document.getElementById('connection-status').textContent = 'Connected';
+                document.getElementById('connection-status').className = 'connection-status connected';
                 reconnectAttempts = 0;
             };
             
@@ -551,8 +570,8 @@
             
             ws.onclose = () => {
                 console.log('WebSocket closed');
-                document.getElementById('connectionStatus').textContent = 'Disconnected';
-                document.getElementById('connectionStatus').className = 'connection-status disconnected';
+                document.getElementById('connection-status').textContent = 'Disconnected';
+                document.getElementById('connection-status').className = 'connection-status disconnected';
                 
                 if (reconnectAttempts < maxReconnectAttempts) {
                     reconnectAttempts++;
@@ -664,11 +683,18 @@
             const statusClass = trace.status === 'error' ? 'status-error' : 'status-success';
             
             // Extract metadata from trace
-            const provider = trace.spans?.[0]?.attributes?.provider || 'unknown';
-            const model = trace.spans?.[0]?.attributes?.model || 'unknown';
-            const agent = trace.spans?.[0]?.attributes?.agent || 'none';
+            const provider = trace.spans?.[0]?.attributes?.provider || trace.provider || 'unknown';
+            const model = trace.spans?.[0]?.attributes?.model || trace.model || 'unknown';
+            const agent = trace.spans?.[0]?.attributes?.agent || trace.agent || 'none';
             
             const primitiveTypes = trace.spans ? new Set(trace.spans.map(s => extractPrimitiveType(s.name))) : new Set();
+            
+            // Parse timestamp (handles ISO strings, nanoseconds, and milliseconds)
+            let timestamp = trace.start_time || trace.timestamp || Date.now();
+            if (typeof timestamp === 'number' && timestamp > 1e15) {
+                // Nanosecond timestamp - convert to milliseconds
+                timestamp = Math.floor(timestamp / 1e6);
+            }
             
             div.innerHTML = `
                 <div class="trace-header">
@@ -676,10 +702,10 @@
                         <span class="${statusClass}">${statusIcon}</span>
                         <span class="trace-id">${trace.trace_id.substring(0, 12)}...</span>
                         <span style="margin-left: 10px; opacity: 0.6; font-size: 0.9em;">
-                            ${new Date(trace.start_time || Date.now()).toLocaleTimeString()}
+                            ${new Date(timestamp).toLocaleTimeString()}
                         </span>
                     </div>
-                    <div class="trace-duration">${(trace.duration_ms || 0).toFixed(2)}ms</div>
+                    <div class="trace-duration">${(trace.duration_ms || trace.duration_ns / 1e6 || 0).toFixed(2)}ms</div>
                 </div>
                 
                 <div class="trace-hierarchy">
@@ -972,198 +998,6 @@
             });
         }
         
-        // CodeGraph visualization class
-        class CodeGraph {
-            constructor(containerId) {
-                this.containerId = containerId;
-                this.svg = null;
-                this.simulation = null;
-            }
-            
-            async loadGraph(viewType) {
-                const container = document.getElementById(this.containerId);
-                
-                // Fetch graph data from CGC based on view type
-                let apiEndpoint;
-                switch(viewType) {
-                    case 'primitives':
-                        apiEndpoint = '/api/cgc/primitives';
-                        break;
-                    case 'agents':
-                        apiEndpoint = '/api/cgc/agents';
-                        break;
-                    case 'dependencies':
-                    case 'architecture':
-                    default:
-                        apiEndpoint = '/api/cgc/stats';
-                }
-                
-                const response = await fetch(apiEndpoint);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const data = await response.json();
-                
-                // Convert CGC data to graph format
-                const graphData = this.convertToGraphData(data, viewType);
-                this.renderGraph(container, graphData);
-            }
-            
-            convertToGraphData(data, viewType) {
-                // Convert CGC response to D3 graph format
-                if (viewType === 'primitives' && data.results) {
-                    const nodes = [];
-                    const edges = [];
-                    const nodeMap = new Map();
-                    
-                    // Process nodes from Cypher results
-                    data.results.forEach(result => {
-                        if (result.c && !nodeMap.has(result.c.name)) {
-                            nodes.push({
-                                id: result.c.name,
-                                label: result.c.name,
-                                type: 'primitive'
-                            });
-                            nodeMap.set(result.c.name, nodes.length - 1);
-                        }
-                        
-                        if (result.related && !nodeMap.has(result.related.name)) {
-                            nodes.push({
-                                id: result.related.name,
-                                label: result.related.name,
-                                type: 'class'
-                            });
-                            nodeMap.set(result.related.name, nodes.length - 1);
-                        }
-                        
-                        if (result.r && result.c && result.related) {
-                            edges.push({
-                                source: result.c.name,
-                                target: result.related.name,
-                                type: result.r.type
-                            });
-                        }
-                    });
-                    
-                    return { nodes, edges };
-                }
-                
-                // Default fallback: create demo graph
-                return {
-                    nodes: [
-                        { id: 'TTA.dev', label: 'TTA.dev Core', type: 'root' },
-                        { id: 'primitives', label: 'Primitives', type: 'module' },
-                        { id: 'agents', label: 'Agents', type: 'module' },
-                        { id: 'workflows', label: 'Workflows', type: 'module' }
-                    ],
-                    edges: [
-                        { source: 'TTA.dev', target: 'primitives' },
-                        { source: 'TTA.dev', target: 'agents' },
-                        { source: 'TTA.dev', target: 'workflows' },
-                        { source: 'workflows', target: 'primitives' }
-                    ]
-                };
-            }
-            
-            renderGraph(container, data) {
-                // Clear container
-                container.innerHTML = '';
-                
-                // Create SVG
-                const width = container.clientWidth;
-                const height = 600;
-                
-                const svg = d3.select(`#${this.containerId}`)
-                    .append('svg')
-                    .attr('width', width)
-                    .attr('height', height)
-                    .style('background', '#0f1419');
-                
-                // Create force simulation
-                const simulation = d3.forceSimulation(data.nodes)
-                    .force('link', d3.forceLink(data.edges).id(d => d.id).distance(100))
-                    .force('charge', d3.forceManyBody().strength(-300))
-                    .force('center', d3.forceCenter(width / 2, height / 2))
-                    .force('collision', d3.forceCollide().radius(30));
-                
-                // Draw edges
-                const links = svg.append('g')
-                    .selectAll('line')
-                    .data(data.edges)
-                    .enter().append('line')
-                    .attr('stroke', '#4a5568')
-                    .attr('stroke-width', 2)
-                    .attr('stroke-opacity', 0.6);
-                
-                // Draw nodes
-                const nodes = svg.append('g')
-                    .selectAll('circle')
-                    .data(data.nodes)
-                    .enter().append('circle')
-                    .attr('r', 8)
-                    .attr('fill', d => this.getNodeColor(d.type))
-                    .call(d3.drag()
-                        .on('start', (event, d) => {
-                            if (!event.active) simulation.alphaTarget(0.3).restart();
-                            d.fx = d.x;
-                            d.fy = d.y;
-                        })
-                        .on('drag', (event, d) => {
-                            d.fx = event.x;
-                            d.fy = event.y;
-                        })
-                        .on('end', (event, d) => {
-                            if (!event.active) simulation.alphaTarget(0);
-                            d.fx = null;
-                            d.fy = null;
-                        }));
-                
-                // Add labels
-                const labels = svg.append('g')
-                    .selectAll('text')
-                    .data(data.nodes)
-                    .enter().append('text')
-                    .text(d => d.label || d.id)
-                    .attr('font-size', 10)
-                    .attr('fill', '#e0e6ed')
-                    .attr('dx', 12)
-                    .attr('dy', 4);
-                
-                // Update positions on simulation tick
-                simulation.on('tick', () => {
-                    links
-                        .attr('x1', d => d.source.x)
-                        .attr('y1', d => d.source.y)
-                        .attr('x2', d => d.target.x)
-                        .attr('y2', d => d.target.y);
-                    
-                    nodes
-                        .attr('cx', d => d.x)
-                        .attr('cy', d => d.y);
-                    
-                    labels
-                        .attr('x', d => d.x)
-                        .attr('y', d => d.y);
-                });
-                
-                this.svg = svg;
-                this.simulation = simulation;
-            }
-            
-            getNodeColor(type) {
-                const colors = {
-                    'primitive': '#10b981',
-                    'workflow': '#3b82f6',
-                    'agent': '#8b5cf6',
-                    'function': '#f59e0b',
-                    'class': '#ef4444',
-                    'module': '#6366f1'
-                };
-                return colors[type] || '#6b7280';
-            }
-        }
-        
         function fitGraphView() {
             if (window.codeGraphInstance && window.codeGraphInstance.simulation) {
                 // Fit the graph to view
@@ -1315,184 +1149,3 @@
     <script src="/static/js/code-graph.js"></script>
 </body>
 </html>
-
-<script>
-// Real-time WebSocket Connection
-let ws = null;
-let reconnectAttempts = 0;
-const MAX_RECONNECT_ATTEMPTS = 5;
-
-function connectWebSocket() {
-    const wsUrl = `ws://${window.location.host}/ws`;
-    console.log('Connecting to WebSocket:', wsUrl);
-    
-    ws = new WebSocket(wsUrl);
-    
-    ws.onopen = () => {
-        console.log('✓ WebSocket connected');
-        reconnectAttempts = 0;
-        updateConnectionStatus(true);
-    };
-    
-    ws.onmessage = (event) => {
-        try {
-            const message = JSON.parse(event.data);
-            handleWebSocketMessage(message);
-        } catch (error) {
-            console.error('Error parsing WebSocket message:', error);
-        }
-    };
-    
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        updateConnectionStatus(false);
-    };
-    
-    ws.onclose = () => {
-        console.log('WebSocket disconnected');
-        updateConnectionStatus(false);
-        
-        // Attempt reconnect
-        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-            reconnectAttempts++;
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
-            console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts})`);
-            setTimeout(connectWebSocket, delay);
-        }
-    };
-}
-
-function handleWebSocketMessage(message) {
-    if (message.type === 'trace') {
-        addTraceToList(message.data);
-        updateStats();
-    }
-}
-
-function addTraceToList(trace) {
-    const tracesList = document.getElementById('traces-list');
-    if (!tracesList) return;
-    
-    const traceEl = createTraceElement(trace);
-    
-    // Add to top with fade-in animation
-    traceEl.style.opacity = '0';
-    tracesList.insertBefore(traceEl, tracesList.firstChild);
-    
-    setTimeout(() => {
-        traceEl.style.transition = 'opacity 0.3s';
-        traceEl.style.opacity = '1';
-    }, 10);
-    
-    // Keep only last 50 traces
-    while (tracesList.children.length > 50) {
-        tracesList.removeChild(tracesList.lastChild);
-    }
-}
-
-function createTraceElement(trace) {
-    const div = document.createElement('div');
-    div.className = 'trace-item';
-    div.onclick = () => showTraceDetails(trace);
-    
-    const status = trace.status || 'success';
-    const statusClass = status === 'error' ? 'error' : 'success';
-    
-    div.innerHTML = `
-        <div class="trace-header">
-            <span class="trace-id">${trace.trace_id || 'unknown'}</span>
-            <span class="trace-status status-${statusClass}">${status}</span>
-        </div>
-        <div class="trace-meta">
-            <span>Duration: ${(trace.duration_ms || 0).toFixed(2)}ms</span>
-            <span>Spans: ${(trace.spans || []).length}</span>
-            <span>${new Date(trace.start_time).toLocaleString()}</span>
-        </div>
-    `;
-    
-    return div;
-}
-
-function updateConnectionStatus(connected) {
-    const statusEl = document.getElementById('connection-status');
-    if (!statusEl) return;
-    
-    if (connected) {
-        statusEl.textContent = '● Connected';
-        statusEl.className = 'status-connected';
-    } else {
-        statusEl.textContent = '○ Disconnected';
-        statusEl.className = 'status-disconnected';
-    }
-}
-
-// Initialize WebSocket on page load
-document.addEventListener('DOMContentLoaded', () => {
-    connectWebSocket();
-    
-    // Heartbeat to keep connection alive
-    setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send('ping');
-        }
-    }, 30000); // Every 30 seconds
-});
-</script>
-
-<style>
-.status-connected {
-    color: #4ade80;
-}
-
-.status-disconnected {
-    color: #f87171;
-}
-
-.trace-item {
-    padding: 1rem;
-    background: #1e293b;
-    border-radius: 0.5rem;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.trace-item:hover {
-    background: #334155;
-    transform: translateX(4px);
-}
-
-.trace-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-}
-
-.trace-id {
-    font-family: monospace;
-    color: #60a5fa;
-}
-
-.trace-status {
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-}
-
-.status-success {
-    background: #166534;
-    color: #4ade80;
-}
-
-.status-error {
-    background: #7f1d1d;
-    color: #f87171;
-}
-
-.trace-meta {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.875rem;
-    color: #94a3b8;
-}
-</style>

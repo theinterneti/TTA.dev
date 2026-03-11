@@ -7,7 +7,7 @@ they work effectively across multiple AI agents and models.
 
 import asyncio
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from tta_dev_primitives import WorkflowContext
 from tta_dev_primitives.integrations import CodeExecutionPrimitive
@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
-class A_B_TestRunner(InstrumentedPrimitive[Dict, Dict]):
+class A_B_TestRunner(InstrumentedPrimitive[Dict, Dict]):  # noqa: N801
     """
     A primitive that runs a single A/B test case in an e2b sandbox.
     """
@@ -157,6 +157,7 @@ asyncio.run(test())
 
 if __name__ == "__main__":
     import os
+
     from dotenv import load_dotenv
 
     load_dotenv()

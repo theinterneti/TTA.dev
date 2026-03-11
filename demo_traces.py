@@ -8,13 +8,13 @@ from pathlib import Path
 # Add tta-dev to path
 sys.path.insert(0, str(Path(__file__).parent / "tta-dev"))
 
-from primitives.core import WorkflowContext, LambdaPrimitive
-from primitives.recovery.retry import RetryPrimitive, RetryStrategy
-from primitives.recovery.circuit_breaker_primitive import (
-    CircuitBreakerPrimitive,
-    CircuitBreakerConfig,
-)
 from observability.observability_integration import initialize_observability
+from primitives.core import LambdaPrimitive, WorkflowContext
+from primitives.recovery.circuit_breaker_primitive import (
+    CircuitBreakerConfig,
+    CircuitBreakerPrimitive,
+)
+from primitives.recovery.retry import RetryPrimitive, RetryStrategy
 
 
 async def sample_task(data: dict, ctx: WorkflowContext) -> dict:
@@ -52,9 +52,7 @@ async def generate_traces():
 
     circuit_breaker_workflow = CircuitBreakerPrimitive(
         LambdaPrimitive(sample_task),
-        config=CircuitBreakerConfig(
-            failure_threshold=3, recovery_timeout=5.0, success_threshold=2
-        ),
+        config=CircuitBreakerConfig(failure_threshold=3, recovery_timeout=5.0, success_threshold=2),
     )
 
     workflows = [

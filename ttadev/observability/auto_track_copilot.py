@@ -4,11 +4,14 @@ Auto-tracking for GitHub Copilot CLI agent actions.
 This module automatically detects and tracks actions by GitHub Copilot CLI.
 """
 
-import os
 import inspect
+import os
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable
+from typing import Any
+
 from .agent_tracker import track_action
+
 
 def is_copilot_session() -> bool:
     """Detect if we're running in a GitHub Copilot CLI session."""
@@ -20,6 +23,7 @@ def is_copilot_session() -> bool:
     ]
     return any(os.getenv(var) for var in copilot_indicators)
 
+
 def get_copilot_context() -> dict[str, Any]:
     """Get context about the current Copilot session."""
     return {
@@ -29,13 +33,15 @@ def get_copilot_context() -> dict[str, Any]:
         "session_id": os.getenv("COPILOT_SESSION_ID", "unknown"),
     }
 
+
 def track_primitive_execution(func: Callable) -> Callable:
     """Decorator to auto-track primitive executions."""
+
     @wraps(func)
     async def wrapper(self, *args, **kwargs):
         if is_copilot_session():
             ctx = get_copilot_context()
-            
+
             # Determine TTA agent if any
             tta_agent = None
             frame = inspect.currentframe()
@@ -44,7 +50,7 @@ def track_primitive_execution(func: Callable) -> Callable:
                 local_vars = frame.f_back.f_locals
                 if "agent_name" in local_vars:
                     tta_agent = local_vars["agent_name"]
-            
+
             # Track execution start
             track_action(
                 provider=ctx["provider"],
@@ -59,11 +65,12 @@ def track_primitive_execution(func: Callable) -> Callable:
                 tta_agent=tta_agent,
                 user=ctx["user"],
             )
-        
+
         result = await func(self, *args, **kwargs)
         return result
-    
+
     return wrapper
+
 
 def track_workflow_execution(workflow_name: str, primitives: list[str]) -> None:
     """Track a complete workflow execution."""
@@ -80,6 +87,7 @@ def track_workflow_execution(workflow_name: str, primitives: list[str]) -> None:
             },
             user=ctx["user"],
         )
+
 
 def track_agent_activation(agent_name: str, task: str) -> None:
     """Track when a TTA agent is activated."""

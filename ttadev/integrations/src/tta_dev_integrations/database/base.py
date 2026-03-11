@@ -3,8 +3,8 @@
 from abc import abstractmethod
 from typing import Any
 
-from pydantic import BaseModel
 from primitives import WorkflowContext, WorkflowPrimitive
+from pydantic import BaseModel
 
 
 class DatabaseQuery(BaseModel):

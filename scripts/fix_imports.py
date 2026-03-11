@@ -30,15 +30,16 @@ IMPORT_MAPPINGS = {
     r"import tta_dev_primitives": "import primitives",
 }
 
+
 def fix_imports_in_file(file_path: Path) -> bool:
     """Fix imports in a single file."""
     try:
         content = file_path.read_text()
         original = content
-        
+
         for old_pattern, new_import in IMPORT_MAPPINGS.items():
             content = re.sub(old_pattern, new_import, content)
-        
+
         if content != original:
             file_path.write_text(content)
             print(f"✓ Fixed: {file_path}")
@@ -48,24 +49,26 @@ def fix_imports_in_file(file_path: Path) -> bool:
         print(f"✗ Error fixing {file_path}: {e}")
         return False
 
+
 def main():
     """Fix all imports in tta-dev directory."""
     tta_dev = Path("/home/thein/repos/TTA.dev/tta-dev")
-    
+
     if not tta_dev.exists():
         print(f"Error: {tta_dev} does not exist")
         return
-    
+
     python_files = list(tta_dev.rglob("*.py"))
     fixed_count = 0
-    
+
     print(f"Processing {len(python_files)} Python files...")
-    
+
     for py_file in python_files:
         if fix_imports_in_file(py_file):
             fixed_count += 1
-    
+
     print(f"\n✓ Fixed {fixed_count} files")
+
 
 if __name__ == "__main__":
     main()

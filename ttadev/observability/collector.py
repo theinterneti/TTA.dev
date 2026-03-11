@@ -10,10 +10,11 @@ This module provides file-based trace collection that:
 import asyncio
 import json
 from collections import defaultdict
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+
 import aiofiles
 import aiofiles.os
 
@@ -21,16 +22,17 @@ import aiofiles.os
 @dataclass
 class TraceEvent:
     """A single event in a trace."""
+
     trace_id: str
     span_id: str
     event_type: str
     timestamp: str
     data: dict[str, Any]
-    
+
     def to_json(self) -> str:
         """Convert to JSON string."""
         return json.dumps(asdict(self))
-    
+
     @classmethod
     def from_json(cls, json_str: str) -> "TraceEvent":
         """Create from JSON string."""
@@ -43,7 +45,7 @@ class ObservabilityCollector:
 
     def __init__(self, trace_dir: Path | str = ".tta/traces"):
         """Initialize collector with trace directory.
-        
+
         Args:
             trace_dir: Directory to store trace files
         """
@@ -51,14 +53,14 @@ class ObservabilityCollector:
         self.active_dir = self.trace_dir / "active"
         self.completed_dir = self.trace_dir / "completed"
         self._locks: dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
-        
+
         # Create directory structure
         self.active_dir.mkdir(parents=True, exist_ok=True)
         self.completed_dir.mkdir(parents=True, exist_ok=True)
 
     async def record_event(self, event: TraceEvent) -> None:
         """Record a trace event to the active trace file.
-        
+
         Args:
             event: The trace event to record
         """
@@ -69,17 +71,17 @@ class ObservabilityCollector:
 
     async def complete_trace(self, trace_id: str) -> None:
         """Move a trace from active to completed.
-        
+
         Args:
             trace_id: The trace ID to complete
         """
         async with self._locks[trace_id]:
             active_file = self.active_dir / f"{trace_id}.jsonl"
             completed_file = self.completed_dir / f"{trace_id}.jsonl"
-            
+
             if await aiofiles.os.path.exists(active_file):
                 # Read and write (aiofiles doesn't have rename)
-                async with aiofiles.open(active_file, "r") as src:
+                async with aiofiles.open(active_file) as src:
                     content = await src.read()
                 async with aiofiles.open(completed_file, "w") as dst:
                     await dst.write(content)
@@ -87,7 +89,7 @@ class ObservabilityCollector:
 
     async def list_active_traces(self) -> list[str]:
         """List all active trace IDs.
-        
+
         Returns:
             List of active trace IDs
         """
@@ -96,10 +98,10 @@ class ObservabilityCollector:
 
     async def get_trace_events(self, trace_id: str) -> list[TraceEvent]:
         """Get all events for a trace.
-        
+
         Args:
             trace_id: The trace ID to retrieve
-            
+
         Returns:
             List of trace events
         """
@@ -107,53 +109,53 @@ class ObservabilityCollector:
         trace_file = self.active_dir / f"{trace_id}.jsonl"
         if not await aiofiles.os.path.exists(trace_file):
             trace_file = self.completed_dir / f"{trace_id}.jsonl"
-        
+
         if not await aiofiles.os.path.exists(trace_file):
             return []
-        
+
         events = []
-        async with aiofiles.open(trace_file, "r") as f:
+        async with aiofiles.open(trace_file) as f:
             async for line in f:
                 if line.strip():
                     events.append(TraceEvent.from_json(line))
-        
+
         return events
 
 
 # Modern TraceCollector for Phase 1 tests
 class TraceCollector:
     """Collects traces and persists them to filesystem."""
-    
+
     def __init__(self, traces_dir: Path | str | None = None):
         """Initialize collector.
-        
+
         Args:
             traces_dir: Directory to store traces (default: .observability/traces)
         """
         self.traces_dir = Path(traces_dir) if traces_dir else Path(".observability/traces")
         self.traces_dir.mkdir(parents=True, exist_ok=True)
         self._subscribers: list[asyncio.Queue] = []
-    
+
     async def collect_trace(self, trace_data: dict[str, Any]) -> None:
         """Collect and persist a trace.
-        
+
         Args:
             trace_data: Trace data dictionary with trace_id and spans
         """
         trace_id = trace_data["trace_id"]
-        
+
         # Add timestamp if not present
         if "timestamp" not in trace_data:
-            trace_data["timestamp"] = datetime.now(timezone.utc).isoformat() + "Z"
-        
+            trace_data["timestamp"] = datetime.now(UTC).isoformat() + "Z"
+
         # Write to file
         trace_file = self.traces_dir / f"{trace_id}.json"
         async with aiofiles.open(trace_file, "w") as f:
             await f.write(json.dumps(trace_data, indent=2))
-        
+
         # Broadcast to subscribers
         await self._broadcast(trace_data)
-    
+
     async def _broadcast(self, trace_data: dict[str, Any]) -> None:
         """Broadcast trace to all subscribers."""
         for queue in self._subscribers:
@@ -161,25 +163,25 @@ class TraceCollector:
                 await queue.put({"type": "new_trace", "trace": trace_data})
             except Exception:
                 pass  # Subscriber queue full or closed
-    
+
     def subscribe(self) -> asyncio.Queue:
         """Subscribe to trace updates.
-        
+
         Returns:
             Queue that will receive trace updates
         """
         queue: asyncio.Queue = asyncio.Queue(maxsize=100)
         self._subscribers.append(queue)
         return queue
-    
+
     def unsubscribe(self, queue: asyncio.Queue) -> None:
         """Unsubscribe from trace updates."""
         if queue in self._subscribers:
             self._subscribers.remove(queue)
-    
+
     def get_all_traces(self) -> list[dict[str, Any]]:
         """Get all collected traces.
-        
+
         Returns:
             List of trace dictionaries
         """
@@ -191,7 +193,7 @@ class TraceCollector:
             except Exception:
                 continue  # Skip corrupted files
         return traces
-    
+
     async def close(self):
         """Close resources."""
         pass
@@ -200,4 +202,3 @@ class TraceCollector:
 # Global singleton instances
 observability_collector = ObservabilityCollector()
 trace_collector = TraceCollector()  # Legacy
-

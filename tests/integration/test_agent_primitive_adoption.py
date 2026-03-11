@@ -41,13 +41,9 @@ class TestPrimitiveAdoption:
             tree = ast.parse(content)
 
             # Check for primitive imports
-            imports = [
-                node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
-            ]
+            imports = [node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
             primitive_imports = [
-                imp
-                for imp in imports
-                if imp.module and "tta_dev_primitives" in imp.module
+                imp for imp in imports if imp.module and "tta_dev_primitives" in imp.module
             ]
 
             if not primitive_imports:
@@ -62,9 +58,7 @@ class TestPrimitiveAdoption:
 
         unexpected_files = [f for f in missing_imports if f not in allowed_exceptions]
 
-        assert not unexpected_files, (
-            f"Examples missing primitive imports: {unexpected_files}"
-        )
+        assert not unexpected_files, f"Examples missing primitive imports: {unexpected_files}"
 
     def test_no_direct_asyncio_gather_in_examples(self, examples_dir: Path):
         """Verify examples don't use asyncio.gather() directly."""
@@ -233,9 +227,7 @@ class TestPrimitiveAdoption:
         # Allow some exceptions (e.g., pure wrapper classes)
         allowed_exceptions = {"__init__.py"}
 
-        unexpected_files = [
-            f for f in missing_error_handling if f not in allowed_exceptions
-        ]
+        unexpected_files = [f for f in missing_error_handling if f not in allowed_exceptions]
 
         assert not unexpected_files, (
             f"Recovery primitives without error handling: {unexpected_files}"

@@ -80,9 +80,7 @@ def main():
     parser = argparse.ArgumentParser(description="Log AI agent decisions")
     parser.add_argument("--agent-name", required=True, help="Name of AI agent")
     parser.add_argument("--action", required=True, help="Proposed action")
-    parser.add_argument(
-        "--confidence", type=float, required=True, help="Confidence (0.0-1.0)"
-    )
+    parser.add_argument("--confidence", type=float, required=True, help="Confidence (0.0-1.0)")
     parser.add_argument("--rationale", required=True, help="Decision rationale")
     parser.add_argument(
         "--metadata",

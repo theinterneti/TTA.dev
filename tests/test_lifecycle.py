@@ -17,6 +17,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+
 from ttadev.primitives.core.base import WorkflowContext
 from ttadev.primitives.lifecycle import (
     DEPLOYMENT_TO_PRODUCTION,
@@ -75,18 +76,12 @@ def context() -> WorkflowContext:
 @pytest.fixture
 def tmp_project(tmp_path: Path) -> Path:
     """Create a minimal project structure in a temp directory."""
-    (tmp_path / "pyproject.toml").write_text(
-        '[project]\nname = "test"\nversion = "1.0.0"\n'
-    )
-    (tmp_path / "README.md").write_text(
-        "# Test Project\n\n## Installation\n\npip install test\n"
-    )
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "test"\nversion = "1.0.0"\n')
+    (tmp_path / "README.md").write_text("# Test Project\n\n## Installation\n\npip install test\n")
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "main.py").write_text('"""Main module."""\nprint("hello")\n')
     (tmp_path / "tests").mkdir()
-    (tmp_path / "tests" / "test_main.py").write_text(
-        "def test_main():\n    assert True\n"
-    )
+    (tmp_path / "tests" / "test_main.py").write_text("def test_main():\n    assert True\n")
     return tmp_path
 
 
@@ -94,9 +89,7 @@ def tmp_project(tmp_path: Path) -> Path:
 def complete_project(tmp_project: Path) -> Path:
     """Create a fully complete project with all required files."""
     (tmp_project / "LICENSE").write_text("MIT License\n")
-    (tmp_project / "CHANGELOG.md").write_text(
-        "# Changelog\n\n## 1.0.0\n\n- Initial release\n"
-    )
+    (tmp_project / "CHANGELOG.md").write_text("# Changelog\n\n## 1.0.0\n\n- Initial release\n")
     (tmp_project / "examples").mkdir()
     (tmp_project / "examples" / "basic.py").write_text("print('example')\n")
     return tmp_project
@@ -260,9 +253,7 @@ class TestValidationCheck:
         assert result.fix_command == "run fix"
 
     @pytest.mark.asyncio
-    async def test_check_exception(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_check_exception(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test ValidationCheck that raises an exception."""
 
         async def raise_error(path: Path, ctx: WorkflowContext) -> bool:
@@ -368,9 +359,7 @@ class TestReadinessCheckPrimitive:
     """Tests for ReadinessCheckPrimitive parallel execution."""
 
     @pytest.mark.asyncio
-    async def test_parallel_execution(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_parallel_execution(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test that multiple checks run in parallel."""
 
         async def check_readme(path: Path, ctx: WorkflowContext) -> bool:
@@ -459,9 +448,7 @@ class TestStageReadiness:
             target_stage=Stage.DEPLOYMENT,
             ready=False,
             blockers=[
-                ValidationResult(
-                    "x", False, Severity.BLOCKER, "missing license", "add license"
-                )
+                ValidationResult("x", False, Severity.BLOCKER, "missing license", "add license")
             ],
             next_steps=["Add LICENSE file"],
             recommended_actions=["Run quality checks"],
@@ -616,9 +603,7 @@ class TestStageManager:
         assert readiness.ready
 
     @pytest.mark.asyncio
-    async def test_transition_success(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_transition_success(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test successful stage transition."""
         manager = StageManager(stage_criteria_map={})
         result = await manager.transition(
@@ -662,9 +647,7 @@ class TestStageManager:
             )
 
     @pytest.mark.asyncio
-    async def test_transition_force(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_transition_force(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test forced transition overrides blockers."""
 
         async def always_fail(path: Path, ctx: WorkflowContext) -> bool:
@@ -704,9 +687,7 @@ class TestGenericChecks:
     """Tests for language-agnostic validation checks."""
 
     @pytest.mark.asyncio
-    async def test_has_package_manifest(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_has_package_manifest(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test HAS_PACKAGE_MANIFEST check."""
         result = await HAS_PACKAGE_MANIFEST.execute(tmp_project, context)
         assert result.passed
@@ -720,41 +701,31 @@ class TestGenericChecks:
         assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_has_readme(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_has_readme(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test HAS_README check."""
         result = await HAS_README.execute(tmp_project, context)
         assert result.passed
 
     @pytest.mark.asyncio
-    async def test_has_readme_missing(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_has_readme_missing(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test HAS_README fails when no README."""
         result = await HAS_README.execute(tmp_path, context)
         assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_has_license(
-        self, context: WorkflowContext, complete_project: Path
-    ) -> None:
+    async def test_has_license(self, context: WorkflowContext, complete_project: Path) -> None:
         """Test HAS_LICENSE check."""
         result = await HAS_LICENSE.execute(complete_project, context)
         assert result.passed
 
     @pytest.mark.asyncio
-    async def test_has_license_missing(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_has_license_missing(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test HAS_LICENSE fails when no LICENSE."""
         result = await HAS_LICENSE.execute(tmp_path, context)
         assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_has_tests_directory(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_has_tests_directory(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test HAS_TESTS_DIRECTORY check."""
         result = await HAS_TESTS_DIRECTORY.execute(tmp_project, context)
         assert result.passed
@@ -768,9 +739,7 @@ class TestGenericChecks:
         assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_has_src_directory(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_has_src_directory(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test HAS_SRC_DIRECTORY check."""
         result = await HAS_SRC_DIRECTORY.execute(tmp_project, context)
         assert result.passed
@@ -793,9 +762,7 @@ class TestDocumentationChecks:
     """Tests for documentation validation checks."""
 
     @pytest.mark.asyncio
-    async def test_readme_has_sections(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_readme_has_sections(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test HAS_README_SECTIONS passes when README has required sections."""
         result = await HAS_README_SECTIONS.execute(tmp_project, context)
         assert result.passed
@@ -818,67 +785,51 @@ class TestDocumentationChecks:
         assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_has_changelog(
-        self, context: WorkflowContext, complete_project: Path
-    ) -> None:
+    async def test_has_changelog(self, context: WorkflowContext, complete_project: Path) -> None:
         """Test HAS_CHANGELOG passes when CHANGELOG.md exists."""
         result = await HAS_CHANGELOG.execute(complete_project, context)
         assert result.passed
 
     @pytest.mark.asyncio
-    async def test_has_changelog_missing(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_has_changelog_missing(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test HAS_CHANGELOG fails when no CHANGELOG."""
         result = await HAS_CHANGELOG.execute(tmp_path, context)
         assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_has_changelog_changes_md(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_has_changelog_changes_md(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test HAS_CHANGELOG passes with CHANGES.md variant."""
         (tmp_path / "CHANGES.md").write_text("# Changes\n")
         result = await HAS_CHANGELOG.execute(tmp_path, context)
         assert result.passed
 
     @pytest.mark.asyncio
-    async def test_has_examples(
-        self, context: WorkflowContext, complete_project: Path
-    ) -> None:
+    async def test_has_examples(self, context: WorkflowContext, complete_project: Path) -> None:
         """Test HAS_EXAMPLES passes when examples/ exists."""
         result = await HAS_EXAMPLES.execute(complete_project, context)
         assert result.passed
 
     @pytest.mark.asyncio
-    async def test_has_examples_missing(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_has_examples_missing(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test HAS_EXAMPLES fails when no examples."""
         result = await HAS_EXAMPLES.execute(tmp_path, context)
         assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_has_examples_via_files(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_has_examples_via_files(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test HAS_EXAMPLES passes with example_*.py files."""
         (tmp_path / "example_basic.py").write_text("print('hello')\n")
         result = await HAS_EXAMPLES.execute(tmp_path, context)
         assert result.passed
 
     @pytest.mark.asyncio
-    async def test_has_docstrings(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_has_docstrings(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test HAS_DOCSTRINGS passes when source files have docstrings."""
         result = await HAS_DOCSTRINGS.execute(tmp_project, context)
         assert result.passed
 
     @pytest.mark.asyncio
-    async def test_has_docstrings_missing(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_has_docstrings_missing(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test HAS_DOCSTRINGS fails when files lack docstrings."""
         src = tmp_path / "src"
         src.mkdir()
@@ -888,9 +839,7 @@ class TestDocumentationChecks:
         assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_has_docstrings_no_src(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_has_docstrings_no_src(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test HAS_DOCSTRINGS passes vacuously when no src/."""
         result = await HAS_DOCSTRINGS.execute(tmp_path, context)
         assert result.passed
@@ -922,9 +871,7 @@ class TestGitChecks:
             )
             (tmp_path / "file.txt").write_text("hello")
             subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True
-            )
+            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
 
             result = await WORKING_TREE_CLEAN.execute(tmp_path, context)
             assert result.passed
@@ -947,9 +894,7 @@ class TestGitChecks:
             )
             (tmp_path / "file.txt").write_text("hello")
             subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True
-            )
+            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
             # Now make a dirty change
             (tmp_path / "dirty.txt").write_text("uncommitted")
 
@@ -961,9 +906,7 @@ class TestGitChecks:
         """Test ON_CORRECT_BRANCH passes on main branch."""
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
-            subprocess.run(
-                ["git", "init", "-b", "main"], cwd=tmp_path, capture_output=True
-            )
+            subprocess.run(["git", "init", "-b", "main"], cwd=tmp_path, capture_output=True)
             subprocess.run(
                 ["git", "config", "user.email", "test@test.com"],
                 cwd=tmp_path,
@@ -976,9 +919,7 @@ class TestGitChecks:
             )
             (tmp_path / "f.txt").write_text("x")
             subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True
-            )
+            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
 
             result = await ON_CORRECT_BRANCH.execute(tmp_path, context)
             assert result.passed
@@ -988,9 +929,7 @@ class TestGitChecks:
         """Test ON_CORRECT_BRANCH fails on feature branch."""
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
-            subprocess.run(
-                ["git", "init", "-b", "main"], cwd=tmp_path, capture_output=True
-            )
+            subprocess.run(["git", "init", "-b", "main"], cwd=tmp_path, capture_output=True)
             subprocess.run(
                 ["git", "config", "user.email", "test@test.com"],
                 cwd=tmp_path,
@@ -1003,9 +942,7 @@ class TestGitChecks:
             )
             (tmp_path / "f.txt").write_text("x")
             subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True
-            )
+            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
             subprocess.run(
                 ["git", "checkout", "-b", "feature/my-branch"],
                 cwd=tmp_path,
@@ -1035,9 +972,7 @@ class TestGitChecks:
                 '[project]\nname = "test"\nversion = "0.1.0"\n'
             )
             subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True
-            )
+            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
 
             result = await VERSION_BUMPED.execute(tmp_path, context)
             assert result.passed  # No tags = version considered bumped
@@ -1060,17 +995,13 @@ class TestSecurityChecks:
     """Tests for security validation checks."""
 
     @pytest.mark.asyncio
-    async def test_no_secrets_clean(
-        self, context: WorkflowContext, tmp_project: Path
-    ) -> None:
+    async def test_no_secrets_clean(self, context: WorkflowContext, tmp_project: Path) -> None:
         """Test NO_SECRETS_IN_CODE passes on clean project."""
         result = await NO_SECRETS_IN_CODE.execute(tmp_project, context)
         assert result.passed
 
     @pytest.mark.asyncio
-    async def test_no_secrets_with_secret(
-        self, context: WorkflowContext, tmp_path: Path
-    ) -> None:
+    async def test_no_secrets_with_secret(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test NO_SECRETS_IN_CODE fails when secret is detected."""
         src = tmp_path / "src"
         src.mkdir()
@@ -1085,9 +1016,7 @@ class TestSecurityChecks:
         """Test NO_SECRETS_IN_CODE skips test files."""
         src = tmp_path / "src"
         src.mkdir()
-        (src / "test_config.py").write_text(
-            'api_key = "sk_test_FAKE_KEY_FOR_TESTING"\n'
-        )
+        (src / "test_config.py").write_text('api_key = "sk_test_FAKE_KEY_FOR_TESTING"\n')
         result = await NO_SECRETS_IN_CODE.execute(tmp_path, context)
         assert result.passed  # Skipped because it's a test file
 
@@ -1165,15 +1094,9 @@ class TestStageDefinitions:
         for stage, criteria in STAGE_CRITERIA_MAP.items():
             for check in criteria.get_all_checks():
                 assert check.name, f"Check missing name in {stage}"
-                assert check.description, (
-                    f"Check '{check.name}' missing description in {stage}"
-                )
-                assert check.failure_message, (
-                    f"Check '{check.name}' missing failure_message"
-                )
-                assert check.severity is not None, (
-                    f"Check '{check.name}' missing severity"
-                )
+                assert check.description, f"Check '{check.name}' missing description in {stage}"
+                assert check.failure_message, f"Check '{check.name}' missing failure_message"
+                assert check.severity is not None, f"Check '{check.name}' missing severity"
 
 
 # ---------------------------------------------------------------------------

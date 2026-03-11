@@ -12,7 +12,8 @@ Then open: http://localhost:8000
 """
 
 import asyncio
-from ttadev.primitives import RetryPrimitive, CachePrimitive, TimeoutPrimitive
+
+from ttadev.primitives import CachePrimitive, RetryPrimitive, TimeoutPrimitive
 from ttadev.primitives.core.base import WorkflowContext
 
 

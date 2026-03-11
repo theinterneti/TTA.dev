@@ -12,7 +12,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class SkillStatus(str, enum.Enum):
+class SkillStatus(enum.StrEnum):
     """Lifecycle status of a skill."""
 
     DRAFT = "draft"

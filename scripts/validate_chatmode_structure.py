@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Validate chatmode structure and Hypertool integration."""
 
-import json
 import re
 from pathlib import Path
 from typing import Any
@@ -35,15 +34,15 @@ TOKEN_BUDGET_RANGES = {
 
 def extract_frontmatter(content: str) -> dict[str, Any]:
     """Extract YAML frontmatter from chatmode file."""
-    match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+    match = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
     if not match:
         return {}
 
     # Simple YAML parsing (just for key: value)
     frontmatter: dict[str, Any] = {}
-    for line in match.group(1).split('\n'):
-        if ':' in line and not line.strip().startswith('-'):
-            key, value = line.split(':', 1)
+    for line in match.group(1).split("\n"):
+        if ":" in line and not line.strip().startswith("-"):
+            key, value = line.split(":", 1)
             frontmatter[key.strip()] = value.strip()
 
     return frontmatter
@@ -67,11 +66,11 @@ def validate_chatmode(file_path: Path) -> tuple[bool, list[str], dict[str, Any]]
         return False, errors, {}
 
     # Check hypertool_persona field
-    if 'hypertool_persona' not in frontmatter:
+    if "hypertool_persona" not in frontmatter:
         errors.append("Missing 'hypertool_persona' field")
     else:
-        persona = frontmatter['hypertool_persona']
-        info['persona'] = persona
+        persona = frontmatter["hypertool_persona"]
+        info["persona"] = persona
 
         # Validate persona name
         if persona not in VALID_PERSONAS:
@@ -82,17 +81,17 @@ def validate_chatmode(file_path: Path) -> tuple[bool, list[str], dict[str, Any]]
             if not persona_file.exists():
                 errors.append(f"Persona definition not found: {persona_file}")
             else:
-                info['persona_file_exists'] = True
+                info["persona_file_exists"] = True
 
     # Check token budget
-    if 'persona_token_budget' not in frontmatter:
+    if "persona_token_budget" not in frontmatter:
         errors.append("Missing 'persona_token_budget' field")
     else:
         try:
-            budget = int(frontmatter['persona_token_budget'])
-            info['token_budget'] = budget
+            budget = int(frontmatter["persona_token_budget"])
+            info["token_budget"] = budget
 
-            persona = frontmatter.get('hypertool_persona')
+            persona = frontmatter.get("hypertool_persona")
             if persona in TOKEN_BUDGET_RANGES:
                 min_budget, max_budget = TOKEN_BUDGET_RANGES[persona]
                 if not (min_budget <= budget <= max_budget):
@@ -104,9 +103,9 @@ def validate_chatmode(file_path: Path) -> tuple[bool, list[str], dict[str, Any]]
             errors.append("Invalid token budget (not a number)")
 
     # Check tools_via_hypertool
-    if 'tools_via_hypertool' not in frontmatter:
+    if "tools_via_hypertool" not in frontmatter:
         errors.append("Missing 'tools_via_hypertool' field")
-    elif frontmatter['tools_via_hypertool'] != 'true':
+    elif frontmatter["tools_via_hypertool"] != "true":
         errors.append("'tools_via_hypertool' should be 'true'")
 
     return len(errors) == 0, errors, info
@@ -136,7 +135,7 @@ def main():
         "failed": 0,
         "errors": {},
         "persona_distribution": {},
-        "token_budgets": []
+        "token_budgets": [],
     }
 
     for file_path in sorted(chatmode_files):
@@ -145,18 +144,21 @@ def main():
 
         if valid:
             print(f"✅ {relative_path}")
-            print(f"   └─ Persona: {info.get('persona', 'N/A')} ({info.get('token_budget', 'N/A')} tokens)")
+            print(
+                f"   └─ Persona: {info.get('persona', 'N/A')} ({info.get('token_budget', 'N/A')} tokens)"
+            )
             results["passed"] += 1
 
             # Track persona distribution
-            persona = info.get('persona')
+            persona = info.get("persona")
             if persona:
-                results["persona_distribution"][persona] = \
+                results["persona_distribution"][persona] = (
                     results["persona_distribution"].get(persona, 0) + 1
+                )
 
             # Track token budgets
-            if 'token_budget' in info:
-                results["token_budgets"].append(info['token_budget'])
+            if "token_budget" in info:
+                results["token_budgets"].append(info["token_budget"])
         else:
             print(f"❌ {relative_path}")
             for error in errors:
@@ -166,14 +168,14 @@ def main():
 
     # Summary
     print("\n" + "=" * 70)
-    print(f"\n📊 Validation Summary:")
+    print("\n📊 Validation Summary:")
     print(f"   ✅ Passed: {results['passed']}")
     print(f"   ❌ Failed: {results['failed']}")
     print(f"   📈 Success Rate: {results['passed'] / len(chatmode_files) * 100:.1f}%")
 
     # Persona distribution
     if results["persona_distribution"]:
-        print(f"\n👥 Persona Distribution:")
+        print("\n👥 Persona Distribution:")
         for persona, count in sorted(results["persona_distribution"].items()):
             percentage = count / results["passed"] * 100
             print(f"   • {persona}: {count} ({percentage:.1f}%)")
@@ -183,7 +185,7 @@ def main():
         avg_budget = sum(results["token_budgets"]) / len(results["token_budgets"])
         min_budget = min(results["token_budgets"])
         max_budget = max(results["token_budgets"])
-        print(f"\n💰 Token Budget Statistics:")
+        print("\n💰 Token Budget Statistics:")
         print(f"   • Average: {avg_budget:.0f} tokens")
         print(f"   • Range: {min_budget} - {max_budget} tokens")
 
@@ -191,7 +193,7 @@ def main():
         print(f"\n⚠️  {results['failed']} chatmode(s) need attention")
         return 1
     else:
-        print(f"\n🎉 All chatmodes validated successfully!")
+        print("\n🎉 All chatmodes validated successfully!")
         return 0
 
 

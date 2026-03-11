@@ -1,26 +1,27 @@
 """Phase 1: Foundation Tests - Stable Server & Basic Data Flow."""
 
-import pytest
 import asyncio
-import aiohttp
 from pathlib import Path
+
+import aiohttp
+import pytest
 
 
 @pytest.fixture
 async def observability_server():
     """Fixture that starts and stops the observability server."""
-    from ttadev.observability.server import ObservabilityServer
     from ttadev.observability.collector import TraceCollector
-    
+    from ttadev.observability.server import ObservabilityServer
+
     collector = TraceCollector()
     server = ObservabilityServer(collector=collector, port=8000)
     await server.start()
-    
+
     # Wait for server to be ready
     await asyncio.sleep(0.5)
-    
+
     yield server
-    
+
     await server.stop()
 
 
@@ -48,7 +49,7 @@ async def test_websocket_connection(server_url):
         async with session.ws_connect(ws_url) as ws:
             # Should connect successfully
             assert not ws.closed
-            
+
             # Should receive initial state
             msg = await asyncio.wait_for(ws.receive_json(), timeout=5.0)
             assert msg["type"] in ["initial_state", "ping"]
@@ -58,29 +59,32 @@ async def test_websocket_connection(server_url):
 async def test_trace_collection_to_file():
     """Test that traces are written to filesystem."""
     from ttadev.observability.collector import TraceCollector
-    
+
     collector = TraceCollector()
-    
+
     # Create test trace
     trace_data = {
         "trace_id": "test-123",
-        "spans": [{
-            "name": "test_span",
-            "start_time": "2026-03-09T21:00:00Z",
-            "end_time": "2026-03-09T21:00:01Z",
-            "attributes": {"test": "value"}
-        }]
+        "spans": [
+            {
+                "name": "test_span",
+                "start_time": "2026-03-09T21:00:00Z",
+                "end_time": "2026-03-09T21:00:01Z",
+                "attributes": {"test": "value"},
+            }
+        ],
     }
-    
+
     # Collect trace
     await collector.collect_trace(trace_data)
-    
+
     # Verify file was created
     trace_file = Path(".observability/traces/test-123.json")
     assert trace_file.exists()
-    
+
     # Verify content
     import json
+
     with open(trace_file) as f:
         saved_trace = json.load(f)
     assert saved_trace["trace_id"] == "test-123"
@@ -102,19 +106,16 @@ async def test_realtime_trace_broadcast(observability_server):
     """Test that new traces are broadcast via WebSocket."""
     collector = observability_server.collector
     ws_url = "ws://localhost:8000/ws"
-    
+
     async with aiohttp.ClientSession() as session:
         async with session.ws_connect(ws_url) as ws:
             # Consume initial state message
             await ws.receive_json()
-            
+
             # Send a new trace
-            trace_data = {
-                "trace_id": "broadcast-test",
-                "spans": [{"name": "broadcast_span"}]
-            }
+            trace_data = {"trace_id": "broadcast-test", "spans": [{"name": "broadcast_span"}]}
             await collector.collect_trace(trace_data)
-            
+
             # Should receive broadcast within 2 seconds
             msg = await asyncio.wait_for(ws.receive_json(), timeout=2.0)
             assert msg["type"] == "new_trace"

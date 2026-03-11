@@ -739,7 +739,7 @@ class LearningAlgorithms:
 
         if model:
             # Aggregate updates from multiple clients
-            aggregated_update = await self._aggregate_federated_updates(model_updates)
+            await self._aggregate_federated_updates(model_updates)
 
             # Update model parameters
             model.training_data["federated_updates"] = (

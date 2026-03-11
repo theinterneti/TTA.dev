@@ -2,15 +2,16 @@
 """Comprehensive demo showcasing all TTA.dev instrumented primitives."""
 
 import asyncio
+
 from primitives import (
-    SequentialPrimitive,
-    ParallelPrimitive,
     ConditionalPrimitive,
+    FallbackPrimitive,
+    LambdaPrimitive,
+    ParallelPrimitive,
     RetryPrimitive,
     RetryStrategy,
-    FallbackPrimitive,
+    SequentialPrimitive,
     WorkflowContext,
-    LambdaPrimitive,
 )
 
 
@@ -52,7 +53,7 @@ async def send_sms(data: dict, ctx: WorkflowContext) -> dict:
 async def main():
     """Run comprehensive demo workflow."""
     print("🚀 Starting TTA.dev Comprehensive Demo\n")
-    
+
     # Step 1: Parallel data fetching
     print("📊 Creating parallel data fetching workflow...")
     fetch_workflow = ParallelPrimitive(
@@ -62,13 +63,13 @@ async def main():
             LambdaPrimitive(fetch_preferences),
         ]
     )
-    
+
     # Step 2: Add retry resilience
     print("🔄 Wrapping with retry primitive (max 3 attempts)...")
     resilient_fetch = RetryPrimitive(
         fetch_workflow, strategy=RetryStrategy(max_retries=3, backoff_base=2.0)
     )
-    
+
     # Step 3: Conditional notification with fallback
     print("📧 Setting up conditional notification with email → SMS fallback...")
     notification = ConditionalPrimitive(
@@ -79,27 +80,27 @@ async def main():
         ),
         else_primitive=LambdaPrimitive(lambda d, c: {**d, "skipped": True}),
     )
-    
+
     # Step 4: Complete sequential pipeline
     print("⚡ Assembling sequential pipeline...\n")
     pipeline = SequentialPrimitive([resilient_fetch, notification])
-    
+
     # Execute workflow
     ctx = WorkflowContext(workflow_id="user_onboarding_demo")
     print(f"🎯 Executing workflow: {ctx.workflow_id}")
     print("=" * 60)
-    
+
     result = await pipeline.execute({"id": 12345}, ctx)
-    
+
     print("=" * 60)
-    print(f"\n✅ Workflow completed successfully!")
+    print("\n✅ Workflow completed successfully!")
     print(f"📊 Result: {result}")
-    print(f"\n🔍 Check the observability dashboard at http://localhost:8000")
-    print(f"   You should see:")
-    print(f"   - Parallel execution of fetch operations")
-    print(f"   - Retry attempts (if any failures)")
-    print(f"   - Conditional branching based on validation")
-    print(f"   - Fallback from email to SMS (if email fails)")
+    print("\n🔍 Check the observability dashboard at http://localhost:8000")
+    print("   You should see:")
+    print("   - Parallel execution of fetch operations")
+    print("   - Retry attempts (if any failures)")
+    print("   - Conditional branching based on validation")
+    print("   - Fallback from email to SMS (if email fails)")
 
 
 if __name__ == "__main__":

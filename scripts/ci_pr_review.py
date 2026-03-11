@@ -9,20 +9,20 @@ Usage:
     python scripts/ci_pr_review.py [--target-branch main]
 """
 
-import os
-import sys
 import argparse
-import subprocess
 import logging
+import os
+import subprocess
+import sys
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("ci_pr_review")
 
 PROMPT_FILE = ".github/prompts/pr-review.prompt.md"
+
 
 def get_git_diff(target_branch="main"):
     """Get the git diff between target branch and current HEAD."""
@@ -38,6 +38,7 @@ def get_git_diff(target_branch="main"):
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to get git diff: {e}")
         return None
+
 
 def main():
     parser = argparse.ArgumentParser(description="Run CI PR Review")
@@ -73,7 +74,9 @@ def main():
         logger.info("Loaded project memory.")
 
     # Combine prompt, memory, and diff
-    combined_content = f"{prompt_content}{memory_content}\n\n## Code Changes to Review\n\n```diff\n{diff}\n```"
+    combined_content = (
+        f"{prompt_content}{memory_content}\n\n## Code Changes to Review\n\n```diff\n{diff}\n```"
+    )
 
     # Use run_agent.py logic to execute
     # We can import run_agent or just call it via subprocess if we want to reuse its logic
@@ -82,7 +85,8 @@ def main():
     # For now, let's write a temp file.
 
     import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as tmp:
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as tmp:
         tmp.write(combined_content)
         tmp_path = tmp.name
 
@@ -98,6 +102,7 @@ def main():
     finally:
         os.remove(tmp_path)
         logger.info("Cleaned up temporary file.")
+
 
 if __name__ == "__main__":
     main()

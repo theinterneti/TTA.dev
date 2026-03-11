@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import json
-import os
 import time
 from pathlib import Path
 from typing import Any
 
 try:
     from opentelemetry import trace
-    from opentelemetry.trace import Status, StatusCode
-    from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
     from opentelemetry.sdk.trace import ReadableSpan
+    from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult
+    from opentelemetry.trace import Status, StatusCode
 
     TRACING_AVAILABLE = True
 except ImportError:
@@ -45,7 +44,9 @@ class FileSpanExporter(SpanExporter):
                             "status_code": span.status.status_code.name if span.status else "UNSET",
                             "description": span.status.description if span.status else "",
                         },
-                        "parent_span_id": format(span.parent.span_id, "016x") if span.parent else None,
+                        "parent_span_id": format(span.parent.span_id, "016x")
+                        if span.parent
+                        else None,
                     }
                     f.write(json.dumps(span_dict) + "\n")
             return SpanExportResult.SUCCESS
@@ -74,14 +75,14 @@ def setup_tracing(service_name: str = "tta-workflow") -> None:
 
     resource = Resource.create({"service.name": service_name})
     provider = TracerProvider(resource=resource)
-    
+
     # Add file-based exporter
     file_exporter = FileSpanExporter()
     processor = BatchSpanProcessor(file_exporter)
     provider.add_span_processor(processor)
-    
+
     trace.set_tracer_provider(provider)
-    
+
     # Auto-instrument all primitives
     _auto_instrument_primitives()
 
@@ -179,24 +180,24 @@ def _auto_instrument_primitives() -> None:
     """Auto-instrument all WorkflowPrimitive subclasses with tracing."""
     if not TRACING_AVAILABLE:
         return
-    
+
     import functools
-    
+
     tracer = trace.get_tracer(__name__)
     original_execute = WorkflowPrimitive.execute
-    
+
     @functools.wraps(original_execute)
     async def instrumented_execute(self, input_data: Any, context: WorkflowContext) -> Any:
         """Wrapped execute with automatic tracing."""
         primitive_name = self.__class__.__name__
-        
+
         with tracer.start_as_current_span(
             primitive_name,
             attributes={
                 "primitive.type": primitive_name,
                 "workflow.id": context.workflow_id,
                 "workflow.correlation_id": context.correlation_id,
-            }
+            },
         ) as span:
             try:
                 result = await original_execute(self, input_data, context)
@@ -206,7 +207,6 @@ def _auto_instrument_primitives() -> None:
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 span.record_exception(e)
                 raise
-    
+
     # Monkey-patch the base class
     WorkflowPrimitive.execute = instrumented_execute
-

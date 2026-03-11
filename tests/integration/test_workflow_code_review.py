@@ -12,6 +12,7 @@ Demonstrates:
 import asyncio
 
 import pytest
+
 from ttadev.primitives import WorkflowContext, WorkflowPrimitive
 from ttadev.primitives.core.parallel import ParallelPrimitive
 from ttadev.primitives.observability.tracing import ObservablePrimitive
@@ -220,9 +221,7 @@ async def test_observable_review_pipeline():
 
     pipeline = syntax >> style
 
-    context = WorkflowContext(
-        workflow_id="observable-review", correlation_id="review-123"
-    )
+    context = WorkflowContext(workflow_id="observable-review", correlation_id="review-123")
     result = await pipeline.execute({"code": "import test"}, context)
 
     assert result["syntax_checked"] is True
@@ -392,9 +391,7 @@ async def test_review_pipeline_performance():
     seq_duration = time.time() - start
 
     # Parallel
-    par_workflow = ParallelPrimitive(
-        [SyntaxChecker(), StyleChecker(), SecurityChecker()]
-    )
+    par_workflow = ParallelPrimitive([SyntaxChecker(), StyleChecker(), SecurityChecker()])
     context = WorkflowContext(workflow_id="par-perf")
 
     start = time.time()
@@ -420,9 +417,7 @@ async def test_large_codebase_review():
     parallel_review = ParallelPrimitive([checker] * len(files))
 
     context = WorkflowContext(workflow_id="large-review")
-    results = await parallel_review.execute(
-        files[0], context
-    )  # Using same input for simplicity
+    results = await parallel_review.execute(files[0], context)  # Using same input for simplicity
 
     # Should complete all reviews
     assert len(results) == 5

@@ -23,7 +23,6 @@ from typing import Any
 
 # MCP server imports
 try:
-    import mcp.server.stdio
     import mcp.types as types
     from mcp.server import Server
     from mcp.server.models import InitializationOptions

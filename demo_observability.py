@@ -2,11 +2,10 @@
 """Demo script to generate observability data."""
 
 import asyncio
-import os
-from primitives.core import WorkflowContext, LambdaPrimitive
+
 from primitives.composition import SequentialPrimitive
-from primitives.recovery import RetryPrimitive, FallbackPrimitive
-from primitives.flow_control import ConditionalPrimitive
+from primitives.core import LambdaPrimitive, WorkflowContext
+from primitives.recovery import FallbackPrimitive, RetryPrimitive
 
 
 async def fetch_data(data: dict, ctx: WorkflowContext) -> dict:
@@ -29,37 +28,33 @@ async def save_data(data: dict, ctx: WorkflowContext) -> dict:
 
 async def main():
     """Run demo workflows to generate telemetry."""
-    
+
     print("🚀 Generating observability data...")
-    
+
     # Build a complex workflow
-    workflow = SequentialPrimitive([
-        RetryPrimitive(
-            LambdaPrimitive(fetch_data),
-            max_attempts=3,
-            backoff_factor=1.5
-        ),
-        LambdaPrimitive(process_data),
-        FallbackPrimitive(
-            LambdaPrimitive(save_data),
-            LambdaPrimitive(lambda d, ctx: {**d, "fallback": True})
-        )
-    ])
-    
+    workflow = SequentialPrimitive(
+        [
+            RetryPrimitive(LambdaPrimitive(fetch_data), max_attempts=3, backoff_factor=1.5),
+            LambdaPrimitive(process_data),
+            FallbackPrimitive(
+                LambdaPrimitive(save_data), LambdaPrimitive(lambda d, ctx: {**d, "fallback": True})
+            ),
+        ]
+    )
+
     # Execute multiple times to generate data
     for i in range(5):
         ctx = WorkflowContext(
-            workflow_id=f"demo-workflow-{i}",
-            metadata={"iteration": i, "demo": True}
+            workflow_id=f"demo-workflow-{i}", metadata={"iteration": i, "demo": True}
         )
-        
+
         result = await workflow.execute({"request_id": i}, ctx)
         print(f"  ✓ Workflow {i} completed: {result.get('result')}")
         await asyncio.sleep(0.5)
-    
+
     print("\n✅ Generated 5 workflow traces!")
-    print(f"📊 Check dashboard at http://localhost:8000")
-    print(f"💾 Data stored in: ~/.tta/observability/traces/")
+    print("📊 Check dashboard at http://localhost:8000")
+    print("💾 Data stored in: ~/.tta/observability/traces/")
 
 
 if __name__ == "__main__":

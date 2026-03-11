@@ -20,14 +20,14 @@ from __future__ import annotations
 import os
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
 from primitives import WorkflowContext, WorkflowPrimitive
+from pydantic import BaseModel, Field
 
 
-class UserBudgetProfile(str, Enum):
+class UserBudgetProfile(StrEnum):
     """Budget profile determining model selection and cost management."""
 
     FREE = "free"  # Broke students, hobbyists - FREE models only
@@ -35,7 +35,7 @@ class UserBudgetProfile(str, Enum):
     UNLIMITED = "unlimited"  # Companies - Best model always, cost tracked but not limiting
 
 
-class CoderType(str, Enum):
+class CoderType(StrEnum):
     """Agentic coder type."""
 
     AUTO = "auto"  # Auto-detect which coder is available
@@ -44,7 +44,7 @@ class CoderType(str, Enum):
     AUGMENT = "augment"  # Augment Code VS Code extension
 
 
-class ModalityType(str, Enum):
+class ModalityType(StrEnum):
     """Environment where the coder operates."""
 
     VSCODE = "vscode"  # VS Code extension
@@ -53,7 +53,7 @@ class ModalityType(str, Enum):
     BROWSER = "browser"  # Web interfaces (ChatGPT, Claude, Gemini)
 
 
-class ModelTier(str, Enum):
+class ModelTier(StrEnum):
     """Model cost tier."""
 
     FREE = "free"  # Free tier models

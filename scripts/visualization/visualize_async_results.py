@@ -302,7 +302,7 @@ def create_html_report(results, model_results, output_dir):
         </div>
 
         <h2>Model Details</h2>
-    """.format(
+    """.format(  # noqa: F524
         timestamp=results["timestamp"],
         num_models=len(model_results),
         configs=f"Quantizations: {results['quantizations']}, Flash Attention: {results['flash_attention_settings']}, Temperatures: {results['temperatures']}",

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import subprocess
 from datetime import datetime, timedelta
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 from ..core.base import WorkflowContext, WorkflowPrimitive
 
 
-class IntegrationFrequency(str, Enum):
+class IntegrationFrequency(StrEnum):
     """How often agents should integrate their work."""
 
     CONTINUOUS = "continuous"  # After every logical unit (< 1 hour)
@@ -28,7 +28,7 @@ class IntegrationFrequency(str, Enum):
     WEEKLY = "weekly"  # Once per week (ANTI-PATTERN, discouraged)
 
 
-class MergeStrategy(str, Enum):
+class MergeStrategy(StrEnum):
     """Strategy for merging agent work."""
 
     FAST_FORWARD = "fast_forward"  # Clean history, requires rebase

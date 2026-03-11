@@ -11,12 +11,12 @@ from pathlib import Path
 # Add tta-dev to path
 sys.path.insert(0, str(Path(__file__).parent / "tta-dev"))
 
-from primitives.core import WorkflowContext, LambdaPrimitive
-from primitives.recovery.retry import RetryPrimitive, RetryStrategy
+from primitives.core import LambdaPrimitive, WorkflowContext
 from primitives.recovery.circuit_breaker_primitive import (
-    CircuitBreakerPrimitive,
     CircuitBreakerConfig,
+    CircuitBreakerPrimitive,
 )
+from primitives.recovery.retry import RetryPrimitive, RetryStrategy
 
 print("🚀 TTA.dev Hello World Demo")
 print("=" * 50)
@@ -64,9 +64,7 @@ async def main():
     # Step 2: Process with circuit breaker
     process_step = CircuitBreakerPrimitive(
         primitive=LambdaPrimitive(process_data),
-        config=CircuitBreakerConfig(
-            failure_threshold=3, recovery_timeout=5.0, success_threshold=2
-        ),
+        config=CircuitBreakerConfig(failure_threshold=3, recovery_timeout=5.0, success_threshold=2),
     )
 
     # Step 3: Save the data

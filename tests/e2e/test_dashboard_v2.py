@@ -20,7 +20,7 @@ import urllib.request
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import Browser, Page, sync_playwright, expect
+from playwright.sync_api import Browser, Page, expect, sync_playwright
 
 _PORT = 8000
 _BASE = f"http://localhost:{_PORT}"
@@ -161,8 +161,9 @@ def test_cgc_graph_renders(page: Page) -> None:
     expect(canvas).to_be_visible()
     # Allow graph to finish loading
     page.wait_for_timeout(3000)
-    assert not canvas.locator("text=Loading").is_visible(), \
+    assert not canvas.locator("text=Loading").is_visible(), (
         "Graph still showing loading spinner after 6.5s total"
+    )
 
 
 # ---------------------------------------------------------------------------

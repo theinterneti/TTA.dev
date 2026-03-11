@@ -11,23 +11,22 @@ but needs proper package integration.
 import pytest
 
 pytest.skip("MCP module integration pending", allow_module_level=True)
-import json
-import os
-import subprocess
-import sys
-import time
-from pathlib import Path
+import json  # noqa: E402
+import os  # noqa: E402
+import subprocess  # noqa: E402
+import sys  # noqa: E402
+import time  # noqa: E402
+from pathlib import Path  # noqa: E402
 
-import requests
+import requests  # noqa: E402
 
 # Add the project root to the Python path
 project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
 # Import the example MCP servers
-import sys
 
-from src.mcp import MCPServerManager, MCPServerType
+from src.mcp import MCPServerManager, MCPServerType  # noqa: E402
 
 # Add the examples directory to the Python path
 examples_path = os.path.join(

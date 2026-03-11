@@ -17,9 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Run integration tests for MCP servers"
-    )
+    parser = argparse.ArgumentParser(description="Run integration tests for MCP servers")
 
     parser.add_argument(
         "--test",

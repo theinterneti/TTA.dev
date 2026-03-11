@@ -17,14 +17,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import asyncio
 import time
+
 from ttadev.primitives.core import (
-    SequentialPrimitive,
-    ParallelPrimitive,
     LambdaPrimitive,
+    ParallelPrimitive,
+    SequentialPrimitive,
     WorkflowContext,
 )
-from ttadev.primitives.recovery.retry import RetryPrimitive, RetryStrategy
 from ttadev.primitives.recovery.fallback import FallbackPrimitive
+from ttadev.primitives.recovery.retry import RetryPrimitive, RetryStrategy
 
 
 async def data_fetch_step(data: dict, ctx: WorkflowContext) -> dict:
@@ -61,7 +62,7 @@ async def fallback_step(data: dict, ctx: WorkflowContext) -> dict:
 
 async def main():
     """Run comprehensive observability demo."""
-    
+
     print("🚀 Starting TTA.dev Observability Demo")
     print("=" * 60)
     print()
@@ -75,7 +76,7 @@ async def main():
     print()
     print("=" * 60)
     print()
-    
+
     # Scenario 1: Simple sequential workflow
     print("📋 Scenario 1: Sequential Data Pipeline")
     sequential_workflow = (
@@ -84,59 +85,61 @@ async def main():
         >> LambdaPrimitive(validate_step)
         >> LambdaPrimitive(save_step)
     )
-    
+
     ctx1 = WorkflowContext(workflow_id="data-pipeline-001")
     result1 = await sequential_workflow.execute({"source": "api"}, ctx1)
     print(f"✅ Sequential workflow completed: {result1}")
     print()
-    
+
     # Scenario 2: Sequential workflow with retry
     print("📋 Scenario 2: Sequential Processing with Retry")
-    
+
     async def risky_operation(data: dict, ctx: WorkflowContext) -> dict:
         """Operation that sometimes fails."""
         await asyncio.sleep(0.2)
         # Simulate occasional failures (will succeed on retry)
         import random
+
         if random.random() < 0.3:
             raise RuntimeError("Temporary processing error")
         return {**data, "processed": True}
-    
+
     retry_workflow = RetryPrimitive(
-        LambdaPrimitive(risky_operation),
-        strategy=RetryStrategy(max_retries=3, backoff_base=0.1)
+        LambdaPrimitive(risky_operation), strategy=RetryStrategy(max_retries=3, backoff_base=0.1)
     )
-    
+
     ctx2 = WorkflowContext(workflow_id="retry-demo-001")
     result2 = await retry_workflow.execute({"task": "process_data"}, ctx2)
     print(f"✅ Retry workflow completed: {result2}")
     print()
-    
+
     # Scenario 3: Fallback recovery
     print("📋 Scenario 3: Fallback Recovery Pattern")
-    
+
     fallback_workflow = FallbackPrimitive(
-        primary=SequentialPrimitive([
-            LambdaPrimitive(data_fetch_step),
-            LambdaPrimitive(transform_step),
-            LambdaPrimitive(validate_step),
-        ]),
-        fallback=LambdaPrimitive(fallback_step)
+        primary=SequentialPrimitive(
+            [
+                LambdaPrimitive(data_fetch_step),
+                LambdaPrimitive(transform_step),
+                LambdaPrimitive(validate_step),
+            ]
+        ),
+        fallback=LambdaPrimitive(fallback_step),
     )
-    
+
     ctx3 = WorkflowContext(workflow_id="fallback-demo-001")
     # This will fail validation and use fallback
     result3 = await fallback_workflow.execute({"source": "api", "records": 10}, ctx3)
     print(f"✅ Fallback workflow completed: {result3}")
     print()
-    
+
     # Scenario 4: Complex nested workflow
     print("📋 Scenario 4: Complex Nested Workflow")
-    
+
     async def enrichment_step(data: dict, ctx: WorkflowContext) -> dict:
         await asyncio.sleep(0.2)
         return {**data, "enriched": True, "metadata_added": True}
-    
+
     async def merge_step(data: dict, ctx: WorkflowContext) -> dict:
         """Merge parallel results."""
         if isinstance(data, list):
@@ -146,26 +149,30 @@ async def main():
                 merged.update(item)
             return merged
         return data
-    
-    complex_workflow = SequentialPrimitive([
-        RetryPrimitive(
-            LambdaPrimitive(data_fetch_step),
-            strategy=RetryStrategy(max_retries=2, backoff_base=0.1)
-        ),
-        ParallelPrimitive([
-            LambdaPrimitive(transform_step),
-            LambdaPrimitive(enrichment_step),
-        ]),
-        LambdaPrimitive(merge_step),
-        LambdaPrimitive(validate_step),
-        LambdaPrimitive(save_step),
-    ])
-    
+
+    complex_workflow = SequentialPrimitive(
+        [
+            RetryPrimitive(
+                LambdaPrimitive(data_fetch_step),
+                strategy=RetryStrategy(max_retries=2, backoff_base=0.1),
+            ),
+            ParallelPrimitive(
+                [
+                    LambdaPrimitive(transform_step),
+                    LambdaPrimitive(enrichment_step),
+                ]
+            ),
+            LambdaPrimitive(merge_step),
+            LambdaPrimitive(validate_step),
+            LambdaPrimitive(save_step),
+        ]
+    )
+
     ctx4 = WorkflowContext(workflow_id="complex-workflow-001")
     result4 = await complex_workflow.execute({"source": "api"}, ctx4)
     print(f"✅ Complex workflow completed: {result4}")
     print()
-    
+
     print("=" * 60)
     print("🎉 Demo completed!")
     print()

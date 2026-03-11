@@ -1,36 +1,30 @@
 """Auto-instrumentation that logs agent activity."""
+
 import json
-import os
+import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
-import uuid
 
 from .context import ExecutionContext
 
 
 class ActivityLogger:
     """Logs agent/workflow activity to filesystem."""
-    
+
     def __init__(self):
         self.traces_dir = Path.home() / ".tta" / "traces"
         self.traces_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Auto-detect current context
         self.context = ExecutionContext.detect_current()
         self.context.provider = "github-copilot"  # We know we're Copilot
         self.context.model = "claude-sonnet-4.5"  # We know the model
-    
-    def log_activity(
-        self,
-        activity_type: str,
-        details: dict,
-        agent: Optional[str] = None
-    ):
+
+    def log_activity(self, activity_type: str, details: dict, agent: str | None = None):
         """Log a single activity."""
-        
+
         trace_id = str(uuid.uuid4())
-        
+
         activity = {
             "trace_id": trace_id,
             "timestamp": datetime.now().isoformat(),
@@ -41,17 +35,17 @@ class ActivityLogger:
             "user": self.context.user,
             "details": details,
         }
-        
+
         # Write to file
         trace_file = self.traces_dir / f"{trace_id}.json"
         with open(trace_file, "w") as f:
             json.dump(activity, f, indent=2)
-        
+
         return trace_id
 
 
 # Global singleton
-_logger: Optional[ActivityLogger] = None
+_logger: ActivityLogger | None = None
 
 
 def get_logger() -> ActivityLogger:
@@ -62,7 +56,7 @@ def get_logger() -> ActivityLogger:
     return _logger
 
 
-def log_tool_use(tool_name: str, parameters: dict, agent: Optional[str] = None):
+def log_tool_use(tool_name: str, parameters: dict, agent: str | None = None):
     """Log that a tool was used."""
     logger = get_logger()
     return logger.log_activity(
@@ -71,11 +65,11 @@ def log_tool_use(tool_name: str, parameters: dict, agent: Optional[str] = None):
             "tool": tool_name,
             "parameters": parameters,
         },
-        agent=agent
+        agent=agent,
     )
 
 
-def log_workflow_start(workflow_name: str, agent: Optional[str] = None):
+def log_workflow_start(workflow_name: str, agent: str | None = None):
     """Log workflow started."""
     logger = get_logger()
     return logger.log_activity(
@@ -83,11 +77,11 @@ def log_workflow_start(workflow_name: str, agent: Optional[str] = None):
         {
             "workflow": workflow_name,
         },
-        agent=agent
+        agent=agent,
     )
 
 
-def log_workflow_end(workflow_name: str, status: str, agent: Optional[str] = None):
+def log_workflow_end(workflow_name: str, status: str, agent: str | None = None):
     """Log workflow completed."""
     logger = get_logger()
     return logger.log_activity(
@@ -96,7 +90,7 @@ def log_workflow_end(workflow_name: str, status: str, agent: Optional[str] = Non
             "workflow": workflow_name,
             "status": status,
         },
-        agent=agent
+        agent=agent,
     )
 
 
