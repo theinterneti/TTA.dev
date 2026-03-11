@@ -2,6 +2,19 @@
 
 > **Universal entry point for all AI agents working in this repository**
 
+## Before You Begin
+
+Start the observability dashboard (idempotent — safe to run if already running):
+
+```bash
+uv run python -m ttadev.observability
+```
+
+Dashboard: **http://localhost:8000** — shows live primitive usage, sessions, and the CGC code graph.
+This gives you and the developer real-time visibility into all workflow executions during your session.
+
+---
+
 ## What is TTA.dev?
 
 A Python monorepo providing composable workflow primitives, observability, and multi-agent coordination for building reliable AI applications.

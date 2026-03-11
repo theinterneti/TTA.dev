@@ -44,7 +44,8 @@ Repository = "https://github.com/theinterneti/TTA.dev"
 Issues = "https://github.com/theinterneti/TTA.dev/issues"
 
 [project.scripts]
-tta-observe = "ttadev.ui.observability_server:main"
+tta-observe = "ttadev.ui.observability_server:main"      # deprecated — use tta-dashboard
+tta-dashboard = "ttadev.observability.__main__:main"
 
 [build-system]
 requires = ["hatchling"]

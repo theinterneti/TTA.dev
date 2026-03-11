@@ -1,0 +1,187 @@
+"""SessionManager — session lifecycle, persistence, and span indexing.
+
+Storage layout:
+  .tta/sessions/{session_id}.json         — session metadata
+  .tta/sessions/{session_id}/spans.jsonl  — append-only span log
+"""
+
+import json
+import os
+import socket
+import uuid
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from pathlib import Path
+
+from ttadev.observability.span_processor import ProcessedSpan
+
+
+@dataclass
+class Session:
+    """Metadata for a single observability session."""
+
+    id: str
+    started_at: str  # ISO 8601
+    ended_at: str | None
+    agent_tool: str  # "claude-code" | "copilot" | "cline" | "unknown"
+    project_path: str
+    hostname: str
+
+
+class SessionManager:
+    """Manages session lifecycle and provides span storage/query."""
+
+    def __init__(self, data_dir: Path | str = ".tta") -> None:
+        self._data_dir = Path(data_dir)
+        self._sessions_dir = self._data_dir / "sessions"
+        self._sessions_dir.mkdir(parents=True, exist_ok=True)
+        self._current: Session | None = None
+
+    # ------------------------------------------------------------------
+    # Lifecycle
+    # ------------------------------------------------------------------
+
+    def start_session(self) -> Session:
+        """Create and persist a new session. Returns the active session."""
+        session = Session(
+            id=str(uuid.uuid4()),
+            started_at=datetime.now(UTC).isoformat(),
+            ended_at=None,
+            agent_tool=self._detect_agent_tool(),
+            project_path=str(Path.cwd()),
+            hostname=socket.gethostname(),
+        )
+        self._current = session
+        self._persist_session(session)
+        # Create span directory eagerly
+        self._span_dir(session.id).mkdir(parents=True, exist_ok=True)
+        return session
+
+    def end_session(self) -> None:
+        """Mark the current session as ended."""
+        if self._current is None:
+            return
+        self._current.ended_at = datetime.now(UTC).isoformat()
+        self._persist_session(self._current)
+        self._current = None
+
+    # ------------------------------------------------------------------
+    # Queries
+    # ------------------------------------------------------------------
+
+    def get_current(self) -> Session | None:
+        """Return the currently active session, or None."""
+        return self._current
+
+    def list_sessions(self) -> list[Session]:
+        """Return all sessions newest-first."""
+        sessions: list[Session] = []
+        for meta_file in self._sessions_dir.glob("*.json"):
+            try:
+                data = json.loads(meta_file.read_text())
+                sessions.append(Session(**data))
+            except Exception:
+                continue
+        sessions.sort(key=lambda s: s.started_at, reverse=True)
+        return sessions
+
+    def get_session(self, session_id: str) -> Session | None:
+        """Return a specific session by ID, or None."""
+        meta_file = self._sessions_dir / f"{session_id}.json"
+        if not meta_file.exists():
+            return None
+        try:
+            data = json.loads(meta_file.read_text())
+            return Session(**data)
+        except Exception:
+            return None
+
+    # ------------------------------------------------------------------
+    # Span ingestion
+    # ------------------------------------------------------------------
+
+    def add_span(self, session_id: str, span: ProcessedSpan) -> None:
+        """Append a ProcessedSpan to the session's spans.jsonl."""
+        span_file = self._span_dir(session_id) / "spans.jsonl"
+        with span_file.open("a") as f:
+            f.write(json.dumps(asdict(span)) + "\n")
+
+    def get_session_spans(self, session_id: str) -> list[ProcessedSpan]:
+        """Return all spans for a session."""
+        span_file = self._span_dir(session_id) / "spans.jsonl"
+        if not span_file.exists():
+            return []
+        spans: list[ProcessedSpan] = []
+        for line in span_file.read_text().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                spans.append(ProcessedSpan(**json.loads(line)))
+            except Exception:
+                continue
+        return spans
+
+    # ------------------------------------------------------------------
+    # Live overlay helpers
+    # ------------------------------------------------------------------
+
+    def get_active_primitive_names(self, session_id: str) -> list[str]:
+        """Return deduplicated list of primitive types used in this session."""
+        seen: set[str] = set()
+        for span in self.get_session_spans(session_id):
+            if span.primitive_type:
+                seen.add(span.primitive_type)
+        return sorted(seen)
+
+    def get_recently_active(self, session_id: str, within_seconds: int = 30) -> list[str]:
+        """Return primitive types active within the last N seconds."""
+        now = datetime.now(UTC)
+        seen: set[str] = set()
+        for span in self.get_session_spans(session_id):
+            if not span.primitive_type or not span.started_at:
+                continue
+            try:
+                started = datetime.fromisoformat(span.started_at)
+                # Make offset-aware if naive
+                if started.tzinfo is None:
+                    started = started.replace(tzinfo=UTC)
+                age = (now - started).total_seconds()
+                if age <= within_seconds:
+                    seen.add(span.primitive_type)
+            except ValueError:
+                continue
+        return sorted(seen)
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    def _span_dir(self, session_id: str) -> Path:
+        d = self._sessions_dir / session_id
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    def _persist_session(self, session: Session) -> None:
+        meta_file = self._sessions_dir / f"{session.id}.json"
+        meta_file.write_text(json.dumps(asdict(session), indent=2))
+
+    def _detect_agent_tool(self) -> str:
+        """Detect which agent tool is running via environment variables."""
+        # Explicit override always wins
+        override = os.environ.get("TTA_AGENT_TOOL")
+        if override:
+            return override
+
+        # Claude Code sets CLAUDECODE=1 and/or CLAUDE_CODE_ENTRYPOINT=cli
+        if os.environ.get("CLAUDECODE") or os.environ.get("CLAUDE_CODE_ENTRYPOINT"):
+            return "claude-code"
+
+        term = os.environ.get("TERM_PROGRAM", "")
+        if "vscode" in term.lower():
+            return "copilot"
+
+        if os.environ.get("CLINE"):
+            return "cline"
+
+        return "unknown"

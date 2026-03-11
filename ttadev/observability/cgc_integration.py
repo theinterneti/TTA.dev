@@ -1,66 +1,110 @@
-"""CodeGraphContext integration for observability dashboard."""
+"""CodeGraphContext integration for observability dashboard.
+
+Availability is checked by pinging FalkorDB directly via its Unix socket
+(fast, <1ms).  Graph queries spawn a stdio subprocess per call with a
+generous timeout — acceptable since they're infrequent and cached.
+"""
 
 import asyncio
 import json
+import os
+import shutil
+import socket
 from typing import Any
+
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from mcp.types import TextContent
+
+# Direct binary path avoids uv startup overhead on each call
+_CGC_BIN = shutil.which("cgc") or "cgc"
+_FALKORDB_SOCK = os.path.expanduser("~/.codegraphcontext/falkordb.sock")
+_CGC_ENV = {
+    **os.environ,
+    "DEFAULT_DATABASE": "falkordb",
+    "FALKORDB_SOCKET_PATH": _FALKORDB_SOCK,
+    "ENABLE_APP_LOGS": "CRITICAL",
+    "LIBRARY_LOG_LEVEL": "WARNING",
+}
+
+# Timeout for each subprocess+MCP call (startup ~8-12s, plus query time)
+_CALL_TIMEOUT = 25.0
+
+
+def _falkordb_reachable() -> bool:
+    """Synchronous socket ping — returns True in <5ms when FalkorDB is up."""
+    if not os.path.exists(_FALKORDB_SOCK):
+        return False
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+            s.settimeout(1.0)
+            s.connect(_FALKORDB_SOCK)
+            s.send(b"*1\r\n$4\r\nPING\r\n")
+            return s.recv(10) == b"+PONG\r\n"
+    except OSError:
+        return False
 
 
 class CGCIntegration:
     """Integration with CodeGraphContext MCP server."""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.server_params = StdioServerParameters(
-            command='uv',
-            args=['run', '--python', '3.12', 'cgc', 'mcp', 'start'],
-            env=None
+            command=_CGC_BIN,
+            args=["mcp", "start"],
+            env=_CGC_ENV,
         )
-    
+
+    # ------------------------------------------------------------------
+    # Internal: spawn a subprocess for one batch of tool calls
+    # ------------------------------------------------------------------
+
+    async def _run(self, tool: str, args: dict[str, Any] | None = None) -> Any:
+        """Spawn cgc subprocess, call one tool, return parsed result."""
+        async with stdio_client(self.server_params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await asyncio.wait_for(session.initialize(), timeout=_CALL_TIMEOUT)
+                result = await asyncio.wait_for(
+                    session.call_tool(tool, args or {}), timeout=_CALL_TIMEOUT
+                )
+                first = result.content[0]
+                raw = first.text if isinstance(first, TextContent) else str(first)
+                return json.loads(raw) if raw.strip().startswith(("{", "[")) else raw
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    async def is_available(self) -> bool:
+        """Fast check: is FalkorDB reachable?
+
+        Uses a direct Unix socket ping instead of spawning a subprocess,
+        so it completes in <5ms even when the CGC binary is slow to start.
+        """
+        try:
+            return await asyncio.get_event_loop().run_in_executor(None, _falkordb_reachable)
+        except Exception:
+            return False
+
     async def get_repository_stats(self) -> dict[str, Any]:
-        """Get statistics about the indexed repository."""
-        async with stdio_client(self.server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                
-                result = await session.call_tool('get_repository_stats', {})
-                return json.loads(result.content[0].text)
-    
+        return await asyncio.wait_for(self._run("get_repository_stats"), timeout=_CALL_TIMEOUT)
+
     async def find_code(self, keyword: str) -> list[dict[str, Any]]:
-        """Find code snippets related to a keyword."""
-        async with stdio_client(self.server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                
-                result = await session.call_tool('find_code', {'keyword': keyword})
-                return json.loads(result.content[0].text)
-    
+        result = await asyncio.wait_for(
+            self._run("find_code", {"keyword": keyword}), timeout=_CALL_TIMEOUT
+        )
+        return result if isinstance(result, list) else []
+
     async def analyze_relationships(self, query_type: str, target: str) -> dict[str, Any]:
-        """Analyze code relationships."""
-        async with stdio_client(self.server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                
-                result = await session.call_tool('analyze_code_relationships', {
-                    'query_type': query_type,
-                    'target': target
-                })
-                return json.loads(result.content[0].text)
-    
-    async def get_graph_visualization(self, cypher_query: str) -> str:
-        """Get a URL to visualize a Cypher query."""
-        async with stdio_client(self.server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                
-                result = await session.call_tool('visualize_graph_query', {
-                    'query': cypher_query
-                })
-                return result.content[0].text
-    
+        return await asyncio.wait_for(
+            self._run(
+                "analyze_code_relationships",
+                {"query_type": query_type, "target": target},
+            ),
+            timeout=_CALL_TIMEOUT,
+        )
+
     async def get_primitives_graph(self) -> dict[str, Any]:
-        """Get graph data for all primitives in the codebase."""
-        # Query for all primitive classes and their relationships
         cypher = """
         MATCH (c:Class)
         WHERE c.name CONTAINS 'Primitive'
@@ -68,30 +112,24 @@ class CGCIntegration:
         RETURN c, r, related
         LIMIT 100
         """
-        
-        async with stdio_client(self.server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                
-                result = await session.call_tool('execute_cypher_query', {
-                    'query': cypher
-                })
-                return json.loads(result.content[0].text)
-    
+        return await asyncio.wait_for(
+            self._run("execute_cypher_query", {"query": cypher}), timeout=_CALL_TIMEOUT
+        )
+
     async def get_agent_files(self) -> list[dict[str, Any]]:
-        """Get all files related to agents."""
-        async with stdio_client(self.server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                
-                result = await session.call_tool('find_code', {'keyword': 'agent'})
-                return json.loads(result.content[0].text)
-    
+        return await self.find_code("agent")
+
     async def get_workflow_files(self) -> list[dict[str, Any]]:
-        """Get all files related to workflows."""
-        async with stdio_client(self.server_params) as (read, write):
-            async with ClientSession(read, write) as session:
-                await session.initialize()
-                
-                result = await session.call_tool('find_code', {'keyword': 'workflow'})
-                return json.loads(result.content[0].text)
+        return await self.find_code("workflow")
+
+    async def get_live_nodes(self, primitive_names: list[str]) -> list[dict[str, Any]]:
+        """Return CGC nodes matching the given primitive names (for live overlay)."""
+        if not primitive_names:
+            return []
+        results: list[dict[str, Any]] = []
+        for name in primitive_names:
+            try:
+                results.extend(await self.find_code(name))
+            except Exception:
+                pass
+        return results

@@ -11,6 +11,18 @@ tools:
 
 # Data Scientist Agent
 
+## Before You Begin
+
+Start the observability dashboard (idempotent — safe to run if already running):
+
+```bash
+uv run python -m ttadev.observability
+```
+
+Dashboard: **http://localhost:8000** — shows live primitive usage, sessions, and the CGC code graph.
+
+---
+
 ## Persona
 
 You are a senior data scientist specializing in:
