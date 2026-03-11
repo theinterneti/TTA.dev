@@ -393,6 +393,32 @@ details pre { background: var(--bg-card); padding: 10px; border-radius: 4px; fon
 /* "All Sessions" sidebar item */
 .session-all .session-tool { color: var(--accent); }
 
+/* Project group in sidebar */
+.session-project-group { border-bottom: 1px solid var(--border); }
+.session-project-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  transition: background 0.15s;
+}
+.session-project-header:hover { background: var(--bg-hover); }
+.project-toggle { font-size: 0.8em; width: 12px; text-align: center; }
+.project-name { flex: 1; font-weight: 600; color: var(--text); }
+.project-count {
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+.session-project-body { padding-left: 16px; }
+.session-project-body.collapsed { display: none; }
+
 /* Agent tool badge on span rows (shown in All Sessions mode) */
 .span-agent {
   font-size: 0.85em;

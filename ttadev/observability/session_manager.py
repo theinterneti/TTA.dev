@@ -6,13 +6,13 @@ Storage layout:
 """
 
 import json
-import os
 import socket
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from ttadev.observability.agent_identity import get_agent_id, get_agent_tool
 from ttadev.observability.span_processor import ProcessedSpan
 
 
@@ -29,6 +29,8 @@ class Session:
     # Stable per-process identifier from FileSpanExporter._AGENT_ID.
     # None for sessions created before agent identity was introduced.
     agent_id: str | None = None
+    # ProjectSession id this session belongs to (if any).
+    project_id: str | None = None
 
 
 class SessionManager:
@@ -50,9 +52,10 @@ class SessionManager:
             id=str(uuid.uuid4()),
             started_at=datetime.now(UTC).isoformat(),
             ended_at=None,
-            agent_tool=self._detect_agent_tool(),
+            agent_tool=get_agent_tool(),
             project_path=str(Path.cwd()),
             hostname=socket.gethostname(),
+            agent_id=get_agent_id(),
         )
         self._current = session
         self._persist_session(session)
@@ -88,7 +91,9 @@ class SessionManager:
         sessions.sort(key=lambda s: s.started_at, reverse=True)
         return sessions
 
-    def get_or_create_agent_session(self, agent_id: str, agent_tool: str) -> Session:
+    def get_or_create_agent_session(
+        self, agent_id: str, agent_tool: str, project_id: str | None = None
+    ) -> Session:
         """Return the existing session for this agent_id, or create a new one.
 
         Called by the ingestion loop when a span carries a tta_agent_id that
@@ -113,6 +118,7 @@ class SessionManager:
             project_path=str(Path.cwd()),
             hostname=socket.gethostname(),
             agent_id=agent_id,
+            project_id=project_id,
         )
         self._persist_session(session)
         self._span_dir(session.id).mkdir(parents=True, exist_ok=True)
@@ -198,23 +204,3 @@ class SessionManager:
     def _persist_session(self, session: Session) -> None:
         meta_file = self._sessions_dir / f"{session.id}.json"
         meta_file.write_text(json.dumps(asdict(session), indent=2))
-
-    def _detect_agent_tool(self) -> str:
-        """Detect which agent tool is running via environment variables."""
-        # Explicit override always wins
-        override = os.environ.get("TTA_AGENT_TOOL")
-        if override:
-            return override
-
-        # Claude Code sets CLAUDECODE=1 and/or CLAUDE_CODE_ENTRYPOINT=cli
-        if os.environ.get("CLAUDECODE") or os.environ.get("CLAUDE_CODE_ENTRYPOINT"):
-            return "claude-code"
-
-        term = os.environ.get("TERM_PROGRAM", "")
-        if "vscode" in term.lower():
-            return "copilot"
-
-        if os.environ.get("CLINE"):
-            return "cline"
-
-        return "unknown"

@@ -12,7 +12,16 @@ import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+# Agent identity — optional import so primitives work without observability installed
+try:
+    from ttadev.observability.agent_identity import get_agent_id
+    from ttadev.observability.agent_identity import get_agent_tool as _get_agent_tool
+
+    _IDENTITY_AVAILABLE = True
+except ImportError:
+    _IDENTITY_AVAILABLE = False
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -49,6 +58,15 @@ class WorkflowContext(BaseModel):
         default=None, description="ID of the event that caused this workflow"
     )
 
+    # Agent identity — auto-populated from agent_identity module if available
+    agent_id: str | None = Field(default=None, description="Stable per-process agent UUID")
+    agent_tool: str | None = Field(
+        default=None, description="Agent tool: claude-code, copilot, etc."
+    )
+    project_id: str | None = Field(
+        default=None, description="ProjectSession ID for multi-agent grouping"
+    )
+
     # Observability metadata
     baggage: dict[str, str] = Field(
         default_factory=dict,
@@ -63,6 +81,19 @@ class WorkflowContext(BaseModel):
     checkpoints: list[tuple[str, float]] = Field(default_factory=list)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _populate_agent_identity(cls, values: Any) -> Any:
+        """Auto-fill agent_id and agent_tool from the process identity module."""
+        if not isinstance(values, dict):
+            return values
+        if _IDENTITY_AVAILABLE:
+            if values.get("agent_id") is None:
+                values["agent_id"] = get_agent_id()
+            if values.get("agent_tool") is None:
+                values["agent_tool"] = _get_agent_tool()
+        return values
 
     def checkpoint(self, name: str) -> None:
         """
@@ -104,6 +135,27 @@ class WorkflowContext(BaseModel):
             causation_id=self.correlation_id,  # Chain causation
             baggage=copy.deepcopy(self.baggage),
             tags=copy.deepcopy(self.tags),
+            # Propagate agent identity and project grouping to child contexts
+            agent_id=self.agent_id,
+            agent_tool=self.agent_tool,
+            project_id=self.project_id,
+        )
+
+    @classmethod
+    def from_project(cls, project: Any, workflow_id: str) -> WorkflowContext:
+        """Create a WorkflowContext pre-populated with project + agent identity.
+
+        Args:
+            project: A ProjectSession instance (typed as Any to avoid a hard
+                     dependency on ttadev.observability in the primitives package).
+            workflow_id: The workflow step name for this context.
+
+        Returns:
+            WorkflowContext with agent_id, agent_tool, and project_id set.
+        """
+        return cls(
+            workflow_id=workflow_id,
+            project_id=getattr(project, "id", None),
         )
 
     def to_otel_context(self) -> dict[str, Any]:

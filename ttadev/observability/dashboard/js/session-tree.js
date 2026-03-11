@@ -1,6 +1,7 @@
 /**
  * session-tree.js — Sessions sidebar component.
- * Renders "All Sessions" at top + per-session items newest-first.
+ * Renders "All Sessions" at top, then project groups (collapsible),
+ * then ungrouped sessions, newest-first.
  */
 
 export class SessionTree {
@@ -8,6 +9,7 @@ export class SessionTree {
     this.el = el;
     this.app = app;
     this.sessions = [];
+    this.projects = [];
   }
 
   async init() {
@@ -18,7 +20,10 @@ export class SessionTree {
 
   async _load() {
     try {
-      this.sessions = await this.app.fetchJSON('/api/v2/sessions');
+      [this.sessions, this.projects] = await Promise.all([
+        this.app.fetchJSON('/api/v2/sessions'),
+        this.app.fetchJSON('/api/v2/projects').catch(() => []),
+      ]);
       this._render();
       // Default to "All Sessions" — shows everything across all agents
       this._select('all');
@@ -31,14 +36,65 @@ export class SessionTree {
     this.el.innerHTML = `<div class="sidebar-heading">Sessions</div>`;
 
     // "All Sessions" virtual entry — always first
-    const allItem = this._makeAllItem();
-    this.el.appendChild(allItem);
+    this.el.appendChild(this._makeAllItem());
 
     if (this.sessions.length === 0) {
       this.el.innerHTML += `<div style="padding:12px 16px;font-size:.85em;color:var(--text-muted)">No sessions yet</div>`;
       return;
     }
-    this.sessions.forEach(s => this.el.appendChild(this._makeItem(s)));
+
+    // Build project lookup map: id → project
+    const projectMap = new Map(this.projects.map(p => [p.id, p]));
+
+    // Partition sessions: grouped vs ungrouped
+    const grouped = new Map(); // project_id → session[]
+    const ungrouped = [];
+    for (const s of this.sessions) {
+      if (s.project_id && projectMap.has(s.project_id)) {
+        if (!grouped.has(s.project_id)) grouped.set(s.project_id, []);
+        grouped.get(s.project_id).push(s);
+      } else {
+        ungrouped.push(s);
+      }
+    }
+
+    // Render project groups
+    for (const [projId, sessions] of grouped) {
+      const proj = projectMap.get(projId);
+      this.el.appendChild(this._makeProjectGroup(proj, sessions));
+    }
+
+    // Render ungrouped sessions
+    ungrouped.forEach(s => this.el.appendChild(this._makeItem(s)));
+  }
+
+  _makeProjectGroup(proj, sessions) {
+    const group = document.createElement('div');
+    group.className = 'session-project-group';
+    group.dataset.projectId = proj.id;
+
+    const header = document.createElement('div');
+    header.className = 'session-project-header';
+    header.innerHTML = `
+      <span class="project-toggle">▾</span>
+      <span class="project-icon">🗂</span>
+      <span class="project-name">${this._escapeHtml(proj.name)}</span>
+      <span class="project-count">${sessions.length}</span>
+    `;
+
+    const body = document.createElement('div');
+    body.className = 'session-project-body';
+    sessions.forEach(s => body.appendChild(this._makeItem(s)));
+
+    // Toggle collapse on header click
+    header.addEventListener('click', () => {
+      const collapsed = body.classList.toggle('collapsed');
+      header.querySelector('.project-toggle').textContent = collapsed ? '▸' : '▾';
+    });
+
+    group.appendChild(header);
+    group.appendChild(body);
+    return group;
   }
 
   _makeAllItem() {
@@ -89,7 +145,7 @@ export class SessionTree {
     // Update the "all" item's session count
     const allItem = this.el.querySelector('[data-id="all"] .session-meta');
     if (allItem) allItem.textContent = `${this.sessions.length} sessions`;
-    // Insert new session item after the "all" item
+    // Insert new session item after the "all" item (before any project groups)
     const allEl = this.el.querySelector('[data-id="all"]');
     const item = this._makeItem(session);
     if (allEl?.nextSibling) {
@@ -112,6 +168,10 @@ export class SessionTree {
   _toolIcon(tool) {
     const icons = { 'claude-code': '🤖', 'copilot': '✈️', 'cline': '🔧', 'unknown': '❓' };
     return icons[tool] || '❓';
+  }
+
+  _escapeHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   _relativeTime(iso) {

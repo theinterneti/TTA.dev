@@ -11,6 +11,9 @@ Routes:
   GET  /api/v2/cgc/{view}         → CGC graph data (graceful degradation)
   GET  /api/v2/cgc/live           → active primitive names for live overlay
   GET  /api/v2/primitives         → primitives catalog
+  GET  /api/v2/projects           → list project sessions (newest first)
+  GET  /api/v2/projects/{id}      → project session detail
+  GET  /api/v2/projects/{id}/sessions → sessions belonging to a project
   WS   /ws                        → real-time span/session events
 
   Legacy v1 routes preserved for backward compatibility.
@@ -27,6 +30,7 @@ from aiohttp import web
 
 from ttadev.observability.cgc_integration import CGCIntegration
 from ttadev.observability.collector import TraceCollector
+from ttadev.observability.project_session import ProjectSessionManager
 from ttadev.observability.session_manager import SessionManager
 from ttadev.observability.span_processor import SpanProcessor
 
@@ -61,6 +65,7 @@ class ObservabilityServer:
         self.cgc = CGCIntegration()
         self.port = port
         self._session_mgr = SessionManager(data_dir or Path(".tta"))
+        self._project_mgr = ProjectSessionManager(data_dir or Path(".tta"))
         self._span_proc = SpanProcessor()
         self._cgc_available: bool = False
         self._cgc_probe_time: float = 0.0  # epoch seconds of last probe
@@ -90,6 +95,9 @@ class ObservabilityServer:
         self.app.router.add_get("/api/v2/cgc/live", self._v2_cgc_live)
         self.app.router.add_get("/api/v2/cgc/{view}", self._v2_cgc_graph)
         self.app.router.add_get("/api/v2/primitives", self._v2_primitives)
+        self.app.router.add_get("/api/v2/projects", self._v2_projects)
+        self.app.router.add_get("/api/v2/projects/{id}/sessions", self._v2_project_sessions)
+        self.app.router.add_get("/api/v2/projects/{id}", self._v2_project_detail)
 
         # Static assets (new dashboard)
         if DASHBOARD_DIR.exists():
@@ -247,6 +255,29 @@ class ObservabilityServer:
 
     async def _v2_primitives(self, request: web.Request) -> web.Response:
         return web.json_response(_PRIMITIVES_CATALOG)
+
+    async def _v2_projects(self, request: web.Request) -> web.Response:
+        """Return all project sessions, newest first."""
+        projects = self._project_mgr.list()
+        return web.json_response([asdict(p) for p in projects])
+
+    async def _v2_project_detail(self, request: web.Request) -> web.Response:
+        """Return a single project session by ID."""
+        project_id = request.match_info["id"]
+        proj = self._project_mgr._get_by_id(project_id)
+        if proj is None:
+            return web.json_response({"error": "Project not found"}, status=404)
+        return web.json_response(asdict(proj))
+
+    async def _v2_project_sessions(self, request: web.Request) -> web.Response:
+        """Return all sessions belonging to a project."""
+        project_id = request.match_info["id"]
+        proj = self._project_mgr._get_by_id(project_id)
+        if proj is None:
+            return web.json_response({"error": "Project not found"}, status=404)
+        all_sessions = self._session_mgr.list_sessions()
+        matched = [s for s in all_sessions if s.project_id == project_id]
+        return web.json_response([asdict(s) for s in matched])
 
     def _build_span_graph(self, view: str) -> dict[str, Any]:
         """Build a graph from ingested span data when CGC is unavailable.
@@ -458,7 +489,9 @@ class ObservabilityServer:
                     # agent_id; fall back to the current session for older spans.
                     if span.agent_id:
                         target = self._session_mgr.get_or_create_agent_session(
-                            span.agent_id, span.agent_tool or "unknown"
+                            span.agent_id,
+                            span.agent_tool or "unknown",
+                            project_id=span.project_id,
                         )
                         if target.id != current.id:
                             # Notify the frontend if we just discovered a new agent

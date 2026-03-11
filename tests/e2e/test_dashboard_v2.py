@@ -176,3 +176,26 @@ def test_v1_traces_route_works(page: Page) -> None:
     assert response.ok
     body = response.json()
     assert "traces" in body
+
+
+# ---------------------------------------------------------------------------
+# Scenario 9 — Project routes exist and return JSON
+# ---------------------------------------------------------------------------
+
+
+def test_projects_api_returns_list(page: Page) -> None:
+    response = page.request.get(f"{_BASE}/api/v2/projects")
+    assert response.ok
+    body = response.json()
+    assert isinstance(body, list)
+
+
+# ---------------------------------------------------------------------------
+# Scenario 10 — Session sidebar renders "All Sessions" item
+# ---------------------------------------------------------------------------
+
+
+def test_sidebar_has_all_sessions_item(page: Page) -> None:
+    all_item = page.locator(".session-all")
+    expect(all_item).to_be_visible(timeout=5000)
+    expect(all_item).to_contain_text("All Sessions")

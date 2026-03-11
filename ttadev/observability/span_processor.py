@@ -33,6 +33,8 @@ class ProcessedSpan:
     # None on older spans (pre-identity); server falls back to current session.
     agent_id: str | None = None
     agent_tool: str | None = None
+    # Project grouping — set when agent joined a ProjectSession before running.
+    project_id: str | None = None
 
 
 # Name-fragment → primitive class name (checked in order, case-insensitive)
@@ -126,6 +128,7 @@ class SpanProcessor:
             attributes=attrs,
             agent_id=raw.get("tta_agent_id"),
             agent_tool=raw.get("tta_agent_tool"),
+            project_id=attrs.get("tta.project_id") or raw.get("tta_project_id"),
         )
 
     def from_activity_log(self, raw: dict[str, Any]) -> ProcessedSpan:
