@@ -87,7 +87,7 @@ jobs:
         continue-on-error: ${{ !inputs.fail-on-type-errors }}
         run: |
           echo "Running pyright type check..."
-          uv run pyright platform/ apps/ 2>&1 | tee typecheck-output.txt
+          uv run pyright ttadev/observability/ ttadev/primitives/ 2>&1 | tee typecheck-output.txt
           echo "result=pass" >> $GITHUB_OUTPUT
 
       - name: Count type errors

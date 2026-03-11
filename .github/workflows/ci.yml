@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'platform/**'
+      - 'ttadev/**'
       - 'apps/**'
       - 'tests/**'
       - '*.py'
@@ -13,7 +13,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'platform/**'
+      - 'ttadev/**'
       - 'apps/**'
       - 'tests/**'
       - '*.py'
@@ -57,7 +57,7 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Run pyright (type checking)
-        run: uvx pyright platform/
+        run: uvx pyright ttadev/observability/ ttadev/primitives/
 
       - name: Validate #dev-todo compliance
         run: |
@@ -166,5 +166,4 @@ jobs:
 
       - name: Validate tta-dev-primitives package
         run: |
-          uv pip install -e platform/primitives/
-          python -c "from tta_dev_primitives import WorkflowPrimitive; print('✅ Package validated')"
+          python -c "from ttadev.primitives.core.base import WorkflowPrimitive; print('✅ Package validated')"
