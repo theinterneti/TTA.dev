@@ -41,25 +41,42 @@ export class SessionDetail {
 
     const tree    = this._buildTree();
     const metrics = this._buildMetrics();
+    // Preserve filter text across re-renders caused by live span updates
+    const prevFilter = this.el.querySelector('.span-filter')?.value || '';
 
     this.el.innerHTML = `
       <div class="panel-heading">Session ${this.currentId.substring(0, 8)}</div>
       ${this._renderMetrics(metrics)}
       <div class="provider-tree">${this._renderTree(tree)}</div>
       <div class="span-list">
-        <div class="panel-heading" style="margin-top:20px;">Recent Spans (${this.spans.length})</div>
-        ${this.spans.slice(-50).reverse().map(s => this._renderSpanRow(s)).join('')}
+        <div class="span-list-header">
+          <div class="panel-heading" style="margin-bottom:0;">Recent Spans (${this.spans.length})</div>
+          <input class="span-filter" type="search" placeholder="Filter spans…" value="${prevFilter}">
+        </div>
+        <div class="span-rows"></div>
       </div>
     `;
 
-    // Wire span row clicks
-    this.el.querySelectorAll('.span-row').forEach(row => {
-      row.addEventListener('click', () => {
-        const spanId = row.dataset.spanId;
-        const span = this.spans.find(s => s.span_id === spanId);
-        if (span) this.app.emit('spanSelected', span);
+    // Wire filter
+    const filterInput = this.el.querySelector('.span-filter');
+    const rowsEl = this.el.querySelector('.span-rows');
+    const renderRows = (q) => {
+      const lq = q.toLowerCase();
+      const visible = this.spans.slice(-100).reverse()
+        .filter(s => !lq || s.name?.toLowerCase().includes(lq)
+                          || s.provider?.toLowerCase().includes(lq)
+                          || s.primitive_type?.toLowerCase().includes(lq));
+      rowsEl.innerHTML = visible.map(s => this._renderSpanRow(s)).join('');
+      rowsEl.querySelectorAll('.span-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const span = this.spans.find(s => s.span_id === row.dataset.spanId);
+          if (span) this.app.emit('spanSelected', span);
+        });
       });
-    });
+    };
+
+    filterInput.addEventListener('input', e => renderRows(e.target.value));
+    renderRows(prevFilter);
   }
 
   _renderEmpty() {
@@ -150,19 +167,42 @@ export class SessionDetail {
   }
 
   _renderSpanRow(span) {
-    const ok   = span.status !== 'error';
-    const icon = ok ? '✅' : '❌';
-    const prim = span.primitive_type ? `<span class="span-prim">${span.primitive_type}</span>` : '';
-    const time = span.started_at ? new Date(span.started_at).toLocaleTimeString() : '';
+    const isErr  = span.status === 'error';
+    const icon   = isErr ? '✕' : '▸';
+    const prim   = span.primitive_type
+      ? `<span class="span-prim">${span.primitive_type}</span>` : '';
+    const badge  = span.provider
+      ? `<span class="span-provider" data-provider="${this._providerKey(span.provider)}">${this._providerShort(span.provider)}</span>` : '';
+    const dur    = (span.duration_ms && span.duration_ms > 0)
+      ? `${span.duration_ms.toFixed(1)}ms` : '—';
+    const time   = span.started_at ? new Date(span.started_at).toLocaleTimeString() : '';
 
     return `
-      <div class="span-row ${ok ? '' : 'error'}" data-span-id="${span.span_id}">
-        <span>${icon}</span>
+      <div class="span-row${isErr ? ' error' : ''}" data-span-id="${span.span_id}">
+        <span class="span-icon ${isErr ? 'err' : ''}">${icon}</span>
         <span class="span-name">${span.name}</span>
+        ${badge}
         ${prim}
-        <span class="span-dur">${(span.duration_ms || 0).toFixed(1)}ms</span>
+        <span class="span-dur">${dur}</span>
         <span class="span-time">${time}</span>
       </div>
     `;
+  }
+
+  _providerKey(provider) {
+    const p = (provider || '').toLowerCase();
+    if (p.includes('copilot') || p.includes('github')) return 'copilot';
+    if (p.includes('anthropic'))  return 'anthropic';
+    if (p.includes('openrouter')) return 'openrouter';
+    if (p.includes('tta'))        return 'tta';
+    return 'other';
+  }
+
+  _providerShort(provider) {
+    const map = {
+      'GitHub Copilot': 'GH', 'Anthropic': 'ANT',
+      'OpenRouter': 'OR', 'TTA.dev': 'TTA',
+    };
+    return map[provider] || provider.substring(0, 3).toUpperCase();
   }
 }

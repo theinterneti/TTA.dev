@@ -24,10 +24,10 @@ export class SpanDetail {
         <div class="panel-heading" style="font-size:.9em;">Execution Chain</div>
         ${this._chainRow('📡 Provider',   span.provider)}
         ${this._chainRow('🤖 Model',      span.model)}
-        ${this._chainRow('🎭 Agent Role', span.agent_role || '(none)')}
-        ${this._chainRow('🔄 Workflow',   span.workflow_id || '(direct)')}
-        ${this._chainRow('⚙️ Primitive',  span.primitive_type || span.name)}
-        ${this._chainRow('⏱️ Duration',   `${(span.duration_ms || 0).toFixed(2)}ms`)}
+        ${span.agent_role ? this._chainRow('🎭 Agent Role', span.agent_role) : ''}
+        ${span.workflow_id ? this._chainRow('🔄 Workflow', span.workflow_id) : ''}
+        ${span.primitive_type ? this._chainRow('⚙️ Primitive', span.primitive_type) : ''}
+        ${this._chainRow('⏱️ Duration', span.duration_ms > 0 ? `${span.duration_ms.toFixed(2)}ms` : '—')}
         ${this._chainRow('📊 Status',     span.status)}
       </div>
 
