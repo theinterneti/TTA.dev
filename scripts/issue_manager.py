@@ -192,7 +192,7 @@ class IssueManager:
         if labels_to_add:
             # Remove existing labels that conflict
             existing = set(issue.labels)
-            existing.union(set(labels_to_add))
+            labels_to_add = list(set(labels_to_add) - existing)
 
             try:
                 subprocess.run(

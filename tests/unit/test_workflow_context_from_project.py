@@ -1,7 +1,6 @@
 """Unit tests for WorkflowContext.from_project() — Task 8."""
 
 
-
 def _make_project(tmp_path, name="test-proj"):
     from ttadev.observability.project_session import ProjectSessionManager
 

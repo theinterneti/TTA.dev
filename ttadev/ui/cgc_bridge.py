@@ -4,11 +4,13 @@ import json
 import subprocess
 from pathlib import Path
 
+# Derive repo root from this file's location — avoids hardcoded paths
+_REPO_ROOT = Path(__file__).parent.parent.parent
+
 
 def query_cgc_graph():
     """Query CGC MCP for graph data and format for d3.js visualization."""
     try:
-        # Use uv to run cgc query - just list Python files
         result = subprocess.run(
             [
                 "uv",
@@ -22,27 +24,23 @@ def query_cgc_graph():
             capture_output=True,
             text=True,
             timeout=10,
-            cwd="/home/thein/repos/TTA.dev",
+            cwd=str(_REPO_ROOT),
         )
 
         if result.returncode != 0:
             print(f"CGC query failed: {result.stderr}")
             return {"nodes": [], "edges": [], "stats": {}}
 
-        # Parse CGC output
         try:
             cgc_data = json.loads(result.stdout)
         except json.JSONDecodeError:
-            # CGC might return text, convert to simple structure
             files = result.stdout.strip().split("\n")
             cgc_data = {"files": [f for f in files if f]}
 
-        # Convert to d3.js graph format
         nodes = []
         edges = []
-
-        # Group files by directory
         file_map = {}
+
         for idx, file_path in enumerate(cgc_data.get("files", [])):
             if not file_path:
                 continue
@@ -51,7 +49,6 @@ def query_cgc_graph():
             node_id = f"file_{idx}"
             file_map[file_path] = node_id
 
-            # Determine node type
             if path.suffix == ".py":
                 node_type = "python"
             elif path.suffix in [".md", ".txt"]:
@@ -71,15 +68,15 @@ def query_cgc_graph():
                 }
             )
 
-        # Create edges based on imports (simplified - would need AST parsing for real)
-        # For now, just create directory grouping edges
-        dir_nodes = {}
-        for node in nodes:
+        # Build directory nodes from a snapshot to avoid mutating while iterating
+        dir_nodes: dict[str, str] = {}
+        dir_node_list = []
+        for node in list(nodes):  # snapshot — don't iterate over appended dir nodes
             dir_name = node["group"]
             if dir_name not in dir_nodes:
                 dir_id = f"dir_{len(dir_nodes)}"
                 dir_nodes[dir_name] = dir_id
-                nodes.append(
+                dir_node_list.append(
                     {
                         "id": dir_id,
                         "name": Path(dir_name).name or "root",
@@ -88,16 +85,16 @@ def query_cgc_graph():
                         "group": dir_name,
                     }
                 )
-
-            # Link file to its directory
             edges.append({"source": dir_nodes[dir_name], "target": node["id"], "type": "contains"})
+
+        nodes.extend(dir_node_list)
 
         return {
             "nodes": nodes,
             "edges": edges,
             "stats": {
                 "total_files": len([n for n in nodes if n["type"] != "directory"]),
-                "total_directories": len([n for n in nodes if n["type"] == "directory"]),
+                "total_directories": len(dir_node_list),
                 "python_files": len([n for n in nodes if n["type"] == "python"]),
                 "doc_files": len([n for n in nodes if n["type"] == "documentation"]),
             },
@@ -112,6 +109,5 @@ def query_cgc_graph():
 
 
 if __name__ == "__main__":
-    # Test the bridge
     graph = query_cgc_graph()
     print(json.dumps(graph, indent=2))

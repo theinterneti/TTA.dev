@@ -204,27 +204,59 @@ export class SessionDetail {
   _renderSpanRow(span) {
     const isErr  = span.status === 'error';
     const icon   = isErr ? '✕' : '▸';
-    const prim   = span.primitive_type
-      ? `<span class="span-prim">${span.primitive_type}</span>` : '';
-    const badge  = span.provider
-      ? `<span class="span-provider" data-provider="${this._providerKey(span.provider)}">${this._providerShort(span.provider)}</span>` : '';
-    const agentBadge = this.allMode && span._session_tool
-      ? `<span class="span-agent" title="Session ${span._session_id}">${this._toolIcon(span._session_tool)}</span>` : '';
     const dur    = (span.duration_ms && span.duration_ms > 0)
       ? `${span.duration_ms.toFixed(1)}ms` : '—';
     const time   = span.started_at ? new Date(span.started_at).toLocaleTimeString() : '';
 
-    return `
-      <div class="span-row${isErr ? ' error' : ''}" data-span-id="${span.span_id}">
-        <span class="span-icon ${isErr ? 'err' : ''}">${icon}</span>
-        ${agentBadge}
-        <span class="span-name">${span.name}</span>
-        ${badge}
-        ${prim}
-        <span class="span-dur">${dur}</span>
-        <span class="span-time">${time}</span>
-      </div>
-    `;
+    // Build row via DOM to avoid XSS — span fields are untrusted server data
+    const row = document.createElement('div');
+    row.className = `span-row${isErr ? ' error' : ''}`;
+    row.dataset.spanId = span.span_id;
+
+    const iconEl = document.createElement('span');
+    iconEl.className = `span-icon${isErr ? ' err' : ''}`;
+    iconEl.textContent = icon;
+    row.appendChild(iconEl);
+
+    if (this.allMode && span._session_tool) {
+      const agentEl = document.createElement('span');
+      agentEl.className = 'span-agent';
+      agentEl.title = `Session ${span._session_id}`;
+      agentEl.textContent = this._toolIcon(span._session_tool);
+      row.appendChild(agentEl);
+    }
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'span-name';
+    nameEl.textContent = span.name;
+    row.appendChild(nameEl);
+
+    if (span.provider) {
+      const badgeEl = document.createElement('span');
+      badgeEl.className = 'span-provider';
+      badgeEl.dataset.provider = this._providerKey(span.provider);
+      badgeEl.textContent = this._providerShort(span.provider);
+      row.appendChild(badgeEl);
+    }
+
+    if (span.primitive_type) {
+      const primEl = document.createElement('span');
+      primEl.className = 'span-prim';
+      primEl.textContent = span.primitive_type;
+      row.appendChild(primEl);
+    }
+
+    const durEl = document.createElement('span');
+    durEl.className = 'span-dur';
+    durEl.textContent = dur;
+    row.appendChild(durEl);
+
+    const timeEl = document.createElement('span');
+    timeEl.className = 'span-time';
+    timeEl.textContent = time;
+    row.appendChild(timeEl);
+
+    return row.outerHTML;
   }
 
   _toolIcon(tool) {

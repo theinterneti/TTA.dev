@@ -3,23 +3,24 @@
 import subprocess
 from pathlib import Path
 
+# Derive repo root from this file's location — avoids hardcoded absolute paths
+_REPO_ROOT = Path(__file__).parent.parent.parent
+
 
 def query_cgc_structure():
     """Query CGC for codebase structure."""
     try:
-        # Get list of indexed repos
         result = subprocess.run(
             ["uv", "run", "--python", "3.12", "cgc", "list"],
             capture_output=True,
             text=True,
             timeout=10,
-            cwd="/home/thein/repos/TTA.dev",
+            cwd=str(_REPO_ROOT),
         )
 
         if result.returncode != 0:
             return {"error": "Failed to list repos", "detail": result.stderr}
 
-        # Build graph structure from our knowledge
         graph_data = {
             "nodes": [],
             "edges": [],
@@ -27,11 +28,11 @@ def query_cgc_structure():
         }
 
         # Scan for primitives
-        primitives_dir = Path("/home/thein/repos/TTA.dev/ttadev/primitives")
+        primitives_dir = _REPO_ROOT / "ttadev" / "primitives"
         if primitives_dir.exists():
             for py_file in primitives_dir.glob("**/*.py"):
                 if py_file.name != "__init__.py":
-                    rel_path = str(py_file.relative_to("/home/thein/repos/TTA.dev"))
+                    rel_path = str(py_file.relative_to(_REPO_ROOT))
                     graph_data["nodes"].append(
                         {
                             "id": rel_path,
@@ -43,21 +44,21 @@ def query_cgc_structure():
                     graph_data["stats"]["primitives"] += 1
 
         # Scan for workflows
-        workflows_dir = Path("/home/thein/repos/TTA.dev/ttadev/workflows")
+        workflows_dir = _REPO_ROOT / "ttadev" / "workflows"
         if workflows_dir.exists():
             for py_file in workflows_dir.glob("**/*.py"):
                 if py_file.name != "__init__.py":
-                    rel_path = str(py_file.relative_to("/home/thein/repos/TTA.dev"))
+                    rel_path = str(py_file.relative_to(_REPO_ROOT))
                     graph_data["nodes"].append(
                         {"id": rel_path, "type": "workflow", "name": py_file.stem, "path": rel_path}
                     )
                     graph_data["stats"]["workflows"] += 1
 
         # Scan for agents
-        agents_dir = Path("/home/thein/repos/TTA.dev/.github/agents")
+        agents_dir = _REPO_ROOT / ".github" / "agents"
         if agents_dir.exists():
             for agent_file in agents_dir.glob("*.agent.md"):
-                rel_path = str(agent_file.relative_to("/home/thein/repos/TTA.dev"))
+                rel_path = str(agent_file.relative_to(_REPO_ROOT))
                 graph_data["nodes"].append(
                     {
                         "id": rel_path,
@@ -69,7 +70,6 @@ def query_cgc_structure():
                 graph_data["stats"]["agents"] += 1
 
         graph_data["stats"]["files"] = len(graph_data["nodes"])
-
         return graph_data
 
     except Exception as e:
@@ -84,7 +84,7 @@ def query_cgc_dependencies(file_path: str):
             capture_output=True,
             text=True,
             timeout=10,
-            cwd="/home/thein/repos/TTA.dev",
+            cwd=str(_REPO_ROOT),
         )
 
         if result.returncode == 0:
