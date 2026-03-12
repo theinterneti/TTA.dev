@@ -28,4 +28,6 @@ collect_ignore = [
     "test_observability_dashboard.py",
     # Requires hello.py (gitignored, not present in CI)
     "test_hello.py",
+    # Requires pytest-benchmark (not in main deps)
+    "benchmarks/test_primitive_performance.py",
 ]
