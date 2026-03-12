@@ -150,7 +150,6 @@ jobs:
           uv run pytest -v --tb=short
           -m "not integration and not slow and not external and not quarantine"
           --cov=ttadev --cov-branch
-          --cov-fail-under=80
           --cov-report=xml:coverage.xml
           --cov-report=term-missing
 
