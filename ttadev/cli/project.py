@@ -3,10 +3,23 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
+
+_SAFE_NAME = re.compile(r"^[A-Za-z0-9_\-]+$")
+
+
+def _validate_name(name: str) -> None:
+    """Reject names that could escape the projects directory."""
+    if not _SAFE_NAME.match(name):
+        print(
+            f"Invalid project name {name!r}. Use only letters, digits, hyphens, underscores.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 def _projects_dir(data_dir: Path) -> Path:
@@ -17,6 +30,7 @@ def _projects_dir(data_dir: Path) -> Path:
 
 def join(name: str, data_dir: Path) -> None:
     """Join (or re-join) a project by name."""
+    _validate_name(name)
     projects = _projects_dir(data_dir)
     project_file = projects / f"{name}.json"
 
@@ -54,6 +68,7 @@ def list_projects(data_dir: Path) -> None:
 
 def show(name: str, data_dir: Path) -> None:
     """Show details for a named project."""
+    _validate_name(name)
     project_file = _projects_dir(data_dir) / f"{name}.json"
     if not project_file.exists():
         print(f"Project not found: {name}", file=sys.stderr)

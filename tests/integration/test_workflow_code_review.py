@@ -378,6 +378,7 @@ async def test_context_metadata_in_review():
 
 
 @pytest.mark.asyncio
+@pytest.mark.slow
 async def test_review_pipeline_performance():
     """Test that parallel review is faster than sequential."""
     import time
