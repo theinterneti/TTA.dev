@@ -154,8 +154,9 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
       
+
       - name: Audit action pinning
         id: audit-pinning
         run: |
@@ -169,10 +170,12 @@ jobs:
           
           for workflow in $WORKFLOWS; do
             # Find uses: statements that don't use SHA pinning
+            # Match only YAML `uses:` keys (leading whitespace + "uses:"), not
+            # occurrences inside shell-script strings or comments.
             while IFS= read -r line; do
-              if echo "$line" | grep -q "uses:" && ! echo "$line" | grep -qE "@[a-f0-9]{40}" && ! echo "$line" | grep -q "\.\/"; then
+              if echo "$line" | grep -qE "^\s+uses:\s" && ! echo "$line" | grep -qE "@[a-f0-9]{40}" && ! echo "$line" | grep -q "\.\/"; then
                 UNPINNED+=("$workflow: $line")
-              elif echo "$line" | grep -q "uses:" && echo "$line" | grep -qE "@[a-f0-9]{40}"; then
+              elif echo "$line" | grep -qE "^\s+uses:\s" && echo "$line" | grep -qE "@[a-f0-9]{40}"; then
                 PINNED+=("$workflow: $line")
               fi
             done < "$workflow"
@@ -233,7 +236,7 @@ jobs:
           cat security-report.md
 
       - name: Upload security report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: security-posture-report
           path: security-report.md
@@ -256,7 +259,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
         with:
           fetch-depth: 0
       

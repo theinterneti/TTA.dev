@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Setup TTA environment
         uses: ./.github/actions/setup-tta-env
@@ -87,7 +87,7 @@ jobs:
         continue-on-error: ${{ !inputs.fail-on-type-errors }}
         run: |
           echo "Running pyright type check..."
-          uv run pyright platform/ apps/ 2>&1 | tee typecheck-output.txt
+          uvx pyright ttadev/ 2>&1 | tee typecheck-output.txt
           echo "result=pass" >> $GITHUB_OUTPUT
 
       - name: Count type errors
@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload type check results
         if: inputs.check-types && always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: typecheck-results-${{ inputs.python-version }}
           path: typecheck-output.txt

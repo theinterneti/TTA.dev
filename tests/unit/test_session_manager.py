@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 
+import ttadev.observability.agent_identity as _agent_identity_mod
 from ttadev.observability.session_manager import SessionManager
 from ttadev.observability.span_processor import ProcessedSpan
 
@@ -204,6 +205,7 @@ def test_get_recently_active_excludes_old_span(mgr: SessionManager) -> None:
 
 
 def test_detect_agent_tool_env_override(tmp_path: Path) -> None:
+    _agent_identity_mod._AGENT_TOOL = None
     os.environ["TTA_AGENT_TOOL"] = "copilot"
     try:
         mgr = SessionManager(data_dir=tmp_path)
@@ -211,11 +213,13 @@ def test_detect_agent_tool_env_override(tmp_path: Path) -> None:
         assert session.agent_tool == "copilot"
     finally:
         del os.environ["TTA_AGENT_TOOL"]
+        _agent_identity_mod._AGENT_TOOL = None
 
 
 def test_detect_agent_tool_fallback(tmp_path: Path) -> None:
+    _agent_identity_mod._AGENT_TOOL = None
     # Remove any env vars that would trigger detection
-    for key in ("TTA_AGENT_TOOL", "CLAUDE_CODE"):
+    for key in ("TTA_AGENT_TOOL", "CLAUDE_CODE", "CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT", "CLINE"):
         os.environ.pop(key, None)
     # Don't set TERM_PROGRAM to a known value for this test
     original = os.environ.pop("TERM_PROGRAM", None)
@@ -228,9 +232,11 @@ def test_detect_agent_tool_fallback(tmp_path: Path) -> None:
     finally:
         if original is not None:
             os.environ["TERM_PROGRAM"] = original
+        _agent_identity_mod._AGENT_TOOL = None
 
 
 def test_detect_agent_tool_claude_code_env(tmp_path: Path) -> None:
+    _agent_identity_mod._AGENT_TOOL = None
     os.environ.pop("TTA_AGENT_TOOL", None)
     os.environ["CLAUDE_CODE"] = "1"
     try:
@@ -239,3 +245,4 @@ def test_detect_agent_tool_claude_code_env(tmp_path: Path) -> None:
         assert session.agent_tool == "claude-code"
     finally:
         del os.environ["CLAUDE_CODE"]
+        _agent_identity_mod._AGENT_TOOL = None
