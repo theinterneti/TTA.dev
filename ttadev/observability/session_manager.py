@@ -140,6 +140,20 @@ class SessionManager:
         except Exception:
             return None
 
+    def resolve_session_id(self, prefix: str) -> str:
+        """Resolve a full or partial session ID prefix to a full ID.
+
+        Raises ValueError if the prefix matches zero or more than one session.
+        """
+        all_ids = [f.stem for f in self._sessions_dir.glob("*.json")]
+        matches = [sid for sid in all_ids if sid.startswith(prefix)]
+        if not matches:
+            raise ValueError(f"No session matching prefix: {prefix!r}")
+        if len(matches) > 1:
+            listed = ", ".join(sorted(matches)[:5])
+            raise ValueError(f"Ambiguous prefix {prefix!r}: {len(matches)} matches — {listed}")
+        return matches[0]
+
     # ------------------------------------------------------------------
     # Span ingestion
     # ------------------------------------------------------------------

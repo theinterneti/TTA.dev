@@ -200,6 +200,52 @@ def test_get_recently_active_excludes_old_span(mgr: SessionManager) -> None:
 
 
 # ---------------------------------------------------------------------------
+# resolve_session_id
+# ---------------------------------------------------------------------------
+
+
+def test_resolve_session_id_exact(mgr: SessionManager) -> None:
+    session = mgr.start_session()
+    resolved = mgr.resolve_session_id(session.id)
+    assert resolved == session.id
+
+
+def test_resolve_session_id_prefix(mgr: SessionManager) -> None:
+    session = mgr.start_session()
+    prefix = session.id[:8]
+    resolved = mgr.resolve_session_id(prefix)
+    assert resolved == session.id
+
+
+def test_resolve_session_id_not_found(mgr: SessionManager) -> None:
+    mgr.start_session()
+    with pytest.raises(ValueError, match="No session matching"):
+        mgr.resolve_session_id("00000000")
+
+
+def test_resolve_session_id_ambiguous(tmp_path: Path) -> None:
+    # Create two sessions whose IDs share the same first character
+    # by patching uuid to return known values
+    import unittest.mock as mock
+
+    ids = ["aaaaaaaa-0000-0000-0000-000000000001", "aaaaaaaa-0000-0000-0000-000000000002"]
+    id_iter = iter(ids)
+    with mock.patch(
+        "ttadev.observability.session_manager.uuid.uuid4", side_effect=lambda: next(id_iter)
+    ):
+        m = SessionManager(data_dir=tmp_path)
+        m.start_session()
+        m.end_session()
+        m2 = SessionManager(data_dir=tmp_path)
+        m2.start_session()
+        m2.end_session()
+
+    mgr2 = SessionManager(data_dir=tmp_path)
+    with pytest.raises(ValueError, match="Ambiguous"):
+        mgr2.resolve_session_id("aaaaaaaa")
+
+
+# ---------------------------------------------------------------------------
 # Agent tool detection
 # ---------------------------------------------------------------------------
 
