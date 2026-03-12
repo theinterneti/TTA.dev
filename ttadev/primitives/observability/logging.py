@@ -55,12 +55,16 @@ class _StdlibStructlogAdapter:
     def __init__(self, inner: logging.Logger) -> None:
         self._inner = inner
 
+    # stdlib logging kwargs that must be forwarded rather than serialised
+    _STDLIB_KW = frozenset({"exc_info", "stack_info", "stacklevel", "extra"})
+
     def _log(self, level: int, event: str, **kw: Any) -> None:
+        stdlib_kw: dict[str, Any] = {k: kw.pop(k) for k in list(kw) if k in self._STDLIB_KW}
         msg = event
         if kw:
             kv = " ".join(f"{k}={v!r}" for k, v in kw.items())
             msg = f"{event} {kv}"
-        self._inner.log(level, msg)
+        self._inner.log(level, msg, **stdlib_kw)
 
     def debug(self, event: str, **kw: Any) -> None:
         self._log(logging.DEBUG, event, **kw)
@@ -75,7 +79,7 @@ class _StdlibStructlogAdapter:
         self._log(logging.ERROR, event, **kw)
 
     def exception(self, event: str, **kw: Any) -> None:
-        self._inner.exception(event)
+        self._log(logging.ERROR, event, exc_info=True, **kw)
 
 
 def get_logger(name: str) -> Any:

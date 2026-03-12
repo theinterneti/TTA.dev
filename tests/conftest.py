@@ -20,8 +20,9 @@ collect_ignore = [
     "test_lifecycle.py",
     # Requires old `observability_integration` package
     "test_observability.py",
-    # Superseded by tests/e2e/test_dashboard_v2.py; has fixture scope bug
+    # Playwright e2e tests — require `playwright install` + live server
     "e2e/test_observability_dashboard.py",
+    "e2e/test_dashboard_v2.py",
     # Playwright tests requiring a live server (not in unit test run)
     "test_observability_ui.py",
     "test_observability_dashboard.py",
