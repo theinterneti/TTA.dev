@@ -127,7 +127,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ['3.11', '3.12', '3.13', '3.14']
-        split-group: [1, 2, 3]
 
     steps:
       - name: Checkout code
@@ -147,19 +146,9 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run tests with coverage enforcement
-        # pytest-split selects tests at collection time (horizontal scaling),
-        # pytest-xdist parallelises them across CPU cores (vertical scaling).
-        # --dist=loadfile groups tests by file to prevent state collisions.
-        # --cov-fail-under=80 enforces baseline coverage (matches codecov.yml)
         run: >
           uv run pytest -v --tb=short
           -m "not integration and not slow and not external and not quarantine"
-          -n auto
-          --dist=loadfile
-          --splitting-algorithm=least_duration
-          --splits=${{ strategy.job-total }}
-          --group=${{ matrix.split-group }}
-          --store-durations
           --cov=ttadev --cov-branch
           --cov-fail-under=80
           --cov-report=xml:coverage.xml
