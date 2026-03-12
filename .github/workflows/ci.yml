@@ -166,4 +166,4 @@ jobs:
 
       - name: Validate tta-dev-primitives package
         run: |
-          uv run python -c "from ttadev.primitives.core.base import WorkflowPrimitive; print('✅ Package validated')"
+          uv run python -c "from ttadev.primitives.core.base import WorkflowPrimitive; print('Package validated OK')"

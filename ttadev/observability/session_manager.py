@@ -105,7 +105,12 @@ class SessionManager:
             try:
                 data = json.loads(meta_file.read_text())
                 if data.get("agent_id") == agent_id:
-                    return Session(**data)
+                    session = Session(**data)
+                    # Back-fill project_id if span now carries one
+                    if project_id and not session.project_id:
+                        session.project_id = project_id
+                        self._persist_session(session)
+                    return session
             except Exception:
                 continue
 
