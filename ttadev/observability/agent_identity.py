@@ -48,7 +48,7 @@ def get_agent_tool() -> str:
     if _AGENT_TOOL is not None:
         return _AGENT_TOOL
 
-    if os.environ.get("CLAUDECODE") or os.environ.get("CLAUDE_CODE_ENTRYPOINT"):
+    if os.environ.get("CLAUDECODE") or os.environ.get("CLAUDE_CODE") or os.environ.get("CLAUDE_CODE_ENTRYPOINT"):
         _AGENT_TOOL = "claude-code"
     elif "vscode" in os.environ.get("TERM_PROGRAM", "").lower():
         _AGENT_TOOL = "copilot"
