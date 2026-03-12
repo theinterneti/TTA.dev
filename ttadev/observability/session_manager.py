@@ -71,6 +71,14 @@ class SessionManager:
         self._persist_session(self._current)
         self._current = None
 
+    def end_session_by_id(self, session_id: str) -> None:
+        """Mark an arbitrary session as ended by its ID (disk-backed, no in-memory state required)."""
+        session = self.get_session(session_id)
+        if session is None:
+            return
+        session.ended_at = datetime.now(UTC).isoformat()
+        self._persist_session(session)
+
     # ------------------------------------------------------------------
     # Queries
     # ------------------------------------------------------------------

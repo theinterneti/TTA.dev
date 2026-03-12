@@ -35,28 +35,20 @@ def _make_session(
 ) -> Session:
     mgr = SessionManager(data_dir=tmp_path)
     s = mgr.start_session()
-    # Patch started_at for ordering tests
-    if minutes_ago:
-        started = (datetime.now(UTC) - timedelta(minutes=minutes_ago)).isoformat()
-        s = Session(
-            id=s.id,
-            started_at=started,
-            ended_at=None,
-            agent_tool=agent_tool,
-            project_path=s.project_path,
-            hostname=s.hostname,
-            agent_id=s.agent_id,
-            project_id=project_id,
-        )
-        meta_file = tmp_path / "sessions" / f"{s.id}.json"
-        meta_file.write_text(json.dumps({k: v for k, v in s.__dict__.items()}))
     if ended:
         mgr.end_session()
-        # Re-read to get ended_at
-        meta_file = tmp_path / "sessions" / f"{s.id}.json"
-        data = json.loads(meta_file.read_text())
-        s = Session(**data)
-    return s
+
+    # Always patch the JSON with desired agent_tool, started_at, and project_id
+    meta_file = tmp_path / "sessions" / f"{s.id}.json"
+    data = json.loads(meta_file.read_text())
+    data["agent_tool"] = agent_tool
+    if project_id is not None:
+        data["project_id"] = project_id
+    if minutes_ago:
+        data["started_at"] = (datetime.now(UTC) - timedelta(minutes=minutes_ago)).isoformat()
+    meta_file.write_text(json.dumps(data))
+
+    return Session(**json.loads(meta_file.read_text()))
 
 
 def _make_span(session_id: str, tmp_path: Path, primitive_type: str = "RetryPrimitive") -> None:

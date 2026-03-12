@@ -3,10 +3,18 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
 from ttadev.observability.session_manager import Session, SessionManager
+
+_SAFE_NAME = re.compile(r"^[A-Za-z0-9_\-]+$")
+
+
+def _validate_project_name(name: str) -> bool:
+    """Return True if name is safe to use as a filename component."""
+    return bool(_SAFE_NAME.match(name))
 
 
 def _fmt_dt(iso: str | None) -> str:
@@ -37,12 +45,28 @@ def list_sessions(data_dir: Path, limit: int, project_name: str | None) -> None:
 
     # Filter by project name if requested
     if project_name is not None:
+        if not _validate_project_name(project_name):
+            print(
+                f"Invalid project name {project_name!r}. Use only letters, digits, hyphens, underscores.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
         project_file = data_dir / "projects" / f"{project_name}.json"
         if not project_file.exists():
             print(f"No sessions for project: {project_name}")
             return
-        meta = json.loads(project_file.read_text())
-        project_id = meta["id"]
+        try:
+            meta = json.loads(project_file.read_text())
+        except json.JSONDecodeError as exc:
+            print(f"Error reading project metadata for {project_name!r}: {exc}", file=sys.stderr)
+            return
+        project_id = meta.get("id")
+        if project_id is None:
+            print(
+                f"Project metadata for {project_name!r} is missing required 'id' field.",
+                file=sys.stderr,
+            )
+            return
         sessions = [s for s in sessions if s.project_id == project_id]
 
     if not sessions:
@@ -132,9 +156,7 @@ def end_session(data_dir: Path) -> None:
         print("No active session to end.", file=sys.stderr)
         return
 
-    # Load session into manager's in-memory state so end_session() can persist it
-    mgr._current = s  # noqa: SLF001
-    mgr.end_session()
+    mgr.end_session_by_id(s.id)
     print(f"Ended session: {s.id}")
 
 
@@ -172,7 +194,7 @@ def list_spans(
 
     for sp in spans:
         prim = sp.primitive_type or "-"
-        dur = f"{sp.duration_ms:.0f}ms" if sp.duration_ms else "-"
+        dur = f"{sp.duration_ms:.0f}ms" if sp.duration_ms is not None else "-"
         print(
             f"{sp.span_id[:8]:<{col[0]}}  "
             f"{sp.name:<{col[1]}}  "
