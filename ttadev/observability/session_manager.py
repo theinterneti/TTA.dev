@@ -71,6 +71,14 @@ class SessionManager:
         self._persist_session(self._current)
         self._current = None
 
+    def end_session_by_id(self, session_id: str) -> None:
+        """Mark an arbitrary session as ended by its ID (disk-backed, no in-memory state required)."""
+        session = self.get_session(session_id)
+        if session is None:
+            return
+        session.ended_at = datetime.now(UTC).isoformat()
+        self._persist_session(session)
+
     # ------------------------------------------------------------------
     # Queries
     # ------------------------------------------------------------------
@@ -139,6 +147,20 @@ class SessionManager:
             return Session(**data)
         except Exception:
             return None
+
+    def resolve_session_id(self, prefix: str) -> str:
+        """Resolve a full or partial session ID prefix to a full ID.
+
+        Raises ValueError if the prefix matches zero or more than one session.
+        """
+        all_ids = [f.stem for f in self._sessions_dir.glob("*.json")]
+        matches = [sid for sid in all_ids if sid.startswith(prefix)]
+        if not matches:
+            raise ValueError(f"No session matching prefix: {prefix!r}")
+        if len(matches) > 1:
+            listed = ", ".join(sorted(matches)[:5])
+            raise ValueError(f"Ambiguous prefix {prefix!r}: {len(matches)} matches — {listed}")
+        return matches[0]
 
     # ------------------------------------------------------------------
     # Span ingestion
