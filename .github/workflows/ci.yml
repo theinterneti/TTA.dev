@@ -67,8 +67,19 @@ jobs:
           
           echo "🔍 Validating #dev-todo compliance..."
           
-          # Find all TODOs with #dev-todo tag (excluding documentation and scripts)
-          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" . | grep -v "^\.\/docs\/" | grep -v "^\.\/\.github\/workflows\/.*\.md" | grep -v "^\.\/scripts\/" || true)
+          # Find all TODOs with #dev-todo tag in source files only
+          # Exclude: docs/, scripts/, logseq/, root-level *.md, .github/ markdown,
+          # and test fixtures that reference the tag format as a string literal.
+          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" . \
+            | grep -v "^\.\/docs\/" \
+            | grep -v "^\.\/scripts\/" \
+            | grep -v "^\.\/logseq\/" \
+            | grep -v "^\.\/\.github\/" \
+            | grep -v "^\.\/CHANGELOG" \
+            | grep -v "^\.\/SESSION_" \
+            | grep -v "^\.\/[A-Z_]*\.md:" \
+            | grep -v "^\.\/tests\/test_issue_manager" \
+            || true)
           
           if [ -z "$todos" ]; then
             echo "✅ No #dev-todos found"
