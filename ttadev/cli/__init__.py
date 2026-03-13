@@ -53,6 +53,32 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     # ------------------------------------------------------------------ #
+    # run subcommand                                                       #
+    # ------------------------------------------------------------------ #
+    run_p = sub.add_parser("run", help="Run a primitive workflow around a shell command")
+    run_sub = run_p.add_subparsers(dest="run_command")
+
+    # run retry
+    retry_p = run_sub.add_parser("retry", help="Retry a command on failure")
+    retry_p.add_argument("--max-retries", type=int, default=3, metavar="N")
+    retry_p.add_argument("cmd", nargs=argparse.REMAINDER, metavar="-- COMMAND")
+
+    # run timeout
+    timeout_p = run_sub.add_parser("timeout", help="Kill a command after N seconds")
+    timeout_p.add_argument("--seconds", type=float, default=30.0, metavar="N")
+    timeout_p.add_argument("cmd", nargs=argparse.REMAINDER, metavar="-- COMMAND")
+
+    # run cache
+    cache_p = run_sub.add_parser("cache", help="Cache the output of a command")
+    cache_p.add_argument("--ttl", type=float, default=3600.0, metavar="N")
+    cache_p.add_argument("--key", default=None, metavar="KEY")
+    cache_p.add_argument("cmd", nargs=argparse.REMAINDER, metavar="-- COMMAND")
+
+    # run echo
+    echo_p = run_sub.add_parser("echo", help="Print arguments (useful for testing)")
+    echo_p.add_argument("cmd", nargs=argparse.REMAINDER, metavar="ARGS")
+
+    # ------------------------------------------------------------------ #
     # project subcommand                                                   #
     # ------------------------------------------------------------------ #
     project_p = sub.add_parser("project", help="Manage TTA projects")
@@ -78,7 +104,36 @@ def main() -> None:
 
     data_dir = Path(args.data_dir)
 
-    if args.command == "session":
+    if args.command == "run":
+        from ttadev.cli.run import run_cache, run_echo, run_retry, run_timeout
+
+        if not args.run_command:
+            parser.parse_args(["run", "--help"])
+            sys.exit(0)
+
+        # Strip leading "--" separator if present
+        cmd = args.cmd
+        if cmd and cmd[0] == "--":
+            cmd = cmd[1:]
+
+        if not cmd and args.run_command != "echo":
+            print(
+                f"error: 'tta run {args.run_command}' requires a command after --", file=sys.stderr
+            )
+            sys.exit(1)
+
+        if args.run_command == "retry":
+            run_retry(cmd, max_retries=args.max_retries, data_dir=data_dir)
+        elif args.run_command == "timeout":
+            run_timeout(cmd, seconds=args.seconds, data_dir=data_dir)
+        elif args.run_command == "cache":
+            run_cache(cmd, ttl=args.ttl, key=args.key, data_dir=data_dir)
+        elif args.run_command == "echo":
+            run_echo(cmd)
+        else:
+            parser.parse_args(["run", "--help"])
+
+    elif args.command == "session":
         from ttadev.cli.session import (
             current_session,
             end_session,
