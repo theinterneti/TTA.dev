@@ -13,6 +13,7 @@ from typing import Any
 
 from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 from ttadev.primitives.recovery.retry import RetryPrimitive, RetryStrategy
+from ttadev.primitives.recovery.timeout import TimeoutError as PrimitiveTimeoutError
 from ttadev.primitives.recovery.timeout import TimeoutPrimitive
 
 # ---------------------------------------------------------------------------
@@ -76,9 +77,11 @@ class DiskCache:
         try:
             data = json.loads(p.read_text())
             if time.time() - data["ts"] >= data["ttl"]:
+                p.unlink(missing_ok=True)
                 return None
             return data["value"]
         except Exception:
+            p.unlink(missing_ok=True)
             return None
 
     def set(self, key: str, value: Any, ttl: float) -> None:
@@ -130,7 +133,13 @@ def run_retry(cmd: list[str], max_retries: int, data_dir: Path) -> None:
 
     shell = ShellPrimitive(cmd, raise_on_error=True)
     primitive = RetryPrimitive(
-        shell, strategy=RetryStrategy(max_retries=max_retries, backoff_base=0.0)
+        shell,
+        strategy=RetryStrategy(
+            max_retries=max_retries,
+            backoff_base=0.0,
+            max_backoff=0.0,
+            jitter=False,
+        ),
     )
 
     try:
@@ -158,7 +167,7 @@ def run_timeout(cmd: list[str], seconds: float, data_dir: Path) -> None:
     try:
         result: ShellResult = _execute(primitive, cmd)
         _print_and_exit(result)
-    except TimeoutError:
+    except PrimitiveTimeoutError:
         print(f"[timeout] Command exceeded {seconds}s limit.", file=sys.stderr)
         sys.exit(1)
     except Exception as exc:
@@ -177,6 +186,9 @@ def _default_key(cmd: list[str]) -> str:
 
 def run_cache(cmd: list[str], ttl: float, key: str | None, data_dir: Path) -> None:
     """Run cmd, serving cached stdout on hit."""
+    if ttl < 0:
+        print("error: --ttl must be >= 0", file=sys.stderr)
+        sys.exit(1)
     if ttl == 0:
         print("warning: --ttl 0 disables caching (always miss)", file=sys.stderr)
 
@@ -187,6 +199,7 @@ def run_cache(cmd: list[str], ttl: float, key: str | None, data_dir: Path) -> No
     if cached is not None:
         print("[cache hit] Returning cached output.", file=sys.stderr)
         print(cached, end="")
+        return
 
     # Cache miss — run the command
     shell = ShellPrimitive(cmd)

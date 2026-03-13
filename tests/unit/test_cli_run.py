@@ -139,7 +139,9 @@ def test_run_timeout_fast_command_passes(
     assert "fast" in capsys.readouterr().out
 
 
-def test_run_timeout_slow_command_exits_1(tmp_path: Path) -> None:
+def test_run_timeout_slow_command_exits_1(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     with pytest.raises(SystemExit) as exc:
         run_timeout(
             [sys.executable, "-c", "import time; time.sleep(10)"],
@@ -147,6 +149,7 @@ def test_run_timeout_slow_command_exits_1(tmp_path: Path) -> None:
             data_dir=tmp_path,
         )
     assert exc.value.code == 1
+    assert "timeout" in capsys.readouterr().err.lower()
 
 
 def test_run_timeout_zero_seconds_exits_1(tmp_path: Path) -> None:
@@ -189,13 +192,24 @@ def test_run_cache_miss_runs_command(tmp_path: Path, capsys: pytest.CaptureFixtu
 
 
 def test_run_cache_hit_skips_command(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    cmd = [sys.executable, "-c", "print('ran')"]
+    counter = tmp_path / "count.txt"
+    counter.write_text("0")
+    script = (
+        "from pathlib import Path; "
+        f"p = Path(r'''{counter}'''); "
+        "n = int(p.read_text()); "
+        "p.write_text(str(n + 1)); "
+        "print('ran')"
+    )
+    cmd = [sys.executable, "-c", script]
     run_cache(cmd, ttl=60, key="k2", data_dir=tmp_path)
+    assert counter.read_text() == "1"
     capsys.readouterr()  # clear
     run_cache(cmd, ttl=60, key="k2", data_dir=tmp_path)
     captured = capsys.readouterr()
     assert "cache hit" in captured.err.lower()
     assert "ran" in captured.out
+    assert counter.read_text() == "1"  # command did NOT re-execute
 
 
 def test_run_cache_expired_reruns_command(
@@ -206,9 +220,9 @@ def test_run_cache_expired_reruns_command(
     capsys.readouterr()
     time.sleep(0.05)
     run_cache(cmd, ttl=0.01, key="k3", data_dir=tmp_path)
-    out = capsys.readouterr().out
-    assert "cache hit" not in out.lower()
-    assert "ran" in out
+    captured = capsys.readouterr()
+    assert "cache hit" not in captured.err.lower()
+    assert "ran" in captured.out
 
 
 def test_run_cache_default_key_from_command(tmp_path: Path) -> None:

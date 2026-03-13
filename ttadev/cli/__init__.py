@@ -116,6 +116,12 @@ def main() -> None:
         if cmd and cmd[0] == "--":
             cmd = cmd[1:]
 
+        if not cmd and args.run_command != "echo":
+            print(
+                f"error: 'tta run {args.run_command}' requires a command after --", file=sys.stderr
+            )
+            sys.exit(1)
+
         if args.run_command == "retry":
             run_retry(cmd, max_retries=args.max_retries, data_dir=data_dir)
         elif args.run_command == "timeout":
