@@ -1,0 +1,14 @@
+# CGC indexing exclusions — mirrors .gitignore noise
+node_modules/
+.venv/
+.archive/
+dist/
+build/
+__pycache__/
+*.pyc
+.git/
+.tta/
+.ttadev/
+htmlcov/
+.pytest_cache/
+*.egg-info/
