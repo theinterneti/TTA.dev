@@ -43,6 +43,7 @@ tests/              # Integration tests
 | [sdd-constitution](docs/agent-guides/sdd-constitution.md) | Full SDD §1-§4 |
 | [observability-guide](docs/agent-guides/observability-guide.md) | OpenTelemetry integration |
 | [todo-management](docs/agent-guides/todo-management.md) | Logseq TODOs, tags |
+| [secrets-guide](docs/agent-guides/secrets-guide.md) | API keys, `.env`, 1Password CLI |
 
 ## Non-Negotiable Standards (Quick Reference)
 

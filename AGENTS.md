@@ -190,17 +190,6 @@ Native MCP servers available to agents: [.mcp/config.json](.mcp/config.json)
 
 ---
 
-## Migration Notes
-
-**⚠️ Hypertool Legacy:**  
-This repo has migrated from Hypertool to GitHub Copilot native agents. Legacy configuration archived in `_archive/hypertool/`.
-
-**Changes:**
-- Hypertool personas → `.github/agents/*.agent.md`
-- Hypertool workflows → `.github/skills/*/SKILL.md`
-- Hypertool MCP config → `.mcp/config.json`
-- New coordination model defined in this file
-
 ---
 
 ## Getting Started
@@ -258,15 +247,11 @@ ls .github/skills/
 - [Getting Started](GETTING_STARTED.md)
 - [Primitives Catalog](PRIMITIVES_CATALOG.md)
 - [Vibe Coding Guide](VIBE_CODING.md)
-- [Migration Plan](docs/HYPERTOOL_MIGRATION_PLAN.md)
-- [Persona Status Report](docs/PERSONA_STATUS_REPORT_2026_03.md)
-
 ---
 
-**Version:** 2.0.0 (GitHub Copilot Native)  
-**Last Updated:** 2026-03-07  
-**Status:** Active  
-**Previous:** Hypertool-based (archived)
+**Version:** 2.0.0
+**Last Updated:** 2026-03-18
+**Status:** Active
 
 
 ---
