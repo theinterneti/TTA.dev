@@ -52,7 +52,6 @@ except ImportError as e:
 # Import Gemini SDK
 try:
     import google.generativeai as genai
-
     from tta_secrets import get_gemini_api_key
 
     try:
@@ -166,10 +165,22 @@ app = FastAPI(
     version="2.0.0",
 )
 
+# Configure network defaults securely while allowing explicit overrides.
+allowed_origins = [
+    origin.strip()
+    for origin in os.environ.get(
+        "TTA_API_ALLOWED_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
+    if origin.strip()
+]
+server_host = os.environ.get("TTA_API_HOST", "127.0.0.1")
+server_port = int(os.environ.get("TTA_API_PORT", "8000"))
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -340,4 +351,4 @@ print(f"Primitives: {'✅ ACTIVE' if TTA_PRIMITIVES_AVAILABLE else '❌ INACTIVE
 print("=" * 60)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run(app, host=server_host, port=server_port, reload=False)
