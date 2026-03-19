@@ -154,3 +154,21 @@ class OpenRouterPrimitive(WorkflowPrimitive[OpenRouterRequest, OpenRouterRespons
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
         await self.client.aclose()
+
+    async def chat(
+        self,
+        messages: list[dict],
+        system: str | None,
+        ctx: "WorkflowContext",
+    ) -> str:
+        """ChatPrimitive protocol implementation.
+
+        OpenRouter does not have a dedicated system prompt field;
+        the system prompt is prepended as a system-role message if provided.
+        """
+        all_messages = list(messages)
+        if system:
+            all_messages = [{"role": "system", "content": system}] + all_messages
+        request = OpenRouterRequest(messages=all_messages)
+        response = await self.execute(request, ctx)
+        return response.content

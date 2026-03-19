@@ -9,17 +9,16 @@ Claude Code is the **primary agent** for this repository. Other agents defer to 
 ## Repo Layout
 
 ```
-platform/           # Core packages
-├── primitives/     # tta-dev-primitives — core workflows
-├── observability/  # tta-observability-integration
-├── agent-context/  # universal-agent-context
-├── agent-coordination/
-├── integrations/
-├── documentation/
-└── kb-automation/
-apps/               # User-facing applications
+ttadev/             # Main package
+├── primitives/     # Core workflow primitives (retry, cache, timeout, etc.)
+├── agents/         # Role-based agent system (specs, registry, router)
+├── observability/  # OpenTelemetry integration
+├── integrations/   # LLM integrations (Anthropic, OpenAI, Groq, etc.)
+├── cli/            # `tta` CLI subcommands
+├── skills/         # Agent skills
+└── ui/             # UI components
 docs/               # Architecture, guides, agent docs
-tests/              # Integration tests
+tests/              # Test suite
 ```
 
 ## Agent Skills (Tier 2)
@@ -50,7 +49,7 @@ tests/              # Integration tests
 - **Package manager:** `uv` always (never `pip`/`poetry`)
 - **Python:** 3.11+ with `str | None` (not `Optional[str]`)
 - **Linting:** Ruff — line length 88, strict mode (`uv run ruff check . --fix`)
-- **Type checking:** Pyright basic mode (`uvx pyright platform/`)
+- **Type checking:** Pyright basic mode (`uvx pyright ttadev/`)
 - **Testing:** pytest AAA pattern, 100% coverage for new code
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
 - **Primitives:** Always use for workflows (never manual retry/timeout loops)
