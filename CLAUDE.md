@@ -43,6 +43,7 @@ tests/              # Test suite
 | [observability-guide](docs/agent-guides/observability-guide.md) | OpenTelemetry integration |
 | [todo-management](docs/agent-guides/todo-management.md) | Logseq TODOs, tags |
 | [secrets-guide](docs/agent-guides/secrets-guide.md) | API keys, `.env`, 1Password CLI |
+| [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md) | LLM provider hierarchy, OpenRouter + Ollama |
 
 ## Non-Negotiable Standards (Quick Reference)
 
@@ -54,6 +55,7 @@ tests/              # Test suite
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
 - **Primitives:** Always use for workflows (never manual retry/timeout loops)
 - **State:** Pass via `WorkflowContext` (never globals)
+- **LLM providers:** OpenRouter free models first, Ollama fallback — see [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md)
 
 ### ⛔ TODO Management — CI-Blocking Rule
 
