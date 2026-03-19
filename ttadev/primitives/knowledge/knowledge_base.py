@@ -1,4 +1,4 @@
-"""Knowledge base primitive for querying Logseq graph.
+"""Knowledge base primitive for querying contextual guidance backends.
 
 # See: [[TTA.dev/Primitives/KnowledgeBasePrimitive]]
 """
@@ -8,8 +8,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from primitives.core.base import WorkflowContext
-from primitives.observability.instrumented_primitive import (
+from ..core.base import WorkflowContext
+from ..observability.instrumented_primitive import (
     InstrumentedPrimitive,
 )
 
@@ -20,7 +20,7 @@ class KBPage(BaseModel):
     title: str = Field(description="Page title")
     content: str | None = Field(default=None, description="Page content markdown")
     tags: list[str] = Field(default_factory=list, description="Page tags")
-    url: str | None = Field(default=None, description="Logseq page URL (optional)")
+    url: str | None = Field(default=None, description="Knowledge source URL (optional)")
     relevance_score: float = Field(default=1.0, description="Relevance score (0.0-1.0)")
 
 
@@ -43,32 +43,32 @@ class KBResult(BaseModel):
     pages: list[KBPage] = Field(default_factory=list, description="Matching pages")
     total_found: int = Field(description="Total pages found")
     query_time_ms: float = Field(description="Query execution time in milliseconds")
-    source: Literal["logseq", "fallback"] = Field(
-        description="Result source (logseq=real, fallback=empty)"
+    source: Literal["backend", "fallback"] = Field(
+        description="Result source (backend=query backend, fallback=empty response)"
     )
 
 
 class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
-    """Query Logseq knowledge base for contextual guidance.
+    """Query a knowledge backend for contextual guidance.
 
-    This primitive wraps LogSeq MCP integration to provide:
+    This primitive provides:
     - Best practices queries
     - Common mistakes warnings
     - Related examples
     - Stage-specific recommendations
 
-    Gracefully degrades when LogSeq MCP is unavailable (returns empty results).
+    Gracefully degrades when the configured backend is unavailable.
 
     Example:
         ```python
-        from primitives.knowledge import (
+        from ttadev.primitives.knowledge import (
             KnowledgeBasePrimitive,
             KBQuery,
         )
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.core.base import WorkflowContext
 
         # Create KB primitive
-        kb = KnowledgeBasePrimitive(logseq_available=True)
+        kb = KnowledgeBasePrimitive(backend_available=True)
 
         # Query best practices
         query = KBQuery(
@@ -87,16 +87,15 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         ```
     """
 
-    def __init__(self, logseq_available: bool = False) -> None:
+    def __init__(self, backend_available: bool = False) -> None:
         """Initialize KB primitive.
 
         Args:
-            logseq_available: Whether LogSeq MCP tools are available.
-                             True only in VS Code with LogSeq MCP configured.
-                             False in GitHub Actions and other environments.
+            backend_available: Whether a knowledge backend is available in the
+                current environment.
         """
         super().__init__(name="knowledge_base")
-        self.logseq_available = logseq_available
+        self.backend_available = backend_available
 
     async def _execute_impl(self, input_data: KBQuery, context: WorkflowContext) -> KBResult:
         """Execute knowledge base query.
@@ -106,11 +105,11 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
             context: Workflow context for observability
 
         Returns:
-            KBResult with matching pages or empty result if MCP unavailable
+            KBResult with matching pages or empty result if no backend is available
         """
         start_time = time.time()
 
-        if not self.logseq_available:
+        if not self.backend_available:
             # Graceful degradation - return empty result
             return KBResult(
                 pages=[],
@@ -139,7 +138,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
             pages=pages[: input_data.max_results],
             total_found=len(pages),
             query_time_ms=query_time_ms,
-            source="logseq",
+            source="backend",
         )
 
     async def _query_best_practices_impl(
@@ -162,8 +161,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         if query.stage:
             search_tags.append(f"stage-{query.stage}")
 
-        # TODO: Call LogSeq MCP search tool when available
-        # For now, return empty list (MCP integration in future PR)
+        # TODO: Call the configured knowledge backend when available.
         return []
 
     async def _query_common_mistakes_impl(
@@ -184,7 +182,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         if query.stage:
             search_tags.append(f"stage-{query.stage}")
 
-        # TODO: Call LogSeq MCP search tool
+        # TODO: Call the configured knowledge backend.
         return []
 
     async def _query_examples_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
@@ -199,7 +197,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of matching KB pages
         """
-        # TODO: Call LogSeq MCP search tool with tags ["examples", query.topic]
+        # TODO: Call the configured knowledge backend with tags ["examples", query.topic].
         return []
 
     async def _query_related_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
@@ -214,7 +212,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of related KB pages
         """
-        # TODO: Call LogSeq MCP get related pages tool
+        # TODO: Call the configured knowledge backend for related pages.
         return []
 
     async def _query_by_tags_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
@@ -227,7 +225,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of matching KB pages
         """
-        # TODO: Call LogSeq MCP search by tags tool
+        # TODO: Call the configured knowledge backend to search by tags.
         return []
 
     # Convenience methods for common queries
@@ -250,7 +248,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
 
         Example:
             ```python
-            kb = KnowledgeBasePrimitive(logseq_available=True)
+            kb = KnowledgeBasePrimitive(backend_available=True)
             result = await kb.search_by_tags(
                 tags=["testing", "best-practices"],
                 max_results=3

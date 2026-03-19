@@ -20,8 +20,7 @@ import random
 from dataclasses import dataclass
 from typing import Any
 
-from primitives.core.base import WorkflowContext
-
+from ..core.base import WorkflowContext
 from .base import AdaptivePrimitive, LearningMode, LearningStrategy
 
 logger = logging.getLogger(__name__)
@@ -77,24 +76,18 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
         target_primitive: Any,
         learning_mode: LearningMode = LearningMode.VALIDATE,
         max_strategies: int = 8,
-        logseq_integration: Any | None = None,
-        enable_auto_persistence: bool = True,
         **kwargs: Any,
     ) -> None:
         super().__init__(learning_mode=learning_mode, max_strategies=max_strategies, **kwargs)
 
         self.target_primitive = target_primitive
-        self.logseq_integration = logseq_integration
-        self.enable_auto_persistence = enable_auto_persistence
 
         # Initialize with baseline strategy
         self.baseline_strategy = self._create_baseline_strategy()
         self.strategies[self.baseline_strategy.name] = self.baseline_strategy
 
         logger.info(
-            f"Initialized AdaptiveRetryPrimitive with target={type(target_primitive).__name__}, "
-            f"logseq_enabled={logseq_integration is not None}, "
-            f"auto_persist={enable_auto_persistence}"
+            f"Initialized AdaptiveRetryPrimitive with target={type(target_primitive).__name__}"
         )
 
     async def _execute_with_strategy(
@@ -322,10 +315,6 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
 
             logger.info(f"Created low-retry strategy: {strategy_name}")
 
-            # Auto-persist to Logseq if enabled
-            if self.enable_auto_persistence and self.logseq_integration:
-                await self._persist_strategy_to_logseq(new_strategy, context)
-
     async def _consider_increasing_retries(
         self,
         context_key: str,
@@ -355,10 +344,6 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
             self.total_adaptations += 1
 
             logger.info(f"Created high-retry strategy: {strategy_name}")
-
-            # Auto-persist to Logseq if enabled
-            if self.enable_auto_persistence and self.logseq_integration:
-                await self._persist_strategy_to_logseq(new_strategy, context)
 
     async def _consider_error_specific_strategy(
         self,
@@ -409,10 +394,6 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
 
             logger.info(f"Created error-specific strategy: {strategy_name}")
 
-            # Auto-persist to Logseq if enabled
-            if self.enable_auto_persistence and self.logseq_integration:
-                await self._persist_strategy_to_logseq(new_strategy, context)
-
     async def _consider_faster_backoff(
         self, context_key: str, strategy: LearningStrategy, context: WorkflowContext
     ) -> None:
@@ -439,31 +420,6 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[dict[str, Any], dict[str, Any]]):
             self.total_adaptations += 1
 
             logger.info(f"Created fast-backoff strategy: {strategy_name}")
-
-            # Auto-persist to Logseq if enabled
-            if self.enable_auto_persistence and self.logseq_integration:
-                await self._persist_strategy_to_logseq(new_strategy, context)
-
-    async def _persist_strategy_to_logseq(
-        self, strategy: LearningStrategy, context: WorkflowContext
-    ) -> None:
-        """Persist learned strategy to Logseq knowledge base."""
-        if not self.logseq_integration:
-            return
-
-        try:
-            await self.logseq_integration.save_learned_strategy(
-                strategy=strategy,
-                primitive_type="AdaptiveRetryPrimitive",
-                context=context,
-                performance_data={
-                    "latency_percentiles": {},  # Could be populated from metrics
-                    "error_breakdown": {},  # Could be populated from execution history
-                },
-            )
-            logger.info(f"Persisted strategy '{strategy.name}' to Logseq")
-        except Exception as e:
-            logger.warning(f"Failed to persist strategy to Logseq: {e}")
 
 
 # Export the adaptive retry primitive

@@ -350,16 +350,14 @@ class IssueManager:
         print(f"ℹ️ Could not determine milestone for issue #{issue_number}")
         return True
 
-    def generate_logseq_todo(self, issue_number: int) -> str | None:
-        """
-        Generate a Logseq-formatted TODO string for a GitHub issue.
-        """
+    def generate_todo_block(self, issue_number: int) -> str | None:
+        """Generate a dev TODO block for a GitHub issue."""
         issue = self.get_issue(issue_number)
         if not issue:
             print(f"Issue #{issue_number} not found")
             return None
 
-        # Map GitHub labels to Logseq priorities
+        # Map GitHub labels to TODO priorities
         priority_map = {
             "P0": "high",
             "P1": "high",
@@ -387,7 +385,7 @@ class IssueManager:
         elif "observability" in issue.labels:
             todo_type = "observability"
 
-        # Build the Logseq block
+        # Build the TODO block
         # Format: - TODO Title #tags
         # Filter out P-labels for tags to avoid redundancy with priority property
         tags = [f"#{label}" for label in issue.labels if not label.startswith("P")]
@@ -800,12 +798,12 @@ def main():
         success = manager.assign_milestone(issue_number)
         sys.exit(0 if success else 1)
 
-    elif command == "logseq-todo":
+    elif command == "todo-block":
         if len(sys.argv) < 3:
-            print("Usage: ./scripts/issue_manager.py logseq-todo <issue-number>")
+            print("Usage: ./scripts/issue_manager.py todo-block <issue-number>")
             sys.exit(1)
         issue_number = int(sys.argv[2])
-        todo_block = manager.generate_logseq_todo(issue_number)
+        todo_block = manager.generate_todo_block(issue_number)
         if todo_block:
             print(todo_block)
             sys.exit(0)

@@ -9,26 +9,18 @@ Key Components:
     LearningStrategy: Represents a learned strategy with metrics
     StrategyMetrics: Performance tracking for strategies
     LearningMode: Controls learning behavior and safety
-    LogseqStrategyIntegration: Persist strategies to knowledge base
-
 Example - Basic Adaptive Retry:
     ```python
-    from primitives.adaptive import (
+    from ttadev.primitives.adaptive import (
         AdaptiveRetryPrimitive,
         LearningMode,
-        LogseqStrategyIntegration
     )
-    from primitives.core.base import WorkflowContext
+    from ttadev.primitives.core.base import WorkflowContext
 
-    # Create Logseq integration for automatic knowledge base persistence
-    logseq = LogseqStrategyIntegration("my_service")
-
-    # Create adaptive retry that learns and persists strategies
+    # Create adaptive retry that learns from execution patterns
     adaptive_retry = AdaptiveRetryPrimitive(
         target_primitive=my_api_service,
         learning_mode=LearningMode.VALIDATE,  # Only use validated strategies
-        logseq_integration=logseq,
-        enable_auto_persistence=True  # Auto-save learned strategies
     )
 
     # Use it - learning happens automatically
@@ -38,17 +30,13 @@ Example - Basic Adaptive Retry:
     )
     result = await adaptive_retry.execute(input_data, context)
 
-    # Strategies are automatically:
-    # - Learned from execution patterns
-    # - Validated before adoption
-    # - Persisted to Logseq knowledge base
-    # - Shared across instances via KB
+    # Strategies are automatically learned and validated before adoption
     ```
 
 Example - Custom Adaptive Primitive:
     ```python
-    from primitives.adaptive import AdaptivePrimitive, LearningMode
-    from primitives.core.base import WorkflowContext
+    from ttadev.primitives.adaptive import AdaptivePrimitive, LearningMode
+    from ttadev.primitives.core.base import WorkflowContext
 
     class AdaptiveCachePrimitive(AdaptivePrimitive[dict, dict]):
         \"\"\"Cache primitive that learns optimal TTL and size.\"\"\"
@@ -94,7 +82,6 @@ from .exceptions import (
     ValidationWindowError,
 )
 from .fallback import AdaptiveFallbackPrimitive
-from .logseq_integration import LogseqStrategyIntegration
 from .metrics import AdaptiveMetrics, get_adaptive_metrics, reset_adaptive_metrics
 from .retry import AdaptiveRetryPrimitive
 from .timeout import AdaptiveTimeoutPrimitive
@@ -123,8 +110,6 @@ __all__ = [
     "AdaptiveMetrics",
     "get_adaptive_metrics",
     "reset_adaptive_metrics",
-    # Logseq integration
-    "LogseqStrategyIntegration",
 ]
 
 __version__ = "0.1.0"

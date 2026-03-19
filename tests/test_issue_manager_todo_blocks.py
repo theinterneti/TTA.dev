@@ -26,35 +26,30 @@ def _make_issue(
     )
 
 
-def test_generate_logseq_todo_basic(monkeypatch) -> None:
+def test_generate_todo_block_basic(monkeypatch) -> None:
+    # Arrange
     manager = IssueManager()
-
     issue = _make_issue(labels=["P2"], state="OPEN")
     monkeypatch.setattr(manager, "get_issue", lambda n: issue)
 
-    block = manager.generate_logseq_todo(issue.number)
+    # Act
+    block = manager.generate_todo_block(issue.number)
+
+    # Assert
     assert block is not None
 
     lines = block.splitlines()
-
-    # First line is a TODO with dev tag
     assert lines[0].startswith("- TODO Implement CachePrimitive metrics")
     assert "#dev-todo" in lines[0]
-
-    # Default type and mapped priority
     assert "type:: implementation" in block
-    assert "priority:: medium" in block  # from P2
-
-    # Status is lowercased
+    assert "priority:: medium" in block
     assert "status:: open" in block
-
-    # URL includes repo and issue number
     assert re.search(r"url:: https://github.com/.+/issues/42", block)
 
 
-def test_generate_logseq_todo_with_labels_and_milestone(monkeypatch) -> None:
+def test_generate_todo_block_with_labels_and_milestone(monkeypatch) -> None:
+    # Arrange
     manager = IssueManager()
-
     issue = _make_issue(
         labels=["P0", "observability"],
         state="OPEN",
@@ -63,27 +58,28 @@ def test_generate_logseq_todo_with_labels_and_milestone(monkeypatch) -> None:
     )
     monkeypatch.setattr(manager, "get_issue", lambda n: issue)
 
-    block = manager.generate_logseq_todo(issue.number)
+    # Act
+    block = manager.generate_todo_block(issue.number)
+
+    # Assert
     assert block is not None
 
     lines = block.splitlines()
-
-    # Tags include non-priority labels only
     assert "#observability" in lines[0]
     assert "#P0" not in lines[0]
-
-    # Priority and type reflect labels
-    assert "priority:: high" in block  # P0
+    assert "priority:: high" in block
     assert "type:: observability" in block
-
-    # Milestone and assignee lines present
     assert "milestone:: [[Phase 2: Observability Integration]]" in block
     assert "assigned:: [[@theinterneti]]" in block
 
 
-def test_generate_logseq_todo_returns_none_for_missing_issue(monkeypatch) -> None:
+def test_generate_todo_block_returns_none_for_missing_issue(monkeypatch) -> None:
+    # Arrange
     manager = IssueManager()
     monkeypatch.setattr(manager, "get_issue", lambda n: None)
 
-    block = manager.generate_logseq_todo(9999)
+    # Act
+    block = manager.generate_todo_block(9999)
+
+    # Assert
     assert block is None

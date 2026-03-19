@@ -1851,22 +1851,18 @@ def _generate_adaptive_transformation(code: str, targets: list[dict], info: dict
 # - Automatic strategy learning from execution patterns
 # - Safe validation before adopting new strategies
 # - Context-aware optimization (prod vs staging)
-# - Logseq integration for strategy persistence
+# - In-memory strategy learning without external persistence
 
-from primitives.adaptive import (
+from ttadev.primitives.adaptive import (
     AdaptiveRetryPrimitive,
     LearningStrategy,
-    LogseqStrategyIntegration,
+    LearningMode,
 )
-
-# Setup Logseq integration for strategy persistence (optional)
-logseq = LogseqStrategyIntegration("{func_name}")
+from ttadev.primitives.core.base import WorkflowContext
 
 # Create adaptive retry with automatic learning
 adaptive_{func_name} = AdaptiveRetryPrimitive(
     target_primitive=your_operation,  # Wrap your existing operation
-    logseq_integration=logseq,
-    enable_auto_persistence=True,
     learning_mode=LearningMode.ACTIVE,  # DISABLED, OBSERVE, VALIDATE, ACTIVE
     min_observations_before_learning=10,
 )

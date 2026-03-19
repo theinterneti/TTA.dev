@@ -12,7 +12,6 @@ from typing import Any, Generic, TypeVar
 from ..core.base import WorkflowContext, WorkflowPrimitive
 from ..observability.logging import get_logger
 from .base import AdaptivePrimitive, LearningMode, LearningStrategy, StrategyMetrics
-from .logseq_integration import LogseqStrategyIntegration
 
 logger = get_logger(__name__)
 
@@ -33,17 +32,12 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
         ```python
         from primitives.adaptive import (
             AdaptiveCachePrimitive,
-            LogseqStrategyIntegration,
             LearningMode
         )
 
-        # Create adaptive cache that learns optimal TTL
-        logseq = LogseqStrategyIntegration("llm_service")
         adaptive_cache = AdaptiveCachePrimitive(
             target_primitive=expensive_llm,
             cache_key_fn=lambda data, ctx: f"{data['prompt']}:{ctx.user_id}",
-            logseq_integration=logseq,
-            enable_auto_persistence=True,
             learning_mode=LearningMode.ACTIVE
         )
 
@@ -72,8 +66,6 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
         cache_key_fn: Callable[[TInput, WorkflowContext], str],
         learning_mode: LearningMode = LearningMode.VALIDATE,
         max_strategies: int = 8,
-        logseq_integration: LogseqStrategyIntegration | None = None,
-        enable_auto_persistence: bool = True,
         **kwargs: Any,
     ) -> None:
         """
@@ -84,8 +76,6 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
             cache_key_fn: Function to generate cache key from input/context
             learning_mode: Learning mode (DISABLED, OBSERVE, VALIDATE, ACTIVE)
             max_strategies: Maximum number of strategies to maintain
-            logseq_integration: Optional Logseq integration for persistence
-            enable_auto_persistence: Auto-persist strategies to Logseq
             **kwargs: Additional arguments for AdaptivePrimitive
         """
         super().__init__(
@@ -96,8 +86,6 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[TInput, TOutput], Generic[TInput,
 
         self.target_primitive = target_primitive
         self.cache_key_fn = cache_key_fn
-        self.logseq_integration = logseq_integration
-        self.enable_auto_persistence = enable_auto_persistence
 
         # Cache storage: key -> (value, timestamp, context_key)
         self._cache: dict[str, tuple[TOutput, float, str]] = {}

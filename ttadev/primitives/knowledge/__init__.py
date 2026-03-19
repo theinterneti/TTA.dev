@@ -1,10 +1,10 @@
 """Knowledge base integration for workflow primitives.
 
-This module provides primitives for querying the Logseq knowledge base
-to retrieve contextual guidance, best practices, and examples.
+This module provides primitives for querying contextual guidance backends
+to retrieve best practices, examples, and related recommendations.
 """
 
-from primitives.knowledge.knowledge_base import (
+from .knowledge_base import (
     KBPage,
     KBQuery,
     KBResult,

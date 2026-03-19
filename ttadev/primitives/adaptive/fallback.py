@@ -54,8 +54,6 @@ class AdaptiveFallbackPrimitive(AdaptivePrimitive[Any, Any]):
         min_observations_before_learning: int = 10,
         validation_window: int = 20,
         enable_circuit_breaker: bool = True,
-        logseq_integration: Any = None,
-        enable_auto_persistence: bool = False,
     ) -> None:
         """
         Initialize adaptive fallback primitive.
@@ -69,13 +67,9 @@ class AdaptiveFallbackPrimitive(AdaptivePrimitive[Any, Any]):
             min_observations_before_learning: Minimum observations before creating new strategies
             validation_window: Number of executions to validate new strategies
             enable_circuit_breaker: Enable circuit breaker for bad strategies
-            logseq_integration: Optional LogseqStrategyIntegration for persistence
-            enable_auto_persistence: Auto-save strategies to Logseq
         """
         self.primary = primary
         self.fallbacks = fallbacks
-        self.logseq_integration = logseq_integration
-        self.enable_auto_persistence = enable_auto_persistence
         self.min_observations_before_learning = min_observations_before_learning
 
         # Convert string to LearningMode enum
@@ -396,22 +390,6 @@ class AdaptiveFallbackPrimitive(AdaptivePrimitive[Any, Any]):
                 "fallback_timeout_ms": 10000,  # Use default
             },
         )
-
-        # Persist to Logseq if enabled
-        if self.enable_auto_persistence and self.logseq_integration:
-            try:
-                await self.logseq_integration.save_learned_strategy(
-                    strategy=new_strategy,
-                    primitive_type="AdaptiveFallbackPrimitive",
-                    context=context_key,
-                    notes=f"Fallback success rates: {fallback_success_rates}\nOptimal order: {optimal_order}",
-                )
-            except Exception as e:
-                logger.warning(
-                    "adaptive_fallback.persistence_failed",
-                    error=str(e),
-                    strategy_name=strategy_name,
-                )
 
         return new_strategy
 
