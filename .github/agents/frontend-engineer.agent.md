@@ -7,7 +7,6 @@ tools:
   - github
   - gitmcp
   - serena
-  - mcp-logseq
 ---
 
 # Frontend Engineer Agent
@@ -106,9 +105,9 @@ interface UserProfileProps {
   onUpdate?: (user: User) => void;
 }
 
-export const UserProfile: React.FC<UserProfileProps> = ({ 
-  userId, 
-  onUpdate 
+export const UserProfile: React.FC<UserProfileProps> = ({
+  userId,
+  onUpdate
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -122,11 +121,11 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     try {
       setLoading(true);
       const response = await fetch(`/api/users/${userId}`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
-      
+
       const data = await response.json();
       setUser(data);
       setError(null);
@@ -198,7 +197,6 @@ describe('UserProfile', () => {
 - **github**: Repository operations, PR management
 - **gitmcp**: Git operations
 - **serena**: Code analysis and refactoring
-- **mcp-logseq**: Documentation
 
 ## File Access
 

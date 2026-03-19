@@ -1,3 +1,8 @@
+---
+name: create-atomic-note
+description: Use this skill when saving a single-topic documentation note to docs/kb-exports/ for later knowledge base ingestion.
+---
+
 # Skill: create-atomic-note
 
 ## Purpose

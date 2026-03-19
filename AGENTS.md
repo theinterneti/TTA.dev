@@ -169,7 +169,7 @@ uv run pytest -v            # Test
 
 - Google-style docstrings
 - Update README when features change
-- Document decisions in Logseq
+- Document decisions in repo docs or Hindsight
 - Keep CHANGELOG.md current
 
 ---
@@ -186,7 +186,6 @@ Native MCP servers available to agents: [.mcp/config.json](.mcp/config.json)
 - **gitmcp**: Git operations
 - **serena**: Code analysis
 - **sequential-thinking**: Problem decomposition
-- **mcp-logseq**: Knowledge base
 
 ---
 

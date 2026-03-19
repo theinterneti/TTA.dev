@@ -6,7 +6,6 @@ tools:
   - github
   - gitmcp
   - sequential-thinking
-  - mcp-logseq
 ---
 
 # Data Scientist Agent
@@ -128,7 +127,6 @@ print(importance)
 - **github**: Share notebooks, collaborate
 - **gitmcp**: Version control for experiments
 - **sequential-thinking**: Experiment planning
-- **mcp-logseq**: Document findings
 
 ## File Access
 

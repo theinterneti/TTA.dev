@@ -7,7 +7,6 @@ tools:
   - sequential-thinking
   - gitmcp
   - serena
-  - mcp-logseq
 ---
 
 # Backend Engineer Agent
@@ -100,7 +99,6 @@ git push origin <branch>
 - **sequential-thinking**: Problem decomposition
 - **gitmcp**: Git operations and history
 - **serena**: Code analysis and refactoring
-- **mcp-logseq**: Knowledge base documentation
 
 ### Programmatic Tool Calling (PTC) Support
 

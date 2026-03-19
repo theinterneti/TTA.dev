@@ -6,7 +6,6 @@ tools:
   - github
   - gitmcp
   - sequential-thinking
-  - mcp-logseq
 ---
 
 # Observability Expert Agent
@@ -107,14 +106,14 @@ async def process_user_request(user_id: str) -> dict:
         # Add events to span
         span.add_event("Fetching user data")
         user = await fetch_user(user_id)
-        
+
         span.add_event("Processing request")
         result = await process(user)
-        
+
         # Set span attributes
         span.set_attribute("result.status", "success")
         span.set_attribute("result.items", len(result))
-        
+
         return result
 ```
 
@@ -165,19 +164,19 @@ async def handle_request(request: Request):
         user_id=request.user.id,
         correlation_id=request.headers.get("X-Correlation-ID")
     )
-    
+
     try:
         result = await process_request(request)
-        
+
         logger.info(
             "request_completed",
             status="success",
             duration_ms=result.duration_ms,
             correlation_id=request.headers.get("X-Correlation-ID")
         )
-        
+
         return result
-    
+
     except Exception as error:
         logger.error(
             "request_failed",
@@ -266,7 +265,7 @@ groups:
     rules:
       - alert: HighErrorRate
         expr: |
-          rate(http_requests_total{status=~"5.."}[5m]) 
+          rate(http_requests_total{status=~"5.."}[5m])
           / rate(http_requests_total[5m]) > 0.01
         for: 5m
         labels:
@@ -274,10 +273,10 @@ groups:
         annotations:
           summary: "High error rate detected"
           description: "Error rate is {{ $value | humanizePercentage }}"
-      
+
       - alert: SlowResponseTime
         expr: |
-          histogram_quantile(0.95, 
+          histogram_quantile(0.95,
             rate(http_request_duration_seconds_bucket[5m])
           ) > 2.0
         for: 10m
@@ -286,10 +285,10 @@ groups:
         annotations:
           summary: "Slow API responses"
           description: "p95 latency is {{ $value }}s"
-      
+
       - alert: HighMemoryUsage
         expr: |
-          container_memory_usage_bytes{container="tta-dev"} 
+          container_memory_usage_bytes{container="tta-dev"}
           / container_spec_memory_limit_bytes{container="tta-dev"} > 0.90
         for: 5m
         labels:
@@ -305,7 +304,6 @@ groups:
 - **github**: Document incidents, update runbooks
 - **gitmcp**: Review code for observability gaps
 - **sequential-thinking**: Troubleshooting planning
-- **mcp-logseq**: Incident postmortems
 
 ## File Access
 
@@ -349,7 +347,7 @@ docker logs tta-dev --tail=100 --since=30m
 ### 4. Resolve
 - Verify metrics return to normal
 - Close alerts
-- Write postmortem in Logseq
+- Write postmortem in repo docs or the incident tracker
 
 ## Success Metrics
 

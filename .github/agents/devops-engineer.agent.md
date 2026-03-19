@@ -6,7 +6,6 @@ tools:
   - grafana
   - gitmcp
   - sequential-thinking
-  - mcp-logseq
 ---
 
 # DevOps Engineer Agent
@@ -112,19 +111,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install UV
         run: curl -LsSf https://astral.sh/uv/install.sh | sh
-      
+
       - name: Install dependencies
         run: uv sync --all-extras
-      
+
       - name: Run tests
         run: uv run pytest -v --cov=platform
-      
+
       - name: Type check
         run: uvx pyright platform/
-      
+
       - name: Security scan
         uses: snyk/actions/python@master
         env:
@@ -135,10 +134,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Build Docker image
         run: docker build -t tta-dev:latest .
-      
+
       - name: Scan image
         run: docker run --rm aquasec/trivy image tta-dev:latest
 
@@ -216,7 +215,6 @@ volumes:
 - **grafana**: Metrics querying, dashboard management
 - **gitmcp**: Repository operations
 - **sequential-thinking**: Deployment planning
-- **mcp-logseq**: Runbook documentation
 
 ## File Access
 
@@ -254,7 +252,7 @@ volumes:
    - Document actions in runbook
 
 4. **Post-Incident**
-   - Write postmortem in Logseq
+   - Write postmortem in repo docs or the incident tracker
    - Update runbooks
    - Implement preventive measures
 

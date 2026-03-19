@@ -8,7 +8,6 @@ tools:
   - gitmcp
   - serena
   - sequential-thinking
-  - mcp-logseq
 ---
 
 # Testing Specialist Agent
@@ -113,10 +112,10 @@ async def test_retry_primitive_success():
     mock = MockPrimitive("operation", return_value={"success": True})
     retry = RetryPrimitive(mock, max_retries=3)
     context = WorkflowContext(workflow_id="test")
-    
+
     # Act
     result = await retry.execute({"input": "data"}, context)
-    
+
     # Assert
     assert result["success"] is True
     assert mock.call_count == 1
@@ -135,10 +134,10 @@ async def test_retry_primitive_eventual_success():
     )
     retry = RetryPrimitive(mock, max_retries=3)
     context = WorkflowContext(workflow_id="test")
-    
+
     # Act
     result = await retry.execute({"input": "data"}, context)
-    
+
     # Assert
     assert result["success"] is True
     assert mock.call_count == 3
@@ -150,11 +149,11 @@ async def test_retry_primitive_max_retries_exceeded():
     mock = MockPrimitive("operation", side_effect=ValueError("Always fails"))
     retry = RetryPrimitive(mock, max_retries=2)
     context = WorkflowContext(workflow_id="test")
-    
+
     # Act & Assert
     with pytest.raises(WorkflowExecutionError):
         await retry.execute({"input": "data"}, context)
-    
+
     assert mock.call_count == 3  # Initial + 2 retries
 ```
 
@@ -167,32 +166,32 @@ test.describe('User Profile Management', () => {
   test('displays and edits user profile', async ({ page }) => {
     // Navigate to profile
     await page.goto('/profile/123');
-    
+
     // Verify profile loads
     await expect(page.locator('h1')).toContainText('Test User');
     await expect(page.locator('.email')).toContainText('test@example.com');
-    
+
     // Click edit button
     await page.click('button:has-text("Edit")');
-    
+
     // Edit display name
     await page.fill('input[name="display_name"]', 'Updated Name');
-    
+
     // Save changes
     await page.click('button:has-text("Save")');
-    
+
     // Verify update reflected
     await expect(page.locator('h1')).toContainText('Updated Name');
   });
-  
+
   test('validates form input', async ({ page }) => {
     await page.goto('/profile/123');
     await page.click('button:has-text("Edit")');
-    
+
     // Try empty name
     await page.fill('input[name="display_name"]', '');
     await page.click('button:has-text("Save")');
-    
+
     // Verify validation error
     await expect(page.locator('.error')).toContainText('required');
   });
@@ -207,22 +206,22 @@ import AxeBuilder from '@axe-core/playwright';
 
 test('profile page meets WCAG AA', async ({ page }) => {
   await page.goto('/profile/123');
-  
+
   const accessibilityScanResults = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa'])
     .analyze();
-  
+
   expect(accessibilityScanResults.violations).toEqual([]);
 });
 
 test('keyboard navigation works', async ({ page }) => {
   await page.goto('/profile/123');
-  
+
   // Tab through interactive elements
   await page.keyboard.press('Tab');  // Focus first element
   await page.keyboard.press('Tab');  // Focus next element
   await page.keyboard.press('Enter'); // Activate
-  
+
   // Verify action occurred
   await expect(page.locator('.edit-form')).toBeVisible();
 });
@@ -236,7 +235,6 @@ test('keyboard navigation works', async ({ page }) => {
 - **gitmcp**: Review code changes
 - **serena**: Code quality analysis
 - **sequential-thinking**: Test strategy planning
-- **mcp-logseq**: Document test cases
 
 ## File Access
 
@@ -269,7 +267,7 @@ async def backend_quality_gate(data: dict) -> bool:
         "linting": data["ruff_errors"] == 0,
         "security": data["security_issues"] == 0
     }
-    
+
     return all(checks.values())
 ```
 
@@ -284,7 +282,7 @@ function frontendQualityGate(data: QualityData): boolean {
     bundleSize: data.bundleSizeKB < 500,
     lighthouse: data.lighthouseScore >= 90
   };
-  
+
   return Object.values(checks).every(Boolean);
 }
 ```
