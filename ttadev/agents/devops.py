@@ -4,16 +4,27 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ttadev.agents._utils import _matches
 from ttadev.agents.base import AgentPrimitive
 from ttadev.agents.registry import _global_registry
 from ttadev.agents.spec import AgentSpec, AgentTool, HandoffTrigger, QualityGate, ToolRule
-from ttadev.agents.task import AgentTask
 
 if TYPE_CHECKING:
     from ttadev.agents.protocol import ChatPrimitive
 
 _SECURITY_KEYWORDS = frozenset(
-    ["security", "vulnerability", "secret", "credential", "auth", "tls", "certificate", "firewall"]
+    [
+        "security",
+        "vulnerability",
+        "secret",
+        "credential",
+        "tls",
+        "certificate",
+        "firewall",
+        "auth",
+        "authentication",
+        "authorization",
+    ]
 )
 _DEVELOPER_KEYWORDS = frozenset(
     ["implement", "refactor", "add feature", "fix bug", "write code", "unit test"]
@@ -21,11 +32,6 @@ _DEVELOPER_KEYWORDS = frozenset(
 _GITHUB_KEYWORDS = frozenset(
     ["pull request", "pr", "merge", "branch protection", "codeowners", "release"]
 )
-
-
-def _matches(task: AgentTask, keywords: frozenset[str]) -> bool:
-    text = task.instruction.lower()
-    return any(kw in text for kw in keywords)
 
 
 DEVOPS_SPEC = AgentSpec(

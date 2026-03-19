@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ttadev.agents._utils import _matches
 from ttadev.agents.base import AgentPrimitive
 from ttadev.agents.registry import _global_registry
 from ttadev.agents.spec import AgentSpec, AgentTool, HandoffTrigger, QualityGate, ToolRule
-from ttadev.agents.task import AgentTask
 
 if TYPE_CHECKING:
     from ttadev.agents.protocol import ChatPrimitive
@@ -18,11 +18,6 @@ _DEVELOPER_KEYWORDS = frozenset(
 _DEVOPS_KEYWORDS = frozenset(
     ["scale", "horizontal scaling", "load balancer", "kubernetes", "autoscale", "infrastructure"]
 )
-
-
-def _matches(task: AgentTask, keywords: frozenset[str]) -> bool:
-    text = task.instruction.lower()
-    return any(kw in text for kw in keywords)
 
 
 PERFORMANCE_SPEC = AgentSpec(
