@@ -102,6 +102,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
     register_agent_subcommands(sub)
 
+    # ------------------------------------------------------------------ #
+    # workflow subcommand                                                  #
+    # ------------------------------------------------------------------ #
+    from ttadev.cli.workflow import register_workflow_subcommands
+
+    register_workflow_subcommands(sub)
+
     return parser
 
 
@@ -183,6 +190,11 @@ def main() -> None:
         from ttadev.cli.agent import handle_agent_command
 
         sys.exit(handle_agent_command(args))
+
+    elif args.command == "workflow":
+        from ttadev.cli.workflow import handle_workflow_command
+
+        sys.exit(handle_workflow_command(args, data_dir))
 
     else:
         parser.print_help()

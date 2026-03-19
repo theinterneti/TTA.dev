@@ -80,6 +80,10 @@ class WorkflowContext(BaseModel):
     start_time: float = Field(default_factory=time.time)
     checkpoints: list[tuple[str, float]] = Field(default_factory=list)
 
+    # Workflow memory — set by WorkflowOrchestrator; None outside of guided workflows.
+    # Typed as Any to avoid a circular import between primitives and workflows.
+    memory: Any = Field(default=None, exclude=True)
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @model_validator(mode="before")
