@@ -1,6 +1,6 @@
 ---
-description: 'Python code standards for TTA.dev packages'
-applyTo: 'platform/**/src/**/*.py'
+description: 'Python code standards for TTA.dev Python packages'
+applyTo: 'ttadev/**/*.py'
 ---
 
 # Python Development

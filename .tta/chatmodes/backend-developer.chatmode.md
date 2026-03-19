@@ -13,7 +13,6 @@ security:
     - sequential-thinking
     - gitmcp
     - serena
-    - mcp-logseq
 ---
 
 # Chat Mode: Backend Developer (Hypertool-Enhanced)
@@ -35,8 +34,6 @@ security:
 - 🧠 **Sequential Thinking** - Advanced reasoning and planning
 - 📁 **GitMCP** - Repository-specific Git operations
 - 🔧 **Serena** - Code analysis and refactoring
-- 📓 **Logseq** - Knowledge base integration
-
 **Token Budget:** 2000 tokens (optimized for backend work)
 
 **Security Boundaries:**

@@ -10,7 +10,6 @@ security:
     - context7
     - github
     - sequential-thinking
-    - mcp-logseq
 ---
 
 # Chat Mode: Data Scientist (Hypertool-Enhanced)

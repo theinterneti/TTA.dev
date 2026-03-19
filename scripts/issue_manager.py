@@ -353,8 +353,6 @@ class IssueManager:
     def generate_logseq_todo(self, issue_number: int) -> str | None:
         """
         Generate a Logseq-formatted TODO string for a GitHub issue.
-
-        Follows the convention defined in .github/instructions/logseq-knowledge-base.instructions.md
         """
         issue = self.get_issue(issue_number)
         if not issue:

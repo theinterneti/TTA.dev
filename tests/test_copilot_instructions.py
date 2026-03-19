@@ -15,11 +15,10 @@ COPILOT_INSTRUCTIONS = REPO_ROOT / ".github" / "copilot-instructions.md"
 
 # Expected instruction files and their glob patterns
 EXPECTED_FILES = {
-    "python.instructions.md": "platform/**/src/**/*.py",
+    "python.instructions.md": "ttadev/**/*.py",
     "testing.instructions.md": "**/tests/**/*.py,**/*_test.py,**/test_*.py",
     "scripts.instructions.md": "scripts/**/*.py",
     "documentation.instructions.md": "**/*.md,**/README.md,**/CHANGELOG.md",
-    "logseq-knowledge-base.instructions.md": "logseq/**/*.md",
 }
 
 
@@ -93,9 +92,9 @@ def test_glob_patterns_match_expected():
     for filename, expected_pattern in EXPECTED_FILES.items():
         path = INSTRUCTIONS_DIR / filename
         fm = _parse_frontmatter(path)
-        assert fm["applyTo"] == expected_pattern, (
-            f"{filename}: applyTo is '{fm['applyTo']}', expected '{expected_pattern}'"
-        )
+        assert (
+            fm["applyTo"] == expected_pattern
+        ), f"{filename}: applyTo is '{fm['applyTo']}', expected '{expected_pattern}'"
 
 
 def test_glob_patterns_match_real_files():
@@ -106,19 +105,18 @@ def test_glob_patterns_match_real_files():
         for pattern in patterns:
             matches = _glob_matches(pattern)
             total_matches += len(matches)
-        assert total_matches > 0, (
-            f"{filename}: pattern '{pattern_str}' matches no files in the repo"
-        )
+        assert (
+            total_matches > 0
+        ), f"{filename}: pattern '{pattern_str}' matches no files in the repo"
 
 
-def test_python_pattern_matches_platform_source():
-    """Python instructions should match platform source files only."""
-    matches = _glob_matches("platform/**/src/**/*.py")
-    assert len(matches) > 0, "No platform source Python files found"
+def test_python_pattern_matches_ttadev_source():
+    """Python instructions should match the current ttadev Python package layout."""
+    matches = _glob_matches("ttadev/**/*.py")
+    assert len(matches) > 0, "No ttadev Python files found"
     for m in matches:
         rel = m.relative_to(REPO_ROOT)
-        assert rel.parts[0] == "platform", f"Unexpected match: {rel}"
-        assert "src" in rel.parts, f"Matched non-source file: {rel}"
+        assert rel.parts[0] == "ttadev", f"Unexpected match: {rel}"
 
 
 def test_testing_pattern_matches_test_files():
@@ -198,9 +196,9 @@ def test_consistent_package_manager_guidance():
     """All files referencing package commands should use 'uv'."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
     assert "uv" in main_content, "Main instructions should mention 'uv'"
-    assert "never `pip`" in main_content.lower() or "never pip" in main_content.lower(), (
-        "Main instructions should warn against pip"
-    )
+    assert (
+        "never `pip`" in main_content.lower() or "never pip" in main_content.lower()
+    ), "Main instructions should warn against pip"
 
     # Files with shell command examples should all use 'uv' commands
     for filename in ["python.instructions.md", "scripts.instructions.md"]:
