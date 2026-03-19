@@ -185,6 +185,33 @@ class WorkflowContext(BaseModel):
             "workflow.elapsed_ms": self.elapsed_ms(),
         }
 
+    async def spawn_agent(self, agent_name: str, task: Any) -> Any:
+        """Spawn a sub-agent as a child span of the current workflow.
+
+        Looks up ``agent_name`` in the global AgentRegistry, creates a child
+        context (preserving the trace), and executes the agent.
+
+        Imports are deferred to avoid a circular dependency between
+        ``ttadev.primitives.core`` and ``ttadev.agents``.
+
+        Args:
+            agent_name: Name registered in the AgentRegistry.
+            task: An AgentTask instance.
+
+        Returns:
+            AgentResult from the spawned agent.
+
+        Raises:
+            KeyError: if no agent with ``agent_name`` is registered.
+        """
+        from ttadev.agents.registry import get_registry  # deferred — avoids circular import
+
+        registry = get_registry()
+        agent_class = registry.get(agent_name)  # raises KeyError if not found
+        child_ctx = self.create_child_context()
+        agent = agent_class()
+        return await agent.execute(task, child_ctx)
+
 
 class WorkflowPrimitive(Generic[T, U], ABC):
     """

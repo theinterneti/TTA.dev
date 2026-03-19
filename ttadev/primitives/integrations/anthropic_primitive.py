@@ -126,3 +126,14 @@ class AnthropicPrimitive(WorkflowPrimitive[AnthropicRequest, AnthropicResponse])
             },
             stop_reason=response.stop_reason or "unknown",
         )
+
+    async def chat(
+        self,
+        messages: list[dict],
+        system: str | None,
+        ctx: "WorkflowContext",
+    ) -> str:
+        """ChatPrimitive protocol implementation."""
+        request = AnthropicRequest(messages=messages, system=system)
+        response = await self.execute(request, ctx)
+        return response.content

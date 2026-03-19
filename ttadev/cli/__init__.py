@@ -95,6 +95,13 @@ def _build_parser() -> argparse.ArgumentParser:
     show_p = project_sub.add_parser("show", help="Show project details")
     show_p.add_argument("name", help="Project name")
 
+    # ------------------------------------------------------------------ #
+    # agent subcommand                                                     #
+    # ------------------------------------------------------------------ #
+    from ttadev.cli.agent import register_agent_subcommands
+
+    register_agent_subcommands(sub)
+
     return parser
 
 
@@ -171,6 +178,12 @@ def main() -> None:
             show(args.name, data_dir)
         else:
             parser.parse_args(["project", "--help"])
+
+    elif args.command == "agent":
+        from ttadev.cli.agent import handle_agent_command
+
+        sys.exit(handle_agent_command(args))
+
     else:
         parser.print_help()
         sys.exit(0)

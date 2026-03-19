@@ -162,3 +162,21 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
             usage=usage,
             finish_reason=finish_reason,
         )
+
+    async def chat(
+        self,
+        messages: list[dict],
+        system: str | None,
+        ctx: "WorkflowContext",
+    ) -> str:
+        """ChatPrimitive protocol implementation.
+
+        Google AI Studio does not have a dedicated system prompt field;
+        the system prompt is prepended as a user message if provided.
+        """
+        all_messages = list(messages)
+        if system:
+            all_messages = [{"role": "user", "content": system}] + all_messages
+        request = GoogleAIStudioRequest(messages=all_messages)
+        response = await self.execute(request, ctx)
+        return response.content

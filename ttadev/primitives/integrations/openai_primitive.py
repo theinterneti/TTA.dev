@@ -121,3 +121,17 @@ class OpenAIPrimitive(WorkflowPrimitive[OpenAIRequest, OpenAIResponse]):
             },
             finish_reason=choice.finish_reason or "unknown",
         )
+
+    async def chat(
+        self,
+        messages: list[dict],
+        system: str | None,
+        ctx: "WorkflowContext",
+    ) -> str:
+        """ChatPrimitive protocol implementation."""
+        all_messages = list(messages)
+        if system:
+            all_messages = [{"role": "system", "content": system}] + all_messages
+        request = OpenAIRequest(messages=all_messages)
+        response = await self.execute(request, ctx)
+        return response.content
