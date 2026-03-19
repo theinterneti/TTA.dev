@@ -52,7 +52,7 @@ jobs:
       - name: Type check
         id: typecheck
         continue-on-error: true
-        run: uv run pyright packages/
+        run: uvx pyright ttadev/
 
       - name: Quality summary
         if: always()

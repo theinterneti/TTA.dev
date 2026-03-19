@@ -50,7 +50,7 @@ jobs:
         run: uv run ruff check .
 
       - name: Type check
-        run: uv run pyright packages/
+        run: uvx pyright ttadev/
 
       - name: Security scan (pip-audit)
         run: uvx pip-audit

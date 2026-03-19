@@ -8,9 +8,9 @@ This directory contains GitHub Actions workflows for TTA.dev. The workflows have
 
 ### 1. 🚀 Pull Request Validation (`consolidated-pr-validation.yml`)
 
-**Purpose:** Fast feedback for pull requests  
-**Trigger:** PR opened, synchronized, reopened  
-**Duration:** ~5 minutes  
+**Purpose:** Fast feedback for pull requests
+**Trigger:** PR opened, synchronized, reopened
+**Duration:** ~5 minutes
 **Jobs:**
 - Quality checks (format, lint, types)
 - Unit tests (Python 3.12, Ubuntu only)
@@ -28,9 +28,9 @@ This directory contains GitHub Actions workflows for TTA.dev. The workflows have
 
 ### 2. ✅ Merge Gate (`consolidated-merge-gate.yml`)
 
-**Purpose:** Comprehensive validation before merge  
-**Trigger:** Push to main/develop  
-**Duration:** ~15-20 minutes  
+**Purpose:** Comprehensive validation before merge
+**Trigger:** Push to main/develop
+**Duration:** ~15-20 minutes
 **Jobs:**
 - Quality validation
 - Comprehensive tests (Python 3.11, 3.12)
@@ -51,9 +51,9 @@ This directory contains GitHub Actions workflows for TTA.dev. The workflows have
 
 ### 3. 🌐 Platform Compatibility (`consolidated-platform-compatibility.yml`)
 
-**Purpose:** Cross-platform compatibility testing  
-**Trigger:** Nightly, manual, or push to main (core packages)  
-**Duration:** ~20-30 minutes  
+**Purpose:** Cross-platform compatibility testing
+**Trigger:** Nightly, manual, or push to main (core packages)
+**Duration:** ~20-30 minutes
 **Jobs:**
 - Matrix builds (Ubuntu, macOS, Windows × Python 3.11, 3.12)
 - Platform compatibility summary
@@ -70,9 +70,9 @@ This directory contains GitHub Actions workflows for TTA.dev. The workflows have
 
 ### 4. 🤖 AI Code Review (`consolidated-ai-review.yml`)
 
-**Purpose:** Automated code review with fallback  
-**Trigger:** PR opened, synchronized, reopened  
-**Duration:** ~5-10 minutes  
+**Purpose:** Automated code review with fallback
+**Trigger:** PR opened, synchronized, reopened
+**Duration:** ~5-10 minutes
 **Jobs:**
 - Check Gemini availability
 - Gemini review (with retry and timeout)
@@ -303,7 +303,7 @@ Different workflows use different tokens:
 ### PR Validation Fails
 
 1. Check quality checks (format, lint, types)
-2. Run locally: `uv run ruff format --check . && uv run ruff check . && uv run pyright packages/`
+2. Run locally: `uv run ruff format --check . && uv run ruff check . && uvx pyright ttadev/`
 3. Fix issues and push
 
 ### Merge Gate Fails
@@ -391,6 +391,6 @@ See [MIGRATION_PLAN.md](MIGRATION_PLAN.md) for detailed migration strategy and t
 
 ---
 
-**Last Updated:** November 15, 2025  
-**Status:** ✅ Phase 1 Complete - Consolidation  
+**Last Updated:** November 15, 2025
+**Status:** ✅ Phase 1 Complete - Consolidation
 **Next:** Phase 2 - Performance Optimization
