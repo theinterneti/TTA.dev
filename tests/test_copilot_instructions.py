@@ -92,9 +92,9 @@ def test_glob_patterns_match_expected():
     for filename, expected_pattern in EXPECTED_FILES.items():
         path = INSTRUCTIONS_DIR / filename
         fm = _parse_frontmatter(path)
-        assert (
-            fm["applyTo"] == expected_pattern
-        ), f"{filename}: applyTo is '{fm['applyTo']}', expected '{expected_pattern}'"
+        assert fm["applyTo"] == expected_pattern, (
+            f"{filename}: applyTo is '{fm['applyTo']}', expected '{expected_pattern}'"
+        )
 
 
 def test_glob_patterns_match_real_files():
@@ -105,9 +105,9 @@ def test_glob_patterns_match_real_files():
         for pattern in patterns:
             matches = _glob_matches(pattern)
             total_matches += len(matches)
-        assert (
-            total_matches > 0
-        ), f"{filename}: pattern '{pattern_str}' matches no files in the repo"
+        assert total_matches > 0, (
+            f"{filename}: pattern '{pattern_str}' matches no files in the repo"
+        )
 
 
 def test_python_pattern_matches_ttadev_source():
@@ -196,9 +196,9 @@ def test_consistent_package_manager_guidance():
     """All files referencing package commands should use 'uv'."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
     assert "uv" in main_content, "Main instructions should mention 'uv'"
-    assert (
-        "never `pip`" in main_content.lower() or "never pip" in main_content.lower()
-    ), "Main instructions should warn against pip"
+    assert "never `pip`" in main_content.lower() or "never pip" in main_content.lower(), (
+        "Main instructions should warn against pip"
+    )
 
     # Files with shell command examples should all use 'uv' commands
     for filename in ["python.instructions.md", "scripts.instructions.md"]:
