@@ -85,7 +85,7 @@ jobs:
         run: |
           uv run pytest -v \
             -m "not integration and not slow" \
-            --cov=packages \
+            --cov=ttadev \
             --cov-branch \
             --cov-report=xml:coverage.xml \
             --cov-report=html \
@@ -192,13 +192,14 @@ jobs:
 
       - name: Validate packages
         run: |
-          for package in packages/*/pyproject.toml; do
+          shopt -s nullglob
+          for package in ttadev/*/pyproject.toml ttadev/integrations/pyproject.toml ttadev/skills/pyproject.toml; do
+            [ -f "$package" ] || continue
             dir=$(dirname $package)
             echo "Validating $dir..."
-            cd $dir
-            uv build --check || echo "Build check failed for $dir"
-            cd - > /dev/null
+            (cd $dir && uv build --check) || echo "Build check failed for $dir"
           done
+          echo "Package validation complete"
 
   # Final merge gate summary
   merge-gate-summary:
