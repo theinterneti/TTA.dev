@@ -234,3 +234,4 @@ templates/
 # Local MCP config (machine-specific paths)
 .mcp.json
 mcp.json
+.superpowers/
