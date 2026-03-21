@@ -244,3 +244,24 @@ class TestDevelopmentCycleRecall:
             WorkflowContext(),
         )
         assert result["context_prefix"] == ""
+
+
+class TestDevelopmentCycleWrite:
+    @pytest.mark.asyncio
+    async def test_write_raises_on_empty_llm_response(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response="")
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with pytest.raises(ValueError, match="LLM returned empty response"):
+            await cycle.execute(
+                DevelopmentTask(instruction="Explain the cache primitive"),
+                WorkflowContext(),
+            )

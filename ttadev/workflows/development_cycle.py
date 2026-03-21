@@ -8,22 +8,22 @@ observable, composable InstrumentedPrimitive.
 from __future__ import annotations
 
 import logging
-from contextlib import nullcontext  # noqa: F401
-from typing import Any, TypedDict  # noqa: F401
+from contextlib import nullcontext
+from typing import Any, TypedDict
 
 import httpx
 
 from ttadev.primitives.code_graph import (
-    CGCOp,  # noqa: F401
+    CGCOp,
     CodeGraphPrimitive,
-    CodeGraphQuery,  # noqa: F401
+    CodeGraphQuery,
     ImpactReport,
 )
 from ttadev.primitives.core.base import WorkflowContext
 from ttadev.primitives.integrations.e2b_primitive import CodeExecutionPrimitive
 from ttadev.primitives.memory import AgentMemory
 from ttadev.primitives.observability import InstrumentedPrimitive
-from ttadev.workflows.llm_provider import get_llm_client  # noqa: F401
+from ttadev.workflows.llm_provider import get_llm_client
 
 logger = logging.getLogger(__name__)
 
