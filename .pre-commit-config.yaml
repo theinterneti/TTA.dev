@@ -73,6 +73,17 @@ repos:
       - id: debug-statements
         name: "🐛 Check Debug Statements"
 
+  # Pytest — run tests for any changed source files
+  - repo: local
+    hooks:
+      - id: pytest-changed
+        name: "🧪 Pytest Changed Tests"
+        entry: python scripts/run_changed_tests.py
+        language: system
+        types: [python]
+        pass_filenames: true
+        stages: [pre-commit]
+
 # CI configuration
 ci:
   autofix_commit_msg: "style: auto-fix by pre-commit hooks"
