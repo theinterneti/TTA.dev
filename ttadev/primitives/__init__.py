@@ -10,14 +10,16 @@ Extension modules (ace, adaptive, analysis, apm, benchmarking, knowledge,
 lifecycle, orchestration, research, speckit) are accessible via their original
 import paths or through the ``extensions`` namespace::
 
-    from primitives.extensions import EXTENSION_MODULES
-    from primitives.extensions import adaptive
+    from ttadev.primitives.extensions import EXTENSION_MODULES
+    from ttadev.primitives.extensions import adaptive
 
 KB Safety: All primitives follow the one-way sync architecture (Code → KB only).
 See docs/architecture/KB_SAFETY_ARCHITECTURE.md for details.
 """
 
 # ── Core: collaboration ─────────────────────────────────────────────────
+# ── Code graph (CGC / FalkorDB) ──────────────────────────────────────────────
+from .code_graph import CGCOp, CodeGraphPrimitive, CodeGraphQuery, ImpactReport
 from .collaboration import (
     AgentIdentity,
     CommitFrequencyPolicy,
@@ -78,6 +80,11 @@ __all__ = [
     "FakeUnitOfWork",
     # Testing primitives
     "MockPrimitive",
+    # Code graph primitives
+    "CodeGraphPrimitive",
+    "CodeGraphQuery",
+    "ImpactReport",
+    "CGCOp",
 ]
 
 __version__ = "1.3.1"
