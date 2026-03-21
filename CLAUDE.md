@@ -6,6 +6,17 @@ Claude Code is the **primary agent** for this repository. Other agents defer to 
 
 **No implementation code before a signed-off spec.** Follow the [sdd-workflow](.claude/skills/sdd-workflow/SKILL.md) skill for the 4-phase process (`/specify` → `/plan` → `/tasks` → `/implement`). Full constitution: [docs/agent-guides/sdd-constitution.md](docs/agent-guides/sdd-constitution.md).
 
+## Session Start Protocol
+
+**Every session begins with `/session-start`** (or the session-start skill steps manually).
+
+1. `mcp__hindsight__recall` — query `tta-dev` bank for directives + mental models
+2. `mcp__codegraphcontext__get_repository_stats` — confirm graph is current
+3. Acknowledge what was loaded before any task work begins
+
+**Every significant task ends with `mcp__hindsight__retain`** to the `tta-dev` bank:
+decisions made, patterns used, failures encountered.
+
 ## Repo Layout
 
 ```
@@ -25,6 +36,7 @@ tests/              # Test suite
 
 | Skill | When to Use |
 |-------|-------------|
+| [session-start](.claude/skills/session-start/SKILL.md) | Start of every session — load directives, mental models, CGC orientation |
 | [build-test-verify](.claude/skills/build-test-verify/SKILL.md) | Build, test, lint, verify |
 | [git-commit](.claude/skills/git-commit/SKILL.md) | Making commits |
 | [create-pull-request](.claude/skills/create-pull-request/SKILL.md) | Creating PRs |
@@ -56,6 +68,8 @@ tests/              # Test suite
 - **Primitives:** Always use for workflows (never manual retry/timeout loops)
 - **State:** Pass via `WorkflowContext` (never globals)
 - **LLM providers:** OpenRouter free models first, Ollama fallback — see [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md)
+- **Orient before edit:** Run CGC (`find_code` + `analyze_code_relationships`) on any non-trivial target before touching it
+- **Retain after task:** Store decisions, patterns, failures to `tta-dev` Hindsight bank after each significant task
 
 ### ⛔ TODO Management — CI-Blocking Rule
 
