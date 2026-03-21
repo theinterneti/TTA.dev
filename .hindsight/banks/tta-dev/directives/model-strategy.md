@@ -10,9 +10,12 @@ tags: [directive, llm, openrouter, ollama, free-models]
 ## For TTA.dev apps (end-user facing)
 
 Provider hierarchy — always use `get_llm_client()`, never hardcode:
-1. **Ollama** (default, zero config) — `qwen2.5:7b`, CPU-only homelab compatible
+1. **`LLM_FORCE_PROVIDER=ollama`** (override) — forces Ollama regardless of other keys
 2. **OpenRouter :free** (if `OPENROUTER_API_KEY` set) — gemma-3n → mistral-small → gpt-oss-20b
-3. **Paid models** (if paid key set) — user's choice
+3. **Ollama** (default, zero config) — `qwen2.5:7b`, CPU-only homelab compatible (fallback)
+4. **Paid models** (if paid key set) — user's choice
+
+Note: when `OPENROUTER_API_KEY` is set, OpenRouter wins over Ollama. Use `LLM_FORCE_PROVIDER=ollama` to override.
 
 ## For building TTA.dev itself
 
