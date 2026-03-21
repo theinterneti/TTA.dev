@@ -17,9 +17,10 @@ KB Safety: All primitives follow the one-way sync architecture (Code → KB only
 See docs/architecture/KB_SAFETY_ARCHITECTURE.md for details.
 """
 
-# ── Core: collaboration ─────────────────────────────────────────────────
-# ── Code graph (CGC / FalkorDB) ──────────────────────────────────────────────
+# ── Code graph (CGC / FalkorDB) ─────────────────────────────────────────
 from .code_graph import CGCOp, CodeGraphPrimitive, CodeGraphQuery, ImpactReport
+
+# ── Core: collaboration ─────────────────────────────────────────────────
 from .collaboration import (
     AgentIdentity,
     CommitFrequencyPolicy,
