@@ -36,6 +36,9 @@ from .core.parallel import ParallelPrimitive
 from .core.routing import RouterPrimitive
 from .core.sequential import SequentialPrimitive
 
+# ── Memory (Hindsight / AgentMemory) ─────────────────────────────────────
+from .memory import AgentMemory, HindsightClient, MemoryResult, RetainResult
+
 # ── Core: performance ───────────────────────────────────────────────────
 from .performance.cache import CachePrimitive
 
@@ -86,6 +89,11 @@ __all__ = [
     "CodeGraphQuery",
     "ImpactReport",
     "CGCOp",
+    # Memory primitives
+    "AgentMemory",
+    "HindsightClient",
+    "MemoryResult",
+    "RetainResult",
 ]
 
 __version__ = "1.3.1"
