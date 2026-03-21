@@ -124,26 +124,13 @@ class CodeGraphPrimitive(InstrumentedPrimitive[CodeGraphQuery, ImpactReport]):
         target: str = input_data.get("target", "")
         operations: list[CGCOp] = input_data.get("operations", [])
         requested_depth: int = input_data.get("depth", 2)
-        depth = min(requested_depth, _MAX_DEPTH)
         cypher: str = input_data.get("cypher", "")
         repo_path: str | None = input_data.get("repo_path") or self._repo_path
 
         if requested_depth > _MAX_DEPTH:
             logger.warning("depth clamped to %d (requested %d)", _MAX_DEPTH, requested_depth)
 
-        # ── Validation ────────────────────────────────────────────────────────
-        if not operations:
-            return _empty_report(target, f"No operations requested for `{target}`")
-        if not target and CGCOp.raw_cypher not in operations:
-            raise ValueError("target is required for non-cypher operations")
-        if CGCOp.raw_cypher in operations and not cypher:
-            raise ValueError("cypher query string is required for CGCOp.raw_cypher")
-
-        # ── Availability check ────────────────────────────────────────────────
-        if not self._client.is_reachable():
-            return _empty_report(target, "CGC unavailable — orient step skipped")
-
-        # ── Execute operations ────────────────────────────────────────────────
+        # ── Span wraps ALL execution paths (including unavailable / validation) ─
         span_cm: Any = (
             self._cgc_tracer.start_as_current_span("cgc.orient")
             if self._cgc_tracer
@@ -151,6 +138,29 @@ class CodeGraphPrimitive(InstrumentedPrimitive[CodeGraphQuery, ImpactReport]):
         )
         with span_cm as span:
             try:
+                # ── Validation ────────────────────────────────────────────────
+                if not operations:
+                    if span is not None:
+                        span.set_attribute("target", target)
+                        span.set_attribute("operations", [])
+                        span.set_attribute("risk", "low")
+                        span.set_attribute("cgc_available", False)
+                    return _empty_report(target, f"No operations requested for `{target}`")
+                if not target and CGCOp.raw_cypher not in operations:
+                    raise ValueError("target is required for non-cypher operations")
+                if CGCOp.raw_cypher in operations and not cypher:
+                    raise ValueError("cypher query string is required for CGCOp.raw_cypher")
+
+                # ── Availability check ─────────────────────────────────────────
+                if not self._client.is_reachable():
+                    if span is not None:
+                        span.set_attribute("target", target)
+                        span.set_attribute("operations", [op.value for op in operations])
+                        span.set_attribute("risk", "low")
+                        span.set_attribute("cgc_available", False)
+                    return _empty_report(target, "CGC unavailable — orient step skipped")
+
+                # ── Execute operations ─────────────────────────────────────────
                 callers: list[str] = []
                 deps: list[str] = []
                 tests: list[str] = []
@@ -193,7 +203,7 @@ class CodeGraphPrimitive(InstrumentedPrimitive[CodeGraphQuery, ImpactReport]):
 
                 only_raw = operations == [CGCOp.raw_cypher]
                 summary = (
-                    raw_result
+                    (raw_result or "Cypher query returned no results.")
                     if only_raw
                     else _build_summary(target, callers, deps, tests, complexity, risk)
                 )
@@ -220,6 +230,3 @@ class CodeGraphPrimitive(InstrumentedPrimitive[CodeGraphQuery, ImpactReport]):
             except Exception as exc:
                 logger.warning("CGC query failed for target=%r: %s", target, exc)
                 return _empty_report(target, f"CGC unavailable: {exc}")
-
-        # unreachable — depth variable used to suppress unused-variable warning
-        _ = depth

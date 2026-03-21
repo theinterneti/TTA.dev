@@ -192,6 +192,26 @@ class TestCodeGraphPrimitiveOperations:
         assert len(result["summary"]) > 0
 
     @pytest.mark.asyncio
+    async def test_raw_cypher_empty_result_has_non_empty_summary(self) -> None:
+        from ttadev.primitives.code_graph.primitive import CodeGraphPrimitive
+
+        client = _mock_client(
+            execute_cypher=AsyncMock(return_value=[])  # no rows returned
+        )
+        prim = CodeGraphPrimitive(cgc_client=client)
+        result = await prim.execute(
+            CodeGraphQuery(
+                target="",
+                operations=[CGCOp.raw_cypher],
+                cypher="MATCH (f:Function) RETURN f.name LIMIT 0",
+            ),
+            WorkflowContext(),
+        )
+        assert result["cgc_available"] is True
+        assert len(result["summary"]) > 0
+        assert result["summary"] == "Cypher query returned no results."
+
+    @pytest.mark.asyncio
     async def test_multiple_ops_in_one_call(self) -> None:
         from ttadev.primitives.code_graph.primitive import CodeGraphPrimitive
 
@@ -245,6 +265,36 @@ class TestCodeGraphPrimitiveOperations:
         assert set_attr_calls["operations"] == ["get_relationships"]
         assert set_attr_calls["risk"] in ("low", "medium", "high")
         assert set_attr_calls["cgc_available"] is True
+
+    @pytest.mark.asyncio
+    async def test_otel_span_emitted_when_cgc_unavailable(self) -> None:
+        from unittest.mock import MagicMock
+
+        from ttadev.primitives.code_graph.primitive import CodeGraphPrimitive
+
+        client = _mock_client()
+        client.is_reachable = MagicMock(return_value=False)
+
+        mock_span = MagicMock()
+        mock_tracer = MagicMock()
+        mock_tracer.start_as_current_span.return_value.__enter__ = MagicMock(return_value=mock_span)
+        mock_tracer.start_as_current_span.return_value.__exit__ = MagicMock(return_value=False)
+
+        prim = CodeGraphPrimitive(cgc_client=client)
+        prim._tracer = None
+        prim._cgc_tracer = mock_tracer  # type: ignore[assignment]
+
+        await prim.execute(
+            CodeGraphQuery(target="my_fn", operations=[CGCOp.get_relationships]),
+            WorkflowContext(),
+        )
+
+        mock_tracer.start_as_current_span.assert_called_once_with("cgc.orient")
+        set_attr_calls = {
+            call.args[0]: call.args[1] for call in mock_span.set_attribute.call_args_list
+        }
+        assert set_attr_calls["target"] == "my_fn"
+        assert set_attr_calls["cgc_available"] is False
 
 
 class TestCodeGraphPrimitiveDegradation:
