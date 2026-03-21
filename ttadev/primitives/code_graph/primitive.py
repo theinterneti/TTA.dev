@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import nullcontext
-from typing import Any
+from typing import Any, Literal
 
 from ttadev.primitives.core.base import WorkflowContext
 from ttadev.primitives.observability import InstrumentedPrimitive
@@ -24,7 +24,7 @@ _MAX_DEPTH = 5
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 
-def _derive_risk(complexity: float, callers: list[str]) -> str:
+def _derive_risk(complexity: float, callers: list[str]) -> Literal["low", "medium", "high"]:
     if complexity >= 10:
         return "high"
     if complexity >= 5 or len(callers) >= 5:
