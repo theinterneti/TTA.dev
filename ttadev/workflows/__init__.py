@@ -7,6 +7,11 @@ from ttadev.workflows.definition import (
     WorkflowResult,
     WorkflowStep,
 )
+from ttadev.workflows.development_cycle import (
+    DevelopmentCycle,
+    DevelopmentResult,
+    DevelopmentTask,
+)
 from ttadev.workflows.gate import ApprovalGate, GateDecision
 from ttadev.workflows.llm_provider import LLMClientConfig, get_llm_client
 from ttadev.workflows.memory import PersistentMemory, WorkflowMemory
@@ -34,4 +39,8 @@ __all__ = [
     # llm provider
     "LLMClientConfig",
     "get_llm_client",
+    # development cycle
+    "DevelopmentCycle",
+    "DevelopmentTask",
+    "DevelopmentResult",
 ]
