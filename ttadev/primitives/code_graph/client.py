@@ -71,7 +71,7 @@ class FalkorDBClient:
 
     async def _query(self, cypher: str, params: dict[str, Any] | None = None) -> list[Any]:
         """Async wrapper: runs _query_sync in thread executor."""
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             self._executor,
             lambda: self._query_sync(cypher, params),
@@ -88,13 +88,17 @@ class FalkorDBClient:
 
         Returns list of dicts: {name, path, line_number, kind}.
         """
-        repo_filter = f" AND f.path STARTS WITH '{repo_path}'" if repo_path else ""
+        params: dict[str, Any] = {"target": target}
+        repo_filter = ""
+        if repo_path:
+            repo_filter = " AND f.path STARTS WITH $repo_path"
+            params["repo_path"] = repo_path
         results: list[dict[str, Any]] = []
 
         rows = await self._query(
             f"MATCH (f:Function) WHERE f.name CONTAINS $target{repo_filter} "
-            f"RETURN f.name, f.path, f.line_number",
-            {"target": target},
+            "RETURN f.name, f.path, f.line_number",
+            params,
         )
         for row in rows:
             results.append(
@@ -103,8 +107,8 @@ class FalkorDBClient:
 
         rows = await self._query(
             f"MATCH (c:Class) WHERE c.name CONTAINS $target{repo_filter} "
-            f"RETURN c.name, c.path, c.line_number",
-            {"target": target},
+            "RETURN c.name, c.path, c.line_number",
+            params,
         )
         for row in rows:
             results.append({"name": row[0], "path": row[1], "line_number": row[2], "kind": "Class"})
@@ -113,23 +117,31 @@ class FalkorDBClient:
 
     async def get_callers(self, target: str, repo_path: str | None = None) -> list[dict[str, Any]]:
         """Find functions that CALL any function whose name contains ``target``."""
-        repo_filter = f" AND callee.path STARTS WITH '{repo_path}'" if repo_path else ""
+        params: dict[str, Any] = {"target": target}
+        repo_filter = ""
+        if repo_path:
+            repo_filter = " AND callee.path STARTS WITH $repo_path"
+            params["repo_path"] = repo_path
         rows = await self._query(
             f"MATCH (caller:Function)-[:CALLS]->(callee:Function) "
             f"WHERE callee.name CONTAINS $target{repo_filter} "
-            f"RETURN DISTINCT caller.name, caller.path, caller.line_number",
-            {"target": target},
+            "RETURN DISTINCT caller.name, caller.path, caller.line_number",
+            params,
         )
         return [{"name": r[0], "path": r[1], "line_number": r[2]} for r in rows]
 
     async def get_callees(self, target: str, repo_path: str | None = None) -> list[dict[str, Any]]:
         """Find functions called BY any function whose name contains ``target``."""
-        repo_filter = f" AND caller.path STARTS WITH '{repo_path}'" if repo_path else ""
+        params: dict[str, Any] = {"target": target}
+        repo_filter = ""
+        if repo_path:
+            repo_filter = " AND caller.path STARTS WITH $repo_path"
+            params["repo_path"] = repo_path
         rows = await self._query(
             f"MATCH (caller:Function)-[:CALLS]->(callee:Function) "
             f"WHERE caller.name CONTAINS $target{repo_filter} "
-            f"RETURN DISTINCT callee.name, callee.path, callee.line_number",
-            {"target": target},
+            "RETURN DISTINCT callee.name, callee.path, callee.line_number",
+            params,
         )
         return [{"name": r[0], "path": r[1], "line_number": r[2]} for r in rows]
 
@@ -138,12 +150,16 @@ class FalkorDBClient:
 
         Returns 0.0 if not found or if complexity property is null.
         """
-        repo_filter = f" AND f.path STARTS WITH '{repo_path}'" if repo_path else ""
+        params: dict[str, Any] = {"target": target}
+        repo_filter = ""
+        if repo_path:
+            repo_filter = " AND f.path STARTS WITH $repo_path"
+            params["repo_path"] = repo_path
         rows = await self._query(
             f"MATCH (f:Function) WHERE f.name CONTAINS $target{repo_filter} "
-            f"RETURN f.cyclomatic_complexity "
-            f"ORDER BY f.cyclomatic_complexity DESC LIMIT 1",
-            {"target": target},
+            "RETURN f.cyclomatic_complexity "
+            "ORDER BY f.cyclomatic_complexity DESC LIMIT 1",
+            params,
         )
         if rows and rows[0][0] is not None:
             return float(rows[0][0])

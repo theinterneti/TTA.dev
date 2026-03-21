@@ -81,16 +81,19 @@ class TestFalkorDBClientFindCode:
     @pytest.mark.asyncio
     async def test_find_code_with_repo_path_filter(self) -> None:
         client = FalkorDBClient(socket_path="/fake/path")
-        captured: list[str] = []
+        captured_queries: list[str] = []
+        captured_params: list[dict] = []
 
         def _fake_query(cypher: str, params: dict | None = None) -> list:
-            captured.append(cypher)
+            captured_queries.append(cypher)
+            captured_params.append(params or {})
             return []
 
         with patch.object(client, "_query_sync", side_effect=_fake_query):
             await client.find_code("fn", repo_path="/home/user/myrepo")
 
-        assert all("/home/user/myrepo" in q for q in captured)
+        assert all("$repo_path" in q for q in captured_queries)
+        assert all(p.get("repo_path") == "/home/user/myrepo" for p in captured_params)
 
 
 class TestFalkorDBClientRelationships:
