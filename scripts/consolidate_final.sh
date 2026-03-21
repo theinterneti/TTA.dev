@@ -136,9 +136,9 @@ Visit http://localhost:5001 to see your workflows in real-time!
 
 ## What You Get
 
-✅ **Workflow Primitives** - Retry, timeout, cache, circuit breaker, fallback  
-✅ **Built-in Observability** - Auto-instrumented tracing with live UI  
-✅ **Production Ready** - Sampling, error tracking, performance metrics  
+✅ **Workflow Primitives** - Retry, timeout, cache, circuit breaker, fallback
+✅ **Built-in Observability** - Auto-instrumented tracing with live UI
+✅ **Production Ready** - Sampling, error tracking, performance metrics
 ✅ **AI-Native** - Works with any AI coding agent (Claude, Copilot, Cline)
 
 ## Architecture

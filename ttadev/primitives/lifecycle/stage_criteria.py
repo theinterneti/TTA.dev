@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from primitives.lifecycle.stage import Stage
-from primitives.lifecycle.validation import ValidationCheck, ValidationResult
+from ttadev.primitives.lifecycle.stage import Stage
+from ttadev.primitives.lifecycle.validation import ValidationCheck, ValidationResult
 
 
 @dataclass

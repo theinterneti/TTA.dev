@@ -6,7 +6,7 @@ with confidence scoring.
 
 from typing import Any
 
-from primitives.analysis.models import (
+from ttadev.primitives.analysis.models import (
     CodeAnalysisResult,
     RecommendationContext,
 )
@@ -32,7 +32,7 @@ class PrimitiveMatcher:
         self.primitive_catalog: dict[str, dict[str, Any]] = {
             "RetryPrimitive": {
                 "description": "Automatic retry with exponential backoff",
-                "import_path": "from primitives.recovery import RetryPrimitive",
+                "import_path": "from ttadev.primitives.recovery import RetryPrimitive",
                 "requirements": ["retry_logic", "error_recovery", "api_resilience"],
                 "patterns": ["retry_patterns", "error_handling", "api_calls"],
                 "use_cases": [
@@ -55,7 +55,7 @@ class PrimitiveMatcher:
             },
             "TimeoutPrimitive": {
                 "description": "Timeout protection for operations",
-                "import_path": "from primitives.recovery import TimeoutPrimitive",
+                "import_path": "from ttadev.primitives.recovery import TimeoutPrimitive",
                 "requirements": ["timeout_handling", "api_resilience"],
                 "patterns": ["timeout_patterns", "async_operations", "api_calls"],
                 "use_cases": [
@@ -92,7 +92,7 @@ class PrimitiveMatcher:
             },
             "FallbackPrimitive": {
                 "description": "Graceful degradation with fallback cascade",
-                "import_path": "from primitives.recovery import FallbackPrimitive",
+                "import_path": "from ttadev.primitives.recovery import FallbackPrimitive",
                 "requirements": ["fallback_strategy", "error_recovery"],
                 "patterns": ["fallback_patterns", "error_handling", "llm_patterns"],
                 "use_cases": [
@@ -144,7 +144,7 @@ class PrimitiveMatcher:
             },
             "RouterPrimitive": {
                 "description": "Dynamic routing to multiple destinations",
-                "import_path": "from primitives.core import RouterPrimitive",
+                "import_path": "from ttadev.primitives.core import RouterPrimitive",
                 "requirements": ["intelligent_routing"],
                 "patterns": ["routing_patterns", "llm_patterns"],
                 "use_cases": [
@@ -161,7 +161,7 @@ class PrimitiveMatcher:
             },
             "CircuitBreakerPrimitive": {
                 "description": "Circuit breaker pattern to prevent cascade failures",
-                "import_path": "from primitives.recovery import CircuitBreakerPrimitive",
+                "import_path": "from ttadev.primitives.recovery import CircuitBreakerPrimitive",
                 "requirements": ["error_recovery", "api_resilience"],
                 "patterns": ["error_handling", "api_calls"],
                 "use_cases": [
@@ -217,7 +217,7 @@ class PrimitiveMatcher:
             },
             "CompensationPrimitive": {
                 "description": "Saga pattern for distributed transactions with rollback",
-                "import_path": "from primitives.recovery import CompensationPrimitive",
+                "import_path": "from ttadev.primitives.recovery import CompensationPrimitive",
                 "requirements": ["error_recovery", "transaction_management"],
                 "patterns": ["error_handling", "workflow_patterns"],
                 "use_cases": [
@@ -235,7 +235,7 @@ class PrimitiveMatcher:
             },
             "DelegationPrimitive": {
                 "description": "Orchestrator to Executor pattern for multi-agent workflows",
-                "import_path": "from primitives.orchestration import DelegationPrimitive",
+                "import_path": "from ttadev.primitives.orchestration import DelegationPrimitive",
                 "requirements": ["multi_agent", "intelligent_routing"],
                 "patterns": ["llm_patterns", "workflow_patterns", "routing_patterns"],
                 "use_cases": [
@@ -253,7 +253,7 @@ class PrimitiveMatcher:
             },
             "MultiModelWorkflow": {
                 "description": "Intelligent multi-model coordination",
-                "import_path": "from primitives.orchestration import MultiModelWorkflow",
+                "import_path": "from ttadev.primitives.orchestration import MultiModelWorkflow",
                 "requirements": ["multi_agent", "llm_reliability"],
                 "patterns": ["llm_patterns", "routing_patterns"],
                 "use_cases": [
@@ -271,7 +271,7 @@ class PrimitiveMatcher:
             },
             "TaskClassifierPrimitive": {
                 "description": "Classify tasks and route to appropriate handler",
-                "import_path": "from primitives.orchestration import TaskClassifierPrimitive",
+                "import_path": "from ttadev.primitives.orchestration import TaskClassifierPrimitive",
                 "requirements": ["intelligent_routing"],
                 "patterns": ["routing_patterns", "llm_patterns", "validation_patterns"],
                 "use_cases": [
@@ -289,7 +289,7 @@ class PrimitiveMatcher:
             },
             "MockPrimitive": {
                 "description": "Mock primitive for testing workflows",
-                "import_path": "from primitives.testing import MockPrimitive",
+                "import_path": "from ttadev.primitives.testing import MockPrimitive",
                 "requirements": ["testing_support"],
                 "patterns": ["testing_patterns"],
                 "use_cases": [
@@ -306,7 +306,7 @@ class PrimitiveMatcher:
             },
             "InstrumentedPrimitive": {
                 "description": "Base class with automatic observability",
-                "import_path": "from primitives.observability import InstrumentedPrimitive",
+                "import_path": "from ttadev.primitives.observability import InstrumentedPrimitive",
                 "requirements": ["observability"],
                 "patterns": ["logging_patterns"],
                 "use_cases": [
@@ -323,7 +323,7 @@ class PrimitiveMatcher:
             },
             "AdaptivePrimitive": {
                 "description": "Base class for self-improving primitives that learn from execution",
-                "import_path": "from primitives.adaptive import AdaptivePrimitive",
+                "import_path": "from ttadev.primitives.adaptive import AdaptivePrimitive",
                 "requirements": ["self_improvement", "llm_reliability"],
                 "patterns": ["llm_patterns", "workflow_patterns"],
                 "use_cases": [
@@ -340,7 +340,7 @@ class PrimitiveMatcher:
             },
             "AdaptiveRetryPrimitive": {
                 "description": "Retry primitive that learns optimal parameters from execution",
-                "import_path": "from primitives.adaptive import AdaptiveRetryPrimitive",
+                "import_path": "from ttadev.primitives.adaptive import AdaptiveRetryPrimitive",
                 "requirements": ["retry_logic", "self_improvement"],
                 "patterns": ["retry_patterns", "error_handling", "api_calls"],
                 "use_cases": [

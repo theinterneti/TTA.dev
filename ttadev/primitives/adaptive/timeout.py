@@ -38,7 +38,7 @@ class AdaptiveTimeoutPrimitive(AdaptivePrimitive[Any, Any]):
 
     Example:
         ```python
-        from primitives.adaptive import (
+        from ttadev.primitives.adaptive import (
             AdaptiveTimeoutPrimitive,
             LearningMode
         )

@@ -17,12 +17,12 @@ prometheus.scrape "tta_app" {
 prometheus.remote_write "grafana_cloud" {
   endpoint {
     url = "https://prometheus-prod-36-prod-us-west-0.grafana.net/api/prom/push"
-    
+
     basic_auth {
       username = "2497221"
       password = env("GRAFANA_CLOUD_TOKEN")
     }
-    
+
     queue_config {
       capacity = 10000
       max_shards = 10
@@ -34,7 +34,7 @@ prometheus.remote_write "grafana_cloud" {
 loki.source.journal "system_logs" {
   max_age = "24h"
   forward_to = [loki.process.tta_filter.receiver]
-  
+
   labels = {
     job = "systemd-journal",
     host = env("HOSTNAME"),
@@ -44,12 +44,12 @@ loki.source.journal "system_logs" {
 // Filter and process logs
 loki.process "tta_filter" {
   forward_to = [loki.write.grafana_cloud.receiver]
-  
+
   // Extract log level
   stage.regex {
     expression = "level=(?P<level>\\w+)"
   }
-  
+
   stage.labels {
     values = {
       level = "",
@@ -61,7 +61,7 @@ loki.process "tta_filter" {
 loki.write "grafana_cloud" {
   endpoint {
     url = "https://logs-prod-36.grafana.net/loki/api/v1/push"
-    
+
     basic_auth {
       username = "2497221"
       password = env("GRAFANA_CLOUD_TOKEN")
@@ -74,11 +74,11 @@ otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4317"
   }
-  
+
   http {
     endpoint = "0.0.0.0:4318"
   }
-  
+
   output {
     traces = [otelcol.exporter.otlp.grafana_cloud.input]
   }

@@ -73,4 +73,3 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           python scripts/branch_manager.py delete-orphaned-branches "$ORPHAN_DAYS" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-

@@ -187,6 +187,6 @@ The old CI workflow was simple but didn't enforce quality gates. Consider keepin
 
 ---
 
-**Implementation Date**: 2026-03-07  
-**Author**: GitHub Copilot CLI (Principal DevOps Engineer persona)  
+**Implementation Date**: 2026-03-07
+**Author**: GitHub Copilot CLI (Principal DevOps Engineer persona)
 **Tested On**: Python 3.11, 3.12 (local validation)

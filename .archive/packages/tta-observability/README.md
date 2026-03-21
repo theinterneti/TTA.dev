@@ -2,8 +2,8 @@
 
 Comprehensive observability and monitoring integration for the TTA (Therapeutic Text Adventure) platform.
 
-> **⚠️ IMPORTANT - LangFuse Integration Consolidation**  
-> The LangFuse integration previously in this package (`observability_integration.langfuse_integration`) has been **deprecated**.  
+> **⚠️ IMPORTANT - LangFuse Integration Consolidation**
+> The LangFuse integration previously in this package (`observability_integration.langfuse_integration`) has been **deprecated**.
 > Use `tta_apm_langfuse` instead. See [LANGFUSE_CONSOLIDATION.md](../../docs/observability/LANGFUSE_CONSOLIDATION.md) for migration guide.
 
 ## Features

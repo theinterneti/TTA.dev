@@ -14,20 +14,20 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
-from primitives.orchestration.delegation_primitive import (
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.orchestration.delegation_primitive import (
     DelegationPrimitive,
     DelegationRequest,
     DelegationResponse,
 )
-from primitives.orchestration.task_classifier_primitive import (
+from ttadev.primitives.orchestration.task_classifier_primitive import (
     TaskClassifierPrimitive,
     TaskClassifierRequest,
 )
 
 # Try to import configuration
 try:
-    from primitives.config import OrchestrationConfig, load_orchestration_config
+    from ttadev.primitives.config import OrchestrationConfig, load_orchestration_config
 
     CONFIG_AVAILABLE = True
 except ImportError:
@@ -90,13 +90,13 @@ class MultiModelWorkflow(WorkflowPrimitive[MultiModelRequest, MultiModelResponse
 
     Example:
         ```python
-        from primitives.orchestration import MultiModelWorkflow
-        from primitives.integrations import (
+        from ttadev.primitives.orchestration import MultiModelWorkflow
+        from ttadev.primitives.integrations import (
             GoogleAIStudioPrimitive,
             GroqPrimitive,
             OpenRouterPrimitive
         )
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.core.base import WorkflowContext
 
         # Create workflow with executor primitives
         workflow = MultiModelWorkflow(

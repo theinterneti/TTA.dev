@@ -24,16 +24,16 @@ TOTAL=0
 # Find all workflow files
 for workflow in .github/workflows/*.yml .github/workflows/*.yaml; do
     [ -f "$workflow" ] || continue
-    
+
     echo "Processing: $workflow"
-    
+
     # Create backup
     cp "$workflow" "$workflow.bak"
-    
+
     # Replace unpinned actions
     for action_tag in "${!ACTION_PINS[@]}"; do
         action_pin="${ACTION_PINS[$action_tag]}"
-        
+
         if grep -q "uses: $action_tag" "$workflow"; then
             echo "  📌 Pinning $action_tag"
             # Handle both GNU and BSD sed (macOS)
@@ -47,7 +47,7 @@ for workflow in .github/workflows/*.yml .github/workflows/*.yaml; do
         fi
         ((TOTAL++))
     done
-    
+
     # Remove backup if no changes
     if diff "$workflow" "$workflow.bak" > /dev/null 2>&1; then
         rm "$workflow.bak"

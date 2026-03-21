@@ -11,7 +11,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class TaskComplexity(StrEnum):
@@ -74,8 +74,8 @@ class TaskClassifierPrimitive(WorkflowPrimitive[TaskClassifierRequest, TaskClass
 
     Example:
         ```python
-        from primitives.orchestration import TaskClassifierPrimitive
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.orchestration import TaskClassifierPrimitive
+        from ttadev.primitives.core.base import WorkflowContext
 
         # Create classifier
         classifier = TaskClassifierPrimitive()

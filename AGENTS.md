@@ -180,10 +180,13 @@ Native MCP servers available to agents: [.mcp/config.json](.mcp/config.json)
 
 **Core Servers:**
 - **context7**: Library documentation
+- **codegraphcontext**: Code graph analysis and repository context
+- **e2b**: Secure sandboxed code execution
 - **github**: Repository operations
 - **playwright**: Browser automation
 - **grafana**: Monitoring and metrics
 - **gitmcp**: Git operations
+- **hindsight**: Long-term memory and recall
 - **serena**: Code analysis
 - **sequential-thinking**: Problem decomposition
 

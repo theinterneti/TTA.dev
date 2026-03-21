@@ -22,21 +22,21 @@ echo "------------------"
 
 for worktree_path in $(git worktree list --porcelain | grep "^worktree " | cut -d' ' -f2); do
     worktree_name=$(basename "$worktree_path")
-    
+
     echo ""
     echo "=== $worktree_name ==="
     cd "$worktree_path"
-    
+
     # Branch info
     branch=$(git branch --show-current)
     echo "📍 Branch: $branch"
-    
+
     # Worktree config
     if [ -f .git ]; then
         email=$(git config --worktree user.email 2>/dev/null || echo "Not set")
         echo "📧 Agent: $email"
     fi
-    
+
     # Status
     if git diff-index --quiet HEAD 2>/dev/null; then
         echo "✅ Status: Clean"
@@ -44,13 +44,13 @@ for worktree_path in $(git worktree list --porcelain | grep "^worktree " | cut -
         echo "⚠️  Status: Uncommitted changes"
         git status -s
     fi
-    
+
     # Sync status
     git fetch origin --quiet 2>/dev/null || true
     LOCAL=$(git rev-parse @ 2>/dev/null || echo "")
     REMOTE=$(git rev-parse @{u} 2>/dev/null || echo "")
     BASE=$(git merge-base @ @{u} 2>/dev/null || echo "")
-    
+
     if [ "$LOCAL" = "$REMOTE" ]; then
         echo "🔄 Sync: Up to date with origin"
     elif [ "$LOCAL" = "$BASE" ]; then
@@ -60,7 +60,7 @@ for worktree_path in $(git worktree list --porcelain | grep "^worktree " | cut -
     else
         echo "🔀 Sync: Diverged from origin"
     fi
-    
+
     echo ""
 done
 

@@ -210,8 +210,8 @@ class LLMGenerationPrimitive(WorkflowPrimitive[dict[str, Any], dict[str, Any]]):
         # Simulated response
         response = """Based on the provided context, here's the answer:
 
-TTA.dev is a production-ready AI development toolkit that provides composable workflow primitives. 
-You can use the >> operator for sequential composition and the | operator for parallel execution. 
+TTA.dev is a production-ready AI development toolkit that provides composable workflow primitives.
+You can use the >> operator for sequential composition and the | operator for parallel execution.
 All primitives include built-in observability with OpenTelemetry integration."""
 
         # Simulate token usage

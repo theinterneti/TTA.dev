@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from primitives import WorkflowContext
-from primitives.observability import InstrumentedPrimitive
+from ttadev.primitives.observability import InstrumentedPrimitive
 
 
 class SpecifyPrimitive(InstrumentedPrimitive[dict[str, Any], dict[str, Any]]):

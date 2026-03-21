@@ -33,12 +33,15 @@ non-interactive/background tasks (memory synthesis, batch jobs) at the cost of s
 Try in order; skip any that return 429 or 404:
 
 ```
-1. nvidia/nemotron-3-super-120b-a12b:free   # 120B, 262K ctx — NVIDIA infra, reliable
-2. openai/gpt-oss-120b:free                 # 120B, 131K ctx — OpenInference
-3. nousresearch/hermes-3-llama-3.1-405b:free  # 405B, 131K ctx — Venice (often rate-limited)
-4. meta-llama/llama-3.3-70b-instruct:free   # 70B, 65K ctx  — Venice (often rate-limited)
-5. openrouter/free                          # auto-router, picks best available
+1. google/gemma-3n-e4b-it:free              # confirmed working, returns non-null content
+2. mistralai/mistral-small-3.1-24b-instruct:free  # fallback if gemma 429s
+3. openai/gpt-oss-20b:free                  # second fallback
+4. openrouter/free                          # auto-router, picks best available
 ```
+
+> **Warning:** `nvidia/nemotron-3-super-120b-a12b:free` is a reasoning-only model —
+> it returns `content: null` (output is in `reasoning_content`). Do NOT use it as a
+> default for any pipeline that reads `content`.
 
 Check live availability:
 ```bash
@@ -139,7 +142,7 @@ docker rm -f hindsight && docker run -d --name hindsight \
 
 ```bash
 OPENROUTER_API_KEY=...
-HINDSIGHT_LLM_MODEL=nvidia/nemotron-3-super-120b-a12b:free
+HINDSIGHT_LLM_MODEL=google/gemma-3n-e4b-it:free
 OLLAMA_BASE_URL=http://localhost:11434/v1
 OLLAMA_MODEL=qwen2.5:7b
 ```

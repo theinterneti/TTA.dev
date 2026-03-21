@@ -15,8 +15,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from primitives.core.base import WorkflowContext
-from primitives.lifecycle.validation import Severity, ValidationCheck
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.lifecycle.validation import Severity, ValidationCheck
 
 
 async def check_readme_has_sections(project_path: Path, context: WorkflowContext) -> bool:

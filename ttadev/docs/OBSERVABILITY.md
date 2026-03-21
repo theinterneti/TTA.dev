@@ -85,7 +85,7 @@ user_workflow = SequentialPrimitive([
 ## Examples
 
 - **examples/simple_demo.py** - Sequential workflow with retries
-- **examples/comprehensive_demo.py** - All primitive types  
+- **examples/comprehensive_demo.py** - All primitive types
 - **examples/hello_world.py** - Self-observing dashboard
 
 ## Philosophy

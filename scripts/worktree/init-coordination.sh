@@ -77,20 +77,20 @@ echo "  ✓ Created coordination dashboard"
 echo "🔧 Setting up agent worktrees..."
 for worktree in "${WORKTREES[@]}"; do
     worktree_path="/home/thein/repos/$worktree"
-    
+
     if [ ! -d "$worktree_path" ]; then
         echo "  ⚠ Worktree not found: $worktree_path (skipping)"
         continue
     fi
-    
+
     echo "  📦 Setting up $worktree..."
-    
+
     # Create .worktree directory structure
     cd "$worktree_path"
     mkdir -p .worktree/local-patterns
     mkdir -p .worktree/experiments
     mkdir -p .worktree/session-logs
-    
+
     # Create agent config template
     cat > .worktree/agent-config.yml << 'EOF'
 # Agent-specific configuration
@@ -103,20 +103,20 @@ auto_tag_patterns: true
 share_preferences:
   auto_share_high_impact: true
   require_review_before_share: false
-  
+
 # Integration preferences
 integration_preferences:
   accept_auto_integrate: false
   review_all_integrations: true
 EOF
-    
+
     # Link shared KB (symlink)
     if [ ! -L "logseq/shared" ]; then
         mkdir -p logseq
         ln -s "$ORCHESTRATOR/logseq/shared" logseq/shared
         echo "    ✓ Linked shared KB"
     fi
-    
+
     # Add .worktree to .gitignore if not already there
     if [ -f .gitignore ]; then
         if ! grep -q "^.worktree/$" .gitignore; then
@@ -127,7 +127,7 @@ EOF
         echo ".worktree/" > .gitignore
         echo "    ✓ Created .gitignore with .worktree/"
     fi
-    
+
     echo "    ✓ Setup complete for $worktree"
 done
 

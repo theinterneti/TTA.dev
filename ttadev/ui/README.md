@@ -7,7 +7,7 @@ Real-time observability dashboard built using TTA.dev's own primitives to prove 
 ## Features
 
 - 🔄 **Real-time Updates**: WebSocket-based live metrics
-- 🛡️ **Fault Tolerant**: Built with CircuitBreaker + Retry primitives  
+- 🛡️ **Fault Tolerant**: Built with CircuitBreaker + Retry primitives
 - 📊 **Production Ready**: REST API + health checks
 - 🎨 **Beautiful UI**: Clean, modern dashboard
 - 🚀 **Self-Hosting**: TTA.dev uses TTA.dev primitives
@@ -48,9 +48,9 @@ metrics_workflow = CircuitBreakerPrimitive(
 
 ## What This Proves
 
-✅ TTA.dev primitives are production-ready  
-✅ Composition works (CircuitBreaker + Retry + Lambda)  
-✅ Async workflows handle real traffic  
+✅ TTA.dev primitives are production-ready
+✅ Composition works (CircuitBreaker + Retry + Lambda)
+✅ Async workflows handle real traffic
 ✅ Self-hosting: TTA.dev builds itself
 
 ## Next Steps

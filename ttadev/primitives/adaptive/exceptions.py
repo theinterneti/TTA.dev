@@ -12,7 +12,7 @@ Exception Hierarchy:
     └── ContextExtractionError - Context extraction failures
 
 Usage:
-    from primitives.adaptive.exceptions import (
+    from ttadev.primitives.adaptive.exceptions import (
         LearningError,
         CircuitBreakerError,
         StrategyValidationError

@@ -51,7 +51,75 @@ How do I use async/await with httpx library?
 - Best practices research
 - Integration patterns
 
-### 2. AI Toolkit - Agent Development
+### 2. CodeGraphContext - Code Graph Analysis
+
+**Purpose:** Query repository structure, symbol relationships, call chains, and indexed code context
+
+**Core Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `find_code` | Search for functions, classes, and symbols | Locate implementation targets before editing |
+| `analyze_code_relationships` | Explore callers, callees, and dependencies | Understand impact before changes |
+| `get_repository_stats` | Inspect repository indexing status and graph coverage | Confirm the graph is current |
+| `list_indexed_repositories` | Show repositories available in the graph store | Verify indexed projects |
+
+**Setup:**
+
+CodeGraphContext is started locally through the installed `cgc` CLI:
+
+```bash
+cgc mcp start
+```
+
+**Configuration:**
+
+- Integrated in `.mcp/config.json` as `codegraphcontext`
+- Uses the local `cgc mcp start` stdio MCP server
+- Can also be configured with `cgc mcp setup` for supported IDEs and CLIs
+
+**Use Cases:**
+
+- Understanding call chains and dependencies
+- Finding code by symbol or pattern
+- Exploring class hierarchies and architecture
+- Verifying repository indexing before AI-assisted edits
+
+### 3. E2B - Secure Code Execution
+
+**Purpose:** Run code and commands in isolated cloud sandboxes for safe execution and testing
+
+**Core Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `run_code` | Execute generated code in a secure sandbox | Validate snippets without touching the host |
+| `run_command` | Execute shell commands in an isolated environment | Test tooling workflows safely |
+| `write_file` | Create files inside the sandbox | Prepare multi-file experiments |
+| `read_file` | Inspect sandbox outputs and artifacts | Retrieve generated results |
+
+**Setup:**
+
+E2B uses the official MCP server package:
+
+```bash
+npx -y @e2b/mcp-server
+```
+
+**Configuration:**
+
+- Integrated in `.mcp/config.json` as `e2b`
+- Requires `E2B_API_KEY` in the environment
+- Uses the published `@e2b/mcp-server` package over stdio
+
+**Use Cases:**
+
+- Executing untrusted or generated code safely
+- Running isolated experiments and repros
+- Testing commands without modifying the host system
+- Providing disposable sandboxes to coding agents
+
+### 4. AI Toolkit - Agent Development
 
 **Purpose:** Best practices and guidance for AI application development
 
@@ -85,7 +153,7 @@ What are best practices for creating an AI agent that uses multiple LLMs?
 - Tracing and observability
 - Evaluation frameworks
 
-### 3. Grafana - Observability
+### 5. Grafana - Observability
 
 **Purpose:** Query Prometheus metrics and Loki logs
 
@@ -120,7 +188,46 @@ Show me the error rate for the last hour
 - Investigating errors
 - Dashboard creation
 
-### 4. Pylance - Python Tools
+### 6. Hindsight - Long-Term Memory
+
+**Purpose:** Persistent agent memory for retaining, recalling, and reflecting on project knowledge
+
+**Core Tools Provided:**
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| `retain` | Store information in long-term memory | Save decisions, preferences, or findings |
+| `recall` | Retrieve relevant memories | Ask for prior context or known facts |
+| `reflect` | Synthesize memories into a reasoned answer | Summarize learned patterns or guidance |
+
+**Setup:**
+
+Start the local Hindsight MCP server before connecting clients:
+
+```bash
+HINDSIGHT_API_LLM_API_KEY=sk-... uvx --from hindsight-api hindsight-local-mcp
+```
+
+For local models with Ollama:
+
+```bash
+HINDSIGHT_API_LLM_PROVIDER=ollama HINDSIGHT_API_LLM_MODEL=llama3.2 uvx --from hindsight-api hindsight-local-mcp
+```
+
+**Configuration:**
+
+- Integrated in `.mcp/config.json` as `hindsight`
+- Uses the local HTTP MCP endpoint at `http://localhost:8888/mcp/`
+- Requires the Hindsight local server to already be running
+
+**Use Cases:**
+
+- Preserving cross-session agent memory
+- Remembering user and project preferences
+- Capturing decisions, discoveries, and historical context
+- Building personalized or learning-oriented agents
+
+### 7. Pylance - Python Tools
 
 **Purpose:** Python-specific development tools
 
@@ -154,7 +261,7 @@ Check for syntax errors in this file
 - Environment management
 - Quick code testing
 
-### 5. Database Client - SQL Operations
+### 8. Database Client - SQL Operations
 
 **Purpose:** Execute database queries and manage schemas
 

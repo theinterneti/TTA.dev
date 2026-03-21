@@ -7,7 +7,7 @@ description: |
   Production-ready development primitives for TTA agent workflows.
   Provides composable workflow patterns, recovery strategies, performance
   utilities, and observability tools for development automation.
-  
+
   NOTE: This is for development tooling, not player-facing game components.
 
 author: TTA Development Team
@@ -38,7 +38,7 @@ dependencies:
     - opentelemetry-api: ">=1.24.0"
     - opentelemetry-sdk: ">=1.24.0"
     - tenacity: ">=8.2.3"
-  
+
   optional:
     tracing:
       - opentelemetry-instrumentation: ">=0.45b0"
@@ -46,7 +46,7 @@ dependencies:
     apm:
       - opentelemetry-exporter-prometheus: ">=0.41b0"
       - opentelemetry-instrumentation: ">=0.41b0"
-  
+
   development:
     - pytest: ">=8.0.0"
     - pytest-asyncio: ">=0.23.0"
@@ -118,7 +118,7 @@ metadata:
   test_coverage: 57%
   test_count: 35
   documentation: comprehensive
-  
+
 quality:
   tests:
     total: 35
@@ -128,12 +128,12 @@ quality:
       core: 97%
       recovery: 92%
       performance: 100%
-  
+
   code_quality:
     formatter: ruff
     linter: ruff
     type_checker: mypy
-    
+
 changelog:
   - version: 0.1.0
     date: 2025-10-28

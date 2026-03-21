@@ -45,7 +45,7 @@ if [ -n "$UNTRACKED" ]; then
     echo "Found untracked files:"
     echo "$UNTRACKED"
     echo ""
-    
+
     # Check specific files
     if [ -f ".github/workflows/auto-lazy-dev-setup.yml" ]; then
         echo -e "${YELLOW}📄 .github/workflows/auto-lazy-dev-setup.yml${NC}"
@@ -56,7 +56,7 @@ if [ -n "$UNTRACKED" ]; then
             echo -e "${GREEN}✅ Added${NC}"
         fi
     fi
-    
+
     if [ -f "scripts/git_manager.py" ]; then
         echo -e "${YELLOW}📄 scripts/git_manager.py${NC}"
         read -p "Add this new git management tool? (y/n) " -n 1 -r
@@ -66,7 +66,7 @@ if [ -n "$UNTRACKED" ]; then
             echo -e "${GREEN}✅ Added${NC}"
         fi
     fi
-    
+
     if [ -f "GIT_CLEANUP_PLAN.md" ]; then
         echo -e "${YELLOW}📄 GIT_CLEANUP_PLAN.md${NC}"
         read -p "Add this cleanup plan? (y/n) " -n 1 -r
@@ -76,7 +76,7 @@ if [ -n "$UNTRACKED" ]; then
             echo -e "${GREEN}✅ Added${NC}"
         fi
     fi
-    
+
     # Commit staged files
     if ! git diff --cached --quiet; then
         read -p "Commit staged files? (y/n) " -n 1 -r
@@ -98,7 +98,7 @@ if [ "$STASH_COUNT" -gt 0 ]; then
     echo "Found $STASH_COUNT stash(es)"
     git stash list
     echo ""
-    
+
     # Check stash@{1} - likely obsolete merge conflict
     if git stash list | grep -q "stash@{1}"; then
         echo -e "${YELLOW}Stash@{1}: WIP on docs/mcp-references (merge conflicts)${NC}"
@@ -109,7 +109,7 @@ if [ "$STASH_COUNT" -gt 0 ]; then
             echo -e "${GREEN}✅ Dropped stash@{1}${NC}"
         fi
     fi
-    
+
     # Review stash@{0}
     if git stash list | grep -q "stash@{0}"; then
         echo -e "${YELLOW}Stash@{0}: Documentation reorganization${NC}"

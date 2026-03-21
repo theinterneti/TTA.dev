@@ -30,6 +30,7 @@ def _find_test_file(source_path: Path) -> Path | None:
     # Build candidate: tests/<rel_dir>/test_<stem>.py
     *dirs, filename = rel_parts
     stem = Path(filename).stem
+    # NOTE: candidate.exists() is relative to CWD — must be called from repo root.
     candidate = Path("tests", *dirs, f"test_{stem}.py")
     return candidate if candidate.exists() else None
 

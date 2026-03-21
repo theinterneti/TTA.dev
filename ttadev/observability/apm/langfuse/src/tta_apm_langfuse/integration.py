@@ -11,7 +11,7 @@ from typing import Any
 
 from langfuse import Langfuse
 from langfuse.decorators import langfuse_context, observe
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class LangFuseIntegration:

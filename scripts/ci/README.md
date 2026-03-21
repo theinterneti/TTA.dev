@@ -108,7 +108,7 @@ jobs:
   your-job:
     steps:
       # ... your steps that create ci-ai-decisions/ logs ...
-  
+
   upload-decisions:
     needs: your-job
     uses: ./.github/workflows/upload-ai-decisions.yml

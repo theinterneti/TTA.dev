@@ -24,16 +24,16 @@
 #### Duplicates Removed:
 - **PR Validation:** Kept `consolidated-pr-validation.yml`
   - Archived: `pr-validation.yml`, `pr-validation-v2.yml`, `agentic-pr-review.yml`
-  
+
 - **Merge Gates:** Kept `consolidated-merge-gate.yml`
   - Archived: `merge-validation.yml`, `merge-validation-v2.yml`
-  
+
 - **Quality Checks:** Kept `ci.yml` (comprehensive)
   - Archived: `quality-check.yml`, `test-quality-checks.yml`, `agentic-checks.yml`
-  
+
 - **Testing:** Kept `ci.yml` (includes all tests)
   - Archived: `tests.yml`, `tests-split.yml`
-  
+
 - **AI Review:** Kept `consolidated-ai-review.yml`
   - Archived: `orchestration-pr-review.yml`, `agentic-self-heal.yml`
 
@@ -66,7 +66,7 @@
 ├── ci.yml                              # Main CI (quality + tests + matrix)
 ├── ai-guardrails.yml                   # AI agent safety
 ├── consolidated-pr-validation.yml      # PR checks
-├── consolidated-merge-gate.yml         # Merge requirements  
+├── consolidated-merge-gate.yml         # Merge requirements
 ├── consolidated-ai-review.yml          # AI code review
 ├── consolidated-platform-compatibility.yml # Cross-platform testing
 ├── upload-ai-decisions.yml             # OTEL integration

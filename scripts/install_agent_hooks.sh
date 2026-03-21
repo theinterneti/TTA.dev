@@ -28,9 +28,9 @@ for worktree in "${WORKTREES[@]}"; do
         echo "⚠️  Worktree not found: $worktree (skipping)"
         continue
     fi
-    
+
     echo "📁 Installing hooks for: $worktree"
-    
+
     # For worktrees, .git is a file pointing to the real git dir
     if [ -f "$worktree/.git" ]; then
         # Read the gitdir path from the .git file
@@ -40,13 +40,13 @@ for worktree in "${WORKTREES[@]}"; do
         # Main repo has .git directory
         HOOKS_DIR="$worktree/.git/hooks"
     fi
-    
+
     mkdir -p "$HOOKS_DIR"
-    
+
     for hook in "${HOOKS[@]}"; do
         SOURCE_HOOK="$SOURCE_HOOKS_DIR/$hook"
         TARGET_HOOK="$HOOKS_DIR/$hook"
-        
+
         if [ -f "$SOURCE_HOOK" ]; then
             # Copy hook
             cp "$SOURCE_HOOK" "$TARGET_HOOK"
@@ -56,7 +56,7 @@ for worktree in "${WORKTREES[@]}"; do
             echo "  ⚠️  Hook not found: $SOURCE_HOOK"
         fi
     done
-    
+
     echo ""
 done
 

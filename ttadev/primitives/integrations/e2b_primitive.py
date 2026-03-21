@@ -14,7 +14,7 @@ Free Tier: 20 concurrent sandboxes, 8 vCPUs each, 1-hour sessions.
 
 Example:
     ```python
-    from primitives.integrations import CodeExecutionPrimitive
+    from ttadev.primitives.integrations import CodeExecutionPrimitive
     from primitives import WorkflowContext
 
     executor = CodeExecutionPrimitive()
@@ -46,8 +46,8 @@ from typing import TypedDict
 
 from e2b_code_interpreter import AsyncSandbox
 
-from primitives.core.base import WorkflowContext
-from primitives.observability import InstrumentedPrimitive
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.observability import InstrumentedPrimitive
 
 logger = logging.getLogger(__name__)
 

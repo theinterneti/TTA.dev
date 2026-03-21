@@ -22,7 +22,7 @@ class TemplateProvider:
         """Initialize with template definitions."""
         self.templates: dict[str, dict[str, Any]] = {
             "RetryPrimitive": {
-                "basic": """from primitives.recovery import RetryPrimitive
+                "basic": """from ttadev.primitives.recovery import RetryPrimitive
 from primitives import WorkflowContext
 
 # Wrap your function with retry logic
@@ -37,7 +37,7 @@ retry = RetryPrimitive(
 # Execute with automatic retry
 context = WorkflowContext(workflow_id="retry-example")
 result = await retry.execute(data, context)""",
-                "with_composition": """from primitives.recovery import RetryPrimitive, TimeoutPrimitive
+                "with_composition": """from ttadev.primitives.recovery import RetryPrimitive, TimeoutPrimitive
 from primitives import WorkflowContext
 
 # Compose timeout + retry
@@ -56,7 +56,7 @@ result = await workflow.execute(data, context)""",
                 ],
             },
             "TimeoutPrimitive": {
-                "basic": """from primitives.recovery import TimeoutPrimitive
+                "basic": """from ttadev.primitives.recovery import TimeoutPrimitive
 from primitives import WorkflowContext
 
 # Add timeout protection
@@ -68,7 +68,7 @@ timeout = TimeoutPrimitive(
 
 context = WorkflowContext(workflow_id="timeout-example")
 result = await timeout.execute(data, context)""",
-                "with_fallback": """from primitives.recovery import TimeoutPrimitive, FallbackPrimitive
+                "with_fallback": """from ttadev.primitives.recovery import TimeoutPrimitive, FallbackPrimitive
 from primitives import WorkflowContext
 
 # Timeout with fallback
@@ -120,7 +120,7 @@ result = await cached.execute({"model": "gpt-4", "prompt": "Hello"}, context)"""
                 ],
             },
             "FallbackPrimitive": {
-                "basic": """from primitives.recovery import FallbackPrimitive
+                "basic": """from ttadev.primitives.recovery import FallbackPrimitive
 from primitives import WorkflowContext
 
 # Graceful degradation with fallbacks
@@ -131,7 +131,7 @@ fallback = FallbackPrimitive(
 
 context = WorkflowContext(workflow_id="resilient-llm")
 result = await fallback.execute(prompt, context)""",
-                "multi_provider": """from primitives.recovery import FallbackPrimitive, RetryPrimitive
+                "multi_provider": """from ttadev.primitives.recovery import FallbackPrimitive, RetryPrimitive
 from primitives import WorkflowContext
 
 # Multi-provider with retry per provider
@@ -203,7 +203,7 @@ result = await workflow.execute(data, context)""",
                 ],
             },
             "RouterPrimitive": {
-                "basic": """from primitives.core import RouterPrimitive
+                "basic": """from ttadev.primitives.core import RouterPrimitive
 from primitives import WorkflowContext
 
 def select_provider(data, ctx):
@@ -225,7 +225,7 @@ router = RouterPrimitive(
 
 context = WorkflowContext(workflow_id="smart-router")
 result = await router.execute({"prompt": "Hello", "priority": "quality"}, context)""",
-                "cost_based": """from primitives.core import RouterPrimitive
+                "cost_based": """from ttadev.primitives.core import RouterPrimitive
 from primitives import WorkflowContext
 
 def cost_aware_routing(data, ctx):
@@ -245,7 +245,7 @@ router = RouterPrimitive(
                 ],
             },
             "CircuitBreakerPrimitive": {
-                "basic": """from primitives.recovery import CircuitBreakerPrimitive
+                "basic": """from ttadev.primitives.recovery import CircuitBreakerPrimitive
 from primitives import WorkflowContext
 
 # Protect against cascade failures

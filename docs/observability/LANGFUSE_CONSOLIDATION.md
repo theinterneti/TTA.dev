@@ -38,7 +38,7 @@ This package becomes the canonical LangFuse integration because it:
    ```python
    import os
    from tta_apm_langfuse import LangFuseIntegration
-   
+
    apm = LangFuseIntegration(
        public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
        secret_key=os.getenv("LANGFUSE_SECRET_KEY"),

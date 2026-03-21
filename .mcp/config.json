@@ -76,6 +76,47 @@
         "history"
       ]
     },
+    "codegraphcontext": {
+      "command": "/home/adam/.local/bin/cgc",
+      "args": [
+        "mcp",
+        "start"
+      ],
+      "description": "Code graph analysis, symbol relationships, and repository context",
+      "tags": [
+        "code-analysis",
+        "graph",
+        "repository",
+        "architecture"
+      ]
+    },
+    "e2b": {
+      "command": "/usr/bin/npx",
+      "args": [
+        "-y",
+        "@e2b/mcp-server"
+      ],
+      "env": {
+        "E2B_API_KEY": "${E2B_API_KEY}"
+      },
+      "description": "Secure cloud sandbox and code interpreter execution via E2B",
+      "tags": [
+        "sandbox",
+        "code-execution",
+        "testing",
+        "automation"
+      ]
+    },
+    "hindsight": {
+      "url": "http://localhost:8888/mcp/",
+      "description": "Long-term agent memory and recall via local Hindsight MCP",
+      "tags": [
+        "memory",
+        "context",
+        "learning",
+        "personalization"
+      ]
+    },
     "serena": {
       "command": "/usr/bin/uvx",
       "args": [

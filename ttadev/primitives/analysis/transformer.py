@@ -1878,18 +1878,18 @@ class CodeTransformer:
     def __init__(self) -> None:
         """Initialize the transformer."""
         self._import_map = {
-            "RetryPrimitive": "from primitives.recovery import RetryPrimitive",
-            "TimeoutPrimitive": "from primitives.recovery import TimeoutPrimitive",
-            "FallbackPrimitive": "from primitives.recovery import FallbackPrimitive",
+            "RetryPrimitive": "from ttadev.primitives.recovery import RetryPrimitive",
+            "TimeoutPrimitive": "from ttadev.primitives.recovery import TimeoutPrimitive",
+            "FallbackPrimitive": "from ttadev.primitives.recovery import FallbackPrimitive",
             "CachePrimitive": "from tta_dev_primitives.performance import CachePrimitive",
             "ParallelPrimitive": "from primitives import ParallelPrimitive",
             "SequentialPrimitive": "from primitives import SequentialPrimitive",
-            "RouterPrimitive": "from primitives.core import RouterPrimitive",
-            "CircuitBreakerPrimitive": "from primitives.recovery import CircuitBreakerPrimitive",
-            "CompensationPrimitive": "from primitives.recovery import CompensationPrimitive",
+            "RouterPrimitive": "from ttadev.primitives.core import RouterPrimitive",
+            "CircuitBreakerPrimitive": "from ttadev.primitives.recovery import CircuitBreakerPrimitive",
+            "CompensationPrimitive": "from ttadev.primitives.recovery import CompensationPrimitive",
             "MemoryPrimitive": "from tta_dev_primitives.performance import MemoryPrimitive",
-            "DelegationPrimitive": "from primitives.orchestration import DelegationPrimitive",
-            "AdaptivePrimitive": "from primitives.adaptive import AdaptivePrimitive",
+            "DelegationPrimitive": "from ttadev.primitives.orchestration import DelegationPrimitive",
+            "AdaptivePrimitive": "from ttadev.primitives.adaptive import AdaptivePrimitive",
         }
 
     def transform(

@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
-_DEFAULT_OPENROUTER_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
+_DEFAULT_OPENROUTER_MODEL = "google/gemma-3n-e4b-it:free"
 _DEFAULT_OLLAMA_MODEL = "qwen2.5:7b"
 _DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434/v1"
 _OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"

@@ -35,7 +35,7 @@
    - **Why Critical:** Foundation for everything else
    - **Estimate:** 3 weeks
 
-2. **#35** - Submit MCP Servers to GitHub Registry  
+2. **#35** - Submit MCP Servers to GitHub Registry
    - **Status:** Updated with PTC progress
    - **Why Critical:** Deployment blocker
    - **Next:** Test PTC, update docs, submit
@@ -210,6 +210,6 @@
 
 ---
 
-**Last Updated:** March 6, 2026  
-**Next Review:** March 13, 2026  
+**Last Updated:** March 6, 2026
+**Next Review:** March 13, 2026
 **Status:** ✅ Stack is healthy and prioritized

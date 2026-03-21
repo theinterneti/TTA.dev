@@ -10,6 +10,6 @@ Usage:
     tta-dev serve
 """
 
-from primitives.cli.app import app
+from ttadev.primitives.cli.app import app
 
 __all__ = ["app"]

@@ -8,7 +8,7 @@ from typing import Any
 from anthropic import AsyncAnthropic
 from pydantic import BaseModel, Field
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class AnthropicRequest(BaseModel):
@@ -40,8 +40,8 @@ class AnthropicPrimitive(WorkflowPrimitive[AnthropicRequest, AnthropicResponse])
 
     Example:
         ```python
-        from primitives.integrations import AnthropicPrimitive
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.integrations import AnthropicPrimitive
+        from ttadev.primitives.core.base import WorkflowContext
 
         # Create primitive
         llm = AnthropicPrimitive(model="claude-3-5-sonnet-20241022")

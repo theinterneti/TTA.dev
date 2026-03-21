@@ -39,19 +39,19 @@ check_os() {
         log_error "Cannot detect OS. /etc/os-release not found."
         exit 1
     fi
-    
+
     log_info "Detected OS: $OS $OS_VERSION"
 }
 
 check_requirements() {
     log_info "Checking requirements..."
-    
+
     # Check if running with sudo
     if [[ $EUID -ne 0 ]]; then
         log_error "This script must be run with sudo"
         exit 1
     fi
-    
+
     # Check for required commands
     local required_cmds=("systemctl" "wget" "gpg")
     for cmd in "${required_cmds[@]}"; do
@@ -60,7 +60,7 @@ check_requirements() {
             exit 1
         fi
     done
-    
+
     log_info "All requirements met"
 }
 
@@ -72,7 +72,7 @@ load_env_file() {
         set -a
         source "$env_file"
         set +a
-        
+
         # Extract token if present
         if [[ -n "${GRAFANA_CLOUD_API_KEY:-}" ]]; then
             GRAFANA_CLOUD_TOKEN="$GRAFANA_CLOUD_API_KEY"
@@ -84,28 +84,28 @@ load_env_file() {
 
 setup_grafana_repo_debian() {
     log_info "Setting up Grafana APT repository..."
-    
+
     # Install GPG if not present
     if ! command -v gpg &> /dev/null; then
         apt-get update
         apt-get install -y gpg
     fi
-    
+
     # Add Grafana repository
     mkdir -p /etc/apt/keyrings/
     wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | tee /etc/apt/keyrings/grafana.gpg > /dev/null
     echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | tee /etc/apt/sources.list.d/grafana.list
-    
+
     apt-get update
     log_info "Grafana repository added successfully"
 }
 
 setup_grafana_repo_rhel() {
     log_info "Setting up Grafana YUM repository..."
-    
+
     wget -q -O gpg.key https://rpm.grafana.com/gpg.key
     rpm --import gpg.key
-    
+
     cat > /etc/yum.repos.d/grafana.repo <<EOF
 [grafana]
 name=grafana
@@ -117,13 +117,13 @@ gpgkey=https://rpm.grafana.com/gpg.key
 sslverify=1
 sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 EOF
-    
+
     log_info "Grafana repository added successfully"
 }
 
 install_alloy() {
     log_info "Installing Grafana Alloy..."
-    
+
     case "$OS" in
         ubuntu|debian)
             apt-get install -y alloy
@@ -136,7 +136,7 @@ install_alloy() {
             exit 1
             ;;
     esac
-    
+
     # Verify installation
     if command -v alloy &> /dev/null; then
         local version=$(alloy --version | head -n1)
@@ -149,13 +149,13 @@ install_alloy() {
 
 configure_alloy_env() {
     log_info "Configuring Alloy environment..."
-    
+
     if [[ -z "$GRAFANA_CLOUD_TOKEN" ]]; then
         log_error "GRAFANA_CLOUD_TOKEN is not set"
         log_error "Please set it in ~/.env.tta-dev or export it before running this script"
         exit 1
     fi
-    
+
     # Create environment file
     cat > /etc/default/alloy <<EOF
 # Grafana Cloud Configuration
@@ -172,16 +172,16 @@ CONFIG_FILE="/etc/alloy/config.alloy"
 # Restart on system upgrade
 RESTART_ON_UPGRADE=true
 EOF
-    
+
     chmod 600 /etc/default/alloy
     log_info "Alloy environment configured at /etc/default/alloy"
 }
 
 configure_alloy_config() {
     log_info "Creating Alloy configuration..."
-    
+
     mkdir -p /etc/alloy
-    
+
     cat > /etc/alloy/config.alloy <<'EOF'
 // Grafana Alloy Configuration for TTA.dev
 // Collects metrics, logs, and traces and ships to Grafana Cloud
@@ -201,12 +201,12 @@ prometheus.scrape "tta_app" {
 prometheus.remote_write "grafana_cloud" {
   endpoint {
     url = "https://prometheus-" + env("GRAFANA_CLOUD_REGION") + ".grafana.net/api/prom/push"
-    
+
     basic_auth {
       username = env("GRAFANA_CLOUD_STACK")
       password = env("GRAFANA_CLOUD_TOKEN")
     }
-    
+
     queue_config {
       capacity = 10000
       max_shards = 10
@@ -218,7 +218,7 @@ prometheus.remote_write "grafana_cloud" {
 loki.source.journal "system_logs" {
   max_age = "24h"
   forward_to = [loki.process.tta_filter.receiver]
-  
+
   labels = {
     job = "systemd-journal",
     host = env("HOSTNAME"),
@@ -228,12 +228,12 @@ loki.source.journal "system_logs" {
 // Filter and process logs
 loki.process "tta_filter" {
   forward_to = [loki.write.grafana_cloud.receiver]
-  
+
   // Extract log level
   stage.regex {
     expression = "level=(?P<level>\\w+)"
   }
-  
+
   stage.labels {
     values = {
       level = "",
@@ -245,7 +245,7 @@ loki.process "tta_filter" {
 loki.write "grafana_cloud" {
   endpoint {
     url = "https://logs-" + env("GRAFANA_CLOUD_REGION") + ".grafana.net/loki/api/v1/push"
-    
+
     basic_auth {
       username = env("GRAFANA_CLOUD_STACK")
       password = env("GRAFANA_CLOUD_TOKEN")
@@ -258,11 +258,11 @@ otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4317"
   }
-  
+
   http {
     endpoint = "0.0.0.0:4318"
   }
-  
+
   output {
     traces = [otelcol.exporter.otlp.grafana_cloud.input]
   }
@@ -282,23 +282,23 @@ otelcol.exporter.otlp "grafana_cloud" {
   }
 }
 EOF
-    
+
     chmod 644 /etc/alloy/config.alloy
     log_info "Alloy configuration created at /etc/alloy/config.alloy"
 }
 
 start_alloy_service() {
     log_info "Starting Grafana Alloy service..."
-    
+
     # Reload systemd
     systemctl daemon-reload
-    
+
     # Enable Alloy service
     systemctl enable alloy
-    
+
     # Start Alloy service
     systemctl start alloy
-    
+
     # Check status
     if systemctl is-active --quiet alloy; then
         log_info "Grafana Alloy service started successfully"
@@ -311,21 +311,21 @@ start_alloy_service() {
 
 verify_alloy() {
     log_info "Verifying Alloy installation..."
-    
+
     # Wait a few seconds for service to start
     sleep 3
-    
+
     # Check if metrics endpoint is accessible
     if curl -sf http://localhost:12345/metrics > /dev/null; then
         log_info "Alloy metrics endpoint is accessible"
     else
         log_warn "Cannot access Alloy metrics endpoint at http://localhost:12345/metrics"
     fi
-    
+
     # Check service status
     if systemctl is-active --quiet alloy; then
         log_info "Alloy service is running"
-        
+
         # Show recent logs
         echo ""
         log_info "Recent Alloy logs:"
@@ -340,31 +340,31 @@ install_local_prometheus() {
     if [[ "$INSTALL_LOCAL_PROMETHEUS" != "true" ]]; then
         return
     fi
-    
+
     log_info "Installing local Prometheus..."
-    
+
     local version="2.48.1"
     local arch="linux-amd64"
     local url="https://github.com/prometheus/prometheus/releases/download/v${version}/prometheus-${version}.${arch}.tar.gz"
-    
+
     # Download and extract
     cd /tmp
     wget -q "$url"
     tar xzf "prometheus-${version}.${arch}.tar.gz"
     cd "prometheus-${version}.${arch}"
-    
+
     # Install binaries
     cp prometheus promtool /usr/local/bin/
-    
+
     # Create user
     if ! id prometheus &>/dev/null; then
         useradd --no-create-home --shell /bin/false prometheus
     fi
-    
+
     # Create directories
     mkdir -p /etc/prometheus /var/lib/prometheus
     chown -R prometheus:prometheus /etc/prometheus /var/lib/prometheus
-    
+
     # Create configuration
     cat > /etc/prometheus/prometheus.yml <<EOF
 global:
@@ -377,9 +377,9 @@ scrape_configs:
       - targets: ['localhost:9464']
     scrape_interval: 15s
 EOF
-    
+
     chown prometheus:prometheus /etc/prometheus/prometheus.yml
-    
+
     # Create systemd service
     cat > /etc/systemd/system/prometheus.service <<EOF
 [Unit]
@@ -401,18 +401,18 @@ ExecStart=/usr/local/bin/prometheus \\
 [Install]
 WantedBy=multi-user.target
 EOF
-    
+
     # Start service
     systemctl daemon-reload
     systemctl enable prometheus
     systemctl start prometheus
-    
+
     if systemctl is-active --quiet prometheus; then
         log_info "Local Prometheus installed and running at http://localhost:9090"
     else
         log_warn "Prometheus installation completed but service is not running"
     fi
-    
+
     # Cleanup
     cd /
     rm -rf /tmp/prometheus-*
@@ -422,9 +422,9 @@ install_local_grafana() {
     if [[ "$INSTALL_LOCAL_GRAFANA" != "true" ]]; then
         return
     fi
-    
+
     log_info "Installing local Grafana..."
-    
+
     case "$OS" in
         ubuntu|debian)
             apt-get install -y grafana
@@ -437,11 +437,11 @@ install_local_grafana() {
             exit 1
             ;;
     esac
-    
+
     # Start service
     systemctl enable grafana-server
     systemctl start grafana-server
-    
+
     if systemctl is-active --quiet grafana-server; then
         log_info "Local Grafana installed and running at http://localhost:3000"
         log_info "Default credentials: admin/admin"
@@ -459,15 +459,15 @@ print_summary() {
     log_info "Services:"
     log_info "  - Grafana Alloy: systemctl status alloy"
     log_info "  - Alloy metrics: http://localhost:12345/metrics"
-    
+
     if [[ "$INSTALL_LOCAL_PROMETHEUS" == "true" ]]; then
         log_info "  - Local Prometheus: http://localhost:9090"
     fi
-    
+
     if [[ "$INSTALL_LOCAL_GRAFANA" == "true" ]]; then
         log_info "  - Local Grafana: http://localhost:3000"
     fi
-    
+
     echo ""
     log_info "Grafana Cloud:"
     log_info "  - Dashboard: https://${GRAFANA_CLOUD_STACK}.grafana.net/"
@@ -485,11 +485,11 @@ print_summary() {
 main() {
     log_info "Starting Native Linux Observability Setup"
     echo ""
-    
+
     check_os
     check_requirements
     load_env_file
-    
+
     # Setup repository based on OS
     case "$OS" in
         ubuntu|debian)
@@ -503,18 +503,18 @@ main() {
             exit 1
             ;;
     esac
-    
+
     # Install and configure Alloy
     install_alloy
     configure_alloy_env
     configure_alloy_config
     start_alloy_service
     verify_alloy
-    
+
     # Optional: Install local services
     install_local_prometheus
     install_local_grafana
-    
+
     print_summary
 }
 

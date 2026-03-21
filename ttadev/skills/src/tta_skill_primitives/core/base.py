@@ -12,7 +12,7 @@ from abc import abstractmethod
 from typing import Any, Generic, TypeVar
 
 import structlog
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 from .models import SkillDescriptor, SkillStatus
 

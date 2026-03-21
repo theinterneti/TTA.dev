@@ -8,7 +8,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class ModelQualityMetrics(BaseModel):
@@ -118,8 +118,8 @@ class FreeTierResearchPrimitive(
 
     Example:
         ```python
-        from primitives.research import FreeTierResearchPrimitive
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.research import FreeTierResearchPrimitive
+        from ttadev.primitives.core.base import WorkflowContext
 
         # Create primitive
         researcher = FreeTierResearchPrimitive()
@@ -586,13 +586,13 @@ class FreeTierResearchPrimitive(
 
         # Generate code
         code_lines = [
-            "from primitives.integrations import (",
+            "from ttadev.primitives.integrations import (",
             "    OpenAIPrimitive,",
             "    AnthropicPrimitive,",
             "    OllamaPrimitive,",
             ")",
-            "from primitives.recovery import FallbackPrimitive",
-            "from primitives.core.base import WorkflowContext",
+            "from ttadev.primitives.recovery import FallbackPrimitive",
+            "from ttadev.primitives.core.base import WorkflowContext",
             "",
             f"# Recommended fallback strategy for: {use_case}",
             f"# Generated: {datetime.now().strftime('%Y-%m-%d')}",

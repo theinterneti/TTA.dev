@@ -27,7 +27,7 @@ open http://localhost:8000
 ## 🎯 What You Get
 
 - **🔄 Resilient Workflows**: Retry, timeout, circuit breaker, fallback primitives
-- **📊 Built-in Observability**: Zero-config dashboard showing all agent activity  
+- **📊 Built-in Observability**: Zero-config dashboard showing all agent activity
 - **🤖 AI-Native**: Works with Claude, Copilot, Cline, or any coding agent
 - **🚀 Batteries Included**: No external services, databases, or complex setup
 

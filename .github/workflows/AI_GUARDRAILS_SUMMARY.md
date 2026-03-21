@@ -1,6 +1,6 @@
 # AI Guardrails Implementation Summary
 
-**Date:** March 7, 2026  
+**Date:** March 7, 2026
 **Purpose:** Implement strict Policy-as-Code guardrails for AI coding agents in CI/CD
 
 ---
@@ -15,7 +15,7 @@ This implementation adds comprehensive security and process controls for AI-gene
 
 ### 1. Draft PR Enforcement (`enforce-draft-for-ai` job)
 
-**Trigger:** Any PR opened, synchronized, or labeled  
+**Trigger:** Any PR opened, synchronized, or labeled
 **Detection Logic:**
 - Checks if PR author contains `[bot]` or `bot` in username
 - Checks for `ai-generated` label
@@ -35,7 +35,7 @@ This implementation adds comprehensive security and process controls for AI-gene
 
 ### 2. Provenance Tagging (`provenance-tagging` job)
 
-**Trigger:** Any PR from branches matching `copilot/*` or `agent/*`  
+**Trigger:** Any PR from branches matching `copilot/*` or `agent/*`
 **Detection Logic:**
 - Pattern matches branch name
 - Checks existing labels to avoid duplicates
@@ -53,7 +53,7 @@ This implementation adds comprehensive security and process controls for AI-gene
 
 ### 3. Security Posture Report (`security-posture` job)
 
-**Always Runs:** On every workflow trigger  
+**Always Runs:** On every workflow trigger
 **Audits:**
 
 #### a) Action Pinning Audit
@@ -74,7 +74,7 @@ This implementation adds comprehensive security and process controls for AI-gene
 
 ### 4. AI Compliance Validation (`validate-ai-compliance` job)
 
-**Trigger:** Only runs for AI-generated PRs  
+**Trigger:** Only runs for AI-generated PRs
 **Validations:**
 
 #### a) Prohibited Pattern Detection
@@ -242,6 +242,6 @@ gh pr create --title "Test Copilot PR"
 
 ---
 
-**Implementation by:** GitHub Copilot CLI  
-**Review required by:** DevOps Team Lead  
+**Implementation by:** GitHub Copilot CLI
+**Review required by:** DevOps Team Lead
 **Security review required:** Yes (action pinning changes)

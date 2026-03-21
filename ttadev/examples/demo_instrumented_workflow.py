@@ -3,9 +3,9 @@
 
 import asyncio
 
-from primitives.core.base import LambdaPrimitive, WorkflowContext
-from primitives.core.parallel import ParallelPrimitive
-from primitives.core.sequential import SequentialPrimitive
+from ttadev.primitives.core.base import LambdaPrimitive, WorkflowContext
+from ttadev.primitives.core.parallel import ParallelPrimitive
+from ttadev.primitives.core.sequential import SequentialPrimitive
 
 
 async def step1(data: dict, ctx: WorkflowContext) -> dict:

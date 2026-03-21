@@ -68,7 +68,7 @@ git remote -v
 if git remote | grep -q "^origin$"; then
     print_warning "Found 'origin' remote pointing to copilot fork"
     echo "Current origin: $(git remote get-url origin)"
-    
+
     if confirm "Rename 'origin' to 'copilot-fork'?"; then
         git remote rename origin copilot-fork
         print_success "Renamed origin -> copilot-fork"
@@ -91,7 +91,7 @@ if [ -z "$COPILOT_BRANCHES" ]; then
 else
     echo "Found $(echo "$COPILOT_BRANCHES" | wc -l) copilot sub-PR branches:"
     echo "$COPILOT_BRANCHES" | sed 's/^/  - /'
-    
+
     if confirm "Delete ALL these remote branches?"; then
         echo "$COPILOT_BRANCHES" | while IFS= read -r branch; do
             echo "Deleting: $branch"
@@ -114,7 +114,7 @@ if [ -z "$MERGED_BRANCHES" ]; then
 else
     echo "Found merged branches:"
     echo "$MERGED_BRANCHES" | sed 's/^/  - /'
-    
+
     if confirm "Delete these merged local branches?"; then
         echo "$MERGED_BRANCHES" | xargs git branch -d
         print_success "Deleted merged branches"
@@ -133,7 +133,7 @@ if [ -z "$FIX_BRANCHES" ]; then
 else
     echo "Found fix branches:"
     echo "$FIX_BRANCHES" | sed 's/^/  /'
-    
+
     echo -e "\n${YELLOW}Review these branches manually:${NC}"
     echo "  - Check if fixes are merged"
     echo "  - Close related PRs if complete"
@@ -150,7 +150,7 @@ if [ -z "$EXP_BRANCHES" ]; then
 else
     echo "Found experimental/old branches:"
     echo "$EXP_BRANCHES" | sed 's/^/  /'
-    
+
     echo -e "\n${YELLOW}Review these branches manually:${NC}"
     echo "  - Check if work is complete"
     echo "  - Archive if needed"

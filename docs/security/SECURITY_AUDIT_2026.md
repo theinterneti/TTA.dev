@@ -1,8 +1,8 @@
 # Security Audit Report - March 2026
 
-**Audit Date:** 2026-03-07  
-**Auditor:** GitHub Copilot CLI  
-**Tool:** Bandit 1.9.4  
+**Audit Date:** 2026-03-07
+**Auditor:** GitHub Copilot CLI
+**Tool:** Bandit 1.9.4
 **Scope:** Complete platform/ codebase (4556 Python files)
 
 ## Executive Summary
@@ -20,8 +20,8 @@ Comprehensive security audit identified **4,648 potential security issues** acro
 ## HIGH Severity Issues (Priority 1)
 
 ### 1. Weak Cryptographic Hash (B324) - 10 instances
-**Issue:** Use of SHA1 for security-sensitive operations  
-**Risk:** SHA1 is cryptographically broken and vulnerable to collision attacks  
+**Issue:** Use of SHA1 for security-sensitive operations
+**Risk:** SHA1 is cryptographically broken and vulnerable to collision attacks
 **Recommendation:** Use SHA256 or SHA3 for security. For non-security uses, add `usedforsecurity=False`
 
 **Affected Areas:**
@@ -43,8 +43,8 @@ hash_obj = hashlib.sha1(data.encode(), usedforsecurity=False)
 ```
 
 ### 2. Shell Injection Risk (B602, B605) - 3 instances
-**Issue:** Subprocess calls with `shell=True`  
-**Risk:** Command injection if user input reaches shell commands  
+**Issue:** Subprocess calls with `shell=True`
+**Risk:** Command injection if user input reaches shell commands
 **Recommendation:** Use `shell=False` with argument lists, or sanitize inputs
 
 **Affected Areas:**
@@ -62,8 +62,8 @@ subprocess.run(["command", user_input], shell=False)
 ```
 
 ### 3. Unsafe Archive Extraction (B202) - 2 instances
-**Issue:** `tarfile.extractall()` without path validation  
-**Risk:** Path traversal attacks (zip slip)  
+**Issue:** `tarfile.extractall()` without path validation
+**Risk:** Path traversal attacks (zip slip)
 **Recommendation:** Validate and sanitize extraction paths
 
 **Affected Areas:**
@@ -87,8 +87,8 @@ safe_extract(tar, dest)
 ```
 
 ### 4. Jinja2 XSS Risk (B701) - 1 instance
-**Issue:** Jinja2 autoescape disabled  
-**Risk:** Cross-site scripting if rendering untrusted content  
+**Issue:** Jinja2 autoescape disabled
+**Risk:** Cross-site scripting if rendering untrusted content
 **Recommendation:** Enable autoescape or use `select_autoescape()`
 
 **Affected Areas:**
@@ -109,16 +109,16 @@ env = Environment(loader=loader, autoescape=True)
 1. **Hard-coded passwords/tokens** (B105, B106) - 15 instances
    - Test fixtures with hardcoded secrets
    - Example connection strings
-   
+
 2. **Insecure temporary files** (B108) - 12 instances
    - Use of /tmp without proper permissions
-   
+
 3. **Assert statements in production** (B101) - 18 instances
    - Assertions can be optimized away with -O flag
-   
+
 4. **Try-except-pass** (B110) - 10 instances
    - Silent error swallowing
-   
+
 5. **Weak random** (B311) - 8 instances
    - Use of `random` module for security-sensitive operations
 

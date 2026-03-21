@@ -8,7 +8,7 @@ from typing import Any
 import aiosqlite
 from pydantic import BaseModel, Field
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class SQLiteRequest(BaseModel):
@@ -44,8 +44,8 @@ class SQLitePrimitive(WorkflowPrimitive[SQLiteRequest, SQLiteResponse]):
 
     Example:
         ```python
-        from primitives.integrations import SQLitePrimitive
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.integrations import SQLitePrimitive
+        from ttadev.primitives.core.base import WorkflowContext
 
         # Create primitive
         db = SQLitePrimitive(database="app.db")

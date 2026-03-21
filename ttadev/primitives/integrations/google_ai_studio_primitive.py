@@ -9,7 +9,7 @@ from typing import Any
 import google.generativeai as genai
 from pydantic import BaseModel, Field
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class GoogleAIStudioRequest(BaseModel):
@@ -48,8 +48,8 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
 
     Example:
         ```python
-        from primitives.integrations import GoogleAIStudioPrimitive
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.integrations import GoogleAIStudioPrimitive
+        from ttadev.primitives.core.base import WorkflowContext
 
         # Create primitive (free Gemini Pro access)
         llm = GoogleAIStudioPrimitive(

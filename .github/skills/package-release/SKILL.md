@@ -9,7 +9,7 @@ description: Multi-persona workflow for releasing TTA.dev packages to PyPI with 
 
 Orchestrates **Backend Engineer → Testing Specialist → DevOps Engineer** for safe, validated package releases to PyPI.
 
-**Duration:** ~30 minutes (automated) vs 2-4 hours (manual)  
+**Duration:** ~30 minutes (automated) vs 2-4 hours (manual)
 **Personas Required:** 3 (Backend, Testing, DevOps)
 
 ## Prerequisites
@@ -33,8 +33,8 @@ echo $PYPI_TOKEN                   # Should be set
 
 ## Stage 1: Prepare Release (Backend Engineer)
 
-**Persona:** @backend-engineer  
-**Duration:** ~10-15 minutes  
+**Persona:** @backend-engineer
+**Duration:** ~10-15 minutes
 **Goal:** Version bump, changelog, documentation
 
 ### Step 1.1: Determine Version Bump
@@ -128,8 +128,8 @@ git push origin main
 
 ## Stage 2: Quality Validation (Testing Specialist)
 
-**Persona:** @testing-specialist  
-**Duration:** ~10 minutes  
+**Persona:** @testing-specialist
+**Duration:** ~10 minutes
 **Goal:** Validate all quality gates pass
 
 ### Step 2.1: Run Full Test Suite
@@ -210,7 +210,7 @@ echo "@devops-engineer Quality gates passed, ready for deployment"
 # Create issue for failures
 gh issue create --title "Release v$NEW_VERSION blocked by quality gates" \
   --body "See /tmp/quality-report.md for details"
-  
+
 # Notify Backend Engineer
 echo "@backend-engineer Quality gates failed, please fix issues"
 ```
@@ -221,8 +221,8 @@ echo "@backend-engineer Quality gates failed, please fix issues"
 
 ## Stage 3: Deploy and Monitor (DevOps Engineer)
 
-**Persona:** @devops-engineer  
-**Duration:** ~10 minutes  
+**Persona:** @devops-engineer
+**Duration:** ~10 minutes
 **Goal:** Publish to PyPI, create release, verify
 
 ### Step 3.1: Create Git Tag

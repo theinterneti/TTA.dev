@@ -35,13 +35,13 @@ echo -e "Worktree: ${GREEN}$WORKTREE_PATH${NC}"
 # Check if this is an agent branch
 if [[ "$BRANCH" == agent/* ]]; then
     echo -e "${YELLOW}📋 Agent branch detected - running validation...${NC}"
-    
+
     # 1. Check for secrets
     if command -v detect-secrets &> /dev/null; then
         echo -e "${YELLOW}🔐 Scanning for secrets...${NC}"
         detect-secrets scan --baseline .secrets.baseline
     fi
-    
+
     # 2. Check Python syntax if files changed
     PYTHON_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.py$' || true)
     if [ -n "$PYTHON_FILES" ]; then
@@ -55,19 +55,19 @@ if [[ "$BRANCH" == agent/* ]]; then
             fi
         done
     fi
-    
+
     # 3. Check commit message format
     COMMIT_MSG_FILE=".git/COMMIT_EDITMSG"
     if [ -f "$COMMIT_MSG_FILE" ]; then
         COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
-        
+
         # Ensure agent is identified in commit
         if ! echo "$COMMIT_MSG" | grep -qE "\[agent:(augment|cline|copilot|claude)\]"; then
             echo -e "${YELLOW}⚠️  Adding agent identifier to commit message${NC}"
             # This will be added by prepare-commit-msg hook
         fi
     fi
-    
+
     echo -e "${GREEN}✅ Pre-commit validation passed${NC}"
 else
     echo -e "${YELLOW}ℹ️  Non-agent branch - skipping agent-specific checks${NC}"

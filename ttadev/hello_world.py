@@ -10,9 +10,9 @@ import asyncio
 import time
 
 from observability.auto_instrument import auto_instrument_primitives
-from primitives.adaptive.retry import RetryPrimitive, RetryStrategy
-from primitives.core.base import LambdaPrimitive, WorkflowContext
-from primitives.core.sequential import SequentialPrimitive
+from ttadev.primitives.adaptive.retry import RetryPrimitive, RetryStrategy
+from ttadev.primitives.core.base import LambdaPrimitive, WorkflowContext
+from ttadev.primitives.core.sequential import SequentialPrimitive
 
 
 async def fetch_data(data: dict, ctx: WorkflowContext) -> dict:

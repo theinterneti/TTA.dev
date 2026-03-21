@@ -24,8 +24,8 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 
-from primitives.analysis import TTAAnalyzer
-from primitives.config import (
+from ttadev.primitives.analysis import TTAAnalyzer
+from ttadev.primitives.config import (
     TTAConfig,
     find_config_file,
     generate_default_config,
@@ -34,7 +34,7 @@ from primitives.config import (
 )
 
 if TYPE_CHECKING:
-    from primitives.analysis import AnalysisReport
+    from ttadev.primitives.analysis import AnalysisReport
 
 # Create the main app
 app = typer.Typer(
@@ -218,7 +218,7 @@ def analyze(
 
     # Handle --apply or --apply-primitive
     if apply or apply_primitive:
-        from primitives.analysis.transformer import transform_code
+        from ttadev.primitives.analysis.transformer import transform_code
 
         # Use AST-based transformer for smarter rewrites
         if apply_primitive:
@@ -433,7 +433,7 @@ def _find_pattern_lines(code: str) -> dict[str, list[int]]:
 
 def _detect_anti_patterns(code: str) -> dict[str, Any]:
     """Detect anti-patterns that should be converted to TTA.dev primitives."""
-    from primitives.analysis.patterns import PatternDetector
+    from ttadev.primitives.analysis.patterns import PatternDetector
 
     detector = PatternDetector()
     return detector.get_anti_pattern_summary(code)
@@ -476,7 +476,7 @@ def _print_suggested_diffs(
                 f"  Lines {line_info['timeout_patterns'][:3]} have manual timeout handling."
             )
             console.print("\n[dim]Replace asyncio.wait_for with TimeoutPrimitive:[/dim]")
-            timeout_code = """from primitives.recovery import TimeoutPrimitive
+            timeout_code = """from ttadev.primitives.recovery import TimeoutPrimitive
 from primitives import WorkflowContext
 
 # Wrap your operation with timeout protection
@@ -498,7 +498,7 @@ result = await protected_operation.execute(input_data, context)"""
             lines_to_show = line_info.get("fallback_patterns", line_info.get("error_handling", []))
             console.print(f"  Lines {lines_to_show[:3]} have manual fallback/error handling.")
             console.print("\n[dim]Replace with FallbackPrimitive:[/dim]")
-            fallback_code = """from primitives.recovery import FallbackPrimitive
+            fallback_code = """from ttadev.primitives.recovery import FallbackPrimitive
 from primitives import WorkflowContext
 
 # Define your primary and fallback operations
@@ -758,7 +758,7 @@ def serve(
 
     try:
         # Import and run the MCP server
-        from primitives.mcp_server import run_server
+        from ttadev.primitives.mcp_server import run_server
 
         run_server(transport=transport, port=port)
     except ImportError as e:
@@ -1127,7 +1127,7 @@ def _generate_compensation_transformation(code: str, targets: list[dict], info: 
     """Generate smart CompensationPrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import CompensationDetector
+    from ttadev.primitives.analysis.transformer import CompensationDetector
 
     lines = code.split("\n")
 
@@ -1139,7 +1139,9 @@ def _generate_compensation_transformation(code: str, targets: list[dict], info: 
         elif line.strip() and not line.startswith("#") and import_idx > 0:
             break
 
-    import_path = info.get("import_path", "from primitives.recovery import CompensationPrimitive")
+    import_path = info.get(
+        "import_path", "from ttadev.primitives.recovery import CompensationPrimitive"
+    )
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1249,13 +1251,13 @@ def _generate_timeout_transformation(code: str, targets: list[dict], info: dict)
     """Generate smart TimeoutPrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import TimeoutDetector
+    from ttadev.primitives.analysis.transformer import TimeoutDetector
 
     lines = code.split("\n")
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get("import_path", "from primitives.recovery import TimeoutPrimitive")
+    import_path = info.get("import_path", "from ttadev.primitives.recovery import TimeoutPrimitive")
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1300,13 +1302,15 @@ def _generate_fallback_transformation(code: str, targets: list[dict], info: dict
     """Generate smart FallbackPrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import FallbackDetector
+    from ttadev.primitives.analysis.transformer import FallbackDetector
 
     lines = code.split("\n")
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get("import_path", "from primitives.recovery import FallbackPrimitive")
+    import_path = info.get(
+        "import_path", "from ttadev.primitives.recovery import FallbackPrimitive"
+    )
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1353,13 +1357,13 @@ def _generate_router_transformation(code: str, targets: list[dict], info: dict) 
     """Generate smart RouterPrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import RouterPatternDetector
+    from ttadev.primitives.analysis.transformer import RouterPatternDetector
 
     lines = code.split("\n")
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get("import_path", "from primitives.core import RouterPrimitive")
+    import_path = info.get("import_path", "from ttadev.primitives.core import RouterPrimitive")
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1412,13 +1416,15 @@ def _generate_circuit_breaker_transformation(code: str, targets: list[dict], inf
     """Generate smart CircuitBreakerPrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import CircuitBreakerDetector
+    from ttadev.primitives.analysis.transformer import CircuitBreakerDetector
 
     lines = code.split("\n")
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get("import_path", "from primitives.recovery import CircuitBreakerPrimitive")
+    import_path = info.get(
+        "import_path", "from ttadev.primitives.recovery import CircuitBreakerPrimitive"
+    )
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
@@ -1469,7 +1475,7 @@ def _generate_memory_transformation(code: str, targets: list[dict], info: dict) 
     """Generate smart MemoryPrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import MemoryDetector
+    from ttadev.primitives.analysis.transformer import MemoryDetector
 
     lines = code.split("\n")
 
@@ -1572,7 +1578,7 @@ def _generate_delegation_transformation(code: str, targets: list[dict], info: di
     """Generate smart DelegationPrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import DelegationDetector
+    from ttadev.primitives.analysis.transformer import DelegationDetector
 
     lines = code.split("\n")
 
@@ -1580,7 +1586,7 @@ def _generate_delegation_transformation(code: str, targets: list[dict], info: di
     import_idx = _find_import_index(lines)
     import_path = info.get(
         "import_path",
-        "from primitives.orchestration import DelegationPrimitive",
+        "from ttadev.primitives.orchestration import DelegationPrimitive",
     )
     if import_path not in code:
         lines.insert(import_idx, import_path)
@@ -1623,7 +1629,7 @@ def _generate_delegation_transformation(code: str, targets: list[dict], info: di
 # - Cost-effective models execute (bulk work)
 # - 80%+ cost reduction while maintaining quality
 
-from primitives.orchestration import DelegationPrimitive, DelegationRequest
+from ttadev.primitives.orchestration import DelegationPrimitive, DelegationRequest
 
 # Register executor models
 delegation = DelegationPrimitive()
@@ -1704,7 +1710,7 @@ def _generate_sequential_transformation(code: str, targets: list[dict], info: di
     """Generate smart SequentialPrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import SequentialDetector
+    from ttadev.primitives.analysis.transformer import SequentialDetector
 
     lines = code.split("\n")
 
@@ -1810,17 +1816,19 @@ def _generate_adaptive_transformation(code: str, targets: list[dict], info: dict
     """Generate smart AdaptivePrimitive transformation using AST analysis."""
     import ast
 
-    from primitives.analysis.transformer import AdaptiveDetector
+    from ttadev.primitives.analysis.transformer import AdaptiveDetector
 
     lines = code.split("\n")
 
     # Add imports
     import_idx = _find_import_index(lines)
-    import_path = info.get("import_path", "from primitives.adaptive import AdaptivePrimitive")
+    import_path = info.get(
+        "import_path", "from ttadev.primitives.adaptive import AdaptivePrimitive"
+    )
     if import_path not in code:
         lines.insert(import_idx, import_path)
         lines.insert(import_idx + 1, "from primitives import WorkflowContext")
-        lines.insert(import_idx + 2, "from primitives.adaptive import LearningMode")
+        lines.insert(import_idx + 2, "from ttadev.primitives.adaptive import LearningMode")
         lines.insert(import_idx + 3, "")
 
     # Parse code to extract adaptive patterns
@@ -1888,7 +1896,7 @@ adaptive_{func_name} = AdaptiveRetryPrimitive(
 # - Adapts selection based on context
 # - Validates improvements before adoption
 
-from primitives.adaptive import AdaptivePrimitive, LearningStrategy
+from ttadev.primitives.adaptive import AdaptivePrimitive, LearningStrategy
 
 # Define baseline strategies from your config
 baseline = LearningStrategy(
@@ -2019,8 +2027,8 @@ def benchmark(
     iterations = iterations if iterations is not None else config.benchmark.iterations
 
     try:
-        from primitives.ace import BenchmarkSuite, SelfLearningCodePrimitive
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.ace import BenchmarkSuite, SelfLearningCodePrimitive
+        from ttadev.primitives.core.base import WorkflowContext
     except ImportError as e:
         console.print(f"[red]ACE module not available: {e}[/red]")
         raise typer.Exit(1) from e
@@ -2190,8 +2198,8 @@ def ab_test(
 
     async def run_ab_tests() -> dict:
         try:
-            from primitives.core.base import WorkflowContext
-            from primitives.integrations.e2b_primitive import (
+            from ttadev.primitives.core.base import WorkflowContext
+            from ttadev.primitives.integrations.e2b_primitive import (
                 CodeExecutionPrimitive,
             )
         except ImportError as e:

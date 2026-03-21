@@ -14,8 +14,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from primitives.core.base import WorkflowContext
-from primitives.lifecycle.validation import Severity, ValidationCheck
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.lifecycle.validation import Severity, ValidationCheck
 
 
 async def check_package_manifest_exists(project_path: Path, context: WorkflowContext) -> bool:

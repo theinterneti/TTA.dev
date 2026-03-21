@@ -19,12 +19,12 @@ echo "📦 Archiving experimental workflows..."
 if [ -d "${WORKFLOWS_DIR}/experimental/gemini" ]; then
     # Keep only gemini-triage.yml as the reference implementation
     find "${WORKFLOWS_DIR}/experimental/gemini" -name "*.yml" ! -name "gemini-triage.yml" -exec mv {} "${ARCHIVE_DIR}/experimental/" \;
-    
+
     # If gemini-triage exists, keep it
     if [ -f "${WORKFLOWS_DIR}/experimental/gemini/gemini-triage.yml" ]; then
         mv "${WORKFLOWS_DIR}/experimental/gemini/gemini-triage.yml" "${ARCHIVE_DIR}/experimental/gemini-triage.yml.reference"
     fi
-    
+
     # Remove empty experimental directory
     rmdir "${WORKFLOWS_DIR}/experimental/gemini" 2>/dev/null || true
     rmdir "${WORKFLOWS_DIR}/experimental" 2>/dev/null || true

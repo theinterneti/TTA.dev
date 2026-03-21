@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from primitives import WorkflowContext
-from primitives.observability.instrumented_primitive import (
+from ttadev.primitives.observability.instrumented_primitive import (
     InstrumentedPrimitive,
 )
 

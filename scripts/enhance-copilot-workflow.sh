@@ -27,10 +27,10 @@ cat > "$WORKFLOW_FILE" << 'EOF'
 name: "Copilot Setup Steps"
 
 # This workflow configures the GitHub Copilot coding agent's ephemeral environment.
-# 
+#
 # Performance: ~9-11 seconds with cache, ~14 seconds without
 # Cache: ~/.cache/uv + .venv (~43MB)
-# 
+#
 # For more information:
 # - Workflow docs: docs/development/TESTING_COPILOT_SETUP.md
 # - Environment verification: scripts/check-environment.sh
@@ -94,27 +94,27 @@ jobs:
           echo "=== 🐍 Python Environment ==="
           uv run python --version
           uv run python -c "import sys; print(f'Python: {sys.executable}')"
-          
+
           echo ""
           echo "=== 📦 Package Manager ==="
           uv --version
           echo "uv location: $(which uv)"
-          
+
           echo ""
           echo "=== 🧪 Testing Tools ==="
           uv run pytest --version
           TEST_COUNT=$(uv run pytest --collect-only -q 2>/dev/null | tail -1 || echo "tests available")
           echo "Tests: $TEST_COUNT"
-          
+
           echo ""
           echo "=== 🎨 Code Quality Tools ==="
           uv run ruff --version
           uvx --version
-          
+
           echo ""
           echo "=== 📚 Key Packages ==="
           uv pip list | grep -E "(structlog|opentelemetry|pytest)" || echo "Core packages installed"
-          
+
           echo ""
           echo "✅ Environment ready! Agent can now:"
           echo "  • Run tests: uv run pytest -v"

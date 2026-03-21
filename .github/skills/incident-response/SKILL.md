@@ -9,7 +9,7 @@ description: Emergency response workflow for production issues
 
 Emergency workflow for handling production incidents with **DevOps Engineer** and **Observability Expert**.
 
-**Duration:** Variable (15 minutes - 2 hours)  
+**Duration:** Variable (15 minutes - 2 hours)
 **Personas Required:** DevOps, Observability
 
 ## Incident Workflow

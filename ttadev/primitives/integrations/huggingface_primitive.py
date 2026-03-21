@@ -9,7 +9,7 @@ from typing import Any
 import httpx
 from pydantic import BaseModel, Field
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
 class HuggingFaceRequest(BaseModel):
@@ -46,8 +46,8 @@ class HuggingFacePrimitive(WorkflowPrimitive[HuggingFaceRequest, HuggingFaceResp
 
     Example:
         ```python
-        from primitives.integrations import HuggingFacePrimitive
-        from primitives.core.base import WorkflowContext
+        from ttadev.primitives.integrations import HuggingFacePrimitive
+        from ttadev.primitives.core.base import WorkflowContext
 
         # Create primitive (free access to thousands of models)
         llm = HuggingFacePrimitive(

@@ -14,8 +14,8 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from primitives.core import LambdaPrimitive, WorkflowContext
-from primitives.recovery import RetryPrimitive
+from ttadev.primitives.core import LambdaPrimitive, WorkflowContext
+from ttadev.primitives.recovery import RetryPrimitive
 
 
 async def flaky_api_call(data: dict, ctx: WorkflowContext) -> dict:

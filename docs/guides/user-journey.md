@@ -146,13 +146,13 @@ LIVE TRACES
 [12:34:56] ✅ OpenAI Chat Completion
            Duration: 1.2s | Cost: $0.003
            Cache: HIT (saved $0.003)
-           
+
 [12:34:57] ⚠️  OpenAI Rate Limited (429)
            Retry 1/5: waiting 2s...
-           
+
 [12:35:00] ✅ OpenAI Chat Completion (retry)
            Duration: 0.8s | Cost: $0.002
-           
+
 [12:35:01] ✅ Router: Switched to Ollama
            Reason: Consecutive failures
            Duration: 0.3s | Cost: $0.000
@@ -215,9 +215,9 @@ TTA.dev applications are just Python packages:
 - ✅ Comprehensive documentation
 - ✅ Ready to deploy
 
-**Time**: Hours, not weeks  
-**Code Quality**: Production-grade  
-**Cost**: Optimized automatically  
+**Time**: Hours, not weeks
+**Code Quality**: Production-grade
+**Cost**: Optimized automatically
 **Maintenance**: Batteries included
 
 ## Real-World Examples
@@ -320,13 +320,13 @@ results = await workflow.execute(records, context)
 
 ## Success Stories
 
-> "I'm not a programmer, but I built a production AI app in 2 days using TTA.dev. The observability UI showed me exactly what was happening, and the primitives handled all the hard stuff."  
+> "I'm not a programmer, but I built a production AI app in 2 days using TTA.dev. The observability UI showed me exactly what was happening, and the primitives handled all the hard stuff."
 > — **Non-technical founder**
 
-> "TTA.dev is like having a senior engineer on your team. It prevents the mistakes I used to make and shows me what's happening in production."  
+> "TTA.dev is like having a senior engineer on your team. It prevents the mistakes I used to make and shows me what's happening in production."
 > — **Junior developer**
 
-> "We migrated our entire AI pipeline to TTA.dev primitives. Cut our costs by 40% and reduced errors by 80%. The observability is game-changing."  
+> "We migrated our entire AI pipeline to TTA.dev primitives. Cut our costs by 40% and reduced errors by 80%. The observability is game-changing."
 > — **CTO, AI startup**
 
 ---

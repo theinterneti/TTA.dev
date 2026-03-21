@@ -59,16 +59,16 @@ check_docker() {
 
 start_services() {
     log_info "Starting OpenTelemetry integration test environment..."
-    
+
     cd "$PROJECT_DIR"
     docker compose --profile "$COMPOSE_PROFILE" up -d
-    
+
     log_info "Waiting for services to be ready..."
     sleep 10
-    
+
     # Check service health
     check_service_health
-    
+
     log_success "Services started successfully!"
     log_info "Access points:"
     echo "  - Jaeger UI:    http://localhost:16686"
@@ -80,16 +80,16 @@ start_services() {
 
 stop_services() {
     log_info "Stopping OpenTelemetry integration test environment..."
-    
+
     cd "$PROJECT_DIR"
     docker compose --profile "$COMPOSE_PROFILE" stop
-    
+
     log_success "Services stopped successfully!"
 }
 
 restart_services() {
     log_info "Restarting OpenTelemetry integration test environment..."
-    
+
     stop_services
     sleep 2
     start_services
@@ -97,14 +97,14 @@ restart_services() {
 
 check_status() {
     log_info "Checking service status..."
-    
+
     cd "$PROJECT_DIR"
     docker compose --profile "$COMPOSE_PROFILE" ps
 }
 
 view_logs() {
     log_info "Viewing service logs (Ctrl+C to exit)..."
-    
+
     cd "$PROJECT_DIR"
     docker compose --profile "$COMPOSE_PROFILE" logs -f
 }
@@ -112,7 +112,7 @@ view_logs() {
 check_service_health() {
     local max_attempts=30
     local attempt=0
-    
+
     log_info "Checking Jaeger health..."
     while [ $attempt -lt $max_attempts ]; do
         if curl -s http://localhost:16686/api/services > /dev/null 2>&1; then
@@ -122,11 +122,11 @@ check_service_health() {
         attempt=$((attempt + 1))
         sleep 1
     done
-    
+
     if [ $attempt -eq $max_attempts ]; then
         log_warning "Jaeger health check timed out"
     fi
-    
+
     attempt=0
     log_info "Checking Prometheus health..."
     while [ $attempt -lt $max_attempts ]; do
@@ -137,7 +137,7 @@ check_service_health() {
         attempt=$((attempt + 1))
         sleep 1
     done
-    
+
     if [ $attempt -eq $max_attempts ]; then
         log_warning "Prometheus health check timed out"
     fi
@@ -145,19 +145,19 @@ check_service_health() {
 
 run_tests() {
     log_info "Running integration tests..."
-    
+
     cd "$PROJECT_DIR"
-    
+
     # Check if services are running
     if ! docker compose --profile "$COMPOSE_PROFILE" ps | grep -q "Up"; then
         log_warning "Services are not running. Starting them now..."
         start_services
     fi
-    
+
     # Run tests
     log_info "Executing pytest..."
     uv run pytest platform/primitives/tests/integration/test_otel_backend_integration.py -v
-    
+
     if [ $? -eq 0 ]; then
         log_success "All integration tests passed!"
     else
@@ -168,10 +168,10 @@ run_tests() {
 
 clean_environment() {
     log_info "Cleaning up OpenTelemetry integration test environment..."
-    
+
     cd "$PROJECT_DIR"
     docker compose --profile "$COMPOSE_PROFILE" down -v
-    
+
     log_success "Environment cleaned successfully!"
 }
 
@@ -210,7 +210,7 @@ EOF
 # Main
 main() {
     check_docker
-    
+
     case "${1:-help}" in
         start)
             start_services
@@ -245,4 +245,3 @@ main() {
 }
 
 main "$@"
-

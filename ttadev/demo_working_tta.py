@@ -8,12 +8,12 @@ import asyncio
 import json
 from datetime import datetime
 
-from primitives.core import LambdaPrimitive, WorkflowContext
-from primitives.recovery.circuit_breaker_primitive import (
+from ttadev.primitives.core import LambdaPrimitive, WorkflowContext
+from ttadev.primitives.recovery.circuit_breaker_primitive import (
     CircuitBreakerConfig,
     CircuitBreakerPrimitive,
 )
-from primitives.recovery.retry import RetryPrimitive, RetryStrategy
+from ttadev.primitives.recovery.retry import RetryPrimitive, RetryStrategy
 
 
 async def fetch_workflow_metrics(data: dict, ctx: WorkflowContext) -> dict:

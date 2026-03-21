@@ -4,8 +4,8 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-from primitives.core.base import WorkflowContext
-from primitives.testing import MockPrimitive
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.testing import MockPrimitive
 
 from tta_apm_langfuse.integration import LangFuseIntegration, auto_instrument
 

@@ -1114,7 +1114,7 @@ TTA.dev/Guides/Logseq Documentation Standards for Agents:
   -> Error Handling
   -> Best Practices
   -> Intermediate
-  ->  ! "$file" =~ ^(README|AGENTS|CHANGELOG|CONTRIBUTING|LICENSE)\.md$ 
+  ->  ! "$file" =~ ^(README|AGENTS|CHANGELOG|CONTRIBUTING|LICENSE)\.md$
   -> 2025-10-30
   -> 2025-10-30
   -> Critical

@@ -22,7 +22,7 @@ except ImportError:
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
-from primitives.analysis import TTAAnalyzer
+from ttadev.primitives.analysis import TTAAnalyzer
 
 logger = structlog.get_logger("tta_dev.mcp")
 
@@ -255,7 +255,7 @@ result = await workflow.execute(data, context)
         """
         import difflib
 
-        from primitives.cli.app import (
+        from ttadev.primitives.cli.app import (
             _find_transform_targets,
             _generate_transformation,
         )
@@ -352,7 +352,7 @@ result = await workflow.execute(data, context)
             }
 
         # Apply transformation
-        from primitives.cli.app import (
+        from ttadev.primitives.cli.app import (
             _find_transform_targets,
             _generate_transformation,
         )
@@ -514,7 +514,7 @@ result = await workflow.execute(data, context)
                     "summary": str
                 }
         """
-        from primitives.analysis.patterns import PatternDetector
+        from ttadev.primitives.analysis.patterns import PatternDetector
 
         logger.info(
             "mcp_tool_called",
@@ -568,7 +568,7 @@ result = await workflow.execute(data, context)
         """
         import difflib
 
-        from primitives.analysis.transformer import transform_code
+        from ttadev.primitives.analysis.transformer import transform_code
 
         logger.info(
             "mcp_tool_called",
@@ -626,7 +626,7 @@ result = await workflow.execute(data, context)
     @mcp.resource("tta://patterns")
     def get_patterns() -> str:
         """Get information about detectable code patterns."""
-        from primitives.analysis.patterns import PatternDetector
+        from ttadev.primitives.analysis.patterns import PatternDetector
 
         detector = PatternDetector()
         info = detector.get_pattern_info()

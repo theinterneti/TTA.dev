@@ -62,7 +62,7 @@ if git rev-parse origin/experimental/workflow-agent-integrations >/dev/null 2>&1
     echo ""
     read -p "Choose option (1-4): " -n 1 -r
     echo
-    
+
     case $REPLY in
         1)
             echo "🔀 Merging workspace cleanup changes..."

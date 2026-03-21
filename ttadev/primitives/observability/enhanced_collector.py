@@ -26,7 +26,7 @@ class EnhancedMetricsCollector:
 
     Example:
         ```python
-        from primitives.observability import get_enhanced_metrics_collector
+        from ttadev.primitives.observability import get_enhanced_metrics_collector
 
         collector = get_enhanced_metrics_collector()
 

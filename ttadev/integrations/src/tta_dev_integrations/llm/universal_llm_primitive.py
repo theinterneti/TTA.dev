@@ -130,8 +130,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
     - Empirical model selection
 
     Example:
-        >>> from primitives.integrations import UniversalLLMPrimitive
-        >>> from primitives.integrations.budget import UserBudgetProfile
+        >>> from ttadev.primitives.integrations import UniversalLLMPrimitive
+        >>> from ttadev.primitives.integrations.budget import UserBudgetProfile
         >>>
         >>> llm = UniversalLLMPrimitive(
         ...     coder="auto",

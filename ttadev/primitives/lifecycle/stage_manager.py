@@ -9,14 +9,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from primitives.core.base import WorkflowContext, WorkflowPrimitive
-from primitives.lifecycle.stage import Stage, StageTransitionError
-from primitives.lifecycle.stage_criteria import (
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.lifecycle.stage import Stage, StageTransitionError
+from ttadev.primitives.lifecycle.stage_criteria import (
     StageCriteria,
     StageReadiness,
     TransitionResult,
 )
-from primitives.lifecycle.validation import (
+from ttadev.primitives.lifecycle.validation import (
     ReadinessCheckPrimitive,
     ReadinessCheckResult,
 )
@@ -50,7 +50,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
 
     Example:
         ```python
-        from primitives.lifecycle import (
+        from ttadev.primitives.lifecycle import (
             StageManager,
             Stage,
             StageRequest,
@@ -170,7 +170,7 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         if kb:
             try:
                 # Query for target stage best practices
-                from primitives.knowledge import KBQuery
+                from ttadev.primitives.knowledge import KBQuery
 
                 best_practices_query = KBQuery(
                     query_type="best_practices",

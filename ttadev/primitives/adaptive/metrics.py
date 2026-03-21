@@ -64,7 +64,7 @@ class AdaptiveMetrics:
         - adaptive_active_strategies{primitive_type}: Current number of active strategies
 
     Example:
-        >>> from primitives.adaptive.metrics import get_adaptive_metrics
+        >>> from ttadev.primitives.adaptive.metrics import get_adaptive_metrics
         >>>
         >>> # Get metrics collector (singleton)
         >>> metrics = get_adaptive_metrics()

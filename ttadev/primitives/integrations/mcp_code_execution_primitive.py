@@ -18,8 +18,8 @@ import os
 from datetime import datetime
 from typing import Any, TypedDict
 
-from primitives.core.base import WorkflowContext
-from primitives.integrations.e2b_primitive import (
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.integrations.e2b_primitive import (
     CodeExecutionPrimitive,
     CodeInput,
     CodeOutput,

@@ -880,7 +880,7 @@ Templates:
   -> packages/tta-dev-primitives/examples/agent_patterns_simple.py
 
 TTA.dev/Guides/Logseq Documentation Standards for Agents:
-  ->  ! "$file" =~ ^(README|AGENTS|CHANGELOG|CONTRIBUTING|LICENSE)\.md$ 
+  ->  ! "$file" =~ ^(README|AGENTS|CHANGELOG|CONTRIBUTING|LICENSE)\.md$
   -> API Integration
   -> All AI Agents
   -> Best Practices

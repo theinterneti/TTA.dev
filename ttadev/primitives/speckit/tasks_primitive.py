@@ -13,7 +13,7 @@ Core functionality:
 
 Example usage:
     ```python
-    from primitives.speckit import TasksPrimitive
+    from ttadev.primitives.speckit import TasksPrimitive
     from primitives import WorkflowContext
 
     # Generate tasks from plan
@@ -47,7 +47,7 @@ from pathlib import Path
 from typing import Any
 
 from primitives import WorkflowContext
-from primitives.observability import InstrumentedPrimitive
+from ttadev.primitives.observability import InstrumentedPrimitive
 
 
 @dataclass

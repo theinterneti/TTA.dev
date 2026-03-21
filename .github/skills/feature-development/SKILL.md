@@ -9,7 +9,7 @@ description: Full-stack feature development workflow from API to UI with testing
 
 Orchestrates **Backend Engineer → Frontend Engineer → Testing Specialist** for complete full-stack features.
 
-**Duration:** 4-6 hours (full feature)  
+**Duration:** 4-6 hours (full feature)
 **Personas Required:** 3 (Backend, Frontend, Testing)
 
 ## Workflow Stages

@@ -221,7 +221,7 @@ jobs:
         run: |
           echo "## AI Code Review Complete 🎯" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ needs.gemini-review.result }}" = "success" ]; then
             echo "✅ Gemini AI review completed successfully" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ needs.check-gemini-available.outputs.gemini-available }}" != "true" ]; then

@@ -14,24 +14,37 @@ that other providers can still be imported and used.
 """
 
 try:  # Optional dependency: anthropic SDK
-    from primitives.integrations.anthropic_primitive import AnthropicPrimitive
+    from ttadev.primitives.integrations.anthropic_primitive import AnthropicPrimitive
 except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
     if exc.name == "anthropic":
         AnthropicPrimitive = None  # type: ignore[assignment]
     else:  # Unexpected import error
         raise
-from primitives.integrations.e2b_primitive import (
-    CodeExecutionPrimitive,
-    E2BPrimitive,
-)
-from primitives.integrations.google_ai_studio_primitive import (
-    GoogleAIStudioPrimitive,
-)
-from primitives.integrations.huggingface_primitive import HuggingFacePrimitive
-from primitives.integrations.openrouter_primitive import OpenRouterPrimitive
+try:  # Optional dependency: e2b_code_interpreter SDK
+    from ttadev.primitives.integrations.e2b_primitive import (
+        CodeExecutionPrimitive,
+        E2BPrimitive,
+    )
+except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
+    if exc.name == "e2b_code_interpreter":
+        CodeExecutionPrimitive = None  # type: ignore[assignment]
+        E2BPrimitive = None  # type: ignore[assignment]
+    else:
+        raise
+try:  # Optional dependency: google-generativeai SDK
+    from ttadev.primitives.integrations.google_ai_studio_primitive import (
+        GoogleAIStudioPrimitive,
+    )
+except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
+    if exc.name and exc.name.startswith("google"):
+        GoogleAIStudioPrimitive = None  # type: ignore[assignment]
+    else:
+        raise
+from ttadev.primitives.integrations.huggingface_primitive import HuggingFacePrimitive
+from ttadev.primitives.integrations.openrouter_primitive import OpenRouterPrimitive
 
 try:  # Optional dependency: OpenAI SDK
-    from primitives.integrations.openai_primitive import OpenAIPrimitive
+    from ttadev.primitives.integrations.openai_primitive import OpenAIPrimitive
 except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
     if exc.name == "openai":
         OpenAIPrimitive = None  # type: ignore[assignment]
@@ -40,7 +53,7 @@ except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK 
 
 # Optional integrations (require additional dependencies)
 try:  # Optional dependency: ollama SDK
-    from primitives.integrations.ollama_primitive import OllamaPrimitive
+    from ttadev.primitives.integrations.ollama_primitive import OllamaPrimitive
 except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
     if exc.name == "ollama":
         OllamaPrimitive = None  # type: ignore[assignment]
@@ -48,12 +61,12 @@ except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK 
         raise
 
 try:  # Optional dependency: Groq SDK
-    from primitives.integrations.groq_primitive import GroqPrimitive
+    from ttadev.primitives.integrations.groq_primitive import GroqPrimitive
 except ImportError:  # pragma: no cover - executed only when SDK missing
     GroqPrimitive = None  # type: ignore[assignment]
 
 try:  # Optional dependency: aiosqlite
-    from primitives.integrations.sqlite_primitive import SQLitePrimitive
+    from ttadev.primitives.integrations.sqlite_primitive import SQLitePrimitive
 except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
     if exc.name == "aiosqlite":
         SQLitePrimitive = None  # type: ignore[assignment]
@@ -61,14 +74,14 @@ except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK 
         raise
 
 try:  # Optional dependency: Supabase SDK
-    from primitives.integrations.supabase_primitive import SupabasePrimitive
+    from ttadev.primitives.integrations.supabase_primitive import SupabasePrimitive
 except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
     if exc.name == "supabase":
         SupabasePrimitive = None  # type: ignore[assignment]
     else:
         raise
 
-from primitives.integrations.together_ai_primitive import TogetherAIPrimitive
+from ttadev.primitives.integrations.together_ai_primitive import TogetherAIPrimitive
 
 __all__ = [
     "OpenAIPrimitive",

@@ -71,7 +71,7 @@ async def main():
         LambdaPrimitive(analyze_code),
         LambdaPrimitive(generate_tests),
     ])
-    
+
     ctx = WorkflowContext(workflow_id="my-first-workflow")
     result = await workflow.execute({"file": "main.py"}, ctx)
     print(result)
@@ -186,7 +186,7 @@ TTA.dev is framework-agnostic. Just import the primitives and use them in your a
 
 You now have:
 - ✅ Working observability dashboard
-- ✅ Battle-tested workflow primitives  
+- ✅ Battle-tested workflow primitives
 - ✅ Auto-instrumentation (no logging code needed)
 - ✅ Real-time visibility into AI agent operations
 

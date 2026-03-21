@@ -26,7 +26,7 @@ def _git_log(n: int = 10) -> str:
             ["git", "log", "--oneline", f"-{n}"],
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=_TIMEOUT,
         )
         return result.stdout.strip()
     except Exception:

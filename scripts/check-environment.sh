@@ -1,6 +1,6 @@
 #!/bin/bash
 # scripts/check-environment.sh
-# 
+#
 # Verification script for TTA.dev development environment
 # Tests that all required tools and dependencies are properly installed
 #
@@ -52,7 +52,7 @@ check_command() {
     local cmd=$1
     local name=$2
     local required=${3:-true}
-    
+
     if command -v "$cmd" &> /dev/null; then
         local version=$($cmd --version 2>&1 | head -n1)
         print_status "PASS" "$name is installed: $version"
@@ -71,7 +71,7 @@ check_command() {
 # Function to check Python version
 check_python_version() {
     local python_cmd=""
-    
+
     # Try python3 first (Linux/Mac), then python (Windows/some systems)
     if command -v python3 &> /dev/null; then
         python_cmd="python3"
@@ -81,11 +81,11 @@ check_python_version() {
         print_status "FAIL" "Python is not installed (tried 'python' and 'python3')"
         return 1
     fi
-    
+
     local version=$($python_cmd --version 2>&1 | grep -oP '\d+\.\d+')
     local major=$(echo "$version" | cut -d. -f1)
     local minor=$(echo "$version" | cut -d. -f2)
-    
+
     if [ "$major" -eq 3 ] && [ "$minor" -ge 11 ]; then
         print_status "PASS" "Python version $version meets requirement (≥3.11) [using $python_cmd]"
         return 0
@@ -101,7 +101,7 @@ check_uv() {
         local version=$(uv --version 2>&1)
         local uv_path=$(command -v uv)
         print_status "PASS" "uv is installed: $version (at $uv_path)"
-        
+
         # Check if common uv locations are in PATH
         if [[ ":$PATH:" == *":$HOME/.cargo/bin:"* ]] || [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
             print_status "PASS" "uv is in PATH"
@@ -119,7 +119,7 @@ check_uv() {
 check_venv() {
     if [ -d ".venv" ]; then
         print_status "PASS" "Virtual environment exists (.venv)"
-        
+
         # Check if venv has packages
         if [ -d ".venv/lib/python3.11/site-packages" ] || [ -d ".venv/lib/python3.12/site-packages" ]; then
             local pkg_count=$(ls .venv/lib/python*/site-packages | wc -l)
@@ -140,11 +140,11 @@ check_dependencies() {
         print_status "FAIL" "Cannot check dependencies without virtual environment"
         return 1
     fi
-    
+
     # Check key packages
     local packages=("pytest" "ruff" "structlog" "opentelemetry-api")
     local all_found=true
-    
+
     for pkg in "${packages[@]}"; do
         if uv run python -c "import ${pkg//-/_}" 2>/dev/null; then
             print_status "PASS" "Package '$pkg' is installed"
@@ -153,7 +153,7 @@ check_dependencies() {
             all_found=false
         fi
     done
-    
+
     if [ "$all_found" = true ]; then
         return 0
     else
@@ -168,7 +168,7 @@ check_test_runner() {
         print_status "WARN" "Skipping test runner check (no venv)"
         return 1
     fi
-    
+
     # Try to run pytest --collect-only (doesn't run tests, just collects them)
     if uv run pytest --collect-only -q &>/dev/null; then
         local test_count=$(uv run pytest --collect-only -q 2>/dev/null | grep -c "test_" || echo "0")
@@ -186,7 +186,7 @@ check_quality_tools() {
         print_status "WARN" "Skipping quality tools check (no venv)"
         return 1
     fi
-    
+
     # Check ruff
     if uv run ruff --version &>/dev/null; then
         print_status "PASS" "Ruff (linter/formatter) works"
@@ -194,14 +194,14 @@ check_quality_tools() {
         print_status "FAIL" "Ruff is not working"
         return 1
     fi
-    
+
     # Check pyright (via uvx)
     if command -v uvx &> /dev/null; then
         print_status "PASS" "uvx is available (for pyright type checking)"
     else
         print_status "WARN" "uvx not found (may not be able to run pyright)"
     fi
-    
+
     return 0
 }
 
@@ -209,10 +209,10 @@ check_quality_tools() {
 check_git() {
     if [ -d ".git" ]; then
         print_status "PASS" "Git repository initialized"
-        
+
         local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
         print_status "INFO" "Current branch: $branch"
-        
+
         # Check for uncommitted changes
         if git diff-index --quiet HEAD -- 2>/dev/null; then
             print_status "PASS" "Working directory is clean"
@@ -230,7 +230,7 @@ check_git() {
 check_workspace() {
     local required_dirs=("packages" "docs" "scripts" "tests")
     local all_found=true
-    
+
     for dir in "${required_dirs[@]}"; do
         if [ -d "$dir" ]; then
             print_status "PASS" "Directory '$dir' exists"
@@ -239,7 +239,7 @@ check_workspace() {
             all_found=false
         fi
     done
-    
+
     # Check for key files
     local required_files=("pyproject.toml" "README.md" "AGENTS.md")
     for file in "${required_files[@]}"; do
@@ -250,7 +250,7 @@ check_workspace() {
             all_found=false
         fi
     done
-    
+
     [ "$all_found" = true ]
 }
 
@@ -264,7 +264,7 @@ show_summary() {
     echo -e "${RED}Failed:${NC}  $CHECKS_FAILED"
     echo -e "${YELLOW}Warnings:${NC} $CHECKS_WARNED"
     echo "=========================================="
-    
+
     if [ $CHECKS_FAILED -eq 0 ]; then
         echo -e "${GREEN}✓ Environment is ready for development!${NC}"
         return 0
@@ -316,7 +316,7 @@ EOF
 # Main execution
 main() {
     local quick_mode=false
-    
+
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -339,12 +339,12 @@ main() {
                 ;;
         esac
     done
-    
+
     echo "=========================================="
     echo "TTA.dev Environment Verification"
     echo "=========================================="
     echo ""
-    
+
     # Always run basic checks
     echo "=== Basic Environment ==="
     check_python_version
@@ -353,18 +353,18 @@ main() {
     check_git
     check_workspace
     echo ""
-    
+
     if [ "$quick_mode" = false ]; then
         echo "=== Dependencies ==="
         check_dependencies
         echo ""
-        
+
         echo "=== Development Tools ==="
         check_quality_tools
         check_test_runner
         echo ""
     fi
-    
+
     show_summary
 }
 

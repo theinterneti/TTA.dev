@@ -130,11 +130,11 @@ async def main():
         >> CachePrimitive(ttl=60)
         >> RetryPrimitive(max_attempts=3)
     )
-    
+
     # Execute with context
     ctx = WorkflowContext(workflow_id="my-first-workflow")
     result = await workflow.execute("https://api.example.com/data", ctx)
-    
+
     print(f"Result: {result}")
 
 if __name__ == "__main__":

@@ -58,7 +58,7 @@ if [ ! -f "$HOME/.zsh_local" ]; then
     log_info "Creating user-managed .zsh_local..."
     cp "$SCRIPT_DIR/zsh_local.template" "$HOME/.zsh_local"
     log_success ".zsh_local created"
-    
+
     log_warn "IMPORTANT: Add secrets to ~/.zsh_local (API keys, tokens, etc.)"
 else
     log_info ".zsh_local already exists (not overwriting)"

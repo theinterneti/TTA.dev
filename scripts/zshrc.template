@@ -48,7 +48,7 @@ source $ZSH/oh-my-zsh.sh
 # Lazy load nvm (Node Version Manager)
 if [ -d "$HOME/.nvm" ]; then
   export NVM_DIR="$HOME/.nvm"
-  
+
   # Placeholder function that loads nvm on first use
   nvm() {
     unset -f nvm
@@ -62,7 +62,7 @@ fi
 if command -v pyenv &> /dev/null; then
   export PYENV_ROOT="$HOME/.pyenv"
   export PATH="$PYENV_ROOT/bin:$PATH"
-  
+
   # Placeholder function that loads pyenv on first use
   pyenv() {
     unset -f pyenv
@@ -84,7 +84,7 @@ if command -v fzf &> /dev/null; then
   if [ -f /usr/share/doc/fzf/examples/completion.zsh ]; then
     source /usr/share/doc/fzf/examples/completion.zsh
   fi
-  
+
   # Better defaults for fzf
   export FZF_DEFAULT_OPTS="
     --height 40%

@@ -27,7 +27,8 @@ class TestRetain:
         with patch("httpx.post", return_value=mock_resp) as mock_post:
             result = _retain("http://localhost:8888", "tta-dev", "test content")
         assert result is True
-        mock_post.assert_called_once()
+        call_args = mock_post.call_args
+        assert "/v1/default/banks/tta-dev/memories" in call_args.args[0]
 
     def test_returns_false_on_network_error(self) -> None:
         with patch("httpx.post", side_effect=Exception("connection refused")):

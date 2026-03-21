@@ -34,21 +34,21 @@
         }
         .connected { background: #10b981; color: white; }
         .disconnected { background: #ef4444; color: white; }
-        
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-        
+
         .panel {
             background: #1a1f3a;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        
+
         .panel h2 {
             color: #667eea;
             border-bottom: 2px solid #667eea;
@@ -56,26 +56,26 @@
             margin-bottom: 15px;
             font-size: 1.3em;
         }
-        
+
         .metric-card {
             background: #252d4a;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 10px;
         }
-        
+
         .metric-label {
             font-size: 0.9em;
             opacity: 0.7;
             margin-bottom: 5px;
         }
-        
+
         .metric-value {
             font-size: 2em;
             font-weight: bold;
             color: #667eea;
         }
-        
+
         .trace-item {
             background: #252d4a;
             padding: 15px;
@@ -85,77 +85,77 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .trace-item:hover {
             transform: translateX(5px);
             background: #2d3556;
             box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
         }
-        
+
         .trace-item.error {
             border-left-color: #ef4444;
         }
-        
+
         .trace-item.expanded {
             background: #2d3556;
         }
-        
+
         .trace-detail {
             display: none;
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px solid #3d4563;
         }
-        
+
         .trace-item.expanded .trace-detail {
             display: block;
         }
-        
+
         .trace-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .trace-id {
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
             color: #94a3b8;
         }
-        
+
         .trace-duration {
             background: #667eea;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.9em;
         }
-        
+
         .trace-info {
             display: flex;
             gap: 15px;
             font-size: 0.9em;
             color: #94a3b8;
         }
-        
+
         .trace-detail {
             margin-top: 10px;
             padding-top: 10px;
             border-top: 1px solid #3d4563;
         }
-        
+
         .workflow-hierarchy {
             margin: 10px 0;
             padding: 10px;
             background: #1a1f3a;
             border-radius: 6px;
         }
-        
+
         .hierarchy-level {
             margin-left: 20px;
             padding: 5px;
             border-left: 2px solid #667eea;
         }
-        
+
         .span-timeline {
             position: relative;
             height: 40px;
@@ -163,7 +163,7 @@
             background: #1a1f3a;
             border-radius: 4px;
         }
-        
+
         .span-bar {
             position: absolute;
             height: 30px;
@@ -179,15 +179,15 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
+
         .span-bar.parallel {
             background: linear-gradient(90deg, #10b981, #059669);
         }
-        
+
         .span-bar.error {
             background: linear-gradient(90deg, #ef4444, #dc2626);
         }
-        
+
         .span-item {
             padding: 8px;
             margin: 5px 0;
@@ -195,12 +195,12 @@
             border-radius: 4px;
             font-size: 0.85em;
         }
-        
+
         .span-name {
             font-weight: bold;
             color: #667eea;
         }
-        
+
         .primitive-badge {
             display: inline-block;
             background: #764ba2;
@@ -209,30 +209,30 @@
             font-size: 0.8em;
             margin: 2px;
         }
-        
+
         .status-success { color: #10b981; }
         .status-error { color: #ef4444; }
-        
+
         .empty-state {
             text-align: center;
             padding: 40px;
             color: #64748b;
         }
-        
+
         .loading {
             text-align: center;
             padding: 20px;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
+
         .pulse {
             animation: pulse 2s infinite;
         }
-        
+
         .agent-item, .primitive-item, .workflow-item {
             background: #252d4a;
             padding: 12px;
@@ -240,25 +240,25 @@
             margin-bottom: 8px;
             border-left: 3px solid #667eea;
         }
-        
+
         .item-header {
             font-weight: bold;
             color: #667eea;
             margin-bottom: 5px;
         }
-        
+
         .item-description {
             font-size: 0.85em;
             opacity: 0.8;
             line-height: 1.4;
         }
-        
+
         .pagination-controls {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .pagination-controls button {
             background: #667eea;
             color: white;
@@ -269,18 +269,18 @@
             font-size: 0.9em;
             transition: all 0.2s;
         }
-        
+
         .pagination-controls button:hover:not(:disabled) {
             background: #5568d3;
             transform: translateY(-1px);
         }
-        
+
         .pagination-controls button:disabled {
             background: #4a5568;
             cursor: not-allowed;
             opacity: 0.5;
         }
-        
+
         .graph-btn {
             background: #667eea;
             color: white;
@@ -291,11 +291,11 @@
             font-size: 0.9em;
             transition: background 0.2s;
         }
-        
+
         .graph-btn:hover {
             background: #764ba2;
         }
-        
+
         .trace-modal {
             position: fixed;
             top: 0;
@@ -308,7 +308,7 @@
             justify-content: center;
             z-index: 1000;
         }
-        
+
         .modal-content {
             background: #1a1f3a;
             border-radius: 12px;
@@ -318,7 +318,7 @@
             overflow-y: auto;
             position: relative;
         }
-        
+
         .modal-close {
             position: absolute;
             top: 15px;
@@ -327,18 +327,18 @@
             cursor: pointer;
             color: #94a3b8;
         }
-        
+
         .modal-close:hover {
             color: #ef4444;
         }
-        
+
         .trace-hierarchy-detail {
             background: #252d4a;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
         }
-        
+
         .chain-item {
             padding: 10px;
             margin: 5px 0;
@@ -346,11 +346,11 @@
             border-left: 3px solid #667eea;
             border-radius: 4px;
         }
-        
+
         .trace-spans {
             margin-top: 20px;
         }
-        
+
         .span-item {
             padding: 8px;
             margin: 5px 0;
@@ -358,13 +358,13 @@
             border-radius: 4px;
             font-family: 'Courier New', monospace;
         }
-        
+
         .span-duration {
             float: right;
             color: #10b981;
             font-weight: bold;
         }
-        
+
         .span-type {
             margin-left: 10px;
             padding: 2px 8px;
@@ -372,30 +372,30 @@
             border-radius: 10px;
             font-size: 0.85em;
         }
-        
+
         .trace-card {
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        
+
         .trace-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
-        
+
         .trace-hierarchy {
             margin: 10px 0;
             padding: 10px;
             background: rgba(102, 126, 234, 0.1);
             border-radius: 4px;
         }
-        
+
         .hierarchy-item {
             font-size: 0.9em;
             margin: 3px 0;
             color: #94a3b8;
         }
-        
+
         .item-count {
             display: inline-block;
             background: #764ba2;
@@ -412,7 +412,7 @@
         <p class="subtitle">Real-time monitoring of workflows, primitives & agents</p>
         <div id="connection-status" class="connection-status disconnected">Disconnected</div>
     </div>
-    
+
     <div class="dashboard-grid">
         <!-- Metrics Panel -->
         <div id="stats" class="panel">
@@ -434,7 +434,7 @@
                 <div class="metric-value" id="avgDuration">0ms</div>
             </div>
         </div>
-        
+
         <!-- Agents Panel -->
         <div class="panel">
             <h2>🤖 Active Agents</h2>
@@ -442,7 +442,7 @@
                 Loading agents...
             </div>
         </div>
-        
+
         <!-- Primitives Panel -->
         <div class="panel">
             <h2>⚙️ Primitives Catalog</h2>
@@ -451,7 +451,7 @@
                 Loading primitives...
             </div>
         </div>
-        
+
         <!-- Workflows Panel -->
         <div class="panel">
             <h2>🔄 Workflow Registry</h2>
@@ -460,7 +460,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Code Graph Visualization -->
     <div class="panel" style="margin-bottom: 30px;">
         <h2>🕸️ Codebase Architecture (CodeGraphContext)</h2>
@@ -480,7 +480,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Recent Traces -->
     <div class="panel">
         <h2>📜 Recent Traces</h2>
@@ -488,14 +488,14 @@
             <p>No traces yet. Workflows will appear here automatically.</p>
         </div>
     </div>
-    
+
     <script>
         let ws = null;
         let reconnectAttempts = 0;
         const maxReconnectAttempts = 5;
         const tracesMap = new Map();
         const primitivesUsage = new Map();
-        
+
         // Load initial traces from API
         async function loadInitialTraces() {
             try {
@@ -543,20 +543,20 @@
                 console.error('❌ Failed to load initial traces:', error);
             }
         }
-        
+
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
-            
+
             ws = new WebSocket(wsUrl);
-            
+
             ws.onopen = () => {
                 console.log('✅ WebSocket connected');
                 document.getElementById('connection-status').textContent = 'Connected';
                 document.getElementById('connection-status').className = 'connection-status connected';
                 reconnectAttempts = 0;
             };
-            
+
             function parseMessage(event) {
                 try {
                     const data = JSON.parse(event.data);
@@ -565,26 +565,26 @@
                     console.error('Failed to parse message:', error);
                 }
             }
-            
+
             ws.onmessage = parseMessage;
-            
+
             ws.onclose = () => {
                 console.log('WebSocket closed');
                 document.getElementById('connection-status').textContent = 'Disconnected';
                 document.getElementById('connection-status').className = 'connection-status disconnected';
-                
+
                 if (reconnectAttempts < maxReconnectAttempts) {
                     reconnectAttempts++;
                     console.log(`Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`);
                     setTimeout(connectWebSocket, 2000 * reconnectAttempts);
                 }
             };
-            
+
             ws.onerror = (error) => {
                 console.error('WebSocket error:', error);
             };
         }
-        
+
         function handleMessage(data) {
             if (data.type === 'metrics') {
                 updateMetrics(data.metrics);
@@ -592,26 +592,26 @@
                 addTrace(data.trace);
             }
         }
-        
+
         function updateMetrics(metrics) {
             document.getElementById('totalWorkflows').textContent = metrics.workflows?.total || 0;
             document.getElementById('activeWorkflows').textContent = metrics.workflows?.active || 0;
-            
+
             const total = metrics.workflows?.total || 0;
             const failed = metrics.workflows?.failed || 0;
             const successRate = total > 0 ? Math.round(((total - failed) / total) * 100) : 100;
             document.getElementById('successRate').textContent = `${successRate}%`;
-            
+
             const avgDuration = metrics.performance?.avg_duration_ms || 0;
             document.getElementById('avgDuration').textContent = `${avgDuration.toFixed(2)}ms`;
-            
+
             // Update primitives panel
             updatePrimitivesPanel(metrics.recent_traces || []);
         }
-        
+
         function updatePrimitivesPanel(traces) {
             primitivesUsage.clear();
-            
+
             traces.forEach(trace => {
                 if (trace.spans) {
                     trace.spans.forEach(span => {
@@ -621,14 +621,14 @@
                     });
                 }
             });
-            
+
             const panel = document.getElementById('primitivesCatalog');
-            
+
             if (primitivesUsage.size === 0) {
                 panel.innerHTML = '<div class="empty-state">No primitives used yet</div>';
                 return;
             }
-            
+
             panel.innerHTML = '';
             primitivesUsage.forEach((count, primitive) => {
                 const badge = document.createElement('span');
@@ -637,7 +637,7 @@
                 panel.appendChild(badge);
             });
         }
-        
+
         function extractPrimitiveType(spanName) {
             if (spanName.includes('retry') || spanName.includes('Retry')) return 'RetryPrimitive';
             if (spanName.includes('circuit') || spanName.includes('Circuit')) return 'CircuitBreaker';
@@ -649,28 +649,28 @@
             if (spanName.includes('lambda') || spanName.includes('Lambda')) return 'LambdaPrimitive';
             return spanName;
         }
-        
+
         function addTrace(trace) {
             tracesMap.set(trace.trace_id, trace);
             renderTraces();
         }
-        
+
         function renderTraces() {
             const panel = document.getElementById('recentTraces');
             const traces = Array.from(tracesMap.values()).slice(-20).reverse();
-            
+
             if (traces.length === 0) {
                 panel.innerHTML = '<div class="empty-state">No traces yet</div>';
                 return;
             }
-            
+
             panel.innerHTML = '';
             traces.forEach(trace => {
                 const traceEl = createTraceElement(trace);
                 panel.appendChild(traceEl);
             });
         }
-        
+
         function createTraceElement(trace) {
             const div = document.createElement('div');
             div.className = `trace-card trace-item ${trace.status === 'error' ? 'error' : ''}`;
@@ -678,24 +678,24 @@
                 e.stopPropagation();
                 showTraceDetails(trace.trace_id);
             };
-            
+
             const statusIcon = trace.status === 'error' ? '❌' : '✅';
             const statusClass = trace.status === 'error' ? 'status-error' : 'status-success';
-            
+
             // Extract metadata from trace
             const provider = trace.spans?.[0]?.attributes?.provider || trace.provider || 'unknown';
             const model = trace.spans?.[0]?.attributes?.model || trace.model || 'unknown';
             const agent = trace.spans?.[0]?.attributes?.agent || trace.agent || 'none';
-            
+
             const primitiveTypes = trace.spans ? new Set(trace.spans.map(s => extractPrimitiveType(s.name))) : new Set();
-            
+
             // Parse timestamp (handles ISO strings, nanoseconds, and milliseconds)
             let timestamp = trace.start_time || trace.timestamp || Date.now();
             if (typeof timestamp === 'number' && timestamp > 1e15) {
                 // Nanosecond timestamp - convert to milliseconds
                 timestamp = Math.floor(timestamp / 1e6);
             }
-            
+
             div.innerHTML = `
                 <div class="trace-header">
                     <div>
@@ -707,35 +707,35 @@
                     </div>
                     <div class="trace-duration">${(trace.duration_ms || trace.duration_ns / 1e6 || 0).toFixed(2)}ms</div>
                 </div>
-                
+
                 <div class="trace-hierarchy">
                     <div class="hierarchy-item">📡 Provider: <strong>${provider}</strong></div>
                     <div class="hierarchy-item">🤖 Model: <strong>${model}</strong></div>
                     <div class="hierarchy-item">🎭 Agent: <strong>${agent}</strong></div>
                 </div>
-                
+
                 <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85em; opacity: 0.8;">
                     <span>📊 ${trace.spans ? trace.spans.length : 0} spans</span>
                     <span>⚙️ ${primitiveTypes.size} primitives</span>
                 </div>
-                
+
                 <div style="margin-top: 10px; font-size: 0.85em; opacity: 0.6; text-align: center;">
                     Click for details
                 </div>
             `;
-            
+
             return div;
         }
-        
+
         function toggleTraceExpansion(element) {
             element.classList.toggle('expanded');
         }
-        
+
         function analyzeWorkflowHierarchy(trace) {
             if (!trace.spans || trace.spans.length === 0) {
                 return { depth: 0, html: '<div class="empty-state">No spans</div>' };
             }
-            
+
             // Group spans by parent
             const spansByParent = new Map();
             trace.spans.forEach(span => {
@@ -745,16 +745,16 @@
                 }
                 spansByParent.get(parentId).push(span);
             });
-            
+
             // Build hierarchy HTML
             function buildLevel(parentId, level) {
                 const children = spansByParent.get(parentId) || [];
                 if (children.length === 0) return '';
-                
+
                 return children.map(span => {
                     const primitiveType = extractPrimitiveType(span.name);
                     const hasChildren = spansByParent.has(span.span_id);
-                    
+
                     return `
                         <div class="hierarchy-level">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -769,32 +769,32 @@
                     `;
                 }).join('');
             }
-            
+
             const html = `
                 <h4 style="margin-bottom: 10px; color: #667eea;">Workflow Hierarchy</h4>
                 <div class="workflow-hierarchy">
                     ${buildLevel('root', 0)}
                 </div>
             `;
-            
+
             // Calculate max depth
             function getMaxDepth(parentId, currentDepth) {
                 const children = spansByParent.get(parentId) || [];
                 if (children.length === 0) return currentDepth;
                 return Math.max(...children.map(c => getMaxDepth(c.span_id, currentDepth + 1)));
             }
-            
+
             const depth = getMaxDepth('root', 1);
-            
+
             return { depth, html };
         }
-        
+
         function buildSpanTimeline(trace) {
             if (!trace.spans || trace.spans.length === 0) return '<div class="empty-state">No timeline data</div>';
-            
+
             const startTime = Math.min(...trace.spans.map(s => s.start_time || Date.now()));
             const totalDuration = trace.duration_ms || 1;
-            
+
             // Detect parallel execution
             const timeline = trace.spans.map(span => {
                 const spanStart = span.start_time || startTime;
@@ -802,10 +802,10 @@
                 const duration = span.duration_ms || 0;
                 const leftPercent = (relativeStart / totalDuration) * 100;
                 const widthPercent = (duration / totalDuration) * 100;
-                
+
                 const primitiveType = extractPrimitiveType(span.name);
                 const statusClass = span.status === 'error' ? 'error' : '';
-                
+
                 return `
                     <div class="span-timeline">
                         <div class="span-bar ${statusClass}" style="left: ${leftPercent}%; width: ${widthPercent}%;">
@@ -814,10 +814,10 @@
                     </div>
                 `;
             }).join('');
-            
+
             return `<div style="position: relative;">${timeline}</div>`;
         }
-        
+
         // Load static inventory data on startup
         async function loadInventoryData() {
             try {
@@ -825,12 +825,12 @@
                 const agentsResp = await fetch('/api/agents');
                 const agents = await agentsResp.json();
                 renderAgents(agents);
-                
+
                 // Load primitives catalog
                 const primitivesResp = await fetch('/api/primitives');
                 const primitives = await primitivesResp.json();
                 renderPrimitivesCatalog(primitives);
-                
+
                 // Load workflows
                 const workflowsResp = await fetch('/api/workflows');
                 const workflows = await workflowsResp.json();
@@ -839,32 +839,32 @@
                 console.error('Failed to load inventory:', error);
             }
         }
-        
+
         async function renderAgents(agents) {
             const panel = document.getElementById('agentActivity');
-            
+
             // Fetch real-time agent activity
             try {
                 const activeAgentsResp = await fetch('/api/active_agents');
                 const activeAgents = await activeAgentsResp.json();
-                
+
                 const actionsResp = await fetch('/api/agent_actions?limit=50');
                 const recentActions = await actionsResp.json();
-                
+
                 if (activeAgents.length === 0 && recentActions.length === 0) {
                     panel.innerHTML = '<div class="empty-state">No agent activity yet. Run demo_agent_tracking.py to see activity!</div>';
                     return;
                 }
-                
+
                 let html = `<div style="margin-bottom: 15px; opacity: 0.7;">Active: ${activeAgents.length} agent(s)</div>`;
-                
+
                 // Show active agents with rich details
                 activeAgents.forEach(agent => {
                     const agentKey = `${agent.provider}:${agent.model}`;
-                    const ttaAgents = agent.tta_agents_used.length > 0 
+                    const ttaAgents = agent.tta_agents_used.length > 0
                         ? `<div style="font-size: 0.85em; margin-top: 5px; opacity: 0.7;">TTA Agents: ${agent.tta_agents_used.join(', ')}</div>`
                         : '';
-                    
+
                     html += `
                         <div class="agent-item" style="margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
                             <div class="item-header">🤖 ${agent.provider}</div>
@@ -877,14 +877,14 @@
                         </div>
                     `;
                 });
-                
+
                 // Show recent actions timeline
                 if (recentActions.length > 0) {
                     html += `
                         <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
                             <div style="font-weight: 600; margin-bottom: 10px;">📋 Recent Activity</div>
                     `;
-                    
+
                     recentActions.slice(0, 10).forEach(action => {
                         const timestamp = new Date(action.timestamp).toLocaleTimeString();
                         const ttaAgent = action.tta_agent ? ` [${action.tta_agent}]` : '';
@@ -895,12 +895,12 @@
                             </div>
                         `;
                     });
-                    
+
                     html += `</div>`;
                 }
-                
+
                 panel.innerHTML = html;
-                
+
                 // Refresh agent activity every 5 seconds
                 setTimeout(() => renderAgents(agents), 5000);
             } catch (error) {
@@ -909,7 +909,7 @@
                     panel.innerHTML = '<div class="empty-state">No agents configured</div>';
                     return;
                 }
-                
+
                 panel.innerHTML = `<div style="margin-bottom: 10px; opacity: 0.7;">Found ${agents.length} agent(s)</div>`;
                 agents.forEach(agent => {
                     const div = document.createElement('div');
@@ -923,23 +923,23 @@
                 });
             }
         }
-        
+
         let currentPrimitivesPage = 1;
         const primitivesPerPage = 20;
-        
+
         function renderPrimitivesCatalog(primitives) {
             const panel = document.getElementById('primitivesCatalog');
-            
+
             if (!primitives || primitives.length === 0) {
                 panel.innerHTML = '<div class="empty-state">No primitives found</div>';
                 return;
             }
-            
+
             const totalPages = Math.ceil(primitives.length / primitivesPerPage);
             const startIdx = (currentPrimitivesPage - 1) * primitivesPerPage;
             const endIdx = startIdx + primitivesPerPage;
             const pageData = primitives.slice(startIdx, endIdx);
-            
+
             panel.innerHTML = `
                 <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="opacity: 0.7;">Showing ${startIdx + 1}-${Math.min(endIdx, primitives.length)} of ${primitives.length} primitive(s)</div>
@@ -950,11 +950,11 @@
                     </div>
                 </div>
             `;
-            
+
             // Create primitives list container
             const listContainer = document.createElement('div');
             listContainer.id = 'primitivesList';
-            
+
             pageData.forEach(prim => {
                 const div = document.createElement('div');
                 div.className = 'primitive-item';
@@ -965,10 +965,10 @@
                 `;
                 listContainer.appendChild(div);
             });
-            
+
             panel.appendChild(listContainer);
         }
-        
+
         function changePrimitivesPage(page) {
             currentPrimitivesPage = page;
             // Re-fetch and render
@@ -977,15 +977,15 @@
                 .then(data => renderPrimitivesCatalog(Array.isArray(data) ? data : data.primitives))
                 .catch(err => console.error('Failed to load primitives:', err));
         }
-        
+
         function renderWorkflows(workflows) {
             const panel = document.getElementById('workflowRegistry');
-            
+
             if (!workflows || workflows.length === 0) {
                 panel.innerHTML = '<div style="margin-bottom: 10px; opacity: 0.7;">Registered: 0 workflow(s)</div><div class="empty-state">No workflows registered yet</div>';
                 return;
             }
-            
+
             panel.innerHTML = `<div style="margin-bottom: 10px; opacity: 0.7;">Registered: ${workflows.length} workflow(s)</div>`;
             workflows.forEach(workflow => {
                 const div = document.createElement('div');
@@ -997,40 +997,40 @@
                 panel.appendChild(div);
             });
         }
-        
+
         function fitGraphView() {
             if (window.codeGraphInstance && window.codeGraphInstance.simulation) {
                 // Fit the graph to view
                 window.codeGraphInstance.simulation.alpha(0.3).restart();
             }
         }
-        
+
         function resetGraphView() {
             if (window.codeGraphInstance) {
                 // Reset zoom and position
                 loadGraphView('architecture');
             }
         }
-        
+
         function showTraceDetails(traceId) {
             const trace = tracesMap.get(traceId);
             if (!trace) {
                 console.error('Trace not found:', traceId);
                 return;
             }
-            
+
             const modal = document.createElement('div');
             modal.className = 'trace-modal';
             modal.onclick = (e) => {
                 if (e.target === modal) modal.remove();
             };
-            
+
             // Extract metadata
             const provider = trace.spans?.[0]?.attributes?.provider || 'unknown';
             const model = trace.spans?.[0]?.attributes?.model || 'unknown';
             const agent = trace.spans?.[0]?.attributes?.agent || 'none';
             const workflow = trace.spans?.[0]?.attributes?.workflow || 'direct execution';
-            
+
             modal.innerHTML = `
                 <div class="modal-content">
                     <span class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
@@ -1038,7 +1038,7 @@
                     <div style="font-family: monospace; font-size: 0.9em; color: #94a3b8; margin: 10px 0;">
                         ${traceId}
                     </div>
-                    
+
                     <div class="trace-hierarchy-detail">
                         <h3 style="margin-top: 0;">🎯 Execution Chain</h3>
                         <div class="chain-item">📡 <strong>Provider:</strong> ${provider}</div>
@@ -1048,12 +1048,12 @@
                         <div class="chain-item">⏱️ <strong>Duration:</strong> ${(trace.duration_ms || 0).toFixed(2)}ms</div>
                         <div class="chain-item">📊 <strong>Status:</strong> <span class="status-${trace.status}">${trace.status || 'unknown'}</span></div>
                     </div>
-                    
+
                     <div class="trace-spans">
                         <h3>🔹 Primitives & Spans (${trace.spans?.length || 0})</h3>
                         ${renderSpanHierarchy(trace.spans || [])}
                     </div>
-                    
+
                     ${trace.error_message ? `
                         <div style="margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; border-radius: 4px;">
                             <strong style="color: #ef4444;">❌ Error:</strong><br/>
@@ -1062,50 +1062,50 @@
                     ` : ''}
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
         }
-        
+
         function renderSpanHierarchy(spans) {
             if (!spans || spans.length === 0) {
                 return '<div class="empty-state">No spans recorded</div>';
             }
-            
+
             // Build a map for parent-child relationships
             const spanMap = new Map(spans.map(s => [s.span_id, s]));
             const roots = spans.filter(s => !s.parent_id || !spanMap.has(s.parent_id));
-            
+
             function renderSpan(span, depth = 0) {
-                const duration = span.end_time && span.start_time 
+                const duration = span.end_time && span.start_time
                     ? ((span.end_time - span.start_time) * 1000).toFixed(2)
                     : '0.00';
-                    
+
                 const primitiveType = span.attributes?.primitive_type || extractPrimitiveType(span.name);
                 const children = spans.filter(s => s.parent_id === span.span_id);
-                
+
                 let html = `
                     <div class="span-item" style="margin-left: ${depth * 20}px">
-                        <span style="color: #667eea;">🔹</span> 
+                        <span style="color: #667eea;">🔹</span>
                         <strong>${span.name}</strong>
                         ${primitiveType !== span.name ? `<span class="span-type">${primitiveType}</span>` : ''}
                         <span class="span-duration">${duration}ms</span>
                     </div>
                 `;
-                
+
                 children.forEach(child => {
                     html += renderSpan(child, depth + 1);
                 });
-                
+
                 return html;
             }
-            
+
             return roots.map(span => renderSpan(span)).join('');
         }
-        
+
         async function loadGraphView(viewType) {
             const container = document.getElementById('codeGraph');
             container.innerHTML = '<div class="loading pulse" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">Loading ' + viewType + ' view...</div>';
-            
+
             try {
                 // Initialize D3 graph if not already done
                 if (!window.codeGraphInstance) {
@@ -1116,12 +1116,12 @@
                 container.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align: center;">Failed to load graph: ${error.message}</div>`;
             }
         }
-        
+
         // Connect on load
         connectWebSocket();
         loadInventoryData();
         loadInitialTraces();
-        
+
         // Add search functionality
         const searchBox = document.getElementById('searchPrimitives');
         if (searchBox) {
@@ -1134,10 +1134,10 @@
                 });
             });
         }
-        
+
         // Load default graph view
         setTimeout(() => loadGraphView('architecture'), 1000);
-        
+
         // Periodic refresh
         setInterval(() => {
             if (ws && ws.readyState === WebSocket.OPEN) {

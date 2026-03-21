@@ -13,7 +13,7 @@ import logging
 import time
 from typing import Any
 
-from primitives.core.base import (
+from ttadev.primitives.core.base import (
     WorkflowContext,
     WorkflowPrimitive,
 )

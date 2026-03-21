@@ -43,7 +43,7 @@ if echo "$PYRIGHT_OUTPUT" | grep -q "TIMEOUT"; then
     echo -e "${YELLOW}⚠ Pyright timed out, skipping${NC}"
 else
     REAL_ERRORS=$(echo "$PYRIGHT_OUTPUT" | grep "error:" | grep -v "could not be resolved" | grep -v "not exported" | wc -l)
-    
+
     # Allow up to 2 errors (the known OpenTelemetry issues)
     if [ "$REAL_ERRORS" -le 2 ]; then
         echo -e "${GREEN}✓ Pyright passed (${REAL_ERRORS} known acceptable errors)${NC}"

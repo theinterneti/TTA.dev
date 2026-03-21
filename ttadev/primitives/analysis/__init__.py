@@ -4,7 +4,7 @@ Shared analysis core for CLI and MCP server.
 Provides pattern detection, primitive matching, and recommendation generation.
 
 Usage:
-    from primitives.analysis import TTAAnalyzer, AnalysisReport
+    from ttadev.primitives.analysis import TTAAnalyzer, AnalysisReport
 
     analyzer = TTAAnalyzer()
     report = analyzer.analyze(code, file_path="my_file.py")
@@ -16,16 +16,16 @@ Usage:
     data = report.to_dict()
 """
 
-from primitives.analysis.analyzer import TTAAnalyzer
-from primitives.analysis.matcher import PrimitiveMatcher
-from primitives.analysis.models import (
+from ttadev.primitives.analysis.analyzer import TTAAnalyzer
+from ttadev.primitives.analysis.matcher import PrimitiveMatcher
+from ttadev.primitives.analysis.models import (
     AnalysisReport,
     CodeAnalysisResult,
     PrimitiveRecommendation,
     RecommendationContext,
 )
-from primitives.analysis.patterns import PatternDetector
-from primitives.analysis.templates import TemplateProvider
+from ttadev.primitives.analysis.patterns import PatternDetector
+from ttadev.primitives.analysis.templates import TemplateProvider
 
 __all__ = [
     # Main entry point

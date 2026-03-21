@@ -272,7 +272,7 @@ def create_default_config(
         output_path: Path where to save the configuration file
 
     Example:
-        >>> from primitives.config import create_default_config
+        >>> from ttadev.primitives.config import create_default_config
         >>> create_default_config(".tta/orchestration-config.yaml")
     """
     output_path = Path(output_path)

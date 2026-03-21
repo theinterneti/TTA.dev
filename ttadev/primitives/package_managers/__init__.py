@@ -6,7 +6,7 @@ the ``>>`` and ``|`` operators.
 
 Example:
     ```python
-    from primitives.package_managers import (
+    from ttadev.primitives.package_managers import (
         UvSyncPrimitive, UvSyncInput,
     )
     from primitives import WorkflowContext

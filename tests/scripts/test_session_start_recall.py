@@ -18,6 +18,14 @@ class TestGetDirectives:
             result = _get_directives("http://localhost:8888", "tta-dev")
         assert result == ["Always orient first."]
 
+    def test_returns_directives_from_text_field(self) -> None:
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status = MagicMock()
+        mock_resp.json.return_value = {"directives": [{"text": "Use uv always."}]}
+        with patch("httpx.get", return_value=mock_resp):
+            result = _get_directives("http://localhost:8888", "tta-dev")
+        assert result == ["Use uv always."]
+
     def test_returns_empty_on_failure(self) -> None:
         with patch("httpx.get", side_effect=Exception("timeout")):
             result = _get_directives("http://localhost:8888", "tta-dev")

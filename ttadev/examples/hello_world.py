@@ -15,7 +15,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from primitives.core import LambdaPrimitive, WorkflowContext
+from ttadev.primitives.core import LambdaPrimitive, WorkflowContext
 
 
 async def greet(name: str, ctx: WorkflowContext) -> str:

@@ -1,8 +1,8 @@
 # TTA.dev Primitives Performance Benchmark Report
 
-**Date:** March 7, 2026  
-**Tool:** pytest-benchmark 5.2.3  
-**Platform:** Linux WSL2, Python 3.12.3  
+**Date:** March 7, 2026
+**Tool:** pytest-benchmark 5.2.3
+**Platform:** Linux WSL2, Python 3.12.3
 
 ## Executive Summary
 
@@ -40,7 +40,7 @@ Established formal performance benchmarks for TTA.dev primitives. Initial baseli
 
 ### Sequential Primitive (Chaining)
 - **2 Steps:** 555μs mean
-- **5 Steps:** 917μs mean  
+- **5 Steps:** 917μs mean
 - **Per-Step Overhead:** ~183μs average
 - **Scaling:** Near-linear O(n)
 
@@ -101,10 +101,10 @@ uv run pytest tests/benchmarks/ --benchmark-histogram
 def test_new_primitive(self, benchmark, context):
     """Benchmark description."""
     workflow = MyPrimitive(...)
-    
+
     def run():
         return asyncio.run(workflow.execute(data, context))
-    
+
     result = benchmark(run)
     assert result["expected"] == value
 ```
@@ -182,5 +182,5 @@ uv run pytest tests/benchmarks/ \
 
 ---
 
-**Maintained by:** TTA.dev Core Team  
+**Maintained by:** TTA.dev Core Team
 **Next Review:** June 2026

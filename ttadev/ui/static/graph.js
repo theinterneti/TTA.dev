@@ -5,10 +5,10 @@ function filterByType(type) {
     // Filter nodes in the graph by type
     const nodes = window.currentGraph.nodes.filter(n => n.type === type);
     const nodeIds = new Set(nodes.map(n => n.id));
-    const edges = window.currentGraph.edges.filter(e => 
+    const edges = window.currentGraph.edges.filter(e =>
         nodeIds.has(e.source) && nodeIds.has(e.target)
     );
-    
+
     renderGraph({nodes, edges});
 }
 
@@ -18,23 +18,23 @@ function searchGraph() {
         renderGraph(window.currentGraph);
         return;
     }
-    
-    const nodes = window.currentGraph.nodes.filter(n => 
-        n.name.toLowerCase().includes(query) || 
+
+    const nodes = window.currentGraph.nodes.filter(n =>
+        n.name.toLowerCase().includes(query) ||
         n.type.toLowerCase().includes(query)
     );
     const nodeIds = new Set(nodes.map(n => n.id));
-    const edges = window.currentGraph.edges.filter(e => 
+    const edges = window.currentGraph.edges.filter(e =>
         nodeIds.has(e.source) && nodeIds.has(e.target)
     );
-    
+
     renderGraph({nodes, edges});
 }
 
 function showNodeDetails(nodeId) {
     const node = window.currentGraph.nodes.find(n => n.id === nodeId);
     if (!node) return;
-    
+
     const details = document.getElementById('nodeDetails');
     details.innerHTML = `
         <h3>${node.name}</h3>

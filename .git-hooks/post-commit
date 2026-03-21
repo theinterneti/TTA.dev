@@ -48,7 +48,7 @@ if [ "$AGENT" != "copilot" ]; then
     if [ -d "$COPILOT_WORKTREE" ]; then
         NOTIFICATION_DIR="$COPILOT_WORKTREE/.agent-notifications"
         mkdir -p "$NOTIFICATION_DIR"
-        
+
         NOTIFICATION_FILE="$NOTIFICATION_DIR/pending-$AGENT-$(date +%s).json"
         cat > "$NOTIFICATION_FILE" << EOF
 {
