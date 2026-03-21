@@ -134,8 +134,120 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
         if not instruction:
             raise ValueError("instruction must not be empty")
 
-        target_files = list(task.get("target_files") or [])[:3]  # noqa: F841
-        agent_hint = task.get("agent_hint") or self._agent_hint  # noqa: F841
+        target_files = list(task.get("target_files") or [])[:3]
+        agent_hint = task.get("agent_hint") or self._agent_hint
 
-        # Steps implemented in subsequent tasks
-        raise NotImplementedError
+        # Step 1 — Orient
+        impact_report = await self._orient(target_files, context)
+
+        # Step 2 — Recall
+        context_prefix = await self._recall(instruction)
+
+        # Step 3 — Write
+        response = await self._write(instruction, agent_hint, context_prefix)
+
+        # Step 4 — Validate
+        validated = await self._validate(impact_report, context)
+
+        # Step 5 — Retain
+        memories_retained = await self._retain(instruction, response)
+
+        return DevelopmentResult(
+            response=response,
+            validated=validated,
+            impact_report=impact_report,
+            memories_retained=memories_retained,
+            context_prefix=context_prefix,
+        )
+
+    async def _orient(self, target_files: list[str], context: WorkflowContext) -> ImpactReport:
+        """Step 1 — Orient: query CGC for impact analysis."""
+        span_cm: Any = (
+            self._dc_tracer.start_as_current_span("development_cycle.orient")
+            if self._dc_tracer
+            else nullcontext()
+        )
+        with span_cm as span:
+            if not target_files:
+                report = _empty_impact_report()
+                if span is not None:
+                    span.set_attribute("cgc_available", False)
+                    span.set_attribute("target_files", [])
+                return report
+
+            query = CodeGraphQuery(
+                target=target_files[0],
+                operations=[CGCOp.find_code, CGCOp.get_relationships, CGCOp.find_tests],
+            )
+            # CodeGraphPrimitive degrades gracefully — never raises
+            report = await self._graph.execute(query, context)
+
+            if span is not None:
+                span.set_attribute("cgc_available", report.get("cgc_available", False))
+                span.set_attribute("target_files", target_files)
+                span.set_attribute("risk", report.get("risk", "low"))
+            return report
+
+    async def _recall(self, instruction: str) -> str:
+        """Step 2 — Recall: build context prefix from Hindsight."""
+        span_cm: Any = (
+            self._dc_tracer.start_as_current_span("development_cycle.recall")
+            if self._dc_tracer
+            else nullcontext()
+        )
+        with span_cm as span:
+            prefix = await self._memory.build_context_prefix(instruction)
+            if span is not None:
+                span.set_attribute("context_chars", len(prefix))
+                span.set_attribute("hindsight_available", bool(prefix))
+            return prefix
+
+    async def _write(self, instruction: str, agent_hint: str, context_prefix: str) -> str:
+        """Step 3 — Write: LLM call with system prompt + instruction."""
+        cfg = get_llm_client()
+        system = _build_system_prompt(agent_hint, context_prefix)
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user", "content": instruction},
+        ]
+        resp = await self._http.post(
+            f"{cfg.base_url}/chat/completions",
+            headers={"Authorization": f"Bearer {cfg.api_key}"},
+            json={"model": cfg.model, "messages": messages},
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        content: str = data["choices"][0]["message"]["content"] or ""
+        if not content:
+            raise ValueError("LLM returned empty response")
+        return content
+
+    async def _validate(self, impact_report: ImpactReport, context: WorkflowContext) -> bool:
+        """Step 4 — Validate: run related tests in E2B sandbox."""
+        tests = impact_report.get("related_tests", [])
+        if not tests or self._executor is None:
+            return False
+        try:
+            tests_repr = repr(tests)
+            code = (
+                "import subprocess\n"
+                f"result = subprocess.run(\n"
+                f"    ['python', '-m', 'pytest'] + {tests_repr} + ['-x', '--tb=short'],\n"
+                f"    capture_output=True, text=True\n"
+                f")\n"
+                f"print(result.stdout)\n"
+                f"if result.returncode != 0:\n"
+                f"    print(result.stderr)\n"
+                f"    raise SystemExit(result.returncode)\n"
+            )
+            output = await self._executor.execute({"code": code, "language": "python"}, context)
+            return bool(output.get("success", False))
+        except Exception as exc:
+            logger.warning("DevelopmentCycle validate step failed: %s", exc)
+            return False
+
+    async def _retain(self, instruction: str, response: str) -> int:
+        """Step 5 — Retain: store a structured memory in Hindsight."""
+        content = f"[type: decision] {instruction[:80]} → {response[:120]}"
+        result = await self._memory.retain(content, async_=True)
+        return 1 if result.get("success", False) else 0
