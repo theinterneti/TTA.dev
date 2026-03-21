@@ -45,6 +45,7 @@ for attempt in range(3):  # WRONG
 | Global variables for state | `WorkflowContext` |
 | `pip install` | `uv add` |
 | `Optional[str]` | `str | None` |
+| `from primitives.X` | `from ttadev.primitives.X` |
 
 #### State Management
 
@@ -55,8 +56,28 @@ context = WorkflowContext(workflow_id="demo")
 result = await workflow.execute(input_data, context)
 ```
 
+#### LLM Provider Strategy
+
+**Always use `get_llm_client()` — never hardcode a model or base URL.**
+
+```python
+from ttadev.workflows.llm_provider import get_llm_client
+
+cfg = get_llm_client()
+# cfg.base_url, cfg.model, cfg.api_key, cfg.provider
+```
+
+Provider hierarchy for TTA.dev apps (automatic, zero config required):
+1. **Ollama** — default, always available, no API key needed (`qwen2.5:7b`)
+2. **OpenRouter `:free`** — if `OPENROUTER_API_KEY` is set
+3. **Paid models** — if a paid key is configured
+
+**Never use** `nvidia/nemotron-3-super-120b-a12b:free` — it is a reasoning-only
+model that returns `content: null`. Any code reading `response.content` will crash.
+
 #### Deep Reference
 
 - Primitives API & patterns: [`docs/agent-guides/primitives-patterns.md`](../../docs/agent-guides/primitives-patterns.md)
 - Python standards: [`docs/agent-guides/python-standards.md`](../../docs/agent-guides/python-standards.md)
+- LLM provider strategy: [`docs/agent-guides/llm-provider-strategy.md`](../../docs/agent-guides/llm-provider-strategy.md)
 - TODO management: [`docs/agent-guides/todo-management.md`](../../docs/agent-guides/todo-management.md)
