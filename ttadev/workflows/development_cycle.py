@@ -204,50 +204,83 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
 
     async def _write(self, instruction: str, agent_hint: str, context_prefix: str) -> str:
         """Step 3 — Write: LLM call with system prompt + instruction."""
-        cfg = get_llm_client()
-        system = _build_system_prompt(agent_hint, context_prefix)
-        messages = [
-            {"role": "system", "content": system},
-            {"role": "user", "content": instruction},
-        ]
-        resp = await self._http.post(
-            f"{cfg.base_url}/chat/completions",
-            headers={"Authorization": f"Bearer {cfg.api_key}"},
-            json={"model": cfg.model, "messages": messages},
+        span_cm: Any = (
+            self._dc_tracer.start_as_current_span("development_cycle.write")
+            if self._dc_tracer
+            else nullcontext()
         )
-        resp.raise_for_status()
-        data = resp.json()
-        content: str = data["choices"][0]["message"]["content"] or ""
-        if not content:
-            raise ValueError("LLM returned empty response")
-        return content
+        with span_cm as span:
+            cfg = get_llm_client()
+            system = _build_system_prompt(agent_hint, context_prefix)
+            messages = [
+                {"role": "system", "content": system},
+                {"role": "user", "content": instruction},
+            ]
+            resp = await self._http.post(
+                f"{cfg.base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {cfg.api_key}"},
+                json={"model": cfg.model, "messages": messages},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            content: str = data["choices"][0]["message"]["content"] or ""
+            if not content:
+                raise ValueError("LLM returned empty response")
+            if span is not None:
+                span.set_attribute("provider", cfg.provider)
+                span.set_attribute("model", cfg.model)
+                span.set_attribute("response_chars", len(content))
+            return content
 
     async def _validate(self, impact_report: ImpactReport, context: WorkflowContext) -> bool:
         """Step 4 — Validate: run related tests in E2B sandbox."""
-        tests = impact_report.get("related_tests", [])
-        if not tests or self._executor is None:
-            return False
-        try:
-            tests_repr = repr(tests)
-            code = (
-                "import subprocess\n"
-                f"result = subprocess.run(\n"
-                f"    ['python', '-m', 'pytest'] + {tests_repr} + ['-x', '--tb=short'],\n"
-                f"    capture_output=True, text=True\n"
-                f")\n"
-                f"print(result.stdout)\n"
-                f"if result.returncode != 0:\n"
-                f"    print(result.stderr)\n"
-                f"    raise SystemExit(result.returncode)\n"
-            )
-            output = await self._executor.execute({"code": code, "language": "python"}, context)
-            return bool(output.get("success", False))
-        except Exception as exc:
-            logger.warning("DevelopmentCycle validate step failed: %s", exc)
-            return False
+        span_cm: Any = (
+            self._dc_tracer.start_as_current_span("development_cycle.validate")
+            if self._dc_tracer
+            else nullcontext()
+        )
+        with span_cm as span:
+            tests = impact_report.get("related_tests", [])
+            if not tests or self._executor is None:
+                if span is not None:
+                    span.set_attribute("validated", False)
+                    span.set_attribute("n_tests", 0)
+                return False
+            try:
+                tests_repr = repr(tests)
+                code = (
+                    "import subprocess\n"
+                    f"result = subprocess.run(\n"
+                    f"    ['python', '-m', 'pytest'] + {tests_repr} + ['-x', '--tb=short'],\n"
+                    f"    capture_output=True, text=True\n"
+                    f")\n"
+                    f"print(result.stdout)\n"
+                    f"if result.returncode != 0:\n"
+                    f"    print(result.stderr)\n"
+                    f"    raise SystemExit(result.returncode)\n"
+                )
+                output = await self._executor.execute({"code": code, "language": "python"}, context)
+                validated = bool(output.get("success", False))
+            except Exception as exc:
+                logger.warning("DevelopmentCycle validate step failed: %s", exc)
+                validated = False
+            if span is not None:
+                span.set_attribute("validated", validated)
+                span.set_attribute("n_tests", len(tests))
+            return validated
 
     async def _retain(self, instruction: str, response: str) -> int:
         """Step 5 — Retain: store a structured memory in Hindsight."""
-        content = f"[type: decision] {instruction[:80]} → {response[:120]}"
-        result = await self._memory.retain(content, async_=True)
-        return 1 if result.get("success", False) else 0
+        span_cm: Any = (
+            self._dc_tracer.start_as_current_span("development_cycle.retain")
+            if self._dc_tracer
+            else nullcontext()
+        )
+        with span_cm as span:
+            content = f"[type: decision] {instruction[:80]} → {response[:120]}"
+            result = await self._memory.retain(content, async_=True)
+            retained = 1 if result.get("success", False) else 0
+            if span is not None:
+                span.set_attribute("memories_retained", retained)
+                span.set_attribute("hindsight_available", bool(retained))
+            return retained

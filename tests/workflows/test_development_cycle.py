@@ -265,3 +265,267 @@ class TestDevelopmentCycleWrite:
                 DevelopmentTask(instruction="Explain the cache primitive"),
                 WorkflowContext(),
             )
+
+
+class TestDevelopmentCycleWriteFull:
+    @pytest.mark.asyncio
+    async def test_write_calls_llm_with_instruction(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            llm_response="Here is the implementation."
+        )
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        result = await cycle.execute(
+            DevelopmentTask(instruction="Add timeout parameter"),
+            WorkflowContext(),
+        )
+        mock_http.post.assert_called_once()
+        call_kwargs = mock_http.post.call_args
+        body = call_kwargs.kwargs.get("json", {})
+        messages = body.get("messages", [])
+        assert any(
+            m["role"] == "user" and "Add timeout parameter" in m["content"] for m in messages
+        )
+        assert result["response"] == "Here is the implementation."
+
+    @pytest.mark.asyncio
+    async def test_write_includes_persona_in_system_prompt(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            llm_response="Security review done."
+        )
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        await cycle.execute(
+            DevelopmentTask(instruction="Review for vulns", agent_hint="security"),
+            WorkflowContext(),
+        )
+        body = mock_http.post.call_args.kwargs.get("json", {})
+        messages = body.get("messages", [])
+        sys_msg = next(m["content"] for m in messages if m["role"] == "system")
+        assert "security" in sys_msg.lower()
+
+    @pytest.mark.asyncio
+    async def test_write_context_prefix_in_system_prompt(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            context_prefix="## Directives\n- Use uv",
+            llm_response="Done.",
+        )
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        await cycle.execute(
+            DevelopmentTask(instruction="Add feature"),
+            WorkflowContext(),
+        )
+        body = mock_http.post.call_args.kwargs.get("json", {})
+        messages = body.get("messages", [])
+        sys_msg = next(m["content"] for m in messages if m["role"] == "system")
+        assert "Use uv" in sys_msg
+
+
+class TestDevelopmentCycleValidate:
+    @pytest.mark.asyncio
+    async def test_validate_returns_true_when_tests_pass(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        report = ImpactReport(
+            target="retry.py",
+            callers=[],
+            dependencies=[],
+            related_tests=["tests/test_retry.py"],
+            complexity=2.0,
+            risk="low",
+            summary="",
+            cgc_available=True,
+        )
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            impact_report=report, validate_success=True, llm_response="Done."
+        )
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        result = await cycle.execute(
+            DevelopmentTask(instruction="Add timeout", target_files=["retry.py"]),
+            WorkflowContext(),
+        )
+        assert result["validated"] is True
+        mock_executor.execute.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_validate_returns_false_when_no_related_tests(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response="Done.")
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        result = await cycle.execute(
+            DevelopmentTask(instruction="Update README"),
+            WorkflowContext(),
+        )
+        assert result["validated"] is False
+        mock_executor.execute.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_validate_returns_false_when_e2b_errors(self) -> None:
+        from unittest.mock import AsyncMock
+
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        report = ImpactReport(
+            target="retry.py",
+            callers=[],
+            dependencies=[],
+            related_tests=["tests/test_retry.py"],
+            complexity=2.0,
+            risk="low",
+            summary="",
+            cgc_available=True,
+        )
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            impact_report=report, llm_response="Done."
+        )
+        mock_executor.execute = AsyncMock(side_effect=Exception("E2B unavailable"))
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        result = await cycle.execute(
+            DevelopmentTask(instruction="Add timeout", target_files=["retry.py"]),
+            WorkflowContext(),
+        )
+        assert result["validated"] is False
+
+
+class TestDevelopmentCycleRetain:
+    @pytest.mark.asyncio
+    async def test_retain_stores_memory_and_returns_one(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            retain_success=True, llm_response="Here is the output."
+        )
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        result = await cycle.execute(
+            DevelopmentTask(instruction="Add timeout parameter"),
+            WorkflowContext(),
+        )
+        mock_memory.retain.assert_called_once()
+        assert result["memories_retained"] == 1
+
+    @pytest.mark.asyncio
+    async def test_retain_returns_zero_when_hindsight_unavailable(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            retain_success=False, llm_response="Output."
+        )
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        result = await cycle.execute(
+            DevelopmentTask(instruction="Fix bug"),
+            WorkflowContext(),
+        )
+        assert result["memories_retained"] == 0
+
+
+class TestDevelopmentCycleIntegration:
+    @pytest.mark.asyncio
+    async def test_full_cycle_returns_complete_result(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            context_prefix="## Directives\n- Use uv",
+            llm_response="Here is the implementation plan.",
+        )
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        result = await cycle.execute(
+            DevelopmentTask(instruction="Add timeout parameter"),
+            WorkflowContext(),
+        )
+        assert result["response"] == "Here is the implementation plan."
+        assert result["context_prefix"] == "## Directives\n- Use uv"
+        assert isinstance(result["validated"], bool)
+        assert isinstance(result["memories_retained"], int)
+
+    @pytest.mark.asyncio
+    async def test_agent_hint_override_per_call(self) -> None:
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(
+            llm_response="QA review done."
+        )
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            agent_hint="developer",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        await cycle.execute(
+            DevelopmentTask(instruction="Review tests", agent_hint="qa"),
+            WorkflowContext(),
+        )
+        body = mock_http.post.call_args.kwargs.get("json", {})
+        messages = body.get("messages", [])
+        sys_msg = next(m["content"] for m in messages if m["role"] == "system")
+        assert "QA engineer" in sys_msg
