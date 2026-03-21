@@ -241,10 +241,15 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
         )
         with span_cm as span:
             tests = impact_report.get("related_tests", [])
-            if not tests or self._executor is None:
+            if not tests:
                 if span is not None:
                     span.set_attribute("validated", False)
                     span.set_attribute("n_tests", 0)
+                return False
+            if self._executor is None:
+                if span is not None:
+                    span.set_attribute("validated", False)
+                    span.set_attribute("n_tests", len(tests))
                 return False
             try:
                 tests_repr = repr(tests)

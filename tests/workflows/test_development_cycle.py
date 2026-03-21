@@ -29,7 +29,7 @@ def _make_mocks(
     validate_success: bool = False,
     retain_success: bool = True,
     llm_response: str = "Here is the implementation.",
-) -> tuple:
+) -> tuple[MagicMock, MagicMock, MagicMock, MagicMock]:
     """Return (mock_memory, mock_graph, mock_executor, mock_http)."""
     mock_memory = MagicMock()
     mock_memory.build_context_prefix = AsyncMock(return_value=context_prefix)
@@ -401,8 +401,6 @@ class TestDevelopmentCycleValidate:
 
     @pytest.mark.asyncio
     async def test_validate_returns_false_when_e2b_errors(self) -> None:
-        from unittest.mock import AsyncMock
-
         from ttadev.primitives.core.base import WorkflowContext
         from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
 
