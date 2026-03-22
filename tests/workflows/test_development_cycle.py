@@ -987,14 +987,17 @@ class TestDevelopmentCycleReframe:
 
     @pytest.mark.asyncio
     async def test_reframe_also_fails_returns_best_of_all(self) -> None:
-        """Both passes fail gate → best of all returned, retry_count == 1, no exception."""
+        """Both passes fail gate → best of all returned, retry_count == 1, no exception.
+
+        Use quality_threshold=0.8 so a 20-80 char clean response (score≈0.7) fails the
+        gate but scores higher than a refusal (score≈0.1), making the winner deterministic.
+        """
         from ttadev.primitives.core.base import WorkflowContext
         from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
 
-        # score_response uses length; slightly longer response will have a higher score
-        slightly_better = (
-            "I cannot help with that specific request as it falls outside my capabilities."
-        )
+        # Refusal: score ≈ 0.1 (refusal penalty + short length penalty)
+        # Clean 65-char: score ≈ 0.7 (only short-length penalty) → fails gate at 0.8
+        slightly_better = "This is a response that is between 20 and 80 characters long here"
         bad_resp_1 = MagicMock()
         bad_resp_1.raise_for_status = MagicMock()
         bad_resp_1.json.return_value = {"choices": [{"message": {"content": _BAD_RESPONSE}}]}
@@ -1019,11 +1022,11 @@ class TestDevelopmentCycleReframe:
             return_value=_make_chain(["openrouter", "ollama"]),
         ):
             result = await cycle.execute(
-                DevelopmentTask(instruction="Add timeout parameter"),
+                DevelopmentTask(instruction="Add timeout parameter", quality_threshold=0.8),
                 WorkflowContext(),
             )
         assert result["retry_count"] == 1
-        assert result["response"] != ""
+        assert result["response"] == slightly_better
 
     @pytest.mark.asyncio
     async def test_no_reframe_when_primary_passes(self) -> None:

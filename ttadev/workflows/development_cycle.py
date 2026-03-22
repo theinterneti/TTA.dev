@@ -334,6 +334,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
             )
 
             retry_count: int = 0
+            pass1_score = best_score  # captured before any reframe for write.confidence compat
 
             # Reframe if pass 1 failed quality gate
             if best_response and not quality_gate_passed(best_response, effective_threshold):
@@ -356,12 +357,6 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                         retry_score,
                         retry_provider,
                     )
-                elif not best_response and retry_response:
-                    best_response, best_score, best_provider = (
-                        retry_response,
-                        retry_score,
-                        retry_provider,
-                    )
 
             if not best_response:
                 # All providers raised exceptions across all passes
@@ -377,7 +372,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
             if span is not None:
                 span.set_attribute("model", "unknown")  # model is on cfg, not tracked here
                 span.set_attribute("response_chars", len(best_response))
-                span.set_attribute("write.confidence", best_score)
+                span.set_attribute("write.confidence", pass1_score)
                 span.set_attribute("write.provider", best_provider)
                 span.set_attribute("write.fallback_attempts", attempts)
                 span.set_attribute("write.retry_count", retry_count)
