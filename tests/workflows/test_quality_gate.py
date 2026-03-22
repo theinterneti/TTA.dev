@@ -31,7 +31,7 @@ class TestScoreResponse:
         """Response under 80 chars should be penalised."""
         # "Short answer." is 13 chars, < 20 AND < 80
         # Penalties: -0.8 (< 20) + -0.3 (< 80) = -1.1 from 1.0 = -0.1, clamped to 0.0
-        assert score_response("Short answer.") < 0.8
+        assert score_response("Short answer.") == 0.0
 
     def test_refusal_pattern_scores_low(self) -> None:
         """Response with refusal pattern should score < 0.5."""
@@ -47,15 +47,9 @@ class TestScoreResponse:
 
     def test_ai_apology_scores_low(self) -> None:
         """Response with AI apology should score < 0.5."""
-        # Contains "As an AI" and doesn't contain refusal, so:
-        # start 1.0, -0.4 (AI apology) = 0.6 (length is 40, so also -0.3 for <80)
-        # 1.0 - 0.3 - 0.4 = 0.3 < 0.5
-        assert (
-            score_response(
-                "As an AI language model, I cannot help with this request because I lack the ability to process that."
-            )
-            < 0.5
-        )
+        # Contains "As an AI" without refusal keywords, so:
+        # 1.0 - 0.4 (AI apology) - 0.3 (len < 80) = 0.3 < 0.5
+        assert score_response("As an AI, I acknowledge this requires careful consideration.") < 0.5
 
     def test_ai_apology_variant(self) -> None:
         """Response with language model apology should score < 0.5."""
@@ -128,8 +122,14 @@ class DataProcessor:
 
     def test_score_clamped_to_one(self) -> None:
         """Score should never go above 1.0."""
-        clean_response = "This is a very clean response with good content that should not exceed 1.0 due to clamping."
-        assert score_response(clean_response) <= 1.0
+        # Response > 200 chars gets +0.1 bonus, > 500 chars gets another +0.1 bonus
+        # = 1.0 + 0.1 + 0.1 = 1.2 before clamping, should be clamped to 1.0
+        clean_response = (
+            "This is a comprehensive response providing detailed information about the topic. It covers multiple aspects and provides thoughtful analysis. The content is well-structured and clear. "
+            + "x" * 400
+        )
+        assert len(clean_response) > 500
+        assert score_response(clean_response) == 1.0
 
     def test_case_insensitive_refusal(self) -> None:
         """Refusal patterns should match case-insensitively."""
@@ -169,8 +169,6 @@ class TestThresholdFromEnv:
 
         importlib.reload(qg_module)
         assert qg_module._DEFAULT_THRESHOLD == 0.3
-        # Restore original module for other tests
-        importlib.reload(qg_module)
 
     def test_defaults_on_bad_value(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Module should default to 0.5 on bad QUALITY_GATE_THRESHOLD value."""
@@ -179,8 +177,6 @@ class TestThresholdFromEnv:
 
         importlib.reload(qg_module)
         assert qg_module._DEFAULT_THRESHOLD == 0.5
-        # Restore original module for other tests
-        importlib.reload(qg_module)
 
     def test_clamps_above_one(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Module should clamp QUALITY_GATE_THRESHOLD to 1.0 if > 1.0."""
@@ -189,8 +185,6 @@ class TestThresholdFromEnv:
 
         importlib.reload(qg_module)
         assert qg_module._DEFAULT_THRESHOLD == 1.0
-        # Restore original module for other tests
-        importlib.reload(qg_module)
 
     def test_clamps_below_zero(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Module should clamp QUALITY_GATE_THRESHOLD to 0.0 if < 0.0."""
@@ -199,5 +193,3 @@ class TestThresholdFromEnv:
 
         importlib.reload(qg_module)
         assert qg_module._DEFAULT_THRESHOLD == 0.0
-        # Restore original module for other tests
-        importlib.reload(qg_module)
