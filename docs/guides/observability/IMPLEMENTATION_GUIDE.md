@@ -20,7 +20,7 @@
 
 ### 1.1 Enhanced WorkflowContext
 
-**File:** `platform/primitives/src/tta_dev_primitives/core/base.py`
+**File:** `ttadev/primitives/core/base.py`
 
 ```python
 from __future__ import annotations
@@ -127,7 +127,7 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from tta_dev_primitives.core.base import WorkflowContext
+    from ttadev.primitives.core.base import WorkflowContext
 
 try:
     from opentelemetry import trace
@@ -156,7 +156,7 @@ def inject_trace_context(context: WorkflowContext) -> WorkflowContext:
 
     Example:
         ```python
-        from tta_dev_primitives.core.base import WorkflowContext
+        from ttadev.primitives.core.base import WorkflowContext
 
         # At workflow entry point (e.g., HTTP handler)
         context = WorkflowContext(workflow_id="process-123")
@@ -281,7 +281,7 @@ import logging
 import time
 from typing import Any, TypeVar
 
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 from ..context.propagation import create_linked_span, inject_trace_context
 
@@ -426,7 +426,7 @@ class InstrumentedPrimitive(WorkflowPrimitive[T, U]):
 
 ### 2.1 Instrumented SequentialPrimitive
 
-**File:** `platform/primitives/src/tta_dev_primitives/core/sequential.py`
+**File:** `ttadev/primitives/core/sequential.py`
 
 Add instrumentation to existing SequentialPrimitive:
 
@@ -474,7 +474,7 @@ async def execute(self, input_data: Any, context: WorkflowContext) -> Any:
 
 ### 2.2 Instrumented ParallelPrimitive
 
-**File:** `platform/primitives/src/tta_dev_primitives/core/parallel.py`
+**File:** `ttadev/primitives/core/parallel.py`
 
 ```python
 import asyncio  # Required for parallel execution
@@ -539,7 +539,7 @@ async def execute(self, input_data: Any, context: WorkflowContext) -> list[Any]:
 
 import pytest
 
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
 from tta_dev_observability.context.propagation import (
     extract_trace_context,
     inject_trace_context,
@@ -598,13 +598,4 @@ async def test_child_context_creation():
 5. **Create PR and get review**
 6. **Proceed to Phase 2** (primitive instrumentation)
 
-**Estimated Timeline:**
-- Phase 1: 2-3 weeks
-- Phase 2: 2-3 weeks
-- Phase 3: 1 week (testing)
-
-**Total:** 5-7 weeks for production-ready observability foundation
-
-
----
-**Logseq:** [[TTA.dev/Docs/Observability/Implementation_guide]]
+**Estimated Timeline:** Historical estimate from the original rollout plan.

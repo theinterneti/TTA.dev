@@ -1,5 +1,14 @@
 # Quick Start: Observability for Primitives, Integrations & Personas
 
+> [!WARNING]
+> Historical quickstart snapshot.
+>
+> This guide mixes older package imports and a broader Grafana/Alloy setup story than the
+> repository's currently verified March 2026 proof path.
+>
+> For current onboarding, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
 **Get full observability in 5 minutes**
 
 ---
@@ -9,7 +18,7 @@
 Your TTA.dev primitives **already have automatic OpenTelemetry tracing** via `InstrumentedPrimitive`:
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, RouterPrimitive
+from ttadev.primitives import SequentialPrimitive, RouterPrimitive
 
 # This workflow is ALREADY instrumented - no code changes needed!
 workflow = step1 >> RouterPrimitive(...) >> step3
@@ -29,7 +38,7 @@ workflow = step1 >> RouterPrimitive(...) >> step3
 ### Step 1: Initialize Observability (30 seconds)
 
 ```python
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
 
 # At application startup
 initialize_observability(
@@ -291,7 +300,3 @@ sum(rate(primitive_executions_total{
 ---
 
 **Last Updated:** November 15, 2025
-
-
----
-**Logseq:** [[TTA.dev/Docs/Quickstart/Observability_unified_quickstart]]
