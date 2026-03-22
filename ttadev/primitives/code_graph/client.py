@@ -27,6 +27,8 @@ def _falkordb_reachable(socket_path: str) -> bool:
     """Synchronous socket ping — returns True in <5ms when FalkorDB is up."""
     if not os.path.exists(socket_path):
         return False
+    if not hasattr(socket, "AF_UNIX"):
+        return False
     try:
         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
             s.settimeout(1.0)

@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import socket
-import threading
-import time
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -19,38 +17,42 @@ class TestFalkordbReachable:
         result = _falkordb_reachable(str(tmp_path / "nonexistent.sock"))
         assert result is False
 
-    def test_returns_false_on_connection_refused(self, tmp_path) -> None:
-        import os
-
-        sock_path = str(tmp_path / "test.sock")
-        # Bind but don't listen — connect will be refused
-        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        s.bind(sock_path)
-        try:
-            result = _falkordb_reachable(sock_path)
-        finally:
-            s.close()
-            if os.path.exists(sock_path):
-                os.unlink(sock_path)
+    def test_returns_false_when_unix_sockets_unsupported(self, monkeypatch, tmp_path) -> None:
+        monkeypatch.delattr(socket, "AF_UNIX", raising=False)
+        with patch("ttadev.primitives.code_graph.client.os.path.exists", return_value=True):
+            result = _falkordb_reachable(str(tmp_path / "existing.sock"))
         assert result is False
 
-    def test_returns_true_on_pong_response(self, tmp_path) -> None:
-        sock_path = str(tmp_path / "pong.sock")
+    def test_returns_false_on_connection_refused(self) -> None:
+        mock_socket = MagicMock()
+        mock_socket.connect.side_effect = OSError("connection refused")
+        mock_factory = MagicMock()
+        mock_factory.return_value.__enter__.return_value = mock_socket
 
-        def _server() -> None:
-            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            s.bind(sock_path)
-            s.listen(1)
-            conn, _ = s.accept()
-            conn.recv(1024)
-            conn.send(b"+PONG\r\n")
-            conn.close()
-            s.close()
+        with (
+            patch("ttadev.primitives.code_graph.client.os.path.exists", return_value=True),
+            patch.object(socket, "AF_UNIX", 1, create=True),
+            patch("ttadev.primitives.code_graph.client.socket.socket", mock_factory),
+        ):
+            result = _falkordb_reachable("/tmp/test.sock")
 
-        t = threading.Thread(target=_server, daemon=True)
-        t.start()
-        time.sleep(0.05)
-        result = _falkordb_reachable(sock_path)
+        assert result is False
+
+    def test_returns_true_on_pong_response(self) -> None:
+        mock_socket = MagicMock()
+        mock_socket.recv.return_value = b"+PONG\r\n"
+        mock_factory = MagicMock()
+        mock_factory.return_value.__enter__.return_value = mock_socket
+
+        with (
+            patch("ttadev.primitives.code_graph.client.os.path.exists", return_value=True),
+            patch.object(socket, "AF_UNIX", 1, create=True),
+            patch("ttadev.primitives.code_graph.client.socket.socket", mock_factory),
+        ):
+            result = _falkordb_reachable("/tmp/pong.sock")
+
+        mock_socket.connect.assert_called_once_with("/tmp/pong.sock")
+        mock_socket.send.assert_called_once_with(b"*1\r\n$4\r\nPING\r\n")
         assert result is True
 
 
