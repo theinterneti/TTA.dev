@@ -23,12 +23,12 @@ for attempt in range(3):
         await asyncio.sleep(2 ** attempt)
 
 # ✅ After
-from tta_dev_primitives.recovery import RetryPrimitive
+from ttadev.primitives import RetryPrimitive
+from ttadev.primitives.recovery.retry import RetryStrategy
 
 workflow = RetryPrimitive(
     primitive=api_call,
-    max_attempts=3,
-    backoff_factor=2.0
+    strategy=RetryStrategy(max_retries=3, backoff_base=2.0)
 )
 result = await workflow.execute(data, context)
 ```
@@ -43,7 +43,7 @@ except asyncio.TimeoutError:
     result = fallback_value
 
 # ✅ After
-from tta_dev_primitives.recovery import TimeoutPrimitive
+from ttadev.primitives import TimeoutPrimitive
 
 workflow = TimeoutPrimitive(
     primitive=operation,
@@ -65,7 +65,7 @@ async def get_data(key):
     return result
 
 # ✅ After
-from tta_dev_primitives.performance import CachePrimitive
+from ttadev.primitives import CachePrimitive
 
 workflow = CachePrimitive(
     primitive=expensive_fetch,
@@ -85,11 +85,11 @@ except Exception:
     result = await backup()
 
 # ✅ After
-from tta_dev_primitives.recovery import FallbackPrimitive
+from ttadev.primitives import FallbackPrimitive
 
 workflow = FallbackPrimitive(
     primary=primary_operation,
-    fallbacks=[backup_operation]
+    fallback=backup_operation
 )
 result = await workflow.execute(data, context)
 ```

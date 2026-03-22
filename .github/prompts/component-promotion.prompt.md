@@ -57,19 +57,13 @@ This workflow guides the systematic promotion of a TTA component through maturit
 3. Confirm specification file exists
 4. Review component status
 
-**Observability Integration (Langfuse):**
+**Observability Note:** Use the current repository observability stack if available. Do not use
+legacy `.hypertool` tracing examples.
+
 ```python
-# Start trace for component promotion
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
+# Example placeholder for repository-native observability hooks
+record_observation(
     name="component-promotion",
-    persona="release-manager",
-    chatmode="promotion"
-)
-
-# Log validation start
 langfuse.create_generation(
     trace=trace,
     name="pre-promotion-validation",

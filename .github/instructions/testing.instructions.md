@@ -16,8 +16,8 @@ description: "Test files - comprehensive testing with mocks and async support"
 
 ```python
 import pytest
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.testing import MockPrimitive
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.testing.mocks import MockPrimitive
 
 @pytest.mark.asyncio
 async def test_workflow_success():

@@ -20,8 +20,8 @@ Add comprehensive tests for ${file} using TTA.dev testing patterns.
 
 ```python
 import pytest
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.testing import MockPrimitive
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.testing.mocks import MockPrimitive
 
 class Test${input:ComponentName}:
     """Tests for ${input:ComponentName}."""

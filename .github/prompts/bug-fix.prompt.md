@@ -54,27 +54,8 @@ This workflow guides systematic bug investigation, root cause analysis, fix impl
 3. Attempt to reproduce
 4. Document reproduction
 
-**Observability Integration (Langfuse):**
-```python
-# Start trace for bug fix
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
-    name="bug-fix",
-    persona="backend-engineer",
-    chatmode="bug-fix"
-)
-
-# Log reproduction attempt
-langfuse.create_generation(
-    trace=trace,
-    name="reproduction",
-    model="gemini-2.5-flash",
-    prompt="Attempting to reproduce bug...",
-    completion="Reproduction successful/failed."
-)
-```
+**Observability Note:** Use the current repository observability stack if available. Do not copy
+legacy `.hypertool`-style tracing imports into new work.
 
 **Commands:**
 ```bash

@@ -102,15 +102,16 @@ uv run pytest --strict-markers           # Strict mode
 
 ```python
 import pytest
-from tta_dev_primitives.testing import MockPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.recovery.retry import RetryStrategy
+from ttadev.primitives.testing.mocks import MockPrimitive
 
 @pytest.mark.asyncio
 async def test_retry_primitive_success():
     """Test RetryPrimitive succeeds on first attempt."""
     # Arrange
     mock = MockPrimitive("operation", return_value={"success": True})
-    retry = RetryPrimitive(mock, max_retries=3)
+    retry = RetryPrimitive(mock, strategy=RetryStrategy(max_retries=3))
     context = WorkflowContext(workflow_id="test")
 
     # Act
@@ -124,15 +125,16 @@ async def test_retry_primitive_success():
 async def test_retry_primitive_eventual_success():
     """Test RetryPrimitive succeeds after failures."""
     # Arrange
-    mock = MockPrimitive(
-        "operation",
-        side_effect=[
-            ValueError("Fail 1"),
-            ValueError("Fail 2"),
-            {"success": True}  # Success on 3rd attempt
-        ]
-    )
-    retry = RetryPrimitive(mock, max_retries=3)
+    attempts = {"count": 0}
+
+    async def flaky_operation(input_data, context):
+        attempts["count"] += 1
+        if attempts["count"] < 3:
+            raise ValueError(f"Fail {attempts['count']}")
+        return {"success": True}
+
+    mock = MockPrimitive("operation", side_effect=flaky_operation)
+    retry = RetryPrimitive(mock, strategy=RetryStrategy(max_retries=3))
     context = WorkflowContext(workflow_id="test")
 
     # Act
@@ -146,12 +148,12 @@ async def test_retry_primitive_eventual_success():
 async def test_retry_primitive_max_retries_exceeded():
     """Test RetryPrimitive raises after max retries."""
     # Arrange
-    mock = MockPrimitive("operation", side_effect=ValueError("Always fails"))
-    retry = RetryPrimitive(mock, max_retries=2)
+    mock = MockPrimitive("operation", raise_error=ValueError("Always fails"))
+    retry = RetryPrimitive(mock, strategy=RetryStrategy(max_retries=2))
     context = WorkflowContext(workflow_id="test")
 
     # Act & Assert
-    with pytest.raises(WorkflowExecutionError):
+    with pytest.raises(ValueError):
         await retry.execute({"input": "data"}, context)
 
     assert mock.call_count == 3  # Initial + 2 retries

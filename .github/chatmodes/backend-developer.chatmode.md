@@ -69,24 +69,21 @@ You focus on implementing robust, composable backend components using TTA.dev pr
 ### Good: Primitive-Based Implementation
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive, TimeoutPrimitive
+from ttadev.primitives import LambdaPrimitive, RetryPrimitive, SequentialPrimitive, TimeoutPrimitive, WorkflowContext
+from ttadev.primitives.recovery.retry import RetryStrategy
 
 # Correct: Use primitives for reliability
 async def process_data(data: dict, context: WorkflowContext) -> dict:
-    workflow = (
-        validate_input >>
-        RetryPrimitive(
-            primitive=enrich_data,
-            max_retries=3,
-            backoff_strategy="exponential"
-        ) >>
-        TimeoutPrimitive(
-            primitive=save_to_db,
-            timeout_seconds=30.0
-        )
+    enrich = RetryPrimitive(
+        primitive=LambdaPrimitive(enrich_data),
+        strategy=RetryStrategy(max_retries=3, backoff_base=2.0),
     )
-    return await workflow.execute(context, data)
+    save = TimeoutPrimitive(
+        primitive=LambdaPrimitive(save_to_db),
+        timeout_seconds=30.0,
+    )
+    workflow = SequentialPrimitive([LambdaPrimitive(validate_input), enrich, save])
+    return await workflow.execute(data, context)
 ```
 
 ### Bad: Manual Implementation

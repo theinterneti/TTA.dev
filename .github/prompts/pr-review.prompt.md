@@ -8,17 +8,8 @@ Read `.github/copilot-instructions.md` and `AGENTS.md` for project-specific guid
 ## Your Task
 Perform a comprehensive code review of the current pull request, ensuring strict adherence to TTA.dev standards.
 
-**Observability Integration (Langfuse):**
-```python
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
-    name="pr-review",
-    persona="code-reviewer",
-    chatmode="review"
-)
-```
+**Observability Note:** If current observability is configured, attach the review session to that
+stack. Do not use legacy `.hypertool` tracing examples.
 
 ## Review Checklist
 

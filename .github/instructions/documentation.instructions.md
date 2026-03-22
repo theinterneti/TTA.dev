@@ -56,11 +56,10 @@ uv run pytest -v
 ### Good Example
 
 \`\`\`python
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive
+from ttadev.primitives import RetryPrimitive, WorkflowContext
 
-workflow = RetryPrimitive(my_operation, max_attempts=3)
-result = await workflow.execute(data, WorkflowContext())
+workflow = RetryPrimitive(my_operation)
+result = await workflow.execute(data, WorkflowContext(workflow_id="docs-example"))
 \`\`\`
 ```
 

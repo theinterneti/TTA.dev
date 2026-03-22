@@ -8,32 +8,23 @@ Read the target file and understand its functionality. Reference `PRIMITIVES_CAT
 ## Your Task
 Generate comprehensive tests for the specified code file, ensuring 100% coverage and adherence to TTA.dev standards.
 
-**Observability Integration (Langfuse):**
-```python
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
-    name="generate-tests",
-    persona="test-engineer",
-    chatmode="test-generation"
-)
-```
+**Observability Note:** If the repository has current observability configured, attach test
+generation work to that stack. Do not rely on legacy `.hypertool` tracing imports.
 
 ## Requirements
 
 1. **Test Structure**
    ```python
    import pytest
-   from tta_dev_primitives import WorkflowContext
-   from tta_dev_primitives.testing import MockPrimitive
+   from ttadev.primitives.core.base import WorkflowContext
+   from ttadev.primitives.testing.mocks import MockPrimitive
 
    @pytest.mark.asyncio
    async def test_feature_name():
        """Test description."""
        # Arrange
-       context = WorkflowContext(correlation_id="test-123")
-       mock = MockPrimitive(return_value={"result": "test"})
+       context = WorkflowContext(workflow_id="test-123")
+       mock = MockPrimitive("test-primitive", return_value={"result": "test"})
 
        # Act
        result = await primitive.execute(input_data, context)
@@ -72,7 +63,7 @@ trace = langfuse.start_trace(
 # tests/test_<module_name>.py
 
 import pytest
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
 # ... imports ...
 
 class Test<ClassName>:
@@ -81,7 +72,7 @@ class Test<ClassName>:
     @pytest.fixture
     def context(self):
         """Provide test context."""
-        return WorkflowContext(correlation_id="test-123")
+        return WorkflowContext(workflow_id="test-123")
 
     @pytest.mark.asyncio
     async def test_success_case(self, context):

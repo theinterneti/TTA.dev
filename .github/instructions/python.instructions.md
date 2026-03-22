@@ -32,7 +32,7 @@ import pytest
 from opentelemetry import trace
 
 # 3. Local
-from tta_dev_primitives import WorkflowPrimitive
+from ttadev.primitives import WorkflowPrimitive
 ```
 
 ## Primitives Pattern
@@ -41,12 +41,12 @@ All workflow logic must use primitives:
 
 ```python
 # ✅ Correct: Use primitives
-from tta_dev_primitives.recovery import RetryPrimitive
+from ttadev.primitives import RetryPrimitive
+from ttadev.primitives.recovery.retry import RetryStrategy
 
 workflow = RetryPrimitive(
     primitive=api_call,
-    max_retries=3,
-    backoff_strategy="exponential"
+    strategy=RetryStrategy(max_retries=3, backoff_base=2.0),
 )
 
 # ❌ Wrong: Manual retry loop

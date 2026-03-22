@@ -63,21 +63,12 @@ cat specs/features/feature-name.spec.md
 grep -r "component-name" specs/
 ```
 
-**Observability Integration (Langfuse):**
+**Observability Note:** Use the current repository observability stack if available. Do not copy
+legacy `.hypertool` tracing imports into new work.
+
 ```python
-# Start trace for feature implementation
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
-    name="feature-implementation",
-    persona="backend-engineer",
-    chatmode="feature-implementation"
-)
-
-# Log specification review
-langfuse.create_generation(
-    trace=trace,
+# Example placeholder for repository-native observability hooks
+record_observation(
     name="spec-review",
     model="gemini-2.5-flash",
     prompt="Reviewing specification for completeness...",

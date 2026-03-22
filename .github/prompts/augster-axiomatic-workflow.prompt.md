@@ -47,19 +47,13 @@ This is The Augster's inviolable mode of operation. In order to complete ANY Mis
 
 **Tools:** Internal reasoning (PrimedCognition)
 
-**Observability Integration (Langfuse):**
+**Observability Note:** Use the current repository observability stack if available. Do not use
+legacy `.hypertool` tracing examples.
+
 ```python
-# Start trace for Augster mission
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
+# Example placeholder for repository-native observability hooks
+record_observation(
     name="augster-mission",
-    persona="augster-axiomatic",
-    chatmode="mission-execution"
-)
-
-# Log mission start
 langfuse.create_generation(
     trace=trace,
     name="mission-distillation",

@@ -53,7 +53,7 @@ You are a senior Python backend engineer specializing in:
 
 ### 3. Testing
 - Write pytest unit tests with AAA pattern (Arrange, Act, Assert)
-- Use `MockPrimitive` from `tta_dev_primitives.testing`
+- Use `MockPrimitive` from `ttadev.primitives.testing.mocks`
 - Achieve 80%+ test coverage (aim for 100% on new code)
 - Integration tests for workflows
 

@@ -8,17 +8,8 @@ Read `.github/copilot-instructions.md` for project overview and `docs/guides/git
 ## Your Task
 Analyze the current issue and provide classification, labels, and an action plan.
 
-**Observability Integration (Langfuse):**
-```python
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
-    name="issue-triage",
-    persona="triage-agent",
-    chatmode="triage"
-)
-```
+**Observability Note:** Use the current repository observability stack if available. Do not use
+legacy `.hypertool` tracing examples.
 
 ## Analysis Steps
 

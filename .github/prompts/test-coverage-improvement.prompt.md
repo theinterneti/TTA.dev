@@ -39,19 +39,13 @@ This workflow guides the systematic improvement of test coverage for a component
 4. Prioritize critical uncovered code
 5. Categorize gaps (unit, integration, E2E)
 
-**Observability Integration (Langfuse):**
+**Observability Note:** Use the current repository observability stack if available. Do not use
+legacy `.hypertool` tracing examples.
+
 ```python
-# Start trace for coverage improvement
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
+# Example placeholder for repository-native observability hooks
+record_observation(
     name="test-coverage-improvement",
-    persona="qa-engineer",
-    chatmode="test-coverage"
-)
-
-# Log initial analysis
 langfuse.create_generation(
     trace=trace,
     name="coverage-analysis",

@@ -27,13 +27,14 @@ description: "Automation scripts - use primitives for orchestration and reliabil
 """Script using primitives for orchestration."""
 
 import asyncio
-from tta_dev_primitives import (
+from ttadev.primitives import (
+    LambdaPrimitive,
     ParallelPrimitive,
     RetryPrimitive,
     TimeoutPrimitive,
-    LambdaPrimitive,
     WorkflowContext,
 )
+from ttadev.primitives.recovery.retry import RetryStrategy
 
 async def process_item(data: dict, ctx: WorkflowContext) -> dict:
     """Process a single item."""
@@ -44,8 +45,7 @@ def build_workflow():
     return TimeoutPrimitive(
         RetryPrimitive(
             LambdaPrimitive(process_item),
-            max_attempts=3,
-            backoff_factor=2.0
+            strategy=RetryStrategy(max_retries=3, backoff_base=2.0),
         ),
         timeout_seconds=30.0
     )
@@ -72,7 +72,7 @@ for attempt in range(3):
         await asyncio.sleep(2 ** attempt)
 
 # ✅ Correct: Use RetryPrimitive
-workflow = RetryPrimitive(api_call, max_attempts=3, backoff_factor=2.0)
+workflow = RetryPrimitive(api_call, strategy=RetryStrategy(max_retries=3))
 result = await workflow.execute(data, context)
 ```
 
@@ -83,7 +83,7 @@ result = await workflow.execute(data, context)
 """Brief description of script purpose."""
 
 import asyncio
-from tta_dev_primitives import WorkflowContext, ...
+from ttadev.primitives import WorkflowContext, ...
 
 def build_workflow():
     """Build the workflow graph."""

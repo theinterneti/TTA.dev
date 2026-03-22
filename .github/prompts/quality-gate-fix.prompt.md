@@ -37,21 +37,12 @@ This workflow guides the systematic resolution of quality gate failures, ensurin
 3. Categorize failures by type
 4. Prioritize fixes
 
-**Observability Integration (Langfuse):**
+**Observability Note:** Use the current repository observability stack if available. Do not copy
+legacy `.hypertool` tracing imports into new work.
+
 ```python
-# Start trace for quality gate fix
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-
-langfuse = LangfuseIntegration()
-trace = langfuse.start_trace(
-    name="quality-gate-fix",
-    persona="qa-engineer",
-    chatmode="quality-fix"
-)
-
-# Log failure analysis
-langfuse.create_generation(
-    trace=trace,
+# Example placeholder for repository-native observability hooks
+record_observation(
     name="failure-analysis",
     model="gemini-2.5-flash",
     prompt="Analyzing quality gate failures...",

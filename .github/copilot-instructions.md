@@ -64,7 +64,7 @@ uv run ruff check . --fix   # Lint code
 
 - Framework: pytest with AAA pattern (Arrange, Act, Assert)
 - Async tests: `@pytest.mark.asyncio`
-- Mocking: `MockPrimitive` from `tta_dev_primitives.testing`
+- Mocking: `MockPrimitive` from `ttadev.primitives.testing.mocks`
 - Coverage: 80% minimum, **100% for new code**
 
 ## Workflow Primitives
@@ -73,7 +73,10 @@ uv run ruff check . --fix   # Lint code
 
 ```python
 # ✅ Use primitives
-workflow = CachePrimitive(ttl=3600) >> RetryPrimitive(max_retries=3) >> process
+base = LambdaPrimitive(process)
+workflow = RetryPrimitive(
+    CachePrimitive(base, cache_key_fn=lambda data, ctx: str(data), ttl_seconds=3600.0)
+)
 
 # ❌ Don't write manual loops
 for attempt in range(3):  # Never do this

@@ -31,7 +31,7 @@
 ### Test Coverage
 
 - [ ] Unit tests for all new primitives/functions
-- [ ] Unit tests use `MockPrimitive` from `tta_dev_primitives.testing`
+- [ ] Unit tests use `MockPrimitive` from `ttadev.primitives.testing.mocks`
 - [ ] Integration tests verify primitive composition
 - [ ] Test coverage ≥ 90% for new code
 - [ ] All tests pass: `uv run pytest -v`
@@ -167,7 +167,7 @@ Before opening a pull request:
 - **Agent Instructions:** [`AGENTS.md`](../AGENTS.md)
 - **Prompt Templates:** [`.vscode/tta-prompts.md`](../.vscode/tta-prompts.md)
 - **Coding Standards:** [`docs/guides/development/CodingStandards.md`](../docs/guides/development/CodingStandards.md)
-- **Testing Guide:** [`packages/tta-dev-primitives/AGENTS.md#testing`](../packages/tta-dev-primitives/AGENTS.md)
+- **Testing Guide:** [`docs/agent-guides/testing-architecture.md`](../docs/agent-guides/testing-architecture.md)
 
 ---
 

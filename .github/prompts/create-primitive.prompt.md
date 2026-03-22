@@ -20,7 +20,7 @@ Create a new workflow primitive following TTA.dev conventions.
 ```python
 """${input:PrimitiveName} primitive implementation."""
 
-from tta_dev_primitives.core.base import WorkflowPrimitive, WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 class ${input:PrimitiveName}Primitive(WorkflowPrimitive[${input:InputType}, ${input:OutputType}]):
     """${input:Description}.
