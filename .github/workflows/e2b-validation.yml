@@ -1,0 +1,49 @@
+name: E2B Sandbox Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ttadev/**'
+      - 'tests/**'
+      - 'scripts/**'
+
+# Security: Explicit minimal permissions
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2b-validation:
+    name: E2B Sandbox Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@797cf5c0a210b8b257f62fe1fbf9a46b4fc201bf  # v2
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Get changed Python files
+        id: changed
+        run: |
+          git diff --name-only origin/main...HEAD -- '*.py' > /tmp/changed_files.txt
+          echo "Changed files:"
+          cat /tmp/changed_files.txt
+
+      - name: Run E2B sandbox validation
+        env:
+          E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+        run: uv run python scripts/run_e2b_tests.py /tmp/changed_files.txt
