@@ -156,3 +156,61 @@ class TestAgentPipelineExecution:
         await pipeline.execute(PipelineTask(instruction="build X"), WorkflowContext())
         call_args = agent1.execute.call_args[0][0]
         assert call_args["instruction"] == "Review this:\nthe implementation"
+
+
+# ── Early exit tests ──────────────────────────────────────────────────────────
+
+
+class TestAgentPipelineEarlyExit:
+    async def test_stops_after_low_confidence_stage(self) -> None:
+        """Stage 0 returns confidence=0.3 (below 0.7 threshold).
+        Pipeline should stop, agent1 should never be called, completed_stages=1."""
+        agent0 = _make_mock_agent(response="stage0", confidence=0.3)
+        agent1 = _make_mock_agent(response="stage1", confidence=0.8)
+        pipeline = AgentPipeline([agent0, agent1], min_confidence=0.7)
+        result = await pipeline.execute(PipelineTask(instruction="start"), WorkflowContext())
+        assert agent1.execute.call_count == 0
+        assert result["completed_stages"] == 1
+
+    async def test_stopped_early_is_true(self) -> None:
+        """Same setup: stage 0 returns confidence=0.3 (below 0.7).
+        Assert stopped_early is True."""
+        agent0 = _make_mock_agent(response="stage0", confidence=0.3)
+        agent1 = _make_mock_agent(response="stage1", confidence=0.8)
+        pipeline = AgentPipeline([agent0, agent1], min_confidence=0.7)
+        result = await pipeline.execute(PipelineTask(instruction="start"), WorkflowContext())
+        assert result["stopped_early"] is True
+
+    async def test_completed_stages_reflects_stop(self) -> None:
+        """3-agent pipeline, min_confidence=0.6.
+        Stage 0 confidence=0.8 (ok), stage 1 confidence=0.4 (below).
+        Agent2 should never be called, completed_stages=2."""
+        agent0 = _make_mock_agent(response="stage0", confidence=0.8)
+        agent1 = _make_mock_agent(response="stage1", confidence=0.4)
+        agent2 = _make_mock_agent(response="stage2", confidence=0.9)
+        pipeline = AgentPipeline([agent0, agent1, agent2], min_confidence=0.6)
+        result = await pipeline.execute(PipelineTask(instruction="begin"), WorkflowContext())
+        assert result["completed_stages"] == 2
+        assert agent2.execute.call_count == 0
+
+    async def test_no_early_exit_when_confidence_ok(self) -> None:
+        """2-agent pipeline, min_confidence=0.5.
+        Both stages return confidence=0.8 (above threshold).
+        Should complete all stages, stopped_early=False."""
+        agent0 = _make_mock_agent(response="stage0", confidence=0.8)
+        agent1 = _make_mock_agent(response="stage1", confidence=0.8)
+        pipeline = AgentPipeline([agent0, agent1], min_confidence=0.5)
+        result = await pipeline.execute(PipelineTask(instruction="start"), WorkflowContext())
+        assert result["stopped_early"] is False
+        assert result["completed_stages"] == 2
+
+    async def test_min_confidence_zero_never_stops(self) -> None:
+        """2-agent pipeline, min_confidence=0.0.
+        Stage 0 returns confidence=0.0 (absolute minimum).
+        Condition 0.0 < 0.0 is False, so should NOT stop early."""
+        agent0 = _make_mock_agent(response="stage0", confidence=0.0)
+        agent1 = _make_mock_agent(response="stage1", confidence=0.8)
+        pipeline = AgentPipeline([agent0, agent1], min_confidence=0.0)
+        result = await pipeline.execute(PipelineTask(instruction="start"), WorkflowContext())
+        assert result["stopped_early"] is False
+        assert result["completed_stages"] == 2
