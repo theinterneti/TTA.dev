@@ -87,6 +87,21 @@ def _build_system_prompt(agent_hint: str, context_prefix: str) -> str:
     return persona
 
 
+_REFRAME_TEMPLATE = (
+    "Task: {instruction}\n\n"
+    "Instructions:\n"
+    "- Respond with a concrete, actionable answer\n"
+    "- Be specific and direct\n"
+    "- Do not refuse or hedge\n"
+    "- Format: start with the implementation, then explain briefly"
+)
+
+
+def _reframe_instruction(instruction: str) -> str:
+    """Wrap instruction in explicit structure to improve weak-model compliance."""
+    return _REFRAME_TEMPLATE.format(instruction=instruction)
+
+
 # ── Primitive ─────────────────────────────────────────────────────────────────
 
 
@@ -241,6 +256,45 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
         data = resp.json()
         return data["choices"][0]["message"]["content"] or ""
 
+    async def _run_chain_pass(
+        self,
+        chain: list[LLMClientConfig],
+        system: str,
+        instruction: str,
+        threshold: float,
+    ) -> tuple[str, float, str, Exception | None, int]:
+        """Run one full pass through the provider chain.
+
+        Returns (best_response, best_score, best_provider, last_exc, attempts).
+        best_response is "" if all providers raised.
+        """
+        best_response: str = ""
+        best_score: float = 0.0
+        best_provider: str = chain[0].provider
+        last_exc: Exception | None = None
+        attempts: int = 0
+
+        for cfg in chain:
+            attempts += 1
+            try:
+                content = await self._call_llm(cfg, system, instruction)
+            except Exception as exc:
+                logger.warning("DevelopmentCycle write: %s failed: %s", cfg.provider, exc)
+                last_exc = exc
+                continue
+            score = score_response(content)
+            if score > best_score or not best_response:
+                best_response, best_score, best_provider = content, score, cfg.provider
+            if quality_gate_passed(content, threshold):
+                break
+            logger.warning(
+                "DevelopmentCycle write: %s quality gate failed (score=%.2f), trying fallback",
+                cfg.provider,
+                score,
+            )
+
+        return best_response, best_score, best_provider, last_exc, attempts
+
     async def _write(
         self,
         instruction: str,
@@ -254,6 +308,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
 
         Iterates provider chain (per-call override or default from get_llm_provider_chain()).
         Accepts first response passing quality gate.
+        If pass 1 fails the gate: reframes instruction and retries (pass 2).
         If all fail the gate: returns best available (highest score).
         If all providers raise: re-raises last exception.
         """
@@ -267,43 +322,61 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
             effective_chain = chain if chain is not None else get_llm_provider_chain()
             effective_threshold = threshold if threshold is not None else _DEFAULT_THRESHOLD
 
-            best_response: str = ""
-            best_score: float = 0.0
-            best_provider: str = effective_chain[0].provider
-            last_exc: Exception | None = None
-            attempts: int = 0
+            # Pass 1 — original instruction
+            (
+                best_response,
+                best_score,
+                best_provider,
+                last_exc,
+                attempts,
+            ) = await self._run_chain_pass(
+                effective_chain, system, instruction, effective_threshold
+            )
 
-            for cfg in effective_chain:
-                attempts += 1
-                try:
-                    content = await self._call_llm(cfg, system, instruction)
-                except Exception as exc:
-                    logger.warning("DevelopmentCycle write: %s failed: %s", cfg.provider, exc)
-                    last_exc = exc
-                    continue
-                score = score_response(content)
-                if score > best_score or not best_response:
-                    best_response, best_score, best_provider = content, score, cfg.provider
-                if quality_gate_passed(content, effective_threshold):
-                    break
-                logger.warning(
-                    "DevelopmentCycle write: %s quality gate failed (score=%.2f), trying fallback",
-                    cfg.provider,
-                    score,
+            retry_count: int = 0
+
+            # Reframe if pass 1 failed quality gate
+            if best_response and not quality_gate_passed(best_response, effective_threshold):
+                logger.info("DevelopmentCycle write: reframing instruction for retry")
+                reframed = _reframe_instruction(instruction)
+                (
+                    retry_response,
+                    retry_score,
+                    retry_provider,
+                    retry_exc,
+                    _,
+                ) = await self._run_chain_pass(
+                    effective_chain, system, reframed, effective_threshold
                 )
+                retry_count = 1
+                # Keep best across both passes
+                if retry_score > best_score:
+                    best_response, best_score, best_provider = (
+                        retry_response,
+                        retry_score,
+                        retry_provider,
+                    )
+                elif not best_response and retry_response:
+                    best_response, best_score, best_provider = (
+                        retry_response,
+                        retry_score,
+                        retry_provider,
+                    )
+                # Also propagate last_exc from reframe for error path
+                if not best_response and retry_exc is not None:
+                    last_exc = retry_exc
 
             if not best_response:
-                # All providers raised exceptions
+                # All providers raised exceptions across all passes
                 if last_exc is not None:
                     raise last_exc
-                raise RuntimeError("LLM provider chain returned no response")  # unreachable
+                raise RuntimeError("LLM provider chain returned no response")
 
             if not quality_gate_passed(best_response, effective_threshold):
                 logger.warning(
                     "DevelopmentCycle write: all providers below threshold (best=%.2f)", best_score
                 )
 
-            retry_count: int = 0  # updated to 1 in Task 2 when reframe fires
             if span is not None:
                 span.set_attribute("model", "unknown")  # model is on cfg, not tracked here
                 span.set_attribute("response_chars", len(best_response))
@@ -311,6 +384,8 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                 span.set_attribute("write.provider", best_provider)
                 span.set_attribute("write.fallback_attempts", attempts)
                 span.set_attribute("write.retry_count", retry_count)
+                span.set_attribute("write.reframe_triggered", retry_count > 0)
+                span.set_attribute("write.final_confidence", best_score)
 
             return best_response, best_score, best_provider, retry_count
 

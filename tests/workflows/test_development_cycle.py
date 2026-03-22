@@ -910,3 +910,166 @@ class TestDevelopmentCyclePerCallConfig:
                 WorkflowContext(),
             )
         assert result["retry_count"] == 0
+
+
+class TestDevelopmentCycleReframe:
+    @pytest.mark.asyncio
+    async def test_reframe_triggered_when_all_fail_gate(self) -> None:
+        """All providers return refusal → gate fails → reframe attempted → retry_count == 1."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        # Both providers return low-scoring response on every call
+        def _make_bad_resp() -> MagicMock:
+            r = MagicMock()
+            r.raise_for_status = MagicMock()
+            r.json.return_value = {"choices": [{"message": {"content": _BAD_RESPONSE}}]}
+            return r
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        # 2 providers × 2 passes = 4 calls, all returning bad response
+        mock_http.post = AsyncMock(
+            side_effect=[_make_bad_resp(), _make_bad_resp(), _make_bad_resp(), _make_bad_resp()]
+        )
+
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert result["retry_count"] == 1
+
+    @pytest.mark.asyncio
+    async def test_reframe_passes_gate_uses_reframe_response(self) -> None:
+        """Pass 1 fails gate, pass 2 (reframe) passes gate → response is the reframe response."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        bad_resp = MagicMock()
+        bad_resp.raise_for_status = MagicMock()
+        bad_resp.json.return_value = {"choices": [{"message": {"content": _BAD_RESPONSE}}]}
+
+        good_resp = MagicMock()
+        good_resp.raise_for_status = MagicMock()
+        good_resp.json.return_value = {"choices": [{"message": {"content": _GOOD_RESPONSE}}]}
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        # Pass 1: openrouter→bad, ollama→bad; Pass 2: openrouter→good (stops at gate pass)
+        mock_http.post = AsyncMock(side_effect=[bad_resp, bad_resp, good_resp])
+
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert result["response"] == _GOOD_RESPONSE
+        assert result["retry_count"] == 1
+
+    @pytest.mark.asyncio
+    async def test_reframe_also_fails_returns_best_of_all(self) -> None:
+        """Both passes fail gate → best of all returned, retry_count == 1, no exception."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        # score_response uses length; slightly longer response will have a higher score
+        slightly_better = (
+            "I cannot help with that specific request as it falls outside my capabilities."
+        )
+        bad_resp_1 = MagicMock()
+        bad_resp_1.raise_for_status = MagicMock()
+        bad_resp_1.json.return_value = {"choices": [{"message": {"content": _BAD_RESPONSE}}]}
+
+        bad_resp_2 = MagicMock()
+        bad_resp_2.raise_for_status = MagicMock()
+        bad_resp_2.json.return_value = {"choices": [{"message": {"content": slightly_better}}]}
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        # 2 providers × 2 passes = 4 calls; slightly_better on last call wins
+        mock_http.post = AsyncMock(side_effect=[bad_resp_1, bad_resp_1, bad_resp_1, bad_resp_2])
+
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert result["retry_count"] == 1
+        assert result["response"] != ""
+
+    @pytest.mark.asyncio
+    async def test_no_reframe_when_primary_passes(self) -> None:
+        """Primary passes gate → retry_count == 0, LLM called only once."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response=_GOOD_RESPONSE)
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert mock_http.post.call_count == 1
+        assert result["retry_count"] == 0
+
+
+class TestReframeInstruction:
+    def test_contains_original_instruction(self) -> None:
+        from ttadev.workflows.development_cycle import _reframe_instruction
+
+        instruction = "Implement a retry primitive with exponential backoff"
+        reframed = _reframe_instruction(instruction)
+        assert instruction in reframed
+
+    def test_contains_structure_markers(self) -> None:
+        from ttadev.workflows.development_cycle import _reframe_instruction
+
+        reframed = _reframe_instruction("Do something")
+        assert "Task:" in reframed
+        assert "Instructions:" in reframed
+        assert "Format:" in reframed
+
+    def test_different_from_original(self) -> None:
+        from ttadev.workflows.development_cycle import _reframe_instruction
+
+        instruction = "Implement a retry primitive"
+        reframed = _reframe_instruction(instruction)
+        assert reframed != instruction
