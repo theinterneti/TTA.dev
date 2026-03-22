@@ -143,7 +143,7 @@ for the longer-term design direction.
 
 #### 1. Guided Workflow Module 📋
 
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/guided/` (to be created)
+**Location:** `ttadev/primitives/guided/` (proposed)
 
 - 📋 `GuidedWorkflow` - Interactive workflow execution
 - 📋 `Step` - Individual step with validation
@@ -200,7 +200,7 @@ Pre-built workflows for common tasks:
 
 #### 1. Knowledge Base Module 📋
 
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/knowledge/` (to be created)
+**Location:** `ttadev/primitives/knowledge/` (proposed)
 
 - 📋 `KnowledgeBase` - Store and query domain knowledge
 - 📋 `Topic` - Categorize knowledge domains
@@ -288,24 +288,22 @@ Pre-built workflows for common tasks:
    uv run python scripts/assess_deployment_readiness.py --target your-project
    ```
 
-2. **Use core workflow primitives** - Build reliable workflows
+   2. **Use core workflow primitives** - Build reliable workflows
 
    ```python
-   from tta_dev_primitives import SequentialPrimitive, ParallelPrimitive
-   from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive
+   from ttadev.primitives import FallbackPrimitive, RetryPrimitive
 
-   workflow = (
-       RetryPrimitive(api_call, max_retries=3) >>
-       FallbackPrimitive(primary=llm1, fallbacks=[llm2, llm3])
+   protected_call = RetryPrimitive(api_call)
+   workflow = FallbackPrimitive(
+       primary=protected_call,
+       fallback=backup_llm,
    )
    ```
 
-3. **Add observability** - Monitor your workflows
+   3. **Add observability** - Monitor your workflows
 
-   ```python
-   from observability_integration import initialize_observability
-
-   initialize_observability(service_name="my-app")
+   ```bash
+   uv run python -m ttadev.observability
    ```
 
 **What to wait for:**
@@ -319,8 +317,8 @@ Pre-built workflows for common tasks:
 You can create agent-like behavior with current primitives:
 
 ```python
-from tta_dev_primitives import LambdaPrimitive
-from tta_dev_primitives.orchestration import DelegationPrimitive
+from ttadev.primitives.core.base import LambdaPrimitive
+from ttadev.primitives.orchestration import DelegationPrimitive
 
 # Simulate DeveloperAgent
 developer = LambdaPrimitive(
@@ -338,7 +336,8 @@ qa = LambdaPrimitive(
 team = developer >> qa
 ```
 
-See: `packages/tta-dev-primitives/examples/agent_patterns.py` (coming soon)
+See: Phase 2 specs and examples are still being aligned; do not assume a canonical
+`agent_patterns.py` example exists yet.
 
 ---
 
@@ -375,7 +374,7 @@ See: `packages/tta-dev-primitives/examples/agent_patterns.py` (coming soon)
 
 ## Success Stories
 
-*As users build with TTA.dev, we'll document success stories here.*
+*This section is aspirational placeholder material, not verified adoption data yet.*
 
 ### Using Lifecycle Primitives
 
@@ -395,11 +394,11 @@ See: `packages/tta-dev-primitives/examples/agent_patterns.py` (coming soon)
 
 | Phase | Status | Timeline | Key Deliverable |
 |-------|--------|----------|-----------------|
-| Phase 1: Foundation | ✅ Complete | Q4 2025 | Lifecycle primitives + core workflows |
-| Phase 2: Agents | 📋 Planned | Q1 2026 | Specialized domain expert agents |
+| Phase 1: Foundation | ⚠ Mostly implemented | Q4 2025 | Core primitives + observability foundation |
+| Phase 2: Agents | ⚠ Partially implemented | Q1 2026 | Role-based agent system |
 | Phase 3: Guided Workflows | 📋 Planned | Q2 2026 | Interactive step-by-step guidance |
 | Phase 4: Knowledge Base | 📋 Planned | Q3 2026 | Contextual best practices |
-| Phase 5: IDE Integration | 📋 Concept | Q4 2026 | VS Code extension |
+| Phase 5: IDE Integration | 📋 Concept | Q4 2026 | IDE and editor integrations |
 
 ---
 
@@ -465,12 +464,12 @@ The **Atomic DevOps Architecture** represents the ultimate evolution of TTA.dev 
 
 ## Related Documentation
 
-- **Vision:** `VISION.md` - Long-term aspirational vision
-- **Current State:** `PRIMITIVES_CATALOG.md` - What exists today
+- **Vision vs Reality:** `USER_JOURNEY.md` - current framing of ambition vs verified behavior
+- **Current State:** `PRIMITIVES_CATALOG.md` - broad reference, still being refreshed
 - **Atomic DevOps:** `docs/architecture/ATOMIC_DEVOPS_ARCHITECTURE.md` - Complete architecture
-- **Audit:** `UNIVERSAL_AGENTIC_WORKFLOWS_AUDIT.md` - Gap analysis
+- **Getting Started:** `GETTING_STARTED.md` - current verified proof path
 - **Architecture:** `docs/architecture/` - Technical decisions
-- **Examples:** `packages/tta-dev-primitives/examples/` - Working code
+- **Examples:** `scripts/test_realtime_traces.py` - currently re-verified runnable example
 
 ---
 
@@ -479,9 +478,4 @@ The **Atomic DevOps Architecture** represents the ultimate evolution of TTA.dev 
 - GitHub Discussions: <https://github.com/theinterneti/TTA.dev/discussions>
 - Issues: <https://github.com/theinterneti/TTA.dev/issues>
 
-**Last Updated:** November 4, 2025
-**Next Review:** December 1, 2025 (monthly updates)
-
-
----
-**Logseq:** [[TTA.dev/Roadmap]]
+**Last Updated:** March 22, 2026

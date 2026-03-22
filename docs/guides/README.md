@@ -2,10 +2,17 @@
 
 Practical guides for working with TTA.dev components.
 
+> [!WARNING]
+> This directory contains a mix of current guides, migration notes, and historical implementation
+> write-ups. For the March 2026 canonical experience, start with the top-level
+> [`GETTING_STARTED.md`](../../GETTING_STARTED.md), [`QUICKSTART.md`](../../QUICKSTART.md), and
+> [`USER_JOURNEY.md`](../../USER_JOURNEY.md) before trusting older guides here.
+
 ## Getting Started
 
-- **[Getting Started Guide](../../GETTING_STARTED.md)** - Quick start and core concepts
-- **[Phase 3 Examples Guide](../../PHASE3_EXAMPLES_COMPLETE.md)** - 5 production-ready workflows with complete implementation details
+- **[Getting Started Guide](../../GETTING_STARTED.md)** - current setup and verified proof path
+- **[Quickstart](../../QUICKSTART.md)** - shortest honest verification flow
+- **[User Journey](../../USER_JOURNEY.md)** - current vision vs reality framing
 
 ## Development Guides
 
@@ -93,44 +100,22 @@ Practical guides for working with TTA.dev components.
 - **[Copilot Toolsets Guide](copilot-toolsets-guide.md)** - Using GitHub Copilot toolsets in TTA.dev
 - **[Integration Primitives Quickref](integration-primitives-quickref.md)** - Quick reference for integration patterns
 
-## Production Workflows
+## Advanced and historical workflow material
 
-### Recommended Starting Points
+### Recommended starting points
 
-The **Phase 3 Examples** demonstrate production-ready patterns:
+Some of the files below are still useful for design ideas, but they should not be treated as
+verified turnkey examples without re-checking the code and imports first:
 
-1. **[RAG Workflow](../../platform/primitives/examples/rag_workflow.py)**
-   - Caching + Fallback + Retry
-   - Reduces costs by 40-60%
-   - Use for: Document retrieval systems
+- [`MULTI_MODEL_ORCHESTRATION_SUMMARY.md`](MULTI_MODEL_ORCHESTRATION_SUMMARY.md)
+- [`orchestration-configuration-guide.md`](orchestration-configuration-guide.md)
+- [`how-to-add-observability.md`](how-to-add-observability.md)
+- [`UNIFIED_OBSERVABILITY_ARCHITECTURE.md`](UNIFIED_OBSERVABILITY_ARCHITECTURE.md)
 
-2. **[Agentic RAG](../../platform/primitives/examples/agentic_rag_workflow.py)**
-   - Router + Document Grading + Hallucination Detection
-   - Production RAG pattern from NVIDIA
-   - Use for: High-quality RAG with quality controls
+For a currently verified runnable example, prefer:
 
-3. **[Cost Tracking](../../platform/primitives/examples/cost_tracking_workflow.py)**
-   - Budget enforcement + Per-model metrics
-   - Prometheus integration
-   - Use for: Managing LLM API costs
-
-4. **[Streaming](../../platform/primitives/examples/streaming_workflow.py)**
-   - Token-by-token streaming + Buffering
-   - Throughput metrics
-   - Use for: Real-time response streaming
-
-5. **[Multi-Agent](../../platform/primitives/examples/multi_agent_workflow.py)**
-   - Coordinator + Parallel specialists + Aggregation
-   - Agent coordination pattern
-   - Use for: Complex multi-agent workflows
-
-**All examples:**
-- ✅ Use InstrumentedPrimitive pattern
-- ✅ Include automatic OpenTelemetry tracing
-- ✅ Have Prometheus metrics
-- ✅ Are validated and tested
-
-**Detailed Implementation:** See [PHASE3_EXAMPLES_COMPLETE.md](../../PHASE3_EXAMPLES_COMPLETE.md)
+- [`../../scripts/test_realtime_traces.py`](../../scripts/test_realtime_traces.py)
+- [`../../GETTING_STARTED.md`](../../GETTING_STARTED.md)
 
 ## Architecture
 
@@ -149,8 +134,4 @@ When adding a new guide:
 
 ---
 
-**Last Updated:** October 30, 2025
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Readme]]
+**Last Updated:** March 22, 2026

@@ -71,4 +71,5 @@ curl http://localhost:8000/api/v2/spans | head
 - If `/api/v2/spans` is empty immediately after the script runs, wait a few seconds and query it
   again. The ingestion loop is asynchronous.
 - Older demo commands that reference `src/...`, `ttadev/ui/observability_server.py`, or
-  `ttadev/hello_world.py` are being migrated and should not be treated as canonical proof paths.
+  `ttadev/hello_world.py` may not match the current APIs yet and should not be treated as canonical
+  proof paths.

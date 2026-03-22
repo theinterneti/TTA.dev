@@ -69,7 +69,8 @@ Expected results:
 
 ## What is still under repair
 
-- older public demos such as `ttadev/hello_world.py` and `examples/demo_workflow.py`
+- older public demos such as `ttadev/hello_world.py` and `examples/demo_workflow.py` that do not
+  yet match the current primitive APIs
 - older docs that still reference `src/...`, `ttadev/ui/observability_server.py`, or
   `tta_dev_observability`
 - some partial integrations and knowledge-base features

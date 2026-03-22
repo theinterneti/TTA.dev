@@ -53,7 +53,7 @@ tests/              # Test suite
 | [python-standards](docs/agent-guides/python-standards.md) | Types, naming, imports |
 | [sdd-constitution](docs/agent-guides/sdd-constitution.md) | Full SDD §1-§4 |
 | [observability-guide](docs/agent-guides/observability-guide.md) | OpenTelemetry integration |
-| [todo-management](docs/agent-guides/todo-management.md) | Logseq TODOs, tags |
+| [todo-management](docs/agent-guides/todo-management.md) | Repository TODO format and session task tracking |
 | [secrets-guide](docs/agent-guides/secrets-guide.md) | API keys, `.env`, 1Password CLI |
 | [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md) | LLM provider hierarchy, OpenRouter + Ollama |
 

@@ -2,6 +2,30 @@
 
 Index and navigation guide for TTA.dev documentation.
 
+## Canonical vs historical docs
+
+Not every document under `docs/` describes the current verified user experience.
+
+Use these as the primary, current entrypoints first:
+
+- [`../README.md`](../README.md)
+- [`../GETTING_STARTED.md`](../GETTING_STARTED.md)
+- [`../QUICKSTART.md`](../QUICKSTART.md)
+- [`../USER_JOURNEY.md`](../USER_JOURNEY.md)
+- [`../ROADMAP.md`](../ROADMAP.md)
+- [`../AGENTS.md`](../AGENTS.md)
+
+Many other files in `docs/` are still valuable, but they may be one of:
+
+- research documents
+- migration plans
+- implementation summaries
+- historical design records
+- specs for planned work rather than shipped behavior
+
+If a guide disagrees with the top-level docs, prefer the top-level docs and treat the guide as
+historical until refreshed.
+
 ## Directory Structure
 
 ```text
@@ -38,7 +62,7 @@ API reference, protocol documentation, and specifications.
 
 | Subdirectory | Contents |
 |-------------|----------|
-| [mcp/](reference/mcp/) | Model Context Protocol usage, integration, and Hypertool docs |
+| [mcp/](reference/mcp/) | Model Context Protocol usage and integration docs |
 | [mcp-references/](reference/mcp-references/) | MCP server reference (GitHub, Grafana, filesystem, etc.) |
 | [models/](reference/models/) | Model selection strategy and evaluation |
 | [specs/](reference/specs/) | Formal SDD specifications ([index](reference/specs/README.md)) |

@@ -1,9 +1,16 @@
 # Hypertool to GitHub Copilot Native Migration Plan
 **Date:** March 7, 2026
-**Status:** AWAITING APPROVAL
-**Estimated Time:** 4-6 hours
+**Status:** Historical migration note
+**Estimated Time:** Superseded
 
 ---
+
+> [!WARNING]
+> This file is now historical context, not an active migration plan.
+>
+> TTA.dev has already moved into GitHub Copilot custom agents, skills, and repository instructions.
+> Remaining Hypertool references should be treated as cleanup candidates, not as a live migration
+> program.
 
 ## Executive Summary
 

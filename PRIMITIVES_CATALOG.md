@@ -6,6 +6,29 @@
 
 ---
 
+> [!WARNING]
+> This catalog is still being migrated from older package layouts and examples.
+> The most trustworthy current proof path is in [`GETTING_STARTED.md`](GETTING_STARTED.md),
+> [`QUICKSTART.md`](QUICKSTART.md), and the runnable script
+> [`scripts/test_realtime_traces.py`](scripts/test_realtime_traces.py).
+>
+> In particular:
+> - some sections still use the older `tta_dev_primitives` import paths instead of the current
+>   `ttadev.primitives` namespace
+> - some adaptive and Logseq examples describe historical or incomplete surfaces
+> - examples in this file should be treated as reference-in-progress until the catalog refresh lands
+
+## Current reality first
+
+If you are trying to build or verify something today, prefer:
+
+- `from ttadev.primitives import ...`
+- `from ttadev.primitives.core.base import WorkflowContext`
+- `uv run python -m ttadev.observability`
+- `uv run python scripts/test_realtime_traces.py`
+
+---
+
 ## Overview
 
 This catalog provides a complete reference for all TTA.dev workflow primitives, organized by category with import paths, usage examples, and links to source code.
