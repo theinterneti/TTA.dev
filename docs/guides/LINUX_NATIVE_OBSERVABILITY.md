@@ -1,9 +1,18 @@
 # Linux-Native Observability Stack Guide
 
-**Migrating from Docker Desktop to Native Linux Services**
+> [!WARNING]
+> Historical / environment-specific observability guide.
+>
+> This document describes a Linux-native Grafana/Alloy migration path. It may still be useful for
+> local infrastructure experiments, but it is not the canonical March 2026 proof path for the repo.
+>
+> For the current verified path, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
+**Migrating from Docker Desktop to native Linux services**
 
 **Last Updated:** 2025-11-15
-**Status:** Production-Ready Alternative
+**Status:** Historical / environment-specific alternative
 
 ---
 
@@ -692,9 +701,4 @@ Create these additional guides:
 
 **Last Updated:** 2025-11-15
 **Author:** TTA.dev Team
-**Status:** Production-Ready
-
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Linux_native_observability]]
+**Status:** Historical / environment-specific alternative

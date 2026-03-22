@@ -1,5 +1,15 @@
 # 🎉 Linux-Native Observability Implementation Complete!
 
+> [!WARNING]
+> Historical completion summary.
+>
+> This document records a 2025 implementation milestone for a Linux-native observability migration.
+> It is useful as history, but it is not the canonical March 2026 onboarding or proof path for this
+> repository.
+>
+> For current repo reality, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
 **Date:** 2025-11-15
 **Implemented by:** GitHub Copilot
 **Review Status:** Ready for Testing
@@ -537,7 +547,3 @@ Everything is ready for you to:
 - **Logseq TODO:** `logseq/journals/2025_11_15.md`
 
 **Good luck with the migration! 🚀**
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Observability_migration_complete]]

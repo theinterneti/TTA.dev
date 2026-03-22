@@ -1,5 +1,13 @@
 # Multi-Workspace Observability Configuration
 
+> [!WARNING]
+> Historical workspace-specific observability note.
+>
+> This guide assumes a specific multi-workspace local setup from 2025 and should not be treated as
+> the default current-state guidance for all contributors.
+>
+> For current repo onboarding, prefer `README.md`, `GETTING_STARTED.md`, and `QUICKSTART.md`.
+
 **Managing observability across multiple TTA.dev workspace clones**
 
 **Last Updated:** 2025-11-15
@@ -596,9 +604,5 @@ scripts/setup-native-observability.sh
 ---
 
 **Last Updated:** 2025-11-15
-**Status:** Production-Ready
+**Status:** Historical workspace note
 **Recommendation:** Use simple approach (same port, different service names) for most cases
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Multi_workspace_observability]]

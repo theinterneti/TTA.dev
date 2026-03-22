@@ -1,5 +1,14 @@
 # Docker-Free Observability Migration - Summary
 
+> [!WARNING]
+> Historical migration summary.
+>
+> This guide describes a 2025 Linux-native observability migration path. Keep it as an
+> infrastructure note, not as the default current-state guide for the repository.
+>
+> For the current verified path, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
 **Date:** 2025-11-15
 **Status:** Ready for Implementation
 **Estimated Time:** 30-60 minutes
@@ -448,9 +457,4 @@ podman-compose -f docker-compose.yml --profile observability up -d
 **Created:** 2025-11-15
 **Author:** GitHub Copilot
 **Purpose:** Migration from Docker Desktop to Linux-native observability
-**Outcome:** Reliable, lightweight, production-ready observability stack
-
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Docker_free_observability_migration]]
+**Outcome:** Historical migration summary for a Linux-native observability stack
