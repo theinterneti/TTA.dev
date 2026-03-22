@@ -1,6 +1,15 @@
 # Verify Grafana Cloud Integration ✅
 
-**Status:** Alloy is successfully sending metrics to Grafana Cloud US West!
+> [!WARNING]
+> Historical verification snapshot.
+>
+> This document records a successful Grafana Cloud verification for one specific setup. It should
+> not be treated as the default proof path for the repository today.
+>
+> For the current verified path, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
+**Status:** Historical Grafana Cloud verification snapshot
 
 ## Quick Verification
 
@@ -205,7 +214,3 @@ All configuration is in place:
 
 **Setup Completed:** 2025-11-15 19:34 PST
 **Next Action:** Open Grafana Cloud and explore your metrics!
-
-
----
-**Logseq:** [[TTA.dev/Docs/Quickstart/Verify_grafana_cloud]]

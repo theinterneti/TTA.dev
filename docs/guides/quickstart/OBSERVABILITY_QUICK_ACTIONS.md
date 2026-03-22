@@ -1,6 +1,15 @@
 # 🚀 TTA.dev Observability - Quick Actions
 
-**Setup Status:** ✅ Complete | **Last Updated:** 2025-11-15 20:30 PST
+> [!WARNING]
+> Historical quick-actions card.
+>
+> This page assumes a specific 2025 Alloy/Grafana Cloud setup. Keep it as a local operations note,
+> not as the default current-state quickstart for the repository.
+>
+> For the current verified path, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
+**Setup Status:** Historical setup snapshot | **Last Updated:** 2025-11-15 20:30 PST
 
 ---
 
@@ -321,8 +330,4 @@ Run this checklist to verify everything is working:
 
 **Quick Actions Card Version:** 1.0
 **Last Updated:** 2025-11-15 20:30 PST
-**System Status:** Production Ready 🚀
-
-
----
-**Logseq:** [[TTA.dev/Docs/Quickstart/Observability_quick_actions]]
+**System Status:** Historical setup snapshot

@@ -1,8 +1,17 @@
 # TTA.dev Observability Test Results ✅
 
+> [!WARNING]
+> Historical test-results snapshot.
+>
+> This page captures the output of a 2025 observability test run. It is useful as evidence that a
+> prior setup worked, but it is not the canonical March 2026 proof path for the repository.
+>
+> For current onboarding and verification, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`,
+> `python -m ttadev.observability`, and `scripts/test_realtime_traces.py`.
+
 **Test Date:** November 15, 2025
 **Test Suite:** `test_real_workflow.py`
-**Status:** All tests passed successfully
+**Status:** Historical results snapshot
 
 ---
 
@@ -484,7 +493,7 @@ cat /etc/alloy/config.alloy
 - 16,775 samples sent to Grafana Cloud
 - Zero retry failures
 
-✅ **Production Ready**
+✅ **Historical successful run**
 - No code changes needed
 - Low overhead
 - Comprehensive metrics
@@ -496,8 +505,4 @@ cat /etc/alloy/config.alloy
 **Test Completed:** 2025-11-15 20:22:19 PST
 **Next Action:** Open Grafana Cloud and explore your metrics!
 
-🎉 **TTA.dev Observability is LIVE!**
-
-
----
-**Logseq:** [[TTA.dev/Docs/Quickstart/Observability_test_results]]
+🎉 **TTA.dev observability was confirmed working in this historical test run.**
