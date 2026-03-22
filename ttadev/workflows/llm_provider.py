@@ -31,38 +31,6 @@ class LLMClientConfig:
     provider: str  # "openrouter" | "ollama"
 
 
-def get_llm_client() -> LLMClientConfig:
-    """Return LLM client config following the project provider strategy.
-
-    Selection logic:
-    1. If ``LLM_FORCE_PROVIDER=ollama``, use Ollama unconditionally.
-    2. If ``OPENROUTER_API_KEY`` is set, use OpenRouter.
-    3. Otherwise, fall back to Ollama.
-
-    Relevant env vars:
-    - ``OPENROUTER_API_KEY``   — OpenRouter API key
-    - ``HINDSIGHT_LLM_MODEL``  — preferred OpenRouter model
-    - ``LLM_FORCE_PROVIDER``   — set to "ollama" to bypass OpenRouter
-    - ``OLLAMA_BASE_URL``      — Ollama base URL (default: localhost:11434/v1)
-    - ``OLLAMA_MODEL``         — Ollama model (default: qwen2.5:7b)
-    """
-    force = os.environ.get("LLM_FORCE_PROVIDER", "").lower()
-    if force == "ollama":
-        return _ollama_config()
-
-    api_key = os.environ.get("OPENROUTER_API_KEY", "")
-    if api_key:
-        model = os.environ.get("HINDSIGHT_LLM_MODEL", _DEFAULT_OPENROUTER_MODEL)
-        return LLMClientConfig(
-            base_url=_OPENROUTER_BASE_URL,
-            model=model,
-            api_key=api_key,
-            provider="openrouter",
-        )
-
-    return _ollama_config()
-
-
 def get_llm_provider_chain() -> list[LLMClientConfig]:
     """Return ordered list of LLM providers to try, primary first.
 
@@ -89,6 +57,24 @@ def get_llm_provider_chain() -> list[LLMClientConfig]:
         return [openrouter_cfg, _ollama_config()]
 
     return [_ollama_config()]
+
+
+def get_llm_client() -> LLMClientConfig:
+    """Return LLM client config following the project provider strategy.
+
+    Selection logic:
+    1. If ``LLM_FORCE_PROVIDER=ollama``, use Ollama unconditionally.
+    2. If ``OPENROUTER_API_KEY`` is set, use OpenRouter.
+    3. Otherwise, fall back to Ollama.
+
+    Relevant env vars:
+    - ``OPENROUTER_API_KEY``   — OpenRouter API key
+    - ``HINDSIGHT_LLM_MODEL``  — preferred OpenRouter model
+    - ``LLM_FORCE_PROVIDER``   — set to "ollama" to bypass OpenRouter
+    - ``OLLAMA_BASE_URL``      — Ollama base URL (default: localhost:11434/v1)
+    - ``OLLAMA_MODEL``         — Ollama model (default: qwen2.5:7b)
+    """
+    return get_llm_provider_chain()[0]
 
 
 def _ollama_config() -> LLMClientConfig:
