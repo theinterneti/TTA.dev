@@ -303,15 +303,16 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                     "DevelopmentCycle write: all providers below threshold (best=%.2f)", best_score
                 )
 
+            retry_count: int = 0  # updated to 1 in Task 2 when reframe fires
             if span is not None:
                 span.set_attribute("model", "unknown")  # model is on cfg, not tracked here
                 span.set_attribute("response_chars", len(best_response))
                 span.set_attribute("write.confidence", best_score)
                 span.set_attribute("write.provider", best_provider)
                 span.set_attribute("write.fallback_attempts", attempts)
-                span.set_attribute("write.retry_count", 0)
+                span.set_attribute("write.retry_count", retry_count)
 
-            return best_response, best_score, best_provider, 0
+            return best_response, best_score, best_provider, retry_count
 
     async def _validate(self, impact_report: ImpactReport, context: WorkflowContext) -> bool:
         """Step 4 — Validate: run related tests in E2B sandbox."""

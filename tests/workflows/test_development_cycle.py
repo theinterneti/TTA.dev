@@ -813,7 +813,7 @@ class TestDevelopmentCyclePerCallConfig:
         )
         with patch(
             "ttadev.workflows.development_cycle.get_llm_provider_chain",
-            return_value=_make_chain(["openrouter"]),
+            return_value=_make_chain(["openrouter", "ollama"]),
         ):
             result = await cycle.execute(
                 DevelopmentTask(
