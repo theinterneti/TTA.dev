@@ -50,9 +50,11 @@ class AgentPipeline(InstrumentedPrimitive[PipelineTask, PipelineResult]):
         agents: Ordered list of DevelopmentCycle instances (minimum 1).
         min_confidence: If set, halt after any stage with confidence < this value.
             Must be in [0.0, 1.0]. None means never stop early.
-        stage_transforms: Per-stage callables mapping DevelopmentResult → str.
-            Length must equal len(agents) if provided. None entries use default
-            (lambda r: r["response"]).
+        stage_transforms: Per-stage callables mapping DevelopmentResult → str for stages 1+.
+            stage_transforms[0] is never invoked (stage 0 always receives the original
+            instruction). stage_transforms[i] (i ≥ 1) transforms stage i-1's result into
+            stage i's instruction. Length must equal len(agents) if provided. None entries
+            use the default (lambda r: r["response"]).
     """
 
     def __init__(

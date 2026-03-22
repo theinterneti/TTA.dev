@@ -145,3 +145,14 @@ class TestAgentPipelineExecution:
         assert result["completed_stages"] == 3
         assert result["stopped_early"] is False
         assert len(result["stages"]) == 3
+
+    async def test_custom_transform_at_stage1(self) -> None:
+        def prefix_transform(result: DevelopmentResult) -> str:
+            return f"Review this:\n{result['response']}"
+
+        agent0 = _make_mock_agent(response="the implementation")
+        agent1 = _make_mock_agent(response="the review")
+        pipeline = AgentPipeline([agent0, agent1], stage_transforms=[None, prefix_transform])
+        await pipeline.execute(PipelineTask(instruction="build X"), WorkflowContext())
+        call_args = agent1.execute.call_args[0][0]
+        assert call_args["instruction"] == "Review this:\nthe implementation"
