@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -248,11 +248,14 @@ class TestDevelopmentCycleRecall:
 
 class TestDevelopmentCycleWrite:
     @pytest.mark.asyncio
-    async def test_write_raises_on_empty_llm_response(self) -> None:
+    async def test_write_short_llm_response_returns_low_confidence(self) -> None:
+        """Short LLM response no longer raises — quality gate scores it low."""
         from ttadev.primitives.core.base import WorkflowContext
         from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
 
-        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response="")
+        # A very short response: length < 20 (-0.8) + < 80 (-0.3) = 1.0 - 1.1 = 0.0 (clamped)
+        short_response = "Short."
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response=short_response)
         cycle = DevelopmentCycle(
             bank_id="tta-dev",
             _memory=mock_memory,
@@ -260,11 +263,16 @@ class TestDevelopmentCycleWrite:
             _executor=mock_executor,
             _http=mock_http,
         )
-        with pytest.raises(ValueError, match="LLM returned empty response"):
-            await cycle.execute(
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter"]),
+        ):
+            result = await cycle.execute(
                 DevelopmentTask(instruction="Explain the cache primitive"),
                 WorkflowContext(),
             )
+        assert result["confidence"] == 0.0
+        assert result["response"] == short_response
 
 
 class TestDevelopmentCycleWriteFull:
@@ -527,3 +535,221 @@ class TestDevelopmentCycleIntegration:
         messages = body.get("messages", [])
         sys_msg = next(m["content"] for m in messages if m["role"] == "system")
         assert "QA engineer" in sys_msg
+
+
+# ── Quality Gate + Fallback Tests ─────────────────────────────────────────────
+
+from ttadev.workflows.llm_provider import LLMClientConfig  # noqa: E402
+
+
+def _make_chain(providers: list[str]) -> list[LLMClientConfig]:
+    configs = {
+        "openrouter": LLMClientConfig(
+            base_url="https://openrouter.ai/api/v1",
+            model="test-model",
+            api_key="test-key",  # pragma: allowlist secret
+            provider="openrouter",
+        ),
+        "ollama": LLMClientConfig(
+            base_url="http://localhost:11434/v1",
+            model="test-model",
+            api_key="ollama",  # pragma: allowlist secret
+            provider="ollama",
+        ),
+    }
+    return [configs[p] for p in providers]
+
+
+# A response long enough to pass the quality gate (>80 chars, no refusal patterns)
+_GOOD_RESPONSE = (
+    "Here is a thorough implementation with full type annotations, "
+    "docstrings, and error handling as requested by the user. "
+    "The solution uses async/await throughout."
+)
+
+# A response that fails the quality gate (short, < 80 chars)
+_BAD_RESPONSE = "I cannot help with that."
+
+
+class TestDevelopmentCycleQualityGate:
+    @pytest.mark.asyncio
+    async def test_result_includes_confidence_and_provider(self) -> None:
+        """Happy path: DevelopmentResult has confidence and provider fields."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response=_GOOD_RESPONSE)
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert result["confidence"] >= 0.0
+        assert result["provider"] in ("openrouter", "ollama")
+
+    @pytest.mark.asyncio
+    async def test_write_no_fallback_when_primary_passes(self) -> None:
+        """When primary provider passes quality gate, http.post called once."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response=_GOOD_RESPONSE)
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert mock_http.post.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_write_fallback_on_low_confidence(self) -> None:
+        """Primary scores low → fallback called, result.provider = fallback provider."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        # First call returns refusal (fails gate), second returns good response
+        bad_resp = MagicMock()
+        bad_resp.raise_for_status = MagicMock()
+        bad_resp.json.return_value = {"choices": [{"message": {"content": _BAD_RESPONSE}}]}
+
+        good_resp = MagicMock()
+        good_resp.raise_for_status = MagicMock()
+        good_resp.json.return_value = {"choices": [{"message": {"content": _GOOD_RESPONSE}}]}
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        mock_http.post = AsyncMock(side_effect=[bad_resp, good_resp])
+
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert result["provider"] == "ollama"
+        assert mock_http.post.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_write_uses_best_when_all_fail_gate(self) -> None:
+        """All providers below threshold → best returned, no exception raised."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        # Both return short responses that fail the gate; second is slightly longer
+        short1 = "Short."
+        short2 = "Slightly longer short response here."
+
+        resp1 = MagicMock()
+        resp1.raise_for_status = MagicMock()
+        resp1.json.return_value = {"choices": [{"message": {"content": short1}}]}
+
+        resp2 = MagicMock()
+        resp2.raise_for_status = MagicMock()
+        resp2.json.return_value = {"choices": [{"message": {"content": short2}}]}
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        mock_http.post = AsyncMock(side_effect=[resp1, resp2])
+
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            # Should not raise; returns best available
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert result["response"] in (short1, short2)
+        assert isinstance(result["confidence"], float)
+
+    @pytest.mark.asyncio
+    async def test_write_reraises_when_all_providers_raise(self) -> None:
+        """All providers raise → last exception re-raised."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        mock_http.post = AsyncMock(side_effect=RuntimeError("network error"))
+
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            with pytest.raises(RuntimeError, match="network error"):
+                await cycle.execute(
+                    DevelopmentTask(instruction="Add timeout parameter"),
+                    WorkflowContext(),
+                )
+
+    @pytest.mark.asyncio
+    async def test_write_provider_exception_then_fallback_succeeds(self) -> None:
+        """Primary raises, fallback succeeds → result uses fallback response."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        good_resp = MagicMock()
+        good_resp.raise_for_status = MagicMock()
+        good_resp.json.return_value = {"choices": [{"message": {"content": _GOOD_RESPONSE}}]}
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        mock_http.post = AsyncMock(side_effect=[RuntimeError("openrouter down"), good_resp])
+
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter", "ollama"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert result["response"] == _GOOD_RESPONSE
+        assert result["provider"] == "ollama"

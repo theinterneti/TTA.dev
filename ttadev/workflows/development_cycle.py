@@ -23,7 +23,8 @@ from ttadev.primitives.core.base import WorkflowContext
 from ttadev.primitives.integrations.e2b_primitive import CodeExecutionPrimitive
 from ttadev.primitives.memory import AgentMemory
 from ttadev.primitives.observability import InstrumentedPrimitive
-from ttadev.workflows.llm_provider import get_llm_client
+from ttadev.workflows.llm_provider import LLMClientConfig, get_llm_provider_chain
+from ttadev.workflows.quality_gate import quality_gate_passed, score_response
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,8 @@ class DevelopmentResult(TypedDict):
     impact_report: ImpactReport  # From Orient step (empty if CGC unavailable)
     memories_retained: int  # 1 if Hindsight stored the memory; 0 if unavailable
     context_prefix: str  # Memory prefix injected into the LLM system prompt
+    confidence: float  # quality gate score of accepted response (0.0–1.0)
+    provider: str  # provider that produced accepted response
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -144,7 +147,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
         context_prefix = await self._recall(instruction)
 
         # Step 3 — Write
-        response = await self._write(instruction, agent_hint, context_prefix)
+        response, confidence, provider = await self._write(instruction, agent_hint, context_prefix)
 
         # Step 4 — Validate
         validated = await self._validate(impact_report, context)
@@ -158,6 +161,8 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
             impact_report=impact_report,
             memories_retained=memories_retained,
             context_prefix=context_prefix,
+            confidence=confidence,
+            provider=provider,
         )
 
     async def _orient(self, target_files: list[str], context: WorkflowContext) -> ImpactReport:
@@ -202,35 +207,84 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                 span.set_attribute("hindsight_available", bool(prefix))
             return prefix
 
-    async def _write(self, instruction: str, agent_hint: str, context_prefix: str) -> str:
-        """Step 3 — Write: LLM call with system prompt + instruction."""
+    async def _call_llm(self, cfg: LLMClientConfig, system: str, instruction: str) -> str:
+        """Make one LLM API call. Returns content string. Raises on HTTP error."""
+        resp = await self._http.post(
+            f"{cfg.base_url}/chat/completions",
+            headers={"Authorization": f"Bearer {cfg.api_key}"},
+            json={
+                "model": cfg.model,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": instruction},
+                ],
+            },
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        return data["choices"][0]["message"]["content"] or ""
+
+    async def _write(
+        self, instruction: str, agent_hint: str, context_prefix: str
+    ) -> tuple[str, float, str]:
+        """Step 3 — Write: try each provider in chain, return (response, confidence, provider).
+
+        Iterates get_llm_provider_chain(). Accepts first response passing quality gate.
+        If all fail the gate: returns best available (highest score).
+        If all providers raise: re-raises last exception.
+        """
         span_cm: Any = (
             self._dc_tracer.start_as_current_span("development_cycle.write")
             if self._dc_tracer
             else nullcontext()
         )
         with span_cm as span:
-            cfg = get_llm_client()
             system = _build_system_prompt(agent_hint, context_prefix)
-            messages = [
-                {"role": "system", "content": system},
-                {"role": "user", "content": instruction},
-            ]
-            resp = await self._http.post(
-                f"{cfg.base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {cfg.api_key}"},
-                json={"model": cfg.model, "messages": messages},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            content: str = data["choices"][0]["message"]["content"] or ""
-            if not content:
-                raise ValueError("LLM returned empty response")
+            chain = get_llm_provider_chain()
+
+            best_response: str = ""
+            best_score: float = 0.0
+            best_provider: str = chain[0].provider
+            last_exc: Exception | None = None
+            attempts: int = 0
+
+            for cfg in chain:
+                attempts += 1
+                try:
+                    content = await self._call_llm(cfg, system, instruction)
+                except Exception as exc:
+                    logger.warning("DevelopmentCycle write: %s failed: %s", cfg.provider, exc)
+                    last_exc = exc
+                    continue
+                score = score_response(content)
+                if score > best_score or not best_response:
+                    best_response, best_score, best_provider = content, score, cfg.provider
+                if quality_gate_passed(content):
+                    break
+                logger.warning(
+                    "DevelopmentCycle write: %s quality gate failed (score=%.2f), trying fallback",
+                    cfg.provider,
+                    score,
+                )
+
+            if not best_response:
+                # All providers raised exceptions
+                raise last_exc  # type: ignore[misc]
+
+            if not quality_gate_passed(best_response):
+                logger.warning(
+                    "DevelopmentCycle write: all providers below threshold (best=%.2f)", best_score
+                )
+
             if span is not None:
-                span.set_attribute("provider", cfg.provider)
-                span.set_attribute("model", cfg.model)
-                span.set_attribute("response_chars", len(content))
-            return content
+                span.set_attribute("provider", best_provider)
+                span.set_attribute("model", "unknown")  # model is on cfg, not tracked here
+                span.set_attribute("response_chars", len(best_response))
+                span.set_attribute("write.confidence", best_score)
+                span.set_attribute("write.provider", best_provider)
+                span.set_attribute("write.fallback_attempts", attempts)
+
+            return best_response, best_score, best_provider
 
     async def _validate(self, impact_report: ImpactReport, context: WorkflowContext) -> bool:
         """Step 4 — Validate: run related tests in E2B sandbox."""
