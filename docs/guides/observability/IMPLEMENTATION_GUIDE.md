@@ -1,6 +1,16 @@
 # Observability Implementation Guide
 
-**Purpose:** Step-by-step guide to implement production-ready observability for TTA.dev
+> [!WARNING]
+> Historical implementation guide.
+>
+> This document describes an earlier observability implementation plan with older package paths and
+> architecture assumptions. It remains useful as design context, but it is not the primary guide for
+> the current repository.
+>
+> For the current verified observability path, prefer `README.md`, `GETTING_STARTED.md`,
+> `QUICKSTART.md`, and the `ttadev.observability` module.
+
+**Purpose:** Step-by-step guide to implement a previous observability design for TTA.dev
 **Target Audience:** Developers implementing observability improvements
 **Prerequisites:** Understanding of OpenTelemetry, distributed tracing, and TTA.dev primitives
 

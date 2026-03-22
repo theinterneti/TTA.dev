@@ -17,7 +17,17 @@ env:
 
 # Continuous Documentation Agent
 
-Act as a Continuous Documentation Agent responsible for keeping documentation synchronized with code changes.
+> [!WARNING]
+> Historical workflow draft, not an active GitHub Actions workflow.
+>
+> This file captures an older idea for automated documentation maintenance. It is kept as
+> context, but parts of the original draft referenced Logseq-first workflows, non-existent
+> `tta_documentation_primitives`, and older import paths. For current repo truth, prefer:
+> `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, `docs/README.md`, and
+> `.github/copilot-instructions.md`.
+
+Act as a documentation maintenance agent responsible for keeping the canonical docs synchronized
+with code changes.
 
 ## Initialization (Run First!)
 
@@ -48,23 +58,16 @@ This workflow runs when:
    - Update the API Reference for new primitives
    - Ensure all code examples are copy-paste runnable
 
-3. **Sync Logseq Knowledge Base**
-   - Update `logseq/pages/TTA Primitives/` for primitive changes
-   - Create new flashcards for new concepts
-   - Update architecture decision records if patterns changed
-   - Cross-link related pages using `[[Page Name]]` syntax
+3. **Update Canonical Documentation First**
+   - Treat top-level docs and `docs/README.md` as the source of truth
+   - Prefer updating active docs over adding new parallel explanations
+   - If a guide is historical, label it clearly instead of quietly leaving it misleading
+   - Avoid Logseq-specific maintenance unless the work is explicitly about archived Logseq material
 
-4. **Use tta-documentation-primitives**
-   - Leverage the documentation primitives for structured updates:
-     ```python
-     from tta_documentation_primitives import (
-         ExtractAPIPrimitive,
-         GenerateExamplesPrimitive,
-         UpdateLogseqPrimitive,
-         ValidateDocsPrimitive
-     )
-     ```
-   - Build workflows: `ExtractAPIPrimitive >> GenerateExamplesPrimitive >> UpdateLogseqPrimitive`
+4. **Verify Examples Against Current Imports**
+   - Use the current `ttadev.primitives` namespace in active examples
+   - Confirm commands and imports against the repository before editing docs
+   - Prefer simple, copy-paste runnable examples over aspirational architecture snippets
 
 5. **Create Documentation PRs**
    - BEFORE making changes, log your decision:
@@ -92,42 +95,17 @@ Brief explanation.
 
 \`\`\`python
 # Working, runnable example with imports
-from tta_dev_primitives import WorkflowContext
-result = await primitive.execute(data, WorkflowContext())
+from ttadev.primitives import WorkflowContext
+
+context = WorkflowContext()
+result = await primitive.execute(data, context)
 \`\`\`
 ```
 
-### Logseq Format
+### Historical Material Format
 ```markdown
-# Topic Name
-
-Brief description.
-
-## Key Concepts
-
-- Concept 1
-- Concept 2
-
-## Examples
-
-\`\`\`python
-# Working code example
-\`\`\`
-
-## Related
-
-- [[Related Page]]
-```
-
-### Flashcard Format
-```markdown
-## Question #card
-
-What does RetryPrimitive do?
-
----
-
-Automatically retries failed operations with configurable backoff.
+> [!WARNING]
+> Historical document. Prefer `README.md` and `GETTING_STARTED.md` for the current verified path.
 ```
 
 ## Quality Checklist
@@ -138,7 +116,7 @@ Before committing documentation changes:
 - [ ] API documentation matches actual function signatures
 - [ ] Links to source code files are correct
 - [ ] Markdown formatting is clean (100 char lines)
-- [ ] Logseq pages have proper cross-links
+- [ ] Historical docs are clearly labeled if they no longer reflect current APIs
 
 ## Tools Available
 
@@ -152,14 +130,12 @@ Before committing documentation changes:
 1. Fetch latest commits from `main`
 2. Parse diffs to identify changed files
 3. For each changed Python file:
-   - Extract modified public functions/classes
-   - Check if they're documented in README.md
-   - Update examples if signatures changed
-4. Update Logseq knowledge base:
-   - Modify primitive documentation pages
-   - Create new flashcards if needed
-5. Run `uv run python scripts/validate_docs.py`
-6. Commit changes with descriptive message
+    - Extract modified public functions/classes
+    - Check if they're documented in README.md
+    - Update examples if signatures changed
+4. Compare examples against current `ttadev.primitives` imports
+5. Label historical docs if they no longer match current APIs
+6. Run repo validation commands before committing
 
 ## Boundaries
 
@@ -168,3 +144,4 @@ Before committing documentation changes:
 - **Never** modify code files (documentation only)
 - **Always** preserve existing documentation structure
 - **Always** validate examples are runnable
+- **Always** prefer canonical docs over duplicating guidance into stale side documents

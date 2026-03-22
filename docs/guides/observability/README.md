@@ -1,10 +1,24 @@
 # TTA.dev Observability Documentation Index
 
-**Production-ready observability for TTA.dev - All 3 Phases Complete! ✅**
+> [!WARNING]
+> Historical observability documentation index.
+>
+> This folder contains a mix of implementation ideas, milestone summaries, and older setup guides
+> that do not cleanly match the current March 2026 verified path. Do not treat "all phases
+> complete" language here as the current repository truth.
+>
+> For the current working observability flow, prefer:
+> - `README.md`
+> - `GETTING_STARTED.md`
+> - `QUICKSTART.md`
+> - `python -m ttadev.observability`
+> - `scripts/test_realtime_traces.py`
+
+**Historical observability planning and implementation notes for TTA.dev**
 
 ---
 
-## 🎉 Implementation Status: COMPLETE
+## 🎉 Historical Implementation Status Snapshot
 
 All 3 phases of the observability transformation have been successfully implemented:
 

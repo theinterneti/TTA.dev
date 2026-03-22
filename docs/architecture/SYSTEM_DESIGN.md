@@ -8,7 +8,17 @@
 
 ## System Overview
 
-TTA.dev is a production-ready AI development toolkit providing **composable agentic primitives** for building reliable AI workflows. The system is designed around core principles of composability, observability, and reliability.
+> [!WARNING]
+> This document mixes current repository structure with older architecture intent and packaging
+> ideas.
+>
+> Treat it as a high-level map, not proof that every layer below is fully implemented or
+> production-ready today. For the current verified path, start with `README.md` and
+> `GETTING_STARTED.md`.
+
+TTA.dev is an experimental AI development toolkit with a real core of **composable workflow
+primitives** and observability foundations. The repository is still aspirational overall, so this
+document is best read as architecture direction plus current building blocks.
 
 ### Core Vision
 
@@ -17,7 +27,7 @@ TTA.dev is a production-ready AI development toolkit providing **composable agen
 - Composable with intuitive operators (`>>`, `|`)
 - Type-safe composition
 - Built-in observability
-- Production-ready patterns
+- Reliability-oriented patterns that can grow into production use
 
 ---
 
@@ -68,8 +78,7 @@ TTA.dev is a production-ready AI development toolkit providing **composable agen
 **2. Integration Layer**
 - Observability integration (OpenTelemetry, Prometheus)
 - Agent context management
-- API testing framework (Keploy)
-- Python utilities (Pathway)
+- Additional integrations and tooling that are partial, evolving, or exploratory
 
 **3. Application Layer**
 - User workflows
@@ -135,7 +144,7 @@ workflow = step1 >> step3  # ❌ Editor shows type error
 **Example:**
 ```python
 # Observability is automatic
-result = await workflow.execute(context, input_data)
+result = await workflow.execute(input_data, context)
 
 # Automatically:
 # - Creates spans for each primitive
@@ -163,9 +172,10 @@ if not success:
 # Application continues working
 ```
 
-### 5. Production-Ready Patterns
+### 5. Reliability Patterns
 
-**Principle:** Built-in patterns for reliability and performance.
+**Principle:** Provide reusable reliability and performance patterns without requiring every caller
+to reinvent them.
 
 **Implementation:**
 - Retry with exponential backoff
@@ -176,7 +186,7 @@ if not success:
 
 **Example:**
 ```python
-# Production-ready with one line
+# Reliability-oriented composition in one place
 llm = TimeoutPrimitive(
     RetryPrimitive(
         FallbackPrimitive(
@@ -199,7 +209,7 @@ llm = TimeoutPrimitive(
    └─> correlation_id: "req-123"
    └─> data: {"user_id": "user-789"}
 
-2. Execute workflow.execute(context, input_data)
+2. Execute workflow.execute(input_data, context)
    │
    ├─> Step 1: input_processor
    │   ├─> Create span "input_processor.execute"
@@ -240,15 +250,15 @@ llm = TimeoutPrimitive(
 **Purpose:** Base abstraction for all primitives
 
 **Key Methods:**
-- `execute(context, input_data)` - Public interface with observability
-- `_execute_impl(context, input_data)` - Subclass implementation
+- `execute(input_data, context)` - Public interface with observability
+- `_execute_impl(input_data, context)` - Subclass implementation
 - `__rshift__(other)` - Sequential composition (`>>`)
 - `__or__(other)` - Parallel composition (`|`)
 
 **Subclassing:**
 ```python
 class CustomPrimitive(WorkflowPrimitive[str, dict]):
-    async def _execute_impl(self, context, input_data):
+    async def _execute_impl(self, input_data, context):
         # Your logic here
         return {"result": "processed"}
 ```
@@ -269,7 +279,7 @@ context = WorkflowContext(
     data={"user_id": "user-789", "priority": "high"}
 )
 
-result = await workflow.execute(context, input_data)
+result = await workflow.execute(input_data, context)
 
 # correlation_id appears in all logs and traces
 ```
@@ -321,14 +331,20 @@ router = RouterPrimitive(
 
 ### Observability Integration
 
-**Two-Package Design:**
+**Repository Reality:**
 
-1. **Core Observability** (tta-dev-primitives)
+The current repo's most reliable observability story is the source checkout plus
+`python -m ttadev.observability` proof path. Older package split language below should be read as
+historical design direction rather than a promise about current published artifacts.
+
+**Historical/Aspirational Package Split:**
+
+1. **Core Observability** (`tta-dev-primitives`)
    - Lightweight, no external dependencies
    - `InstrumentedPrimitive`, `PrimitiveMetrics`
    - Always available
 
-2. **Enhanced Observability** (tta-observability-integration)
+2. **Enhanced Observability** (`tta-observability-integration`)
    - OpenTelemetry SDK
    - Prometheus metrics server
    - Optional, fails gracefully
@@ -336,7 +352,7 @@ router = RouterPrimitive(
 **Benefits:**
 - Core stays lightweight
 - Enhanced features optional
-- Production-ready patterns available
+- Reliability patterns available
 - Vendor-neutral (works with any backend)
 
 ### Agent Context Integration
@@ -364,6 +380,11 @@ router = RouterPrimitive(
 ---
 
 ## Deployment Models
+
+> [!NOTE]
+> The deployment and installation models below are historical/aspirational packaging sketches.
+> For current repo use, prefer a source checkout and the commands in `README.md` /
+> `GETTING_STARTED.md`.
 
 ### Model 1: Standalone Application
 

@@ -25,9 +25,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/tta-dev-primitives/**'
-      - 'packages/tta-observability-integration/**'
-      - 'packages/universal-agent-context/**'
+      - 'ttadev/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/consolidated-platform-compatibility.yml'
 
 concurrency:
   group: compatibility-${{ github.ref }}
@@ -108,8 +110,8 @@ jobs:
         run: |
           uv run pytest -v \
             --tb=short \
-            -m "not integration and not slow and not external" \
-            --cov=packages \
+            -m "not integration and not slow and not external and not quarantine" \
+            --cov=ttadev \
             --cov-branch \
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing
@@ -126,7 +128,9 @@ jobs:
 
       - name: Test package installation
         shell: bash
-        run: uv pip install -e packages/tta-dev-primitives/
+        run: |
+          uv run python -c \
+            "from ttadev.primitives.core.base import WorkflowPrimitive; print('Package validated OK')"
 
   # Compatibility summary
   compatibility-summary:

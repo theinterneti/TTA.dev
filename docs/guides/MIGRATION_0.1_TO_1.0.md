@@ -2,6 +2,15 @@
 
 **Upgrading TTA.dev from 0.1.x to 1.0.0**
 
+> [!WARNING]
+> Historical migration guide.
+>
+> This document reflects a 2025 packaging and release story that does not fully match the current
+> March 2026 repository reality. Keep it as context for past migration intent, but do not treat it
+> as the primary onboarding path for the current repo.
+>
+> For the current verified path, prefer `README.md`, `GETTING_STARTED.md`, and `QUICKSTART.md`.
+
 **Last Updated:** November 7, 2025
 
 ---

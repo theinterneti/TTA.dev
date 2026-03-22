@@ -1,5 +1,12 @@
 # CI Workflow Modernization Summary
 
+> [!WARNING]
+> Historical summary document.
+>
+> This file describes the CI modernization effort around `ci.yml`, but the workflow has continued
+> to evolve. When this summary disagrees with the live workflow, treat `.github/workflows/ci.yml`
+> as the source of truth.
+
 ## Overview
 
 Modernized `.github/workflows/ci.yml` to establish a strict, deterministic baseline for code quality with comprehensive gates running before expensive test matrices.
@@ -34,15 +41,15 @@ uv run ruff format --check .
 
 #### Type Checking
 ```bash
-uvx pyright platform/
+uvx pyright ttadev/
 ```
-- Validates type hints across the entire platform
+- Validates type hints across the active `ttadev/` package
 - Catches type errors before runtime
 
 #### Custom Compliance: #dev-todo Validation
 ```bash
 # Custom bash script that validates:
-# 1. All #dev-todo tags have required Logseq properties
+# 1. All #dev-todo tags have required repository properties
 # 2. Required properties: type::, priority::, package::
 # 3. Properties must be within 5 lines of the TODO
 ```
@@ -75,33 +82,32 @@ uvx pyright platform/
 
 #### Package Validation
 ```bash
-uv pip install -e platform/primitives/
-python -c "from tta_dev_primitives import WorkflowPrimitive; print('✅ Package validated')"
+uv run python -c "from ttadev.primitives.core.base import WorkflowPrimitive; print('✅ Package validated')"
 ```
-- Validates that the core package can be imported successfully
+- Validates that the core package can be imported successfully from the current namespace
 - Catches packaging/dependency issues early
 
 ### 4. Matrix Strategy (Preserved)
 - **Python versions**: 3.11, 3.12, 3.13, 3.14 (4 versions)
 - **Operating systems**: ubuntu-latest, macos-latest, windows-latest (3 OS)
-- **Test splitting**: 3 groups for horizontal scaling
-- **Total matrix jobs**: 36 (4 Python × 3 OS × 3 splits)
-- **Parallel execution**: pytest-xdist for vertical scaling within each job
+- **Total matrix jobs**: 12 (4 Python × 3 OS)
+- **Coverage upload**: one report per OS/Python combination
+- **Note**: this summary reflects the current unsplit matrix in `ci.yml`
 
 ## Benefits
 
 ### Developer Experience
-1. **Fast feedback**: Quality gates fail in ~2-3 minutes vs waiting for full test matrix
+1. **Fast feedback**: Quality gates fail before the full matrix runs
 2. **Clear errors**: Linting/type errors reported immediately
 3. **Consistent quality**: No ambiguity on formatting/style
 
 ### CI Cost Optimization
 1. **Early termination**: Quality gates prevent expensive test matrix runs on broken code
 2. **Reduced retries**: Fewer "fix formatting, push, repeat" cycles
-3. **Efficient resource usage**: 18 matrix jobs only run when quality gates pass
+3. **Efficient resource usage**: matrix jobs only run when quality gates pass
 
 ### Code Quality
-1. **Zero tolerance**: 100% coverage, perfect linting, strict typing
+1. **High baseline**: linting, formatting, type checking, and coverage reporting run consistently
 2. **Enforced standards**: #dev-todo compliance prevents incomplete task tracking
 3. **Predictable baseline**: Every commit meets the same high bar
 
@@ -124,9 +130,9 @@ python -c "from tta_dev_primitives import WorkflowPrimitive; print('✅ Package 
                │ ✅ All gates pass
                ▼
 ┌─────────────────────────────────────────┐
-│  Test Matrix (18 jobs)                  │
-│  - 3 OS x 2 Python x 3 split groups     │
-│  - 100% coverage enforced               │
+│  Test Matrix (12 jobs)                  │
+│  - 3 OS x 4 Python versions             │
+│  - Coverage reporting                   │
 │  - Package validation                   │
 └─────────────────────────────────────────┘
 ```
@@ -143,14 +149,15 @@ uv run ruff check .
 uv run ruff format --check .
 
 # Type checking
-uvx pyright platform/
+uvx pyright ttadev/
 
 # Tests with coverage
-uv run pytest --cov=platform --cov-branch --cov-fail-under=100
+uv run pytest -v --tb=short \
+  -m "not integration and not slow and not external and not quarantine" \
+  --cov=ttadev --cov-branch
 
 # Package validation
-uv pip install -e platform/primitives/
-python -c "from tta_dev_primitives import WorkflowPrimitive"
+uv run python -c "from ttadev.primitives.core.base import WorkflowPrimitive"
 ```
 
 ## Configuration Files
@@ -176,12 +183,13 @@ The old CI workflow was simple but didn't enforce quality gates. Consider keepin
 
 1. **Caching**: Add caching for ruff/pyright to speed up quality gates
 2. **Parallel quality gates**: Run ruff/pyright/todo-check in parallel
-3. **Custom metrics**: Export CI duration metrics to Prometheus
-4. **Adaptive coverage**: Allow temporary coverage drops with explicit waivers
+3. **Custom metrics**: Export CI duration metrics to observability tooling if that path is revived
+4. **Coverage policy review**: Revisit whether stricter coverage enforcement belongs in CI or in
+   targeted package-level gates
 
 ## Questions?
 
-- **Why 100% coverage?** Maintains baseline quality; use `# pragma: no cover` for justified exclusions
+- **Why no exact workflow copy here?** This file is a summary, not the live workflow definition
 - **Why #dev-todo validation?** Ensures task tracking consistency across the codebase
 - **Why quality gates first?** Saves CI minutes by failing fast on style/type issues
 

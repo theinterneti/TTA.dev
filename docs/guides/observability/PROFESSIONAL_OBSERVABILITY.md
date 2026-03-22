@@ -1,12 +1,23 @@
 # TTA.dev Professional Observability
 
-**Production-grade monitoring, alerting, and visualization for TTA.dev**
+> [!WARNING]
+> Historical/aspirational observability stack guide.
+>
+> This document describes a richer observability stack than the repository's currently verified
+> default path. Keep it as research and future-direction material, not as proof that this full
+> professional stack is the supported default today.
+>
+> For the current repo reality, start with the local observability server flow documented in
+> `README.md`, `GETTING_STARTED.md`, and `QUICKSTART.md`.
+
+**Aspirational monitoring, alerting, and visualization plan for TTA.dev**
 
 ---
 
 ## 🎯 Overview
 
-This professional observability setup provides enterprise-grade monitoring capabilities for TTA.dev, replacing the basic demo configuration with production-ready infrastructure.
+This document describes an aspirational professional observability setup for TTA.dev, extending well
+past the repository's currently verified local observability proof path.
 
 ### What's Included
 
