@@ -560,6 +560,19 @@ def _make_chain(providers: list[str]) -> list[LLMClientConfig]:
     return [configs[p] for p in providers]
 
 
+def _make_chain_from_names(*providers: str) -> list[LLMClientConfig]:
+    """Build a fake provider chain for testing by provider name."""
+    return [
+        LLMClientConfig(
+            base_url=f"http://{p}.test/v1",
+            model="test-model",
+            api_key="test-key",  # pragma: allowlist secret
+            provider=p,
+        )
+        for p in providers
+    ]
+
+
 # A response long enough to pass the quality gate (>80 chars, no refusal patterns)
 _GOOD_RESPONSE = (
     "Here is a thorough implementation with full type annotations, "
@@ -753,3 +766,147 @@ class TestDevelopmentCycleQualityGate:
             )
         assert result["response"] == _GOOD_RESPONSE
         assert result["provider"] == "ollama"
+
+
+class TestDevelopmentCyclePerCallConfig:
+    @pytest.mark.asyncio
+    async def test_per_call_chain_overrides_env_chain(self) -> None:
+        """provider_chain in task overrides get_llm_provider_chain(); env chain never called."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response=_GOOD_RESPONSE)
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            side_effect=RuntimeError("should never be called"),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(
+                    instruction="Add timeout parameter",
+                    provider_chain=_make_chain_from_names("custom"),
+                ),
+                WorkflowContext(),
+            )
+        assert result["provider"] == "custom"
+
+    @pytest.mark.asyncio
+    async def test_per_call_threshold_zero_means_no_gate(self) -> None:
+        """quality_threshold=0.0 means gate always passes, even for low-scoring responses."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        refusal = "I cannot help with that."
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response=refusal)
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(
+                    instruction="Explain the cache primitive",
+                    quality_threshold=0.0,
+                ),
+                WorkflowContext(),
+            )
+        # Gate at 0.0 always passes so only one LLM call made
+        assert mock_http.post.call_count == 1
+        assert result["confidence"] < 0.5
+        assert result["response"] == refusal
+
+    @pytest.mark.asyncio
+    async def test_empty_provider_chain_raises(self) -> None:
+        """provider_chain=[] raises ValueError before any LLM call."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with pytest.raises(ValueError, match="provider_chain must not be empty"):
+            await cycle.execute(
+                DevelopmentTask(instruction="x", provider_chain=[]),
+                WorkflowContext(),
+            )
+
+    @pytest.mark.asyncio
+    async def test_quality_threshold_too_high_raises(self) -> None:
+        """quality_threshold=1.5 raises ValueError."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with pytest.raises(ValueError, match="quality_threshold must be in"):
+            await cycle.execute(
+                DevelopmentTask(instruction="x", quality_threshold=1.5),
+                WorkflowContext(),
+            )
+
+    @pytest.mark.asyncio
+    async def test_quality_threshold_negative_raises(self) -> None:
+        """quality_threshold=-0.1 raises ValueError."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with pytest.raises(ValueError, match="quality_threshold must be in"):
+            await cycle.execute(
+                DevelopmentTask(instruction="x", quality_threshold=-0.1),
+                WorkflowContext(),
+            )
+
+    @pytest.mark.asyncio
+    async def test_retry_count_zero_on_good_response(self) -> None:
+        """Good primary response → result['retry_count'] == 0."""
+        from ttadev.primitives.core.base import WorkflowContext
+        from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
+
+        mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response=_GOOD_RESPONSE)
+        cycle = DevelopmentCycle(
+            bank_id="tta-dev",
+            _memory=mock_memory,
+            _graph=mock_graph,
+            _executor=mock_executor,
+            _http=mock_http,
+        )
+        with patch(
+            "ttadev.workflows.development_cycle.get_llm_provider_chain",
+            return_value=_make_chain(["openrouter"]),
+        ):
+            result = await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
+        assert result["retry_count"] == 0

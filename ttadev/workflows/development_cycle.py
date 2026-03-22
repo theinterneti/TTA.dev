@@ -24,7 +24,7 @@ from ttadev.primitives.integrations.e2b_primitive import CodeExecutionPrimitive
 from ttadev.primitives.memory import AgentMemory
 from ttadev.primitives.observability import InstrumentedPrimitive
 from ttadev.workflows.llm_provider import LLMClientConfig, get_llm_provider_chain
-from ttadev.workflows.quality_gate import quality_gate_passed, score_response
+from ttadev.workflows.quality_gate import _DEFAULT_THRESHOLD, quality_gate_passed, score_response
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,8 @@ class DevelopmentTask(TypedDict, total=False):
     instruction: str  # Required: what to build/analyse/review
     target_files: list[str]  # Optional: file paths/names to orient CGC on (max 3)
     agent_hint: str  # Optional: role persona ("developer", "qa", "security")
+    provider_chain: list[LLMClientConfig]  # Optional: per-call provider override
+    quality_threshold: float  # Optional: per-call threshold override
 
 
 class DevelopmentResult(TypedDict):
@@ -59,6 +61,7 @@ class DevelopmentResult(TypedDict):
     context_prefix: str  # Memory prefix injected into the LLM system prompt
     confidence: float  # quality gate score of accepted response (0.0–1.0)
     provider: str  # provider that produced accepted response
+    retry_count: int  # number of retries attempted (0 = no retry attempted yet)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -140,6 +143,13 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
         target_files = list(task.get("target_files") or [])[:3]
         agent_hint = task.get("agent_hint") or self._agent_hint
 
+        raw_chain = task.get("provider_chain")
+        if raw_chain is not None and len(raw_chain) == 0:
+            raise ValueError("provider_chain must not be empty")
+        raw_threshold = task.get("quality_threshold")
+        if raw_threshold is not None and not (0.0 <= raw_threshold <= 1.0):
+            raise ValueError("quality_threshold must be in [0.0, 1.0]")
+
         # Step 1 — Orient
         impact_report = await self._orient(target_files, context)
 
@@ -147,7 +157,13 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
         context_prefix = await self._recall(instruction)
 
         # Step 3 — Write
-        response, confidence, provider = await self._write(instruction, agent_hint, context_prefix)
+        response, confidence, provider, retry_count = await self._write(
+            instruction,
+            agent_hint,
+            context_prefix,
+            chain=raw_chain,
+            threshold=raw_threshold,
+        )
 
         # Step 4 — Validate
         validated = await self._validate(impact_report, context)
@@ -163,6 +179,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
             context_prefix=context_prefix,
             confidence=confidence,
             provider=provider,
+            retry_count=retry_count,
         )
 
     async def _orient(self, target_files: list[str], context: WorkflowContext) -> ImpactReport:
@@ -225,11 +242,18 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
         return data["choices"][0]["message"]["content"] or ""
 
     async def _write(
-        self, instruction: str, agent_hint: str, context_prefix: str
-    ) -> tuple[str, float, str]:
-        """Step 3 — Write: try each provider in chain, return (response, confidence, provider).
+        self,
+        instruction: str,
+        agent_hint: str,
+        context_prefix: str,
+        *,
+        chain: list[LLMClientConfig] | None = None,
+        threshold: float | None = None,
+    ) -> tuple[str, float, str, int]:
+        """Step 3 — Write: try each provider in chain, return (response, confidence, provider, retry_count).
 
-        Iterates get_llm_provider_chain(). Accepts first response passing quality gate.
+        Iterates provider chain (per-call override or default from get_llm_provider_chain()).
+        Accepts first response passing quality gate.
         If all fail the gate: returns best available (highest score).
         If all providers raise: re-raises last exception.
         """
@@ -240,15 +264,16 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
         )
         with span_cm as span:
             system = _build_system_prompt(agent_hint, context_prefix)
-            chain = get_llm_provider_chain()
+            effective_chain = chain if chain is not None else get_llm_provider_chain()
+            effective_threshold = threshold if threshold is not None else _DEFAULT_THRESHOLD
 
             best_response: str = ""
             best_score: float = 0.0
-            best_provider: str = chain[0].provider
+            best_provider: str = effective_chain[0].provider
             last_exc: Exception | None = None
             attempts: int = 0
 
-            for cfg in chain:
+            for cfg in effective_chain:
                 attempts += 1
                 try:
                     content = await self._call_llm(cfg, system, instruction)
@@ -259,7 +284,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                 score = score_response(content)
                 if score > best_score or not best_response:
                     best_response, best_score, best_provider = content, score, cfg.provider
-                if quality_gate_passed(content):
+                if quality_gate_passed(content, effective_threshold):
                     break
                 logger.warning(
                     "DevelopmentCycle write: %s quality gate failed (score=%.2f), trying fallback",
@@ -273,7 +298,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                     raise last_exc
                 raise RuntimeError("LLM provider chain returned no response")  # unreachable
 
-            if not quality_gate_passed(best_response):
+            if not quality_gate_passed(best_response, effective_threshold):
                 logger.warning(
                     "DevelopmentCycle write: all providers below threshold (best=%.2f)", best_score
                 )
@@ -284,8 +309,9 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                 span.set_attribute("write.confidence", best_score)
                 span.set_attribute("write.provider", best_provider)
                 span.set_attribute("write.fallback_attempts", attempts)
+                span.set_attribute("write.retry_count", 0)
 
-            return best_response, best_score, best_provider
+            return best_response, best_score, best_provider, 0
 
     async def _validate(self, impact_report: ImpactReport, context: WorkflowContext) -> bool:
         """Step 4 — Validate: run related tests in E2B sandbox."""
