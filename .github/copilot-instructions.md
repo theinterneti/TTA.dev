@@ -116,6 +116,23 @@ TODOs without all required properties will fail the `validate-todos` CI step.
 | Validate TODOs | `uv run python scripts/validate-todos.py` |
 | All checks | Run format, lint, typecheck, test, validate-todos in sequence |
 
+## L0 Developer Control Plane
+
+The first L0 slice is already in the repo:
+
+- `ttadev/control_plane/` for task/run/lease state
+- `ttadev/cli/control.py` for `tta control ...`
+
+If you are asked to improve agent management, do **not** create a second queue,
+run ledger, or lease model in another package. Extend this L0 surface.
+
+### Highest-priority follow-up work
+
+1. expose L0 operations as MCP tools
+2. add approval/policy/review state
+3. add file/workspace locks
+4. link L0 state to observability/session/project views
+
 ## Documentation
 
 - [AGENTS.md](../AGENTS.md) - Quick reference for agents

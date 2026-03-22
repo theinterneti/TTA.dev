@@ -109,6 +109,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
     register_workflow_subcommands(sub)
 
+    # ------------------------------------------------------------------ #
+    # control subcommand                                                   #
+    # ------------------------------------------------------------------ #
+    from ttadev.cli.control import register_control_subcommands
+
+    register_control_subcommands(sub)
+
     return parser
 
 
@@ -195,6 +202,11 @@ def main() -> None:
         from ttadev.cli.workflow import handle_workflow_command
 
         sys.exit(handle_workflow_command(args, data_dir))
+
+    elif args.command == "control":
+        from ttadev.cli.control import handle_control_command
+
+        sys.exit(handle_control_command(args, data_dir))
 
     else:
         parser.print_help()

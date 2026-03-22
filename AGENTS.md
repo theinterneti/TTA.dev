@@ -117,6 +117,52 @@ Load these for specific tasks:
 
 ---
 
+## L0 Control Plane Status
+
+The first local L0 slice now exists in:
+
+- `ttadev/control_plane/` — JSON-backed task, run, and lease state
+- `ttadev/cli/control.py` — `tta control task ...` and `tta control run ...`
+
+Interpret this as the beginning of a **developer-agent control plane** for Claude,
+Copilot, Cline, and future coding agents.
+
+Current rule: **extend this L0 surface instead of creating parallel task/run
+systems elsewhere in the repo.**
+
+### L0 Continuation Priorities
+
+When working on L0 from inside `TTA.dev`, prefer this order:
+
+1. expose the current control-plane operations through MCP tools
+2. add approvals, policy checks, and review checkpoints
+3. add workspace/file-lock semantics and stronger project/session linking
+4. connect agent activity + observability views to task/run state
+
+### Repository TODOs
+
+- TODO Expose the current L0 task and run lifecycle through MCP tools in `ttadev/primitives/mcp_server/server.py` and add integration coverage. #dev-todo
+  type:: implementation
+  priority:: high
+  package:: ttadev-mcp-server
+
+- TODO Add approval, policy, and review-gate state to `ttadev/control_plane/`, reusing workflow gate patterns instead of inventing ad hoc flags. #dev-todo
+  type:: implementation
+  priority:: high
+  package:: ttadev-control-plane
+
+- TODO Add workspace and file-lock coordination to the L0 service and surface those locks through the `tta control` CLI. #dev-todo
+  type:: implementation
+  priority:: high
+  package:: ttadev-control-plane
+
+- TODO Cross-link L0 runs with observability sessions, project membership, and agent-tracker telemetry so dashboards can show who owns active work. #dev-todo
+  type:: refactor
+  priority:: medium
+  package:: ttadev-observability
+
+---
+
 ## Deep Reference Guides
 
 Load only when agent or skill instructions are insufficient:
@@ -171,6 +217,7 @@ uv run pytest -v            # Test
 - Update README when features change
 - Document decisions in repo docs or Hindsight
 - Keep CHANGELOG.md current
+- When touching L0, update the shared handoff guidance in `AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md`
 
 ---
 

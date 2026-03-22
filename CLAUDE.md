@@ -102,3 +102,24 @@ Details: [core-conventions](.claude/skills/core-conventions/SKILL.md)
 | Copilot path rules | `.github/instructions/` |
 
 Cross-agent memory: `.hindsight/` — see [Hindsight Memory](docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md).
+
+## L0 Continuation Directive
+
+`TTA.dev` now contains the first implemented L0 developer control-plane slice:
+
+- `ttadev/control_plane/`
+- `ttadev/cli/control.py`
+
+If a task is about coordinating coding agents, task ownership, approvals, leases,
+or developer work orchestration, **continue from that L0 surface** rather than
+building a second orchestration system somewhere else.
+
+### Immediate L0 Priorities
+
+1. expose current task/run/lease operations through MCP tools
+2. add approval and policy state
+3. add workspace/file-lock coordination
+4. wire observability and agent telemetry into L0 ownership views
+
+When implementing these, keep the design additive, local-first, and compatible
+with the existing `.tta` session/project model.
