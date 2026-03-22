@@ -269,7 +269,9 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
 
             if not best_response:
                 # All providers raised exceptions
-                raise last_exc  # type: ignore[misc]
+                if last_exc is not None:
+                    raise last_exc
+                raise RuntimeError("LLM provider chain returned no response")  # unreachable
 
             if not quality_gate_passed(best_response):
                 logger.warning(
@@ -277,7 +279,6 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                 )
 
             if span is not None:
-                span.set_attribute("provider", best_provider)
                 span.set_attribute("model", "unknown")  # model is on cfg, not tracked here
                 span.set_attribute("response_chars", len(best_response))
                 span.set_attribute("write.confidence", best_score)

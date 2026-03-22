@@ -253,7 +253,7 @@ class TestDevelopmentCycleWrite:
         from ttadev.primitives.core.base import WorkflowContext
         from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
 
-        # A very short response: length < 20 (-0.8) + < 80 (-0.3) = 1.0 - 1.1 = 0.0 (clamped)
+        # length < 20 (-0.8) + < 80 (-0.3) → score = -0.1, clamped to 0.0
         short_response = "Short."
         mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response=short_response)
         cycle = DevelopmentCycle(
@@ -595,7 +595,7 @@ class TestDevelopmentCycleQualityGate:
                 WorkflowContext(),
             )
         assert result["confidence"] >= 0.0
-        assert result["provider"] in ("openrouter", "ollama")
+        assert result["provider"] == "openrouter"
 
     @pytest.mark.asyncio
     async def test_write_no_fallback_when_primary_passes(self) -> None:
@@ -663,9 +663,9 @@ class TestDevelopmentCycleQualityGate:
         from ttadev.primitives.core.base import WorkflowContext
         from ttadev.workflows.development_cycle import DevelopmentCycle, DevelopmentTask
 
-        # Both return short responses that fail the gate; second is slightly longer
+        # Both return responses that fail the quality gate
         short1 = "Short."
-        short2 = "Slightly longer short response here."
+        short2 = "I cannot help with that specific request as it falls outside my capabilities."
 
         resp1 = MagicMock()
         resp1.raise_for_status = MagicMock()
@@ -694,8 +694,8 @@ class TestDevelopmentCycleQualityGate:
                 DevelopmentTask(instruction="Add timeout parameter"),
                 WorkflowContext(),
             )
+        assert result["confidence"] < 0.5
         assert result["response"] in (short1, short2)
-        assert isinstance(result["confidence"], float)
 
     @pytest.mark.asyncio
     async def test_write_reraises_when_all_providers_raise(self) -> None:
