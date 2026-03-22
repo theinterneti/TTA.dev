@@ -12,8 +12,8 @@ Every test should be:
 
 ```python
 import pytest
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.testing import MockPrimitive
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.testing import MockPrimitive
 
 @pytest.mark.asyncio
 async def test_workflow_success():
@@ -49,7 +49,7 @@ async def test_workflow_failure():
 ## Testing Primitives with MockPrimitive
 
 ```python
-from tta_dev_primitives.testing import MockPrimitive
+from ttadev.primitives.testing import MockPrimitive
 
 # Return static value
 mock = MockPrimitive("name", return_value={"result": "success"})
@@ -131,7 +131,7 @@ async def test_parallel_execution():
 @pytest.mark.asyncio
 async def test_retry_on_failure():
     """Test retry primitive retries on failure."""
-    from tta_dev_primitives.recovery.retry import RetryPrimitive
+    from ttadev.primitives.recovery.retry import RetryPrimitive
 
     call_count = 0
     async def flaky_operation(data, ctx):
@@ -156,7 +156,7 @@ async def test_retry_on_failure():
 @pytest.mark.asyncio
 async def test_timeout_enforced():
     """Test timeout primitive enforces time limits."""
-    from tta_dev_primitives.recovery.timeout import TimeoutPrimitive, TimeoutError
+    from ttadev.primitives.recovery.timeout import TimeoutPrimitive, TimeoutError
 
     async def slow_operation(data, ctx):
         await asyncio.sleep(10.0)  # Too slow
@@ -179,7 +179,7 @@ async def test_timeout_enforced():
 @pytest.mark.asyncio
 async def test_cache_hits_and_misses():
     """Test cache primitive caches results correctly."""
-    from tta_dev_primitives.performance.cache import CachePrimitive
+    from ttadev.primitives.performance.cache import CachePrimitive
 
     call_count = 0
     async def expensive_op(data, ctx):
@@ -309,7 +309,3 @@ tests/
 - [ ] Uses descriptive test names and docstrings
 - [ ] No external dependencies (no network, DB, filesystem)
 - [ ] Fast execution (< 1s per test)
-
-
----
-**Logseq:** [[TTA.dev/.cline/Rules/Tests.instructions]]

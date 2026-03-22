@@ -2,7 +2,7 @@
 
 ## Core Principle
 
-**ALL scripts should use `tta-dev-primitives` for orchestration, workflow management, and reliability patterns.**
+**All scripts should use `ttadev.primitives` for orchestration, workflow management, and reliability patterns.**
 
 ## Why Use Primitives in Scripts?
 
@@ -30,7 +30,7 @@ Ask yourself:
 """Evaluate multiple models in parallel with retry and timeout."""
 
 import asyncio
-from tta_dev_primitives import (
+from ttadev.primitives import (
     ParallelPrimitive,
     RetryPrimitive,
     TimeoutPrimitive,
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 """Start and monitor MCP servers with retry and parallel startup."""
 
 import asyncio
-from tta_dev_primitives import (
+from ttadev.primitives import (
     ParallelPrimitive,
     RetryPrimitive,
     SequentialPrimitive,
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 """Run package validation checks in parallel."""
 
 import asyncio
-from tta_dev_primitives import (
+from ttadev.primitives import (
     ParallelPrimitive,
     SequentialPrimitive,
     LambdaPrimitive,
@@ -236,7 +236,7 @@ Usage:
 
 import asyncio
 import argparse
-from tta_dev_primitives import (
+from ttadev.primitives import (
     # Import needed primitives
     WorkflowContext,
 )
@@ -275,7 +275,7 @@ Scripts should be testable using `MockPrimitive`:
 ```python
 # test_my_script.py
 import pytest
-from tta_dev_primitives.testing import MockPrimitive
+from ttadev.primitives.testing import MockPrimitive
 from scripts.my_script import build_workflow
 
 @pytest.mark.asyncio
@@ -364,7 +364,3 @@ result = await retry_op.execute({}, context)
 - [ ] Has docstring explaining usage
 - [ ] Can be tested with MockPrimitive
 - [ ] Formatted with `uv run ruff format`
-
-
----
-**Logseq:** [[TTA.dev/.cline/Rules/Scripts.instructions]]

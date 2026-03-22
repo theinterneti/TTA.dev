@@ -95,7 +95,7 @@ License information
 The `SequentialPrimitive` executes operations in order, passing output from each step as input to the next:
 
 \`\`\`python
-from tta_dev_primitives import SequentialPrimitive, LambdaPrimitive, WorkflowContext
+from ttadev.primitives import SequentialPrimitive, LambdaPrimitive, WorkflowContext
 
 # Define steps
 validate = LambdaPrimitive(lambda x, ctx: {"validated": True, **x})
@@ -169,7 +169,7 @@ Cached result of type `U`, or fresh execution if cache miss.
 ### Example
 
 \`\`\`python
-from tta_dev_primitives import CachePrimitive, LambdaPrimitive, WorkflowContext
+from ttadev.primitives import CachePrimitive, LambdaPrimitive, WorkflowContext
 
 async def expensive_operation(data, ctx):
     # Simulate expensive computation
@@ -303,14 +303,14 @@ retry_workflow = RetryPrimitive(
 
 ❌ **Outdated examples**
 ```python
-# Using old package name
-from tta_workflow_primitives import ...  # Wrong!
+# Using an outdated package name
+from old_workflow_package import ...  # Wrong!
 ```
 
 ✅ **Current examples**
 ```python
 # Using current package name
-from tta_dev_primitives import ...  # Correct!
+from ttadev.primitives import ...  # Correct!
 ```
 
 ❌ **No context**
@@ -320,7 +320,7 @@ result = workflow.execute(data)  # Incomplete!
 
 ✅ **Complete context**
 ```python
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
 
 context = WorkflowContext(workflow_id="demo", session_id="123")
 result = await workflow.execute(data, context)  # Complete!
@@ -338,7 +338,3 @@ result = await workflow.execute(data, context)  # Complete!
 - [ ] No lorem ipsum or placeholder text
 - [ ] Formatting is consistent
 - [ ] Technical terms are explained
-
-
----
-**Logseq:** [[TTA.dev/.cline/Rules/Documentation.instructions]]

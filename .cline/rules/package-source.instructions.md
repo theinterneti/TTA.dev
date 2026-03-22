@@ -1,6 +1,6 @@
 # TTA.dev - AI Development Toolkit
 
-**Production-quality agentic primitives and workflow patterns for building reliable AI applications.**
+**Composable workflow primitives and workflow patterns for building reliable AI applications.**
 
 [![CI](https://github.com/theinterneti/TTA.dev/workflows/CI/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
 [![Quality](https://github.com/theinterneti/TTA.dev/workflows/Quality%20Checks/badge.svg)](https://github.com/theinterneti/TTA.dev/actions)
@@ -41,16 +41,16 @@ Production-quality development primitives for building TTA agents and workflows.
 **Installation:**
 ```bash
 # Install from local package
-uv pip install -e packages/tta-dev-primitives
+uv sync --all-extras
 
 # Install with all extras
-uv pip install -e "packages/tta-dev-primitives[dev,tracing,apm]"
+uv run pytest -v
 ```
 
 **Quick Start:**
 
 ```python
-from tta_dev_primitives import RouterPrimitive, CachePrimitive
+from ttadev.primitives import RouterPrimitive, CachePrimitive
 
 # Compose workflow with operators
 workflow = (
@@ -64,7 +64,7 @@ workflow = (
 result = await workflow.execute(data, context)
 ```
 
-[📚 Full Documentation](packages/tta-dev-primitives/README.md)
+[📚 Full Documentation](PRIMITIVES_CATALOG.md)
 
 ---
 
@@ -74,17 +74,16 @@ result = await workflow.execute(data, context)
 
 ```bash
 # Install from local package with uv (recommended)
-uv pip install -e packages/tta-dev-primitives
+uv sync --all-extras
 
 # Install with all extras
-uv pip install -e "packages/tta-dev-primitives[dev,tracing,apm]"
+uv run pytest -v
 ```
 
 ### Basic Workflow Example
 
 ```python
-from tta_workflow_primitives import WorkflowContext
-from tta_workflow_primitives.core.base import LambdaPrimitive
+from ttadev.primitives import WorkflowContext, LambdaPrimitive
 
 # Define primitives
 validate = LambdaPrimitive(lambda x, ctx: {"validated": True, **x})
@@ -140,30 +139,30 @@ TTA.dev follows a **composable, modular architecture**:
 - **[Getting Started Guide](GETTING_STARTED.md)** - 5-minute quickstart
 - **[Architecture Overview](docs/architecture/Overview.md)** - System design and principles
 - **[Coding Standards](docs/guides/development/CodingStandards.md)** - Development best practices
-- **[MCP Integration](docs/reference/mcp/README.md)** - Model Context Protocol guides
-- **[Package Documentation](packages/tta-dev-primitives/README.md)** - Detailed API reference
+- **[MCP Integration](docs/guides/integration/MCP_INTEGRATION_GUIDE.md)** - Model Context Protocol guides
+- **[Package Documentation](PRIMITIVES_CATALOG.md)** - Detailed API reference
 
 ### Additional Resources
 
 - [AI Libraries Comparison](docs/guides/integration/AI_Libraries_Comparison.md)
-- [Model Selection Guide](docs/reference/models/Model_Selection_Strategy.md)
-- [Examples](packages/tta-dev-primitives/examples/)
+- [Model Selection Guide](docs/guides/llm-selection-guide.md)
+- [Examples](examples/)
 
 ---
 
 ## 🧪 Testing
 
-The package maintains **52% test coverage** with 35 comprehensive tests (100% passing).
+The repo includes automated tests for shared primitives and related packages.
 
 ```bash
 # Run all tests
-cd packages/tta-dev-primitives && uv run pytest -v
+uv run pytest -v
 
 # Run with coverage
-cd packages/tta-dev-primitives && uv run pytest --cov=src --cov-report=html
+uv run pytest --cov=ttadev --cov-report=html
 
 # Run specific test module
-cd packages/tta-dev-primitives && uv run pytest tests/test_cache.py -v
+uv run pytest tests -k cache -v
 ```
 
 ---
@@ -496,22 +495,22 @@ git commit -m "fix: specific description of fix"
 ❌ **BAD**:
 ```bash
 # Add new feature
-git add packages/tta-dev-primitives/src/core/new_feature.py
+git add ttadev/primitives/core/new_feature.py
 git commit -m "feat: add new feature"
 ```
 
 ✅ **GOOD**:
 ```bash
 # Add new feature with tests
-git add packages/tta-dev-primitives/src/core/new_feature.py
-git add packages/tta-dev-primitives/tests/test_new_feature.py
+git add ttadev/primitives/core/new_feature.py
+git add tests/unit/test_new_feature.py
 uv run pytest -v
 git commit -m "feat: add new feature with tests"
 ```
 
 ## Remember
 
-**This is a production library** - avoid these patterns to maintain:
+**This is a shared primitives library** - avoid these patterns to maintain:
 - ✅ Type safety
 - ✅ Test coverage
 - ✅ Composability
@@ -522,20 +521,20 @@ git commit -m "feat: add new feature with tests"
 
 ```bash
 # All tests
-cd packages/tta-dev-primitives && uv run pytest -v
+uv run pytest -v
 
 # With coverage
-cd packages/tta-dev-primitives && uv run pytest --cov=src --cov-report=html
+uv run pytest --cov=ttadev --cov-report=html
 
 # Specific test module
-cd packages/tta-dev-primitives && uv run pytest tests/test_cache.py -v
+uv run pytest tests -k cache -v
 
 # Use VS Code task: "🧪 Run All Tests"
 ```
 
 ### Creating a PR
 
-1. Run quality checks: `uv run pytest -v && uv run ruff format . && uvx pyright packages/`
+1. Run quality checks: `uv run pytest -v && uv run ruff format . && uv run ruff check . --fix`
 2. Update `CHANGELOG.md` (if exists)
 3. Follow PR template in `.github/PULL_REQUEST_TEMPLATE.md`
 4. Ensure >80% test coverage for new code
@@ -544,7 +543,7 @@ cd packages/tta-dev-primitives && uv run pytest tests/test_cache.py -v
 ## Debugging Tips
 
 - Use `WorkflowContext.metadata` for debugging state across primitives
-- Enable structured logging: `from tta_workflow_primitives.observability import setup_logging; setup_logging("DEBUG")`
+- Enable observability early: `from ttadev import initialize_observability; initialize_observability(service_name="tta-dev")`
 - Check test output for primitive call counts: `assert mock.call_count == expected`
 - For async issues, ensure `@pytest.mark.asyncio` decorator present
 
@@ -559,11 +558,11 @@ cd packages/tta-dev-primitives && uv run pytest tests/test_cache.py -v
 
 ## Quick Reference
 
-**Run quality checks**: `cd packages/tta-dev-primitives && uv run pytest -v && uv run ruff check . && uvx pyright .`
-**Install package locally**: `uv pip install -e packages/tta-dev-primitives`
+**Run quality checks**: `uv run pytest -v && uv run ruff check . --fix`
+**Install repo dependencies**: `uv sync --all-extras`
 **View tasks**: VS Code → Cmd/Ctrl+Shift+P → "Task: Run Task"
 
-**Remember**: This is a production library - every line must be tested, typed, and documented.
+**Remember**: This shared library code should be tested, typed, and documented.
 1. **Create feature branch**
 
    ```bash
@@ -774,15 +773,15 @@ git commit -m "fix: specific description of fix"
 ❌ **BAD**:
 ```bash
 # Add new feature
-git add packages/tta-dev-primitives/src/core/new_feature.py
+git add ttadev/primitives/core/new_feature.py
 git commit -m "feat: add new feature"
 ```
 
 ✅ **GOOD**:
 ```bash
 # Add new feature with tests
-git add packages/tta-dev-primitives/src/core/new_feature.py
-git add packages/tta-dev-primitives/tests/test_new_feature.py
+git add ttadev/primitives/core/new_feature.py
+git add tests/unit/test_new_feature.py
 uv run pytest -v
 git commit -m "feat: add new feature with tests"
 ```
@@ -863,7 +862,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 # Local package - absolute imports
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 ```
 
 ## Anti-Patterns to Avoid
@@ -906,7 +905,7 @@ def process(data: Dict[str, Any]) -> Optional[str]:  # Don't use this
 All workflows must extend `WorkflowPrimitive[T, U]` and implement `execute()`:
 
 ```python
-from tta_dev_primitives.core.base import WorkflowPrimitive, WorkflowContext
+from ttadev.primitives.core.base import WorkflowPrimitive, WorkflowContext
 
 class MyWorkflow(WorkflowPrimitive[InputType, OutputType]):
     async def execute(self, input_data: InputType, context: WorkflowContext) -> OutputType:
@@ -1043,8 +1042,8 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 # Local package - absolute imports
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
-from tta_dev_primitives.recovery.retry import RetryPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.recovery.retry import RetryPrimitive
 ```
 
 ## Pydantic Models
@@ -1116,8 +1115,8 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 # Local package - absolute imports
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
-from tta_dev_primitives.recovery.retry import RetryPrimitive
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.recovery.retry import RetryPrimitive
 ```
 
 ## Pydantic Models
@@ -1147,7 +1146,3 @@ Before committing, ensure:
 - [ ] Formatted with `uv run ruff format`
 - [ ] Linted with `uv run ruff check --fix`
 - [ ] Type-checked with `uvx pyright`
-
-
----
-**Logseq:** [[TTA.dev/.cline/Rules/Package-source.instructions]]
