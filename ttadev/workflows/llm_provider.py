@@ -63,6 +63,34 @@ def get_llm_client() -> LLMClientConfig:
     return _ollama_config()
 
 
+def get_llm_provider_chain() -> list[LLMClientConfig]:
+    """Return ordered list of LLM providers to try, primary first.
+
+    Selection logic (same env vars as get_llm_client):
+    - If LLM_FORCE_PROVIDER=ollama  →  [ollama]
+    - If OPENROUTER_API_KEY is set  →  [openrouter, ollama]
+    - Otherwise                     →  [ollama]
+
+    Never returns an empty list.
+    """
+    force = os.environ.get("LLM_FORCE_PROVIDER", "").lower()
+    if force == "ollama":
+        return [_ollama_config()]
+
+    api_key = os.environ.get("OPENROUTER_API_KEY", "")
+    if api_key:
+        model = os.environ.get("HINDSIGHT_LLM_MODEL", _DEFAULT_OPENROUTER_MODEL)
+        openrouter_cfg = LLMClientConfig(
+            base_url=_OPENROUTER_BASE_URL,
+            model=model,
+            api_key=api_key,
+            provider="openrouter",
+        )
+        return [openrouter_cfg, _ollama_config()]
+
+    return [_ollama_config()]
+
+
 def _ollama_config() -> LLMClientConfig:
     base_url = os.environ.get("OLLAMA_BASE_URL", _DEFAULT_OLLAMA_BASE_URL)
     model = os.environ.get("OLLAMA_MODEL", _DEFAULT_OLLAMA_MODEL)
