@@ -1,171 +1,135 @@
 # TTA.dev Roadmap
 
-**Last Updated:** November 4, 2025
+**Last Updated:** March 22, 2026
 
 ---
 
 ## Overview
 
-This roadmap outlines TTA.dev's development phases, clearly distinguishing between **what exists today** and **what we plan to build**.
+This roadmap distinguishes between:
 
-**🎯 Vision:** Democratize AI-native software development through composable workflow primitives and intelligent guidance systems.
+- **what is working today**
+- **what is partially implemented**
+- **what is still aspirational**
 
-**🚀 Long-Term Vision:** Build a complete **Atomic DevOps Architecture** - a 5-layer hierarchical agent system for autonomous, self-healing DevSecOps. See [`docs/architecture/ATOMIC_DEVOPS_ARCHITECTURE.md`](docs/architecture/ATOMIC_DEVOPS_ARCHITECTURE.md) for complete details.
+That distinction matters because the repository has a real core, but it is not yet honest to call
+the entire platform production-ready.
 
----
+**🎯 Vision:** Build reusable AI-native workflow and devops tooling that the future TTA product can
+depend on.
 
-## Phase 1: Foundation (Q4 2025) ✅ COMPLETE
-
-**Status:** Production-Ready
-
-### Delivered Components
-
-#### 1. Core Workflow Primitives ✅
-
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/core/`
-
-- ✅ `WorkflowPrimitive` - Base class with type-safe composition
-- ✅ `SequentialPrimitive` - Chain operations with `>>` operator
-- ✅ `ParallelPrimitive` - Concurrent execution with `|` operator
-- ✅ `ConditionalPrimitive` - Branch based on runtime conditions
-- ✅ `RouterPrimitive` - Dynamic routing to different paths
-
-**Impact:** Enables composable, type-safe workflow construction.
-
-#### 2. Recovery Primitives ✅
-
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/recovery/`
-
-- ✅ `RetryPrimitive` - Exponential backoff with jitter
-- ✅ `FallbackPrimitive` - Graceful degradation cascade
-- ✅ `TimeoutPrimitive` - Circuit breaker pattern
-- ✅ `CompensationPrimitive` - Saga pattern for rollback
-- ✅ `CircuitBreakerPrimitive` - Prevent cascade failures
-
-**Impact:** Production-grade error handling and resilience.
-
-#### 3. Performance Primitives ✅
-
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/performance/`
-
-- ✅ `CachePrimitive` - LRU cache with TTL (40-60% cost reduction)
-- ✅ `BatchPrimitive` - Batch processing optimization
-- ✅ `RateLimitPrimitive` - Rate limiting and throttling
-
-**Impact:** Cost optimization and performance enhancement.
-
-#### 4. Development Lifecycle Meta-Framework ✅
-
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/lifecycle/`
-
-- ✅ `Stage` enum - Five lifecycle stages (EXPERIMENTATION → PRODUCTION)
-- ✅ `StageManager` - Orchestrate stage transitions
-- ✅ `StageCriteria` - Entry/exit validation system
-- ✅ `ValidationCheck` - Parallel validation checks
-- ✅ `ReadinessCheckPrimitive` - Detailed readiness assessment
-
-**Impact:** First meta-framework for software development lifecycle management.
-
-#### 5. Basic Orchestration ✅
-
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/orchestration/`
-
-- ✅ `DelegationPrimitive` - Orchestrator → Executor pattern
-- ✅ `MultiModelWorkflow` - Multi-model coordination
-- ✅ `TaskClassifierPrimitive` - Task routing
-
-**Impact:** Foundation for multi-agent workflows.
-
-#### 6. Observability Integration ✅
-
-**Location:** `packages/tta-observability-integration/`
-
-- ✅ `InstrumentedPrimitive` - Automatic OpenTelemetry tracing
-- ✅ Prometheus metrics export (port 9464)
-- ✅ `WorkflowContext` - Correlation ID propagation
-- ✅ Structured logging integration
-
-**Impact:** Production observability out of the box.
-
-#### 7. Testing Utilities ✅
-
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/testing/`
-
-- ✅ `MockPrimitive` - Easy mocking for tests
-- ✅ Test harness utilities
-- ✅ 100% test coverage on all primitives
-
-**Impact:** Excellent developer experience and reliability.
-
-### Phase 1 Metrics
-
-- **Test Coverage:** 95%+
-- **Type Coverage:** 100%
-- **Production Deployments:** Used in 5+ real projects
-- **Documentation:** Complete API docs + 15+ examples
+**🚀 Long-Term Vision:** Build a complete **Atomic DevOps Architecture** - a layered agent system
+for autonomous, self-improving DevSecOps. See
+[`docs/architecture/ATOMIC_DEVOPS_ARCHITECTURE.md`](docs/architecture/ATOMIC_DEVOPS_ARCHITECTURE.md)
+for the longer-term design direction.
 
 ---
 
-## Phase 2: Role-Based Agent System (Q1 2026) 📋 PLANNED
+## Current state snapshot
 
-**Status:** Planning Stage
+### Working today
 
-**Goal:** Provide specialized domain expert agents that guide users through complex tasks.
+- core primitives in `ttadev/primitives/`
+- observability server entrypoint via `python -m ttadev.observability`
+- agent and workflow foundations in `ttadev/agents/` and `ttadev/workflows/`
+- a large automated test suite around the current foundation
 
-### Proposed Components
+### Known gaps
 
-#### 1. Agent Module 📋
+- onboarding docs and older demos are still being migrated to the current APIs
+- Pyright still reports significant type issues
+- some integrations and knowledge-base surfaces remain partial or stubbed
+- the “one canonical proof path” story has only recently been narrowed and re-verified
 
-**Location:** `packages/tta-dev-primitives/src/tta_dev_primitives/agents/` (to be created)
+---
 
-Planned agent classes:
+## Phase 1: Foundation (substantial, not yet fully production-ready)
 
-- 📋 `DeveloperAgent` - Code review, implementation guidance
-- 📋 `QAAgent` - Testing strategies, coverage analysis
-- 📋 `DevOpsAgent` - Deployment, infrastructure guidance
-- 📋 `GitAgent` - Version control best practices
-- 📋 `GitHubAgent` - PR workflow, release management
-- 📋 `SecurityAgent` - Security scanning, vulnerability guidance
-- 📋 `PerformanceAgent` - Performance profiling, optimization
+**Status:** Mostly implemented, verification and cleanup still in progress
 
-**Each agent will provide:**
+### Delivered components
 
-- Domain-specific knowledge
-- Common mistake detection
-- Best practice recommendations
-- Contextual advice
-- Tool selection guidance
+#### 1. Core workflow primitives
 
-#### 2. Agent Coordination 📋
+**Location:** `ttadev/primitives/core/`
 
-- 📋 `AgentTeamPrimitive` - Coordinate multiple agents
-- 📋 `AgentHandoffPrimitive` - Pass work between agents
-- 📋 `AgentConsensus` - Multi-agent decision making
+- ✅ `WorkflowPrimitive`
+- ✅ `SequentialPrimitive`
+- ✅ `ParallelPrimitive`
+- ✅ `ConditionalPrimitive`
+- ✅ `RouterPrimitive`
 
-#### 3. Knowledge Base Integration 📋
+#### 2. Recovery primitives
 
-- Agent knowledge persistence
-- Learning from user interactions
-- Community knowledge contributions
+**Location:** `ttadev/primitives/recovery/`
 
-### Phase 2 Success Metrics
+- ✅ `RetryPrimitive`
+- ✅ `FallbackPrimitive`
+- ✅ `TimeoutPrimitive`
+- ✅ `CompensationPrimitive`
+- ✅ `CircuitBreakerPrimitive`
 
-- [ ] 7 specialized agent classes implemented
-- [ ] Agent coordination patterns documented
-- [ ] 10+ real-world agent workflows
-- [ ] User satisfaction >4/5 on agent guidance
+#### 3. Performance and lifecycle primitives
 
-### Why Not Phase 1?
+**Locations:** `ttadev/primitives/performance/`, `ttadev/primitives/lifecycle/`
 
-**Decision:** Build lifecycle primitives first to validate the meta-framework approach before adding agent abstractions.
+- ✅ caching and related performance helpers
+- ✅ lifecycle stages and readiness checks
+- ✅ orchestration building blocks
 
-**Validation needed:**
+#### 4. Observability foundation
 
-- Do users need specialized agent classes?
-- Or is generic orchestration sufficient?
-- What domain knowledge is most valuable?
+**Location:** `ttadev/observability/`
 
-**Current workaround:** Use `DelegationPrimitive` with `LambdaPrimitive` to create agent-like behavior.
+- ✅ observability server entrypoint
+- ✅ v2 API routes and dashboard assets
+- ✅ trace ingestion from `.observability/traces.jsonl`
+- ⚠ legacy entrypoints and docs still being cleaned up
+
+#### 5. Testing and developer support
+
+**Locations:** `tests/`, `.github/workflows/`, `.github/copilot-hooks/`
+
+- ✅ large automated test suite
+- ✅ repo quality gate hook
+- ⚠ type-health and public demo health still lag behind test volume
+
+### Phase 1 remaining work
+
+- repair or replace broken public demos
+- finish observability entrypoint migration in docs
+- reduce Pyright failures in `ttadev/`
+- align top-level docs and setup output with the verified proof path
+
+---
+
+## Phase 2: Role-Based Agent System (partially implemented, still maturing)
+
+**Status:** Partially implemented in code; documentation and validation still catching up
+
+**Current implementation locations:**
+
+- `ttadev/agents/`
+- `ttadev/workflows/`
+
+### Already present
+
+- ✅ agent specs and registry
+- ✅ agent router
+- ✅ multiple domain-specific agent classes
+- ✅ tool-call loop and quality-gate oriented workflow building blocks
+
+### Still needed
+
+- clearer end-to-end examples
+- stronger documentation around real agent workflows
+- better validation of what is stable vs experimental
+
+### Near-term success criteria
+
+- [ ] one documented, repeatable multi-agent workflow that stays green
+- [ ] roadmap and docs fully aligned with actual agent capabilities
+- [ ] fewer type issues in agent-facing modules
 
 ---
 

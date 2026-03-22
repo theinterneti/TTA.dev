@@ -1,8 +1,12 @@
-# TTA.dev Quickstart - See It Working in 60 Seconds
+# TTA.dev Quickstart - Current Verified Proof Path
 
-Welcome! This guide gets you from zero to a working, observable AI-native app in under a minute.
+This guide is intentionally narrow: it documents the shortest flow we have re-verified in a clean
+clone.
 
-## Step 1: Clone and Setup (30 seconds)
+It proves the current foundation works. It does **not** claim that every legacy demo script or
+future-facing feature in the repository is ready yet.
+
+## Step 1: Clone and setup
 
 ```bash
 git clone https://github.com/theinterneti/TTA.dev.git
@@ -10,113 +14,61 @@ cd TTA.dev
 ./setup.sh
 ```
 
-**What just happened?**
-- ✅ Installed `uv` (fast Python package manager)
-- ✅ Created virtual environment
-- ✅ Installed TTA.dev primitives
-- ✅ Set up observability infrastructure
+## Step 2: Start the observability server
 
-## Step 2: Run Hello World (15 seconds)
+In terminal 1:
 
 ```bash
-# Terminal 1: Start the observability dashboard
-uv run python src/observability_ui.py
-
-# Terminal 2: Run the hello world app
-uv run python src/hello_world.py
+uv run python -m ttadev.observability
 ```
 
-## Step 3: See It Work (15 seconds)
+Expected result:
 
-1. Open http://localhost:8080 in your browser
-2. Watch as the hello world app executes workflows
-3. See live traces, metrics, and performance data
+- the dashboard starts on `http://localhost:8000`
+- `GET /api/v2/health` returns `{"status": "ok", ...}`
 
-**You'll see:**
-- 🔍 **Live traces** as the app runs
-- ⚡ **Performance metrics** (duration, success rate)
-- 🔄 **Primitive composition** (Retry → Cache → Transform)
-- 📊 **Real-time updates** via WebSocket
+## Step 3: Generate trace data
 
-## What Just Happened?
-
-You ran a self-observing application that demonstrates:
-
-1. **TTA.dev Primitives**: Sequential → Retry → Cache → Lambda workflow
-2. **Batteries-Included Observability**: Zero configuration, instant visibility
-3. **AI-Native Patterns**: Built for AI agents and LLM workflows
-
-## Next Steps
-
-### Build Your Own App
-
-```python
-from tta_dev.primitives import WorkflowContext, SequentialPrimitive
-from tta_dev.observability import trace_workflow
-
-@trace_workflow
-async def my_workflow(input_data: str) -> str:
-    workflow = SequentialPrimitive("my-app", [
-        # Your primitives here
-    ])
-    ctx = WorkflowContext(workflow_id="my-workflow")
-    return await workflow.execute(input_data, ctx)
-```
-
-### Explore Primitives
-
-Check out `src/tta_dev/primitives/` to see:
-- `RetryPrimitive` - Automatic retries with backoff
-- `CachePrimitive` - Smart caching with TTL
-- `CircuitBreakerPrimitive` - Fault tolerance
-- `ParallelPrimitive` - Concurrent execution
-- `ConditionalPrimitive` - Branching logic
-
-### Point Your AI Agent Here
-
-Your AI coding assistant (GitHub Copilot, Claude, Cline) will automatically:
-1. Detect `AGENTS.md` and learn TTA.dev patterns
-2. Use primitives correctly in generated code
-3. Include observability by default
-
-### Read the Docs
-
-- `README.md` - Full feature overview
-- `AGENTS.md` - AI agent integration guide
-- `src/tta_dev/primitives/README.md` - Primitive API reference
-
-## Common Commands
+In terminal 2:
 
 ```bash
-# Run tests
-uv run pytest -v
-
-# Check code quality
-uv run ruff check .
-uv run ruff format .
-uvx pyright src/
-
-# Start observability UI
-uv run python src/observability_ui.py
-
-# Run hello world
-uv run python src/hello_world.py
+uv run python scripts/test_realtime_traces.py
 ```
 
-## Troubleshooting
+Expected result:
 
-**Dashboard shows "No traces yet"?**
-- Make sure `hello_world.py` is running in another terminal
-- Check that port 8080 is available
+- the script exits successfully
+- `.observability/traces.jsonl` is created
+- the server begins exposing spans at `http://localhost:8000/api/v2/spans`
 
-**Import errors?**
-- Run `uv sync --all-extras` to reinstall dependencies
-- Make sure you're using Python 3.11+
+You can check directly with:
 
-**Want to see more traces?**
-- Run `hello_world.py` multiple times
-- The second run will show caching in action!
+```bash
+curl http://localhost:8000/api/v2/health
+curl http://localhost:8000/api/v2/spans | head
+```
 
----
+## What this proves today
 
-**🎉 You're now running TTA.dev!** Build something awesome and let us know what you create.
+1. the current `ttadev.primitives` composition API works for a basic sequential workflow
+2. the `python -m ttadev.observability` entrypoint is valid
+3. trace ingestion into the v2 observability API works after a short delay
+
+## What this does **not** prove yet
+
+- that every older public demo script still matches the current primitive APIs
+- that every onboarding path in older docs is up to date
+- that the repo is fully production-ready end to end
+
+## Recommended next reads
+
+- [`GETTING_STARTED.md`](GETTING_STARTED.md) for the current setup story
+- [`USER_JOURNEY.md`](USER_JOURNEY.md) for the long-term vision vs current reality
+- [`ROADMAP.md`](ROADMAP.md) for implemented vs planned work
+
+## Notes
+
+- If `/api/v2/spans` is empty immediately after the script runs, wait a few seconds and query it
+  again. The ingestion loop is asynchronous.
+- Older demo commands that reference `src/...`, `ttadev/ui/observability_server.py`, or
+  `ttadev/hello_world.py` are being migrated and should not be treated as canonical proof paths.
