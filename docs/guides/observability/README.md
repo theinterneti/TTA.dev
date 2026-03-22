@@ -469,13 +469,9 @@ uv run python examples/test_semantic_tracing.py
 ---
 
 **Last Updated:** November 11, 2025
-**Status:** Complete and ready for implementation
-**Next Review:** After Phase 1 implementation
+**Status:** Historical observability notes
+**Next Review:** Only if this historical material is actively refreshed
 
 ---
 
 **Happy Observing! 📊🔍📈**
-
-
----
-**Logseq:** [[TTA.dev/Docs/Observability/Readme]]
