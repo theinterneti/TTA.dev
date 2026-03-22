@@ -74,6 +74,9 @@ target-version = "py311"
 select = ["E", "F", "I", "N", "W"]
 ignore = ["E501"]  # Line too long (handled by formatter)
 
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["N999"]  # Script files use kebab-case names (valid shell convention)
+
 [tool.pyright]
 include = ["ttadev"]
 exclude = ["**/__pycache__", ".venv", "build", "dist"]
