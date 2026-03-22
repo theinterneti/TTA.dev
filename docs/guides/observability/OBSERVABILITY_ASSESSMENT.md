@@ -1,5 +1,14 @@
 # TTA.dev Observability Assessment
 
+> [!WARNING]
+> Historical assessment document.
+>
+> This review reflects an earlier repository layout and observability packaging plan. Keep it as
+> research context, not as the current source of truth for how observability is organized today.
+>
+> For the current verified path, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> the local `ttadev.observability` entrypoint.
+
 **Date:** 2025-10-28
 **Status:** Comprehensive Review
 **Scope:** Observability readiness for production development processes
@@ -34,9 +43,9 @@ The TTA.dev observability infrastructure is **partially implemented** with solid
 
 **Expected:** `packages/tta-dev-observability/`
 **Actual:** Observability code scattered across:
-- `platform/primitives/src/tta_dev_primitives/observability/` (basic logging, metrics, tracing)
-- `platform/primitives/src/tta_dev_primitives/apm/` (APM setup, decorators, instrumented base)
-- `platform/observability/` (separate integration package with enhanced primitives)
+- `ttadev/primitives/observability/` (basic logging, metrics, tracing)
+- `ttadev/primitives/apm/` (APM setup, decorators, instrumented base)
+- `ttadev/observability/` (separate integration package with enhanced primitives)
 
 **Issue:** No centralized observability package. Observability concerns mixed with primitive implementations.
 
@@ -119,7 +128,7 @@ The TTA.dev observability infrastructure is **partially implemented** with solid
 
 ### 3.1 Current Implementation
 
-<augment_code_snippet path="platform/primitives/src/tta_dev_primitives/core/base.py" mode="EXCERPT">
+<augment_code_snippet path="ttadev/primitives/core/base.py" mode="EXCERPT">
 ```python
 class WorkflowContext(BaseModel):
     """Context passed through workflow execution."""
@@ -402,4 +411,3 @@ The current observability implementation provides a **foundation** but is **not 
 
 
 ---
-**Logseq:** [[TTA.dev/Docs/Observability/Observability_assessment]]

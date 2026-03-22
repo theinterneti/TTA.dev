@@ -1,7 +1,17 @@
 # Observability Integration
 
+> [!WARNING]
+> Historical integration guide.
+>
+> This document describes an older two-package observability story and no longer cleanly reflects
+> the repository's current verified entrypoint. Keep it as reference material, not as the canonical
+> onboarding path.
+>
+> For the current working path, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
 **Category:** Monitoring & Tracing
-**Status:** Production Ready
+**Status:** Historical / mixed-current reference
 **Version:** 2.0.0
 **Last Updated:** 2024-03-19
 
@@ -263,7 +273,7 @@ If OpenTelemetry is installed and primitives are executing, you will see
 #### Automatic Tracing (Built-in)
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+from ttadev.primitives import SequentialPrimitive, WorkflowContext
 
 # All primitives have automatic tracing built-in
 workflow = step1 >> step2 >> step3
@@ -431,7 +441,7 @@ async def risky_operation(context, data):
 #### WorkflowContext Integration
 
 ```python
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
 
 # Create context with correlation ID
 context = WorkflowContext(
@@ -481,7 +491,7 @@ async def call_downstream_service(context, data):
 ```python
 from observability_integration import initialize_observability
 from observability_integration.primitives import RouterPrimitive, CachePrimitive
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+from ttadev.primitives import SequentialPrimitive, WorkflowContext
 import structlog
 
 # 1. Initialize observability
@@ -992,16 +1002,15 @@ class ObservabilityConfig:
 ## Related Documentation
 
 - **Package README:** [`platform/observability/README.md`](../../platform/observability/README.md)
-- **Core Observability:** [`platform/primitives/src/tta_dev_primitives/observability/`](../../platform/primitives/src/tta_dev_primitives/observability/)
+- **Core Observability:** [`ttadev/primitives/observability/`](../../ttadev/primitives/observability/)
 - **Architecture:** [`docs/architecture/COMPONENT_INTEGRATION_ANALYSIS.md`](../architecture/COMPONENT_INTEGRATION_ANALYSIS.md)
 - **Monitoring Dashboard:** [`WEEK1_MONITORING_DASHBOARD.md`](../../WEEK1_MONITORING_DASHBOARD.md)
 
 ---
 
 **Last Updated:** 2024-03-19
-**Status:** Production Ready
+**Status:** Historical / mixed-current reference
 **Maintainer:** TTA.dev Team
 
 
 ---
-**Logseq:** [[TTA.dev/Docs/Integration/Observability-integration]]

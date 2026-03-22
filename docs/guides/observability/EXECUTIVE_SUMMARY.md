@@ -1,5 +1,15 @@
 # Observability Assessment - Executive Summary
 
+> [!WARNING]
+> Historical assessment snapshot.
+>
+> This document captures a point-in-time 2025 assessment of observability gaps. It is useful as
+> historical analysis, but it is not the primary guide to the repository's current March 2026
+> observability path.
+>
+> For current repo reality, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
 **Date:** 2025-10-28
 **Reviewer:** AI Assistant
 **Status:** 🔴 **NOT PRODUCTION READY** - Significant work required
@@ -294,7 +304,7 @@ The current observability implementation is **not production-ready** but has a *
 
 - **[OBSERVABILITY_ASSESSMENT.md](./OBSERVABILITY_ASSESSMENT.md)** - Comprehensive technical assessment
 - **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** - Step-by-step implementation guide
-- **[platform/primitives/README.md](../../platform/primitives/README.md)** - Primitives documentation
+- **[PRIMITIVES_CATALOG.md](../../../PRIMITIVES_CATALOG.md)** - Current primitives reference
 
 ---
 
@@ -303,4 +313,3 @@ The current observability implementation is **not production-ready** but has a *
 
 
 ---
-**Logseq:** [[TTA.dev/Docs/Observability/Executive_summary]]

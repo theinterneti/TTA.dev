@@ -1,5 +1,15 @@
 # TTA.dev 3-Pillar Observability Strategy
 
+> [!WARNING]
+> Historical/aspirational strategy document.
+>
+> This file captures a broader observability architecture strategy than the repository's currently
+> verified default path. Treat it as design direction and research, not as proof that the full
+> strategy is already implemented.
+>
+> For current repo reality, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and the
+> `ttadev.observability` module.
+
 **Staff-Level Observability Architecture for Agentic Workflows**
 
 ---
@@ -1177,4 +1187,3 @@ error.type, error.recoverable
 
 
 ---
-**Logseq:** [[TTA.dev/Docs/Observability/Tta_observability_strategy]]
