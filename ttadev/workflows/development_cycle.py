@@ -362,9 +362,6 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
                         retry_score,
                         retry_provider,
                     )
-                # Also propagate last_exc from reframe for error path
-                if not best_response and retry_exc is not None:
-                    last_exc = retry_exc
 
             if not best_response:
                 # All providers raised exceptions across all passes
