@@ -1,5 +1,15 @@
 # TTA Architecture Overview
 
+> [!WARNING]
+> Historical product-concept architecture.
+>
+> This document describes a Therapeutic Text Adventure system architecture rather than the current
+> verified TTA.dev repository architecture. It is useful as long-range product context, but it
+> should not be treated as the current source of truth for this repo.
+>
+> For the current TTA.dev repository story, prefer `README.md`, `USER_JOURNEY.md`, `ROADMAP.md`,
+> and `docs/architecture/SYSTEM_DESIGN.md`.
+
 This document provides an overview of the Therapeutic Text Adventure (TTA) architecture.
 
 ## System Architecture
@@ -117,7 +127,3 @@ The TTA architecture follows these key design principles:
 - **Transformers**: Library for working with language models
 - **Pydantic**: Data validation and settings management
 - **Docker**: Containerization for development and deployment
-
-
----
-**Logseq:** [[TTA.dev/Docs/Architecture/Overview]]

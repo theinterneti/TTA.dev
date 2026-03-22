@@ -1,12 +1,21 @@
 # How to Add Observability to Workflows
 
-**Complete guide for instrumenting TTA.dev workflows with tracing, metrics, and logging**
+> [!WARNING]
+> Historical observability guide.
+>
+> This document uses older import paths and package assumptions. Keep it as design context, but do
+> not use it as the primary setup guide for the current repo.
+>
+> For the current verified path, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
+**Historical guide for instrumenting TTA.dev workflows with tracing, metrics, and logging**
 
 ---
 
 ## Overview
 
-This guide shows you how to add comprehensive observability to your workflows using:
+This guide shows an earlier approach for adding observability to workflows using:
 - OpenTelemetry distributed tracing
 - Prometheus metrics
 - Structured logging
@@ -25,7 +34,7 @@ This guide shows you how to add comprehensive observability to your workflows us
 ### Step 1: Initialize Observability
 
 ```python
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
 
 # Initialize once at application startup
 success = initialize_observability(
@@ -43,11 +52,8 @@ else:
 ### Step 2: Use Enhanced Primitives
 
 ```python
-from observability_integration.primitives import (
-    RouterPrimitive,
-    CachePrimitive,
-    TimeoutPrimitive
-)
+from ttadev.primitives import CachePrimitive, TimeoutPrimitive
+from ttadev.primitives.core.routing import RouterPrimitive
 
 # These primitives have automatic observability
 workflow = (
@@ -60,7 +66,7 @@ workflow = (
 ### Step 3: Execute with Context
 
 ```python
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
 
 context = WorkflowContext(
     correlation_id="req-12345",
@@ -204,7 +210,7 @@ All primitives log execution details:
 {
   "timestamp": "2025-10-31T10:30:00Z",
   "level": "INFO",
-  "logger": "tta_dev_primitives.cache",
+  "logger": "ttadev.primitives.performance.cache",
   "message": "Cache hit",
   "correlation_id": "req-12345",
   "primitive_name": "cache",
@@ -253,7 +259,7 @@ logger.info(
 `WorkflowContext` carries state and correlation IDs through your workflow:
 
 ```python
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
 
 context = WorkflowContext(
     correlation_id="req-12345",  # Unique request ID
@@ -292,8 +298,8 @@ result = await workflow.execute(input_data, context)
 ### Pattern 1: Custom Primitive with Observability
 
 ```python
-from tta_dev_primitives.observability import InstrumentedPrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.observability import InstrumentedPrimitive
 
 class MyPrimitive(InstrumentedPrimitive[dict, dict]):
     """Custom primitive with automatic observability."""
@@ -326,7 +332,7 @@ class MyPrimitive(InstrumentedPrimitive[dict, dict]):
 ### Pattern 2: Wrapping External Functions
 
 ```python
-from observability_integration.primitives import ObservablePrimitive
+from ttadev.primitives.observability import ObservablePrimitive
 
 # Wrap existing function with observability
 observable_llm = ObservablePrimitive(
@@ -341,7 +347,7 @@ result = await observable_llm.execute(input_data, context)
 ### Pattern 3: Custom Metrics
 
 ```python
-from tta_dev_primitives.observability import PrimitiveMetrics
+from ttadev.primitives.observability import PrimitiveMetrics
 
 class MyPrimitive(InstrumentedPrimitive[dict, dict]):
     def __init__(self):
@@ -500,7 +506,7 @@ result = await workflow.execute(data, context)
 
 2. **Use enhanced primitives**
    ```python
-   from observability_integration.primitives import CachePrimitive
+   from ttadev.primitives import CachePrimitive
    ```
 
 3. **Add meaningful attributes**
@@ -610,7 +616,7 @@ async def test_primitive_records_metrics():
 Before deploying to production:
 
 - [ ] `initialize_observability()` called at startup
-- [ ] Using enhanced primitives from `observability_integration`
+- [ ] Using current `ttadev` observability and primitive imports
 - [ ] All workflows create `WorkflowContext` with correlation IDs
 - [ ] Prometheus scraping configured
 - [ ] Grafana dashboards created
@@ -634,7 +640,3 @@ Before deploying to production:
 **Last Updated:** [[2025-10-31]]
 **Difficulty:** Intermediate
 **Time:** 1-2 hours
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/How-to-add-observability]]

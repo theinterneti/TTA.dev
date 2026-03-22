@@ -1,6 +1,15 @@
 # Integration Primitives Quick Reference
 
-**One-page cheat sheet for all 5 TTA.dev integration primitives**
+> [!WARNING]
+> Historical integration quick reference.
+>
+> This guide points at older package paths and integration surfaces that may no longer match the
+> active `ttadev` layout. Keep it as a reference snapshot, not as the primary source of truth.
+>
+> For current primitives and verified usage, prefer `PRIMITIVES_CATALOG.md`, `README.md`, and
+> `GETTING_STARTED.md`.
+
+**Historical cheat sheet for older integration primitives**
 
 ---
 
@@ -22,21 +31,20 @@
 
 ```bash
 # Install with integration extras
-cd platform/primitives
-uv sync --extra integrations
+uv sync --all-extras
 ```
 
 ### Import
 
 ```python
-from tta_dev_primitives.integrations import (
+from ttadev.primitives.integrations import (
     OpenAIPrimitive,
     AnthropicPrimitive,
     OllamaPrimitive,
     SupabasePrimitive,
     SQLitePrimitive,
 )
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import WorkflowContext
 ```
 
 ---
@@ -53,7 +61,7 @@ llm = OpenAIPrimitive(
 )
 
 # Execute
-from tta_dev_primitives.integrations import OpenAIRequest
+from ttadev.primitives.integrations.openai_primitive import OpenAIRequest
 
 request = OpenAIRequest(
     messages=[
@@ -71,7 +79,7 @@ print(response.content)  # "Hello! How can I help you?"
 
 **When to use:** Production apps, cost-effective, fast
 **Cost:** $0.15-$15 per 1M tokens
-**Docs:** [OpenAI Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/openai_primitive.py)
+**Docs:** [OpenAI Primitive](../../ttadev/primitives/integrations/openai_primitive.py)
 
 ---
 
@@ -85,7 +93,7 @@ llm = AnthropicPrimitive(
 )
 
 # Execute
-from tta_dev_primitives.integrations import AnthropicRequest
+from ttadev.primitives.integrations.anthropic_primitive import AnthropicRequest
 
 request = AnthropicRequest(
     messages=[
@@ -102,7 +110,7 @@ print(response.content)
 
 **When to use:** Long context (200K tokens), safety-critical, complex reasoning
 **Cost:** $3-$15 per 1M tokens
-**Docs:** [Anthropic Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/anthropic_primitive.py)
+**Docs:** [Anthropic Primitive](../../ttadev/primitives/integrations/anthropic_primitive.py)
 
 ---
 
@@ -116,7 +124,7 @@ llm = OllamaPrimitive(
 )
 
 # Execute
-from tta_dev_primitives.integrations import OllamaRequest
+from ttadev.primitives.integrations.ollama_primitive import OllamaRequest
 
 request = OllamaRequest(
     messages=[
@@ -132,7 +140,7 @@ print(response.content)
 
 **When to use:** Privacy-critical, offline, cost-free
 **Cost:** $0 (free)
-**Docs:** [Ollama Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/ollama_primitive.py)
+**Docs:** [Ollama Primitive](../../ttadev/primitives/integrations/ollama_primitive.py)
 
 ---
 
@@ -148,7 +156,7 @@ db = SupabasePrimitive(
 )
 
 # SELECT
-from tta_dev_primitives.integrations import SupabaseRequest
+from ttadev.primitives.integrations.supabase_primitive import SupabaseRequest
 
 request = SupabaseRequest(
     operation="select",
@@ -189,7 +197,7 @@ await db.execute(delete_request, context)
 
 **When to use:** Multi-user apps, cloud deployment, real-time
 **Cost:** Free tier → $25/month
-**Docs:** [Supabase Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/supabase_primitive.py)
+**Docs:** [Supabase Primitive](../../ttadev/primitives/integrations/supabase_primitive.py)
 
 ---
 
@@ -200,7 +208,7 @@ await db.execute(delete_request, context)
 db = SQLitePrimitive(database="app.db")  # or ":memory:"
 
 # CREATE TABLE
-from tta_dev_primitives.integrations import SQLiteRequest
+from ttadev.primitives.integrations.sqlite_primitive import SQLiteRequest
 
 create_request = SQLiteRequest(
     query="""
@@ -262,7 +270,7 @@ await db.execute(delete_request, context)
 
 **When to use:** Local apps, prototyping, single-user
 **Cost:** $0 (free)
-**Docs:** [SQLite Primitive](../../platform/primitives/src/tta_dev_primitives/integrations/sqlite_primitive.py)
+**Docs:** [SQLite Primitive](../../ttadev/primitives/integrations/sqlite_primitive.py)
 
 ---
 
@@ -271,7 +279,7 @@ await db.execute(delete_request, context)
 ### Sequential LLM + Database
 
 ```python
-from tta_dev_primitives import SequentialPrimitive
+from ttadev.primitives import SequentialPrimitive
 
 # Generate content → Save to database
 workflow = (
@@ -283,7 +291,7 @@ workflow = (
 ### Parallel Multi-LLM
 
 ```python
-from tta_dev_primitives import ParallelPrimitive
+from ttadev.primitives import ParallelPrimitive
 
 # Query multiple LLMs simultaneously
 workflow = (
@@ -296,8 +304,8 @@ workflow = (
 ### Router with Fallback
 
 ```python
-from tta_dev_primitives import RouterPrimitive
-from tta_dev_primitives.recovery import FallbackPrimitive
+from ttadev.primitives import RouterPrimitive
+from ttadev.primitives.recovery.fallback import FallbackPrimitive
 
 # Try OpenAI, fallback to Ollama if fails
 primary = OpenAIPrimitive(api_key="...")
@@ -363,7 +371,7 @@ supabase_db = SupabasePrimitive(
 ### Error Handling
 
 ```python
-from tta_dev_primitives.recovery import RetryPrimitive
+from ttadev.primitives.recovery.retry import RetryPrimitive
 
 # Retry LLM calls on failure
 llm = RetryPrimitive(
@@ -375,7 +383,7 @@ llm = RetryPrimitive(
 ### Caching
 
 ```python
-from tta_dev_primitives.performance import CachePrimitive
+from ttadev.primitives.performance.cache import CachePrimitive
 
 # Cache expensive LLM calls
 llm = CachePrimitive(
@@ -391,15 +399,11 @@ llm = CachePrimitive(
 - **Full Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)
 - **LLM Selection Guide:** [llm-selection-guide.md](llm-selection-guide.md)
 - **Database Selection Guide:** [database-selection-guide.md](database-selection-guide.md)
-- **Integration Tests:** [`platform/primitives/tests/test_integrations.py`](../../platform/primitives/tests/test_integrations.py)
+- **Integration Tests:** search under [`tests/`](../../tests/) and `ttadev/primitives/integrations/`
+  for current coverage and implementation details
 
 ---
 
 **Last Updated:** October 30, 2025
 **For:** Quick reference (all skill levels)
 **Maintained by:** TTA.dev Team
-
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Integration-primitives-quickref]]

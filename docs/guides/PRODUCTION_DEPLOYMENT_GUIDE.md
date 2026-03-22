@@ -1,12 +1,21 @@
 # TTA.dev API Production Deployment Guide
 
-**Upgrade from mock to real Gemini AI in 3 minutes**
+> [!WARNING]
+> Historical deployment guide.
+>
+> This document describes an older Gemini-specific API deployment path that is not the canonical
+> March 2026 onboarding or proof path for this repository. Keep it as a narrow integration note, not
+> as the default way to understand or deploy TTA.dev.
+>
+> For current repo reality, start with `README.md`, `GETTING_STARTED.md`, and `QUICKSTART.md`.
+
+**Historical guide for upgrading a mock Gemini-backed API example**
 
 ---
 
 ## 🎯 Quick Start
 
-### Current Status: Mock Mode ✅
+### Historical Status Snapshot
 
 Your API server is working in **mock mode** with demonstration responses. This is perfect for:
 - Testing the n8n integration
@@ -14,7 +23,7 @@ Your API server is working in **mock mode** with demonstration responses. This i
 - Understanding the API structure
 - Demonstrating to stakeholders
 
-### Upgrade to Production: Real Gemini AI 🚀
+### Optional Gemini Integration Path
 
 When ready for real AI analysis, follow these steps:
 
@@ -318,7 +327,7 @@ Before going live:
 ### 1. Add FallbackPrimitive
 
 ```python
-from tta_dev_primitives.recovery import FallbackPrimitive
+from ttadev.primitives.recovery.fallback import FallbackPrimitive
 
 workflow = FallbackPrimitive(
     primary=gemini_llm,
@@ -331,7 +340,7 @@ workflow = FallbackPrimitive(
 ### 2. Add Monitoring
 
 ```python
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
 
 initialize_observability(
     service_name="tta-api",
@@ -378,7 +387,3 @@ api_key_header = APIKeyHeader(name="X-API-Key")
 - `TTA_API_COMPLETE.md` - Complete API documentation
 - `TTA_API_N8N_INTEGRATION_GUIDE.md` - n8n integration details
 - `N8N_GITHUB_CREDENTIAL_SETUP.md` - Credential configuration
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Production_deployment_guide]]
