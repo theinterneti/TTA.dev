@@ -214,3 +214,137 @@ class TestAgentPipelineEarlyExit:
         result = await pipeline.execute(PipelineTask(instruction="start"), WorkflowContext())
         assert result["stopped_early"] is False
         assert result["completed_stages"] == 2
+
+
+# ── Stage Transform tests ─────────────────────────────────────────────────────
+
+
+class TestAgentPipelineTransforms:
+    async def test_default_transform_uses_response(self) -> None:
+        """2-agent pipeline with no stage_transforms arg.
+        Stage 0 response = "hello". Assert agent1 receives instruction="hello"
+        (the default lambda r: r["response"])."""
+        agent0 = _make_mock_agent(response="hello")
+        agent1 = _make_mock_agent(response="processed")
+        pipeline = AgentPipeline([agent0, agent1])
+        await pipeline.execute(PipelineTask(instruction="start"), WorkflowContext())
+        call_args = agent1.execute.call_args[0][0]
+        assert call_args["instruction"] == "hello"
+
+    async def test_custom_transform_prefix(self) -> None:
+        """2-agent pipeline with custom transform.
+        stage_transforms=[None, lambda r: f"Review: {r['response']}"].
+        Stage 0 response = "my code". Assert agent1 receives instruction="Review: my code"."""
+        agent0 = _make_mock_agent(response="my code")
+        agent1 = _make_mock_agent(response="review")
+        pipeline = AgentPipeline(
+            [agent0, agent1],
+            stage_transforms=[None, lambda r: f"Review: {r['response']}"],  # noqa: E731
+        )
+        await pipeline.execute(PipelineTask(instruction="implement"), WorkflowContext())
+        call_args = agent1.execute.call_args[0][0]
+        assert call_args["instruction"] == "Review: my code"
+
+    async def test_transform_receives_full_result(self) -> None:
+        """The transform callable receives the complete DevelopmentResult.
+        Set up a transform that reads result["confidence"] and returns a string based on it."""
+
+        def confidence_transform(result: DevelopmentResult) -> str:
+            confidence = result["confidence"]
+            if confidence > 0.75:
+                return "High confidence output"
+            else:
+                return "Low confidence output"
+
+        agent0 = _make_mock_agent(response="test", confidence=0.9)
+        agent1 = _make_mock_agent(response="final")
+        pipeline = AgentPipeline(
+            [agent0, agent1],
+            stage_transforms=[None, confidence_transform],
+        )
+        await pipeline.execute(PipelineTask(instruction="start"), WorkflowContext())
+        call_args = agent1.execute.call_args[0][0]
+        assert call_args["instruction"] == "High confidence output"
+
+    async def test_mixed_transforms_three_stage(self) -> None:
+        """3-agent pipeline with mixed transforms.
+        stage_transforms=[None, custom_fn1, custom_fn2].
+        Stage 0 response = "A". custom_fn1 returns "B(A)".
+        Stage 1 response = "C". custom_fn2 returns "D(C)".
+        Assert agent1 received "B(A)", agent2 received "D(C)"."""
+
+        def fn1(result: DevelopmentResult) -> str:
+            return f"B({result['response']})"
+
+        def fn2(result: DevelopmentResult) -> str:
+            return f"D({result['response']})"
+
+        agent0 = _make_mock_agent(response="A")
+        agent1 = _make_mock_agent(response="C")
+        agent2 = _make_mock_agent(response="final")
+        pipeline = AgentPipeline(
+            [agent0, agent1, agent2],
+            stage_transforms=[None, fn1, fn2],
+        )
+        await pipeline.execute(PipelineTask(instruction="begin"), WorkflowContext())
+        call_args_1 = agent1.execute.call_args[0][0]
+        call_args_2 = agent2.execute.call_args[0][0]
+        assert call_args_1["instruction"] == "B(A)"
+        assert call_args_2["instruction"] == "D(C)"
+
+
+# ── OTel Span tests ───────────────────────────────────────────────────────────
+
+
+class TestAgentPipelineOTel:
+    async def test_span_attributes_set(self) -> None:
+        """Mock the tracer and verify all 4 span attributes are set:
+        - pipeline.agent_count
+        - pipeline.completed_stages
+        - pipeline.stopped_early
+        - pipeline.final_confidence"""
+        agent = _make_mock_agent(confidence=0.8)
+        pipeline = AgentPipeline([agent])
+        mock_span = MagicMock()
+        mock_tracer = MagicMock()
+        mock_tracer.start_as_current_span.return_value.__enter__ = MagicMock(return_value=mock_span)
+        mock_tracer.start_as_current_span.return_value.__exit__ = MagicMock(return_value=False)
+        pipeline._pipeline_tracer = mock_tracer
+
+        await pipeline.execute(PipelineTask(instruction="test"), WorkflowContext())
+
+        mock_span.set_attribute.assert_any_call("pipeline.agent_count", 1)
+        mock_span.set_attribute.assert_any_call("pipeline.completed_stages", 1)
+        mock_span.set_attribute.assert_any_call("pipeline.stopped_early", False)
+        mock_span.set_attribute.assert_any_call("pipeline.final_confidence", 0.8)
+
+    async def test_span_completed_stages_matches_result(self) -> None:
+        """With mock tracer, verify the value passed to pipeline.completed_stages
+        span attribute equals result["completed_stages"]."""
+        agents = [_make_mock_agent() for _ in range(2)]
+        pipeline = AgentPipeline(agents)
+        mock_span = MagicMock()
+        mock_tracer = MagicMock()
+        mock_tracer.start_as_current_span.return_value.__enter__ = MagicMock(return_value=mock_span)
+        mock_tracer.start_as_current_span.return_value.__exit__ = MagicMock(return_value=False)
+        pipeline._pipeline_tracer = mock_tracer
+
+        result = await pipeline.execute(PipelineTask(instruction="test"), WorkflowContext())
+
+        # Verify the span attribute matches the result
+        calls = mock_span.set_attribute.call_args_list
+        completed_stages_call = next(c for c in calls if c[0][0] == "pipeline.completed_stages")
+        assert completed_stages_call[0][1] == result["completed_stages"]
+
+    async def test_no_span_when_tracer_none(self) -> None:
+        """Set pipeline._pipeline_tracer = None.
+        Execute normally. Assert no error raised and result is valid."""
+        agent = _make_mock_agent(response="output")
+        pipeline = AgentPipeline([agent])
+        pipeline._pipeline_tracer = None
+
+        result = await pipeline.execute(PipelineTask(instruction="test"), WorkflowContext())
+
+        assert result["completed_stages"] == 1
+        assert result["final_response"] == "output"
+        assert result["stopped_early"] is False
