@@ -1,19 +1,28 @@
 # Quick Start: Using Observability in TTA.dev
 
+> [!WARNING]
+> Historical observability quickstart.
+>
+> This quickstart uses older `observability_integration` imports and workspace-specific setup steps.
+> It is useful as historical context, but it is not the current March 2026 source of truth.
+>
+> For the current verified path, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
 **Updated:** November 15, 2025
-**Status:** ✅ Workspace configuration fixed
+**Status:** Historical quickstart snapshot
 
 ---
 
 ## TL;DR
 
 ```bash
-# Initialize observability for your workspace
+# Historical workspace-specific test path
 uv run python test_observability.py tta-dev-copilot
 
 # Or in your Python code
 uv run python -c "
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
 initialize_observability(service_name='tta-dev-copilot')
 "
 
@@ -42,7 +51,7 @@ uv run python test_observability.py tta-dev-augment
 Add to your application startup code:
 
 ```python
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
 
 # Initialize at application startup
 success = initialize_observability(
@@ -67,7 +76,7 @@ uv run python your_application.py
 
 # Or run a quick test
 uv run python -c "
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
 print('Initialized:', initialize_observability(service_name='test'))
 "
 ```
@@ -176,7 +185,7 @@ uv sync --all-extras
 ### 2. Import Test
 
 ```bash
-uv run python -c "from observability_integration import initialize_observability; print('✅ OK')"
+uv run python -c "from ttadev import initialize_observability; print('✅ OK')"
 ```
 
 **Expected:** `✅ OK`
@@ -225,7 +234,7 @@ Integrate observability into your application:
 
 ```python
 # At application startup
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
 
 if __name__ == "__main__":
     # Initialize observability
@@ -251,7 +260,7 @@ Once Grafana Alloy is running and sending to Grafana Cloud:
 
 ## Troubleshooting
 
-### "Module not found: observability_integration"
+### "Module not found" for old observability imports
 
 **Solution:** Use `uv run`:
 ```bash
@@ -324,9 +333,5 @@ sudo systemctl status alloy
 ---
 
 **Last Updated:** November 15, 2025
-**Status:** ✅ Working
+**Status:** Historical quickstart snapshot
 **Next:** Install Grafana Alloy for cloud integration
-
-
----
-**Logseq:** [[TTA.dev/Docs/Quickstart/Observability_quickstart]]

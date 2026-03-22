@@ -1,6 +1,16 @@
 # Native Observability Quick Reference
 
-**Replace Docker Desktop with Linux-native services for TTA.dev**
+> [!WARNING]
+> Historical quick reference.
+>
+> This guide documents a Linux-native Grafana/Alloy setup path that is not the repository's current
+> canonical proof path. Keep it as an optional environment-specific note, not as the default
+> onboarding path.
+>
+> For the current verified observability flow, prefer `README.md`, `GETTING_STARTED.md`,
+> `QUICKSTART.md`, and `python -m ttadev.observability`.
+
+**Historical Linux-native observability quick reference for TTA.dev**
 
 ---
 
@@ -281,7 +291,7 @@ sudo ufw allow 4318/tcp comment 'Alloy OTLP HTTP'
 ### Your Application (No Changes Needed!)
 
 ```python
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
 
 # This stays the same
 success = initialize_observability(
@@ -471,7 +481,3 @@ curl http://localhost:12345/metrics
 
 **Last Updated:** 2025-11-15
 **Quick Start Script:** `./scripts/setup-native-observability.sh`
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Native_observability_quickref]]

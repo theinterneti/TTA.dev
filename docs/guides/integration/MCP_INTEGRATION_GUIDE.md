@@ -1,12 +1,23 @@
 # TTA.dev MCP Integration Guide
 
-**Complete guide for using Model Context Protocol (MCP) servers with Gemini CLI in GitHub Actions**
+> [!WARNING]
+> Historical MCP integration guide.
+>
+> This document describes an older Gemini CLI + APM workflow story. The current repository has a
+> more restrained view of MCP usage: MCP can be powerful, but it should be used deliberately and not
+> treated as the default answer for every workflow.
+>
+> For current repo guidance, prefer `AGENTS.md`, `.github/copilot-instructions.md`, and the
+> top-level onboarding docs.
+
+**Historical guide for MCP server usage with older Gemini/APM workflow assumptions**
 
 ---
 
 ## Overview
 
-This guide documents how TTA.dev integrates MCP servers using the Agent Package Manager (APM) framework to provide advanced AI agent capabilities in automated workflows.
+This guide documents an earlier approach to MCP server integration using the Agent Package Manager
+(APM) framework for automated workflows.
 
 ### What is MCP?
 
@@ -227,7 +238,7 @@ Use these MCP tools to gather information:
 
 **Trigger:**
 ```
-@gemini-cli-advanced generate tests for platform/primitives/src/tta_dev_primitives/core/router.py
+@gemini-cli-advanced generate tests for ttadev/primitives/core/routing.py
 ```
 
 **What Happens:**
@@ -592,7 +603,3 @@ telemetry:
 **Last Updated:** November 1, 2025
 **Status:** Implementation Complete - Awaiting PAT Configuration
 **Next Action:** Add GITHUB_COPILOT_CHAT secret for advanced mode testing
-
-
----
-**Logseq:** [[TTA.dev/Docs/Integration/Mcp_integration_guide]]

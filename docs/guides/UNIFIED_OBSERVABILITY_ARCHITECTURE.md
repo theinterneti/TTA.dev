@@ -1,9 +1,19 @@
 # Unified Observability Architecture for TTA.dev
 
-**Complete observability across Primitives, Integrations, and Personas**
+> [!WARNING]
+> Historical/aspirational observability architecture.
+>
+> This document describes a broader observability architecture than the repository's currently
+> verified default path. Treat it as design direction and research, not as proof that the full
+> Grafana/Langfuse/persona stack is the supported default today.
+>
+> For the current repo reality, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
+> `python -m ttadev.observability`.
+
+**Historical observability architecture across primitives, integrations, and personas**
 
 **Last Updated:** November 15, 2025
-**Status:** Production-Ready
+**Status:** Historical / aspirational architecture
 
 ---
 
@@ -92,9 +102,9 @@ This architecture supports:
 **All TTA.dev primitives automatically inherit from `InstrumentedPrimitive`** - no code changes needed!
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, RouterPrimitive
-from tta_dev_primitives.recovery import RetryPrimitive
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
+from ttadev.primitives import RouterPrimitive, SequentialPrimitive
+from ttadev.primitives.recovery.retry import RetryPrimitive
 
 # Initialize once at application startup
 initialize_observability(
@@ -180,12 +190,11 @@ generation = langfuse.create_generation(
 **Automatic OpenTelemetry + Manual Langfuse:**
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
-from tta_dev_primitives.observability import InstrumentedPrimitive
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+from ttadev.primitives import SequentialPrimitive, WorkflowContext
+from ttadev.primitives.observability import InstrumentedPrimitive
 
 class LLMAnalyzerPrimitive(InstrumentedPrimitive[dict, dict]):
-    """Primitive that calls LLM with Langfuse tracking."""
+    """Primitive that calls an LLM with optional extended observability."""
 
     def __init__(self):
         super().__init__(name="LLMAnalyzer")
@@ -248,8 +257,8 @@ result = await workflow.execute({"text": "...", "persona": "analyst"}, context)
 **For integrations (OpenAI, Anthropic, Supabase, E2B):**
 
 ```python
-from tta_dev_integrations import OpenAIPrimitive
-from observability_integration import initialize_observability
+from ttadev import initialize_observability
+from ttadev.primitives.integrations import OpenAIPrimitive
 
 # Initialize observability
 initialize_observability(service_name="tta-dev-main")
@@ -271,11 +280,10 @@ result = await openai_primitive.execute({"prompt": "Hello"}, context)
 **Track persona changes with all three layers:**
 
 ```python
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
 
-# Initialize Langfuse
-langfuse = LangfuseIntegration()
+# Initialize any optional extended LLM observability separately if your current
+# repo setup includes it.
 
 def switch_persona(new_persona: str, chatmode: str, context: WorkflowContext):
     """Switch persona and update observability context."""
@@ -403,8 +411,7 @@ LANGFUSE_HOST=https://cloud.langfuse.com  # or self-hosted URL
 
 ```python
 # At application startup
-from observability_integration import initialize_observability
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+from ttadev import initialize_observability
 import os
 from dotenv import load_dotenv
 
@@ -417,8 +424,8 @@ initialize_observability(
     prometheus_port=9464,
 )
 
-# Initialize Langfuse (for LLM calls)
-langfuse = LangfuseIntegration()
+# Initialize any optional extended LLM observability separately if your current
+# repo setup includes it.
 
 # Your application code...
 ```
@@ -546,7 +553,7 @@ uv run python -c "from opentelemetry import trace; print('OpenTelemetry OK')"
 
 **Verify initialization:**
 ```python
-from observability_integration import is_observability_enabled
+from ttadev.observability.observability_integration import is_observability_enabled
 print(f"Observability: {is_observability_enabled()}")
 ```
 
@@ -556,9 +563,9 @@ print(f"Observability: {is_observability_enabled()}")
 
 - **Linux-Native Observability:** [`LINUX_NATIVE_OBSERVABILITY.md`](LINUX_NATIVE_OBSERVABILITY.md)
 - **Multi-Workspace Setup:** [`MULTI_WORKSPACE_OBSERVABILITY.md`](MULTI_WORKSPACE_OBSERVABILITY.md)
-- **Langfuse Integration:** [`../../.hypertool/instrumentation/LANGFUSE_INTEGRATION.md`](../../.hypertool/instrumentation/LANGFUSE_INTEGRATION.md)
+- **Langfuse Integration:** historical Hypertool-era note; verify current support before relying on it
 - **Primitives Catalog:** [`../../PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)
-- **Integrations Package:** [`../../packages/tta-dev-integrations/README.md`](../../packages/tta-dev-integrations/README.md)
+- **Integrations Package:** [`../../ttadev/primitives/integrations/__init__.py`](../../ttadev/primitives/integrations/__init__.py)
 
 ---
 
@@ -575,9 +582,5 @@ print(f"Observability: {is_observability_enabled()}")
 ---
 
 **Last Updated:** November 15, 2025
-**Status:** Production-Ready
+**Status:** Historical / aspirational architecture
 **Maintained by:** TTA.dev Team
-
-
----
-**Logseq:** [[TTA.dev/Docs/Guides/Unified_observability_architecture]]
