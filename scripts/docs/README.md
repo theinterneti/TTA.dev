@@ -41,7 +41,7 @@ Code blocks can be marked as runnable by adding `# runnable` as the first line:
 
 \`\`\`python
 # runnable
-from tta_dev_primitives import WorkflowPrimitive
+from ttadev.primitives import WorkflowPrimitive
 
 print("This block can be executed in tests")
 \`\`\`

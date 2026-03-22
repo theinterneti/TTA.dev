@@ -1,5 +1,14 @@
 # GitHub Workflows Organization Guide
 
+> [!WARNING]
+> Historical workflow organization snapshot.
+>
+> This note reflects an earlier branch and workflow-organization model, including experimental Gemini
+> branches and a stronger production/experimental separation than the repo currently documents
+> elsewhere.
+>
+> Treat it as historical reference, not as the primary source of truth for current workflow policy.
+
 ## Overview
 
 This document describes the organization of GitHub workflows in the TTA.dev repository.
@@ -85,7 +94,7 @@ See `experimental/README.md` for full details.
 ## Branch Policy
 
 ### Main/Refactor Branches
-- Only production-ready workflows
+- Only mature workflows intended for main branches
 - Must pass all quality checks
 - Require maintainer approval
 
@@ -138,8 +147,4 @@ If pushing workflow files fails:
 
 **Last Updated:** 2025-11-17
 **Maintained by:** TTA.dev Team
-**Status:** Active - Production and Experimental Workflows Separated
-
-
----
-**Logseq:** [[TTA.dev/.github/Workflows/Workflow_file_note]]
+**Status:** Historical workflow organization note

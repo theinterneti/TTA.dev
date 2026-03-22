@@ -1,5 +1,14 @@
 # MCP Server Integration Registry
 
+> [!WARNING]
+> Mixed-current reference.
+>
+> This registry is a useful catalog of MCP server ideas and capabilities, but MCP support and local
+> configuration evolve quickly. Treat this file as a reference index, not as the canonical setup
+> source of truth for the repository.
+>
+> For the current repo-specific configuration, check `.mcp/config.json` and `AGENTS.md`.
+
 ## What is MCP?
 
 **Model Context Protocol (MCP)** is an open standard for connecting AI applications to external data sources and tools. MCP servers expose capabilities that AI agents can use to:
@@ -292,7 +301,3 @@ Show me the schema for the users table
 - Data analysis
 - Query testing
 - Database documentation
-
-
----
-**Logseq:** [[TTA.dev/Mcp_tool_registry]]

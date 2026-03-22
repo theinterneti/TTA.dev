@@ -1,5 +1,14 @@
 # MCP Auto-Integration Scripts
 
+> [!WARNING]
+> Historical Hypertool-era setup guide.
+>
+> The scripts in this folder still describe and consume `.hypertool/mcp_servers.json`. That makes
+> this README useful as historical tooling context, but not the canonical MCP setup path for the
+> repository today.
+>
+> For the current repo-managed MCP configuration, start with `.mcp/config.json` and `AGENTS.md`.
+
 **Automatic MCP server configuration and persona activation for TTA.dev agents**
 
 ---
