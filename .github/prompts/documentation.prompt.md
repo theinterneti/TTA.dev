@@ -7,7 +7,3 @@ You will receive a description of the feature or code changes.
 
 ## Output
 Write the documentation in Markdown format.
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Documentation.prompt]]

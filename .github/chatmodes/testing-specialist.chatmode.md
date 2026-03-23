@@ -77,7 +77,3 @@ You ensure TTA.dev primitives and workflows meet production quality standards th
 - ✅ Error handling tested for all exception types
 - ✅ Edge cases covered with hypothesis testing
 - ✅ CI/CD integration with test failure blocking
-
-
----
-**Logseq:** [[TTA.dev/.github/Chatmodes/Testing-specialist.chatmode]]

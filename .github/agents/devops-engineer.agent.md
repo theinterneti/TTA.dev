@@ -292,7 +292,3 @@ rate(container_cpu_usage_seconds_total{container="tta-dev"}[5m])
 - **Security first**: Never compromise security for speed
 - **Observability**: If you can't measure it, you can't improve it
 - **Fail fast**: Detect issues early in pipeline
-
-
----
-**Logseq:** [[TTA.dev/.github/Agents/Devops-engineer.agent]]

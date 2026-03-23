@@ -61,7 +61,3 @@ Emergency workflow for handling production incidents with **DevOps Engineer** an
 - ✅ Service restored <1 hour
 - ✅ Postmortem complete <24 hours
 - ✅ Preventive measures implemented
-
-
----
-**Logseq:** [[TTA.dev/.github/Skills/Incident-response/Skill]]

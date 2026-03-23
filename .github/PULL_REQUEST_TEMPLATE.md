@@ -69,7 +69,3 @@ None
 - [ ] Documentation is clear
 - [ ] Breaking changes are justified
 - [ ] Commit history is clean
-
-
----
-**Logseq:** [[TTA.dev/.github/Pull_request_template]]

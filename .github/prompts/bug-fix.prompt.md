@@ -539,8 +539,3 @@ async def get_ai_response(prompt):
 ---
 
 **Note:** Always write a regression test before fixing the bug. This ensures the bug is caught if it reappears.
-
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Bug-fix.prompt]]

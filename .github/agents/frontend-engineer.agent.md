@@ -279,7 +279,3 @@ After completing UI:
 - **Accessible by default**: WCAG AA compliance
 - **Performance matters**: Optimize bundles, lazy load
 - **Type safety**: Use TypeScript strictly
-
-
----
-**Logseq:** [[TTA.dev/.github/Agents/Frontend-engineer.agent]]

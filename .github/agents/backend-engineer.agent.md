@@ -145,7 +145,3 @@ for primitive in primitives["recovery"]:
 1. **Vibe first** - Build fast, ship fast
 2. **Scale when needed** - Add primitives incrementally
 3. **Use primitives** - Never write manual retry/timeout loops
-
-
----
-**Logseq:** [[TTA.dev/.github/Agents/Backend-engineer.agent]]

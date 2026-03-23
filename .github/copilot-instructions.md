@@ -138,7 +138,3 @@ run ledger, or lease model in another package. Extend this L0 surface.
 - [AGENTS.md](../AGENTS.md) - Quick reference for agents
 - [PRIMITIVES_CATALOG.md](../PRIMITIVES_CATALOG.md) - Complete primitive API
 - [GETTING_STARTED.md](../GETTING_STARTED.md) - Setup guide
-
-
----
-**Logseq:** [[TTA.dev/.github/Copilot-instructions]]

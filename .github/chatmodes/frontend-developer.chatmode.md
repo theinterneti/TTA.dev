@@ -77,7 +77,8 @@ You focus on creating user interfaces that integrate seamlessly with TTA.dev bac
 
 ```tsx
 import React, { useState, useEffect } from 'react';
-import { WorkflowContext, useTTAWorkflow } from 'tta-dev-primitives';
+import type { WorkflowContext } from '@/types/workflow';
+import { runUserDashboardWorkflow } from '@/lib/workflows';
 
 interface UserDashboardProps {
   userId: string;
@@ -88,14 +89,13 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   userId,
   context
 }) => {
-  const workflow = useTTAWorkflow();
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const result = await workflow.execute(context, { userId });
+        const result = await runUserDashboardWorkflow(context, { userId });
         setUserData(result.user);
       } catch (error) {
         console.error('Failed to load user:', error);
@@ -105,7 +105,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
     };
 
     loadData();
-  }, [userId, context, workflow]);
+  }, [userId, context]);
 
   if (loading) return <div className="animate-pulse bg-gray-300 h-8 rounded"></div>;
   if (!userData) return <div>No user found</div>;
@@ -165,7 +165,3 @@ Before finalizing components, verify:
 - ✅ Accessibility attributes (aria-*, alt, etc.)
 - ✅ Component testing with React Testing Library
 - ✅ Browser testing setup with Playwright
-
-
----
-**Logseq:** [[TTA.dev/.github/Chatmodes/Frontend-developer.chatmode]]

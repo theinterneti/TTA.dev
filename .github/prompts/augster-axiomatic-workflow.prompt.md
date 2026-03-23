@@ -400,8 +400,3 @@ python .augment/context/cli.py add session-id "Mission: [mission statement]" --i
 
 **Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
-
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Augster-axiomatic-workflow.prompt]]

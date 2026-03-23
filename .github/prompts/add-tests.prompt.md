@@ -83,7 +83,3 @@ class Test${input:ComponentName}:
 uv run pytest tests/test_${input:module}.py -v
 uv run pytest --cov=src --cov-report=html
 ```
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Add-tests.prompt]]

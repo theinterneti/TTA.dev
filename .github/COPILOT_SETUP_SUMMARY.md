@@ -200,7 +200,3 @@ Copilot will automatically:
 
 **Last Updated:** 2025-11-13
 **Status:** ✅ Ready for Review
-
-
----
-**Logseq:** [[TTA.dev/.github/Copilot_setup_summary]]

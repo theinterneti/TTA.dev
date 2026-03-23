@@ -384,7 +384,3 @@ git commit -am "fix: critical issue in v$NEW_VERSION"
 - [TTA.dev Contributing Guide](../../CONTRIBUTING.md)
 - [Python Package Publishing](../../docs/publishing.md)
 - [Quality Gates](../../docs/quality-gates.md)
-
-
----
-**Logseq:** [[TTA.dev/.github/Skills/Package-release/Skill]]
