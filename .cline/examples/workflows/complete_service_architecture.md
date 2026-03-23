@@ -1,6 +1,6 @@
 # Workflow Examples for Cline
 
-**Purpose:** Learn how to combine TTA.dev primitives into comprehensive, production-ready workflows for complex use cases
+**Purpose:** Learn how to combine TTA.dev primitives into comprehensive, reliability-oriented workflows for complex use cases
 
 ## Example 1: Complete Service Architecture - Layered Approach
 
@@ -9,7 +9,7 @@
 **Cline Prompt Example:**
 
 ```
-I need to build a production-ready LLM service that can handle high load,
+I need to build a reliability-focused LLM service that can handle high load,
 costs, and reliability. Include caching, timeout protection, retry logic,
 and fallback to cheaper models when needed.
 ```
@@ -17,11 +17,11 @@ and fallback to cheaper models when needed.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.sequential import SequentialPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive, TimeoutPrimitive
-from tta_dev_primitives.performance import CachePrimitive
+from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import SequentialPrimitive
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives import RetryPrimitive, FallbackPrimitive, TimeoutPrimitive
+from ttadev.primitives import CachePrimitive
 import asyncio
 
 class ProductionLLMService:
@@ -331,10 +331,10 @@ Include state management and coordination between agents.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.sequential import SequentialPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive
+from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import SequentialPrimitive
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives import RetryPrimitive, FallbackPrimitive
 import asyncio
 from typing import Any, Dict, List
 
@@ -846,7 +846,3 @@ except Exception:
 ---
 
 **Next Steps:** When cline detects complex multi-agent coordination scenarios, it should automatically suggest appropriate workflow patterns, state management strategies, and coordination mechanisms based on the specific use case requirements.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Workflows/Complete_service_architecture]]

@@ -938,7 +938,7 @@ class IntelligentSuggestionEngine:
         examples = {
             "cache_primitive": {
                 "python": """
-from tta_dev_primitives import CachePrimitive
+from ttadev.primitives import CachePrimitive
 
 cached_operation = CachePrimitive(
     primitive=expensive_database_query,
@@ -949,11 +949,10 @@ cached_operation = CachePrimitive(
 result = await cached_operation.execute(context, query_data)
                 """,
                 "javascript": """
-// For JavaScript/Node.js projects
-const { CachePrimitive } = require('tta-dev-primitives');
-
-const cachedOperation = new CachePrimitive({
-    primitive: expensiveDatabaseQuery,
+// TTA.dev's maintained primitive surface is currently Python-first.
+// For Node.js, apply the same cache-wrapper pattern with your existing abstractions.
+const cachedOperation = createCachedOperation({
+    operation: expensiveDatabaseQuery,
     ttlSeconds: 3600,
     maxSize: 1000
 });
@@ -963,7 +962,7 @@ const result = await cachedOperation.execute(context, queryData);
             },
             "retry_primitive": {
                 "python": """
-from tta_dev_primitives import RetryPrimitive
+from ttadev.primitives import RetryPrimitive
 
 retry_operation = RetryPrimitive(
     primitive=unreliable_api_call,
@@ -976,7 +975,7 @@ result = await retry_operation.execute(context, request_data)
             },
             "fallback_primitive": {
                 "python": """
-from tta_dev_primitives import FallbackPrimitive
+from ttadev.primitives import FallbackPrimitive
 
 fallback_operation = FallbackPrimitive(
     primary=primary_service_call,
@@ -988,7 +987,7 @@ result = await fallback_operation.execute(context, request_data)
             },
             "timeout_primitive": {
                 "python": """
-from tta_dev_primitives import TimeoutPrimitive
+from ttadev.primitives import TimeoutPrimitive
 
 timeout_operation = TimeoutPrimitive(
     primitive=slow_operation,
@@ -1000,7 +999,7 @@ result = await timeout_operation.execute(context, operation_data)
             },
             "sequential_primitive": {
                 "python": """
-from tta_dev_primitives import SequentialPrimitive
+from ttadev.primitives import SequentialPrimitive
 
 workflow = step1 >> step2 >> step3
 result = await workflow.execute(context, input_data)
@@ -1008,7 +1007,7 @@ result = await workflow.execute(context, input_data)
             },
             "parallel_primitive": {
                 "python": """
-from tta_dev_primitives import ParallelPrimitive
+from ttadev.primitives import ParallelPrimitive
 
 parallel_workflow = task1 | task2 | task3
 result = await parallel_workflow.execute(context, input_data)
@@ -1016,7 +1015,7 @@ result = await parallel_workflow.execute(context, input_data)
             },
             "router_primitive": {
                 "python": """
-from tta_dev_primitives import RouterPrimitive
+from ttadev.primitives import RouterPrimitive
 
 router = RouterPrimitive(
     routes={
@@ -1087,28 +1086,28 @@ result = await router.execute(context, request_data)
         """Get implementation steps for a primitive."""
         steps_map = {
             "cache_primitive": [
-                "1. Import CachePrimitive from tta_dev_primitives",
+                "1. Import CachePrimitive from ttadev.primitives",
                 "2. Define the function to be cached",
                 "3. Create CachePrimitive with appropriate TTL and size",
                 "4. Replace direct function calls with primitive calls",
                 "5. Monitor cache hit rates and adjust parameters",
             ],
             "retry_primitive": [
-                "1. Import RetryPrimitive from tta_dev_primitives",
+                "1. Import RetryPrimitive from ttadev.primitives",
                 "2. Identify operations that may fail transiently",
                 "3. Configure retry parameters (max_retries, backoff_strategy)",
                 "4. Wrap operations with RetryPrimitive",
                 "5. Test failure scenarios and retry behavior",
             ],
             "fallback_primitive": [
-                "1. Import FallbackPrimitive from tta_dev_primitives",
+                "1. Import FallbackPrimitive from ttadev.primitives",
                 "2. Define primary and fallback operations",
                 "3. Configure fallback triggers and conditions",
                 "4. Implement fallback operation logic",
                 "5. Test both primary and fallback paths",
             ],
             "timeout_primitive": [
-                "1. Import TimeoutPrimitive from tta_dev_primitives",
+                "1. Import TimeoutPrimitive from ttadev.primitives",
                 "2. Identify operations that may hang",
                 "3. Set appropriate timeout values",
                 "4. Handle timeout exceptions gracefully",
@@ -1119,7 +1118,7 @@ result = await router.execute(context, request_data)
         return steps_map.get(
             primitive,
             [
-                f"1. Import {primitive} from tta_dev_primitives",
+                f"1. Import {primitive} from ttadev.primitives",
                 "2. Configure primitive parameters",
                 "3. Replace existing implementation",
                 "4. Test thoroughly",

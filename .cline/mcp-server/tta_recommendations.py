@@ -368,8 +368,8 @@ class TemplateProvider:
     def __init__(self):
         self.templates = {
             "TimeoutPrimitive": {
-                "basic_template": """from tta_dev_primitives.recovery import TimeoutPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "basic_template": """from ttadev.primitives import TimeoutPrimitive
+from ttadev.primitives import WorkflowContext
 
 # Create timeout primitive
 timeout_primitive = TimeoutPrimitive(
@@ -382,8 +382,8 @@ timeout_primitive = TimeoutPrimitive(
 # Use in workflow
 context = WorkflowContext(workflow_id="timeout_example")
 result = await timeout_primitive.execute(data, context)""",
-                "circuit_breaker_template": """from tta_dev_primitives.recovery import TimeoutPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "circuit_breaker_template": """from ttadev.primitives import TimeoutPrimitive
+from ttadev.primitives import WorkflowContext
 
 class CircuitBreaker:
     def __init__(self):
@@ -406,8 +406,8 @@ class CircuitBreaker:
                 ],
             },
             "ParallelPrimitive": {
-                "basic_template": """from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "basic_template": """from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import WorkflowContext
 
 # Create parallel execution
 parallel_workflow = ParallelPrimitive([
@@ -430,8 +430,8 @@ workflow = function1 | function2 | function3""",
                 ],
             },
             "RouterPrimitive": {
-                "basic_template": """from tta_dev_primitives.core.routing import RouterPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "basic_template": """from ttadev.primitives import RouterPrimitive
+from ttadev.primitives import WorkflowContext
 
 # Create router
 router = RouterPrimitive(
@@ -455,8 +455,8 @@ result = await router.execute(data, context)""",
                 ],
             },
             "CachePrimitive": {
-                "basic_template": """from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "basic_template": """from ttadev.primitives import CachePrimitive
+from ttadev.primitives import WorkflowContext
 
 # Create cache primitive
 cached_function = CachePrimitive(

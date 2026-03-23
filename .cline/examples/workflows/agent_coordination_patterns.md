@@ -17,11 +17,11 @@ proper state management and error handling between agents.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.sequential import SequentialPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive
-from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
+from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import SequentialPrimitive
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives import RetryPrimitive, FallbackPrimitive
+from ttadev.primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
 import asyncio
 from typing import Any, Dict, List, Optional
 import json
@@ -600,10 +600,10 @@ Include error handling and quality assurance.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.sequential import SequentialPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive, TimeoutPrimitive
+from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import SequentialPrimitive
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives import RetryPrimitive, FallbackPrimitive, TimeoutPrimitive
 import asyncio
 from typing import Any, Dict, List, Tuple
 import json
@@ -1279,7 +1279,3 @@ fallback_reporting = FallbackPrimitive(
 ---
 
 **Next Steps:** When cline detects complex data processing and quality assurance scenarios, it should automatically suggest appropriate pipeline architectures, state management strategies, and quality assurance patterns based on the specific data requirements and use cases.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Workflows/Agent_coordination_patterns]]

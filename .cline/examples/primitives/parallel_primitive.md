@@ -16,9 +16,9 @@ to get the fastest response or compare their outputs.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.sequential import SequentialPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import SequentialPrimitive
+from ttadev.primitives import WorkflowContext
 import asyncio
 
 class ConcurrentLLMService:
@@ -181,8 +181,8 @@ into a single dashboard. Make the API calls parallel for better performance.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import WorkflowContext
 import aiohttp
 import asyncio
 
@@ -372,8 +372,8 @@ validation, and enrichment. Process these steps in parallel to speed up the pipe
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import WorkflowContext
 import asyncio
 import json
 
@@ -593,8 +593,8 @@ provides the best quality for my content. Run them in parallel for efficiency.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import WorkflowContext
 import asyncio
 import time
 
@@ -893,7 +893,3 @@ parallel_apis = api1 | api2 | api3
 ---
 
 **Next Steps:** When cline detects parallelizable operations, it should automatically suggest ParallelPrimitive with the `|` operator for clean syntax and provide aggregation/comparison strategies based on the use case.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Parallel_primitive]]
