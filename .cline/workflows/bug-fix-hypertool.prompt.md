@@ -1,5 +1,5 @@
 ---
-hypertool_enabled: true
+hypertool_enabled: false
 workflow_type: multi_persona
 workflow_name: bug_fix_hypertool
 version: 1.0.0
@@ -19,11 +19,13 @@ quality_gates:
   - regression_tests_added
 ---
 
-# Multi-Persona Workflow: Bug Fix with Hypertool
+# Multi-Persona Workflow: Bug Fix
 
-**Purpose:** Diagnose and fix bugs using optimal persona switching
+**Purpose:** Diagnose and fix bugs using staged persona handoffs and current repo tooling
 
-**APM Integration:** Complete observability with PersonaMetricsCollector and WorkflowTracer
+**Status:** Historical workflow scaffold. Keep the investigation → fix → validation flow,
+but adapt the handoff mechanics to the current agent/tooling surface instead of relying on
+Hypertool-era automation.
 
 ---
 
@@ -31,7 +33,7 @@ quality_gates:
 
 **Active Persona:** `observability-expert` (Token Budget: 2000)
 
-**Hypertool Command:**
+**Historical handoff example:**
 ```bash
 tta-persona switch observability-expert --chatmode bug-investigation
 ```
@@ -74,7 +76,7 @@ curl http://localhost:9090/api/v1/query \
 
 **Persona Switch:** `observability-expert` → `backend-engineer`
 
-**Hypertool Command:**
+**Historical handoff example:**
 ```bash
 tta-persona switch backend-engineer --chatmode bug-fix
 ```
@@ -133,7 +135,7 @@ async def process_request(data: dict) -> dict:
 
 **Persona Switch:** `backend-engineer` → `testing-specialist`
 
-**Hypertool Command:**
+**Historical handoff example:**
 ```bash
 tta-persona switch testing-specialist --chatmode bug-validation
 ```
@@ -173,7 +175,3 @@ async def test_null_user_id_handling():
 
 **Workflow Version:** 1.0.0
 **Last Updated:** 2025-11-15
-
-
----
-**Logseq:** [[TTA.dev/.cline/Workflows/Bug-fix-hypertool.prompt]]
