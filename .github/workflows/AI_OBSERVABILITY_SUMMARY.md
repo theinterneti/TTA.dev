@@ -1,5 +1,13 @@
 # AI Agent Observability Implementation Summary
 
+> [!WARNING]
+> Historical implementation summary.
+>
+> This document captures a completed branch-era observability effort, but it should not be read as a
+> claim that the repository now has fully production-ready AI observability end to end. For current
+> repo truth, prefer `README.md`, `GETTING_STARTED.md`, and the current observability guides under
+> `docs/guides/observability/`.
+
 **Date**: 2026-03-07
 **Status**: ✅ Complete
 **PR**: #210 (feat/agentic-workflows branch)
@@ -327,7 +335,10 @@ cat ci-ai-decisions/*.json | jq .
 
 ## Conclusion
 
-Successfully implemented production-ready observability infrastructure for AI agents in CI pipelines. All code passes quality gates, comprehensive documentation provided, and integration with existing systems verified. Ready for merge and live testing.
+Successfully implemented a substantial observability foundation for AI agents in CI pipelines at the
+time of this summary. The branch passed its quality gates and shipped useful scripts and workflow
+drafts, but the repository should still treat observability maturity as an evolving area rather than
+as universally production-ready.
 
 **Branch**: feat/agentic-workflows
 **PR**: #210

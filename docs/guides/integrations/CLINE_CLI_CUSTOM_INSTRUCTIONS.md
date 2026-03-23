@@ -151,7 +151,8 @@ mkdir -p memory-bank
 cat > memory-bank/projectbrief.md << 'EOF'
 # TTA.dev Project Brief
 
-TTA.dev is a production-ready AI development toolkit providing composable agentic primitives for building reliable AI workflows.
+TTA.dev is an evolving AI development toolkit providing composable agentic primitives for building
+reliable AI workflows.
 
 ## Core Requirements
 - Composable workflow primitives (Sequential, Parallel, Router, etc.)
