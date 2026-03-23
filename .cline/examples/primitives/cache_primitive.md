@@ -16,8 +16,7 @@ Implement CachePrimitive to reduce costs and improve response time.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import CachePrimitive, WorkflowContext
 
 # Cache expensive LLM calls
 cached_llm = CachePrimitive(
@@ -56,8 +55,7 @@ The data changes infrequently so can be cached for 30 minutes.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import CachePrimitive, WorkflowContext
 import aiosqlite
 
 class UserProfileService:
@@ -102,8 +100,7 @@ Create a cache that considers both parameters.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import CachePrimitive, WorkflowContext
 
 # Multi-parameter cache key
 search_service = CachePrimitive(
@@ -134,8 +131,7 @@ The cache should be cleared to ensure fresh data.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import CachePrimitive, WorkflowContext
 import asyncio
 from collections import defaultdict
 
@@ -216,7 +212,3 @@ key_fn=lambda data, ctx: data.get("id", "")
 ---
 
 **Next Steps:** When cline detects caching patterns, it should automatically suggest CachePrimitive with appropriate configuration based on the use case.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Cache_primitive]]

@@ -16,8 +16,7 @@ Add automatic retry with exponential backoff to handle transient failures.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import RetryPrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import RetryPrimitive, WorkflowContext
 import asyncio
 
 class PaymentService:
@@ -59,8 +58,7 @@ Implement retry logic to handle connection failures automatically.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import RetryPrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import RetryPrimitive, WorkflowContext
 import aiosqlite
 
 class DatabaseService:
@@ -107,9 +105,8 @@ Add smart retry logic that respects rate limits and handles different error type
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import RetryPrimitive
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.exceptions import (
+from ttadev.primitives import RetryPrimitive, WorkflowContext
+from your_app.exceptions import (
     RateLimitError,
     ServerError,
     AuthenticationError
@@ -162,8 +159,7 @@ Implement chunked upload with retry to handle partial failures.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import RetryPrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import RetryPrimitive, WorkflowContext
 import aiofiles
 
 class FileUploadService:
@@ -224,8 +220,7 @@ Implement retry with different strategies to ensure important emails get through
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import RetryPrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import RetryPrimitive, WorkflowContext
 
 class EmailService:
     def __init__(self):
@@ -346,7 +341,3 @@ retry = RetryPrimitive(
 ---
 
 **Next Steps:** When cline detects failure-prone operations, it should automatically suggest RetryPrimitive with appropriate backoff strategy and exception handling.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Retry_primitive]]

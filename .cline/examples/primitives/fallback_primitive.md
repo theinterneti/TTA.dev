@@ -16,8 +16,7 @@ Add fallback to alternate providers if the primary one fails.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import FallbackPrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import FallbackPrimitive, WorkflowContext
 
 class HighAvailabilityLLMService:
     def __init__(self):
@@ -70,8 +69,7 @@ If the primary database fails, fall back to read replicas.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import FallbackPrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import FallbackPrimitive, WorkflowContext
 import aiosqlite
 
 class DatabaseService:
@@ -130,8 +128,7 @@ If primary CDN fails, try secondary CDNs and finally the origin server.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import FallbackPrimitive
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import FallbackPrimitive, WorkflowContext
 import aiohttp
 
 class ContentDeliveryService:
@@ -216,7 +213,7 @@ class ContentDeliveryService:
 
 ```python
 # Track fallback usage and performance
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
 
 async def track_fallback_usage(self, data: dict, context: WorkflowContext):
     context.metadata.update({
@@ -252,7 +249,3 @@ reliable = FallbackPrimitive(
 ---
 
 **Next Steps:** When cline detects high availability needs, it should suggest FallbackPrimitive with appropriate provider ordering and emergency fallback strategy.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Fallback_primitive]]
