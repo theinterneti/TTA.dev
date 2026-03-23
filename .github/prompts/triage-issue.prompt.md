@@ -18,20 +18,20 @@ legacy `.hypertool` tracing examples.
    - Priority: critical | high | medium | low
    - Complexity: trivial | simple | moderate | complex
    - Package: Which package(s) does this affect?
-     - tta-dev-primitives
-     - tta-observability-integration
-     - universal-agent-context
-     - keploy-framework
-     - documentation
-     - infrastructure
+      - ttadev
+      - tta-dev-integrations
+      - tta-skill-primitives
+      - documentation
+      - infrastructure
+      - historical/archive
 
 2. **Labels to Add**
-   Suggest appropriate labels:
-   - `bug`, `feature`, `documentation`, `refactor`
-   - `good-first-issue`, `help-wanted`
-   - `priority:high`, `priority:medium`, `priority:low`
-   - `needs-design`, `needs-tests`, `needs-docs`
-   - Package labels: `pkg:primitives`, `pkg:observability`, etc.
+    Suggest appropriate labels:
+    - `bug`, `feature`, `documentation`, `refactor`
+    - `good-first-issue`, `help-wanted`
+    - `priority:high`, `priority:medium`, `priority:low`
+    - `needs-design`, `needs-tests`, `needs-docs`
+    - Package labels: `pkg:ttadev`, `pkg:integrations`, `pkg:skills`, `pkg:docs`, `pkg:infra`
 
 3. **Assignment Recommendations**
    - Is this suitable for new contributors?

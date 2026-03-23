@@ -96,20 +96,14 @@
 Run these commands before committing:
 
 ```bash
-# 1. Validate primitive usage
-./scripts/validate-primitive-usage.sh
+# 1. Run the standard repo gate
+.github/copilot-hooks/post-generation.sh
 
-# 2. Format code
-uv run ruff format .
+# 2. Validate TODO formatting when relevant
+uv run python scripts/validate-todos.py
 
-# 3. Lint code
-uv run ruff check . --fix
-
-# 4. Type check
-uvx pyright packages/
-
-# 5. Run tests
-uv run pytest -v
+# 3. Optional deeper test run
+uv run pytest -v --tb=short -m "not integration and not slow and not external"
 ```
 
 ### Manual Verification
@@ -122,28 +116,27 @@ uv run pytest -v
 
 ---
 
-## 🎯 Package-Specific Checks
+## 🎯 Package-Area Checks
 
-### tta-dev-primitives
+### ttadev (root package)
 
-- [ ] New primitives extend `WorkflowPrimitive[TInput, TOutput]`
-- [ ] Primitives implement `_execute_impl()` method
-- [ ] Primitives support `>>` and `|` operators
+- [ ] New primitives extend `WorkflowPrimitive[...]` or `InstrumentedPrimitive[...]` as appropriate
+- [ ] Workflow code lives under `ttadev/`
+- [ ] Root package examples and docs stay aligned with `ttadev` imports
 - [ ] Examples created in `examples/` directory
 - [ ] Tests in `tests/` directory with 100% coverage
 
-### tta-observability-integration
+### tta-dev-integrations
 
-- [ ] OpenTelemetry integration tested
-- [ ] Prometheus metrics validated
-- [ ] Grafana dashboards updated (if applicable)
-- [ ] Trace propagation verified
+- [ ] Standalone package changes stay scoped to `ttadev/integrations/`
+- [ ] Dependency expectations remain explicit in `ttadev/integrations/pyproject.toml`
+- [ ] API/client integration behavior is tested
 
-### universal-agent-context
+### tta-skill-primitives
 
-- [ ] Agent context properly managed
-- [ ] MCP server integration tested
-- [ ] Multi-agent coordination validated
+- [ ] Standalone package changes stay scoped to `ttadev/skills/`
+- [ ] SKILL.md behavior stays aligned with current repo conventions
+- [ ] Skill examples and metadata remain current
 
 ---
 
@@ -165,7 +158,7 @@ Before opening a pull request:
 
 - **Primitives Catalog:** [`PRIMITIVES_CATALOG.md`](../PRIMITIVES_CATALOG.md)
 - **Agent Instructions:** [`AGENTS.md`](../AGENTS.md)
-- **Prompt Templates:** [`.vscode/tta-prompts.md`](../.vscode/tta-prompts.md)
+- **Prompt Templates:** [`.github/prompts/triage-issue.prompt.md`](../.github/prompts/triage-issue.prompt.md)
 - **Coding Standards:** [`docs/guides/development/CodingStandards.md`](../docs/guides/development/CodingStandards.md)
 - **Testing Guide:** [`docs/agent-guides/testing-architecture.md`](../docs/agent-guides/testing-architecture.md)
 
