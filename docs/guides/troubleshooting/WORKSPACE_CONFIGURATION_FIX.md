@@ -1,8 +1,15 @@
 # Workspace Configuration Fix
 
+> [!WARNING]
+> Historical troubleshooting report.
+>
+> This document captures a November 2025 workspace-layout issue from an earlier package structure
+> that used `packages/...` paths and package names like `tta-dev-primitives`. Keep the examples as
+> historical context; do not treat the old package layout as the current repo structure.
+
 **Issue Resolved:** November 15, 2025
 **Problem:** `uv` workspace dependency configuration error
-**Status:** ✅ Fixed
+**Status:** Historical fix record
 
 ---
 

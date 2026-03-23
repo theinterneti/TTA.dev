@@ -132,8 +132,8 @@ To add additional code owners for specific paths:
 * @Copilot
 
 # Package-specific owners
-/packages/tta-dev-primitives/ @theinterneti @Copilot
-/packages/tta-observability-integration/ @theinterneti @Copilot
+/ttadev/primitives/ @theinterneti @Copilot
+/ttadev/observability/ @theinterneti @Copilot
 
 # Documentation
 /docs/ @theinterneti @Copilot

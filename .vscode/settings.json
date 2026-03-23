@@ -2,7 +2,6 @@
     "python.defaultInterpreterPath": "/workspaces/TTA.dev/.venv/bin/python",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.diagnosticMode": "workspace",
-    // Ruff - New Native Server Configuration (November 2025)
     "ruff.nativeServer": true,
     "ruff.configuration": "./pyproject.toml",
     "ruff.lineLength": 88,
@@ -26,7 +25,6 @@
             "path": "/usr/bin/zsh"
         }
     },
-    // MCP Configuration - Hypertool Integration
     "mcp.servers": {
         "hypertool": {
             "command": "npx",
@@ -41,7 +39,6 @@
             "env": {
                 "HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/.hypertool",
                 "HYPERTOOL_SERVERS_FILE": "${workspaceFolder}/.hypertool/mcp_servers.json",
-                "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",
                 "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
             },
             "description": "Hypertool MCP Loader - Persona-based tool orchestration",
@@ -58,9 +55,9 @@
             "command": "uv",
             "args": [
                 "run",
-                "--directory",
-                "${workspaceFolder}/platform/primitives",
-                "tta-dev-mcp"
+                "python",
+                "-m",
+                "ttadev.primitives.mcp_server"
             ],
             "env": {},
             "description": "TTA.dev Primitives - Code analysis and primitive recommendations",
