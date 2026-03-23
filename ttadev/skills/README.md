@@ -22,7 +22,7 @@ uv pip install -e platform/skills
 
 ```python
 from tta_skill_primitives import Skill, SkillDescriptor, SkillRegistry
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
 
 class CodeReviewSkill(Skill[str, dict]):
     descriptor = SkillDescriptor(
@@ -76,7 +76,7 @@ print(descriptor.metadata.tags)  # ["code-quality", "security"]
 ## Composition with Primitives
 
 ```python
-from tta_dev_primitives.recovery.retry import RetryPrimitive, RetryStrategy
+from ttadev.primitives import RetryPrimitive, RetryStrategy
 
 # Skills compose like any WorkflowPrimitive
 pipeline = code_review_skill >> security_scan_skill >> format_report

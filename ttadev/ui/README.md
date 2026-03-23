@@ -48,7 +48,7 @@ metrics_workflow = CircuitBreakerPrimitive(
 
 ## What This Proves
 
-✅ TTA.dev primitives are production-ready
+✅ TTA.dev primitives provide a strong foundation for current experiments
 ✅ Composition works (CircuitBreaker + Retry + Lambda)
 ✅ Async workflows handle real traffic
 ✅ Self-hosting: TTA.dev builds itself

@@ -12,12 +12,12 @@ uv pip install -e platform/apm/langfuse
 
 ```python
 from tta_apm_langfuse import LangFuseIntegration
-from tta_dev_primitives import SequentialPrimitive
+from ttadev.primitives import SequentialPrimitive
 
 # Initialize integration
 apm = LangFuseIntegration(
-    public_key="pk_...",
-    secret_key="sk_...",
+    public_key="<langfuse-public-key>",
+    secret_key="<langfuse-secret-key>",
     host="https://cloud.langfuse.com"
 )
 
@@ -43,8 +43,8 @@ result = await instrumented.execute(data, context)
 Set environment variables:
 
 ```bash
-export LANGFUSE_PUBLIC_KEY="pk_..."
-export LANGFUSE_SECRET_KEY="sk_..."
+export LANGFUSE_PUBLIC_KEY="<langfuse-public-key>"
+export LANGFUSE_SECRET_KEY="<langfuse-secret-key>"
 export LANGFUSE_HOST="https://cloud.langfuse.com"
 ```
 
