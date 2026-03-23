@@ -217,7 +217,7 @@ MIT
 
 - **tta-observability-ui** - FastAPI service and web dashboard
 - **tta-observability-integration** - OpenTelemetry integration
-- **tta-dev-primitives** - Core workflow primitives
+- **ttadev.primitives** - Core workflow primitives
 
 ## Resources
 
@@ -225,7 +225,3 @@ MIT
 - **Quick Start**: `packages/tta-observability-ui/QUICKSTART.md`
 - **API Docs**: `http://localhost:8765/docs` (when service running)
 - **TTA.dev**: `AGENTS.md`
-
-
----
-**Logseq:** [[TTA.dev/Apps/Observability-vscode/Readme]]

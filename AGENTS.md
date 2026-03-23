@@ -40,7 +40,7 @@ A Python monorepo providing composable workflow primitives, observability, and m
 ```
 TTA.dev/
 ├── platform/               # Core packages
-│   ├── primitives/         # tta-dev-primitives (Backend Engineer)
+│   ├── primitives/         # Core workflow primitives (Backend Engineer)
 │   ├── observability/      # Monitoring integration (Observability Expert)
 │   ├── agent-context/      # Universal context (Backend Engineer)
 │   ├── agent-coordination/ # Multi-agent orchestration
@@ -301,7 +301,3 @@ ls .github/skills/
 **Version:** 2.0.0
 **Last Updated:** 2026-03-18
 **Status:** Active
-
-
----
-**Logseq:** [[TTA.dev/AGENTS]]
