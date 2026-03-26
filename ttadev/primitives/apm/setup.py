@@ -58,6 +58,10 @@ def setup_apm(
         logger.warning("OpenTelemetry not available, APM disabled")
         return None, None
 
+    # At this point opentelemetry imports succeeded; assert to narrow types.
+    assert TracerProvider is not None
+    assert MeterProvider is not None
+
     if _initialized:
         logger.info("APM already initialized")
         return _tracer_provider, _meter_provider
@@ -89,10 +93,12 @@ def setup_apm(
         # Prometheus metrics reader
         prometheus_reader = PrometheusMetricReader()
         _meter_provider = MeterProvider(resource=resource, metric_readers=[prometheus_reader])
+        assert _meter_provider is not None
         metrics.set_meter_provider(_meter_provider)
         logger.info(f"Prometheus metrics enabled on port {prometheus_port}")
     else:
         _meter_provider = MeterProvider(resource=resource)
+        assert _meter_provider is not None
         metrics.set_meter_provider(_meter_provider)
         logger.info("Metrics provider initialized (no exporters)")
 

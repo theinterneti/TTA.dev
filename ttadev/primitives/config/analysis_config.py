@@ -333,7 +333,8 @@ def _has_tta_dev_section(pyproject_path: Path) -> bool:
 def _load_yaml(path: Path) -> dict[str, Any]:
     """Load YAML configuration file."""
     with open(path) as f:
-        return yaml.safe_load(f) or {}
+        result = yaml.safe_load(f)
+        return result if isinstance(result, dict) else {}
 
 
 def _load_toml(path: Path) -> dict[str, Any]:
@@ -466,7 +467,8 @@ def generate_default_config(format: str = "yaml") -> str:
     data = config.model_dump()
 
     if format == "yaml":
-        return yaml.dump(data, default_flow_style=False, sort_keys=False)
+        result = yaml.dump(data, default_flow_style=False, sort_keys=False)
+        return result if isinstance(result, str) else ""
     elif format == "json":
         import json
 

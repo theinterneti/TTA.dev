@@ -33,7 +33,7 @@ async def fetch_preferences(data: dict, ctx: WorkflowContext) -> dict:
     return {"theme": "dark", "notifications": True}
 
 
-async def validate_user(data: dict, ctx: WorkflowContext) -> bool:
+def validate_user(data: dict, ctx: WorkflowContext) -> bool:
     """Check if user data is valid."""
     return data.get("user_id") is not None
 
