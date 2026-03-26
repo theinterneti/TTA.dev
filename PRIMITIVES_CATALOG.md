@@ -1143,6 +1143,63 @@ result = await layered_llm.execute({"prompt": "Hello"}, context)
 
 ---
 
+## Coordination Primitives
+
+**Install:** `uv add 'redis[asyncio]'` or `uv sync --extra coordination`
+**Import:** `from ttadev.primitives.coordination import ...`
+
+Redis-backed reliable message passing between queue endpoints. Provides
+priority queues, visibility-timeout reservations, ack/nack semantics,
+dead-letter routing, backpressure, and `recover_pending`.
+
+```python
+from redis.asyncio import Redis
+from ttadev.primitives.coordination import (
+    QueueEndpoint, MessagePriority, RedisMessageCoordinator,
+)
+
+redis = Redis.from_url("redis://localhost:6379")
+coord = RedisMessageCoordinator(redis, key_prefix="myapp")
+
+worker   = QueueEndpoint(queue_type="worker", instance="1")
+ingester = QueueEndpoint(queue_type="ingester")
+
+# Send
+await coord.send_message(
+    sender=ingester, recipient=worker,
+    message_id="job-001", message_type="process",
+    payload={"file": "data.csv"},
+    priority=MessagePriority.HIGH,
+)
+
+# Receive and ack
+msg = await coord.receive(worker, visibility_timeout=30)
+if msg:
+    # ... do work ...
+    await coord.ack(worker, msg.token)
+
+# Nack (transient → retry with backoff; permanent → DLQ)
+await coord.nack(worker, msg.token, failure=FailureType.TRANSIENT)
+
+# Reclaim expired reservations (pass None to scan all endpoints)
+recovered = await coord.recover_pending(worker)
+```
+
+**Types:**
+
+| Type | Description |
+|------|-------------|
+| `QueueEndpoint` | Generic identity: `queue_type: str`, `instance: str` |
+| `CoordinationMessage` | Message body with `message_id`, `sender`, `message_type`, `payload`, `priority` |
+| `QueuedMessage` | `CoordinationMessage` + queue metadata (attempts, timestamps) |
+| `ReceivedMessage` | Reserved message with `token` and `visibility_deadline` |
+| `MessagePriority` | `LOW=1`, `NORMAL=5`, `HIGH=9` |
+| `FailureType` | `TRANSIENT`, `PERMANENT`, `TIMEOUT` |
+| `MessageResult` | `delivered: bool`, `error: str \| None` |
+| `MessageCoordinator` | Abstract interface (for testing / alternative backends) |
+
+---
+
 ## Related Documentation
 
 - **Getting Started:** [\`GETTING_STARTED.md\`](GETTING_STARTED.md)

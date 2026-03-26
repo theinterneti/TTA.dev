@@ -26,6 +26,7 @@ dependencies = [
     "mcp>=1.26.0",
     "opentelemetry-api>=1.20.0",
     "opentelemetry-sdk>=1.20.0",
+    "structlog>=25.5.0",
 ]
 
 [project.optional-dependencies]
@@ -36,9 +37,13 @@ dev = [
     "ruff>=0.1.0",
     "pyright>=1.1.0",
     "playwright>=1.40.0",
+    "fakeredis>=2.26",
 ]
 cgc = [
     "codegraphcontext>=0.3.1",
+]
+coordination = [
+    "redis[asyncio]>=5.0",
 ]
 
 [project.urls]
