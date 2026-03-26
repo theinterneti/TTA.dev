@@ -657,9 +657,12 @@ class ControlPlaneService:
         task = self.get_task(task_id)
         _, step = self._get_workflow_step(task, step_index)
 
+        now_iso = self._now_iso()
         step.last_result_summary = result_summary or None
         step.last_confidence = confidence
-        task.updated_at = self._now_iso()
+        step.completed_at = now_iso
+        step.status = WorkflowStepStatus.COMPLETED
+        task.updated_at = now_iso
         self._store.put_task(task)
         return task
 

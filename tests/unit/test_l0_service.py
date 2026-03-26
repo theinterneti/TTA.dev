@@ -214,3 +214,60 @@ def test_active_ownership_includes_workflow_summary(monkeypatch, tmp_path) -> No
     assert workflow["current_agent"] == "qa"
     assert workflow["current_step"]["agent_name"] == "qa"
     assert workflow["recent_steps"][0]["agent_name"] == "developer"
+
+
+# ---------------------------------------------------------------------------
+# Step timestamp + duration attribution
+# ---------------------------------------------------------------------------
+
+
+def test_step_timestamps_populated(tmp_path) -> None:
+    """mark_workflow_step_running sets started_at; record_workflow_step_result sets completed_at."""
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="feature_dev",
+        workflow_goal="add login",
+        step_agents=["developer"],
+    )
+    task_id = claim.task.id
+
+    service.mark_workflow_step_running(task_id, step_index=0)
+    task = service.get_task(task_id)
+    assert task.workflow is not None
+    step = task.workflow.steps[0]
+    assert step.started_at is not None, "started_at should be set after mark_running"
+    assert step.completed_at is None, "completed_at should be None while step is running"
+
+    service.record_workflow_step_result(
+        task_id, step_index=0, result_summary="done", confidence=0.9
+    )
+    task = service.get_task(task_id)
+    step = task.workflow.steps[0]
+    assert step.completed_at is not None, "completed_at should be set after record_result"
+
+
+def test_step_duration_helper_known_timestamps() -> None:
+    """_step_duration returns correctly formatted duration for known ISO timestamps."""
+    from ttadev.cli.control import _step_duration
+
+    started = "2026-03-26T10:00:00+00:00"
+    completed = "2026-03-26T10:00:02.500000+00:00"
+    assert _step_duration(started, completed) == "2.5s"
+
+
+def test_step_duration_helper_missing_start() -> None:
+    """_step_duration returns '-' when started_at is None."""
+    from ttadev.cli.control import _step_duration
+
+    assert _step_duration(None, None) == "-"
+    assert _step_duration(None, "2026-03-26T10:00:00+00:00") == "-"
+
+
+def test_step_duration_helper_in_progress() -> None:
+    """_step_duration uses current time when completed_at is absent."""
+    from ttadev.cli.control import _step_duration
+
+    started = datetime.now(UTC).isoformat()
+    result = _step_duration(started, None)
+    assert result.endswith("s")
+    assert float(result[:-1]) >= 0.0

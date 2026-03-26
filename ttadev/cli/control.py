@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 from ttadev.control_plane import (
@@ -14,6 +15,21 @@ from ttadev.control_plane import (
     RunStatus,
     TaskStatus,
 )
+
+
+def _step_duration(started_at: str | None, completed_at: str | None) -> str:
+    """Return human-readable wall-clock duration for a workflow step.
+
+    Returns '-' if started_at is missing.
+    Uses current time if completed_at is absent (step still running).
+    """
+    if not started_at:
+        return "-"
+    start = datetime.fromisoformat(started_at).replace(tzinfo=UTC)
+    end_str = completed_at or datetime.now(UTC).isoformat()
+    end = datetime.fromisoformat(end_str).replace(tzinfo=UTC)
+    secs = (end - start).total_seconds()
+    return f"{secs:.1f}s"
 
 
 def register_control_subcommands(sub: argparse._SubParsersAction) -> None:  # type: ignore[type-arg]
@@ -303,7 +319,7 @@ def _handle_task_command(args: argparse.Namespace, service: ControlPlaneService)
                 linked_gate = step.linked_gate_id or "-"
                 decision = step.gate_decision.value if step.gate_decision is not None else "-"
                 started_at = step.started_at or "-"
-                completed_at = step.completed_at or "-"
+                duration = _step_duration(step.started_at, step.completed_at)
                 summary = step.last_result_summary or "-"
                 confidence = (
                     f"{step.last_confidence:.0%}" if step.last_confidence is not None else "-"
@@ -311,9 +327,8 @@ def _handle_task_command(args: argparse.Namespace, service: ControlPlaneService)
                 print(
                     "      "
                     f"{step.step_index + 1}. {step.agent_name} "
-                    f"status={step.status.value} attempts={step.attempts} "
-                    f"gate={decision} linked_gate={linked_gate} "
-                    f"started_at={started_at} completed_at={completed_at} "
+                    f"status={step.status.value} duration={duration} "
+                    f"started_at={started_at} gate={decision} linked_gate={linked_gate} "
                     f"confidence={confidence}"
                 )
                 print(f"         summary={summary}")
