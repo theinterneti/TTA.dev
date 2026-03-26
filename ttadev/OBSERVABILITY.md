@@ -37,7 +37,7 @@ TTA.dev provides **zero-config, persistent observability** out of the box. Just 
 
 ```bash
 cd TTA.dev
-uv run python tta-dev/ui/observability_server.py
+uv run python -m ttadev.observability
 ```
 
 The dashboard starts at `http://localhost:8000`
@@ -250,8 +250,8 @@ For multiple developers/machines:
 
 ### Dashboard Shows "Disconnected"
 
-- Check if server is running: `ps aux | grep observability_server`
-- Restart: `uv run python tta-dev/ui/observability_server.py`
+- Check if server is running: `ps aux | grep 'ttadev.observability'`
+- Restart: `uv run python -m ttadev.observability`
 - Check port 8000 isn't in use: `lsof -i :8000`
 
 ### No Traces Appearing
