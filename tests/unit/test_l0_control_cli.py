@@ -339,6 +339,55 @@ def test_task_show_renders_tracked_workflow_metadata(tmp_path: Path) -> None:
     assert "gate_history:" in shown.stdout
 
 
+def test_task_show_renders_step_duration(tmp_path: Path) -> None:
+    """Completed steps include a non-zero duration= field in task show output."""
+    from ttadev.control_plane import ControlPlaneService
+
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="feature_dev",
+        workflow_goal="add auth",
+        step_agents=["developer"],
+    )
+    service.mark_workflow_step_running(claim.task.id, step_index=0)
+    service.record_workflow_step_result(
+        claim.task.id,
+        step_index=0,
+        result_summary="done",
+        confidence=0.85,
+    )
+
+    shown = _run(["control", "task", "show", claim.task.id], tmp_path)
+    assert shown.returncode == 0
+    # duration= should appear and end with 's' (e.g. "0.0s", "0.1s")
+    assert "duration=" in shown.stdout
+    duration_token = next(tok for tok in shown.stdout.split() if tok.startswith("duration="))
+    duration_val = duration_token.split("=", 1)[1]
+    assert duration_val.endswith("s")
+    assert float(duration_val[:-1]) >= 0.0
+
+
+def test_task_show_renders_running_step_duration(tmp_path: Path) -> None:
+    """Running steps show an elapsed duration= (not '-') in task show output."""
+    from ttadev.control_plane import ControlPlaneService
+
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="feature_dev",
+        workflow_goal="add search",
+        step_agents=["qa"],
+    )
+    service.mark_workflow_step_running(claim.task.id, step_index=0)
+
+    shown = _run(["control", "task", "show", claim.task.id], tmp_path)
+    assert shown.returncode == 0
+    assert "duration=" in shown.stdout
+    duration_token = next(tok for tok in shown.stdout.split() if tok.startswith("duration="))
+    duration_val = duration_token.split("=", 1)[1]
+    assert duration_val.endswith("s")
+    assert float(duration_val[:-1]) >= 0.0
+
+
 def test_lock_declared_task_claims_and_lists_locks(tmp_path: Path) -> None:
     """Declare task locks, auto-acquire on claim, then inspect and release them."""
     created = _run(
