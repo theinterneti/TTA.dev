@@ -2,22 +2,15 @@
 
 **Complete Reference for All Workflow Primitives**
 
-**Last Updated:** 2026-03-23
+**Last Updated:** 2026-03-26
 
 ---
 
-> [!WARNING]
-> This catalog is still being migrated from older package layouts and examples.
-> The most trustworthy current proof path is in [`GETTING_STARTED.md`](GETTING_STARTED.md),
-> [`QUICKSTART.md`](QUICKSTART.md), and the runnable script
-> [`scripts/test_realtime_traces.py`](scripts/test_realtime_traces.py).
->
-> In particular:
-> - some sections still need hand-verified cleanup after the older `tta_dev_primitives` and
->   `platform/...` layouts
-> - the adaptive and `extensions` sections include mixed-current notes because those surfaces are
->   not fully reconciled yet
-> - examples in this file should be treated as reference-in-progress until each section is verified
+> [!NOTE]
+> All import examples in this file use the current `ttadev.primitives.*` namespace.
+> The `extensions` section still has a mixed-current note because some lazy-import metadata
+> internally maps to older package names — prefer direct module imports there.
+> For a working end-to-end proof, see [`tests/integration/test_multi_agent_proof.py`](tests/integration/test_multi_agent_proof.py).
 
 ## Current reality first
 

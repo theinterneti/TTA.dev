@@ -48,11 +48,28 @@ curl http://localhost:8000/api/v2/health
 curl http://localhost:8000/api/v2/spans | head
 ```
 
+## Step 4: Run the multi-agent workflow (no API key needed)
+
+```bash
+uv run pytest tests/integration/test_multi_agent_proof.py -v
+```
+
+This executes a 3-agent `feature_dev` workflow (developer → qa → security) with L0 task tracking,
+using a deterministic mock LLM — no API keys required, CI-safe.
+
+To run it live via the CLI (requires Ollama or an `OPENROUTER_API_KEY`):
+
+```bash
+tta workflow run feature_dev --goal "Add a health check endpoint" --track-l0 --no-confirm
+tta control task show <task_id from output>
+```
+
 ## What this proves today
 
 1. the current `ttadev.primitives` composition API works for a basic sequential workflow
 2. the `python -m ttadev.observability` entrypoint is valid
 3. trace ingestion into the v2 observability API works after a short delay
+4. a 3-agent multi-agent workflow runs end-to-end with L0 task/step tracking
 
 ## What this does **not** prove yet
 

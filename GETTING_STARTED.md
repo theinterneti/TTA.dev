@@ -67,6 +67,22 @@ Expected results:
 - the current observability entrypoint is `python -m ttadev.observability`
 - trace ingestion into the v2 API is functioning
 
+## Step 3b: Run the multi-agent workflow proof (no API key needed)
+
+```bash
+uv run pytest tests/integration/test_multi_agent_proof.py -v
+```
+
+This proves a 3-agent `feature_dev` workflow (developer → qa → security) with full L0 control-plane
+task/step tracking. Uses a deterministic mock LLM — no API keys needed.
+
+To explore via the CLI (requires Ollama or `OPENROUTER_API_KEY`):
+
+```bash
+tta workflow run feature_dev --goal "Add a health check endpoint" --track-l0 --no-confirm
+tta control task show <task_id>
+```
+
 ## What is still under repair
 
 - some package-local or historical docs still need cleanup outside the canonical proof path

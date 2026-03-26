@@ -154,16 +154,22 @@ slice.
 ### Near-term success criteria
 
 - [x] one documented, repeatable multi-agent workflow that stays green
+- [x] integration test proves 3-agent workflow with L0 tracking (no API key required)
 - [ ] roadmap and docs fully aligned with actual agent capabilities
 - [ ] fewer type issues in agent-facing modules
 
 ### Current proof workflow
 
-The first Phase 2 proof path now runs through the existing `feature_dev`
-workflow with opt-in L0 tracking:
+**CI-safe (no API key):**
 
 ```bash
-tta workflow run feature_dev --goal "Add password reset flow" --track-l0
+uv run pytest tests/integration/test_multi_agent_proof.py -v
+```
+
+**Live CLI path (requires Ollama or `OPENROUTER_API_KEY`):**
+
+```bash
+tta workflow run feature_dev --goal "Add password reset flow" --track-l0 --no-confirm
 tta control task show <task_id>
 ```
 
@@ -171,13 +177,12 @@ That path proves:
 
 - one top-level L0 task per workflow execution
 - one L0 run tied to the orchestrator
-- per-step workflow metadata and gate outcomes on the tracked task
-- inspectable quit/failure/completion state through the existing control-plane
-  CLI
+- per-step workflow metadata and confidence on the tracked task
+- inspectable failure/completion state through the existing control-plane CLI
 
 ### Phase 2 L0 priorities
 
-1. prove one repeatable multi-agent workflow on top of the current L0 surface
+1. ✅ prove one repeatable multi-agent workflow on top of the current L0 surface (completed 2026-03-26)
 2. deepen gate semantics only where that workflow needs them
 3. improve telemetry attribution enough to explain who owns active workflow steps
 4. connect more agent-facing surfaces to L0 state instead of creating parallel coordination models

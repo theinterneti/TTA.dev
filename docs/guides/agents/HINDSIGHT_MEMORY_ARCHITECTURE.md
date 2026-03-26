@@ -546,10 +546,9 @@ First Run:
 | Configuration | 🚧 In Progress | `config.yaml` schema |
 | Semantic indexing | 📋 Planned | Embeddings + vector search |
 | Agent integration | 📋 Planned | Auto-load, write APIs |
-| Logseq sync | 📋 Planned | Bidirectional sync |
+| Logseq sync | ❌ Not planned | Deferred; Hindsight is the current memory layer |
 | Container isolation | 📋 Planned | For user repos |
 
 ---
 
 **Last Updated:** 2025-12-19
-**Logseq:** [[TTA.dev/Agents/Hindsight Memory Architecture]]
