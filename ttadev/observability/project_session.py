@@ -66,6 +66,10 @@ class ProjectSessionManager:
         except Exception:
             return None
 
+    def get_by_id(self, project_id: str) -> ProjectSession | None:
+        """Return a project by its durable ID, or None if it doesn't exist."""
+        return self._get_by_id(project_id)
+
     def list(self) -> list[ProjectSession]:
         """Return all projects newest-first."""
         projects: list[ProjectSession] = []

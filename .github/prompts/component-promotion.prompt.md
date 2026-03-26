@@ -58,7 +58,7 @@ This workflow guides the systematic promotion of a TTA component through maturit
 4. Review component status
 
 **Observability Note:** Use the current repository observability stack if available. Do not use
-legacy `.hypertool` tracing examples.
+deprecated Hypertool-era tracing examples.
 
 ```python
 # Example placeholder for repository-native observability hooks

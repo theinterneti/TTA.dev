@@ -123,6 +123,7 @@ The first local L0 slice now exists in:
 
 - `ttadev/control_plane/` — JSON-backed task, run, and lease state
 - `ttadev/cli/control.py` — `tta control task ...` and `tta control run ...`
+- `ttadev/primitives/mcp_server/server.py` — MCP tools for the current task/run lifecycle
 
 Interpret this as the beginning of a **developer-agent control plane** for Claude,
 Copilot, Cline, and future coding agents.
@@ -134,29 +135,24 @@ systems elsewhere in the repo.**
 
 When working on L0 from inside `TTA.dev`, prefer this order:
 
-1. expose the current control-plane operations through MCP tools
-2. add approvals, policy checks, and review checkpoints
-3. add workspace/file-lock semantics and stronger project/session linking
-4. connect agent activity + observability views to task/run state
+1. use the current L0 surface to prove one documented, repeatable multi-agent workflow
+2. deepen approval/policy/review workflows only where that workflow needs richer coordination
+3. strengthen ownership and telemetry attribution so active workflow steps can be explained clearly
+4. connect more agent-facing surfaces to the existing L0 state instead of creating parallel coordination models
 
 ### Repository TODOs
 
-- TODO Expose the current L0 task and run lifecycle through MCP tools in `ttadev/primitives/mcp_server/server.py` and add integration coverage. #dev-todo
-  type:: implementation
-  priority:: high
-  package:: ttadev-mcp-server
-
-- TODO Add approval, policy, and review-gate state to `ttadev/control_plane/`, reusing workflow gate patterns instead of inventing ad hoc flags. #dev-todo
+- TODO Prove one documented, repeatable multi-agent workflow on top of the current L0 task/run/gate/lock/ownership surface so Phase 2 has a real green path. #dev-todo
   type:: implementation
   priority:: high
   package:: ttadev-control-plane
 
-- TODO Add workspace and file-lock coordination to the L0 service and surface those locks through the `tta control` CLI. #dev-todo
+- TODO Deepen the first-pass gate model with richer approval, policy, and review workflows only where the first repeatable multi-agent workflow needs stronger coordination. #dev-todo
   type:: implementation
-  priority:: high
+  priority:: medium
   package:: ttadev-control-plane
 
-- TODO Cross-link L0 runs with observability sessions, project membership, and agent-tracker telemetry so dashboards can show who owns active work. #dev-todo
+- TODO Improve ownership telemetry beyond session-linked summaries so active work in the first repeatable multi-agent workflow can be attributed more precisely without forking control-plane state. #dev-todo
   type:: refactor
   priority:: medium
   package:: ttadev-observability

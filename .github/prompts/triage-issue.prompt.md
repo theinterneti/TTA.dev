@@ -9,7 +9,7 @@ Read `.github/copilot-instructions.md` for project overview and `docs/guides/git
 Analyze the current issue and provide classification, labels, and an action plan.
 
 **Observability Note:** Use the current repository observability stack if available. Do not use
-legacy `.hypertool` tracing examples.
+deprecated Hypertool-era tracing examples.
 
 ## Analysis Steps
 

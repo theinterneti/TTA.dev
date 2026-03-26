@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
-"""
-TTA.dev Hello World - Self-Observing Demo
-
-This script demonstrates TTA.dev primitives with auto-instrumentation.
-Run this to see your workflows appear in the observability dashboard!
-"""
+"""TTA.dev Hello World demo using the current primitives and observability APIs."""
 
 import asyncio
+import sys
 import time
+from pathlib import Path
 
-from observability.auto_instrument import auto_instrument_primitives
-from ttadev.primitives.adaptive.retry import RetryPrimitive, RetryStrategy
-from ttadev.primitives.core.base import LambdaPrimitive, WorkflowContext
-from ttadev.primitives.core.sequential import SequentialPrimitive
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import ttadev
+from ttadev.primitives import (
+    LambdaPrimitive,
+    RetryPrimitive,
+    RetryStrategy,
+    SequentialPrimitive,
+    WorkflowContext,
+)
 
 
 async def fetch_data(data: dict, ctx: WorkflowContext) -> dict:
@@ -50,21 +54,20 @@ async def main():
     print("📊 Dashboard: http://localhost:8000")
     print()
 
-    # Enable auto-instrumentation for all primitives
-    print("🔍 Auto-instrumenting primitives...")
-    auto_instrument_primitives()
+    # Explicit opt-in keeps observability behavior aligned with the current package API.
+    print("🔍 Initializing observability...")
+    ttadev.initialize_observability()
     print()
 
     # Build workflow with resilience primitives
-    fetch = LambdaPrimitive(fetch_data, name="FetchData")
-    enrich = LambdaPrimitive(enrich_data, name="EnrichData")
-    format_step = LambdaPrimitive(format_response, name="FormatResponse")
+    fetch = LambdaPrimitive(fetch_data)
+    enrich = LambdaPrimitive(enrich_data)
+    format_step = LambdaPrimitive(format_response)
 
     # Add retry capability to fetch step
     resilient_fetch = RetryPrimitive(
         fetch,
-        strategy=RetryStrategy(max_attempts=3, backoff_multiplier=2.0),
-        name="ResilientFetch",
+        strategy=RetryStrategy(max_retries=3, backoff_base=2.0),
     )
 
     # Compose workflow: resilient_fetch >> enrich >> format

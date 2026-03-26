@@ -40,14 +40,19 @@ That flow currently proves:
 - **Composable primitives** for sequencing, parallelism, retries, timeouts, caching, and more
 - **A local observability server** with a working v2 API and dashboard entrypoint
 - **Agent and workflow foundations** in `ttadev/agents/` and `ttadev/workflows/`
+- **An L0 developer control plane** for local task, run, gate, lock, and ownership coordination
+- **A documented L0-backed workflow proof path** via
+  `tta workflow run feature_dev --track-l0`
 - **A substantial automated test suite** covering a large portion of the current core
 
 ## What is still in progress
 
-- some older demo scripts and onboarding commands are being migrated to the current API
-- documentation and roadmap language are being aligned to actual repository state
+- broader example coverage beyond the narrow proof path is still catching up
+- some package-local and historical docs still need follow-up cleanup for full consistency
 - type-checking still fails in several areas
 - some integrations and knowledge-base surfaces remain partial or stubbed
+- the first documented multi-agent proof path exists, but the repo still needs
+  broader workflow coverage and stronger validation of what is stable vs experimental
 
 ## Learn more
 
@@ -58,6 +63,8 @@ That flow currently proves:
 - [**Primitives Catalog**](PRIMITIVES_CATALOG.md) - available primitives and API surface
 - [**Agent Instructions**](AGENTS.md) - how AI agents are expected to work in this repo
 - [**Contributing**](CONTRIBUTING.md) - development guide
+- [**Feature Dev + L0 Example**](docs/examples/feature-dev-l0-workflow.md) - run
+  the current proof workflow and inspect it through `tta control`
 
 ## License
 

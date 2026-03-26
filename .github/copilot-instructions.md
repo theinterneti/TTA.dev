@@ -122,16 +122,17 @@ The first L0 slice is already in the repo:
 
 - `ttadev/control_plane/` for task/run/lease state
 - `ttadev/cli/control.py` for `tta control ...`
+- `ttadev/primitives/mcp_server/server.py` for MCP access to the current task/run lifecycle
 
 If you are asked to improve agent management, do **not** create a second queue,
 run ledger, or lease model in another package. Extend this L0 surface.
 
 ### Highest-priority follow-up work
 
-1. expose L0 operations as MCP tools
-2. add approval/policy/review state
-3. add file/workspace locks
-4. link L0 state to observability/session/project views
+1. use the current L0 surface to prove one documented, repeatable multi-agent workflow
+2. deepen approval/policy/review workflows only where that workflow needs richer coordination
+3. strengthen ownership and telemetry attribution so active workflow steps can be explained clearly
+4. connect more agent-facing surfaces to the existing L0 state instead of creating parallel coordination systems
 
 ## Documentation
 

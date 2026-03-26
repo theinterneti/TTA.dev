@@ -69,11 +69,14 @@ Expected results:
 
 ## What is still under repair
 
-- older public demos such as `ttadev/hello_world.py` and `examples/demo_workflow.py` that do not
-  yet match the current primitive APIs
-- older docs that still reference `src/...`, `ttadev/ui/observability_server.py`, or
-  `tta_dev_observability`
+- some package-local or historical docs still need cleanup outside the canonical proof path
 - some partial integrations and knowledge-base features
+
+The lightweight demo scripts below now run with the current APIs, but they are still supplementary
+to the canonical proof path above:
+
+- `uv run python examples/demo_workflow.py`
+- `uv run python ttadev/hello_world.py`
 
 ## Step 4: Build a small workflow with the current API
 

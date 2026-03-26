@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-21
 **Phase:** 3 — The loop as a single composable primitive
-**Status:** Draft — awaiting approval
+**Status:** Approved — 2026-03-25
 **Depends on:** `CodeGraphPrimitive` (Phase 2a, complete), `AgentMemory` (Phase 2b, complete)
 **Leads to:** Phase 4 — Automation (hooks, pre-commit, auto-retain)
 
@@ -24,14 +24,14 @@ It composes three previously-built primitives (`CodeGraphPrimitive`, `AgentMemor
 `AgentMemory` answers: *"What do we already know about this task?"*
 `DevelopmentCycle` answers: *"What should be built, given what we know — and does it work?"*
 
-Together these three form the complete Orient + Recall + Write + Validate + Retain loop that turns a free Ollama model into a grounded, context-aware, self-improving development agent.
+Together these three form the complete Orient + Recall + Write + Validate + Retain loop that turns a configured workflow model into a grounded, context-aware, self-improving development agent.
 
 ---
 
 ## The Five Steps
 
 ```
-CGC            Hindsight       LLM (free)     E2B            Hindsight
+CGC            Hindsight       LLM            E2B            Hindsight
   |                |               |              |               |
 [1. Orient] → [2. Recall] → [3. Write] → [4. Validate] → [5. Retain]
 ```
@@ -51,7 +51,7 @@ CGC            Hindsight       LLM (free)     E2B            Hindsight
 ### Journey 1 — Basic development task
 
 ```python
-cycle = DevelopmentCycle(bank_id="tta-dev")
+cycle = DevelopmentCycle(bank_id="project-tta.dev-9af638ec")
 context = WorkflowContext()
 
 result = await cycle.execute(
@@ -70,7 +70,7 @@ result = await cycle.execute(
 ### Journey 2 — Graceful degradation when CGC is offline
 
 ```python
-cycle = DevelopmentCycle(bank_id="tta-dev")
+cycle = DevelopmentCycle(bank_id="project-tta.dev-9af638ec")
 result = await cycle.execute(
     DevelopmentTask(instruction="Refactor the cache primitive"),
     context,
@@ -108,7 +108,7 @@ result = await cycle.execute(
 ### Journey 5 — Custom role (agent_hint)
 
 ```python
-cycle = DevelopmentCycle(bank_id="tta-dev")
+cycle = DevelopmentCycle(bank_id="project-tta.dev-9af638ec")
 result = await cycle.execute(
     DevelopmentTask(
         instruction="Review the retry primitive for security issues",
@@ -122,8 +122,8 @@ result = await cycle.execute(
 
 ```python
 # DevelopmentCycle composes like any InstrumentedPrimitive
-dev = DevelopmentCycle(bank_id="tta-dev")
-review = DevelopmentCycle(bank_id="tta-dev", agent_hint="qa")
+dev = DevelopmentCycle(bank_id="project-tta.dev-9af638ec")
+review = DevelopmentCycle(bank_id="project-tta.dev-9af638ec", agent_hint="qa")
 
 # Sequential: dev writes, then review validates
 pipeline = SequentialPrimitive([dev, review])
@@ -174,7 +174,7 @@ class DevelopmentResult(TypedDict):
 class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]):
     def __init__(
         self,
-        bank_id: str = "tta-dev",
+        bank_id: str = "project-tta.dev-9af638ec",
         base_url: str | None = None,    # Hindsight base URL (default: HINDSIGHT_URL or localhost:8888)
         agent_hint: str = "developer",  # Default role persona for Write step
         timeout: float = 10.0,          # Hindsight and CGC timeout
@@ -288,7 +288,7 @@ The full system prompt is: `{persona}\n\n{context_prefix}` (context_prefix omitt
 
 ## Success Criteria
 
-1. `DevelopmentCycle(bank_id="tta-dev")` constructs without errors
+1. `DevelopmentCycle(bank_id="project-tta.dev-9af638ec")` constructs without errors
 2. `execute(DevelopmentTask(instruction="..."), context)` returns `DevelopmentResult` — all five steps run
 3. Each step degrades independently: CGC, Hindsight, or E2B unavailability does not abort the cycle
 4. `instruction=""` raises `ValueError` before any step runs
@@ -323,10 +323,10 @@ The full system prompt is: `{persona}\n\n{context_prefix}` (context_prefix omitt
 impact = await CodeGraphPrimitive().execute(CodeGraphQuery(...), context)
 
 # Phase 2b — what do we know about this task?
-prefix = await AgentMemory("tta-dev").build_context_prefix(query)
+prefix = await AgentMemory("project-tta.dev-9af638ec").build_context_prefix(query)
 
 # Phase 3 — what should be built, and does it work? (this spec)
-result = await DevelopmentCycle("tta-dev").execute(
+result = await DevelopmentCycle("project-tta.dev-9af638ec").execute(
     DevelopmentTask(instruction=query, target_files=[...]),
     context,
 )

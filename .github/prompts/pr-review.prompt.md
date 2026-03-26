@@ -9,7 +9,7 @@ Read `.github/copilot-instructions.md` and `AGENTS.md` for project-specific guid
 Perform a comprehensive code review of the current pull request, ensuring strict adherence to TTA.dev standards.
 
 **Observability Note:** If current observability is configured, attach the review session to that
-stack. Do not use legacy `.hypertool` tracing examples.
+stack. Do not use deprecated Hypertool-era tracing examples.
 
 ## Review Checklist
 

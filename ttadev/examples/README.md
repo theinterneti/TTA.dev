@@ -1,50 +1,33 @@
-# TTA.dev Examples
+# TTA.dev Example Guide
 
-Real-world examples showing TTA.dev primitives in action. Each example is fully instrumented - run them and watch their execution on the dashboard at http://localhost:8000!
+The maintained demo scripts live at the repository root in [`examples/`](../../examples).
 
-## Getting Started
+## Current demo commands
 
 ```bash
-# Start the observability dashboard (in one terminal)
-uv run python tta-dev/ui/observability_server.py
+# Terminal 1: start the observability server
+uv run python -m ttadev.observability
 
-# Run any example (in another terminal)
-uv run python tta-dev/examples/hello_world.py
+# Terminal 2: run a lightweight primitive demo
+uv run python examples/demo_workflow.py
+
+# Optional: run the hello world variant
+uv run python ttadev/hello_world.py
 ```
 
-## Examples
+## Verified lightweight demos
 
-### 1. Hello World (`hello_world.py`)
-**Learn:** Basic workflow composition with `>>` operator
-- Simple chaining of primitives
-- Observability context
-- Real-time trace viewing
+- `examples/demo_workflow.py` - small retry/cache/timeout workflow using the current API
+- `ttadev/hello_world.py` - self-observing hello world workflow using the current API
 
-### 2. Retry Pattern (`retry_pattern.py`)
-**Learn:** Handling transient failures gracefully
-- Automatic retry with exponential backoff
-- Failure recovery
-- Watch retry attempts in dashboard
+## Canonical proof path
 
-### 3. Parallel Processing (`parallel_processing.py`)
-**Learn:** Speed up workflows with concurrency
-- Process multiple items simultaneously
-- See parallel execution in timeline view
-- Efficient resource utilization
+For the shortest re-verified flow, prefer:
 
-## What You'll See
+```bash
+uv run python -m ttadev.observability
+uv run python scripts/test_realtime_traces.py
+```
 
-Open http://localhost:8000 in your browser to see:
-- **Live traces** as workflows execute
-- **Timeline view** showing span durations
-- **Success/failure status** for each operation
-- **Performance metrics** in real-time
-
-## Next Steps
-
-1. Modify these examples to fit your use case
-2. Combine primitives to build complex workflows
-3. Add your own business logic
-4. Watch everything in the dashboard!
-
-Check out the [Primitives Catalog](../PRIMITIVES_CATALOG.md) for all available primitives.
+See [`GETTING_STARTED.md`](../../GETTING_STARTED.md) and [`QUICKSTART.md`](../../QUICKSTART.md)
+for the current onboarding story.

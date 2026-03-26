@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -187,3 +188,192 @@ class TestSessionsIncludeProjectId:
             assert len(sessions) >= 1
             # project_id field must be present (may be None)
             assert "project_id" in sessions[0]
+
+
+class TestOwnershipRoutes:
+    @pytest.mark.asyncio
+    async def test_control_ownership_empty_when_no_active_work(self, tmp_path):
+        srv = _make_server(tmp_path)
+        async with TestClient(TestServer(srv.app)) as client:
+            resp = await client.get("/api/v2/control/ownership")
+            assert resp.status == 200
+            data = await resp.json()
+            assert data == {"active": []}
+
+    @pytest.mark.asyncio
+    async def test_control_ownership_returns_linked_records(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_id", lambda: "agent-1")
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_tool", lambda: "copilot")
+        srv = _make_server(tmp_path)
+        session_mgr = SessionManager(tmp_path)
+        session = session_mgr.start_session()
+        session_mgr.add_span(
+            session.id,
+            ProcessedSpan(
+                span_id="span-1",
+                trace_id="trace-1",
+                parent_span_id=None,
+                name="tool_call",
+                provider="GitHub Copilot",
+                model="claude-sonnet-4.5",
+                agent_role="backend-engineer",
+                workflow_id=None,
+                primitive_type="RetryPrimitive",
+                started_at=datetime.now(UTC).isoformat(),
+                duration_ms=0.0,
+                status="success",
+            ),
+        )
+
+        from ttadev.control_plane import ControlPlaneService
+
+        service = ControlPlaneService(tmp_path)
+        task = service.create_task(
+            "Ownership task", project_name="alpha", requested_role="developer"
+        )
+        claim = service.claim_task(task.id, agent_role="developer", lease_ttl_seconds=60)
+
+        async with TestClient(TestServer(srv.app)) as client:
+            resp = await client.get("/api/v2/control/ownership")
+            assert resp.status == 200
+            data = await resp.json()
+            assert len(data["active"]) == 1
+            record = data["active"][0]
+            assert record["task"]["id"] == task.id
+            assert record["run"]["id"] == claim.run.id
+            assert record["session"]["id"] == session.id
+            assert record["project"]["id"] == task.project_id
+            assert record["workflow"] is None
+            assert record["telemetry"]["has_recent_activity"] is True
+            assert record["telemetry"]["recent_action_types"] == ["tool_call"]
+
+    @pytest.mark.asyncio
+    async def test_project_ownership_filters_and_404s(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_id", lambda: "agent-1")
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_tool", lambda: "copilot")
+        srv = _make_server(tmp_path)
+        session_mgr = SessionManager(tmp_path)
+        session_mgr.start_session()
+
+        from ttadev.control_plane import ControlPlaneService
+
+        service = ControlPlaneService(tmp_path)
+        alpha = service.create_task("Alpha work", project_name="alpha")
+        beta = service.create_task("Beta work", project_name="beta")
+        service.claim_task(alpha.id, lease_ttl_seconds=60)
+        service.claim_task(beta.id, lease_ttl_seconds=60)
+
+        async with TestClient(TestServer(srv.app)) as client:
+            alpha_resp = await client.get(f"/api/v2/projects/{alpha.project_id}/ownership")
+            assert alpha_resp.status == 200
+            alpha_data = await alpha_resp.json()
+            assert alpha_data["project_id"] == alpha.project_id
+            assert [record["task"]["id"] for record in alpha_data["active"]] == [alpha.id]
+
+            missing = await client.get("/api/v2/projects/missing/ownership")
+            assert missing.status == 404
+
+    @pytest.mark.asyncio
+    async def test_session_ownership_filters_and_404s(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_id", lambda: "agent-1")
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_tool", lambda: "copilot")
+        srv = _make_server(tmp_path)
+        session_mgr = SessionManager(tmp_path)
+        session = session_mgr.start_session()
+
+        from ttadev.control_plane import ControlPlaneService
+
+        service = ControlPlaneService(tmp_path)
+        task = service.create_task("Session-owned work")
+        service.claim_task(task.id, lease_ttl_seconds=60)
+
+        async with TestClient(TestServer(srv.app)) as client:
+            resp = await client.get(f"/api/v2/sessions/{session.id}/ownership")
+            assert resp.status == 200
+            data = await resp.json()
+            assert data["session_id"] == session.id
+            assert len(data["active"]) == 1
+            assert data["active"][0]["task"]["id"] == task.id
+            assert data["active"][0]["workflow"] is None
+            assert "telemetry" in data["active"][0]
+
+            missing = await client.get("/api/v2/sessions/missing/ownership")
+            assert missing.status == 404
+
+    @pytest.mark.asyncio
+    async def test_ownership_telemetry_is_null_without_linked_session(self, tmp_path, monkeypatch):
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_id", lambda: "agent-1")
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_tool", lambda: "copilot")
+        srv = _make_server(tmp_path)
+
+        from ttadev.control_plane import ControlPlaneService
+
+        service = ControlPlaneService(tmp_path)
+        service._get_active_session = lambda: None  # type: ignore[method-assign]
+        task = service.create_task("Unlinked work")
+        service.claim_task(task.id, lease_ttl_seconds=60)
+
+        async with TestClient(TestServer(srv.app)) as client:
+            resp = await client.get("/api/v2/control/ownership")
+            assert resp.status == 200
+            data = await resp.json()
+            assert len(data["active"]) == 1
+            assert data["active"][0]["session"] is None
+            assert data["active"][0]["workflow"] is None
+            assert data["active"][0]["telemetry"] is None
+
+    @pytest.mark.asyncio
+    async def test_ownership_routes_include_workflow_summary_for_tracked_runs(
+        self, tmp_path, monkeypatch
+    ):
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_id", lambda: "agent-1")
+        monkeypatch.setattr("ttadev.control_plane.service.get_agent_tool", lambda: "copilot")
+        srv = _make_server(tmp_path)
+        session_mgr = SessionManager(tmp_path)
+        session = session_mgr.start_session()
+
+        from ttadev.control_plane import ControlPlaneService
+        from ttadev.control_plane.models import WorkflowGateDecisionOutcome
+
+        service = ControlPlaneService(tmp_path)
+        claim = service.start_tracked_workflow(
+            workflow_name="feature_dev",
+            workflow_goal="ship auth",
+            step_agents=["developer", "qa"],
+            project_name="alpha",
+        )
+        service.mark_workflow_step_running(claim.task.id, step_index=0)
+        service.record_workflow_step_result(
+            claim.task.id,
+            step_index=0,
+            result_summary="developer output",
+            confidence=0.9,
+        )
+        service.record_workflow_gate_outcome(
+            claim.task.id,
+            step_index=0,
+            decision=WorkflowGateDecisionOutcome.CONTINUE,
+            summary="approved",
+        )
+        service.mark_workflow_step_running(claim.task.id, step_index=1)
+
+        async with TestClient(TestServer(srv.app)) as client:
+            control_resp = await client.get("/api/v2/control/ownership")
+            assert control_resp.status == 200
+            control_data = await control_resp.json()
+            assert len(control_data["active"]) == 1
+            assert control_data["active"][0]["session"]["id"] == session.id
+            workflow = control_data["active"][0]["workflow"]
+            assert workflow["workflow_name"] == "feature_dev"
+            assert workflow["current_step_number"] == 2
+            assert workflow["current_step"]["agent_name"] == "qa"
+
+            project_resp = await client.get(f"/api/v2/projects/{claim.task.project_id}/ownership")
+            assert project_resp.status == 200
+            project_data = await project_resp.json()
+            assert project_data["active"][0]["workflow"]["workflow_goal"] == "ship auth"
+
+            session_resp = await client.get(f"/api/v2/sessions/{session.id}/ownership")
+            assert session_resp.status == 200
+            session_data = await session_resp.json()
+            assert session_data["active"][0]["workflow"]["workflow_status"] == "running"

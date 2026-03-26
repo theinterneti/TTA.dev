@@ -56,7 +56,9 @@ dist-ssr/
 *.local
 *.tsbuildinfo
 
-# === VS Code ===
+# === IDE (Kate, VS Code) ===
+.kateproject
+.coding-session.json
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

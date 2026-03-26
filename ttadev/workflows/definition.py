@@ -60,3 +60,5 @@ class WorkflowResult:
     memory_snapshot: dict[str, Any]
     completed: bool
     total_confidence: float
+    tracked_task_id: str | None = None
+    tracked_run_id: str | None = None

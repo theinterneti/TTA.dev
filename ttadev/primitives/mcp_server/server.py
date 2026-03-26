@@ -22,9 +22,96 @@ except ImportError:
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
+from ttadev.control_plane import (
+    ControlPlaneError,
+    ControlPlaneService,
+    GateStatus,
+    LockScopeType,
+    RunStatus,
+    TaskStatus,
+)
+from ttadev.control_plane.models import LeaseRecord, LockRecord, RunRecord, TaskRecord
+from ttadev.observability.project_session import ProjectSessionManager
+from ttadev.observability.session_manager import SessionManager
 from ttadev.primitives.analysis import TTAAnalyzer
 
 logger = structlog.get_logger("tta_dev.mcp")
+
+
+def _create_control_plane_service(data_dir: str = ".tta") -> ControlPlaneService:
+    """Create a control-plane service for the requested data directory."""
+    return ControlPlaneService(data_dir)
+
+
+def _create_project_session_manager(data_dir: str = ".tta") -> ProjectSessionManager:
+    """Create a project-session manager for the requested data directory."""
+    return ProjectSessionManager(data_dir)
+
+
+def _create_session_manager(data_dir: str = ".tta") -> SessionManager:
+    """Create a session manager for the requested data directory."""
+    return SessionManager(data_dir)
+
+
+def _serialize_task(task: TaskRecord) -> dict[str, Any]:
+    """Serialize a task record for MCP responses."""
+    return task.to_dict()
+
+
+def _serialize_run(run: RunRecord) -> dict[str, Any]:
+    """Serialize a run record for MCP responses."""
+    return run.to_dict()
+
+
+def _serialize_lease(lease: LeaseRecord | None) -> dict[str, Any] | None:
+    """Serialize a lease record for MCP responses."""
+    if lease is None:
+        return None
+    return lease.to_dict()
+
+
+def _serialize_lock(lock: LockRecord) -> dict[str, Any]:
+    """Serialize a lock record for MCP responses."""
+    return lock.to_dict()
+
+
+def _serialize_ownership_record(record: dict[str, Any]) -> dict[str, Any]:
+    """Serialize a nested ownership record for MCP responses."""
+    return {
+        "task": dict(record["task"]),
+        "run": dict(record["run"]),
+        "lease": dict(record["lease"]) if record.get("lease") is not None else None,
+        "session": dict(record["session"]) if record.get("session") is not None else None,
+        "project": dict(record["project"]) if record.get("project") is not None else None,
+        "telemetry": (dict(record["telemetry"]) if record.get("telemetry") is not None else None),
+    }
+
+
+def _serialize_ownership_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Serialize nested ownership records for MCP responses."""
+    return [_serialize_ownership_record(record) for record in records]
+
+
+def _control_plane_error_payload(exc: Exception) -> dict[str, str]:
+    """Convert a control-plane exception into a structured MCP payload."""
+    return {
+        "error": str(exc),
+        "error_type": type(exc).__name__,
+    }
+
+
+def _ensure_project_exists(project_id: str, *, data_dir: str) -> None:
+    """Validate that a project exists in the local project manager."""
+    project = _create_project_session_manager(data_dir).get_by_id(project_id)
+    if project is None:
+        raise ControlPlaneError(f"Project not found: {project_id}")
+
+
+def _ensure_session_exists(session_id: str, *, data_dir: str) -> None:
+    """Validate that a session exists in the local session manager."""
+    session = _create_session_manager(data_dir).get_session(session_id)
+    if session is None:
+        raise ControlPlaneError(f"Session not found: {session_id}")
 
 
 def create_server() -> Any:
@@ -48,9 +135,15 @@ def create_server() -> Any:
     # Shared analyzer instance
     analyzer = TTAAnalyzer()
 
+    def register_tool(**kwargs: Any) -> Any:
+        """Register a tool while tolerating unsupported MCP decorator kwargs."""
+        supported_kwargs = dict(kwargs)
+        supported_kwargs.pop("allowed_callers", None)
+        return mcp.tool(**supported_kwargs)
+
     # ========== TOOLS ==========
 
-    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
+    @register_tool(allowed_callers=["code_execution_20260120"])
     async def analyze_code(
         code: str,
         file_path: str = "",
@@ -99,7 +192,7 @@ def create_server() -> Any:
         )
         return report.to_dict()
 
-    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
+    @register_tool(allowed_callers=["code_execution_20260120"])
     async def get_primitive_info(primitive_name: str) -> dict[str, Any]:
         """Get detailed information about a TTA.dev primitive.
 
@@ -123,7 +216,7 @@ def create_server() -> Any:
         """
         return analyzer.get_primitive_info(primitive_name)
 
-    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
+    @register_tool(allowed_callers=["code_execution_20260120"])
     async def list_primitives() -> list[dict[str, Any]]:
         """List all available TTA.dev primitives.
 
@@ -142,7 +235,7 @@ def create_server() -> Any:
         """
         return analyzer.list_primitives()
 
-    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
+    @register_tool(allowed_callers=["code_execution_20260120"])
     async def search_templates(query: str) -> list[dict[str, Any]]:
         """Search for primitive templates by keyword.
 
@@ -163,7 +256,7 @@ def create_server() -> Any:
         """
         return analyzer.search_templates(query)
 
-    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
+    @register_tool(allowed_callers=["code_execution_20260120"])
     async def get_composition_example(
         primitives: list[str],
     ) -> dict[str, Any]:
@@ -227,7 +320,7 @@ result = await workflow.execute(data, context)
             "imports": list(set(imports)),
         }
 
-    @mcp.tool()
+    @register_tool()
     async def transform_code(
         code: str,
         primitive: str,
@@ -300,7 +393,7 @@ result = await workflow.execute(data, context)
             "primitive": primitive,
         }
 
-    @mcp.tool()
+    @register_tool()
     async def analyze_and_fix(
         code: str,
         file_path: str = "",
@@ -378,7 +471,7 @@ result = await workflow.execute(data, context)
                 "message": f"No suitable functions found for {prim_to_apply}",
             }
 
-    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
+    @register_tool(allowed_callers=["code_execution_20260120"])
     async def suggest_fixes(
         code: str,
         file_path: str = "",
@@ -484,7 +577,7 @@ result = await workflow.execute(data, context)
             "patterns_found": report.analysis.detected_patterns,
         }
 
-    @mcp.tool(allowed_callers=["code_execution_20260120"])  # type: ignore[call-arg]
+    @register_tool(allowed_callers=["code_execution_20260120"])
     async def detect_anti_patterns(
         code: str,
         file_path: str = "",
@@ -538,7 +631,7 @@ result = await workflow.execute(data, context)
             "anti_patterns": detailed,
         }
 
-    @mcp.tool()
+    @register_tool()
     async def rewrite_code(
         code: str,
         primitive: str | None = None,
@@ -601,6 +694,417 @@ result = await workflow.execute(data, context)
             "success": result.success,
             "error": result.error,
             "diff": "".join(diff),
+        }
+
+    @register_tool()
+    async def control_create_task(
+        title: str,
+        description: str = "",
+        project_name: str | None = None,
+        requested_role: str | None = None,
+        priority: str = "normal",
+        gates: list[dict[str, Any]] | None = None,
+        workspace_locks: list[str] | None = None,
+        file_locks: list[str] | None = None,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Create a new L0 control-plane task."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_create_task",
+            data_dir=data_dir,
+            project_name=project_name,
+            priority=priority,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            task = service.create_task(
+                title,
+                description=description,
+                project_name=project_name,
+                requested_role=requested_role,
+                priority=priority,
+                gates=gates,
+                workspace_locks=workspace_locks,
+                file_locks=file_locks,
+            )
+        except ControlPlaneError as exc:
+            return _control_plane_error_payload(exc)
+        return {"task": _serialize_task(task)}
+
+    @register_tool()
+    async def control_list_tasks(
+        status: str | None = None,
+        project_name: str | None = None,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """List L0 control-plane tasks."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_list_tasks",
+            data_dir=data_dir,
+            status=status,
+            project_name=project_name,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            parsed_status = TaskStatus(status) if status is not None else None
+            tasks = service.list_tasks(status=parsed_status, project_name=project_name)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"tasks": [_serialize_task(task) for task in tasks]}
+
+    @register_tool()
+    async def control_get_task(task_id: str, data_dir: str = ".tta") -> dict[str, Any]:
+        """Get a single L0 control-plane task."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_get_task",
+            data_dir=data_dir,
+            task_id=task_id,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            task = service.get_task(task_id)
+        except ControlPlaneError as exc:
+            return _control_plane_error_payload(exc)
+        return {"task": _serialize_task(task)}
+
+    @register_tool()
+    async def control_claim_task(
+        task_id: str,
+        agent_role: str | None = None,
+        lease_ttl_seconds: float = 300.0,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Claim an L0 control-plane task and create an active run."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_claim_task",
+            data_dir=data_dir,
+            task_id=task_id,
+            agent_role=agent_role,
+            lease_ttl_seconds=lease_ttl_seconds,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            claim = service.claim_task(
+                task_id,
+                agent_role=agent_role,
+                lease_ttl_seconds=lease_ttl_seconds,
+            )
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {
+            "task": _serialize_task(claim.task),
+            "run": _serialize_run(claim.run),
+            "lease": _serialize_lease(claim.lease),
+        }
+
+    @register_tool()
+    async def control_decide_gate(
+        task_id: str,
+        gate_id: str,
+        status: str,
+        decided_by: str | None = None,
+        decision_role: str | None = None,
+        summary: str = "",
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Record a gate decision for an L0 control-plane task."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_decide_gate",
+            data_dir=data_dir,
+            task_id=task_id,
+            gate_id=gate_id,
+            status=status,
+            decision_role=decision_role,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            task = service.decide_gate(
+                task_id,
+                gate_id,
+                status=GateStatus(status),
+                decided_by=decided_by,
+                decision_role=decision_role,
+                summary=summary,
+            )
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"task": _serialize_task(task)}
+
+    @register_tool()
+    async def control_reopen_gate(
+        task_id: str,
+        gate_id: str,
+        reopened_by: str | None = None,
+        summary: str = "",
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Reopen a gate that is currently in changes_requested."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_reopen_gate",
+            data_dir=data_dir,
+            task_id=task_id,
+            gate_id=gate_id,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            task = service.reopen_gate(
+                task_id,
+                gate_id,
+                reopened_by=reopened_by,
+                summary=summary,
+            )
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"task": _serialize_task(task)}
+
+    @register_tool()
+    async def control_list_locks(
+        scope_type: str | None = None,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """List active L0 control-plane locks."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_list_locks",
+            data_dir=data_dir,
+            scope_type=scope_type,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            parsed_scope_type = LockScopeType(scope_type) if scope_type is not None else None
+            locks = service.list_locks(scope_type=parsed_scope_type)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"locks": [_serialize_lock(lock) for lock in locks]}
+
+    @register_tool()
+    async def control_acquire_workspace_lock(
+        task_id: str,
+        run_id: str,
+        workspace_name: str,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Acquire a workspace lock for an active L0 run."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_acquire_workspace_lock",
+            data_dir=data_dir,
+            task_id=task_id,
+            run_id=run_id,
+            workspace_name=workspace_name,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            lock = service.acquire_workspace_lock(task_id, run_id, workspace_name)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"lock": _serialize_lock(lock)}
+
+    @register_tool()
+    async def control_acquire_file_lock(
+        task_id: str,
+        run_id: str,
+        file_path: str,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Acquire a file lock for an active L0 run."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_acquire_file_lock",
+            data_dir=data_dir,
+            task_id=task_id,
+            run_id=run_id,
+            file_path=file_path,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            lock = service.acquire_file_lock(task_id, run_id, file_path)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"lock": _serialize_lock(lock)}
+
+    @register_tool()
+    async def control_release_lock(lock_id: str, data_dir: str = ".tta") -> dict[str, Any]:
+        """Release an L0 control-plane lock."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_release_lock",
+            data_dir=data_dir,
+            lock_id=lock_id,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            service.release_lock(lock_id)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"released_lock_id": lock_id}
+
+    @register_tool()
+    async def control_list_runs(
+        status: str | None = None,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """List L0 control-plane runs."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_list_runs",
+            data_dir=data_dir,
+            status=status,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            parsed_status = RunStatus(status) if status is not None else None
+            runs = service.list_runs(status=parsed_status)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"runs": [_serialize_run(run) for run in runs]}
+
+    @register_tool()
+    async def control_get_run(run_id: str, data_dir: str = ".tta") -> dict[str, Any]:
+        """Get a single L0 control-plane run and its lease, if any."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_get_run",
+            data_dir=data_dir,
+            run_id=run_id,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            run = service.get_run(run_id)
+            lease = service.get_lease_for_run(run_id)
+        except ControlPlaneError as exc:
+            return _control_plane_error_payload(exc)
+        return {
+            "run": _serialize_run(run),
+            "lease": _serialize_lease(lease),
+        }
+
+    @register_tool()
+    async def control_heartbeat_run(
+        run_id: str,
+        lease_ttl_seconds: float = 300.0,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Renew the lease for an active L0 control-plane run."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_heartbeat_run",
+            data_dir=data_dir,
+            run_id=run_id,
+            lease_ttl_seconds=lease_ttl_seconds,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            lease = service.heartbeat_run(run_id, lease_ttl_seconds=lease_ttl_seconds)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"lease": _serialize_lease(lease)}
+
+    @register_tool()
+    async def control_complete_run(
+        run_id: str,
+        summary: str = "",
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Complete an active L0 control-plane run."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_complete_run",
+            data_dir=data_dir,
+            run_id=run_id,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            run = service.complete_run(run_id, summary=summary)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"run": _serialize_run(run)}
+
+    @register_tool()
+    async def control_release_run(
+        run_id: str,
+        reason: str = "",
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Release an active L0 control-plane run back to pending."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_release_run",
+            data_dir=data_dir,
+            run_id=run_id,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            run = service.release_run(run_id, reason=reason)
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"run": _serialize_run(run)}
+
+    @register_tool()
+    async def control_list_ownership(data_dir: str = ".tta") -> dict[str, Any]:
+        """List active L0 ownership records across all projects and sessions."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_list_ownership",
+            data_dir=data_dir,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            active = service.list_active_ownership()
+        except ControlPlaneError as exc:
+            return _control_plane_error_payload(exc)
+        return {"active": _serialize_ownership_records(active)}
+
+    @register_tool()
+    async def control_list_project_ownership(
+        project_id: str,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """List active L0 ownership records for a single project."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_list_project_ownership",
+            data_dir=data_dir,
+            project_id=project_id,
+        )
+        try:
+            _ensure_project_exists(project_id, data_dir=data_dir)
+            service = _create_control_plane_service(data_dir)
+            active = service.list_active_ownership(project_id=project_id)
+        except ControlPlaneError as exc:
+            return _control_plane_error_payload(exc)
+        return {
+            "project_id": project_id,
+            "active": _serialize_ownership_records(active),
+        }
+
+    @register_tool()
+    async def control_list_session_ownership(
+        session_id: str,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """List active L0 ownership records for a single session."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_list_session_ownership",
+            data_dir=data_dir,
+            session_id=session_id,
+        )
+        try:
+            _ensure_session_exists(session_id, data_dir=data_dir)
+            service = _create_control_plane_service(data_dir)
+            active = service.list_active_ownership(session_id=session_id)
+        except ControlPlaneError as exc:
+            return _control_plane_error_payload(exc)
+        return {
+            "session_id": session_id,
+            "active": _serialize_ownership_records(active),
         }
 
     # ========== RESOURCES ==========

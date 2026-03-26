@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-21
 **Phase:** 5 — Full agent autonomy
-**Status:** Draft — awaiting approval
+**Status:** Approved — 2026-03-25
 **Depends on:** `QualityGates` (Phase 4c, complete)
 **Leads to:** Phase 6 — Multi-agent orchestration
 
@@ -28,7 +28,7 @@ After Phase 4c, `DevelopmentCycle` can detect that a response is bad (low `confi
 
 The integration design's layman's view is: *"Build me a data analysis tool." `DevelopmentCycle` runs. The user gets a proven artifact. They never see any of this.* That requires the cycle to resolve its own failures invisibly, not pass them to the caller.
 
-Prompt reframing is the key missing mechanism: when a free model fails the quality gate, the problem is usually prompt mismatch (too vague, wrong format expectation, ambiguous role), not model capability. A structured reformulation — explicit output format, concrete scope, simplified role — dramatically improves success rate on the same model.
+Prompt reframing is the key missing mechanism: when a weaker or poorly matched model fails the quality gate, the problem is usually prompt mismatch (too vague, wrong format expectation, ambiguous role), not pure model capability. A structured reformulation — explicit output format, concrete scope, simplified role — dramatically improves success rate on the same model.
 
 ---
 
@@ -37,15 +37,15 @@ Prompt reframing is the key missing mechanism: when a free model fails the quali
 ### Journey 1 — Autonomous recovery from a weak first response
 
 ```python
-cycle = DevelopmentCycle(bank_id="tta-dev")
+cycle = DevelopmentCycle(bank_id="project-tta.dev-9af638ec")
 result = await cycle.execute(
     DevelopmentTask(instruction="improve the retry primitive"),
     context,
 )
-# First attempt: Ollama returns vague filler, confidence=0.3
+# First attempt: the primary configured provider returns vague filler, confidence=0.3
 # → _write detects all providers failed quality gate
 # → automatically reformulates instruction with explicit structure
-# → second attempt: Ollama returns focused implementation, confidence=0.74
+# → second attempt returns focused implementation, confidence=0.74
 # result.confidence == 0.74
 # result.retry_count == 1   ← caller can see a retry happened
 # result.response   contains usable output
@@ -200,21 +200,21 @@ Maximum one reframe per `_write` call (no infinite loops). The reframe is logged
 
 ```python
 def coding_assistant(
-    bank_id: str = "tta-dev",
+    bank_id: str = "project-tta.dev-9af638ec",
     base_url: str | None = None,
     timeout: float = 10.0,
 ) -> DevelopmentCycle:
     """DevelopmentCycle configured for code generation tasks."""
 
 def code_reviewer(
-    bank_id: str = "tta-dev",
+    bank_id: str = "project-tta.dev-9af638ec",
     base_url: str | None = None,
     timeout: float = 10.0,
 ) -> DevelopmentCycle:
     """DevelopmentCycle configured for code review tasks (agent_hint='qa')."""
 
 def qa_agent(
-    bank_id: str = "tta-dev",
+    bank_id: str = "project-tta.dev-9af638ec",
     base_url: str | None = None,
     timeout: float = 10.0,
 ) -> DevelopmentCycle:

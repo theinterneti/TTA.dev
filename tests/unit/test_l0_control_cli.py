@@ -91,3 +91,340 @@ def test_task_show_and_claim_then_complete(tmp_path: Path) -> None:
     shown_again = _run(["control", "task", "show", task_id], tmp_path)
     assert shown_again.returncode == 0
     assert "completed" in shown_again.stdout
+
+
+def test_gated_task_requires_decision_before_completion(tmp_path: Path) -> None:
+    created = _run(
+        [
+            "control",
+            "task",
+            "create",
+            "Ship gated change",
+            "--gate",
+            "approval:approval:required:Human approval",
+        ],
+        tmp_path,
+    )
+    assert created.returncode == 0
+    task_id = _parse_prefixed_value(created.stdout, "Task")
+
+    shown = _run(["control", "task", "show", task_id], tmp_path)
+    assert shown.returncode == 0
+    assert "Human approval" in shown.stdout
+    assert "pending" in shown.stdout
+
+    claimed = _run(
+        ["control", "task", "claim", task_id],
+        tmp_path,
+        env={"TTA_AGENT_ID": "agent-123", "TTA_AGENT_TOOL": "copilot"},
+    )
+    assert claimed.returncode == 0
+    run_id = _parse_prefixed_value(claimed.stdout, "Run")
+
+    blocked = _run(["control", "run", "complete", run_id], tmp_path)
+    assert blocked.returncode == 1
+    assert "approval" in blocked.stderr.lower()
+
+    decided = _run(
+        [
+            "control",
+            "task",
+            "decide-gate",
+            task_id,
+            "approval",
+            "--status",
+            "approved",
+            "--by",
+            "reviewer-1",
+            "--summary",
+            "looks good",
+        ],
+        tmp_path,
+    )
+    assert decided.returncode == 0
+    assert "approved" in decided.stdout
+
+    completed = _run(
+        ["control", "run", "complete", run_id, "--summary", "done"],
+        tmp_path,
+    )
+    assert completed.returncode == 0
+
+
+def test_assigned_gate_requires_matching_cli_identity_or_role(tmp_path: Path) -> None:
+    """Show gate assignments and reject unauthorized CLI gate decisions."""
+    created = _run(
+        [
+            "control",
+            "task",
+            "create",
+            "Assigned gated change",
+            "--gate",
+            "review:review:required:Code review",
+            "--gate-assign-role",
+            "review:reviewer",
+            "--gate-assign-decider",
+            "review:reviewer-1",
+        ],
+        tmp_path,
+    )
+    assert created.returncode == 0
+    task_id = _parse_prefixed_value(created.stdout, "Task")
+
+    shown = _run(["control", "task", "show", task_id], tmp_path)
+    assert shown.returncode == 0
+    assert "assigned_role=reviewer" in shown.stdout
+    assert "assigned_decider=reviewer-1" in shown.stdout
+
+    blocked = _run(
+        [
+            "control",
+            "task",
+            "decide-gate",
+            task_id,
+            "review",
+            "--status",
+            "approved",
+        ],
+        tmp_path,
+        env={"TTA_AGENT_ID": "agent-123", "TTA_AGENT_TOOL": "copilot"},
+    )
+    assert blocked.returncode == 1
+    assert "reviewer-1" in blocked.stderr or "reviewer" in blocked.stderr
+
+    decided = _run(
+        [
+            "control",
+            "task",
+            "decide-gate",
+            task_id,
+            "review",
+            "--status",
+            "approved",
+            "--by",
+            "reviewer-1",
+            "--role",
+            "reviewer",
+        ],
+        tmp_path,
+        env={"TTA_AGENT_ID": "agent-123", "TTA_AGENT_TOOL": "copilot"},
+    )
+    assert decided.returncode == 0
+    assert "approved" in decided.stdout
+
+
+def test_changes_requested_requires_reopen_before_cli_completion(tmp_path: Path) -> None:
+    """Gate lifecycle supports changes_requested and explicit reopen on the CLI."""
+    created = _run(
+        [
+            "control",
+            "task",
+            "create",
+            "Lifecycle gated change",
+            "--gate",
+            "review:review:required:Code review",
+        ],
+        tmp_path,
+    )
+    assert created.returncode == 0
+    task_id = _parse_prefixed_value(created.stdout, "Task")
+
+    claimed = _run(
+        ["control", "task", "claim", task_id],
+        tmp_path,
+        env={"TTA_AGENT_ID": "agent-123", "TTA_AGENT_TOOL": "copilot"},
+    )
+    assert claimed.returncode == 0
+    run_id = _parse_prefixed_value(claimed.stdout, "Run")
+
+    changes = _run(
+        [
+            "control",
+            "task",
+            "decide-gate",
+            task_id,
+            "review",
+            "--status",
+            "changes_requested",
+            "--summary",
+            "needs updates",
+        ],
+        tmp_path,
+    )
+    assert changes.returncode == 0
+    assert "changes_requested" in changes.stdout
+
+    blocked_completion = _run(["control", "run", "complete", run_id], tmp_path)
+    assert blocked_completion.returncode == 1
+    assert "review" in blocked_completion.stderr.lower()
+
+    blocked_direct_approve = _run(
+        [
+            "control",
+            "task",
+            "decide-gate",
+            task_id,
+            "review",
+            "--status",
+            "approved",
+        ],
+        tmp_path,
+    )
+    assert blocked_direct_approve.returncode == 1
+    assert "without reopen" in blocked_direct_approve.stderr
+
+    reopened = _run(
+        ["control", "task", "reopen-gate", task_id, "review"],
+        tmp_path,
+        env={"TTA_AGENT_ID": "agent-123", "TTA_AGENT_TOOL": "copilot"},
+    )
+    assert reopened.returncode == 0
+    assert "pending" in reopened.stdout
+
+    approved = _run(
+        [
+            "control",
+            "task",
+            "decide-gate",
+            task_id,
+            "review",
+            "--status",
+            "approved",
+        ],
+        tmp_path,
+    )
+    assert approved.returncode == 0
+
+    shown = _run(["control", "task", "show", task_id], tmp_path)
+    assert shown.returncode == 0
+    assert "history:" in shown.stdout
+    assert "decision pending -> changes_requested" in shown.stdout
+    assert "reopened changes_requested -> pending" in shown.stdout
+    assert "decision pending -> approved" in shown.stdout
+
+    completed = _run(["control", "run", "complete", run_id, "--summary", "done"], tmp_path)
+    assert completed.returncode == 0
+
+
+def test_task_show_renders_tracked_workflow_metadata(tmp_path: Path) -> None:
+    """Tracked workflow tasks show per-step state in the control CLI."""
+    from ttadev.control_plane import ControlPlaneService
+    from ttadev.control_plane.models import WorkflowGateDecisionOutcome
+
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="feature_dev",
+        workflow_goal="ship auth",
+        step_agents=["developer", "qa"],
+    )
+    service.mark_workflow_step_running(claim.task.id, step_index=0)
+    service.record_workflow_step_result(
+        claim.task.id,
+        step_index=0,
+        result_summary="developer output",
+        confidence=0.9,
+    )
+    service.record_workflow_gate_outcome(
+        claim.task.id,
+        step_index=0,
+        decision=WorkflowGateDecisionOutcome.CONTINUE,
+        summary="approved",
+    )
+
+    shown = _run(["control", "task", "show", claim.task.id], tmp_path)
+    assert shown.returncode == 0
+    assert "workflow:" in shown.stdout
+    assert "name:              feature_dev" in shown.stdout
+    assert "1. developer status=completed" in shown.stdout
+    assert "gate_history:" in shown.stdout
+
+
+def test_lock_declared_task_claims_and_lists_locks(tmp_path: Path) -> None:
+    """Declare task locks, auto-acquire on claim, then inspect and release them."""
+    created = _run(
+        [
+            "control",
+            "task",
+            "create",
+            "Lock me",
+            "--workspace-lock",
+            "alpha-workspace",
+            "--file-lock",
+            "./src\\main.py",
+        ],
+        tmp_path,
+    )
+    assert created.returncode == 0
+    task_id = _parse_prefixed_value(created.stdout, "Task")
+    assert "workspace_locks: alpha-workspace" in created.stdout
+    assert "file_locks: src/main.py" in created.stdout
+
+    claimed = _run(
+        ["control", "task", "claim", task_id],
+        tmp_path,
+        env={"TTA_AGENT_ID": "agent-123", "TTA_AGENT_TOOL": "copilot"},
+    )
+    assert claimed.returncode == 0
+    run_id = _parse_prefixed_value(claimed.stdout, "Run")
+
+    listed = _run(["control", "lock", "list"], tmp_path)
+    assert listed.returncode == 0
+    assert "alpha-workspace" in listed.stdout
+    assert "src/main.py" in listed.stdout
+    assert run_id in listed.stdout
+
+    workspace_lock_id = next(
+        line.split()[0]
+        for line in listed.stdout.splitlines()
+        if "alpha-workspace" in line and "workspace" in line
+    )
+    released = _run(["control", "lock", "release", workspace_lock_id], tmp_path)
+    assert released.returncode == 0
+    assert workspace_lock_id in released.stdout
+
+
+def test_claim_fails_when_declared_lock_conflicts(tmp_path: Path) -> None:
+    """Reject a second claim when a declared workspace lock is already held."""
+    first = _run(
+        [
+            "control",
+            "task",
+            "create",
+            "First lock holder",
+            "--workspace-lock",
+            "shared-workspace",
+        ],
+        tmp_path,
+    )
+    first_task_id = _parse_prefixed_value(first.stdout, "Task")
+    first_claim = _run(
+        ["control", "task", "claim", first_task_id],
+        tmp_path,
+        env={"TTA_AGENT_ID": "agent-1", "TTA_AGENT_TOOL": "copilot"},
+    )
+    assert first_claim.returncode == 0
+
+    second = _run(
+        [
+            "control",
+            "task",
+            "create",
+            "Second lock holder",
+            "--workspace-lock",
+            "shared-workspace",
+        ],
+        tmp_path,
+    )
+    second_task_id = _parse_prefixed_value(second.stdout, "Task")
+
+    blocked = _run(
+        ["control", "task", "claim", second_task_id],
+        tmp_path,
+        env={"TTA_AGENT_ID": "agent-2", "TTA_AGENT_TOOL": "copilot"},
+    )
+    assert blocked.returncode == 1
+    assert "shared-workspace" in blocked.stderr
+
+    shown = _run(["control", "task", "show", second_task_id], tmp_path)
+    assert shown.returncode == 0
+    assert "status:         pending" in shown.stdout

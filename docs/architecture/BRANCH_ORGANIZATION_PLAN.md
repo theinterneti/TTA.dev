@@ -6,6 +6,12 @@
 
 ---
 
+> [!WARNING]
+> This branch plan is historical workspace bookkeeping.
+>
+> Any Hypertool paths or branch names in this file describe an older worktree layout, not a current
+> TTA.dev runtime dependency.
+
 ## 📋 Overview
 
 We have two sets of changes to organize:

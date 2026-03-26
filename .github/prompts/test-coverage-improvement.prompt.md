@@ -40,7 +40,7 @@ This workflow guides the systematic improvement of test coverage for a component
 5. Categorize gaps (unit, integration, E2E)
 
 **Observability Note:** Use the current repository observability stack if available. Do not use
-legacy `.hypertool` tracing examples.
+deprecated Hypertool-era tracing examples.
 
 ```python
 # Example placeholder for repository-native observability hooks

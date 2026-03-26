@@ -40,7 +40,7 @@ return a response string; the new fields are derived from it by the scorer.
 Two new required fields added:
 ```python
 confidence: float   # 0.0–1.0 quality score
-provider: str       # "openrouter" | "ollama"
+    provider: str       # provider identifier from the configured workflow/app chain
 ```
 Existing tests that construct `DevelopmentCycle` via `_make_mocks()` will now get these fields
 populated automatically by the updated `_write`. No test fixtures need changes — tests that

@@ -28,7 +28,7 @@ TTA.dev provides **three layers of observability** that work together:
 This architecture supports:
 - ✅ **TTA.dev Primitives** - Sequential, Parallel, Router, Retry workflows
 - ✅ **Integrations** - OpenAI, Anthropic, Supabase, E2B, etc.
-- ✅ **Persona Switching** - Hypertool context changes
+- ✅ **Agent Context Switching** - workflow and persona context changes
 - ✅ **Multi-Workspace** - Different service names per workspace
 
 ---
@@ -156,10 +156,10 @@ This installs:
 **Langfuse provides LLM-specific analytics** (prompts, completions, costs):
 
 ```python
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+from tta_apm_langfuse import LangFuseIntegration
 
 # Initialize Langfuse (uses env vars: LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
-langfuse = LangfuseIntegration()
+langfuse = LangFuseIntegration()
 
 # Start trace with persona context
 trace = langfuse.start_trace(
@@ -179,7 +179,7 @@ generation = langfuse.create_generation(
 )
 ```
 
-**See:** [`.hypertool/instrumentation/LANGFUSE_INTEGRATION.md`](../../.hypertool/instrumentation/LANGFUSE_INTEGRATION.md)
+**See:** [`ttadev/observability/apm/langfuse/src/tta_apm_langfuse/integration.py`](../../ttadev/observability/apm/langfuse/src/tta_apm_langfuse/integration.py)
 
 ---
 
@@ -198,7 +198,7 @@ class LLMAnalyzerPrimitive(InstrumentedPrimitive[dict, dict]):
 
     def __init__(self):
         super().__init__(name="LLMAnalyzer")
-        self.langfuse = LangfuseIntegration()
+        self.langfuse = LangFuseIntegration()
 
     async def _execute_impl(self, input_data: dict, context: WorkflowContext) -> dict:
         # OpenTelemetry span created automatically by InstrumentedPrimitive
@@ -275,7 +275,7 @@ result = await openai_primitive.execute({"prompt": "Hello"}, context)
 
 **See:** [`packages/tta-dev-integrations/`](../../packages/tta-dev-integrations/)
 
-### Pattern 3: Persona Switching (Hypertool)
+### Pattern 3: Agent Context Switching
 
 **Track persona changes with all three layers:**
 
@@ -533,9 +533,9 @@ echo $LANGFUSE_SECRET_KEY
 
 **Check initialization:**
 ```python
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+from tta_apm_langfuse import LangFuseIntegration
 
-langfuse = LangfuseIntegration()
+langfuse = LangFuseIntegration()
 print(f"Langfuse enabled: {langfuse.enabled}")
 ```
 

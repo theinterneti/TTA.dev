@@ -10,8 +10,8 @@ Spec: `docs/superpowers/specs/2026-03-21-sessionautomation.md`
 ## Architecture Overview
 
 ```
-scripts/auto_retain.py          ← Stop hook target (sync httpx, git log)
-scripts/session_start_recall.py ← UserPromptSubmit hook target (sync httpx)
+scripts/auto_retain.py          ← Stop hook target (stdlib HTTP, git log)
+scripts/session_start_recall.py ← UserPromptSubmit hook target (stdlib HTTP)
 scripts/run_changed_tests.py    ← pre-commit hook target (subprocess pytest)
 
 .pre-commit-config.yaml         ← add pytest-changed local hook
@@ -25,8 +25,8 @@ tests/scripts/
 ```
 
 **Design choices:**
-- Scripts use **synchronous `httpx.Client`** (not async) — they are shell entry points, not primitives. No `asyncio.run()` needed.
-- Scripts are **standalone** — they import only stdlib + `httpx` (already a project dep). They do NOT import from `ttadev`.
+- Scripts use **synchronous stdlib HTTP** — they are shell entry points, not primitives. No `asyncio.run()` needed.
+- Scripts are **standalone** — they import only stdlib and do NOT import from `ttadev`.
 - All Hindsight calls use the same endpoint paths as `HindsightClient` (`/v1/default/banks/{bank_id}/...`).
 - All scripts **exit 0 on any failure** except `run_changed_tests.py` (which must propagate pytest's exit code).
 
@@ -37,7 +37,9 @@ tests/scripts/
 | Var | Default | Used by |
 |-----|---------|---------|
 | `HINDSIGHT_URL` | `http://localhost:8888` | `auto_retain.py`, `session_start_recall.py` |
-| `HINDSIGHT_BANK` | `tta-dev` | `auto_retain.py`, `session_start_recall.py` |
+| `HINDSIGHT_BANK` | unset | Optional override for a specific bank |
+| `COPILOT_HINDSIGHT_PROJECT_BANK` | derived `project-*` / `workspace-*` bank | Preferred repo/workspace target |
+| `HINDSIGHT_PROJECT_BANK` | derived `project-*` / `workspace-*` bank | Secondary repo/workspace target |
 
 ---
 
@@ -53,12 +55,13 @@ Reads recent git commits, posts a summary to Hindsight retain endpoint.
 Exits 0 always — never blocks the session.
 """
 from __future__ import annotations
-import os, subprocess, sys
-from datetime import date
-import httpx
+ import hashlib, json, os, subprocess, sys
+ from datetime import date
+ from pathlib import Path
+ from urllib import request
 
-_DEFAULT_URL = "http://localhost:8888"
-_DEFAULT_BANK = "tta-dev"
+ _DEFAULT_URL = "http://localhost:8888"
+ _DEFAULT_BANK = "tta-dev"
 _TIMEOUT = 5.0
 
 
@@ -74,13 +77,31 @@ def _git_log(n: int = 10) -> str:
         return ""
 
 
-def _retain(base_url: str, bank_id: str, content: str) -> bool:
-    """POST content to Hindsight retain. Returns True on success."""
-    try:
-        url = f"{base_url}/v1/default/banks/{bank_id}/memories"
-        resp = httpx.post(url, json={"items": [{"content": content}], "async": True}, timeout=_TIMEOUT)
-        resp.raise_for_status()
-        return True
+ def _default_project_bank() -> str:
+     root = Path.cwd().resolve()
+     digest = hashlib.sha1(str(root).encode("utf-8")).hexdigest()[:8]
+     return f"workspace-{root.name.lower().replace(' ', '-')}-{digest}"
+
+
+ def _target_bank() -> str:
+     return (
+         os.environ.get("HINDSIGHT_BANK")
+         or os.environ.get("COPILOT_HINDSIGHT_PROJECT_BANK")
+         or os.environ.get("HINDSIGHT_PROJECT_BANK")
+         or _default_project_bank()
+         or _DEFAULT_BANK
+     )
+
+
+ def _retain(base_url: str, bank_id: str, content: str) -> bool:
+     """POST content to Hindsight retain. Returns True on success."""
+     try:
+         url = f"{base_url}/v1/default/banks/{bank_id}/memories"
+         payload = json.dumps({"items": [{"content": content}], "async": True}).encode("utf-8")
+         req = request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
+         with request.urlopen(req, timeout=_TIMEOUT):
+             pass
+         return True
     except Exception as exc:
         print(f"auto_retain: Hindsight unavailable, skipping ({exc})", file=sys.stderr)
         return False
@@ -88,7 +109,7 @@ def _retain(base_url: str, bank_id: str, content: str) -> bool:
 
 def main() -> None:
     base_url = os.environ.get("HINDSIGHT_URL", _DEFAULT_URL).rstrip("/")
-    bank_id  = os.environ.get("HINDSIGHT_BANK", _DEFAULT_BANK)
+     bank_id  = _target_bank()
     commits  = _git_log()
     subjects = commits if commits else "no commits this session"
     content  = f"[type: session-end] {date.today()} — {subjects}"
@@ -117,23 +138,48 @@ Claude Code injects stdout into the conversation context.
 Exits 0 silently on failure.
 """
 from __future__ import annotations
-import os, sys
-import httpx
+ import hashlib, json, os, subprocess, sys, time
+ from pathlib import Path
+ from urllib import request
 
-_DEFAULT_URL = "http://localhost:8888"
-_DEFAULT_BANK = "tta-dev"
-_TIMEOUT = 2.0  # must not slow session start
+ _DEFAULT_URL = "http://localhost:8888"
+ _DEFAULT_BANK = "tta-dev"
+ _TIMEOUT = 2.0  # must not slow session start
 
 
-def _get_directives(base_url: str, bank_id: str) -> list[str]:
-    try:
-        url = f"{base_url}/v1/default/banks/{bank_id}/directives"
-        resp = httpx.get(url, timeout=_TIMEOUT)
-        resp.raise_for_status()
-        data = resp.json()
-        items = data.get("directives", []) if isinstance(data, dict) else data
-        return [
-            d.get("content") or d.get("text", "")
+ def _default_project_bank() -> str:
+     root = Path.cwd().resolve()
+     digest = hashlib.sha1(str(root).encode("utf-8")).hexdigest()[:8]
+     return f"workspace-{root.name.lower().replace(' ', '-')}-{digest}"
+
+
+ def _candidate_banks() -> list[str]:
+     explicit = os.environ.get("HINDSIGHT_BANK")
+     if explicit:
+         return [explicit]
+     banks: list[str] = []
+     for candidate in (
+         os.environ.get("COPILOT_HINDSIGHT_GLOBAL_BANK"),
+         os.environ.get("HINDSIGHT_GLOBAL_BANK"),
+         "adam-global",
+         os.environ.get("COPILOT_HINDSIGHT_PROJECT_BANK"),
+         os.environ.get("HINDSIGHT_PROJECT_BANK"),
+         _default_project_bank(),
+         _DEFAULT_BANK,
+     ):
+         if candidate and candidate not in banks:
+             banks.append(candidate)
+     return banks
+
+
+ def _get_directives(base_url: str, bank_id: str) -> list[str]:
+     try:
+         url = f"{base_url}/v1/default/banks/{bank_id}/directives"
+         with request.urlopen(url, timeout=_TIMEOUT) as resp:
+             data = json.load(resp)
+         items = data.get("directives", data.get("items", [])) if isinstance(data, dict) else data
+         return [
+             d.get("content") or d.get("text", "")
             for d in items
             if d.get("content") or d.get("text")
         ]
@@ -143,8 +189,13 @@ def _get_directives(base_url: str, bank_id: str) -> list[str]:
 
 def main() -> None:
     base_url = os.environ.get("HINDSIGHT_URL", _DEFAULT_URL).rstrip("/")
-    bank_id  = os.environ.get("HINDSIGHT_BANK", _DEFAULT_BANK)
-    directives = _get_directives(base_url, bank_id)
+     directives = []
+     seen = set()
+     for bank_id in _candidate_banks():
+         for directive in _get_directives(base_url, bank_id):
+             if directive not in seen:
+                 directives.append(directive)
+                 seen.add(directive)
     if not directives:
         return  # silent — don't pollute context with empty noise
     print("## Hindsight Directives (auto-loaded)")

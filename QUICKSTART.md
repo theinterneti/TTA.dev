@@ -56,7 +56,6 @@ curl http://localhost:8000/api/v2/spans | head
 
 ## What this does **not** prove yet
 
-- that every older public demo script still matches the current primitive APIs
 - that every onboarding path in older docs is up to date
 - that the repo is fully production-ready end to end
 
@@ -70,6 +69,7 @@ curl http://localhost:8000/api/v2/spans | head
 
 - If `/api/v2/spans` is empty immediately after the script runs, wait a few seconds and query it
   again. The ingestion loop is asynchronous.
-- Older demo commands that reference `src/...`, `ttadev/ui/observability_server.py`, or
-  `ttadev/hello_world.py` may not match the current APIs yet and should not be treated as canonical
-  proof paths.
+- `examples/demo_workflow.py` and `ttadev/hello_world.py` are lightweight working demos, but the
+  canonical proof path remains the one in this file.
+- Older commands that reference `src/...` or `ttadev/ui/observability_server.py` are stale and
+  should not be treated as canonical proof paths.

@@ -10,12 +10,13 @@ Claude Code is the **primary agent** for this repository. Other agents defer to 
 
 **Every session begins with `/session-start`** (or the session-start skill steps manually).
 
-1. `mcp__hindsight__recall` — query `tta-dev` bank for directives + mental models
+1. `mcp__hindsight__recall` — query `adam-global` for durable directives/preferences, then query the current derived `project-*` or `workspace-*` bank for repository-specific mental models and context
 2. `mcp__codegraphcontext__get_repository_stats` — confirm graph is current
 3. Acknowledge what was loaded before any task work begins
 
-**Every significant task ends with `mcp__hindsight__retain`** to the `tta-dev` bank:
-decisions made, patterns used, failures encountered.
+**Every significant task ends with `mcp__hindsight__retain`** to the right bank:
+- retain cross-project preferences and reusable workflow patterns in `adam-global`
+- retain repository-specific decisions, commands, patterns, and failures in the current derived `project-*` or `workspace-*` bank
 
 ## Repo Layout
 
@@ -55,7 +56,7 @@ tests/              # Test suite
 | [observability-guide](docs/agent-guides/observability-guide.md) | OpenTelemetry integration |
 | [todo-management](docs/agent-guides/todo-management.md) | Repository TODO format and session task tracking |
 | [secrets-guide](docs/agent-guides/secrets-guide.md) | API keys, `.env`, 1Password CLI |
-| [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md) | LLM provider hierarchy, OpenRouter + Ollama |
+| [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md) | Live Hindsight runtime defaults, Groq preference, and fallback provider guidance |
 
 ## Non-Negotiable Standards (Quick Reference)
 
@@ -67,9 +68,9 @@ tests/              # Test suite
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
 - **Primitives:** Always use for workflows (never manual retry/timeout loops)
 - **State:** Pass via `WorkflowContext` (never globals)
-- **LLM providers:** OpenRouter free models first, Ollama fallback — see [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md)
+- **LLM providers:** Groq `openai/gpt-oss-20b` for the live Hindsight runtime by default; keep Gemini 3.1 Flash Lite Preview and local Ollama as fallbacks — see [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md)
 - **Orient before edit:** Run CGC (`find_code` + `analyze_code_relationships`) on any non-trivial target before touching it
-- **Retain after task:** Store decisions, patterns, failures to `tta-dev` Hindsight bank after each significant task
+- **Retain after task:** Store cross-project signal in `adam-global` and repo-specific signal in the current derived `project-*` or `workspace-*` Hindsight bank
 
 ### ⛔ TODO Management — CI-Blocking Rule
 
@@ -109,6 +110,7 @@ Cross-agent memory: `.hindsight/` — see [Hindsight Memory](docs/guides/agents/
 
 - `ttadev/control_plane/`
 - `ttadev/cli/control.py`
+- `ttadev/primitives/mcp_server/server.py`
 
 If a task is about coordinating coding agents, task ownership, approvals, leases,
 or developer work orchestration, **continue from that L0 surface** rather than
@@ -116,10 +118,10 @@ building a second orchestration system somewhere else.
 
 ### Immediate L0 Priorities
 
-1. expose current task/run/lease operations through MCP tools
-2. add approval and policy state
-3. add workspace/file-lock coordination
-4. wire observability and agent telemetry into L0 ownership views
+1. use the current L0 surface to prove one documented, repeatable multi-agent workflow
+2. deepen approval/policy/review workflows only where that workflow needs richer coordination
+3. strengthen ownership and telemetry attribution so active workflow steps can be explained clearly
+4. connect additional agent-facing surfaces to the existing L0 state instead of creating parallel coordination systems
 
 When implementing these, keep the design additive, local-first, and compatible
 with the existing `.tta` session/project model.

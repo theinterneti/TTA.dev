@@ -20,7 +20,7 @@ The central design is **The DevelopmentCycle**: a five-step loop (Orient → Rec
 2. **Eliminate blind edits** — every non-trivial change is preceded by a CGC impact analysis
 3. **Eliminate unvalidated code** — new code is proven in an E2B sandbox before committing
 4. **Compound learning** — decisions, patterns, and failures are retained after every session
-5. **Free by default** — apps built on TTA.dev work out of the box with Ollama, no API key required
+5. **Practical defaults** — apps built on TTA.dev should work with low-friction defaults, while the live Hindsight runtime can use a different provider strategy when that is more reliable
 6. **Always observable** — every step in the loop emits an OTel span
 
 ---
@@ -31,16 +31,16 @@ Three audiences, one coherent hierarchy. This is the foundation everything else 
 
 | Audience | Models | Config required |
 |---|---|---|
-| **Building TTA.dev** (Claude Code, Copilot, Augment) | Paid models (Claude, GPT-4o) | Developer's own keys |
-| **TTA.dev platform** (agents, workflows, memory synthesis) | OpenRouter `:free` → Ollama | `OPENROUTER_API_KEY` optional |
-| **Apps built on TTA.dev** (end users) | Ollama default → OpenRouter → paid (opt-in) | None — just works |
+| **Building TTA.dev** (Claude Code, Copilot, Augment) | Paid or user-selected coding models | Developer's own keys |
+| **Live Hindsight runtime** (memory synthesis, directives, mental models) | Groq `openai/gpt-oss-20b` default, Gemini 3.1 Flash Lite Preview fallback, Ollama local fallback | Groq or Google key preferred; Ollama optional |
+| **Apps built on TTA.dev** (end users) | Historical app-side chain: Ollama default → OpenRouter → paid (opt-in) | App-specific |
 
-**Provider selection hierarchy for TTA.dev apps:**
-1. Ollama `qwen2.5:7b` — local, always available, zero config, ~4.5GB RAM
-2. OpenRouter `:free` — if `OPENROUTER_API_KEY` set (gemma-3n → mistral-small → gpt-oss-20b)
-3. Paid models — if `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, etc. set
+**Provider selection note:**
+1. The live Hindsight runtime now prefers Groq `openai/gpt-oss-20b` for reliability on this machine.
+2. Gemini 3.1 Flash Lite Preview is a viable fallback, with known tool-calling caveats.
+3. The older Ollama/OpenRouter hierarchy described below is historical app-side workflow guidance, not the preferred live Hindsight runtime.
 
-**The free-model amplifier** — TTA.dev's job is to make free models punch above their weight:
+**The provider amplifier** — TTA.dev's job is to make lower-cost or weaker providers punch above their weight:
 - **Structured prompting**: output schemas, few-shot examples, CoT scaffolds in `AgentSpec.system_prompt` + `AgentMemory` directives
 - **Retry + fallback**: `RetryPrimitive` + `FallbackPrimitive` — quality gate fails → reframe prompt → try next model; transparent to caller
 - **Context economy**: `CodeGraphPrimitive` delivers targeted context only; `CachePrimitive` on repeated CGC queries; tight token budgets
@@ -50,10 +50,10 @@ Three audiences, one coherent hierarchy. This is the foundation everything else 
 
 ## The Loop
 
-Five steps. Every step traced by OTel. Free LLM at the centre.
+Five steps. Every step traced by OTel. An LLM sits at the centre.
 
 ```
-CGC          Hindsight      LLM (free)    E2B           Hindsight
+CGC          Hindsight      LLM           E2B           Hindsight
   │              │               │            │               │
 [1. Orient] → [2. Recall] → [3. Write] → [4. Validate] → [5. Retain]
 ```
@@ -79,7 +79,9 @@ Before touching any file, query CGC for:
 
 **Question:** "What do we know that's relevant to this task?"
 
-Pull from the `tta-dev` Hindsight bank:
+Pull from the active Hindsight banks:
+- `adam-global` for durable directives and cross-project preferences
+- current derived `project-*` or `workspace-*` bank for repository-specific context
 - Architectural decisions relevant to the target module
 - Known failure patterns to avoid
 - Coding directives (standards, SDD mandate, model strategy)
@@ -91,7 +93,7 @@ Pull from the `tta-dev` Hindsight bank:
 
 ---
 
-### Step 3 — Write (LLM, free by default)
+### Step 3 — Write (LLM)
 
 **Question:** "What should be built, given what we know?"
 
@@ -144,7 +146,7 @@ After each task: store decisions made, patterns used, anything that failed. The 
 | **Directives** | Persistent instructions | "Always orient with CGC before editing any non-trivial file" |
 | **Mental models** | Synthesized module summaries | Full summary of the primitives system architecture |
 
-### H1 — `tta-dev` bank structure
+### H1 — legacy repo-local bank structure
 
 ```
 tta-dev/
@@ -155,7 +157,7 @@ tta-dev/
 ├── directives/              # NEW — persistent rules
 │   ├── dev-loop.md          # orient→recall→write→validate→retain
 │   ├── coding-standards.md  # uv, ruff, pyright, SDD mandate
-│   └── model-strategy.md    # free first, Ollama default, never nemotron
+│   └── model-strategy.md    # historical model guidance from the repo-local/file-based layout
 └── mental-models/           # NEW — synthesized module summaries
     ├── primitives.md
     ├── agents.md
@@ -165,7 +167,7 @@ tta-dev/
 
 ### H2 — AgentMemory (platform primitive)
 
-Per-app, per-agent memory banks. Bank ID pattern: `{app-name}.{agent-name}` and `{app-name}.shared`.
+Per-app, per-agent memory banks. In the current live runtime, Copilot/Hindsight sessions also use `adam-global` plus derived `project-*` / `workspace-*` banks.
 
 ```python
 class AgentMemory:
@@ -298,12 +300,12 @@ feature_dev_workflow = WorkflowDefinition(
 **Goal:** Immediately improve the Claude Code development loop using existing MCP tools.
 
 Deliverables:
-- Populate `directives/` in Hindsight `tta-dev` bank: `dev-loop.md`, `coding-standards.md`, `model-strategy.md`
-- Populate `mental-models/` in Hindsight `tta-dev` bank: one per major module (primitives, agents, workflows, integrations)
+- Populate durable directives in `adam-global`, and repo-specific directives/mental models in the derived `project-*` or `workspace-*` bank
+- Populate repo-specific mental models for major modules (primitives, agents, workflows, integrations) in the derived project/workspace bank
 - Update `CLAUDE.md`: mandate orient-before-edit, document session-start ritual
 - New `.claude/skills/session-start/` skill: loads directives + mental models + CGC orientation
 - Update `build-test-verify` skill: add CGC impact check before write, E2B validation step after write
-- Update `core-conventions` skill: add free-model strategy section
+- Update `core-conventions` skill: add provider-strategy guidance that distinguishes the live Hindsight runtime from app-side provider chains
 
 Success criteria: every session starts with context loaded; every non-trivial edit is preceded by a CGC query; new code is sandbox-validated before committing.
 
@@ -330,7 +332,7 @@ Each primitive gets its own SDD spec before implementation (`/specify → /plan 
 
 Deliverables:
 - `ttadev/workflows/development_cycle.py` — `DevelopmentCycle`, `DevelopmentTask`, `DevelopmentResult`
-- Free-model amplifier: retry chains with model fallback, quality gates, context budget management, structured prompt templates per agent role
+- Provider amplifier: retry chains with model fallback, quality gates, context budget management, structured prompt templates per agent role
 - Updated `feature_dev_workflow` — uses `DevelopmentCycle` at each non-git step
 - New prebuilt: `quick_fix_workflow` — single cycle, no approval gates
 - Dogfood: use `DevelopmentCycle` to implement Phase 2 primitives
@@ -359,12 +361,13 @@ CGC (MCP)       →  CodeGraphPrimitive →  developer / qa   →  DevelopmentCy
 Hindsight (MCP) →  AgentMemory        →  all agents       →  DevelopmentCycle  →  OTel: recall/retain
 E2B sandbox     →  CodeExecutionPrim  →  developer / qa   →  DevelopmentCycle  →  OTel: validate
 
-Ollama (default)
-+ OpenRouter :free  →  get_llm_client()  →  free-model amplifier  →  quality output
-+ paid (opt-in)
+Groq / Gemini / app provider chain
+→ get_llm_client() or live runtime provider config
+→ provider amplifier
+→ quality output
 ```
 
-**The layman's view:** "Build me a data analysis tool." `DevelopmentCycle` runs. CGC understands the codebase. Hindsight recalls what worked before. A free model writes the code. E2B proves it works. Hindsight learns. The user gets a proven artifact. They never see any of this.
+**The layman's view:** "Build me a data analysis tool." `DevelopmentCycle` runs. CGC understands the codebase. Hindsight recalls what worked before. The configured model writes the code. E2B proves it works. Hindsight learns. The user gets a proven artifact. They never see any of this.
 
 ---
 

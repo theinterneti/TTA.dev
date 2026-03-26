@@ -1,8 +1,12 @@
-"""Enhanced observability server with provider/model/agent tracking."""
+"""Legacy observability dashboard server.
+
+Deprecated: use ``python -m ttadev.observability`` as the supported server entrypoint.
+"""
 
 import asyncio
 import json
 import sys
+import warnings
 from pathlib import Path
 
 import aiohttp
@@ -21,6 +25,17 @@ TRACES_DIR = Path.home() / ".tta" / "traces"
 
 # WebSocket connections
 websocket_connections = set()
+
+_DEPRECATION_MESSAGE = (
+    "ttadev.ui.observability_server is deprecated. "
+    "Use `uv run python -m ttadev.observability` instead."
+)
+
+
+def warn_deprecated_entrypoint() -> None:
+    """Warn when the legacy observability entrypoint is used."""
+    warnings.warn(_DEPRECATION_MESSAGE, DeprecationWarning, stacklevel=2)
+    print(f"WARNING: {_DEPRECATION_MESSAGE}", file=sys.stderr)
 
 
 async def handle_dashboard(request):
@@ -398,7 +413,7 @@ async def start_server():
 
     print("✓ Observability dashboard running at http://0.0.0.0:8000")
     print(f"✓ Watching traces in: {TRACES_DIR}")
-    print("✓ WebSocket endpoint available at ws://0.0.0.0:8000/ws")
+    print("✓ WebSocket endpoint available at 0.0.0.0:8000/ws")
 
     # Start trace watcher in background
     asyncio.create_task(watch_traces())
@@ -409,7 +424,8 @@ async def start_server():
 
 
 def main():
-    """Entry point for tta-observe command."""
+    """Run the legacy observability entrypoint with a deprecation warning."""
+    warn_deprecated_entrypoint()
     asyncio.run(start_server())
 
 

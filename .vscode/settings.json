@@ -26,24 +26,6 @@
         }
     },
     "mcp.servers": {
-        "hypertool": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@toolprint/hypertool-mcp@latest",
-                "mcp",
-                "run",
-                "--mcp-config",
-                "${workspaceFolder}/.hypertool/mcp_config.json"
-            ],
-            "env": {
-                "HYPERTOOL_CONFIG_DIR": "${workspaceFolder}/.hypertool",
-                "HYPERTOOL_SERVERS_FILE": "${workspaceFolder}/.hypertool/mcp_servers.json",
-                "GITHUB_TOKEN": "${env:GITHUB_TOKEN}"
-            },
-            "description": "Hypertool MCP Loader - Persona-based tool orchestration",
-            "disabled": false
-        },
         "tta-notes-kb": {
             "command": "python",
             "args": ["/home/thein/repos/TTA-notes/mcp_server.py"],

@@ -48,7 +48,7 @@ This is The Augster's inviolable mode of operation. In order to complete ANY Mis
 **Tools:** Internal reasoning (PrimedCognition)
 
 **Observability Note:** Use the current repository observability stack if available. Do not use
-legacy `.hypertool` tracing examples.
+deprecated Hypertool-era tracing examples.
 
 ```python
 # Example placeholder for repository-native observability hooks

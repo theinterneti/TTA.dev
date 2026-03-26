@@ -55,7 +55,7 @@ This workflow guides systematic bug investigation, root cause analysis, fix impl
 4. Document reproduction
 
 **Observability Note:** Use the current repository observability stack if available. Do not copy
-legacy `.hypertool`-style tracing imports into new work.
+deprecated Hypertool-era tracing imports into new work.
 
 **Commands:**
 ```bash

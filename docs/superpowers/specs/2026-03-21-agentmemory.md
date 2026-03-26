@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-21
 **Phase:** 2b — Recall Step of the DevelopmentCycle
-**Status:** Draft — awaiting approval
+**Status:** Approved — 2026-03-25
 **Depends on:** `CodeGraphPrimitive` (Phase 2a, complete)
 **Leads to:** `DevelopmentCycle` (Phase 3)
 
@@ -26,7 +26,7 @@
 `CodeGraphPrimitive` answers: *"What does this code touch?"*
 `AgentMemory` answers: *"What do we already know about this task?"*
 
-Together they form the Orient + Recall prologue that grounds every LLM call with structured, codebase-aware context — making free models (Ollama, OpenRouter `:free`) produce reliably better output without prompt engineering in every agent.
+Together they form the Orient + Recall prologue that grounds every LLM call with structured, codebase-aware context — making the active Hindsight runtime more reliable without prompt engineering in every agent.
 
 ---
 
@@ -35,7 +35,7 @@ Together they form the Orient + Recall prologue that grounds every LLM call with
 ### Journey 1 — DevelopmentCycle recall prologue
 
 ```python
-memory = AgentMemory(bank_id="tta-dev")
+memory = AgentMemory(bank_id="project-tta.dev-9af638ec")
 context_prefix = await memory.build_context_prefix(query="adding a new primitive")
 # Returns directives + relevant memories formatted as a system prompt prefix
 # → injected into the agent's system_prompt before the LLM call
@@ -68,7 +68,7 @@ memories = await memory.recall("retry primitive timeout handling")
 ### Journey 5 — Graceful degradation
 
 ```python
-memory = AgentMemory(bank_id="tta-dev", base_url="http://localhost:8888")
+memory = AgentMemory(bank_id="project-tta.dev-9af638ec", base_url="http://localhost:8888")
 # If Hindsight is not running → recall() returns [], retain() is a no-op
 # No exceptions raised — DevelopmentCycle continues without memory context
 ```
@@ -222,7 +222,7 @@ Synchronous HTTP GET `/health` with 1s timeout. Returns `True` if Hindsight resp
 
 ## Success Criteria
 
-1. `AgentMemory("tta-dev")` constructs without errors whether or not Hindsight is running
+1. `AgentMemory("project-tta.dev-9af638ec")` constructs without errors whether or not Hindsight is running
 2. `recall(query)` returns a `list[MemoryResult]` — never raises on connectivity failures
 3. `retain(content)` returns `RetainResult` — never raises on connectivity failures
 4. `get_directives()` returns `list[str]` — never raises on connectivity failures
@@ -254,7 +254,7 @@ When `DevelopmentCycle` (Phase 3) is built, it will use `AgentMemory` like this:
 
 ```python
 class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]):
-    def __init__(self, bank_id: str = "tta-dev", ...):
+    def __init__(self, bank_id: str = "project-tta.dev-9af638ec", ...):
         self._memory = AgentMemory(bank_id=bank_id)
         self._graph = CodeGraphPrimitive()
 

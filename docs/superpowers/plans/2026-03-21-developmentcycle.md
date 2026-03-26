@@ -213,7 +213,7 @@ class TestDevelopmentCycleConstruction:
     def test_constructs_with_defaults(self) -> None:
         from ttadev.workflows.development_cycle import DevelopmentCycle
 
-        cycle = DevelopmentCycle(bank_id="tta-dev")
+        cycle = DevelopmentCycle(bank_id="project-tta.dev-9af638ec")
         assert cycle is not None
 
     def test_constructs_with_injected_dependencies(self) -> None:
@@ -221,7 +221,7 @@ class TestDevelopmentCycleConstruction:
 
         mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -238,7 +238,7 @@ class TestDevelopmentCycleValidation:
 
         mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -254,7 +254,7 @@ class TestDevelopmentCycleValidation:
 
         mock_memory, mock_graph, mock_executor, mock_http = _make_mocks()
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -365,7 +365,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
     due to CGC, Hindsight, or E2B being unavailable.
 
     Args:
-        bank_id: Hindsight bank identifier (default ``"tta-dev"``).
+        bank_id: Hindsight bank identifier (for example a derived `project-*` bank such as ``"project-tta.dev-9af638ec"``).
         base_url: Hindsight base URL (default: ``HINDSIGHT_URL`` or localhost:8888).
         agent_hint: Default role persona for Write step (default ``"developer"``).
         timeout: Timeout for Hindsight and network calls in seconds.
@@ -377,7 +377,7 @@ class DevelopmentCycle(InstrumentedPrimitive[DevelopmentTask, DevelopmentResult]
 
     def __init__(
         self,
-        bank_id: str = "tta-dev",
+        bank_id: str = "project-tta.dev-9af638ec",
         base_url: str | None = None,
         agent_hint: str = "developer",
         timeout: float = 10.0,
@@ -454,7 +454,7 @@ class TestDevelopmentCycleOrient:
             impact_report=report, llm_response="Here is the plan."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -477,7 +477,7 @@ class TestDevelopmentCycleOrient:
             llm_response="Here is the plan."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -499,7 +499,7 @@ class TestDevelopmentCycleOrient:
             llm_response="Done."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -529,7 +529,7 @@ class TestDevelopmentCycleRecall:
             llm_response="Implementation here.",
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -551,7 +551,7 @@ class TestDevelopmentCycleRecall:
             context_prefix="", llm_response="Implementation."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -704,7 +704,7 @@ class TestDevelopmentCycleWrite:
             llm_response="Here is the implementation."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -730,7 +730,7 @@ class TestDevelopmentCycleWrite:
             llm_response="Security review done."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -752,7 +752,7 @@ class TestDevelopmentCycleWrite:
 
         mock_memory, mock_graph, mock_executor, mock_http = _make_mocks(llm_response="")
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -774,7 +774,7 @@ class TestDevelopmentCycleWrite:
             llm_response="Done.",
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -805,7 +805,7 @@ class TestDevelopmentCycleValidate:
             impact_report=report, validate_success=True, llm_response="Done."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -827,7 +827,7 @@ class TestDevelopmentCycleValidate:
             llm_response="Done."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -855,7 +855,7 @@ class TestDevelopmentCycleValidate:
         )
         mock_executor.execute = AsyncMock(side_effect=Exception("E2B unavailable"))
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -878,7 +878,7 @@ class TestDevelopmentCycleRetain:
             retain_success=True, llm_response="Here is the output."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -900,7 +900,7 @@ class TestDevelopmentCycleRetain:
             retain_success=False, llm_response="Output."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -924,7 +924,7 @@ class TestDevelopmentCycleIntegration:
             llm_response="Here is the implementation plan.",
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             _memory=mock_memory,
             _graph=mock_graph,
             _executor=mock_executor,
@@ -948,7 +948,7 @@ class TestDevelopmentCycleIntegration:
             llm_response="QA review done."
         )
         cycle = DevelopmentCycle(
-            bank_id="tta-dev",
+            bank_id="project-tta.dev-9af638ec",
             agent_hint="developer",  # default
             _memory=mock_memory,
             _graph=mock_graph,

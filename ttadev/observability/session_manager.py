@@ -85,6 +85,11 @@ class SessionManager:
 
     def get_current(self) -> Session | None:
         """Return the currently active session, or None."""
+        if self._current is None:
+            return None
+        refreshed = self.get_session(self._current.id)
+        if refreshed is not None:
+            self._current = refreshed
         return self._current
 
     def list_sessions(self) -> list[Session]:
@@ -147,6 +152,17 @@ class SessionManager:
             return Session(**data)
         except Exception:
             return None
+
+    def update_session_project(self, session_id: str, project_id: str) -> Session | None:
+        """Persist a project_id onto an existing session if present."""
+        session = self.get_session(session_id)
+        if session is None:
+            return None
+        session.project_id = project_id
+        self._persist_session(session)
+        if self._current is not None and self._current.id == session_id:
+            self._current = session
+        return session
 
     def resolve_session_id(self, prefix: str) -> str:
         """Resolve a full or partial session ID prefix to a full ID.
@@ -218,6 +234,48 @@ class SessionManager:
             except ValueError:
                 continue
         return sorted(seen)
+
+    def get_recent_activity_summary(
+        self,
+        session_id: str,
+        *,
+        within_seconds: int = 300,
+    ) -> dict[str, object]:
+        """Return a concise summary of recent session activity."""
+        now = datetime.now(UTC)
+        recent_action_types: set[str] = set()
+        recent_agent_roles: set[str] = set()
+        recent_primitive_types: set[str] = set()
+        recent_span_count = 0
+
+        for span in self.get_session_spans(session_id):
+            if not span.started_at:
+                continue
+            try:
+                started = datetime.fromisoformat(span.started_at)
+                if started.tzinfo is None:
+                    started = started.replace(tzinfo=UTC)
+                age = (now - started).total_seconds()
+                if age > within_seconds:
+                    continue
+            except ValueError:
+                continue
+
+            recent_span_count += 1
+            if span.name:
+                recent_action_types.add(span.name)
+            if span.agent_role:
+                recent_agent_roles.add(span.agent_role)
+            if span.primitive_type:
+                recent_primitive_types.add(span.primitive_type)
+
+        return {
+            "has_recent_activity": recent_span_count > 0,
+            "recent_span_count": recent_span_count,
+            "recent_action_types": sorted(recent_action_types),
+            "recent_agent_roles": sorted(recent_agent_roles),
+            "recent_primitive_types": sorted(recent_primitive_types),
+        }
 
     # ------------------------------------------------------------------
     # Private helpers
