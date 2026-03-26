@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from ttadev.agents.protocol import ChatPrimitive
 
 from ttadev.agents.task import AgentTask
 from ttadev.control_plane import ControlPlaneService
@@ -50,6 +54,7 @@ class WorkflowOrchestrator(InstrumentedPrimitive[WorkflowGoal, WorkflowResult]):
         control_plane_service: ControlPlaneService | None = None,
         track_in_control_plane: bool = False,
         control_plane_project_name: str | None = None,
+        model_factory: Callable[[], ChatPrimitive] | None = None,
     ) -> None:
         super().__init__(name=f"workflow.{definition.name}")
         self._definition = definition
@@ -58,6 +63,7 @@ class WorkflowOrchestrator(InstrumentedPrimitive[WorkflowGoal, WorkflowResult]):
         self._control_plane = control_plane_service
         self._track_in_control_plane = track_in_control_plane
         self._control_plane_project_name = control_plane_project_name
+        self._model_factory = model_factory
 
     async def _execute_impl(self, goal: WorkflowGoal, context: WorkflowContext) -> WorkflowResult:
         defn = self._definition
@@ -113,7 +119,10 @@ class WorkflowOrchestrator(InstrumentedPrimitive[WorkflowGoal, WorkflowResult]):
 
                 registry = get_registry()
                 agent_class = registry.get(step.agent)
-                agent = agent_class()
+                if self._model_factory is not None:
+                    agent = agent_class(model=self._model_factory())
+                else:
+                    agent = agent_class()
                 agent_result = await agent.execute(task, child_ctx)
 
                 if tracked_task_id is not None and self._control_plane is not None:

@@ -20,9 +20,27 @@ Usage::
 
 from __future__ import annotations
 
-from typing import Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
+
+if TYPE_CHECKING:
+    from ttadev.primitives.core.base import WorkflowContext
 
 T = TypeVar("T")
+
+
+class MockChatPrimitive:
+    """Deterministic ChatPrimitive for tests — no API calls."""
+
+    def __init__(self, response: str = "mock response") -> None:
+        self._response = response
+
+    async def chat(
+        self,
+        messages: list[dict[str, Any]],
+        system: str | None = None,
+        ctx: WorkflowContext | None = None,
+    ) -> str:
+        return self._response
 
 
 class FakeRepository(Generic[T]):

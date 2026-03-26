@@ -14,6 +14,10 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from ttadev.agents.protocol import ChatPrimitive
 
 _DEFAULT_OPENROUTER_MODEL = "google/gemma-3n-e4b-it:free"
 _DEFAULT_OLLAMA_MODEL = "qwen2.5:7b"
@@ -75,6 +79,22 @@ def get_llm_client() -> LLMClientConfig:
     - ``OLLAMA_MODEL``         — Ollama model (default: qwen2.5:7b)
     """
     return get_llm_provider_chain()[0]
+
+
+def build_chat_primitive(config: LLMClientConfig) -> ChatPrimitive:
+    """Instantiate a ChatPrimitive from an LLMClientConfig.
+
+    Returns an OpenAI-compatible primitive for both openrouter and ollama
+    providers (both use the OpenAI wire protocol).
+    """
+    from ttadev.primitives.integrations.openai_primitive import OpenAIPrimitive
+
+    primitive = OpenAIPrimitive(
+        model=config.model,
+        api_key=config.api_key,
+        base_url=config.base_url,  # forwarded via **kwargs → AsyncOpenAI
+    )
+    return cast("ChatPrimitive", primitive)
 
 
 def _ollama_config() -> LLMClientConfig:

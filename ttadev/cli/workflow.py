@@ -114,6 +114,7 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace, data_dir: P
         return 0
 
     from ttadev.primitives.core.base import WorkflowContext
+    from ttadev.workflows.llm_provider import build_chat_primitive, get_llm_provider_chain
     from ttadev.workflows.orchestrator import WorkflowGoal, WorkflowOrchestrator
 
     # Apply --no-confirm override
@@ -122,11 +123,15 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace, data_dir: P
 
         defn = dataclasses.replace(defn, auto_approve=True)
 
+    provider_chain = get_llm_provider_chain()
+    model_factory = lambda: build_chat_primitive(provider_chain[0])  # noqa: E731
+
     control_plane_service = ControlPlaneService(data_dir) if args.track_l0 else None
     orch = WorkflowOrchestrator(
         defn,
         control_plane_service=control_plane_service,
         track_in_control_plane=args.track_l0,
+        model_factory=model_factory,
     )
     ctx = WorkflowContext()
     goal = WorkflowGoal(goal=args.goal)
