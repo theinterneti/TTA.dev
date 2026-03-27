@@ -388,6 +388,64 @@ def test_task_show_renders_running_step_duration(tmp_path: Path) -> None:
     assert float(duration_val[:-1]) >= 0.0
 
 
+def test_task_show_renders_policy_name_for_auto_gate(tmp_path: Path) -> None:
+    """AC5/AC6: gate_history entry with policy_name shows policy= in task show output."""
+    from ttadev.control_plane import ControlPlaneService
+    from ttadev.control_plane.models import WorkflowGateDecisionOutcome
+
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="feature_dev",
+        workflow_goal="add metrics",
+        step_agents=["developer"],
+    )
+    task_id = claim.task.id
+    service.mark_workflow_step_running(task_id, step_index=0)
+    service.record_workflow_step_result(
+        task_id, step_index=0, result_summary="done", confidence=0.92
+    )
+    # Record gate outcome with an auto policy_name (as the orchestrator would)
+    service.record_workflow_gate_outcome(
+        task_id,
+        step_index=0,
+        decision=WorkflowGateDecisionOutcome.CONTINUE,
+        policy_name="auto:confidence≥0.9",
+    )
+
+    shown = _run(["control", "task", "show", task_id], tmp_path)
+    assert shown.returncode == 0
+    assert "policy=auto:confidence≥0.9" in shown.stdout
+
+
+def test_task_show_no_policy_for_human_gate(tmp_path: Path) -> None:
+    """Human gate decisions do not include policy= in task show output."""
+    from ttadev.control_plane import ControlPlaneService
+    from ttadev.control_plane.models import WorkflowGateDecisionOutcome
+
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="feature_dev",
+        workflow_goal="add search",
+        step_agents=["developer"],
+    )
+    task_id = claim.task.id
+    service.mark_workflow_step_running(task_id, step_index=0)
+    service.record_workflow_step_result(
+        task_id, step_index=0, result_summary="done", confidence=0.7
+    )
+    # Human decision — no policy_name
+    service.record_workflow_gate_outcome(
+        task_id,
+        step_index=0,
+        decision=WorkflowGateDecisionOutcome.CONTINUE,
+    )
+
+    shown = _run(["control", "task", "show", task_id], tmp_path)
+    assert shown.returncode == 0
+    assert "gate_history:" in shown.stdout
+    assert "policy=" not in shown.stdout
+
+
 def test_lock_declared_task_claims_and_lists_locks(tmp_path: Path) -> None:
     """Declare task locks, auto-acquire on claim, then inspect and release them."""
     created = _run(

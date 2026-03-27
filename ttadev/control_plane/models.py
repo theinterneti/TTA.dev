@@ -127,6 +127,12 @@ class WorkflowGateDecisionRecord:
     decision: WorkflowGateDecisionOutcome
     occurred_at: str
     summary: str | None = None
+    policy_name: str | None = None
+    """Non-None when the gate decision was made automatically by policy.
+
+    Examples: ``"auto:confidence≥0.85"``, ``"auto:always"``.
+    None indicates a human made the decision interactively.
+    """
 
     def to_dict(self) -> dict[str, str | None]:
         """Serialize the workflow gate-decision record for JSON persistence."""
@@ -134,6 +140,7 @@ class WorkflowGateDecisionRecord:
             "decision": self.decision.value,
             "occurred_at": self.occurred_at,
             "summary": self.summary,
+            "policy_name": self.policy_name,
         }
 
     @classmethod
@@ -143,6 +150,7 @@ class WorkflowGateDecisionRecord:
             decision=WorkflowGateDecisionOutcome(str(data["decision"])),
             occurred_at=str(data["occurred_at"]),
             summary=data.get("summary"),
+            policy_name=data.get("policy_name"),
         )
 
 

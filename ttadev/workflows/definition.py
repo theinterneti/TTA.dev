@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from ttadev.agents.task import AgentResult, AgentTask, Artifact
 
+from ttadev.workflows.gate import GatePolicy
+
 
 @dataclass(frozen=True)
 class WorkflowStep:
@@ -17,6 +19,8 @@ class WorkflowStep:
     agent: str
     gate: bool = True
     input_transform: Callable[[Any], AgentTask] | None = None
+    gate_policy: GatePolicy | None = None
+    """Per-step gate policy.  None means inherit from WorkflowDefinition.gate_policy."""
 
 
 @dataclass(frozen=True)
@@ -36,6 +40,8 @@ class WorkflowDefinition:
     steps: list[WorkflowStep]
     auto_approve: bool = False
     memory_config: MemoryConfig = field(default_factory=MemoryConfig)
+    gate_policy: GatePolicy = field(default_factory=GatePolicy)
+    """Workflow-level gate policy applied to all steps (overridden per-step by WorkflowStep.gate_policy)."""
 
 
 @dataclass

@@ -336,9 +336,11 @@ def _handle_task_command(args: argparse.Namespace, service: ControlPlaneService)
                     print("         gate_history:")
                     for record in step.gate_history:
                         entry_summary = record.summary or "-"
+                        policy_part = f" policy={record.policy_name}" if record.policy_name else ""
                         print(
                             "           "
-                            f"- {record.decision.value} at {record.occurred_at} summary={entry_summary}"
+                            f"- {record.decision.value} at {record.occurred_at}"
+                            f" summary={entry_summary}{policy_part}"
                         )
         return 0
 

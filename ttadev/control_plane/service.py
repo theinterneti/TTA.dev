@@ -296,12 +296,14 @@ class ControlPlaneService:
         decision: WorkflowGateDecisionOutcome,
         occurred_at: str,
         summary: str = "",
+        policy_name: str | None = None,
     ) -> WorkflowGateDecisionRecord:
         """Create a normalized workflow gate-decision record."""
         return WorkflowGateDecisionRecord(
             decision=decision,
             occurred_at=occurred_at,
             summary=summary or None,
+            policy_name=policy_name,
         )
 
     def _build_workflow_ownership_summary(
@@ -673,6 +675,7 @@ class ControlPlaneService:
         step_index: int,
         decision: WorkflowGateDecisionOutcome,
         summary: str = "",
+        policy_name: str | None = None,
     ) -> TaskRecord:
         """Record the approval-gate outcome for a tracked workflow step."""
         self._sweep_expired_leases()
@@ -686,6 +689,7 @@ class ControlPlaneService:
                 decision=decision,
                 occurred_at=now_iso,
                 summary=summary,
+                policy_name=policy_name,
             )
         )
 

@@ -19,8 +19,9 @@ from ttadev.workflows.definition import (
     StepResult,
     WorkflowDefinition,
     WorkflowResult,
+    WorkflowStep,
 )
-from ttadev.workflows.gate import ApprovalGate, GateDecision
+from ttadev.workflows.gate import ApprovalGate, GateDecision, GatePolicy
 from ttadev.workflows.memory import PersistentMemory, WorkflowMemory
 
 _log = logging.getLogger(__name__)
@@ -64,6 +65,12 @@ class WorkflowOrchestrator(InstrumentedPrimitive[WorkflowGoal, WorkflowResult]):
         self._track_in_control_plane = track_in_control_plane
         self._control_plane_project_name = control_plane_project_name
         self._model_factory = model_factory
+
+    def _effective_policy(self, step: WorkflowStep) -> GatePolicy:
+        """Return the gate policy for a step: step-level overrides workflow-level."""
+        if step.gate_policy is not None:
+            return step.gate_policy
+        return self._definition.gate_policy
 
     async def _execute_impl(self, goal: WorkflowGoal, context: WorkflowContext) -> WorkflowResult:
         defn = self._definition
@@ -142,8 +149,11 @@ class WorkflowOrchestrator(InstrumentedPrimitive[WorkflowGoal, WorkflowResult]):
 
                 # Gate check
                 if step.gate:
-                    decision, edited_instruction = await self._gate.check(
-                        sr, total_steps=len(steps), next_agent=next_agent
+                    decision, edited_instruction, policy_name = await self._gate.check(
+                        sr,
+                        total_steps=len(steps),
+                        next_agent=next_agent,
+                        policy=self._effective_policy(step),
                     )
                     sr.gate_decision = decision.value
 
@@ -152,6 +162,7 @@ class WorkflowOrchestrator(InstrumentedPrimitive[WorkflowGoal, WorkflowResult]):
                             tracked_task_id,
                             step_index=i,
                             decision=WorkflowGateDecisionOutcome(decision.value),
+                            policy_name=policy_name,
                         )
 
                     if decision == GateDecision.QUIT:
