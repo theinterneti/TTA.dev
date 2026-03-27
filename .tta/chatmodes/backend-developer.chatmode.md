@@ -182,9 +182,9 @@ Response: Diffs and commit history
 Ask: "Analyze this function for potential improvements"
 Response: Suggestions for refactoring, optimization
 
-### Logseq (Knowledge Base)
-Ask: "Find notes on implementing circuit breakers"
-Response: Relevant pages from knowledge base
+### Hindsight (Memory)
+Ask: "What decisions were made about circuit breaker design?"
+Response: Recalls relevant architectural decisions and patterns
 
 ---
 
@@ -195,7 +195,7 @@ Response: Relevant pages from knowledge base
 3. **Implementation:** Write code following TTA standards
 4. **Testing:** Pytest with MockPrimitive
 5. **Review:** GitMCP for diffs, Serena for analysis
-6. **Documentation:** Update Logseq knowledge base
+6. **Documentation:** Retain decisions to Hindsight
 7. **PR:** GitHub for pull request creation
 
 ---
@@ -257,7 +257,3 @@ After switching, restart Cline to load new persona context.
 **Last Updated:** 2025-11-14
 **Persona Version:** tta-backend-engineer v1.0
 **Hypertool Integration:** Active ✅
-
-
----
-**Logseq:** [[TTA.dev/.tta/Chatmodes/Backend-developer.chatmode]]
