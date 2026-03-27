@@ -236,10 +236,11 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
             .replace('src="app.js"', `src="${jsPath}"`);
 
         // Inject service URL configuration
+        // JSON.stringify safely escapes the URL — never interpolate config values raw into <script>
         dashboardHtml = dashboardHtml.replace(
             '<script src="app.js"',
             `<script>
-                window.TTA_SERVICE_URL = '${serviceUrl}';
+                window.TTA_SERVICE_URL = ${JSON.stringify(serviceUrl)};
                 window.TTA_IN_VSCODE = true;
 
                 // Send trace count updates to extension

@@ -30,7 +30,7 @@ dependencies = [
     "structlog>=25.5.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
@@ -39,7 +39,12 @@ dev = [
     "pyright>=1.1.0",
     "playwright>=1.40.0",
     "fakeredis>=2.26",
+    "cchooks>=0.1.0",
+    "tdd-guard-pytest>=0.1.0",
+    "pip-audit>=2.7.0",
 ]
+
+[project.optional-dependencies]
 cgc = [
     "codegraphcontext>=0.3.1",
 ]
@@ -68,17 +73,80 @@ packages = ["ttadev"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+tdd_guard_project_root = "/home/theinterneti/Repos/TTA.dev"
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
-addopts = "-v --cov=ttadev --cov-report=html --cov-report=term"
+addopts = "-v --cov=ttadev --cov-report=html --cov-report=term --cov-fail-under=100"
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W"]
-ignore = ["E501"]  # Line too long (handled by formatter)
+select = ["ALL"]
+ignore = [
+    "D",       # Docstrings — not enforced; pyright handles type checking
+    "ANN",     # Annotations — pyright is authoritative; ruff ANN is redundant
+    "COM812",  # Trailing comma — conflicts with ruff formatter
+    "ISC001",  # Implicit string concat — conflicts with ruff formatter
+    "E501",    # Line too long — handled by formatter
+    "EM101",   # Raw string in exception — style preference
+    "EM102",   # f-string in exception — style preference
+    "TRY003",  # Raise vanilla args — too strict
+    "FBT",     # Boolean positional args — too strict for this codebase
+    "T201",    # print() — used legitimately in CLI and scripts
+    "G004",    # Logging f-string — structlog handles interpolation differently
+    "TID252",  # Relative imports — project uses absolute imports by convention
+    "S101",    # assert — pytest requires assert; bandit check not useful here
+    "INP001",  # Implicit namespace package — scripts/ is not a package
+    "EXE001",  # Shebang not executable — not relevant in repo context
+    # ── Pre-existing technical debt — remove as addressed ────────────────────
+    "PLR2004", # Magic value comparison — 342 pre-existing occurrences
+    "PLC0415", # Import outside top-level — 253 pre-existing occurrences
+    "ARG001",  # Unused function argument — 112 pre-existing occurrences
+    "ARG002",  # Unused method argument — 178 pre-existing occurrences
+    "ARG005",  # Unused lambda argument — 33 pre-existing occurrences
+    "PTH118",  # os.path.join → pathlib — 90 pre-existing occurrences
+    "PTH120",  # os.path.dirname → pathlib — 54 pre-existing occurrences
+    "PTH123",  # open() → pathlib — 88 pre-existing occurrences
+    "SLF001",  # Private member access — 74 pre-existing occurrences
+    "DTZ005",  # datetime.now without tz — 66 pre-existing occurrences
+    "S603",    # subprocess without shell=True check — 52 pre-existing
+    "S607",    # Partial path in subprocess — 66 pre-existing occurrences
+    "PLW1510", # subprocess.run without check= — 44 pre-existing occurrences
+    "TRY300",  # try-consider-else — 43 pre-existing occurrences
+    "TRY400",  # error-instead-of-exception — 40 pre-existing occurrences
+    "ASYNC221",# run-process-in-async — 36 pre-existing occurrences
+    "C901",    # Complex structure — 36 pre-existing occurrences
+    "LOG015",  # Root logger call — 36 pre-existing occurrences
+    "BLE001",  # Blind except — 87 pre-existing occurrences
+    "PTH100",  # os.path.abspath → pathlib — 23 pre-existing
+    "PTH103",  # os.makedirs → pathlib — 15 pre-existing
+    "PTH110",  # os.path.exists → pathlib — 21 pre-existing
+    "RUF013",  # Implicit Optional — 22 pre-existing occurrences
+    "RUF005",  # Collection literal concatenation — 21 pre-existing
+    "PLR0912", # Too many branches — 21 pre-existing occurrences
+    "PLR0915", # Too many statements — 18 pre-existing occurrences
+    "SIM102",  # Collapsible if — 20 pre-existing occurrences
+    "SIM108",  # If-else → ternary — 20 pre-existing occurrences
+    "S113",    # Requests without timeout — 19 pre-existing occurrences
+    "RUF059",  # Unused unpacked variable — 18 pre-existing occurrences
+    "ASYNC230",# Blocking open in async — 17 pre-existing occurrences
+    "ERA001",  # Commented-out code — 15 pre-existing occurrences
+    # ── Additional pre-existing technical debt ───────────────────────────────
+    "RET504",  "B007",    "PLE1300", "PERF401", "PLR0911", "ASYNC240",
+    "ASYNC250","TC003",   "TRY401",  "PT028",   "TD002",   "TD003",
+    "FIX002",  "PLR0913", "PERF102", "S108",    "DTZ003",  "RUF001",
+    "PTH109",  "S110",    "FURB162", "PTH107",  "NPY002",  "PLW0108",
+    "TC002",   "A001",    "B904",    "C401",    "C408",    "DTZ011",
+    "FAST001", "FURB110", "FURB171", "G201",    "PERF403", "PIE810",
+    "PLC0206", "PLR1714", "PLR1722", "PLW2901", "PT006",   "PT011",
+    "PT012",   "PT013",   "PT018",   "PTH101",  "PTH113",  "PTH204",
+    "PTH208",  "PYI034",  "PYI036",  "RUF002",  "RUF003",  "RUF006",
+    "S103",    "S104",    "S112",    "S310",    "S311",    "S314",
+    "S324",    "S602",    "SIM103",  "SIM105",  "SIM117",  "SIM222",
+    "TC001",   "TD004",   "TRY002",  "TRY301",
+]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/*" = ["N999"]  # Script files use kebab-case names (valid shell convention)
