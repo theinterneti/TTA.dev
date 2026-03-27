@@ -13,14 +13,17 @@ import structlog
 # Try to import MCP - graceful degradation if not available
 try:
     from mcp.server.fastmcp import FastMCP
+    from mcp.types import ToolAnnotations
 
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
     FastMCP = None  # type: ignore
+    ToolAnnotations = None  # type: ignore
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
+    from mcp.types import ToolAnnotations
 
 from ttadev.control_plane import (
     ControlPlaneError,
@@ -36,6 +39,58 @@ from ttadev.observability.session_manager import SessionManager
 from ttadev.primitives.analysis import TTAAnalyzer
 
 logger = structlog.get_logger("tta_dev.mcp")
+
+# ── Code-input size guard ──────────────────────────────────────────────────────
+_MAX_CODE_CHARS = 25_000
+
+
+def _check_code_size(code: str) -> dict[str, str] | None:
+    """Return an error payload if code exceeds the character limit, else None."""
+    if len(code) > _MAX_CODE_CHARS:
+        return {
+            "error": (
+                f"Code input exceeds the {_MAX_CODE_CHARS:,}-character limit "
+                f"({len(code):,} chars received). "
+                "Pass a smaller snippet or a single function."
+            )
+        }
+    return None
+
+
+# ── Pagination helper ──────────────────────────────────────────────────────────
+def _paginate(items: list[Any], limit: int, offset: int) -> dict[str, Any]:
+    """Slice a list and return pagination metadata."""
+    page = items[offset : offset + limit]
+    total = len(items)
+    has_more = offset + limit < total
+    return {
+        "items": page,
+        "total_count": total,
+        "has_more": has_more,
+        "next_offset": offset + limit if has_more else None,
+    }
+
+
+# ── Tool annotation presets ────────────────────────────────────────────────────
+# Defined as functions so they work gracefully when MCP is unavailable.
+def _read_only_annotations() -> Any:
+    return ToolAnnotations(readOnlyHint=True, openWorldHint=False) if ToolAnnotations else None
+
+
+def _mutating_annotations() -> Any:
+    return (
+        ToolAnnotations(destructiveHint=False, idempotentHint=False, openWorldHint=False)
+        if ToolAnnotations
+        else None
+    )
+
+
+def _idempotent_annotations() -> Any:
+    return (
+        ToolAnnotations(destructiveHint=False, idempotentHint=True, openWorldHint=False)
+        if ToolAnnotations
+        else None
+    )
 
 
 def _create_control_plane_service(data_dir: str = ".tta") -> ControlPlaneService:
@@ -135,15 +190,14 @@ def create_server() -> Any:
     # Shared analyzer instance
     analyzer = TTAAnalyzer()
 
-    def register_tool(**kwargs: Any) -> Any:
-        """Register a tool while tolerating unsupported MCP decorator kwargs."""
-        supported_kwargs = dict(kwargs)
-        supported_kwargs.pop("allowed_callers", None)
-        return mcp.tool(**supported_kwargs)
+    # Pre-build annotation objects once per server instance
+    _ro = _read_only_annotations()
+    _mut = _mutating_annotations()
+    _idem = _idempotent_annotations()
 
     # ========== TOOLS ==========
 
-    @register_tool(allowed_callers=["code_execution_20260120"])
+    @mcp.tool(annotations=_ro)
     async def analyze_code(
         code: str,
         file_path: str = "",
@@ -178,6 +232,8 @@ def create_server() -> Any:
                     "complexity_level": str
                 }
         """
+        if err := _check_code_size(code):
+            return err
         logger.info(
             "mcp_tool_called",
             tool="analyze_code",
@@ -192,7 +248,7 @@ def create_server() -> Any:
         )
         return report.to_dict()
 
-    @register_tool(allowed_callers=["code_execution_20260120"])
+    @mcp.tool(annotations=_ro)
     async def get_primitive_info(primitive_name: str) -> dict[str, Any]:
         """Get detailed information about a TTA.dev primitive.
 
@@ -216,7 +272,7 @@ def create_server() -> Any:
         """
         return analyzer.get_primitive_info(primitive_name)
 
-    @register_tool(allowed_callers=["code_execution_20260120"])
+    @mcp.tool(annotations=_ro)
     async def list_primitives() -> list[dict[str, Any]]:
         """List all available TTA.dev primitives.
 
@@ -235,7 +291,7 @@ def create_server() -> Any:
         """
         return analyzer.list_primitives()
 
-    @register_tool(allowed_callers=["code_execution_20260120"])
+    @mcp.tool(annotations=_ro)
     async def search_templates(query: str) -> list[dict[str, Any]]:
         """Search for primitive templates by keyword.
 
@@ -256,7 +312,7 @@ def create_server() -> Any:
         """
         return analyzer.search_templates(query)
 
-    @register_tool(allowed_callers=["code_execution_20260120"])
+    @mcp.tool(annotations=_ro)
     async def get_composition_example(
         primitives: list[str],
     ) -> dict[str, Any]:
@@ -293,7 +349,7 @@ def create_server() -> Any:
 
         code = f"""# Import primitives
 {chr(10).join(set(imports))}
-from primitives import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
 
 # Composing: {primitives_str}
 workflow = (
@@ -320,7 +376,7 @@ result = await workflow.execute(data, context)
             "imports": list(set(imports)),
         }
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def transform_code(
         code: str,
         primitive: str,
@@ -346,6 +402,9 @@ result = await workflow.execute(data, context)
                     "error": Optional[str]
                 }
         """
+        if err := _check_code_size(code):
+            return err
+
         import difflib
 
         from ttadev.primitives.cli.app import (
@@ -393,7 +452,7 @@ result = await workflow.execute(data, context)
             "primitive": primitive,
         }
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def analyze_and_fix(
         code: str,
         file_path: str = "",
@@ -421,6 +480,8 @@ result = await workflow.execute(data, context)
                     "message": Optional[str]
                 }
         """
+        if err := _check_code_size(code):
+            return err
         logger.info(
             "mcp_tool_called",
             tool="analyze_and_fix",
@@ -471,7 +532,7 @@ result = await workflow.execute(data, context)
                 "message": f"No suitable functions found for {prim_to_apply}",
             }
 
-    @register_tool(allowed_callers=["code_execution_20260120"])
+    @mcp.tool(annotations=_ro)
     async def suggest_fixes(
         code: str,
         file_path: str = "",
@@ -511,6 +572,8 @@ result = await workflow.execute(data, context)
         """
         import re
 
+        if err := _check_code_size(code):
+            return err
         logger.info(
             "mcp_tool_called",
             tool="suggest_fixes",
@@ -577,7 +640,7 @@ result = await workflow.execute(data, context)
             "patterns_found": report.analysis.detected_patterns,
         }
 
-    @register_tool(allowed_callers=["code_execution_20260120"])
+    @mcp.tool(annotations=_ro)
     async def detect_anti_patterns(
         code: str,
         file_path: str = "",
@@ -609,6 +672,8 @@ result = await workflow.execute(data, context)
         """
         from ttadev.primitives.analysis.patterns import PatternDetector
 
+        if err := _check_code_size(code):
+            return err
         logger.info(
             "mcp_tool_called",
             tool="detect_anti_patterns",
@@ -631,7 +696,7 @@ result = await workflow.execute(data, context)
             "anti_patterns": detailed,
         }
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def rewrite_code(
         code: str,
         primitive: str | None = None,
@@ -659,6 +724,9 @@ result = await workflow.execute(data, context)
                     "diff": str
                 }
         """
+        if err := _check_code_size(code):
+            return err
+
         import difflib
 
         from ttadev.primitives.analysis.transformer import transform_code
@@ -696,7 +764,7 @@ result = await workflow.execute(data, context)
             "diff": "".join(diff),
         }
 
-    @register_tool()
+    @mcp.tool(annotations=_mut)
     async def control_create_task(
         title: str,
         description: str = "",
@@ -732,10 +800,12 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def control_list_tasks(
         status: str | None = None,
         project_name: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
         data_dir: str = ".tta",
     ) -> dict[str, Any]:
         """List L0 control-plane tasks."""
@@ -752,9 +822,10 @@ result = await workflow.execute(data, context)
             tasks = service.list_tasks(status=parsed_status, project_name=project_name)
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
-        return {"tasks": [_serialize_task(task) for task in tasks]}
+        page = _paginate([_serialize_task(t) for t in tasks], limit, offset)
+        return {"tasks": page["items"], **{k: v for k, v in page.items() if k != "items"}}
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def control_get_task(task_id: str, data_dir: str = ".tta") -> dict[str, Any]:
         """Get a single L0 control-plane task."""
         logger.info(
@@ -770,7 +841,7 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
 
-    @register_tool()
+    @mcp.tool(annotations=_mut)
     async def control_claim_task(
         task_id: str,
         agent_role: str | None = None,
@@ -801,7 +872,7 @@ result = await workflow.execute(data, context)
             "lease": _serialize_lease(claim.lease),
         }
 
-    @register_tool()
+    @mcp.tool(annotations=_mut)
     async def control_decide_gate(
         task_id: str,
         gate_id: str,
@@ -835,7 +906,7 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
 
-    @register_tool()
+    @mcp.tool(annotations=_mut)
     async def control_reopen_gate(
         task_id: str,
         gate_id: str,
@@ -863,9 +934,11 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def control_list_locks(
         scope_type: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
         data_dir: str = ".tta",
     ) -> dict[str, Any]:
         """List active L0 control-plane locks."""
@@ -881,9 +954,10 @@ result = await workflow.execute(data, context)
             locks = service.list_locks(scope_type=parsed_scope_type)
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
-        return {"locks": [_serialize_lock(lock) for lock in locks]}
+        page = _paginate([_serialize_lock(lock) for lock in locks], limit, offset)
+        return {"locks": page["items"], **{k: v for k, v in page.items() if k != "items"}}
 
-    @register_tool()
+    @mcp.tool(annotations=_mut)
     async def control_acquire_workspace_lock(
         task_id: str,
         run_id: str,
@@ -906,7 +980,7 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"lock": _serialize_lock(lock)}
 
-    @register_tool()
+    @mcp.tool(annotations=_mut)
     async def control_acquire_file_lock(
         task_id: str,
         run_id: str,
@@ -929,7 +1003,7 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"lock": _serialize_lock(lock)}
 
-    @register_tool()
+    @mcp.tool(annotations=_idem)
     async def control_release_lock(lock_id: str, data_dir: str = ".tta") -> dict[str, Any]:
         """Release an L0 control-plane lock."""
         logger.info(
@@ -945,9 +1019,11 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"released_lock_id": lock_id}
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def control_list_runs(
         status: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
         data_dir: str = ".tta",
     ) -> dict[str, Any]:
         """List L0 control-plane runs."""
@@ -963,9 +1039,10 @@ result = await workflow.execute(data, context)
             runs = service.list_runs(status=parsed_status)
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
-        return {"runs": [_serialize_run(run) for run in runs]}
+        page = _paginate([_serialize_run(r) for r in runs], limit, offset)
+        return {"runs": page["items"], **{k: v for k, v in page.items() if k != "items"}}
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def control_get_run(run_id: str, data_dir: str = ".tta") -> dict[str, Any]:
         """Get a single L0 control-plane run and its lease, if any."""
         logger.info(
@@ -985,7 +1062,7 @@ result = await workflow.execute(data, context)
             "lease": _serialize_lease(lease),
         }
 
-    @register_tool()
+    @mcp.tool(annotations=_idem)
     async def control_heartbeat_run(
         run_id: str,
         lease_ttl_seconds: float = 300.0,
@@ -1006,7 +1083,7 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"lease": _serialize_lease(lease)}
 
-    @register_tool()
+    @mcp.tool(annotations=_mut)
     async def control_complete_run(
         run_id: str,
         summary: str = "",
@@ -1026,7 +1103,7 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"run": _serialize_run(run)}
 
-    @register_tool()
+    @mcp.tool(annotations=_mut)
     async def control_release_run(
         run_id: str,
         reason: str = "",
@@ -1046,8 +1123,12 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"run": _serialize_run(run)}
 
-    @register_tool()
-    async def control_list_ownership(data_dir: str = ".tta") -> dict[str, Any]:
+    @mcp.tool(annotations=_ro)
+    async def control_list_ownership(
+        limit: int = 50,
+        offset: int = 0,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
         """List active L0 ownership records across all projects and sessions."""
         logger.info(
             "mcp_tool_called",
@@ -1059,11 +1140,14 @@ result = await workflow.execute(data, context)
             active = service.list_active_ownership()
         except ControlPlaneError as exc:
             return _control_plane_error_payload(exc)
-        return {"active": _serialize_ownership_records(active)}
+        page = _paginate(_serialize_ownership_records(active), limit, offset)
+        return {"active": page["items"], **{k: v for k, v in page.items() if k != "items"}}
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def control_list_project_ownership(
         project_id: str,
+        limit: int = 50,
+        offset: int = 0,
         data_dir: str = ".tta",
     ) -> dict[str, Any]:
         """List active L0 ownership records for a single project."""
@@ -1079,14 +1163,18 @@ result = await workflow.execute(data, context)
             active = service.list_active_ownership(project_id=project_id)
         except ControlPlaneError as exc:
             return _control_plane_error_payload(exc)
+        page = _paginate(_serialize_ownership_records(active), limit, offset)
         return {
             "project_id": project_id,
-            "active": _serialize_ownership_records(active),
+            "active": page["items"],
+            **{k: v for k, v in page.items() if k != "items"},
         }
 
-    @register_tool()
+    @mcp.tool(annotations=_ro)
     async def control_list_session_ownership(
         session_id: str,
+        limit: int = 50,
+        offset: int = 0,
         data_dir: str = ".tta",
     ) -> dict[str, Any]:
         """List active L0 ownership records for a single session."""
@@ -1102,9 +1190,11 @@ result = await workflow.execute(data, context)
             active = service.list_active_ownership(session_id=session_id)
         except ControlPlaneError as exc:
             return _control_plane_error_payload(exc)
+        page = _paginate(_serialize_ownership_records(active), limit, offset)
         return {
             "session_id": session_id,
-            "active": _serialize_ownership_records(active),
+            "active": page["items"],
+            **{k: v for k, v in page.items() if k != "items"},
         }
 
     # ========== RESOURCES ==========

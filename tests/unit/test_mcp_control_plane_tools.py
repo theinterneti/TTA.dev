@@ -854,3 +854,116 @@ async def test_control_ownership_tools_return_structured_errors_for_missing_scop
     )
     assert missing_session["error_type"] == "ControlPlaneError"
     assert missing_session["error"] == "Session not found: session-missing"
+
+
+@pytest.mark.asyncio
+async def test_control_list_tasks_returns_pagination_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """list_tasks response includes total_count, has_more, and next_offset."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    for i in range(3):
+        await _call_tool(
+            mcp,
+            "control_create_task",
+            {"title": f"Task {i}", "data_dir": str(tmp_path)},
+        )
+
+    # First page — 2 of 3
+    page1 = await _call_tool(
+        mcp,
+        "control_list_tasks",
+        {"limit": 2, "offset": 0, "data_dir": str(tmp_path)},
+    )
+    assert len(page1["tasks"]) == 2
+    assert page1["total_count"] == 3
+    assert page1["has_more"] is True
+    assert page1["next_offset"] == 2
+
+    # Second page — 1 of 3
+    page2 = await _call_tool(
+        mcp,
+        "control_list_tasks",
+        {"limit": 2, "offset": 2, "data_dir": str(tmp_path)},
+    )
+    assert len(page2["tasks"]) == 1
+    assert page2["total_count"] == 3
+    assert page2["has_more"] is False
+    assert page2["next_offset"] is None
+
+
+@pytest.mark.asyncio
+async def test_control_list_runs_returns_pagination_metadata(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """list_runs response includes total_count and has_more."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    created = await _call_tool(
+        mcp,
+        "control_create_task",
+        {"title": "Run list test", "data_dir": str(tmp_path)},
+    )
+    await _call_tool(
+        mcp,
+        "control_claim_task",
+        {"task_id": created["task"]["id"], "data_dir": str(tmp_path)},
+    )
+
+    listed = await _call_tool(
+        mcp,
+        "control_list_runs",
+        {"status": "active", "limit": 10, "offset": 0, "data_dir": str(tmp_path)},
+    )
+    assert "total_count" in listed
+    assert "has_more" in listed
+    assert listed["total_count"] >= 1
+    assert listed["has_more"] is False
+
+
+@pytest.mark.asyncio
+async def test_control_list_tools_carry_read_only_annotation() -> None:
+    """Read-only list tools expose readOnlyHint=True in their MCP annotations."""
+    mcp = create_server()
+    tools_result = mcp.list_tools()
+    if asyncio.iscoroutine(tools_result):
+        tools_result = await tools_result
+    tool_map = {t.name: t for t in tools_result}
+
+    read_only_tools = [
+        "control_list_tasks",
+        "control_list_runs",
+        "control_list_locks",
+        "control_list_ownership",
+        "control_get_task",
+        "control_get_run",
+    ]
+    for name in read_only_tools:
+        ann = tool_map[name].annotations
+        assert ann is not None, f"{name} has no annotations"
+        assert ann.readOnlyHint is True, f"{name} should have readOnlyHint=True"
+
+
+@pytest.mark.asyncio
+async def test_control_mutating_tools_carry_non_destructive_annotation() -> None:
+    """Mutating control-plane tools declare destructiveHint=False."""
+    mcp = create_server()
+    tools_result = mcp.list_tools()
+    if asyncio.iscoroutine(tools_result):
+        tools_result = await tools_result
+    tool_map = {t.name: t for t in tools_result}
+
+    mutating_tools = [
+        "control_create_task",
+        "control_claim_task",
+        "control_decide_gate",
+        "control_complete_run",
+        "control_release_run",
+    ]
+    for name in mutating_tools:
+        ann = tool_map[name].annotations
+        assert ann is not None, f"{name} has no annotations"
+        assert ann.destructiveHint is False, f"{name} should have destructiveHint=False"
