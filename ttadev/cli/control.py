@@ -13,7 +13,10 @@ from ttadev.control_plane import (
     GateStatus,
     LockScopeType,
     RunStatus,
+    TaskGateError,
+    TaskNotFoundError,
     TaskStatus,
+    WorkflowGateDecisionOutcome,
 )
 
 
@@ -192,6 +195,22 @@ def register_control_subcommands(sub: argparse._SubParsersAction) -> None:  # ty
         help="Orchestrator lease TTL in seconds (default 300)",
     )
 
+    gate_p = control_sub.add_parser("gate", help="Inspect and decide control-plane gates")
+    gate_sub = gate_p.add_subparsers(dest="control_gate_command")
+
+    gate_list = gate_sub.add_parser("list", help="List gates on a task")
+    gate_list.add_argument("task_id", help="Task ID")
+
+    for _sub, _help in (
+        ("approve", "Approve a pending gate"),
+        ("reject", "Reject a pending gate"),
+        ("quit", "Quit the workflow at a gate"),
+    ):
+        _p = gate_sub.add_parser(_sub, help=_help)
+        _p.add_argument("task_id", help="Task ID")
+        _p.add_argument("gate_id", help="Gate ID")
+        _p.add_argument("--note", default="", help="Optional decision note")
+
     lock_p = control_sub.add_parser("lock", help="Inspect and mutate control-plane locks")
     lock_sub = lock_p.add_subparsers(dest="control_lock_command")
 
@@ -233,11 +252,13 @@ def handle_control_command(args: argparse.Namespace, data_dir: Path) -> int:
             return _handle_lock_command(args, service)
         if args.control_command == "workflow":
             return _handle_workflow_command(args, service)
+        if args.control_command == "gate":
+            return _handle_gate_command(args, service)
     except ControlPlaneError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
-    print("Usage: tta control {task,run,lock,workflow} ...", file=sys.stderr)
+    print("Usage: tta control {task,run,lock,workflow,gate} ...", file=sys.stderr)
     return 1
 
 
@@ -653,4 +674,85 @@ def _handle_lock_command(args: argparse.Namespace, service: ControlPlaneService)
         return 0
 
     print("Usage: tta control lock {list,acquire-workspace,acquire-file,release}", file=sys.stderr)
+    return 1
+
+
+def _handle_gate_command(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    if args.control_gate_command == "list":
+        task = service.get_task(args.task_id)
+        if task is None:
+            print(f"Error: task '{args.task_id}' not found", file=sys.stderr)
+            return 1
+        if not task.gates:
+            print("No gates on this task.")
+            return 0
+        print(f"{'ID':<40} {'TYPE':<10} {'STATUS':<20} {'LABEL'}")
+        print("-" * 90)
+        for gate in task.gates:
+            print(f"{gate.id:<40} {gate.gate_type.value:<10} {gate.status.value:<20} {gate.label}")
+        return 0
+
+    if args.control_gate_command in ("approve", "reject"):
+        status = (
+            GateStatus.APPROVED if args.control_gate_command == "approve" else GateStatus.REJECTED
+        )
+        try:
+            service.decide_gate(args.task_id, args.gate_id, status=status, summary=args.note)
+        except TaskGateError as exc:
+            if "already" in str(exc):
+                task = service.get_task(args.task_id)
+                gate = next((g for g in task.gates if g.id == args.gate_id), None)
+                current = gate.status.value if gate else "decided"
+                print(f"Warning: gate '{args.gate_id}' is already {current}.")
+                return 0
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        except TaskNotFoundError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        verb = "approved" if args.control_gate_command == "approve" else "rejected"
+        suffix = f": {args.note}" if args.note else ""
+        print(f"Gate '{args.gate_id}' on task {args.task_id} {verb}{suffix}")
+        return 0
+
+    if args.control_gate_command == "quit":
+        try:
+            task = service.get_task(args.task_id)
+        except TaskNotFoundError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        if task is None:
+            print(f"Error: task '{args.task_id}' not found", file=sys.stderr)
+            return 1
+
+        # Find the workflow step linked to this gate, if any
+        linked_step_index: int | None = None
+        if task.workflow:
+            for step in task.workflow.steps:
+                if step.linked_gate_id == args.gate_id:
+                    linked_step_index = step.step_index
+                    break
+
+        if linked_step_index is not None:
+            service.record_workflow_gate_outcome(
+                args.task_id,
+                step_index=linked_step_index,
+                decision=WorkflowGateDecisionOutcome.QUIT,
+                summary=args.note,
+            )
+        else:
+            # Non-workflow gate: fall back to REJECTED
+            try:
+                service.decide_gate(
+                    args.task_id, args.gate_id, status=GateStatus.REJECTED, summary=args.note
+                )
+            except TaskGateError as exc:
+                print(f"Error: {exc}", file=sys.stderr)
+                return 1
+
+        suffix = f": {args.note}" if args.note else ""
+        print(f"Gate '{args.gate_id}' on task {args.task_id} quit{suffix}")
+        return 0
+
+    print("Usage: tta control gate {list,approve,reject,quit}", file=sys.stderr)
     return 1
