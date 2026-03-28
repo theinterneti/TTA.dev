@@ -142,16 +142,6 @@ When working on L0 from inside `TTA.dev`, prefer this order:
 
 ### Repository TODOs
 
-- TODO Prove one documented, repeatable multi-agent workflow on top of the current L0 task/run/gate/lock/ownership surface so Phase 2 has a real green path. #dev-todo
-  type:: implementation
-  priority:: high
-  package:: ttadev-control-plane
-
-- TODO Deepen the first-pass gate model with richer approval, policy, and review workflows only where the first repeatable multi-agent workflow needs stronger coordination. #dev-todo
-  type:: implementation
-  priority:: medium
-  package:: ttadev-control-plane
-
 - TODO Improve ownership telemetry beyond session-linked summaries so active work in the first repeatable multi-agent workflow can be attributed more precisely without forking control-plane state. #dev-todo
   type:: refactor
   priority:: medium
