@@ -4,6 +4,12 @@
 
 ---
 
+> [!WARNING]
+> This report is a historical snapshot from the Hypertool migration period.
+>
+> It does **not** describe the current TTA.dev runtime architecture. Keep it only as historical
+> context for past persona work.
+
 ## Executive Summary
 
 **Overall Status:** ✅ **COMPLETE** (Phases 1-4) with **Observability Phase 5 IN PROGRESS**

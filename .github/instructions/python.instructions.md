@@ -120,7 +120,3 @@ uv run ruff check . --fix
 uvx pyright platform/
 uv run pytest -v
 ```
-
-
----
-**Logseq:** [[TTA.dev/.github/Instructions/Python.instructions]]

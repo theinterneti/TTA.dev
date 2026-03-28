@@ -23,7 +23,7 @@ EXPERIMENTATION → TESTING → STAGING → DEPLOYMENT → PRODUCTION
 
 ```python
 from pathlib import Path
-from tta_dev_primitives.lifecycle import (
+from ttadev.primitives.lifecycle import (
     StageManager,
     Stage,
     WorkflowContext,
@@ -169,8 +169,8 @@ Create a new module in `checks/` directory:
 
 import subprocess
 from pathlib import Path
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.lifecycle.validation import Severity, ValidationCheck
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.lifecycle.validation import Severity, ValidationCheck
 
 async def check_jest_tests_pass(project_path: Path, context: WorkflowContext) -> bool:
     """Check if Jest tests pass."""
@@ -249,7 +249,7 @@ __all__ = [
 Then update `checks/__init__.py` to import and export your checks:
 
 ```python
-from tta_dev_primitives.lifecycle.checks.javascript import (
+from ttadev.primitives.lifecycle.checks.javascript import (
     JEST_TESTS_PASS,
     ESLINT_PASSES,
     TSC_PASSES,
@@ -389,8 +389,8 @@ Status: ❌ NOT READY
 Create custom criteria for your workflow:
 
 ```python
-from tta_dev_primitives.lifecycle import StageCriteria, Stage
-from tta_dev_primitives.lifecycle.checks import (
+from ttadev.primitives.lifecycle import StageCriteria, Stage
+from ttadev.primitives.lifecycle.checks import (
     HAS_README,
     HAS_LICENSE,
     TESTS_PASS,
@@ -415,8 +415,8 @@ Create custom checks for your needs:
 
 ```python
 from pathlib import Path
-from tta_dev_primitives.lifecycle.validation import ValidationCheck, Severity
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.lifecycle.validation import ValidationCheck, Severity
 
 async def check_docker_file_exists(project_path: Path, context: WorkflowContext) -> bool:
     """Check if Dockerfile exists."""
@@ -459,7 +459,8 @@ The framework can be integrated with existing CI/CD pipelines:
 # CI/CD pipeline script
 import sys
 from pathlib import Path
-from tta_dev_primitives.lifecycle import StageManager, Stage, WorkflowContext
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.lifecycle import StageManager, Stage
 
 async def validate_deployment():
     context = WorkflowContext(correlation_id="ci-cd-check")
@@ -487,10 +488,10 @@ The framework includes comprehensive test coverage:
 
 ```bash
 # Run all lifecycle tests
-uv run pytest packages/tta-dev-primitives/tests/lifecycle/ -v
+uv run pytest tests/test_lifecycle.py -v
 
 # Run with coverage
-uv run pytest packages/tta-dev-primitives/tests/lifecycle/ --cov=tta_dev_primitives.lifecycle
+uv run pytest tests/test_lifecycle.py --cov=ttadev.primitives.lifecycle
 ```
 
 ## See Also

@@ -152,7 +152,7 @@ return DevelopmentResult(
 
 ```python
 def coding_assistant(
-    bank_id: str = "tta-dev",
+    bank_id: str = "project-tta.dev-9af638ec",
     base_url: str | None = None,
     timeout: float = 10.0,
 ) -> DevelopmentCycle:
@@ -160,7 +160,7 @@ def coding_assistant(
     return DevelopmentCycle(bank_id=bank_id, base_url=base_url, agent_hint="developer", timeout=timeout)
 
 def code_reviewer(
-    bank_id: str = "tta-dev",
+    bank_id: str = "project-tta.dev-9af638ec",
     base_url: str | None = None,
     timeout: float = 10.0,
 ) -> DevelopmentCycle:
@@ -168,7 +168,7 @@ def code_reviewer(
     return DevelopmentCycle(bank_id=bank_id, base_url=base_url, agent_hint="qa", timeout=timeout)
 
 def qa_agent(
-    bank_id: str = "tta-dev",
+    bank_id: str = "project-tta.dev-9af638ec",
     base_url: str | None = None,
     timeout: float = 10.0,
 ) -> DevelopmentCycle:

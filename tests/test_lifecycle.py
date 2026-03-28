@@ -518,7 +518,7 @@ class TestStageManager:
         readiness = await manager.check_readiness(
             current_stage=Stage.EXPERIMENTATION,
             target_stage=Stage.TESTING,
-            project_path=Path("."),
+            project_path=Path(),
             context=context,
         )
         assert readiness.ready
@@ -1005,7 +1005,9 @@ class TestSecurityChecks:
         """Test NO_SECRETS_IN_CODE fails when secret is detected."""
         src = tmp_path / "src"
         src.mkdir()
-        (src / "config.py").write_text('api_key = "sk_test_FAKE_KEY_FOR_TESTING"\n')
+        (src / "config.py").write_text(
+            'api_key = "sk_test_FAKE_KEY_FOR_TESTING"\n'  # pragma: allowlist secret
+        )
         result = await NO_SECRETS_IN_CODE.execute(tmp_path, context)
         assert not result.passed
 
@@ -1016,7 +1018,9 @@ class TestSecurityChecks:
         """Test NO_SECRETS_IN_CODE skips test files."""
         src = tmp_path / "src"
         src.mkdir()
-        (src / "test_config.py").write_text('api_key = "sk_test_FAKE_KEY_FOR_TESTING"\n')
+        (src / "test_config.py").write_text(
+            'api_key = "sk_test_FAKE_KEY_FOR_TESTING"\n'  # pragma: allowlist secret
+        )
         result = await NO_SECRETS_IN_CODE.execute(tmp_path, context)
         assert result.passed  # Skipped because it's a test file
 

@@ -79,6 +79,7 @@ jobs:
             | grep -v "^\.\/SESSION_" \
             | grep -v "^\.\/[A-Z_]*\.md:" \
             | grep -v "^\.\/tests\/test_issue_manager" \
+            | grep -v "^\.\/\.cline\/" \
             || true)
 
           if [ -z "$todos" ]; then
@@ -164,6 +165,6 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
-      - name: Validate tta-dev-primitives package
+      - name: Validate ttadev primitives package
         run: |
           uv run python -c "from ttadev.primitives.core.base import WorkflowPrimitive; print('Package validated OK')"

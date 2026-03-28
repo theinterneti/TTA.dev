@@ -215,12 +215,11 @@ def main() -> int:
     if failed > 0:
         print("\n❌ Validation failed - some docstrings need improvement")
         return 1
-    elif needs_improvement > 0:
+    if needs_improvement > 0:
         print("\n⚠️  Validation passed with warnings - consider improving docstrings")
         return 0
-    else:
-        print("\n✅ All docstrings are LLM-friendly!")
-        return 0
+    print("\n✅ All docstrings are LLM-friendly!")
+    return 0
 
 
 if __name__ == "__main__":

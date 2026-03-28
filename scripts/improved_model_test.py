@@ -100,12 +100,11 @@ def format_prompt(prompt: str, model_name: str) -> str:
     """Format prompt based on model type."""
     if "qwen" in model_name.lower():
         return f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
-    elif "gemma" in model_name.lower():
+    if "gemma" in model_name.lower():
         return f"<start_of_turn>user\n{prompt}<end_of_turn>\n<start_of_turn>model\n"
-    elif "phi" in model_name.lower():
+    if "phi" in model_name.lower():
         return f"<|user|>\n{prompt}\n<|assistant|>\n"
-    else:
-        return f"User: {prompt}\n\nAssistant: "
+    return f"User: {prompt}\n\nAssistant: "
 
 
 def evaluate_json_quality(text: str) -> dict[str, Any]:
@@ -123,8 +122,7 @@ def evaluate_json_quality(text: str) -> dict[str, Any]:
                 "complexity": len(json.dumps(json_obj)),
                 "num_fields": len(json_obj) if isinstance(json_obj, dict) else 0,
             }
-        else:
-            return {"is_valid": False, "complexity": 0, "num_fields": 0}
+        return {"is_valid": False, "complexity": 0, "num_fields": 0}
     except Exception:
         return {"is_valid": False, "complexity": 0, "num_fields": 0}
 

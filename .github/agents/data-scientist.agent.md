@@ -153,7 +153,3 @@ print(importance)
 - **Reproducibility first**: Always set random seeds
 - **Validate everything**: Never trust results without validation
 - **Document thoroughly**: Future you will thank present you
-
-
----
-**Logseq:** [[TTA.dev/.github/Agents/Data-scientist.agent]]

@@ -64,7 +64,7 @@ grep -r "component-name" specs/
 ```
 
 **Observability Note:** Use the current repository observability stack if available. Do not copy
-legacy `.hypertool` tracing imports into new work.
+deprecated Hypertool-era tracing imports into new work.
 
 ```python
 # Example placeholder for repository-native observability hooks
@@ -557,8 +557,3 @@ langfuse.create_generation(
 ---
 
 **Note:** This workflow ensures systematic feature implementation following TTA standards and quality gates.
-
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Feature-implementation.prompt]]

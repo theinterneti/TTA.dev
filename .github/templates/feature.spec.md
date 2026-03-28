@@ -92,8 +92,3 @@
 
 ### Traces
 *Critical paths to trace.*
-
-
-
----
-**Logseq:** [[TTA.dev/.github/Templates/Feature.spec]]

@@ -257,12 +257,11 @@ def validate_packages(verbose: bool = False) -> tuple[int, int]:
     if total_errors == 0 and total_warnings == 0:
         print("\n✅ All checks passed! Code follows TTA.dev primitive patterns.")
         return (0, 0)
-    elif total_errors == 0:
+    if total_errors == 0:
         print("\n⚠️  Warnings found. Consider updating code to use primitives.")
         return (0, total_warnings)
-    else:
-        print("\n❌ Errors found. Please fix before committing.")
-        return (total_errors, total_warnings)
+    print("\n❌ Errors found. Please fix before committing.")
+    return (total_errors, total_warnings)
 
 
 def print_usage():
@@ -287,7 +286,7 @@ def main():
         if arg in ("-h", "--help"):
             print_usage()
             return 0
-        elif arg in ("-v", "--verbose"):
+        if arg in ("-v", "--verbose"):
             verbose = True
         else:
             print(f"Unknown argument: {arg}")

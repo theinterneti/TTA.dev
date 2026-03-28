@@ -12,6 +12,12 @@
 
 ---
 
+> [!WARNING]
+> This analysis captures a historical worktree layout.
+>
+> Any references to a `hypertool` branch or worktree describe past repository organization, not a
+> current runtime surface.
+
 ## 📊 Current Setup Overview
 
 ### Worktree Configuration

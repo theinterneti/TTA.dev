@@ -43,6 +43,7 @@ These are still directionally important, but they are **not** part of the curren
 story:
 
 - polished public demo scripts for every major feature
+- broad, fully consistent supporting docs across package-local and historical paths
 - a fully self-discovering dashboard that automatically adapts to everything an agent builds
 - fully aligned docs, roadmap, and examples
 - complete knowledge-base and integration surfaces

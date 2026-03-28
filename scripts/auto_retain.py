@@ -91,7 +91,7 @@ def main() -> None:
     base_url = os.environ.get("HINDSIGHT_URL", _DEFAULT_URL).rstrip("/")
     bank_id = _target_bank()
     commits = _git_log()
-    subjects = commits if commits else "no commits this session"
+    subjects = commits or "no commits this session"
     content = f"[type: session-end] {date.today()} — {subjects}"
     _retain(base_url, bank_id, content)
 

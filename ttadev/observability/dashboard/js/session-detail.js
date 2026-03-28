@@ -13,6 +13,7 @@ export class SessionDetail {
     this.currentId = null;
     this.allMode = false;
     this.spans = [];
+    this.ownership = [];
   }
 
   async init() {
@@ -38,7 +39,12 @@ export class SessionDetail {
 
     if (this.allMode) {
       try {
-        this.spans = await this.app.fetchJSON('/api/v2/spans');
+        const [spans, ownershipPayload] = await Promise.all([
+          this.app.fetchJSON('/api/v2/spans'),
+          this.app.fetchJSON('/api/v2/control/ownership').catch(() => ({ active: [] })),
+        ]);
+        this.spans = spans;
+        this.ownership = ownershipPayload.active || [];
         this.app.updateSessionBadge('All Sessions');
         this._render();
       } catch {
@@ -48,11 +54,13 @@ export class SessionDetail {
     }
 
     try {
-      const [, spans] = await Promise.all([
+      const [, spans, ownershipPayload] = await Promise.all([
         this.app.fetchJSON(`/api/v2/sessions/${id}`),
         this.app.fetchJSON(`/api/v2/sessions/${id}/spans`),
+        this.app.fetchJSON(`/api/v2/sessions/${id}/ownership`).catch(() => ({ active: [] })),
       ]);
       this.spans = spans;
+      this.ownership = ownershipPayload.active || [];
       this.app.updateSessionBadge(`Session ${id.substring(0, 8)}`);
       this._render();
     } catch {
@@ -70,6 +78,7 @@ export class SessionDetail {
 
     this.el.innerHTML = `
       <div class="panel-heading">${heading}</div>
+      ${this._renderWorkflowOwnership()}
       ${this._renderMetrics(metrics)}
       <div class="provider-tree">${this._renderTree(tree)}</div>
       <div class="span-list">
@@ -145,6 +154,92 @@ export class SessionDetail {
     }
 
     return { primCounts, errors, totalMs, cacheHits, cacheMisses, agentTools };
+  }
+
+  _renderWorkflowOwnership() {
+    const workflowRecords = this.ownership.filter(record => record.workflow);
+    const title = this.allMode ? 'Active Workflow Ownership' : 'Workflow Ownership';
+
+    if (workflowRecords.length === 0) {
+      return `
+        <div class="workflow-ownership-panel">
+          <div class="panel-heading workflow-heading">${title}</div>
+          <div class="workflow-empty-state">No tracked workflow ownership is active for this view.</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="workflow-ownership-panel">
+        <div class="panel-heading workflow-heading">${title}</div>
+        <div class="workflow-ownership-list">
+          ${workflowRecords.map(record => this._renderWorkflowOwnershipCard(record)).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  _renderWorkflowOwnershipCard(record) {
+    const workflow = record.workflow;
+    const task = record.task || {};
+    const run = record.run || {};
+    const session = record.session || null;
+    const currentStep = workflow.current_step;
+    const recentSteps = workflow.recent_steps || [];
+
+    return `
+      <div class="workflow-ownership-card">
+        <div class="workflow-card-header">
+          <div>
+            <div class="workflow-title">${this._escapeHtml(workflow.workflow_name)}</div>
+            <div class="workflow-goal">${this._escapeHtml(workflow.workflow_goal || '-')}</div>
+          </div>
+          <span class="workflow-status workflow-status-${this._escapeAttr(workflow.workflow_status)}">
+            ${this._escapeHtml(workflow.workflow_status)}
+          </span>
+        </div>
+        <div class="workflow-meta-row">
+          <span class="workflow-meta-chip">Task ${this._escapeHtml(task.id || '-')}</span>
+          <span class="workflow-meta-chip">Run ${this._escapeHtml(run.id || '-')}</span>
+          ${session ? `<span class="workflow-meta-chip">Session ${this._escapeHtml(session.id.substring(0, 8))}</span>` : ''}
+        </div>
+        <div class="workflow-current-step">
+          <div class="workflow-section-label">Current step</div>
+          ${
+            currentStep
+              ? `
+                <div class="workflow-step-row">
+                  <strong>${currentStep.step_number}. ${this._escapeHtml(currentStep.agent_name)}</strong>
+                  <span>${this._escapeHtml(currentStep.status)}</span>
+                  <span>${this._escapeHtml(currentStep.gate_decision || 'no-gate-decision')}</span>
+                </div>
+                <div class="workflow-step-summary">
+                  ${this._escapeHtml(currentStep.last_result_summary || 'No result summary yet.')}
+                </div>
+              `
+              : `<div class="workflow-step-summary">Workflow tracking exists, but no active step is set yet.</div>`
+          }
+        </div>
+        <div class="workflow-recent-steps">
+          <div class="workflow-section-label">Recent steps</div>
+          ${
+            recentSteps.length
+              ? recentSteps
+                  .map(
+                    step => `
+                      <div class="workflow-step-row workflow-step-row-compact">
+                        <strong>${step.step_number}. ${this._escapeHtml(step.agent_name)}</strong>
+                        <span>${this._escapeHtml(step.status)}</span>
+                        <span>${this._escapeHtml(step.gate_decision || '—')}</span>
+                      </div>
+                    `
+                  )
+                  .join('')
+              : '<div class="workflow-step-summary">No completed or transitioned steps yet.</div>'
+          }
+        </div>
+      </div>
+    `;
   }
 
   _renderMetrics({ primCounts, errors, totalMs, cacheHits, cacheMisses, agentTools }) {
@@ -279,5 +374,18 @@ export class SessionDetail {
       'OpenRouter': 'OR', 'TTA.dev': 'TTA',
     };
     return map[provider] || provider.substring(0, 3).toUpperCase();
+  }
+
+  _escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  _escapeAttr(value) {
+    return String(value).replace(/[^a-zA-Z0-9_-]/g, '-');
   }
 }

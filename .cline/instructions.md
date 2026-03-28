@@ -2,7 +2,9 @@
 
 # Project Overview
 
-TTA.dev is an **AI development toolkit following production-quality standards** providing battle-tested workflow primitives for building reliable AI applications.
+TTA.dev is an **in-progress AI development toolkit** focused on reusable workflow
+primitives, observability, and agent coordination patterns for building reliable AI
+applications.
 
 ## 🚨 Project Constitution: Spec-Driven Development (SDD)
 
@@ -44,12 +46,12 @@ Output format: A markdown document the user can review and approve before procee
 The agent generates a **technical plan** that bridges the approved spec with TTA.dev's
 architecture. The plan **must**:
 
-1. State which existing packages are affected or extended:
-   - `tta-dev-primitives`
-   - `tta-observability-integration`
-   - `universal-agent-context`
-   - `tta-agent-coordination`
-   - `tta-dev-integrations`
+1. State which existing repository surfaces are affected or extended:
+   - `ttadev.primitives`
+   - `ttadev.observability`
+   - `ttadev.integrations`
+   - `ttadev.cli`
+   - `ttadev.control_plane`
 2. Identify every new module, class, or function to be created.
 3. Describe how the feature composes with existing primitives (`>>`, `|`).
 4. List external dependencies (if any) with justification.
@@ -90,8 +92,8 @@ complete:
 
 **Handling Gaps:** If the agent discovers missing dependencies, incomplete interfaces,
 or architectural gaps during implementation, it must **not** silently work around them.
-Instead, it must log a Logseq TODO in `logseq/journals/YYYY_MM_DD.md` using this exact
-format:
+Instead, it must record a repository TODO using the repo's `#dev-todo` format in an
+appropriate tracked surface or issue:
 
 ```markdown
 - TODO <description> #dev-todo
@@ -112,7 +114,7 @@ format:
 
 ## Core Package
 
-**tta-dev-primitives**: Production-quality development primitives providing:
+**`ttadev.primitives`** provides the main workflow primitive surface:
 - Composable workflow patterns (Router, Cache, Timeout, Retry, Sequential, Parallel)
 - Recovery strategies (Fallback, Compensation)
 - Performance utilities (LRU Cache, optimization)
@@ -120,7 +122,7 @@ format:
 
 ## Philosophy
 
-**Only proven code enters this repository:**
+**The repository aims for strong engineering hygiene:**
 - Comprehensive testing required
 - Real production usage validated
 - Complete documentation included
@@ -128,12 +130,12 @@ format:
 
 ## Repository Structure
 
-This is a **monorepo** with:
-- `packages/tta-dev-primitives/` - Core primitives package
+This repository is currently organized around:
+- `ttadev/` - Main Python package for primitives, observability, CLI, and integrations
 - `scripts/` - Automation scripts (should use primitives)
-- `tests/` - Integration tests
+- `tests/` - Test suite
 - `docs/` - Architecture and development guides
-- `archive/` - Legacy code (ignore this)
+- `examples/` - Usage examples and demos
 
 ## Key Principle
 
@@ -240,7 +242,7 @@ uv run ruff format .
 uv run ruff check . --fix
 
 # Type check
-uvx pyright packages/
+uvx pyright ttadev/
 ```
 
 ## Testing Requirements
@@ -249,11 +251,12 @@ uvx pyright packages/
 - Use `pytest-asyncio` with `@pytest.mark.asyncio` for async tests
 - Use `MockPrimitive` from `testing/` for workflow testing
 - Test files mirror source structure: `src/core/cache.py` → `tests/test_cache.py`
-- Coverage command: `uv run pytest --cov=packages --cov-report=html`
+- Coverage command: `uv run pytest --cov=ttadev --cov-report=html`
 
 Example test pattern:
 ```python
-from tta_dev_primitives.testing import MockPrimitive
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.testing import MockPrimitive
 
 @pytest.mark.asyncio
 async def test_sequential_workflow():
@@ -282,15 +285,17 @@ Or use VS Code task: "✅ Quality Check (All)"
 
 ## Package Validation
 
+Use the repository quality gate instead:
+
 ```bash
-./scripts/validate-package.sh tta-dev-primitives
+.github/copilot-hooks/post-generation.sh
 ```
 
 ## Common Tasks
 
 ### Adding a New Primitive
 
-1. Create in appropriate subpackage: `src/<package>/core/my_primitive.py`
+1. Create in an appropriate `ttadev/primitives/` subpackage
 2. Extend `WorkflowPrimitive[T, U]` with typed generics
 3. Implement `async execute(input_data: T, context: WorkflowContext) -> U`
 4. Add comprehensive docstring with example
@@ -377,7 +382,8 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 # Local package - absolute imports
-from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.core.base import WorkflowPrimitive
 ```
 
 ## Anti-Patterns to Avoid
@@ -388,7 +394,3 @@ from tta_dev_primitives.core.base import WorkflowContext, WorkflowPrimitive
 ❌ Global state instead of `WorkflowContext`
 ❌ Modifying code without running quality checks
 ❌ Using `Optional[T]` instead of `T | None`
-
-
----
-**Logseq:** [[TTA.dev/.cline/Instructions]]

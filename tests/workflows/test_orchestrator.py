@@ -5,6 +5,7 @@ import pytest
 from ttadev.agents.registry import AgentRegistry, override_registry
 from ttadev.agents.spec import AgentSpec
 from ttadev.agents.task import AgentResult, AgentTask, Artifact
+from ttadev.control_plane import ControlPlaneService
 from ttadev.primitives.core.base import WorkflowContext
 from ttadev.primitives.core.sequential import SequentialPrimitive
 from ttadev.workflows.definition import MemoryConfig, WorkflowDefinition, WorkflowStep
@@ -261,3 +262,58 @@ class TestComposability:
 
         combined = orch >> LambdaPrimitive(lambda r, ctx: r)
         assert isinstance(combined, SequentialPrimitive)
+
+
+class TestL0Tracking:
+    @pytest.mark.asyncio
+    async def test_tracked_run_creates_l0_task_and_run(self, tmp_path):
+        registry = _three_step_registry()
+        service = ControlPlaneService(tmp_path)
+
+        with override_registry(registry):
+            orch = WorkflowOrchestrator(
+                _three_step_workflow(),
+                control_plane_service=service,
+                track_in_control_plane=True,
+            )
+            ctx = WorkflowContext()
+            result = await orch.execute(WorkflowGoal(goal="add feature"), ctx)
+
+        assert result.tracked_task_id is not None
+        assert result.tracked_run_id is not None
+        task = service.get_task(result.tracked_task_id)
+        assert task.workflow is not None
+        assert task.workflow.status.value == "completed"
+        assert [step.status.value for step in task.workflow.steps] == [
+            "completed",
+            "completed",
+            "completed",
+        ]
+
+    @pytest.mark.asyncio
+    async def test_tracked_quit_records_quit_state(self, tmp_path):
+        registry = _three_step_registry()
+        service = ControlPlaneService(tmp_path)
+
+        class _QuitGate(ApprovalGate):
+            async def _prompt_user(self, step_result, total_steps, next_agent):  # type: ignore[override]
+                return "q"
+
+        with override_registry(registry):
+            defn = _three_step_workflow(auto_approve=False)
+            orch = WorkflowOrchestrator(
+                defn,
+                gate=_QuitGate(auto_approve=False),
+                control_plane_service=service,
+                track_in_control_plane=True,
+            )
+            ctx = WorkflowContext()
+            result = await orch.execute(WorkflowGoal(goal="x"), ctx)
+
+        assert result.completed is False
+        assert result.tracked_task_id is not None
+        task = service.get_task(result.tracked_task_id)
+        assert task.workflow is not None
+        assert task.workflow.status.value == "quit"
+        assert task.workflow.steps[0].gate_decision.value == "quit"
+        assert task.workflow.steps[0].status.value == "quit"

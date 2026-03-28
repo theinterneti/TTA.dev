@@ -48,15 +48,31 @@ curl http://localhost:8000/api/v2/health
 curl http://localhost:8000/api/v2/spans | head
 ```
 
+## Step 4: Run the multi-agent workflow (no API key needed)
+
+```bash
+uv run pytest tests/integration/test_multi_agent_proof.py -v
+```
+
+This executes a 3-agent `feature_dev` workflow (developer → qa → security) with L0 task tracking,
+using a deterministic mock LLM — no API keys required, CI-safe.
+
+To run it live via the CLI (requires Ollama or an `OPENROUTER_API_KEY`):
+
+```bash
+tta workflow run feature_dev --goal "Add a health check endpoint" --track-l0 --no-confirm
+tta control task show <task_id from output>
+```
+
 ## What this proves today
 
 1. the current `ttadev.primitives` composition API works for a basic sequential workflow
 2. the `python -m ttadev.observability` entrypoint is valid
 3. trace ingestion into the v2 observability API works after a short delay
+4. a 3-agent multi-agent workflow runs end-to-end with L0 task/step tracking
 
 ## What this does **not** prove yet
 
-- that every older public demo script still matches the current primitive APIs
 - that every onboarding path in older docs is up to date
 - that the repo is fully production-ready end to end
 
@@ -70,6 +86,7 @@ curl http://localhost:8000/api/v2/spans | head
 
 - If `/api/v2/spans` is empty immediately after the script runs, wait a few seconds and query it
   again. The ingestion loop is asynchronous.
-- Older demo commands that reference `src/...`, `ttadev/ui/observability_server.py`, or
-  `ttadev/hello_world.py` may not match the current APIs yet and should not be treated as canonical
-  proof paths.
+- `examples/demo_workflow.py` and `ttadev/hello_world.py` are lightweight working demos, but the
+  canonical proof path remains the one in this file.
+- Older commands that reference `src/...` or `ttadev/ui/observability_server.py` are stale and
+  should not be treated as canonical proof paths.

@@ -1,6 +1,13 @@
-# Hypertool MCP Server
+# Hypertool MCP Server (Historical)
 
-This document provides an overview of the Hypertool MCP server and how it is used by TTA.dev agents.
+> [!WARNING]
+> This page is retained as historical migration context only.
+>
+> Hypertool is **not** a current TTA.dev runtime dependency. The active repository-managed MCP
+> configuration now lives in [`.mcp/config.json`](../../../.mcp/config.json).
+
+This document summarizes the Hypertool MCP server that TTA.dev used during an earlier migration
+phase.
 
 ## Purpose and Capabilities
 
@@ -12,25 +19,25 @@ This document provides an overview of the Hypertool MCP server and how it is use
     *   **Personas:** Use pre-configured MCP server bundles with pre-built toolsets for specific workflows.
     *   **Context Measurement:** See exactly how much context each tool consumes to optimize your toolsets.
 
-## Usage by TTA.dev Agents
+## Historical Usage by TTA.dev Agents
 
-TTA.dev agents use the Hypertool server to:
+Historically, TTA.dev agents used the Hypertool server to:
 
 *   **Focus on the Task at Hand:** Switch between different toolsets to focus on the specific tools needed for the current task.
 *   **Improve Tool Selection:** Use the enhanced tool descriptions and context measurement to make better decisions about which tools to use.
 *   **Streamline Workflows:** Use personas to quickly set up their environment with the tools needed for a specific workflow.
 
-## Developer Use Cases
+## Historical Developer Use Cases
 
-As a developer, you can use the Hypertool server to:
+At the time, developers could use the Hypertool server to:
 
 *   **Give your AI the best tools from all your MCPs:** Create a more focused and effective AI assistant by providing it with task-specific toolsets.
 *   **Break free from tool limits:** Connect to as many MCP servers as you need without worrying about hitting tool limits.
 *   **Optimize your context usage:** Use the context measurement feature to identify and optimize heavyweight tools.
 
-## Example
+## Historical Example
 
-Here's an example of how you might create and switch to a "coding" toolset:
+Here is an archived example of how a "coding" toolset could be created and activated:
 
 ```
 You: "Create a toolset called 'coding' with git and docker tools"

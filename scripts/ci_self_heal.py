@@ -42,7 +42,7 @@ def run_agent_fix(failure_log):
     logger.info("Attempting to fix test failure with AI agent...")
 
     # Read prompt
-    with open(PROMPT_FILE, "r") as f:
+    with open(PROMPT_FILE) as f:
         prompt_content = f.read()
 
     # Combine prompt and failure log

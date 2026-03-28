@@ -20,7 +20,7 @@
 
 ## Recommended Primitives for New Services
 
-**Start with these primitives for production-ready services:**
+**Start with these primitives for reliability-oriented services:**
 
 1. **CachePrimitive** - Cache expensive operations (LLM calls, DB queries)
 2. **RetryPrimitive** - Handle transient failures with backoff
@@ -260,7 +260,7 @@ full_pipeline = research_workflow >> implementation
 
 1. **MockPrimitive** - Test workflows without external dependencies
    ```python
-   from tta_dev_primitives.testing import MockPrimitive
+   from ttadev.primitives.testing import MockPrimitive
 
    # Mock LLM calls in tests
    mock_llm = MockPrimitive(return_value={"text": "test response"})
@@ -319,7 +319,3 @@ To add a new template:
 ---
 
 **Note:** These templates are loaded dynamically based on the development task detected in cline's conversation, providing more targeted and relevant TTA.dev primitive suggestions.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Context-templates/Development_tasks]]

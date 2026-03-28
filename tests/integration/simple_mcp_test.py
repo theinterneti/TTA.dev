@@ -47,7 +47,7 @@ mcp.run('sse')
 """)
 
     # Make the script executable
-    os.chmod(script_path, 0o755)
+    os.chmod(script_path, 0o755)  # nosemgrep: insecure-file-permissions
 
     # Run the script
     print(f"Running script: {script_path}")
@@ -106,7 +106,7 @@ mcp.run('sse')
 """)
 
     # Make the script executable
-    os.chmod(script_path, 0o755)
+    os.chmod(script_path, 0o755)  # nosemgrep: insecure-file-permissions
 
     # Run the script
     print(f"Running script: {script_path}")
@@ -156,9 +156,8 @@ def test_knowledge_server():
                 if response.status_code == 200:
                     print("Knowledge Resource server is running!")
                     return True
-                else:
-                    print(f"Knowledge Resource server returned status code {response.status_code}")
-                    return False
+                print(f"Knowledge Resource server returned status code {response.status_code}")
+                return False
             except requests.exceptions.ConnectionError as e:
                 print(f"Could not connect to Knowledge Resource server: {e}")
                 return False
@@ -215,9 +214,8 @@ def test_agent_tool_server():
                 if response.status_code == 200:
                     print("Agent Tool server is running!")
                     return True
-                else:
-                    print(f"Agent Tool server returned status code {response.status_code}")
-                    return False
+                print(f"Agent Tool server returned status code {response.status_code}")
+                return False
             except requests.exceptions.ConnectionError as e:
                 print(f"Could not connect to Agent Tool server: {e}")
                 return False

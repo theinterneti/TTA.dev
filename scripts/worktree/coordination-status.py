@@ -13,7 +13,6 @@ Shows:
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict
 
 WORKTREES = {
     "orchestrator": Path("/home/thein/repos/TTA.dev"),
@@ -39,7 +38,7 @@ def get_branch_name(worktree_path: Path) -> str:
         return "error"
 
 
-def check_worktree_status(name: str, path: Path) -> Dict:
+def check_worktree_status(name: str, path: Path) -> dict:
     """Check status of a worktree."""
     return {
         "name": name,
@@ -49,7 +48,7 @@ def check_worktree_status(name: str, path: Path) -> Dict:
     }
 
 
-def count_patterns_in_dir(directory: Path) -> Dict[str, int]:
+def count_patterns_in_dir(directory: Path) -> dict[str, int]:
     """Count patterns by category in a directory."""
     if not directory.exists():
         return {"total": 0, "high_priority": 0, "medium_priority": 0}
@@ -70,7 +69,7 @@ def count_patterns_in_dir(directory: Path) -> Dict[str, int]:
     }
 
 
-def get_sync_status() -> Dict:
+def get_sync_status() -> dict:
     """Get last sync status."""
     if SYNC_STATUS_FILE.exists():
         with open(SYNC_STATUS_FILE) as f:
@@ -86,15 +85,14 @@ def time_since(timestamp: str) -> str:
 
         if delta < timedelta(minutes=1):
             return "just now"
-        elif delta < timedelta(hours=1):
+        if delta < timedelta(hours=1):
             mins = int(delta.total_seconds() / 60)
             return f"{mins} minute{'s' if mins != 1 else ''} ago"
-        elif delta < timedelta(days=1):
+        if delta < timedelta(days=1):
             hours = int(delta.total_seconds() / 3600)
             return f"{hours} hour{'s' if hours != 1 else ''} ago"
-        else:
-            days = delta.days
-            return f"{days} day{'s' if days != 1 else ''} ago"
+        days = delta.days
+        return f"{days} day{'s' if days != 1 else ''} ago"
     except Exception:
         return "unknown"
 

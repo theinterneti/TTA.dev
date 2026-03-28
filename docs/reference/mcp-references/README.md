@@ -11,7 +11,7 @@ This directory contains comprehensive documentation for the various MCP servers 
 *   **[Filesystem](filesystem.md)**: A set of tools for interacting with the local filesystem.
 *   **[GitHub](github.md)**: A comprehensive suite of tools for interacting with the GitHub API.
 *   **[Grafana](grafana.md)**: A tool for visualizing and analyzing metrics.
-*   **[Hypertool](hypertool.md)**: A tool for building and deploying serverless applications.
+*   **[Hypertool](hypertool.md)**: Historical note on TTA.dev's retired Hypertool MCP layer.
 *   **[Jaeger](jaeger.md)**: A tool for distributed tracing.
 *   **[NotebookLM](notebooklm.md)**: A tool for working with Jupyter notebooks.
 *   **[Playwright](playwright.md)**: A tool for browser automation and testing.
@@ -30,7 +30,7 @@ This directory also contains documentation for integrating the various MCP serve
 *   **[Filesystem Integration](integrations/filesystem-integration.md)**
 *   **[GitHub Integration](integrations/github-integration.md)**
 *   **[Grafana Integration](integrations/grafana-integration.md)**
-*   **[Hypertool Integration](integrations/hypertool-integration.md)**
+*   **[Hypertool Integration](integrations/hypertool-integration.md)** *(historical)*
 *   **[Jaeger Integration](integrations/jaeger-integration.md)**
 *   **[NotebookLM Integration](integrations/notebooklm-integration.md)**
 *   **[Playwright Integration](integrations/playwright-integration.md)**

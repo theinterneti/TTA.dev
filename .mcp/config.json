@@ -77,7 +77,7 @@
       ]
     },
     "codegraphcontext": {
-      "command": "/home/adam/.local/bin/cgc",
+      "command": "/home/theinterneti/.local/bin/cgc",
       "args": [
         "mcp",
         "start"
@@ -108,7 +108,7 @@
       ]
     },
     "hindsight": {
-      "url": "http://localhost:8888/mcp/",
+      "url": "http://127.0.0.1:8888/mcp/",
       "description": "Long-term agent memory and recall via local Hindsight MCP",
       "tags": [
         "memory",

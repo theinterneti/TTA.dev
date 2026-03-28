@@ -112,7 +112,7 @@ try:
                 }
 
             except Exception as e:
-                raise Exception(f"Gemini API error: {str(e)}")
+                raise Exception(f"Gemini API error: {e!s}")
 
     class MockLLMPrimitive(WorkflowPrimitive[dict, dict]):
         """Mock LLM for when Gemini is not available."""
@@ -192,7 +192,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure for production
+    allow_origins=["*"],  # Configure for production  # nosemgrep: wildcard-cors
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

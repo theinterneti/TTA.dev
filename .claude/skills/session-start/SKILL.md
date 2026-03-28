@@ -10,15 +10,19 @@ Run these steps at the beginning of every session, before any task work.
 #### 1. Load directives
 
 Call `mcp__hindsight__recall` with:
-- bank_id: `tta-dev`
-- query: `mandatory directives coding standards dev loop model strategy`
+- bank_id: `adam-global`
+- query: `durable directives preferences workflow defaults coding standards model strategy`
 
-Read all results. These are non-negotiable rules for this session.
+Then call `mcp__hindsight__recall` again with:
+- bank_id: the current derived `project-*` or `workspace-*` bank
+- query: `repository conventions architecture commands failures patterns`
+
+Read all results. The global bank carries durable user/workflow rules; the project/workspace bank carries repository-specific context.
 
 #### 2. Load mental models
 
 Call `mcp__hindsight__recall` with:
-- bank_id: `tta-dev`
+- bank_id: the current derived `project-*` or `workspace-*` bank
 - query: `mental model primitives agents workflows integrations architecture`
 
 Read all results. This is your architectural map.
@@ -26,7 +30,7 @@ Read all results. This is your architectural map.
 #### 3. Recall task-specific context (if task is known)
 
 Call `mcp__hindsight__recall` with:
-- bank_id: `tta-dev`
+- bank_id: the current derived `project-*` or `workspace-*` bank
 - query: `<the specific module, feature, or component you are about to work on>`
 
 #### 4. Orient with CGC
@@ -44,11 +48,9 @@ stats — so the user knows the session started warm.
 #### Session End: Retain
 
 Before ending the session or after completing a significant task, call
-`mcp__hindsight__retain` with bank_id `tta-dev` and content covering:
-- Any decision made (what + why)
-- Any pattern used for the first time
-- Any failure encountered (what + why)
-- Any architectural insight gained
+`mcp__hindsight__retain` with the appropriate bank and content covering:
+- `adam-global` for durable cross-project preferences or reusable workflow patterns
+- the current derived `project-*` or `workspace-*` bank for repository-specific decisions, failures, commands, and architectural insights
 
 Use this format for the content:
 ```

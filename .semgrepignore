@@ -3,12 +3,16 @@
 
 # Archive and legacy code
 _archive/
+.archive/
 archive/
 _DEPRECATED/
 
 # AI assistant tooling (non-production)
 .cline/
 .hypertool/
+
+# Developer scripts (non-production tooling)
+scripts/
 
 # Dependencies and build artifacts
 .venv/

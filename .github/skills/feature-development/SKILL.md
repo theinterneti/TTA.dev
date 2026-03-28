@@ -71,7 +71,3 @@ Orchestrates **Backend Engineer → Frontend Engineer → Testing Specialist** f
 - ✅ E2E tests cover user flows
 - ✅ Accessibility violations = 0
 - ✅ Integration tests validate full stack
-
-
----
-**Logseq:** [[TTA.dev/.github/Skills/Feature-development/Skill]]

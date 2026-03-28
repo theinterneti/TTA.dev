@@ -62,9 +62,8 @@ class TestOverrideRegistry:
     def test_override_restored_on_exception(self):
         global_reg = get_registry()
         test_reg = AgentRegistry()
-        with pytest.raises(ValueError):
-            with override_registry(test_reg):
-                raise ValueError("oops")
+        with pytest.raises(ValueError), override_registry(test_reg):
+            raise ValueError("oops")
         assert get_registry() is global_reg
 
     def test_contextvar_isolation_across_async_tasks(self):

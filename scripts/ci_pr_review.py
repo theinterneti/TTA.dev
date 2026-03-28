@@ -63,13 +63,13 @@ def main():
     logger.info(f"Diff size: {len(diff)} chars")
 
     # Read prompt
-    with open(PROMPT_FILE, "r") as f:
+    with open(PROMPT_FILE) as f:
         prompt_content = f.read()
 
     # Read memory file if it exists
     memory_content = ""
     if os.path.exists(".memory.md"):
-        with open(".memory.md", "r") as f:
+        with open(".memory.md") as f:
             memory_content = f"\n\n# Project Memory\n\n{f.read()}\n\n"
         logger.info("Loaded project memory.")
 

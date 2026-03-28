@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-21
 **Phase:** 4 — Automation
-**Status:** Draft — awaiting approval
+**Status:** Approved — 2026-03-25
 **Depends on:** `DevelopmentCycle` (Phase 3, complete), `AgentMemory` (Phase 2b, complete)
 **Leads to:** Phase 5 — Quality Gates + Multi-model Fallback
 
@@ -90,7 +90,7 @@ When Claude Code stops (the `Stop` event fires), `scripts/auto_retain.py` runs:
 Session ends.
 auto_retain.py runs → reads git log → builds summary:
   "[type: session-end] 2026-03-21 — feat(dev-cycle): add OTel spans; fix n_tests span attr"
-→ POST /api/banks/tta-dev/retain
+→ POST /v1/default/banks/<derived-project-or-workspace-bank>/memories
 → exits 0
 ```
 
@@ -125,19 +125,21 @@ auto_retain.py runs → reads git log → builds summary:
 
 Standalone Python script invoked by the Claude Code `Stop` hook.
 
-- Reads `HINDSIGHT_URL` (default: `localhost:8888`), `HINDSIGHT_BANK` (default: `tta-dev`).
+- Reads `HINDSIGHT_URL` (default: `http://localhost:8888`).
+- Targets the current derived `project-*` or `workspace-*` bank by default, unless `HINDSIGHT_BANK` is explicitly set.
 - Runs `git log --oneline -10` to collect recent commit subjects.
-- POSTs `{"content": "[type: session-end] YYYY-MM-DD — <subjects>", "bank_id": bank}` to `{HINDSIGHT_URL}/api/banks/{bank}/retain`.
+- POSTs `{"items": [{"content": "[type: session-end] YYYY-MM-DD — <subjects>"}], "async": true}` to `{HINDSIGHT_URL}/v1/default/banks/{bank}/memories`.
 - If POST fails (network error, timeout, 4xx/5xx): prints warning to stderr, exits 0.
 - If git log is empty: posts `[type: session-end] YYYY-MM-DD — no commits this session`.
-- Uses `httpx` (already a project dependency). No other non-stdlib imports.
+- Uses only the Python standard library so the hook works under plain `python`.
 
 ### 2. `scripts/session_start_recall.py` — Session-start directives script
 
 Standalone Python script invoked by the Claude Code `UserPromptSubmit` hook.
 
-- Reads `HINDSIGHT_URL` (default: `localhost:8888`), `HINDSIGHT_BANK` (default: `tta-dev`).
-- GETs `{HINDSIGHT_URL}/api/banks/{bank}/directives`.
+- Reads `HINDSIGHT_URL` (default: `http://localhost:8888`).
+- Loads directives from `adam-global` first, then from the current derived `project-*` or `workspace-*` bank unless `HINDSIGHT_BANK` is explicitly set.
+- GETs `{HINDSIGHT_URL}/v1/default/banks/{bank}/directives`.
 - Prints directives formatted as Markdown (prefixed `## Hindsight Directives (auto-loaded)`).
 - If unavailable: prints nothing, exits 0 (silent).
 - Timeout: 2 seconds (must not slow down session start perceptibly).

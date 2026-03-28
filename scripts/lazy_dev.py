@@ -244,7 +244,7 @@ Format as:
 
 ## Changes
 
-{commits if commits else "- Implementation changes"}
+{commits or "- Implementation changes"}
 
 ## Files Modified
 
@@ -438,7 +438,7 @@ Please work together on this issue. Create a branch, implement the solution, and
                 print("👋 Goodbye!")
                 break
 
-            elif choice == "1":
+            if choice == "1":
                 desc = input("What are you working on? ").strip()
                 print("\nWork type:")
                 for i, wt in enumerate(WorkType, 1):

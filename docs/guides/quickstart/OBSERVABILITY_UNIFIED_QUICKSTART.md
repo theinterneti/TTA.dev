@@ -84,10 +84,10 @@ curl http://localhost:12345/metrics | grep alloy_
 **For LLM-specific observability (prompts, completions, costs):**
 
 ```python
-from .hypertool.instrumentation.langfuse_integration import LangfuseIntegration
+from tta_apm_langfuse import LangFuseIntegration
 
 # Initialize once (uses env vars)
-langfuse = LangfuseIntegration()
+langfuse = LangFuseIntegration()
 
 # Wrap your LLM calls
 trace = langfuse.start_trace(
@@ -288,7 +288,7 @@ sum(rate(primitive_executions_total{
 
 1. **Read the full guide:** [`UNIFIED_OBSERVABILITY_ARCHITECTURE.md`](UNIFIED_OBSERVABILITY_ARCHITECTURE.md)
 2. **Multi-workspace setup:** [`MULTI_WORKSPACE_OBSERVABILITY.md`](MULTI_WORKSPACE_OBSERVABILITY.md)
-3. **Langfuse details:** [`../../.hypertool/instrumentation/LANGFUSE_INTEGRATION.md`](../../.hypertool/instrumentation/LANGFUSE_INTEGRATION.md)
+3. **Langfuse details:** [`../../../ttadev/observability/apm/langfuse/src/tta_apm_langfuse/integration.py`](../../../ttadev/observability/apm/langfuse/src/tta_apm_langfuse/integration.py)
 4. **Primitives reference:** [`../../PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)
 
 ---

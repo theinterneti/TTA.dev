@@ -28,6 +28,7 @@ from typing import Any
 
 from aiohttp import web
 
+from ttadev.control_plane import ControlPlaneService
 from ttadev.observability.cgc_integration import CGCIntegration
 from ttadev.observability.collector import TraceCollector
 from ttadev.observability.project_session import ProjectSessionManager
@@ -64,8 +65,9 @@ class ObservabilityServer:
         self.collector = collector or TraceCollector()
         self.cgc = CGCIntegration()
         self.port = port
-        self._session_mgr = SessionManager(data_dir or Path(".tta"))
-        self._project_mgr = ProjectSessionManager(data_dir or Path(".tta"))
+        self._data_dir = Path(data_dir or Path(".tta"))
+        self._session_mgr = SessionManager(self._data_dir)
+        self._project_mgr = ProjectSessionManager(self._data_dir)
         self._span_proc = SpanProcessor()
         self._cgc_available: bool = False
         self._cgc_probe_time: float = 0.0  # epoch seconds of last probe
@@ -95,9 +97,12 @@ class ObservabilityServer:
         self.app.router.add_get("/api/v2/cgc/live", self._v2_cgc_live)
         self.app.router.add_get("/api/v2/cgc/{view}", self._v2_cgc_graph)
         self.app.router.add_get("/api/v2/primitives", self._v2_primitives)
+        self.app.router.add_get("/api/v2/control/ownership", self._v2_control_ownership)
         self.app.router.add_get("/api/v2/projects", self._v2_projects)
         self.app.router.add_get("/api/v2/projects/{id}/sessions", self._v2_project_sessions)
+        self.app.router.add_get("/api/v2/projects/{id}/ownership", self._v2_project_ownership)
         self.app.router.add_get("/api/v2/projects/{id}", self._v2_project_detail)
+        self.app.router.add_get("/api/v2/sessions/{id}/ownership", self._v2_session_ownership)
 
         # Static assets (new dashboard)
         if DASHBOARD_DIR.exists():
@@ -256,6 +261,11 @@ class ObservabilityServer:
     async def _v2_primitives(self, request: web.Request) -> web.Response:
         return web.json_response(_PRIMITIVES_CATALOG)
 
+    async def _v2_control_ownership(self, request: web.Request) -> web.Response:
+        """Return active control-plane ownership summaries."""
+        service = ControlPlaneService(self._data_dir)
+        return web.json_response({"active": service.list_active_ownership()})
+
     async def _v2_projects(self, request: web.Request) -> web.Response:
         """Return all project sessions, newest first."""
         projects = self._project_mgr.list()
@@ -264,7 +274,7 @@ class ObservabilityServer:
     async def _v2_project_detail(self, request: web.Request) -> web.Response:
         """Return a single project session by ID."""
         project_id = request.match_info["id"]
-        proj = self._project_mgr._get_by_id(project_id)
+        proj = self._project_mgr.get_by_id(project_id)
         if proj is None:
             return web.json_response({"error": "Project not found"}, status=404)
         return web.json_response(asdict(proj))
@@ -272,12 +282,40 @@ class ObservabilityServer:
     async def _v2_project_sessions(self, request: web.Request) -> web.Response:
         """Return all sessions belonging to a project."""
         project_id = request.match_info["id"]
-        proj = self._project_mgr._get_by_id(project_id)
+        proj = self._project_mgr.get_by_id(project_id)
         if proj is None:
             return web.json_response({"error": "Project not found"}, status=404)
         all_sessions = self._session_mgr.list_sessions()
         matched = [s for s in all_sessions if s.project_id == project_id]
         return web.json_response([asdict(s) for s in matched])
+
+    async def _v2_project_ownership(self, request: web.Request) -> web.Response:
+        """Return active ownership summaries for a single project."""
+        project_id = request.match_info["id"]
+        proj = self._project_mgr.get_by_id(project_id)
+        if proj is None:
+            return web.json_response({"error": "Project not found"}, status=404)
+        service = ControlPlaneService(self._data_dir)
+        return web.json_response(
+            {
+                "project_id": project_id,
+                "active": service.list_active_ownership(project_id=project_id),
+            }
+        )
+
+    async def _v2_session_ownership(self, request: web.Request) -> web.Response:
+        """Return active ownership summaries for a single session."""
+        session_id = request.match_info["id"]
+        session = self._session_mgr.get_session(session_id)
+        if session is None:
+            return web.json_response({"error": "Session not found"}, status=404)
+        service = ControlPlaneService(self._data_dir)
+        return web.json_response(
+            {
+                "session_id": session_id,
+                "active": service.list_active_ownership(session_id=session_id),
+            }
+        )
 
     def _build_span_graph(self, view: str) -> dict[str, Any]:
         """Build a graph from ingested span data when CGC is unavailable.
@@ -624,7 +662,8 @@ _FALLBACK_HTML = """<!DOCTYPE html>
     <p class="status">Server: <strong>running</strong> &nbsp;|&nbsp; WebSocket: <span id="ws-status">connecting...</span></p>
   </div>
   <script>
-    const ws = new WebSocket(`ws://${location.host}/ws`);
+    const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${wsProto}//${location.host}/ws`);
     ws.onopen = () => { document.getElementById('ws-status').textContent = 'connected'; document.getElementById('ws-status').style.color = '#10b981'; };
     ws.onclose = () => { document.getElementById('ws-status').textContent = 'disconnected'; };
   </script>

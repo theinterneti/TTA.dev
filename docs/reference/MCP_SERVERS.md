@@ -231,10 +231,11 @@ Show repository statistics for the TTA.dev org
 
 **Configuration:**
 
-- **Access Method**: Via Hypertool (primary) and standalone MCP server
+- **Access Method**: Via the current repo-managed MCP configuration and standalone MCP server
 - **Authentication**: GitHub Personal Access Token via `GITHUB_TOKEN` environment variable
 - **Toolsets**: `"default,projects,labels,orgs"` (comprehensive coverage)
-- **Location**: `.hypertool/mcp_servers.json` and `.mcp.json` (Hypertool loader)
+- **Location**: `.mcp/config.json` (repo-managed). Historical `.hypertool/mcp_servers.json`
+  survives only in compatibility scripts under `scripts/mcp/`.
 
 **Authentication Setup:**
 
@@ -250,7 +251,7 @@ Show repository statistics for the TTA.dev org
 
 3. **Verify Access:**
    ```bash
-   # Test via Hypertool
+   # Test via the current GitHub MCP configuration
    @workspace #tta-mcp-integration
    List repositories in the TTA.dev organization
    ```

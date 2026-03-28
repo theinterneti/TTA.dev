@@ -132,8 +132,8 @@ To add additional code owners for specific paths:
 * @Copilot
 
 # Package-specific owners
-/packages/tta-dev-primitives/ @theinterneti @Copilot
-/packages/tta-observability-integration/ @theinterneti @Copilot
+/ttadev/primitives/ @theinterneti @Copilot
+/ttadev/observability/ @theinterneti @Copilot
 
 # Documentation
 /docs/ @theinterneti @Copilot
@@ -194,8 +194,3 @@ If you encounter issues:
 
 **Last Updated:** 2025-10-29
 **Maintained by:** @theinterneti
-
-
-
----
-**Logseq:** [[TTA.dev/.github/Copilot_reviewer_setup]]

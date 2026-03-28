@@ -6,6 +6,12 @@
 
 ---
 
+> [!WARNING]
+> This document is a historical planning snapshot.
+>
+> References to Hypertool branches or MCP work are retained for past context and should not be read
+> as the current TTA.dev runtime architecture.
+
 ## Executive Summary
 
 Investigation revealed **8 active workspace packages** (not the initially scoped 3). This document provides comprehensive analysis and migration recommendations based on:

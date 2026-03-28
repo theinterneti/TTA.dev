@@ -73,7 +73,7 @@ Every implementation task must satisfy **all** of the following before it is con
 | **Type Checker** | `uvx pyright platform/` | Zero errors in basic mode. |
 | **Tests** | `uv run pytest -v` | 100% coverage on new code. All existing tests pass. |
 
-**Handling Gaps:** If the agent discovers missing dependencies, incomplete interfaces, or architectural gaps during implementation, it must **not** silently work around them. Instead, it must log a Logseq TODO in `logseq/journals/YYYY_MM_DD.md` using this format:
+**Handling Gaps:** If the agent discovers missing dependencies, incomplete interfaces, or architectural gaps during implementation, it must **not** silently work around them. Instead, it must file a `#dev-todo` in the relevant source file or doc using this format:
 
 ```markdown
 - TODO <description> #dev-todo

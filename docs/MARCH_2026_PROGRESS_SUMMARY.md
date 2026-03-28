@@ -5,6 +5,11 @@
 
 ---
 
+> [!WARNING]
+> This progress summary is a historical status report.
+>
+> Hypertool references remain here only to describe completed migration work from that period.
+
 ## Achievements This Week
 
 ### 1. ✅ Persona Metrics Updated

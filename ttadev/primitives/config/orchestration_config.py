@@ -132,7 +132,7 @@ class OrchestrationConfig(BaseModel):
         with open(yaml_path) as f:
             data = yaml.safe_load(f)
 
-        if not data or "orchestration" not in data:
+        if not isinstance(data, dict) or "orchestration" not in data:
             raise ValueError(
                 f"Invalid configuration file: {yaml_path}. Must contain 'orchestration' key."
             )

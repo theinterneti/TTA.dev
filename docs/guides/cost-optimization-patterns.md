@@ -1,6 +1,6 @@
 # Cost Optimization Patterns for LLM Applications
 
-**Production-Ready Patterns Using TTA.dev Primitives**
+**Cost optimization patterns using TTA.dev primitives**
 
 **Last Updated:** October 30, 2025
 
@@ -22,10 +22,11 @@
 
 ## Overview
 
-This guide provides production-ready patterns for optimizing LLM costs using TTA.dev primitives. Each pattern includes:
+This guide provides composable patterns for optimizing LLM costs using TTA.dev primitives. Each
+pattern includes:
 
 - **Cost savings estimate** (percentage reduction)
-- **Production-ready code** (copy-paste ready)
+- **Working example structure** (adapt before production use)
 - **Real-world use cases**
 - **Monitoring recommendations**
 

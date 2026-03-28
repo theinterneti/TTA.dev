@@ -59,13 +59,17 @@ class FileSpanExporter(SpanExporter):
         try:
             with open(self.file_path, "a") as f:
                 for span in spans:
+                    if span.context is None:
+                        continue
                     span_dict = {
                         "trace_id": format(span.context.trace_id, "032x"),
                         "span_id": format(span.context.span_id, "016x"),
                         "name": span.name,
                         "start_time": span.start_time,
                         "end_time": span.end_time,
-                        "duration_ns": span.end_time - span.start_time if span.end_time else 0,
+                        "duration_ns": (span.end_time - span.start_time)
+                        if (span.end_time and span.start_time)
+                        else 0,
                         # Agent identity — stable per process, used by the observability
                         # server to route this span to the correct session automatically.
                         "tta_agent_id": get_agent_id(),
@@ -232,8 +236,8 @@ def _auto_instrument_primitives() -> None:
             primitive_name,
             attributes={
                 "primitive.type": primitive_name,
-                "workflow.id": context.workflow_id,
-                "workflow.correlation_id": context.correlation_id,
+                "workflow.id": context.workflow_id or "",
+                "workflow.correlation_id": context.correlation_id or "",
             },
         ) as span:
             try:

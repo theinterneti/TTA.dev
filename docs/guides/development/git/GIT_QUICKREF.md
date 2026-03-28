@@ -5,6 +5,12 @@
 
 ---
 
+> [!WARNING]
+> This quick reference reflects a historical multi-worktree setup.
+>
+> Mentions of a `hypertool` worktree are archival context only and do not indicate a current
+> repository dependency.
+
 ## 📍 Current Setup
 
 ### Worktrees

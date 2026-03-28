@@ -6,6 +6,12 @@
 
 ---
 
+> [!WARNING]
+> This summary is historical git-worktree documentation.
+>
+> Hypertool references here describe an older branch layout and should not be interpreted as a
+> current TTA.dev dependency.
+
 ## 🎯 What We Found
 
 ### Current Setup ✅

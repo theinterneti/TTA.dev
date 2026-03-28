@@ -40,7 +40,7 @@ A Python monorepo providing composable workflow primitives, observability, and m
 ```
 TTA.dev/
 ├── platform/               # Core packages
-│   ├── primitives/         # tta-dev-primitives (Backend Engineer)
+│   ├── primitives/         # Core workflow primitives (Backend Engineer)
 │   ├── observability/      # Monitoring integration (Observability Expert)
 │   ├── agent-context/      # Universal context (Backend Engineer)
 │   ├── agent-coordination/ # Multi-agent orchestration
@@ -123,6 +123,7 @@ The first local L0 slice now exists in:
 
 - `ttadev/control_plane/` — JSON-backed task, run, and lease state
 - `ttadev/cli/control.py` — `tta control task ...` and `tta control run ...`
+- `ttadev/primitives/mcp_server/server.py` — MCP tools for the current task/run lifecycle
 
 Interpret this as the beginning of a **developer-agent control plane** for Claude,
 Copilot, Cline, and future coding agents.
@@ -134,32 +135,18 @@ systems elsewhere in the repo.**
 
 When working on L0 from inside `TTA.dev`, prefer this order:
 
-1. expose the current control-plane operations through MCP tools
-2. add approvals, policy checks, and review checkpoints
-3. add workspace/file-lock semantics and stronger project/session linking
-4. connect agent activity + observability views to task/run state
+1. use the current L0 surface to prove one documented, repeatable multi-agent workflow
+2. deepen approval/policy/review workflows only where that workflow needs richer coordination
+3. strengthen ownership and telemetry attribution so active workflow steps can be explained clearly
+4. connect more agent-facing surfaces to the existing L0 state instead of creating parallel coordination models
 
 ### Repository TODOs
 
-- TODO Expose the current L0 task and run lifecycle through MCP tools in `ttadev/primitives/mcp_server/server.py` and add integration coverage. #dev-todo
-  type:: implementation
-  priority:: high
-  package:: ttadev-mcp-server
+All four L0 phase-1 items are complete as of 2026-03-27:
+- Items 1–3: multi-agent workflow proof, gate deepening, OTel trace attribution
+- Item 4: MCP workflow progression tools (`control_start_workflow`, `control_mark_workflow_step_running`, `control_record_workflow_step_result`, `control_record_workflow_gate_outcome`, `control_mark_workflow_step_failed`) plus `tta control workflow start` CLI command
 
-- TODO Add approval, policy, and review-gate state to `ttadev/control_plane/`, reusing workflow gate patterns instead of inventing ad hoc flags. #dev-todo
-  type:: implementation
-  priority:: high
-  package:: ttadev-control-plane
-
-- TODO Add workspace and file-lock coordination to the L0 service and surface those locks through the `tta control` CLI. #dev-todo
-  type:: implementation
-  priority:: high
-  package:: ttadev-control-plane
-
-- TODO Cross-link L0 runs with observability sessions, project membership, and agent-tracker telemetry so dashboards can show who owns active work. #dev-todo
-  type:: refactor
-  priority:: medium
-  package:: ttadev-observability
+The L0 surface is ready to run a documented multi-agent workflow end-to-end.
 
 ---
 
@@ -301,7 +288,3 @@ ls .github/skills/
 **Version:** 2.0.0
 **Last Updated:** 2026-03-18
 **Status:** Active
-
-
----
-**Logseq:** [[TTA.dev/AGENTS]]

@@ -1,5 +1,13 @@
 # TTA.dev Hindsight Memory Configuration
 # See docs/guides/agents/HINDSIGHT_MEMORY_ARCHITECTURE.md for details
+#
+# NOTE:
+# This file describes the older repo-local, file-based Hindsight layout.
+# The live Copilot/Hindsight runtime used in active sessions is API-backed and
+# now follows a different bank model:
+# - global durable bank: adam-global
+# - repo/workspace context bank: derived project-* or workspace-* bank
+# Keep that distinction in mind when reading or extending this config.
 
 version: "1.0"
 

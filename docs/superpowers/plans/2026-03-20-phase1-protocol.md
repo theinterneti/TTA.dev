@@ -805,7 +805,7 @@ cfg = get_llm_client()
 
 Provider hierarchy for TTA.dev apps (automatic, zero config required):
 1. **Ollama** — default, always available, no API key needed (`qwen2.5:7b`)
-2. **OpenRouter `:free`** — if `OPENROUTER_API_KEY` is set
+2. **Gemini 3.1 Flash Lite Preview or other fallback provider** — if the preferred Groq runtime is unavailable and the relevant key is configured
 3. **Paid models** — if a paid key is configured
 
 **Never use** `nvidia/nemotron-3-super-120b-a12b:free` — it is a reasoning-only
@@ -855,12 +855,13 @@ Add this section immediately after `## SDD Mandate`:
 
 **Every session begins with `/session-start`** (or the session-start skill steps manually).
 
-1. `mcp__hindsight__recall` — query `tta-dev` bank for directives + mental models
+1. `mcp__hindsight__recall` — query `adam-global` for durable directives/preferences and the current derived `project-*` or `workspace-*` bank for repo-specific mental models
 2. `mcp__codegraphcontext__get_repository_stats` — confirm graph is current
 3. Acknowledge what was loaded before any task work begins
 
-**Every significant task ends with `mcp__hindsight__retain`** to the `tta-dev` bank:
-decisions made, patterns used, failures encountered.
+**Every significant task ends with `mcp__hindsight__retain`** to the right bank:
+- `adam-global` for durable cross-project preferences and reusable workflow patterns
+- current derived `project-*` or `workspace-*` bank for repo-specific decisions, patterns, and failures
 ```
 
 - [ ] **Step 3: Add Orient Before Edit to Non-Negotiable Standards**
@@ -869,7 +870,7 @@ In the `## Non-Negotiable Standards (Quick Reference)` section, add:
 
 ```markdown
 - **Orient before edit:** Run CGC (`find_code` + `analyze_code_relationships`) on any non-trivial target before touching it
-- **Retain after task:** Store decisions, patterns, failures to `tta-dev` Hindsight bank after each significant task
+- **Retain after task:** Store cross-project signal in `adam-global` and repo-specific signal in the current derived `project-*` or `workspace-*` Hindsight bank after each significant task
 ```
 
 - [ ] **Step 4: Verify CLAUDE.md structure**
@@ -892,14 +893,14 @@ git commit -m "docs(claude-md): add session-start protocol and orient-before-edi
 
 - [ ] **Step 1: Verify all Hindsight content is recalled**
 
-Call `mcp__hindsight__recall` (bank_id: `tta-dev`, query: `dev loop orient recall validate retain directive`).
+Call `mcp__hindsight__recall` (bank_id: `adam-global`, query: `dev loop orient recall validate retain directive`).
 Expected: returns the dev-loop directive content.
 
-Call `mcp__hindsight__recall` (bank_id: `tta-dev`, query: `WorkflowPrimitive InstrumentedPrimitive primitives architecture`).
+Call `mcp__hindsight__recall` (bank_id: current derived `project-*` or `workspace-*` bank, query: `WorkflowPrimitive InstrumentedPrimitive primitives architecture`).
 Expected: returns the primitives mental model content.
 
-Call `mcp__hindsight__recall` (bank_id: `tta-dev`, query: `nemotron bad model openrouter ollama`).
-Expected: returns the model-strategy directive mentioning nemotron.
+Call `mcp__hindsight__recall` (bank_id: `adam-global`, query: `Groq gpt-oss-20b default Hindsight runtime fallback Gemini Ollama slow`).
+Expected: returns the retained provider decision and fallback guidance.
 
 - [ ] **Step 2: Verify skills exist**
 

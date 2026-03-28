@@ -239,7 +239,7 @@ class TestAgentPipelineTransforms:
         agent1 = _make_mock_agent(response="review")
         pipeline = AgentPipeline(
             [agent0, agent1],
-            stage_transforms=[None, lambda r: f"Review: {r['response']}"],  # noqa: E731
+            stage_transforms=[None, lambda r: f"Review: {r['response']}"],
         )
         await pipeline.execute(PipelineTask(instruction="implement"), WorkflowContext())
         call_args = agent1.execute.call_args[0][0]
@@ -253,8 +253,7 @@ class TestAgentPipelineTransforms:
             confidence = result["confidence"]
             if confidence > 0.75:
                 return "High confidence output"
-            else:
-                return "Low confidence output"
+            return "Low confidence output"
 
         agent0 = _make_mock_agent(response="test", confidence=0.9)
         agent1 = _make_mock_agent(response="final")

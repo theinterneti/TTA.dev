@@ -2,12 +2,20 @@
 
 Command-line interface for TTA.dev primitives - analyze code, get recommendations, and explore primitives.
 
+> [!WARNING]
+> Mixed-current package-local CLI document.
+>
+> The analysis CLI internals in `ttadev.primitives.cli` are still present, but the old
+> `tta-dev ...` packaging story no longer matches the current top-level `ttadev` package scripts.
+> Treat the command examples below as package-local historical context unless you have explicitly
+> exposed that CLI entrypoint in your environment.
+
 ## Installation
 
-The CLI is included with the `tta-dev-primitives` package:
+If you are working from this repository, install the current package surface:
 
 ```bash
-uv add tta-dev-primitives
+uv add ttadev
 ```
 
 ## Commands
@@ -143,7 +151,7 @@ $ tta-dev docs CachePrimitive
 LRU cache with TTL for expensive operations.
 
 Import:
-  from tta_dev_primitives.performance import CachePrimitive
+  from ttadev.primitives import CachePrimitive
 
 Use Cases:
   • Cache expensive LLM calls

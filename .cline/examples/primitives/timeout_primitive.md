@@ -16,8 +16,8 @@ Implement a circuit breaker pattern to prevent cascading failures.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import TimeoutPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import TimeoutPrimitive
+from ttadev.primitives import WorkflowContext
 import aiohttp
 import asyncio
 
@@ -88,9 +88,9 @@ Add timeout handling with graceful degradation to cached or simplified responses
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import TimeoutPrimitive, FallbackPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
-from tta_dev_primitives.performance import CachePrimitive
+from ttadev.primitives import TimeoutPrimitive, FallbackPrimitive
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives import CachePrimitive
 
 class LLMTimeoutService:
     def __init__(self):
@@ -170,8 +170,8 @@ Implement timeout handling to prevent query hanging.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import TimeoutPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import TimeoutPrimitive
+from ttadev.primitives import WorkflowContext
 import aiosqlite
 import asyncio
 
@@ -275,8 +275,8 @@ Implement timeout handling for webhook processing with quick responses.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.recovery import TimeoutPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import TimeoutPrimitive
+from ttadev.primitives import WorkflowContext
 import asyncio
 import json
 
@@ -454,7 +454,3 @@ workflow = TimeoutPrimitive(
 ---
 
 **Next Steps:** When cline detects timeout-related patterns, it should automatically suggest TimeoutPrimitive with appropriate configuration and complementary primitives (caching, retry, fallback) based on the specific use case.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Timeout_primitive]]

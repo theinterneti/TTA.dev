@@ -2,6 +2,14 @@
 
 **Primitives that learn from observability data and adapt their behavior over time.**
 
+> [!WARNING]
+> Mixed-current document.
+>
+> The core `ttadev.primitives.adaptive` imports below are still useful, but older Logseq persistence
+> examples in this README describe historical experiments. The current package does not export
+> `LogseqStrategyIntegration`, so treat those sections as background context rather than copy-paste
+> API truth.
+
 ---
 
 ## 🎯 Overview
@@ -13,7 +21,8 @@ The adaptive primitives module provides workflow primitives that **learn from ex
 Instead of static configuration, adaptive primitives use **observability data as input** to learn optimal strategies:
 
 ```python
-from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
+from ttadev.primitives import RetryPrimitive
+from ttadev.primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
 
 # Traditional retry - static configuration
 retry = RetryPrimitive(max_retries=3, backoff_factor=2.0)
@@ -22,7 +31,6 @@ retry = RetryPrimitive(max_retries=3, backoff_factor=2.0)
 adaptive = AdaptiveRetryPrimitive(
     target_primitive=api_call,
     learning_mode=LearningMode.ACTIVE,
-    enable_auto_persistence=True
 )
 # After 50 executions: max_retries=5, backoff_factor=2.5 (learned!)
 ```
@@ -61,8 +69,8 @@ adaptive = AdaptiveRetryPrimitive(
      │ Persists learned strategies
      ▼
 ┌─────────────────────────────────────────────┐
-│    LogseqStrategyIntegration                │
-│  - Knowledge base persistence               │
+│ Historical Logseq persistence concept       │
+│  - Older knowledge-base persistence draft   │
 │  - Strategy pages                           │
 │  - Performance tracking                     │
 │  - Discovery queries                        │
@@ -86,8 +94,8 @@ adaptive = AdaptiveRetryPrimitive(
 4. Circuit Breaker Check
    └─> High failure rate? → Fallback to baseline
 
-5. Persist to Logseq (if enabled)
-   └─> Create strategy pages and journal entries
+5. Optional persistence / review layer
+   └─> Historical drafts used Logseq pages and journal entries
 ```
 
 ---
@@ -97,32 +105,23 @@ adaptive = AdaptiveRetryPrimitive(
 ### Basic Usage
 
 ```python
-from tta_dev_primitives.adaptive import (
-    AdaptiveRetryPrimitive,
-    LearningMode,
-    LogseqStrategyIntegration
-)
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
 
-# 1. Setup Logseq integration (optional but recommended)
-logseq = LogseqStrategyIntegration("my_service")
-
-# 2. Create adaptive retry
+# Create adaptive retry
 adaptive_retry = AdaptiveRetryPrimitive(
     target_primitive=unreliable_api,
     learning_mode=LearningMode.ACTIVE,
-    logseq_integration=logseq,
-    enable_auto_persistence=True
 )
 
-# 3. Use it - learning happens automatically!
+# Use it - learning happens automatically!
 context = WorkflowContext(
     correlation_id="req-123",
     metadata={"environment": "production"}
 )
 result = await adaptive_retry.execute(api_request, context)
 
-# 4. Check learned strategies
+# Check learned strategies
 for name, strategy in adaptive_retry.strategies.items():
     print(f"{name}: {strategy.metrics.success_rate:.1%} success")
 ```
@@ -130,8 +129,8 @@ for name, strategy in adaptive_retry.strategies.items():
 ### Custom Adaptive Primitive
 
 ```python
-from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode, LearningStrategy
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.adaptive import AdaptivePrimitive, LearningMode, LearningStrategy
 
 class AdaptiveCachePrimitive(AdaptivePrimitive[dict, dict]):
     """Cache primitive that learns optimal TTL and size."""
@@ -197,7 +196,7 @@ class AdaptiveCachePrimitive(AdaptivePrimitive[dict, dict]):
 Represents a learned configuration with performance tracking:
 
 ```python
-from tta_dev_primitives.adaptive import LearningStrategy, StrategyMetrics
+from ttadev.primitives.adaptive import LearningStrategy, StrategyMetrics
 
 strategy = LearningStrategy(
     name="production_high_load_v2",
@@ -226,7 +225,7 @@ if strategy.is_validated:
 Controls how aggressive the learning is:
 
 ```python
-from tta_dev_primitives.adaptive import LearningMode
+from ttadev.primitives.adaptive import LearningMode
 
 # DISABLED - No learning (production fallback)
 adaptive = AdaptivePrimitive(learning_mode=LearningMode.DISABLED)
@@ -246,7 +245,7 @@ adaptive = AdaptivePrimitive(learning_mode=LearningMode.ACTIVE)
 Tracks performance of each strategy:
 
 ```python
-from tta_dev_primitives.adaptive import StrategyMetrics
+from ttadev.primitives.adaptive import StrategyMetrics
 
 metrics = StrategyMetrics(
     success_rate=0.94,      # 94% success rate
@@ -334,25 +333,24 @@ adaptive = AdaptiveRetryPrimitive(
 
 ---
 
-## 📊 Logseq Integration
+## 📊 Historical Logseq Integration
+
+> [!WARNING]
+> Historical context only.
+>
+> Earlier adaptive experiments wrote learned strategies into Logseq. The current
+> `ttadev.primitives.adaptive` package does not export `LogseqStrategyIntegration`, so do not treat
+> the examples below as current API guidance.
 
 ### Automatic Persistence
 
 Learned strategies are automatically saved to Logseq:
 
 ```python
-from tta_dev_primitives.adaptive import LogseqStrategyIntegration
-
-logseq = LogseqStrategyIntegration("my_service")
-adaptive = AdaptiveRetryPrimitive(
-    target_primitive=api,
-    logseq_integration=logseq,
-    enable_auto_persistence=True  # Auto-save on learn
-)
-
-# After learning:
-# → Creates: logseq/pages/Strategies/my_service_production_v2.md
-# → Updates: logseq/journals/YYYY_MM_DD.md
+# Historical example only — not part of the current exported adaptive API.
+# Earlier drafts persisted learned strategies into Logseq pages such as:
+# → logseq/pages/Strategies/my_service_production_v2.md
+# → logseq/journals/YYYY_MM_DD.md
 ```
 
 ### Strategy Pages
@@ -437,16 +435,14 @@ context = WorkflowContext(
 )
 ```
 
-### 3. Enable Logseq Persistence
+### 3. Review persistence needs explicitly
 
-Always persist strategies for knowledge sharing:
+If you need persistence for learned strategies, design that adapter explicitly instead of assuming a
+built-in Logseq integration:
 
 ```python
-logseq = LogseqStrategyIntegration("service_name")
-adaptive = AdaptiveRetryPrimitive(
-    logseq_integration=logseq,
-    enable_auto_persistence=True  # Critical for sharing
-)
+adaptive = AdaptiveRetryPrimitive(target_primitive=api)
+# Add your own persistence/reporting layer around learned strategies.
 ```
 
 ### 4. Monitor Learning
@@ -525,7 +521,7 @@ Comprehensive test suite with 5 tests:
 - Basic learning
 - Context awareness
 - Performance improvement
-- Logseq persistence
+- historical Logseq persistence notes
 - Observability integration
 
 ### Example 3: Production Demo
@@ -534,7 +530,7 @@ Comprehensive test suite with 5 tests:
 
 Multi-region API simulation showing real-world usage with different failure patterns per region.
 
-### Example 4: Logseq Integration Demo
+### Example 4: Historical Logseq Integration Demo
 
 **File:** `examples/adaptive_logseq_integration_demo.py`
 
@@ -551,7 +547,7 @@ Complete demonstration of knowledge base integration, strategy pages, and discov
 3. **Implement _consider_new_strategy()**
 
 ```python
-from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningStrategy
+from ttadev.primitives.adaptive import AdaptivePrimitive, LearningStrategy
 
 class MyAdaptivePrimitive(AdaptivePrimitive[InputType, OutputType]):
     async def _execute_with_strategy(
@@ -587,7 +583,7 @@ class MyAdaptivePrimitive(AdaptivePrimitive[InputType, OutputType]):
 
 ```python
 import pytest
-from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
+from ttadev.primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
 
 @pytest.mark.asyncio
 async def test_learning():
@@ -641,34 +637,7 @@ class AdaptiveRetryPrimitive(AdaptivePrimitive[TInput, TOutput]):
         self,
         target_primitive: WorkflowPrimitive[TInput, TOutput],
         learning_mode: LearningMode = LearningMode.VALIDATE,
-        logseq_integration: LogseqStrategyIntegration | None = None,
-        enable_auto_persistence: bool = False,
         **kwargs
-    )
-```
-
-### LogseqStrategyIntegration
-
-```python
-class LogseqStrategyIntegration:
-    def __init__(
-        self,
-        service_name: str,
-        logseq_base_path: Path = Path("logseq")
-    )
-
-    async def save_learned_strategy(
-        self,
-        strategy: LearningStrategy,
-        primitive_type: str,
-        context: str,
-        notes: str | None = None
-    ) -> Path
-
-    async def update_strategy_performance(
-        self,
-        strategy_name: str,
-        new_metrics: StrategyMetrics
     )
 ```
 
@@ -685,5 +654,5 @@ class LogseqStrategyIntegration:
 ---
 
 **Version:** 0.1.0
-**Status:** Production Ready ✅
+**Status:** Experimental foundation / mixed-current documentation
 **Last Updated:** November 7, 2025

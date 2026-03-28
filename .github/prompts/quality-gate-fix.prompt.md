@@ -38,7 +38,7 @@ This workflow guides the systematic resolution of quality gate failures, ensurin
 4. Prioritize fixes
 
 **Observability Note:** Use the current repository observability stack if available. Do not copy
-legacy `.hypertool` tracing imports into new work.
+deprecated Hypertool-era tracing imports into new work.
 
 ```python
 # Example placeholder for repository-native observability hooks
@@ -576,8 +576,3 @@ python .augment/context/cli.py add quality-gate-fix-component-2025-10-20 \
 ---
 
 **Note:** Document all quality gate fixes in `.augment/memory/quality-gates.memory.md` for future reference.
-
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Quality-gate-fix.prompt]]

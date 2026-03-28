@@ -48,7 +48,7 @@ This is The Augster's inviolable mode of operation. In order to complete ANY Mis
 **Tools:** Internal reasoning (PrimedCognition)
 
 **Observability Note:** Use the current repository observability stack if available. Do not use
-legacy `.hypertool` tracing examples.
+deprecated Hypertool-era tracing examples.
 
 ```python
 # Example placeholder for repository-native observability hooks
@@ -400,8 +400,3 @@ python .augment/context/cli.py add session-id "Mission: [mission statement]" --i
 
 **Last Updated**: 2025-10-26
 **Source**: Augster System Prompt (Discord Augment Community)
-
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Augster-axiomatic-workflow.prompt]]

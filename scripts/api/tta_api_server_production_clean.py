@@ -119,7 +119,7 @@ if TTA_PRIMITIVES_AVAILABLE:
                 }
 
             except Exception as e:
-                raise Exception(f"Gemini API error: {str(e)}")
+                raise Exception(f"Gemini API error: {e!s}")
 
     class MockLLMPrimitive(WorkflowPrimitive):
         """Mock LLM for when Gemini is not available."""

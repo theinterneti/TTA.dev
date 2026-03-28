@@ -1,5 +1,12 @@
 # TTA.dev v1.0.0 - Quick Action Items
 
+> [!WARNING]
+> Historical release checklist.
+>
+> This document reflects a November 2025 release-prep snapshot from the older multi-package
+> `packages/...` layout. Keep it as historical context; do not treat the package paths, completion
+> state, or release assumptions here as the current root `ttadev` release process.
+
 **Priority-Ordered Task List for Release Preparation**
 
 **Last Updated:** November 7, 2025 (Updated after completion)

@@ -9,7 +9,7 @@ Shared analysis engine for detecting code patterns and recommending TTA.dev prim
 Detects code patterns using AST analysis:
 
 ```python
-from tta_dev_primitives.analysis import PatternDetector
+from ttadev.primitives.analysis import PatternDetector
 
 detector = PatternDetector()
 patterns = detector.detect(code)
@@ -37,7 +37,7 @@ patterns = detector.detect(code)
 Matches detected patterns to recommended primitives:
 
 ```python
-from tta_dev_primitives.analysis import PrimitiveMatcher
+from ttadev.primitives.analysis import PrimitiveMatcher
 
 matcher = PrimitiveMatcher()
 matches = matcher.match(patterns)
@@ -54,7 +54,7 @@ matches = matcher.match(patterns)
 Provides code templates for primitives:
 
 ```python
-from tta_dev_primitives.analysis import TemplateProvider
+from ttadev.primitives.analysis import TemplateProvider
 
 provider = TemplateProvider()
 
@@ -73,7 +73,7 @@ code = provider.compose(["RetryPrimitive", "CachePrimitive"])
 Main orchestrator combining all components:
 
 ```python
-from tta_dev_primitives.analysis import TTAAnalyzer
+from ttadev.primitives.analysis import TTAAnalyzer
 
 analyzer = TTAAnalyzer()
 result = analyzer.analyze(
@@ -108,7 +108,7 @@ The analysis core is used by both the CLI and MCP server:
 
 ```python
 # CLI uses it directly
-from tta_dev_primitives.analysis import TTAAnalyzer
+from ttadev.primitives.analysis import TTAAnalyzer
 
 analyzer = TTAAnalyzer()
 result = analyzer.analyze(code)
@@ -149,7 +149,7 @@ PRIMITIVES = {
         "name": "CustomPrimitive",
         "category": "custom",
         "description": "Custom primitive description",
-        "import_path": "from tta_dev_primitives.custom import CustomPrimitive",
+        "import_path": "from your_app.primitives import CustomPrimitive",
         "patterns": ["custom_pattern"],
         "use_cases": ["Custom use case"],
     }
@@ -166,7 +166,7 @@ TEMPLATES = {
         "name": "custom_template",
         "description": "Custom template",
         "code": '''
-from tta_dev_primitives.custom import CustomPrimitive
+from your_app.primitives import CustomPrimitive
 
 custom = CustomPrimitive(param=value)
 result = await custom.execute(data, context)
@@ -183,7 +183,7 @@ The analyzer includes structured logging:
 ```python
 import structlog
 
-logger = structlog.get_logger("tta_dev.analysis")
+logger = structlog.get_logger("ttadev.primitives.analysis")
 
 # Logs include:
 # - starting_analysis: Analysis started

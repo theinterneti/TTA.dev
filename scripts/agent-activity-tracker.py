@@ -116,20 +116,19 @@ class AgentActivityHandler(FileSystemEventHandler):
         """Get file type from path."""
         if path.endswith(".py"):
             return "python"
-        elif path.endswith((".js", ".ts", ".jsx", ".tsx")):
+        if path.endswith((".js", ".ts", ".jsx", ".tsx")):
             return "javascript"
-        elif path.endswith(".md"):
+        if path.endswith(".md"):
             return "markdown"
-        elif path.endswith((".yml", ".yaml")):
+        if path.endswith((".yml", ".yaml")):
             return "yaml"
-        elif path.endswith(".json"):
+        if path.endswith(".json"):
             return "json"
-        elif path.endswith(".toml"):
+        if path.endswith(".toml"):
             return "toml"
-        elif path.endswith(".sh"):
+        if path.endswith(".sh"):
             return "shell"
-        else:
-            return "other"
+        return "other"
 
     def _start_session(self) -> None:
         """Start a new tracking session."""

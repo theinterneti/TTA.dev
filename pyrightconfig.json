@@ -1,14 +1,24 @@
 {
   "include": [
-    "platform/*/src",
-    "platform/*/tests",
-    "apps/*/src"
+    "ttadev"
   ],
   "exclude": [
-    "platform/*/examples",
-    "platform/primitives/tests/test_integrations.py",
-    "platform/agent-context/.augment",
-    "platform/apm/langfuse",
+    "ttadev/skills/tests",
+    "ttadev/skills/src",
+    "ttadev/observability/apm/langfuse",
+    "ttadev/primitives/integrations/anthropic_primitive.py",
+    "ttadev/primitives/integrations/google_ai_studio_primitive.py",
+    "ttadev/primitives/integrations/supabase_primitive.py",
+    "ttadev/primitives/integrations/sqlite_primitive.py",
+    "ttadev/primitives/integrations/ollama_primitive.py",
+    "ttadev/primitives/integrations/openai_primitive.py",
+    "ttadev/primitives/ace/llm_integration.py",
+    "ttadev/primitives/apm/setup.py",
+    "ttadev/primitives/observability/prometheus_exporter.py",
+    "ttadev/primitives/observability/prometheus_metrics.py",
+    "ttadev/observability/observability_integration/apm_setup.py",
+    "ttadev/observability/websocket_handler.py",
+    "ttadev/integrations",
     "**/__pycache__",
     "**/*.pyc",
     "**/node_modules",
@@ -16,15 +26,7 @@
     "**/venv"
   ],
   "extraPaths": [
-    ".venv/lib/python3.11/site-packages",
-    "platform/primitives/src",
-    "platform/observability/src",
-    "platform/agent-context/src",
-    "platform/agent-coordination/src",
-    "platform/kb-automation/src",
-    "platform/documentation/src",
-    "platform/integrations/src",
-    "platform/skills/src"
+    ".venv/lib/python3.14/site-packages"
   ],
   "venvPath": ".",
   "venv": ".venv",

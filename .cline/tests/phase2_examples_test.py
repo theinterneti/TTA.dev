@@ -6,6 +6,7 @@ Tests the new examples and MCP server functionality to ensure quality and perfor
 """
 
 import asyncio
+import importlib.util
 
 # Add the parent directory to Python path for imports
 import sys
@@ -16,7 +17,13 @@ import pytest
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from .mcp_server.tta_recommendations import PatternDetector, TTAdevMCPService
+MODULE_PATH = Path(__file__).parent.parent / "mcp-server" / "tta_recommendations.py"
+MODULE_SPEC = importlib.util.spec_from_file_location("tta_recommendations", MODULE_PATH)
+assert MODULE_SPEC is not None and MODULE_SPEC.loader is not None
+TTA_RECOMMENDATIONS = importlib.util.module_from_spec(MODULE_SPEC)
+MODULE_SPEC.loader.exec_module(TTA_RECOMMENDATIONS)
+PatternDetector = TTA_RECOMMENDATIONS.PatternDetector
+TTAdevMCPService = TTA_RECOMMENDATIONS.TTAdevMCPService
 
 
 class TestPhase2Examples:
@@ -40,7 +47,7 @@ class TestPhase2Examples:
         # Check for proper code examples
         assert "TimeoutPrimitive" in content
         assert "WorkflowContext" in content
-        assert "from tta_dev_primitives" in content
+        assert "from ttadev.primitives" in content
 
     def test_parallel_primitive_examples_exist(self):
         """Test that parallel primitive examples exist and are well-formed"""
@@ -60,7 +67,7 @@ class TestPhase2Examples:
         # Check for proper code examples
         assert "ParallelPrimitive" in content
         assert "WorkflowContext" in content
-        assert "from tta_dev_primitives" in content
+        assert "from ttadev.primitives" in content
 
     def test_router_primitive_examples_exist(self):
         """Test that router primitive examples exist and are well-formed"""
@@ -80,7 +87,7 @@ class TestPhase2Examples:
         # Check for proper code examples
         assert "RouterPrimitive" in content
         assert "WorkflowContext" in content
-        assert "from tta_dev_primitives" in content
+        assert "from ttadev.primitives" in content
 
     def test_workflow_examples_exist(self):
         """Test that workflow examples exist and are well-formed"""
@@ -423,7 +430,8 @@ class APIService:
         assert len(result["context"]["detected_issues"]) > 0
         assert len(result["context"]["optimization_opportunities"]) > 0
 
-    def test_performance_under_load(self):
+    @pytest.mark.asyncio
+    async def test_performance_under_load(self):
         """Test performance under multiple concurrent requests"""
         service = TTAdevMCPService()
 
@@ -500,7 +508,7 @@ class TestQualityStandards:
             content = file_path.read_text()
 
             # Should have proper imports
-            assert "from tta_dev_primitives" in content
+            assert "from ttadev.primitives" in content
             assert "WorkflowContext" in content
 
             # Should have async/await patterns

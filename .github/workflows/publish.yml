@@ -1,21 +1,17 @@
 name: Publish to PyPI
 
 # Manually triggered via workflow_dispatch to publish a specific tag to PyPI.
-# Before using this workflow, you must complete the one-time setup described in PUBLISHING.md.
+# Before using this workflow, complete the one-time setup described in PUBLISHING.md.
 #
-# For a simpler release (no PyPI account needed), use the release.yml workflow instead,
-# which is triggered automatically by tag pushes and uploads artifacts to GitHub Releases.
-#
-# Manual setup required (one-time per package):
-#   - Register PyPI trusted publisher at https://pypi.org/manage/account/publishing/
-#   - Publisher: GitHub Actions, repo: theinterneti/TTA.dev, workflow: publish.yml
-#   - Environment name: pypi
+# This active workflow currently publishes the root `ttadev` package only.
+# Historical package tags like `packages/primitives/v...` belonged to an older
+# multi-package layout and are not the current default release path.
 
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to publish (e.g. packages/primitives/v1.3.0)'
+        description: 'Release tag to publish (e.g. packages/ttadev/v0.1.0)'
         required: true
         type: string
 
@@ -29,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       package-dir: ${{ steps.extract.outputs.package-dir }}
+      package-path: ${{ steps.extract.outputs.package-path }}
       package-name: ${{ steps.extract.outputs.package-name }}
       version: ${{ steps.extract.outputs.version }}
     steps:
@@ -45,27 +42,27 @@ jobs:
             exit 1
           fi
 
-          # Map dir to PyPI package name
+          # Map current tag dirs to active package metadata
           declare -A DIR_TO_NAME=(
-            ["primitives"]="tta-dev-primitives"
-            ["observability"]="tta-observability-integration"
-            ["agent-context"]="universal-agent-context"
-            ["integrations"]="tta-dev-integrations"
-            ["agent-coordination"]="tta-agent-coordination"
-            ["dolt"]="tta-dolt-primitives"
+            ["ttadev"]="ttadev"
+          )
+          declare -A DIR_TO_PATH=(
+            ["ttadev"]="."
           )
 
           PKG_NAME="${DIR_TO_NAME[$PKG_DIR]}"
-          if [[ -z "$PKG_NAME" ]]; then
+          PKG_PATH="${DIR_TO_PATH[$PKG_DIR]}"
+          if [[ -z "$PKG_NAME" || -z "$PKG_PATH" ]]; then
             echo "ERROR: Unknown package directory '$PKG_DIR'" >&2
             echo "Known dirs: ${!DIR_TO_NAME[*]}" >&2
             exit 1
           fi
 
           echo "package-dir=$PKG_DIR" >> "$GITHUB_OUTPUT"
+          echo "package-path=$PKG_PATH" >> "$GITHUB_OUTPUT"
           echo "package-name=$PKG_NAME" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Publishing $PKG_NAME v$VERSION from platform/$PKG_DIR"
+          echo "Publishing $PKG_NAME v$VERSION from $PKG_PATH"
 
   build-and-publish:
     name: Build and publish ${{ needs.extract-package.outputs.package-name }}
@@ -84,11 +81,11 @@ jobs:
         run: uv python install 3.11
 
       - name: Build package
-        working-directory: platform/${{ needs.extract-package.outputs.package-dir }}
+        working-directory: ${{ needs.extract-package.outputs.package-path }}
         run: uv build --out-dir dist
 
       - name: Verify built artifacts
-        working-directory: platform/${{ needs.extract-package.outputs.package-dir }}
+        working-directory: ${{ needs.extract-package.outputs.package-path }}
         run: |
           ls -la dist/
           # Ensure we have both wheel and sdist
@@ -107,5 +104,5 @@ jobs:
       - name: Publish to PyPI (OIDC)
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # release/v1
         with:
-          packages-dir: platform/${{ needs.extract-package.outputs.package-dir }}/dist/
+          packages-dir: ${{ needs.extract-package.outputs.package-path }}/dist/
           print-hash: true

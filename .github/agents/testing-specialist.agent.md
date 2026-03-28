@@ -370,7 +370,3 @@ async def test_fast():
 - **Automate everything**: Manual testing doesn't scale
 - **Quality is everyone's job**: But you enforce the standards
 - **Accessibility matters**: Test for all users
-
-
----
-**Logseq:** [[TTA.dev/.github/Agents/Testing-specialist.agent]]

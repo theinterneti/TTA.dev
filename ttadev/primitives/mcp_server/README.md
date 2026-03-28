@@ -2,25 +2,26 @@
 
 Model Context Protocol server exposing TTA.dev primitives as tools for AI assistants.
 
+> [!WARNING]
+> Mixed-current package-local MCP document.
+>
+> The MCP server internals in `ttadev.primitives.mcp_server` are active, but the older
+> `tta-dev-primitives` / `tta-dev-mcp` packaging story is not the current top-level package truth.
+> Prefer the verified module path and repo-local `uv run ...` examples below.
+
 ## Installation
 
-The MCP server is included with the `tta-dev-primitives` package:
+If you are working from this repository, install the current package surface:
 
 ```bash
-uv add tta-dev-primitives
+uv add ttadev
 ```
 
 ## Running the Server
 
 ```bash
-# Via entry point
-tta-dev-mcp
-
-# Via CLI
-tta-dev serve
-
 # Via Python module
-python -m tta_dev_primitives.mcp_server
+python -m ttadev.primitives.mcp_server
 ```
 
 ## Available Tools
@@ -64,7 +65,7 @@ Get detailed information about a specific primitive.
 {
   "name": "RetryPrimitive",
   "description": "Automatic retry with exponential backoff",
-  "import_path": "from tta_dev_primitives.recovery import RetryPrimitive",
+  "import_path": "from ttadev.primitives import RetryPrimitive",
   "category": "recovery",
   "use_cases": ["Handle transient failures", "Retry API calls"],
   "parameters": [
@@ -121,7 +122,7 @@ Generate example code composing multiple primitives.
 **Returns:**
 ```json
 {
-  "code": "from tta_dev_primitives.recovery import RetryPrimitive...",
+  "code": "from ttadev.primitives import RetryPrimitive...",
   "explanation": "This workflow composes RetryPrimitive and CachePrimitive..."
 }
 ```
@@ -137,7 +138,7 @@ Add to `.vscode/settings.json`:
   "mcp.servers": {
     "tta-dev": {
       "command": "uv",
-      "args": ["run", "--directory", "${workspaceFolder}/platform/primitives", "tta-dev-mcp"],
+      "args": ["run", "python", "-m", "ttadev.primitives.mcp_server"],
       "description": "TTA.dev Primitives"
     }
   }
@@ -153,7 +154,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "tta-dev": {
       "command": "uv",
-      "args": ["run", "--directory", "/path/to/TTA.dev/platform/primitives", "tta-dev-mcp"]
+      "args": ["run", "python", "-m", "ttadev.primitives.mcp_server"]
     }
   }
 }

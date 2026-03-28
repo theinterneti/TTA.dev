@@ -80,6 +80,8 @@ class SQLiteSpanExporter(SpanExporter):
             cursor = conn.cursor()
 
             for span in spans:
+                if span.context is None:
+                    continue
                 trace_id = format(span.context.trace_id, "032x")
                 span_id = format(span.context.span_id, "016x")
                 parent_span_id = format(span.parent.span_id, "016x") if span.parent else None

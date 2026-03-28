@@ -23,7 +23,7 @@ from typing import Any
 
 # MCP server imports
 try:
-    import mcp.types as types
+    from mcp import types
     from mcp.server import Server
     from mcp.server.models import InitializationOptions
     from mcp.server.stdio import stdio_server
@@ -204,10 +204,9 @@ class PatternDetector:
 
         if lines_of_code > 200 or pattern_count >= 6:
             return "high"
-        elif lines_of_code > 50 or pattern_count >= 3:
+        if lines_of_code > 50 or pattern_count >= 3:
             return "medium"
-        else:
-            return "low"
+        return "low"
 
 
 class PrimitiveMatcher:
@@ -368,8 +367,8 @@ class TemplateProvider:
     def __init__(self):
         self.templates = {
             "TimeoutPrimitive": {
-                "basic_template": """from tta_dev_primitives.recovery import TimeoutPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "basic_template": """from ttadev.primitives import TimeoutPrimitive
+from ttadev.primitives import WorkflowContext
 
 # Create timeout primitive
 timeout_primitive = TimeoutPrimitive(
@@ -382,8 +381,8 @@ timeout_primitive = TimeoutPrimitive(
 # Use in workflow
 context = WorkflowContext(workflow_id="timeout_example")
 result = await timeout_primitive.execute(data, context)""",
-                "circuit_breaker_template": """from tta_dev_primitives.recovery import TimeoutPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "circuit_breaker_template": """from ttadev.primitives import TimeoutPrimitive
+from ttadev.primitives import WorkflowContext
 
 class CircuitBreaker:
     def __init__(self):
@@ -406,8 +405,8 @@ class CircuitBreaker:
                 ],
             },
             "ParallelPrimitive": {
-                "basic_template": """from tta_dev_primitives.core.parallel import ParallelPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "basic_template": """from ttadev.primitives import ParallelPrimitive
+from ttadev.primitives import WorkflowContext
 
 # Create parallel execution
 parallel_workflow = ParallelPrimitive([
@@ -430,8 +429,8 @@ workflow = function1 | function2 | function3""",
                 ],
             },
             "RouterPrimitive": {
-                "basic_template": """from tta_dev_primitives.core.routing import RouterPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "basic_template": """from ttadev.primitives import RouterPrimitive
+from ttadev.primitives import WorkflowContext
 
 # Create router
 router = RouterPrimitive(
@@ -455,8 +454,8 @@ result = await router.execute(data, context)""",
                 ],
             },
             "CachePrimitive": {
-                "basic_template": """from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+                "basic_template": """from ttadev.primitives import CachePrimitive
+from ttadev.primitives import WorkflowContext
 
 # Create cache primitive
 cached_function = CachePrimitive(
@@ -885,28 +884,27 @@ if Server is not None:
 
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            elif name == "get_primitive_info":
+            if name == "get_primitive_info":
                 result = await tta_service.get_primitive_info(
                     primitive_name=arguments["primitive_name"]
                 )
 
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            elif name == "search_examples":
+            if name == "search_examples":
                 result = await tta_service.search_examples(query=arguments["query"])
 
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            elif name == "get_performance_metrics":
+            if name == "get_performance_metrics":
                 result = tta_service.get_performance_metrics()
 
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            else:
-                return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
+            return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
 
         except Exception as e:
-            return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+            return [types.TextContent(type="text", text=f"Error: {e!s}")]
 
     async def main():
         """Main entry point for MCP server"""

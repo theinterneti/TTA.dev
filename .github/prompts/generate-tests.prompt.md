@@ -9,7 +9,7 @@ Read the target file and understand its functionality. Reference `PRIMITIVES_CAT
 Generate comprehensive tests for the specified code file, ensuring 100% coverage and adherence to TTA.dev standards.
 
 **Observability Note:** If the repository has current observability configured, attach test
-generation work to that stack. Do not rely on legacy `.hypertool` tracing imports.
+generation work to that stack. Do not rely on deprecated Hypertool-era tracing imports.
 
 ## Requirements
 
@@ -95,7 +95,3 @@ class Test<ClassName>:
 - Group related tests in classes
 - Use parametrize for similar tests
 - Follow AAA pattern (Arrange, Act, Assert)
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Generate-tests.prompt]]

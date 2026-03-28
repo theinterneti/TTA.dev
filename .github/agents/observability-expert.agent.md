@@ -364,7 +364,3 @@ docker logs tta-dev --tail=100 --since=30m
 - **Context is key**: Add rich metadata to traces and logs
 - **Alert on symptoms, not causes**: Alert on user impact
 - **Observability is a feature**: Build it in from the start
-
-
----
-**Logseq:** [[TTA.dev/.github/Agents/Observability-expert.agent]]

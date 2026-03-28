@@ -24,7 +24,7 @@ async def process_item(item: dict, ctx: WorkflowContext) -> dict:
 
 async def main():
     # Create parallel processor
-    processor = ParallelPrimitive(LambdaPrimitive(process_item))
+    processor = ParallelPrimitive([LambdaPrimitive(process_item)])
 
     # Process 5 items concurrently
     items = [{"id": i, "value": i * 10} for i in range(1, 6)]

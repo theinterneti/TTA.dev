@@ -5,17 +5,17 @@ for AI agents like Claude, Copilot, and Cline.
 
 Usage:
     # As module
-    python -m tta_dev_primitives.mcp_server
+    python -m ttadev.primitives.mcp_server
 
-    # Via CLI
+    # Via historical package-local CLI wrapper
     tta-dev serve
 
     # In Claude Desktop config
     {
         "mcpServers": {
             "tta-dev": {
-                "command": "uvx",
-                "args": ["tta-dev-primitives"]
+                "command": "uv",
+                "args": ["run", "python", "-m", "ttadev.primitives.mcp_server"]
             }
         }
     }

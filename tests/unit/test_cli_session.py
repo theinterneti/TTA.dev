@@ -175,7 +175,7 @@ def test_show_session_not_found_exits_1(tmp_path: Path) -> None:
 
 
 def test_show_session_ambiguous_exits_1(tmp_path: Path) -> None:
-    import unittest.mock as mock
+    from unittest import mock
 
     ids = ["ffffffff-0000-0000-0000-000000000001", "ffffffff-0000-0000-0000-000000000002"]
     id_iter = iter(ids)

@@ -61,7 +61,3 @@ This project and everyone participating in it is governed by the [TTA.dev Code o
 ## Any questions?
 
 Feel free to open an issue or start a discussion on the [GitHub repository](https://github.com/theinterneti/TTA.dev).
-
-
----
-**Logseq:** [[TTA.dev/Contributing]]

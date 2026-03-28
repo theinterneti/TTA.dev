@@ -5,6 +5,10 @@ from __future__ import annotations
 import argparse
 import json
 import textwrap
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ttadev.agents.task import AgentResult
 
 
 def register_agent_subcommands(sub: argparse._SubParsersAction) -> None:  # type: ignore[type-arg]
@@ -186,8 +190,9 @@ def _cmd_run(args: argparse.Namespace) -> int:
                 reg = get_registry()
                 agent_class = reg.get(args.name)
                 spec = getattr(agent_class, "_class_spec", None)
-                print("\n[dry-run] System prompt preview:\n")
-                print(textwrap.indent(spec.system_prompt[:300] + "...", "  "))
+                if spec is not None:
+                    print("\n[dry-run] System prompt preview:\n")
+                    print(textwrap.indent(spec.system_prompt[:300] + "...", "  "))
             except KeyError:
                 print(f"[dry-run] Warning: agent {args.name!r} not registered")
         return 0
@@ -212,7 +217,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
-async def _run_agent(args: argparse.Namespace, task: object) -> object | None:
+async def _run_agent(args: argparse.Namespace, task: object) -> AgentResult | None:
     from ttadev.agents.registry import get_registry
     from ttadev.primitives.core.base import WorkflowContext
 

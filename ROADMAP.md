@@ -36,16 +36,16 @@ for the longer-term design direction.
 
 ### Known gaps
 
-- onboarding docs and older demos are still being migrated to the current APIs
+- not every package-local or historical doc has been reconciled with the current proof path yet
 - Pyright still reports significant type issues
 - some integrations and knowledge-base surfaces remain partial or stubbed
-- the “one canonical proof path” story has only recently been narrowed and re-verified
+- the “one canonical proof path” story is now in place, but broader supporting examples still lag
 
 ---
 
 ## Phase 1: Foundation (substantial, not yet fully production-ready)
 
-**Status:** Mostly implemented, verification and cleanup still in progress
+**Status:** Mostly implemented, with cleanup and reality-alignment still in progress
 
 ### Delivered components
 
@@ -84,7 +84,8 @@ for the longer-term design direction.
 - ✅ observability server entrypoint
 - ✅ v2 API routes and dashboard assets
 - ✅ trace ingestion from `.observability/traces.jsonl`
-- ⚠ legacy entrypoints and docs still being cleaned up
+- ✅ one supported observability entrypoint documented at `python -m ttadev.observability`
+- ⚠ compatibility surfaces still exist for older entrypoints and v1 API consumers
 
 #### 5. Testing and developer support
 
@@ -92,25 +93,48 @@ for the longer-term design direction.
 
 - ✅ large automated test suite
 - ✅ repo quality gate hook
-- ⚠ type-health and public demo health still lag behind test volume
+- ✅ lightweight public demo scripts now match the current API surface
+- ⚠ type-health and broader example coverage still lag behind test volume
 
 ### Phase 1 remaining work
 
-- repair or replace broken public demos
-- finish observability entrypoint migration in docs
 - reduce Pyright failures in `ttadev/`
-- align top-level docs and setup output with the verified proof path
+- keep non-canonical and package-local docs aligned with the verified proof path
+- clarify which backward-compatibility surfaces are transitional vs supported long term
+- expand the set of runnable, current-API examples beyond the narrow proof path
 
 ---
 
 ## Phase 2: Role-Based Agent System (partially implemented, still maturing)
 
-**Status:** Partially implemented in code; documentation and validation still catching up
+**Status:** Partially implemented in code; stable user-facing workflows and examples still limited
 
 **Current implementation locations:**
 
 - `ttadev/agents/`
 - `ttadev/workflows/`
+
+### How L0 fits Phase 2
+
+The L0 developer control plane now lives in:
+
+- `ttadev/control_plane/`
+- `ttadev/cli/control.py`
+- `ttadev/primitives/mcp_server/server.py`
+
+Its role is not to become a parallel product inside the repo. Its role is to
+make Phase 2 real by giving multi-agent work a shared local backbone for:
+
+- task ownership
+- active run state
+- required review/approval gates
+- workspace and file coordination
+- audit-friendly workflow inspection
+
+That means the next L0 milestone should be judged against the Phase 2 success
+criteria below: if a control-plane feature does not help prove one documented,
+repeatable multi-agent workflow, it is probably not the highest-leverage next
+slice.
 
 ### Already present
 
@@ -118,18 +142,50 @@ for the longer-term design direction.
 - ✅ agent router
 - ✅ multiple domain-specific agent classes
 - ✅ tool-call loop and quality-gate oriented workflow building blocks
+- ✅ local L0 control-plane backbone for task/run/gate/lock/ownership workflows
 
 ### Still needed
 
 - clearer end-to-end examples
 - stronger documentation around real agent workflows
 - better validation of what is stable vs experimental
+- broader workflow coverage beyond the first real proof path
 
 ### Near-term success criteria
 
-- [ ] one documented, repeatable multi-agent workflow that stays green
+- [x] one documented, repeatable multi-agent workflow that stays green
+- [x] integration test proves 3-agent workflow with L0 tracking (no API key required)
 - [ ] roadmap and docs fully aligned with actual agent capabilities
 - [ ] fewer type issues in agent-facing modules
+
+### Current proof workflow
+
+**CI-safe (no API key):**
+
+```bash
+uv run pytest tests/integration/test_multi_agent_proof.py -v
+```
+
+**Live CLI path (requires Ollama or `OPENROUTER_API_KEY`):**
+
+```bash
+tta workflow run feature_dev --goal "Add password reset flow" --track-l0 --no-confirm
+tta control task show <task_id>
+```
+
+That path proves:
+
+- one top-level L0 task per workflow execution
+- one L0 run tied to the orchestrator
+- per-step workflow metadata and confidence on the tracked task
+- inspectable failure/completion state through the existing control-plane CLI
+
+### Phase 2 L0 priorities
+
+1. ✅ prove one repeatable multi-agent workflow on top of the current L0 surface (completed 2026-03-26)
+2. deepen gate semantics only where that workflow needs them
+3. improve telemetry attribution enough to explain who owns active workflow steps
+4. connect more agent-facing surfaces to L0 state instead of creating parallel coordination models
 
 ---
 
@@ -280,15 +336,15 @@ Pre-built workflows for common tasks:
 
 ### For New Users
 
-**What you should use NOW:**
+**What you can experiment with now (beyond the canonical proof path):**
 
-1. **Start with lifecycle primitives** - Check deployment readiness
+1. **Try lifecycle primitives** - Explore deployment-readiness style checks
 
    ```bash
    uv run python scripts/assess_deployment_readiness.py --target your-project
    ```
 
-   2. **Use core workflow primitives** - Build reliable workflows
+2. **Use core workflow primitives** - Build reliable workflows
 
    ```python
    from ttadev.primitives import FallbackPrimitive, RetryPrimitive
@@ -300,7 +356,7 @@ Pre-built workflows for common tasks:
    )
    ```
 
-   3. **Add observability** - Monitor your workflows
+3. **Add observability** - Monitor your workflows
 
    ```bash
    uv run python -m ttadev.observability
@@ -308,9 +364,9 @@ Pre-built workflows for common tasks:
 
 **What to wait for:**
 
-- 📋 Specialized agent classes (Phase 2)
+- 📋 Stable, well-documented multi-agent workflows
 - 📋 Interactive guided workflows (Phase 3)
-- 📋 Knowledge base queries (Phase 4)
+- 📋 Knowledge base queries integrated into supported workflows
 
 ### Building Agent Patterns Now
 
@@ -374,26 +430,20 @@ See: Phase 2 specs and examples are still being aligned; do not assume a canonic
 
 ## Success Stories
 
-*This section is aspirational placeholder material, not verified adoption data yet.*
+*This section is illustrative placeholder material, not verified repository-level adoption data yet.*
 
-### Using Lifecycle Primitives
+### Outcomes we want to validate over time
 
-- ✅ 3 MCP servers validated and deployed to GitHub Registry
-- ✅ 2 production applications using stage management
-- ✅ 100% reduction in "forgot to update version" errors
-
-### Using Core Primitives
-
-- ✅ 40% cost reduction with CachePrimitive
-- ✅ 99.9% uptime with FallbackPrimitive cascade
-- ✅ 10x faster development with composable patterns
+- evidence that primitives reduce repeated workflow boilerplate
+- real examples showing observability helps debug agent or workflow behavior
+- measured cases where caching, retries, or fallbacks improve reliability or cost
 
 ---
 
 ## Timeline Summary
 
-| Phase | Status | Timeline | Key Deliverable |
-|-------|--------|----------|-----------------|
+| Phase | Status | Target window | Key Deliverable |
+|-------|--------|---------------|-----------------|
 | Phase 1: Foundation | ⚠ Mostly implemented | Q4 2025 | Core primitives + observability foundation |
 | Phase 2: Agents | ⚠ Partially implemented | Q1 2026 | Role-based agent system |
 | Phase 3: Guided Workflows | 📋 Planned | Q2 2026 | Interactive step-by-step guidance |

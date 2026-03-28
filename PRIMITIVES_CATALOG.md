@@ -2,28 +2,22 @@
 
 **Complete Reference for All Workflow Primitives**
 
-**Last Updated:** 2026-03-07
+**Last Updated:** 2026-03-26
 
 ---
 
-> [!WARNING]
-> This catalog is still being migrated from older package layouts and examples.
-> The most trustworthy current proof path is in [`GETTING_STARTED.md`](GETTING_STARTED.md),
-> [`QUICKSTART.md`](QUICKSTART.md), and the runnable script
-> [`scripts/test_realtime_traces.py`](scripts/test_realtime_traces.py).
->
-> In particular:
-> - some sections still use the older `tta_dev_primitives` import paths instead of the current
->   `ttadev.primitives` namespace
-> - some adaptive and Logseq examples describe historical or incomplete surfaces
-> - examples in this file should be treated as reference-in-progress until the catalog refresh lands
+> [!NOTE]
+> All import examples in this file use the current `ttadev.primitives.*` namespace.
+> The `extensions` section still has a mixed-current note because some lazy-import metadata
+> internally maps to older package names — prefer direct module imports there.
+> For a working end-to-end proof, see [`tests/integration/test_multi_agent_proof.py`](tests/integration/test_multi_agent_proof.py).
 
 ## Current reality first
 
 If you are trying to build or verify something today, prefer:
 
 - `from ttadev.primitives import ...`
-- `from ttadev.primitives.core.base import WorkflowContext`
+- `from ttadev.primitives import WorkflowContext`
 - `uv run python -m ttadev.observability`
 - `uv run python scripts/test_realtime_traces.py`
 
@@ -42,7 +36,7 @@ This catalog provides a complete reference for all TTA.dev workflow primitives, 
 5. [Orchestration Primitives](#orchestration-primitives) - Multi-agent coordination
 6. [Testing Primitives](#testing-primitives) - Testing utilities
 7. [Observability Primitives](#observability-primitives) - Tracing and metrics
-8. [ACE Framework Agents](#ace-framework-agents) - LLM-powered code generation and learning
+8. [ACE Framework Primitives](#ace-framework-primitives) - LLM-powered code generation and learning
 9. [Extension Modules](#extension-modules) - Specialized non-core primitives
 
 ---
@@ -55,10 +49,10 @@ This catalog provides a complete reference for all TTA.dev workflow primitives, 
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives import WorkflowPrimitive, WorkflowContext
+from ttadev.primitives import WorkflowPrimitive, WorkflowContext
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/core/base.py\`](platform/primitives/src/tta_dev_primitives/core/base.py)
+**Source:** [\`ttadev/primitives/core/base.py\`](ttadev/primitives/core/base.py)
 
 **Type Parameters:**
 
@@ -113,10 +107,10 @@ result = await primitive.execute("hello", context)
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives import SequentialPrimitive
+from ttadev.primitives import SequentialPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/core/sequential.py\`](platform/primitives/src/tta_dev_primitives/core/sequential.py)
+**Source:** [\`ttadev/primitives/core/sequential.py\`](ttadev/primitives/core/sequential.py)
 
 **Usage:**
 \`\`\`python
@@ -165,10 +159,10 @@ responsible for undoing the side effects of `forward` when a failure occurs.
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives import ParallelPrimitive
+from ttadev.primitives import ParallelPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/core/parallel.py\`](platform/primitives/src/tta_dev_primitives/core/parallel.py)
+**Source:** [\`ttadev/primitives/core/parallel.py\`](ttadev/primitives/core/parallel.py)
 
 **Usage:**
 \`\`\`python
@@ -204,10 +198,10 @@ results = await workflow.execute(input_data, context)
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives import ConditionalPrimitive
+from ttadev.primitives import ConditionalPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/core/conditional.py\`](platform/primitives/src/tta_dev_primitives/core/conditional.py)
+**Source:** [\`ttadev/primitives/core/conditional.py\`](ttadev/primitives/core/conditional.py)
 
 **Usage:**
 \`\`\`python
@@ -226,10 +220,10 @@ workflow = ConditionalPrimitive(
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.core import RouterPrimitive
+from ttadev.primitives.core import RouterPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/core/routing.py\`](platform/primitives/src/tta_dev_primitives/core/routing.py)
+**Source:** [\`ttadev/primitives/core/routing.py\`](ttadev/primitives/core/routing.py)
 
 **Usage:**
 \`\`\`python
@@ -254,10 +248,10 @@ router = RouterPrimitive(
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.recovery import RetryPrimitive
+from ttadev.primitives.recovery import RetryPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/recovery/retry.py\`](platform/primitives/src/tta_dev_primitives/recovery/retry.py)
+**Source:** [\`ttadev/primitives/recovery/retry.py\`](ttadev/primitives/recovery/retry.py)
 
 **Usage:**
 \`\`\`python
@@ -278,10 +272,10 @@ reliable_llm = RetryPrimitive(
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.recovery import FallbackPrimitive
+from ttadev.primitives.recovery import FallbackPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/recovery/fallback.py\`](platform/primitives/src/tta_dev_primitives/recovery/fallback.py)
+**Source:** [\`ttadev/primitives/recovery/fallback.py\`](ttadev/primitives/recovery/fallback.py)
 
 **Usage:**
 \`\`\`python
@@ -299,10 +293,10 @@ workflow = FallbackPrimitive(
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.recovery import TimeoutPrimitive
+from ttadev.primitives.recovery import TimeoutPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/recovery/timeout.py\`](platform/primitives/src/tta_dev_primitives/recovery/timeout.py)
+**Source:** [\`ttadev/primitives/recovery/timeout.py\`](ttadev/primitives/recovery/timeout.py)
 
 **Usage:**
 \`\`\`python
@@ -321,14 +315,14 @@ protected_api = TimeoutPrimitive(
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.recovery import CompensationPrimitive
+from ttadev.primitives.recovery import CompensationPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/recovery/compensation.py\`](platform/primitives/src/tta_dev_primitives/recovery/compensation.py)
+**Source:** [\`ttadev/primitives/recovery/compensation.py\`](ttadev/primitives/recovery/compensation.py)
 
 **Usage:**
 \`\`\`python
-from tta_dev_primitives.recovery import CompensationPrimitive
+from ttadev.primitives.recovery import CompensationPrimitive
 
 workflow = CompensationPrimitive(
     forward=process_order,
@@ -346,10 +340,10 @@ workflow = CompensationPrimitive(
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.recovery import CircuitBreakerPrimitive
+from ttadev.primitives.recovery import CircuitBreakerPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/recovery/circuit_breaker.py\`](platform/primitives/src/tta_dev_primitives/recovery/circuit_breaker.py)
+**Source:** [\`ttadev/primitives/recovery/circuit_breaker.py\`](ttadev/primitives/recovery/circuit_breaker.py)
 
 **States:**
 - **Closed** - Normal operation, requests pass through
@@ -358,7 +352,7 @@ from tta_dev_primitives.recovery import CircuitBreakerPrimitive
 
 **Usage:**
 \`\`\`python
-from tta_dev_primitives.recovery import CircuitBreakerPrimitive
+from ttadev.primitives.recovery import CircuitBreakerPrimitive
 
 # Protect an unreliable service
 protected_service = CircuitBreakerPrimitive(
@@ -395,10 +389,10 @@ except CircuitBreakerOpenError:
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.performance import CachePrimitive
+from ttadev.primitives.performance import CachePrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/performance/cache.py\`](platform/primitives/src/tta_dev_primitives/performance/cache.py)
+**Source:** [\`ttadev/primitives/performance/cache.py\`](ttadev/primitives/performance/cache.py)
 
 **Usage:**
 \`\`\`python
@@ -425,12 +419,12 @@ cached_llm = CachePrimitive(
 **Import:**
 
 ```python
-from tta_dev_primitives.performance import MemoryPrimitive, InMemoryStore, create_memory_key
+from ttadev.primitives.performance.memory import MemoryPrimitive, InMemoryStore, create_memory_key
 ```
 
-**Source:** [`platform/primitives/src/tta_dev_primitives/performance/memory.py`](platform/primitives/src/tta_dev_primitives/performance/memory.py)
+**Source:** [`ttadev/primitives/performance/memory.py`](ttadev/primitives/performance/memory.py)
 
-**Documentation:** [`platform/primitives/docs/memory/README.md`](platform/primitives/docs/memory/README.md)
+**Related Spec:** [`docs/reference/specs/primitives/memory-primitive.spec.md`](docs/reference/specs/primitives/memory-primitive.spec.md)
 
 **Usage:**
 
@@ -485,7 +479,7 @@ This primitive demonstrates the **"Fallback first, enhancement optional"** patte
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.collaboration import (
+from ttadev.primitives.collaboration import (
     GitCollaborationPrimitive,
     AgentIdentity,
     IntegrationFrequency,
@@ -494,7 +488,7 @@ from tta_dev_primitives.collaboration import (
 )
 \`\`\`
 
-**Source:** [\`packages/tta-dev-primitives/src/tta_dev_primitives/collaboration/git_integration.py\`](packages/tta-dev-primitives/src/tta_dev_primitives/collaboration/git_integration.py)
+**Source:** [\`ttadev/primitives/collaboration/git_integration.py\`](ttadev/primitives/collaboration/git_integration.py)
 
 **Research Foundation:**
 - Martin Fowler's "Patterns for Managing Source Code Branches"
@@ -597,13 +591,13 @@ policy = CommitFrequencyPolicy(
 - 🚀 **Improves Velocity** - Small, frequent merges reduce risk
 - 🤝 **Enables Collaboration** - Clear agent attribution and coordination
 
-**Full Guide:** [\`packages/tta-dev-primitives/docs/collaboration/GIT_COLLABORATION_GUIDE.md\`](packages/tta-dev-primitives/docs/collaboration/GIT_COLLABORATION_GUIDE.md)
+**Full Guide:** [\`docs/reference/GIT_COLLABORATION_PRIMITIVE_COMPLETE.md\`](docs/reference/GIT_COLLABORATION_PRIMITIVE_COMPLETE.md)
 
 ---
 
 ## Skill Primitives
 
-**Package:** `tta-skill-primitives` (`platform/skills/`)
+**Package:** `tta-skill-primitives` (`ttadev/skills/`)
 
 Skills are self-describing, SKILL.md-compatible agent capabilities built on `WorkflowPrimitive`. They follow the open SKILL.md specification adopted by mainstream AI agent frameworks.
 
@@ -616,12 +610,12 @@ Skills are self-describing, SKILL.md-compatible agent capabilities built on `Wor
 from tta_skill_primitives import Skill, SkillDescriptor
 ```
 
-**Source:** [`platform/skills/src/tta_skill_primitives/core/base.py`](platform/skills/src/tta_skill_primitives/core/base.py)
+**Source:** [`ttadev/skills/src/tta_skill_primitives/core/base.py`](ttadev/skills/src/tta_skill_primitives/core/base.py)
 
 **Usage:**
 ```python
 from tta_skill_primitives import Skill, SkillDescriptor, SkillMetadata
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives import WorkflowContext
 
 class CodeReviewSkill(Skill[str, dict]):
     descriptor = SkillDescriptor(
@@ -702,26 +696,31 @@ text = dump_skill_md(descriptor)
 
 ## Extension Modules
 
-Extension modules provide specialised, non-core capabilities. They are available
-via their original import paths or through the `extensions` namespace:
+> [!WARNING]
+> The `ttadev.primitives.extensions` namespace is still mixed-current.
+> Its lazy-import metadata exists, but some internal module mappings still point at the older
+> `tta_dev_primitives.*` package names. For runnable code, prefer importing the target module
+> directly from `ttadev.primitives.<module>`.
+
+Extension modules provide specialised, non-core capabilities:
 
 ```python
-from tta_dev_primitives.extensions import EXTENSION_MODULES, list_extensions
-from tta_dev_primitives.extensions import adaptive  # Lazy-loaded
+from ttadev.primitives.extensions import EXTENSION_MODULES, list_extensions
+from ttadev.primitives.adaptive import AdaptiveRetryPrimitive
 ```
 
-| Module | Import Path | Purpose |
-|--------|------------|---------|
-| **ace** | `tta_dev_primitives.ace` | LLM-powered code generation with sandbox execution |
-| **adaptive** | `tta_dev_primitives.adaptive` | Self-improving retry, cache, timeout, fallback |
-| **analysis** | `tta_dev_primitives.analysis` | AST-based pattern detection and transformation |
-| **apm** | `tta_dev_primitives.apm` | Application Performance Monitoring decorators |
-| **benchmarking** | `tta_dev_primitives.benchmarking` | Performance benchmarking utilities |
-| **knowledge** | `tta_dev_primitives.knowledge` | Logseq knowledge base querying |
-| **lifecycle** | `tta_dev_primitives.lifecycle` | Stage management and validation gates |
-| **orchestration** | `tta_dev_primitives.orchestration` | Multi-model LLM orchestration |
-| **research** | `tta_dev_primitives.research` | Provider research and free-tier discovery |
-| **speckit** | `tta_dev_primitives.speckit` | Specification-driven development workflow |
+| Module | Preferred Import Path | Purpose |
+|--------|-----------------------|---------|
+| **ace** | `ttadev.primitives.ace` | Self-learning ACE primitives and benchmark helpers |
+| **adaptive** | `ttadev.primitives.adaptive` | Self-improving retry, cache, timeout, and fallback patterns |
+| **analysis** | `ttadev.primitives.analysis` | AST-based pattern detection and transformation |
+| **apm** | `ttadev.primitives.apm` | Application performance monitoring helpers |
+| **benchmarking** | `ttadev.primitives.benchmarking` | Performance benchmarking utilities |
+| **knowledge** | `ttadev.primitives.knowledge` | Knowledge and memory-oriented primitives |
+| **lifecycle** | `ttadev.primitives.lifecycle` | Stage management and validation gates |
+| **orchestration** | `ttadev.primitives.orchestration` | Multi-model orchestration and delegation |
+| **research** | `ttadev.primitives.research` | Provider research and free-tier discovery |
+| **speckit** | `ttadev.primitives.speckit` | Specification-driven development workflow |
 
 ---
 
@@ -733,10 +732,10 @@ from tta_dev_primitives.extensions import adaptive  # Lazy-loaded
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.orchestration import DelegationPrimitive
+from ttadev.primitives.orchestration import DelegationPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/orchestration/delegation_primitive.py\`](platform/primitives/src/tta_dev_primitives/orchestration/delegation_primitive.py)
+**Source:** [\`ttadev/primitives/orchestration/delegation_primitive.py\`](ttadev/primitives/orchestration/delegation_primitive.py)
 
 **Usage:**
 \`\`\`python
@@ -754,10 +753,10 @@ workflow = DelegationPrimitive(
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.orchestration import MultiModelWorkflow
+from ttadev.primitives.orchestration import MultiModelWorkflow
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py\`](platform/primitives/src/tta_dev_primitives/orchestration/multi_model_workflow.py)
+**Source:** [\`ttadev/primitives/orchestration/multi_model_workflow.py\`](ttadev/primitives/orchestration/multi_model_workflow.py)
 
 ---
 
@@ -767,10 +766,10 @@ from tta_dev_primitives.orchestration import MultiModelWorkflow
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.orchestration import TaskClassifierPrimitive
+from ttadev.primitives.orchestration import TaskClassifierPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/orchestration/task_classifier_primitive.py\`](platform/primitives/src/tta_dev_primitives/orchestration/task_classifier_primitive.py)
+**Source:** [\`ttadev/primitives/orchestration/task_classifier_primitive.py\`](ttadev/primitives/orchestration/task_classifier_primitive.py)
 
 ---
 
@@ -782,10 +781,10 @@ from tta_dev_primitives.orchestration import TaskClassifierPrimitive
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.testing import MockPrimitive
+from ttadev.primitives.testing.mocks import MockPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/testing/mock_primitive.py\`](platform/primitives/src/tta_dev_primitives/testing/mock_primitive.py)
+**Source:** [\`ttadev/primitives/testing/mock_primitive.py\`](ttadev/primitives/testing/mock_primitive.py)
 
 **Usage:**
 \`\`\`python
@@ -814,10 +813,10 @@ assert mock_llm.call_count == 1
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.observability import InstrumentedPrimitive
+from ttadev.primitives.observability import InstrumentedPrimitive
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/observability/instrumented_primitive.py\`](platform/primitives/src/tta_dev_primitives/observability/instrumented_primitive.py)
+**Source:** [\`ttadev/primitives/observability/instrumented_primitive.py\`](ttadev/primitives/observability/instrumented_primitive.py)
 
 **Automatic Features:**
 
@@ -836,10 +835,10 @@ from tta_dev_primitives.observability import InstrumentedPrimitive
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode
+from ttadev.primitives.adaptive import AdaptivePrimitive, LearningMode
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/adaptive/base.py\`](platform/primitives/src/tta_dev_primitives/adaptive/base.py)
+**Source:** [\`ttadev/primitives/adaptive/base.py\`](ttadev/primitives/adaptive/base.py)
 
 **Key Concepts:**
 
@@ -856,7 +855,13 @@ from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode
 
 **Usage:**
 \`\`\`python
-from tta_dev_primitives.adaptive import AdaptivePrimitive, LearningMode, LearningStrategy
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.adaptive import (
+    AdaptivePrimitive,
+    LearningMode,
+    LearningStrategy,
+    StrategyMetrics,
+)
 
 class MyAdaptivePrimitive(AdaptivePrimitive[str, dict]):
     async def _execute_with_strategy(
@@ -912,48 +917,33 @@ result = await adaptive.execute(data, context)
 
 **Import:**
 \`\`\`python
-from tta_dev_primitives.adaptive import AdaptiveRetryPrimitive
+from ttadev.primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
 \`\`\`
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/adaptive/retry.py\`](platform/primitives/src/tta_dev_primitives/adaptive/retry.py)
+**Source:** [\`ttadev/primitives/adaptive/retry.py\`](ttadev/primitives/adaptive/retry.py)
 
 **What It Learns:**
 
-- Optimal number of retries (max_retries)
-- Best backoff factor (backoff_factor)
-- Ideal initial delay (initial_delay)
-- Context-specific strategies (production vs staging)
+- Optimal number of retries (`max_retries`)
+- Better backoff tuning for recurring failure modes
+- Context-specific strategies (for example, staging vs production)
+- Whether the baseline strategy should remain dominant
 
 **Usage:**
 \`\`\`python
-from tta_dev_primitives.adaptive import (
-    AdaptiveRetryPrimitive,
-    LogseqStrategyIntegration,
-    LearningMode
-)
-
-# Setup Logseq integration (optional but recommended)
-
-logseq = LogseqStrategyIntegration("my_api_service")
-
-# Create adaptive retry
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.adaptive import AdaptiveRetryPrimitive, LearningMode
 
 adaptive_retry = AdaptiveRetryPrimitive(
     target_primitive=unreliable_api,
-    logseq_integration=logseq,
-    enable_auto_persistence=True,
     learning_mode=LearningMode.ACTIVE,
-    min_observations_before_learning=10
+    min_observations_before_learning=10,
 )
 
-# Use it - learning happens automatically
-
+context = WorkflowContext(workflow_id="adaptive-retry-demo")
 result = await adaptive_retry.execute(api_request, context)
 
-# Check learned strategies
-
-strategies = adaptive_retry.strategies
-for name, strategy in strategies.items():
+for name, strategy in adaptive_retry.strategies.items():
     print(f"{name}: {strategy.metrics.success_rate:.1%} success")
 \`\`\`
 
@@ -962,205 +952,121 @@ for name, strategy in strategies.items():
 - ✅ Learns from failures and successes
 - ✅ Creates context-specific strategies
 - ✅ Validates strategies before adoption
-- ✅ Persists to Logseq automatically
-- ✅ Falls back to baseline on issues
+- ✅ Falls back to a baseline strategy on regressions
+- ✅ Keeps learning local to the primitive instance unless you add your own persistence
 
 **Example Learned Strategy:**
 \`\`\`python
 LearningStrategy(
     name="production_high_load_v2",
-    description="Learned from 50 executions in production context",
+    description="Learned from repeated production traffic spikes",
     parameters={
-        "max_retries": 5,        # Learned: more retries needed
-        "backoff_factor": 2.5,   # Learned: longer waits help
-        "initial_delay": 2.0     # Learned: start with longer delay
+        "max_retries": 5,
+        "backoff_factor": 2.5,
+        "initial_delay": 2.0,
     },
     metrics=StrategyMetrics(
-        success_rate=0.94,       # 94% success rate
-        avg_latency_ms=1250.5,   # Average latency
-        contexts_seen=1          # Specific to this context
-    )
+        success_rate=0.94,
+        avg_latency_ms=1250.5,
+        contexts_seen=1,
+    ),
 )
 \`\`\`
 
 ---
 
-### LogseqStrategyIntegration
+### Historical note: `LogseqStrategyIntegration`
 
-**Persist learned strategies to Logseq knowledge base.**
+`LogseqStrategyIntegration` belongs to the older adaptive/Logseq documentation story and is not
+currently exported from `ttadev.primitives.adaptive`.
 
-**Import:**
-\`\`\`python
-from tta_dev_primitives.adaptive import LogseqStrategyIntegration
-\`\`\`
+If you need durable strategy storage today, prefer one of these patterns:
 
-**Source:** [\`platform/primitives/src/tta_dev_primitives/adaptive/logseq_integration.py\`](platform/primitives/src/tta_dev_primitives/adaptive/logseq_integration.py)
-
-**Features:**
-
-- **Strategy Pages**: Creates `logseq/pages/Strategies/{service_name}_{strategy_name}.md`
-- **Journal Entries**: Logs learning events to daily journals
-- **Query Support**: Pre-configured queries to discover related strategies
-- **Performance Tracking**: Updates metrics over time
-- **Cross-Service Sharing**: Strategies discoverable across services
-
-**Usage:**
-\`\`\`python
-
-# Create integration
-
-logseq = LogseqStrategyIntegration("recommendation_engine")
-
-# Save learned strategy
-
-await logseq.save_learned_strategy(
-    strategy=learned_strategy,
-    primitive_type="AdaptiveRetryPrimitive",
-    context="production_high_load",
-    notes="Learned during Black Friday traffic spike"
-)
-
-# Update performance
-
-await logseq.update_strategy_performance(
-    strategy_name="production_high_load_v2",
-    new_metrics=updated_metrics
-)
-\`\`\`
-
-**Generated Strategy Page Example:**
-\`\`\`markdown
-
-# Strategy - recommendation_engine_production_v2
-
-**Type:** AdaptiveRetryPrimitive
-**Context:** production_high_load
-**Created:** 2025-11-07
-**Performance:** 94.0% success rate, 1250.5ms avg latency
-
-## Parameters
-
-- max_retries: 5
-- backoff_factor: 2.5
-- initial_delay: 2.0
-
-## Performance History
-
-| Date | Success Rate | Avg Latency | Observations |
-|------|--------------|-------------|--------------|
-| 2025-11-07 | 94.0% | 1250.5ms | 50 |
-
-## Related Strategies
-
-{{query (and [[Strategies]] [[recommendation_engine]])}}
-
-## Notes
-
-Learned during Black Friday traffic spike. Higher retry count needed.
-\`\`\`
-
-**Benefits:**
-
-- ✅ **Knowledge Preservation**: Strategies persist across restarts
-- ✅ **Discovery**: Find similar strategies via Logseq queries
-- ✅ **Transparency**: Full visibility into what was learned
-- ✅ **Sharing**: Export strategies for other services
-- ✅ **Auditing**: Complete learning history in journals
+- keep the adaptive primitive in memory and export strategy snapshots yourself
+- store learned strategy metadata in your own persistence layer
+- build an explicit adapter around the current knowledge or memory primitives instead of assuming a
+  built-in Logseq bridge
 
 ---
 
-## ACE Framework Agents
+## ACE Framework Primitives
 
-**The ACE (Autonomous Cognitive Engine) framework provides advanced LLM-powered agents for code generation, analysis, and knowledge management.**
+**The current ACE package is centered on self-learning primitives and supporting benchmark types.**
 
-### GeneratorAgent
+### SelfLearningCodePrimitive
 
-**Purpose**: Generates code using LLM and learned strategies.
-**Import**: `from tta_dev_primitives.ace.agents.generator import GeneratorAgent`
-**Source**: [\`platform/primitives/src/tta_dev_primitives/ace/agents/generator.py\`](platform/primitives/src/tta_dev_primitives/ace/agents/generator.py)
-**Description**: Replaces template-based code generation with sophisticated LLM capabilities, incorporating learned strategies for improved output quality and relevance.
+**Purpose**: Generate code, execute it, and learn from execution feedback.
+**Import**: `from ttadev.primitives.ace import SelfLearningCodePrimitive, ACEInput`
+**Source**: [\`ttadev/primitives/ace/cognitive_manager.py\`](ttadev/primitives/ace/cognitive_manager.py)
+**Description**: Combines LLM-assisted code generation, execution feedback, and a learned playbook
+of strategies.
 
-### ReflectorAgent
+### MockACEPlaybook
 
-**Purpose**: Analyzes execution results and extracts insights.
-**Import**: `from tta_dev_primitives.ace.agents.reflector import ReflectorAgent`
-**Source**: [\`platform/primitives/src/tta_dev_primitives/ace/agents/reflector.py\`](platform/primitives/src/tta_dev_primitives/ace/agents/reflector.py)
-**Description**: Performs deep analysis of execution outcomes, identifying root causes of failures, performance bottlenecks, and extracting actionable strategies for learning.
+**Purpose**: Hold learned strategies during local development and tests.
+**Import**: `from ttadev.primitives.ace import MockACEPlaybook`
+**Source**: [\`ttadev/primitives/ace/cognitive_manager.py\`](ttadev/primitives/ace/cognitive_manager.py)
+**Description**: Simple in-memory strategy store used by the ACE learning flow.
 
-### CuratorAgent
+### Supporting Types
 
-**Purpose**: Manages the knowledge base and strategy selection.
-**Import**: `from tta_dev_primitives.ace.agents.curator import CuratorAgent`
-**Source**: [\`platform/primitives/src/tta_dev_primitives/ace/agents/curator.py\`](platform/primitives/src/tta_dev_primitives/ace/agents/curator.py)
-**Description**: Intelligently manages learned strategies, including deduplication, relevance scoring, and selection for future tasks, ensuring the playbook remains efficient and effective.
+**Import**: `from ttadev.primitives.ace import ACEInput, ACEOutput, BenchmarkSuite`
+
+- `ACEInput` / `ACEOutput` define the typed contract for the self-learning workflow
+- `BenchmarkSuite` and related benchmark types live in `ttadev/primitives/ace/benchmarks.py`
+- metrics helpers are exported from `ttadev.primitives.ace` for reporting and aggregation
 
 ---
 
-## Complete Production Example
+## Complete Layered Example
 
-**Goal:** Build a production-ready LLM service with all safeguards.
+**Goal:** Build a layered LLM workflow example with cache, timeout, retry, fallback, and routing.
 
 \`\`\`python
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.recovery import (
-    RetryPrimitive,
-    FallbackPrimitive,
-    TimeoutPrimitive
-)
-from tta_dev_primitives.performance import CachePrimitive
-from tta_dev_primitives.core import RouterPrimitive
-
-# Layer 1: Cache (40-60% cost reduction)
+from ttadev.primitives.core import RouterPrimitive
+from ttadev.primitives import WorkflowContext
+from ttadev.primitives.performance import CachePrimitive
+from ttadev.primitives.recovery import FallbackPrimitive, RetryPrimitive, TimeoutPrimitive
+from ttadev.primitives.recovery.retry import RetryStrategy
 
 cached_llm = CachePrimitive(
     primitive=gpt4_mini,
-    ttl_seconds=3600,
-    max_size=1000
+    cache_key_fn=lambda data, ctx: data["prompt"],
+    ttl_seconds=3600.0,
 )
-
-# Layer 2: Timeout (prevent hanging)
 
 timed_llm = TimeoutPrimitive(
     primitive=cached_llm,
-    timeout_seconds=30.0
+    timeout_seconds=30.0,
 )
-
-# Layer 3: Retry (handle transient failures)
 
 retry_llm = RetryPrimitive(
     primitive=timed_llm,
-    max_retries=3,
-    backoff_strategy="exponential"
+    strategy=RetryStrategy(max_retries=3, backoff_base=2.0),
 )
-
-# Layer 4: Fallback (high availability)
 
 fallback_llm = FallbackPrimitive(
     primary=retry_llm,
-    fallbacks=[claude_sonnet, gemini_flash, ollama_llama]
+    fallback=claude_sonnet,
 )
 
-# Layer 5: Router (cost optimization)
-
-production_llm = RouterPrimitive(
+layered_llm = RouterPrimitive(
     routes={"fast": fallback_llm, "quality": gpt4},
     router_fn=lambda data, ctx: "quality" if "complex" in data.get("prompt", "") else "fast",
-    default="fast"
+    default="fast",
 )
 
-# Use it
-
-context = WorkflowContext(workflow_id="prod-service")
-result = await production_llm.execute({"prompt": "Hello"}, context)
+context = WorkflowContext(workflow_id="layered-service")
+result = await layered_llm.execute({"prompt": "Hello"}, context)
 \`\`\`
 
 **Benefits:**
 
-- ✅ 40-60% cost reduction (cache)
-- ✅ 30-40% additional reduction (router)
-- ✅ 99.9% availability (fallback)
-- ✅ <30s worst-case latency (timeout)
-- ✅ Automatic retry on failures
+- ✅ Cache repeated work for lower cost and lower latency
+- ✅ Bound request duration with a timeout layer
+- ✅ Retry transient failures with an explicit `RetryStrategy`
+- ✅ Provide graceful degradation with a verified fallback path
+- ✅ Route expensive requests only when they need the higher-quality path
 
 ---
 
@@ -1170,81 +1076,134 @@ result = await production_llm.execute({"prompt": "Hello"}, context)
 
 | Primitive | Operator | Import Path | Purpose |
 |-----------|----------|-------------|---------|
-| WorkflowPrimitive | - | \`tta_dev_primitives\` | Base class |
-| SequentialPrimitive | \`>>\` | \`tta_dev_primitives\` | Execute in sequence |
-| ParallelPrimitive | \`\|\` | \`tta_dev_primitives\` | Execute concurrently |
-| ConditionalPrimitive | - | \`tta_dev_primitives\` | Branch on condition |
-| RouterPrimitive | - | \`tta_dev_primitives.core\` | Dynamic routing |
+| WorkflowPrimitive | - | \`ttadev.primitives\` | Base class |
+| SequentialPrimitive | \`>>\` | \`ttadev.primitives\` | Execute in sequence |
+| ParallelPrimitive | \`\|\` | \`ttadev.primitives\` | Execute concurrently |
+| ConditionalPrimitive | - | \`ttadev.primitives\` | Branch on condition |
+| RouterPrimitive | - | \`ttadev.primitives.core\` | Dynamic routing |
 
 ### Recovery
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| RetryPrimitive | \`tta_dev_primitives.recovery\` | Retry with backoff |
-| FallbackPrimitive | \`tta_dev_primitives.recovery\` | Graceful degradation |
-| TimeoutPrimitive | \`tta_dev_primitives.recovery\` | Circuit breaker |
-| CompensationPrimitive | \`tta_dev_primitives.recovery\` | Saga pattern |
-| CircuitBreakerPrimitive | \`tta_dev_primitives.recovery\` | Circuit breaker |
+| RetryPrimitive | \`ttadev.primitives.recovery\` | Retry with backoff |
+| FallbackPrimitive | \`ttadev.primitives.recovery\` | Graceful degradation |
+| TimeoutPrimitive | \`ttadev.primitives.recovery\` | Bound execution time |
+| CompensationPrimitive | \`ttadev.primitives.recovery\` | Saga pattern |
+| CircuitBreakerPrimitive | \`ttadev.primitives.recovery\` | Open/close on repeated failures |
 
 ### Performance
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| CachePrimitive | \`tta_dev_primitives.performance\` | LRU cache with TTL |
-| MemoryPrimitive | \`tta_dev_primitives.performance\` | Conversational memory |
+| CachePrimitive | \`ttadev.primitives.performance\` | LRU cache with TTL |
+| MemoryPrimitive | \`ttadev.primitives.performance.memory\` | In-memory memory primitive and helpers |
 
 ### Adaptive/Learning
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| AdaptivePrimitive | \`tta_dev_primitives.adaptive\` | Base class for self-improving primitives |
-| AdaptiveRetryPrimitive | \`tta_dev_primitives.adaptive\` | Retry that learns optimal strategies |
-| LogseqStrategyIntegration | \`tta_dev_primitives.adaptive\` | Persist strategies to knowledge base |
+| AdaptivePrimitive | \`ttadev.primitives.adaptive\` | Base class for self-improving primitives |
+| AdaptiveRetryPrimitive | \`ttadev.primitives.adaptive\` | Retry that learns optimal strategies |
+| \`LogseqStrategyIntegration\` | historical | Older doc surface; not currently exported |
 
 ### Collaboration
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| GitCollaborationPrimitive | \`tta_dev_primitives.collaboration\` | Enforce Git best practices for multi-agent workflows |
-| AgentIdentity | \`tta_dev_primitives.collaboration\` | Agent identity and attribution |
-| IntegrationFrequency | \`tta_dev_primitives.collaboration\` | Integration frequency policies |
-| CommitFrequencyPolicy | \`tta_dev_primitives.collaboration\` | Commit hygiene policies |
-| MergeStrategy | \`tta_dev_primitives.collaboration\` | Merge strategy options |
+| GitCollaborationPrimitive | \`ttadev.primitives.collaboration\` | Enforce Git best practices for multi-agent workflows |
+| AgentIdentity | \`ttadev.primitives.collaboration\` | Agent identity and attribution |
+| IntegrationFrequency | \`ttadev.primitives.collaboration\` | Integration frequency policies |
+| CommitFrequencyPolicy | \`ttadev.primitives.collaboration\` | Commit hygiene policies |
+| MergeStrategy | \`ttadev.primitives.collaboration\` | Merge strategy options |
 
 ### Orchestration
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| DelegationPrimitive | \`tta_dev_primitives.orchestration\` | Orchestrator→Executor |
-| MultiModelWorkflow | \`tta_dev_primitives.orchestration\` | Multi-model coordination |
-| TaskClassifierPrimitive | \`tta_dev_primitives.orchestration\` | Task classification |
+| DelegationPrimitive | \`ttadev.primitives.orchestration\` | Orchestrator→executor handoff |
+| MultiModelWorkflow | \`ttadev.primitives.orchestration\` | Multi-model coordination |
+| TaskClassifierPrimitive | \`ttadev.primitives.orchestration\` | Task classification |
 
 ### ACE Framework
 
 | Primitive | Import Path | Purpose |
 |-----------|-------------|---------|
-| GeneratorAgent | \`tta_dev_primitives.ace.agents\` | Generates code using LLM |
-| ReflectorAgent | \`tta_dev_primitives.ace.agents\` | Analyzes execution results |
-| CuratorAgent | \`tta_dev_primitives.ace.agents\` | Manages knowledge base |
+| SelfLearningCodePrimitive | \`ttadev.primitives.ace\` | Self-learning code generation with execution feedback |
+| MockACEPlaybook | \`ttadev.primitives.ace\` | In-memory learned strategy store |
+| ACEInput / ACEOutput | \`ttadev.primitives.ace\` | Typed ACE workflow contract |
+| BenchmarkSuite | \`ttadev.primitives.ace\` | Benchmark orchestration helpers |
+
+---
+
+## Coordination Primitives
+
+**Install:** `uv add 'redis[asyncio]'` or `uv sync --extra coordination`
+**Import:** `from ttadev.primitives.coordination import ...`
+
+Redis-backed reliable message passing between queue endpoints. Provides
+priority queues, visibility-timeout reservations, ack/nack semantics,
+dead-letter routing, backpressure, and `recover_pending`.
+
+```python
+from redis.asyncio import Redis
+from ttadev.primitives.coordination import (
+    QueueEndpoint, MessagePriority, RedisMessageCoordinator,
+)
+
+redis = Redis.from_url("redis://localhost:6379")
+coord = RedisMessageCoordinator(redis, key_prefix="myapp")
+
+worker   = QueueEndpoint(queue_type="worker", instance="1")
+ingester = QueueEndpoint(queue_type="ingester")
+
+# Send
+await coord.send_message(
+    sender=ingester, recipient=worker,
+    message_id="job-001", message_type="process",
+    payload={"file": "data.csv"},
+    priority=MessagePriority.HIGH,
+)
+
+# Receive and ack
+msg = await coord.receive(worker, visibility_timeout=30)
+if msg:
+    # ... do work ...
+    await coord.ack(worker, msg.token)
+
+# Nack (transient → retry with backoff; permanent → DLQ)
+await coord.nack(worker, msg.token, failure=FailureType.TRANSIENT)
+
+# Reclaim expired reservations (pass None to scan all endpoints)
+recovered = await coord.recover_pending(worker)
+```
+
+**Types:**
+
+| Type | Description |
+|------|-------------|
+| `QueueEndpoint` | Generic identity: `queue_type: str`, `instance: str` |
+| `CoordinationMessage` | Message body with `message_id`, `sender`, `message_type`, `payload`, `priority` |
+| `QueuedMessage` | `CoordinationMessage` + queue metadata (attempts, timestamps) |
+| `ReceivedMessage` | Reserved message with `token` and `visibility_deadline` |
+| `MessagePriority` | `LOW=1`, `NORMAL=5`, `HIGH=9` |
+| `FailureType` | `TRANSIENT`, `PERMANENT`, `TIMEOUT` |
+| `MessageResult` | `delivered: bool`, `error: str \| None` |
+| `MessageCoordinator` | Abstract interface (for testing / alternative backends) |
 
 ---
 
 ## Related Documentation
 
-- **Production Integrations:** [\`docs/guides/PRODUCTION_INTEGRATIONS_QUICKREF.md\`](docs/guides/PRODUCTION_INTEGRATIONS_QUICKREF.md)
-- **GitHub Blog Implementation:** [\`docs/guides/GITHUB_BLOG_IMPLEMENTATION.md\`](docs/guides/GITHUB_BLOG_IMPLEMENTATION.md)
-- **VS Code Integration:** [\`docs/guides/VSCODE_INTEGRATION.md\`](docs/guides/VSCODE_INTEGRATION.md)
-- **AI Patterns:** [\`docs/knowledge/AI_PATTERNS.md\`](docs/knowledge/AI_PATTERNS.md)
+- **Getting Started:** [\`GETTING_STARTED.md\`](GETTING_STARTED.md)
+- **Quickstart:** [\`QUICKSTART.md\`](QUICKSTART.md)
 - **Primitive Patterns:** [\`docs/architecture/PRIMITIVE_PATTERNS.md\`](docs/architecture/PRIMITIVE_PATTERNS.md)
-- **Package README:** [\`platform/primitives/README.md\`](platform/primitives/README.md)
-- **Agent Instructions:** [\`platform/primitives/AGENTS.md\`](platform/primitives/AGENTS.md)
+- **Git Collaboration Reference:** [\`docs/reference/GIT_COLLABORATION_PRIMITIVE_COMPLETE.md\`](docs/reference/GIT_COLLABORATION_PRIMITIVE_COMPLETE.md)
+- **Package README:** [\`ttadev/README.md\`](ttadev/README.md)
+- **Agent Instructions:** [\`AGENTS.md\`](AGENTS.md)
 
 ---
 
-**Last Updated:** 2025-11-10
+**Last Updated:** 2026-03-23
 **Maintained by:** TTA.dev Team
 **License:** See package licenses
-
-
----
-**Logseq:** [[TTA.dev/Primitives_catalog]]

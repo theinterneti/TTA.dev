@@ -8,6 +8,9 @@ Working code examples demonstrating TTA.dev primitives and composition patterns.
   sequential (`>>`), parallel (`|`), retry, fallback, timeout, caching, routing,
   and composed resilient workflows
 - [custom_tool.md](custom_tool.md) — Dynamic tool creation
+- [feature-dev-l0-workflow.md](feature-dev-l0-workflow.md) — The first L0-backed
+  Phase 2 proof path for running `feature_dev` and inspecting it through
+  `tta control`
 
 ## Contributing Examples
 

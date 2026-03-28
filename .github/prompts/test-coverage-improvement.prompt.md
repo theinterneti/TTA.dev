@@ -40,7 +40,7 @@ This workflow guides the systematic improvement of test coverage for a component
 5. Categorize gaps (unit, integration, E2E)
 
 **Observability Note:** Use the current repository observability stack if available. Do not use
-legacy `.hypertool` tracing examples.
+deprecated Hypertool-era tracing examples.
 
 ```python
 # Example placeholder for repository-native observability hooks
@@ -563,8 +563,3 @@ python .augment/context/cli.py add coverage-improvement-component-2025-10-20 \
 ---
 
 **Note:** Focus on meaningful tests that verify behavior, not just increase coverage numbers.
-
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Test-coverage-improvement.prompt]]

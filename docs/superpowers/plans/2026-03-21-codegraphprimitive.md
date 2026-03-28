@@ -561,7 +561,7 @@ RUN WITH: uv run python -m pytest tests/primitives/code_graph/test_schema_smoke.
 
 If this test fails after a CGC upgrade:
   1. Update the Cypher queries in ttadev/primitives/code_graph/client.py
-  2. Retain the schema change to Hindsight tta-dev bank
+  2. Retain the schema change to the appropriate Hindsight bank (`adam-global` for durable cross-project guidance, otherwise the current derived project/workspace bank)
 """
 
 from __future__ import annotations

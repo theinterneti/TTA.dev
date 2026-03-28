@@ -12,12 +12,13 @@ TTA.dev provides composable workflow primitives. Always use them instead of manu
 - `|` — Parallel execution (same input to all branches)
 
 ```python
-from tta_dev_primitives import WorkflowContext
-from tta_dev_primitives.recovery import RetryPrimitive, FallbackPrimitive
-from tta_dev_primitives.performance import CachePrimitive
+from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives.recovery.retry import RetryPrimitive
+from ttadev.primitives.recovery.fallback import FallbackPrimitive
+from ttadev.primitives.adaptive.cache import AdaptiveCachePrimitive
 
 # Sequential
-workflow = CachePrimitive(ttl=3600) >> RetryPrimitive(max_retries=3) >> process_data
+workflow = AdaptiveCachePrimitive(ttl=3600) >> RetryPrimitive(max_retries=3) >> process_data
 
 # Parallel
 workflow = fast_path | slow_path | cached_path
@@ -30,7 +31,7 @@ workflow = (
 )
 
 # Execute
-context = WorkflowContext(workflow_id="demo")
+context = WorkflowContext()
 result = await workflow.execute(input_data, context)
 ```
 
@@ -42,27 +43,17 @@ result = await workflow.execute(input_data, context)
 |----------|-----------|
 | **Core** | `SequentialPrimitive`, `ParallelPrimitive`, `RouterPrimitive` |
 | **Recovery** | `RetryPrimitive`, `FallbackPrimitive`, `TimeoutPrimitive`, `CompensationPrimitive` |
-| **Performance** | `CachePrimitive`, `MemoryPrimitive` |
-| **Skills** | `Skill`, `SkillDescriptor`, `SkillRegistry` |
-| **Collaboration** | `GitCollaborationPrimitive` |
-| **Adaptive** | `AdaptiveRetryPrimitive`, `LogseqStrategyIntegration` |
+| **Performance** | `MemoryPrimitive` |
+| **Adaptive** | `AdaptiveRetryPrimitive`, `AdaptiveFallbackPrimitive`, `AdaptiveTimeoutPrimitive`, `AdaptiveCachePrimitive` |
 | **Testing** | `MockPrimitive` |
-
-**Extension modules** (non-core): Accessible via `tta_dev_primitives.extensions`:
-
-```python
-from tta_dev_primitives.extensions import list_extensions, adaptive
-```
 
 ## Recovery Patterns
 
 ```python
-from tta_dev_primitives.recovery import (
-    RetryPrimitive,
-    FallbackPrimitive,
-    TimeoutPrimitive,
-    CompensationPrimitive,
-)
+from ttadev.primitives.recovery.retry import RetryPrimitive
+from ttadev.primitives.recovery.fallback import FallbackPrimitive
+from ttadev.primitives.recovery.timeout import TimeoutPrimitive
+from ttadev.primitives.recovery.compensation import CompensationPrimitive
 
 # Retry with exponential backoff
 workflow = RetryPrimitive(
@@ -87,36 +78,13 @@ workflow = TimeoutPrimitive(
 ## Performance Patterns
 
 ```python
-from tta_dev_primitives.performance import CachePrimitive
+from ttadev.primitives.adaptive.cache import AdaptiveCachePrimitive
 
-# LRU cache with TTL
-cached = CachePrimitive(
+# Adaptive cache with TTL
+cached = AdaptiveCachePrimitive(
     primitive=expensive_llm_call,
     ttl_seconds=3600,
-    max_size=1000,
 )
-```
-
-## Agent Skills (SKILL.md)
-
-Skills are self-describing agent capabilities that extend `WorkflowPrimitive` and compose with `>>` and `|`:
-
-```python
-from tta_skill_primitives import Skill, SkillDescriptor, SkillRegistry
-
-class CodeReviewSkill(Skill[str, dict]):
-    descriptor = SkillDescriptor(
-        name="code-review",
-        description="Analyse code for quality and security issues.",
-    )
-
-    async def execute(self, input_data, context):
-        return {"issues": [], "score": 100}
-
-# Register for discovery
-registry = SkillRegistry()
-registry.register(CodeReviewSkill())
-skill = registry.get("code-review")
 ```
 
 ## Anti-Patterns
@@ -126,7 +94,7 @@ skill = registry.get("code-review")
 | Manual async orchestration | `SequentialPrimitive` or `>>` |
 | `try/except` with retry loops | `RetryPrimitive` |
 | `asyncio.wait_for()` | `TimeoutPrimitive` |
-| Manual caching dicts | `CachePrimitive` |
+| Manual caching dicts | `AdaptiveCachePrimitive` |
 | Global variables for state | `WorkflowContext` |
 | Modifying core primitives | Extend via composition |
 
@@ -135,19 +103,17 @@ skill = registry.get("code-review")
 Always pass state via `WorkflowContext`:
 
 ```python
-from tta_dev_primitives import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
 
-context = WorkflowContext(
-    correlation_id="req-123",
-    data={"user_id": "user-789"},
-)
+context = WorkflowContext()
 result = await workflow.execute(input_data, context)
 ```
 
 ## Key Files
 
-- **Core primitives:** `platform/primitives/src/tta_dev_primitives/`
-- **Observability:** `platform/observability/src/observability_integration/`
-- **Agent context:** `platform/agent-context/src/universal_agent_context/`
-- **Examples:** `platform/primitives/examples/`
+- **Core primitives:** `ttadev/primitives/core/`
+- **Recovery:** `ttadev/primitives/recovery/`
+- **Adaptive:** `ttadev/primitives/adaptive/`
+- **Performance:** `ttadev/primitives/performance/`
+- **Testing:** `ttadev/primitives/testing/`
 - **Full API reference:** [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)

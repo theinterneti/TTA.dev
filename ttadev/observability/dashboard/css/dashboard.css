@@ -210,6 +210,135 @@ body {
 }
 .metric-chip .value { color: var(--accent); font-weight: 700; }
 
+/* Workflow ownership panel */
+.workflow-ownership-panel {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--bg-panel);
+  border-radius: var(--radius);
+}
+
+.workflow-heading {
+  margin-bottom: 12px;
+}
+
+.workflow-empty-state {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.workflow-ownership-list {
+  display: grid;
+  gap: 12px;
+}
+
+.workflow-ownership-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.workflow-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.workflow-title {
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.workflow-goal {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.workflow-status {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.workflow-status-running {
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+}
+
+.workflow-status-completed {
+  background: rgba(102, 126, 234, 0.2);
+  color: #a5b4fc;
+}
+
+.workflow-status-quit,
+.workflow-status-failed {
+  background: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+}
+
+.workflow-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.workflow-meta-chip {
+  background: var(--bg-hover);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78em;
+  color: var(--text-muted);
+}
+
+.workflow-section-label {
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.workflow-current-step,
+.workflow-recent-steps {
+  margin-top: 10px;
+}
+
+.workflow-step-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  background: rgba(10, 14, 39, 0.35);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.86em;
+}
+
+.workflow-step-row strong {
+  color: var(--text);
+}
+
+.workflow-step-row-compact {
+  margin-top: 6px;
+}
+
+.workflow-step-summary {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 0.84em;
+}
+
 /* Span list */
 .span-list { margin-top: 16px; }
 

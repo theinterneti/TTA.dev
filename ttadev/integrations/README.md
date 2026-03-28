@@ -115,7 +115,7 @@ print(result.rows)
 
 All integration primitives:
 
-1. **Inherit from tta-dev-primitives base classes**
+1. **Inherit from TTA.dev primitive base classes**
    - Automatic retry with exponential backoff
    - OpenTelemetry observability
    - Type-safe interfaces
@@ -127,7 +127,7 @@ All integration primitives:
 
 3. **Compose with other primitives**
    ```python
-   from tta_dev_primitives import CachePrimitive, RetryPrimitive
+   from ttadev.primitives import CachePrimitive, RetryPrimitive
 
    # Cache + Retry + OpenAI
    workflow = (
@@ -315,7 +315,7 @@ See `examples/` directory for complete working examples:
 
 ## 🔗 Related Documentation
 
-- **TTA.dev Core**: [`packages/tta-dev-primitives/README.md`](../tta-dev-primitives/README.md)
+- **TTA.dev Core**: [`ttadev/primitives/README.md`](../primitives/README.md)
 - **Vibe Coder Guide**: [`docs/guides/VIBE_CODER_QUICKSTART.md`](../../docs/guides/VIBE_CODER_QUICKSTART.md)
 - **Multi-Agent Collaboration**: [`docs/guides/MULTI_AGENT_COLLABORATION.md`](../../docs/guides/MULTI_AGENT_COLLABORATION.md)
 

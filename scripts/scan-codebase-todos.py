@@ -190,14 +190,13 @@ class CodebaseScanner:
 
         if ".augment" in path_str:
             return "augment"
-        elif "docs/" in path_str or file_path.suffix == ".md":
+        if "docs/" in path_str or file_path.suffix == ".md":
             return "docs"
-        elif ".github/" in path_str or file_path.suffix in [".yml", ".yaml"]:
+        if ".github/" in path_str or file_path.suffix in [".yml", ".yaml"]:
             return "config"
-        elif file_path.suffix == ".py":
+        if file_path.suffix == ".py":
             return "code"
-        else:
-            return "other"
+        return "other"
 
 
 def print_results(result: ScanResult) -> None:

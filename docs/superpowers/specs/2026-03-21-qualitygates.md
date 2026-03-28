@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-21
 **Phase:** 4c — Quality Gates + Multi-model Fallback
-**Status:** Draft — awaiting approval
+**Status:** Approved — 2026-03-25
 **Depends on:** `DevelopmentCycle` (Phase 3, complete), `CIMergeGate` (Phase 4b, complete)
 **Leads to:** Phase 5 — Full agent autonomy
 
@@ -14,7 +14,7 @@
 
 1. **Quality Gate** — a heuristic scorer that evaluates LLM responses for usefulness before accepting them. Assigns a `confidence` score (0.0–1.0) and a boolean `quality_gate_passed` flag.
 
-2. **Multi-model Fallback** — if the primary provider produces a low-confidence response, the Write step automatically retries with the next provider in a configured chain (e.g. OpenRouter free → Ollama). The best response seen is returned.
+2. **Multi-model Fallback** — if the primary provider produces a low-confidence response, the Write step automatically retries with the next provider in the configured workflow/app provider chain (for example the historical OpenRouter → Ollama chain used by `ttadev/workflows/llm_provider.py`). The best response seen is returned.
 
 Together these ensure that `DevelopmentCycle` never silently returns a refusal or empty output when another provider might do better — without adding latency when the primary provider succeeds.
 
@@ -22,7 +22,7 @@ Together these ensure that `DevelopmentCycle` never silently returns a refusal o
 
 ## Motivation
 
-`DevelopmentCycle` currently calls one LLM provider (selected by `get_llm_client()`). Free models can return:
+`DevelopmentCycle` currently calls one LLM provider (selected by `get_llm_client()`). This is about the workflow/app provider chain, not the separate live Hindsight runtime. Lower-cost or weaker models can return:
 - Refusals ("I cannot help with that")
 - Hallucinated apologies ("As an AI language model…")
 - Empty or near-empty completions
@@ -42,7 +42,7 @@ Quality Gates close this gap by:
 ### Journey 1 — Primary provider responds well
 
 ```python
-cycle = DevelopmentCycle(bank_id="tta-dev")
+cycle = DevelopmentCycle(bank_id="project-tta.dev-9af638ec")
 result = await cycle.execute(
     DevelopmentTask(instruction="Add a timeout parameter to RetryPrimitive"),
     context,
@@ -56,10 +56,10 @@ result = await cycle.execute(
 ### Journey 2 — Primary provider returns a refusal, fallback succeeds
 
 ```python
-# OpenRouter free model refuses: "I cannot modify production code."
+# Primary workflow provider refuses: "I cannot modify production code."
 # → Quality gate scores it 0.1 (refusal pattern detected)
-# → Write step retries with Ollama (fallback)
-# → Ollama returns useful code
+# → Write step retries with the configured fallback provider
+# → fallback returns useful code
 # result.confidence == 0.71
 # result.provider   == "ollama"
 # result.response   contains actual Python code
@@ -80,7 +80,7 @@ result = await cycle.execute(
 ### Journey 4 — All providers raise exceptions
 
 ```python
-# OpenRouter times out, Ollama connection refused
+# Primary provider times out, fallback connection refused
 # → Write step re-raises the last exception (existing behaviour)
 # Same as current DevelopmentCycle behaviour — no regression
 ```

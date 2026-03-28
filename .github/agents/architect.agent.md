@@ -40,7 +40,3 @@ Dashboard: **http://localhost:8000** — shows live primitive usage, sessions, a
 - Use clear headings and bullet points.
 - Include Mermaid diagrams for flows.
 - Explicitly state assumptions and risks.
-
-
----
-**Logseq:** [[TTA.dev/.github/Agents/Architect.agent]]

@@ -29,7 +29,7 @@ security:
 - 📚 **Context7** - ML/AI library documentation (LangChain, LangGraph, pandas, scikit-learn)
 - 🐙 **GitHub** - Repository operations, PR management
 - 🧠 **Sequential Thinking** - Advanced reasoning and planning
-- 📓 **Logseq** - Knowledge base for research notes
+- 🧠 **Hindsight** - Long-term memory for research notes and decisions
 
 **Token Budget:** 1700 tokens (optimized for data science work)
 
@@ -403,9 +403,9 @@ Response: Opens PR with ML/AI changes
 Ask: "Analyze why this agent configuration underperforms"
 Response: Breaks down metrics, identifies bottlenecks
 
-### Logseq (Research Notes)
-Ask: "Find my notes on prompt engineering techniques"
-Response: Searches knowledge base for relevant pages
+### Hindsight (Research Memory)
+Ask: "What do I know about prompt engineering techniques?"
+Response: Recalls relevant research notes and past decisions
 
 ---
 
@@ -416,7 +416,7 @@ Response: Searches knowledge base for relevant pages
 3. **Integration:** Wrap models as TTA primitives
 4. **Evaluation:** Measure performance with test cases
 5. **Optimization:** Improve prompts, model selection, caching
-6. **Documentation:** Record findings in Logseq
+6. **Documentation:** Retain findings to Hindsight
 7. **Deployment:** Integrate into production workflows
 
 ---
@@ -428,7 +428,7 @@ Response: Searches knowledge base for relevant pages
 - ✅ Visualize distributions and trends
 - ✅ Calculate summary statistics (mean, median, percentiles)
 - ✅ Identify outliers and anomalies
-- ✅ Document insights in Logseq
+- ✅ Retain insights to Hindsight
 
 ### ML Workflows
 - ✅ Wrap LLMs as TTA primitives for composability
@@ -588,7 +588,3 @@ result
 **Last Updated:** 2025-11-14
 **Persona Version:** tta-data-scientist v1.0
 **Hypertool Integration:** Active ✅
-
-
----
-**Logseq:** [[TTA.dev/.tta/Chatmodes/Data-scientist.chatmode]]

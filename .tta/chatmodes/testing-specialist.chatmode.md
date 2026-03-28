@@ -467,7 +467,3 @@ After switching, restart Cline to load new persona context.
 **Last Updated:** 2025-11-14
 **Persona Version:** tta-testing-specialist v1.0
 **Hypertool Integration:** Active ✅
-
-
----
-**Logseq:** [[TTA.dev/.tta/Chatmodes/Testing-specialist.chatmode]]

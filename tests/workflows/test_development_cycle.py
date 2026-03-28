@@ -726,15 +726,17 @@ class TestDevelopmentCycleQualityGate:
             _executor=mock_executor,
             _http=mock_http,
         )
-        with patch(
-            "ttadev.workflows.development_cycle.get_llm_provider_chain",
-            return_value=_make_chain(["openrouter", "ollama"]),
+        with (
+            patch(
+                "ttadev.workflows.development_cycle.get_llm_provider_chain",
+                return_value=_make_chain(["openrouter", "ollama"]),
+            ),
+            pytest.raises(RuntimeError, match="network error"),
         ):
-            with pytest.raises(RuntimeError, match="network error"):
-                await cycle.execute(
-                    DevelopmentTask(instruction="Add timeout parameter"),
-                    WorkflowContext(),
-                )
+            await cycle.execute(
+                DevelopmentTask(instruction="Add timeout parameter"),
+                WorkflowContext(),
+            )
 
     @pytest.mark.asyncio
     async def test_write_provider_exception_then_fallback_succeeds(self) -> None:

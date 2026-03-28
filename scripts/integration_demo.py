@@ -130,10 +130,9 @@ async def demo_routing():
 
         if tier == "premium":
             return "openai"
-        elif tier == "standard":
+        if tier == "standard":
             return "anthropic"
-        else:
-            return "local"
+        return "local"
 
     # Create router
     router = RouterPrimitive(

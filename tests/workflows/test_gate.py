@@ -24,7 +24,7 @@ class TestAutoApprove:
     @pytest.mark.asyncio
     async def test_auto_approve_returns_continue(self):
         gate = ApprovalGate(auto_approve=True)
-        decision, edit = await gate.check(_step_result(), total_steps=3, next_agent="qa")
+        decision, edit, _policy = await gate.check(_step_result(), total_steps=3, next_agent="qa")
         assert decision == GateDecision.CONTINUE
         assert edit is None
 
@@ -33,7 +33,7 @@ class TestAutoApprove:
         """auto_approve must not touch stdin."""
         monkeypatch.delattr("builtins.input", raising=False)
         gate = ApprovalGate(auto_approve=True)
-        decision, _ = await gate.check(_step_result(), total_steps=1, next_agent=None)
+        decision, _, _policy = await gate.check(_step_result(), total_steps=1, next_agent=None)
         assert decision == GateDecision.CONTINUE
 
 
@@ -42,7 +42,7 @@ class TestNonTTY:
     async def test_non_tty_auto_approves(self, monkeypatch):
         monkeypatch.setattr("sys.stdin.isatty", lambda: False)
         gate = ApprovalGate(auto_approve=False)
-        decision, edit = await gate.check(_step_result(), total_steps=2, next_agent="qa")
+        decision, edit, _policy = await gate.check(_step_result(), total_steps=2, next_agent="qa")
         assert decision == GateDecision.CONTINUE
         assert edit is None
 
@@ -60,20 +60,20 @@ class TestSubclassOverride:
     @pytest.mark.asyncio
     async def test_enter_returns_continue(self):
         gate = self._make_gate("")
-        decision, edit = await gate.check(_step_result(), total_steps=3, next_agent="qa")
+        decision, edit, _policy = await gate.check(_step_result(), total_steps=3, next_agent="qa")
         assert decision == GateDecision.CONTINUE
 
     @pytest.mark.asyncio
     async def test_s_returns_skip(self):
         gate = self._make_gate("s")
-        decision, edit = await gate.check(_step_result(), total_steps=3, next_agent="qa")
+        decision, edit, _policy = await gate.check(_step_result(), total_steps=3, next_agent="qa")
         assert decision == GateDecision.SKIP
         assert edit is None
 
     @pytest.mark.asyncio
     async def test_q_returns_quit(self):
         gate = self._make_gate("q")
-        decision, edit = await gate.check(_step_result(), total_steps=3, next_agent="qa")
+        decision, edit, _policy = await gate.check(_step_result(), total_steps=3, next_agent="qa")
         assert decision == GateDecision.QUIT
 
     @pytest.mark.asyncio
@@ -86,6 +86,6 @@ class TestSubclassOverride:
                 return "revised instruction"
 
         gate = _EditGate(auto_approve=False)
-        decision, edit = await gate.check(_step_result(), total_steps=3, next_agent="qa")
+        decision, edit, _policy = await gate.check(_step_result(), total_steps=3, next_agent="qa")
         assert decision == GateDecision.EDIT
         assert edit == "revised instruction"

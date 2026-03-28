@@ -308,9 +308,9 @@ def validate_against_schema(data: Any, schema: dict[str, Any]) -> float:
         logger.warning("jsonschema not available, using simple validation")
 
         # Check type
-        if schema.get("type") == "object" and not isinstance(data, dict):
-            return 0.0
-        elif schema.get("type") == "array" and not isinstance(data, list):
+        if (schema.get("type") == "object" and not isinstance(data, dict)) or (
+            schema.get("type") == "array" and not isinstance(data, list)
+        ):
             return 0.0
 
         # For objects, check required properties
@@ -327,7 +327,7 @@ def validate_against_schema(data: Any, schema: dict[str, Any]) -> float:
             return 1.0 - (missing / len(required))
 
         # For arrays, check items
-        elif isinstance(data, list) and schema.get("type") == "array":
+        if isinstance(data, list) and schema.get("type") == "array":
             if not data:
                 return 0.5  # Empty array
 

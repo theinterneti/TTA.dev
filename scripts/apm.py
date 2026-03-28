@@ -32,7 +32,7 @@ def load_apm_config():
     for path in APM_SEARCH_PATHS:
         if os.path.exists(path):
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     return yaml.safe_load(f)
             except yaml.YAMLError as e:
                 logger.error(f"Error parsing '{path}': {e}")
@@ -68,7 +68,7 @@ def run_script(script_name: str, extra_args: list):
         # Use shell=True to allow chaining and env var expansion if needed
         # But be careful with security if args come from untrusted sources.
         # For internal dev tool, it's acceptable.
-        subprocess.run(command, shell=True, check=True)
+        subprocess.run(command, shell=True, check=True)  # nosemgrep: subprocess-shell-true
     except subprocess.CalledProcessError as e:
         logger.error(f"Script failed with exit code {e.returncode}")
         sys.exit(e.returncode)

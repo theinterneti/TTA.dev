@@ -1,26 +1,26 @@
-"""
-Demo workflow showing TTA.dev batteries-included observability.
-
-This example demonstrates:
-- Auto-instrumentation of primitives
-- Real-time observability dashboard
-- Composable workflow patterns
-- Zero-config setup
-
-Run: uv run python examples/demo_workflow.py
-Then open: http://localhost:8000
-"""
+"""Demo workflow showing the current TTA.dev primitive APIs in action."""
 
 import asyncio
+import sys
+from pathlib import Path
 
-from ttadev.primitives import CachePrimitive, RetryPrimitive, TimeoutPrimitive
-from ttadev.primitives.core.base import WorkflowContext
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from ttadev.primitives import (
+    CachePrimitive,
+    LambdaPrimitive,
+    RetryPrimitive,
+    RetryStrategy,
+    TimeoutPrimitive,
+    WorkflowContext,
+)
 
 
 async def fetch_user_data(user_id: str, ctx: WorkflowContext) -> dict:
     """Simulate fetching user data from an API."""
     print(f"📡 Fetching data for user: {user_id}")
-    await asyncio.sleep(0.5)  # Simulate network delay
+    await asyncio.sleep(0.05)
     return {
         "user_id": user_id,
         "name": f"User {user_id}",
@@ -32,7 +32,7 @@ async def fetch_user_data(user_id: str, ctx: WorkflowContext) -> dict:
 async def process_user_data(data: dict, ctx: WorkflowContext) -> dict:
     """Process the fetched user data."""
     print(f"⚙️  Processing data for: {data['name']}")
-    await asyncio.sleep(0.3)  # Simulate processing
+    await asyncio.sleep(0.03)
     return {
         **data,
         "processed": True,
@@ -41,17 +41,20 @@ async def process_user_data(data: dict, ctx: WorkflowContext) -> dict:
 
 
 async def main():
+    """Run the current demo workflow."""
     print("🚀 TTA.dev Demo Workflow")
     print("=" * 50)
     print()
 
-    # Build a resilient workflow with composable primitives
-    workflow = (
-        TimeoutPrimitive(timeout_seconds=5.0, name="API Timeout")
-        >> CachePrimitive(ttl=60, name="User Cache")
-        >> RetryPrimitive(max_attempts=3, backoff_factor=2.0, name="Retry Handler")
-        >> process_user_data
+    fetch_step = LambdaPrimitive(fetch_user_data)
+    process_step = LambdaPrimitive(process_user_data)
+
+    cached_fetch = CachePrimitive(
+        RetryPrimitive(fetch_step, strategy=RetryStrategy(max_retries=3, backoff_base=2.0)),
+        cache_key_fn=lambda user_id, ctx: f"{ctx.workflow_id}:{user_id}",
+        ttl_seconds=60.0,
     )
+    workflow = TimeoutPrimitive(cached_fetch >> process_step, timeout_seconds=5.0)
 
     # Execute for multiple users
     user_ids = ["user_123", "user_456", "user_789"]
@@ -67,10 +70,19 @@ async def main():
     print("=" * 50)
     print("🎉 Demo Complete!")
     print()
-    print("📊 View the observability dashboard at:")
-    print("   http://localhost:8000")
+    print("📊 For live traces, start the observability server in another terminal:")
+    print("   uv run python -m ttadev.observability")
+    print("   Then open: http://localhost:8000")
     print()
-    print("💡 Tip: Run this script again and watch the cache hit!")
+    print("📦 This demo uses the current primitive APIs for retry, cache, and timeout.")
+    print()
+    print("💡 Tip: Keep the same workflow object alive and rerun it to watch cache hits.")
+    print()
+    print("📚 The canonical proof path is still:")
+    print("   uv run python scripts/test_realtime_traces.py")
+    print()
+    print("📄 See also:")
+    print("   http://localhost:8000")
 
 
 if __name__ == "__main__":

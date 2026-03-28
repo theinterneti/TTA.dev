@@ -9,7 +9,7 @@ Read `.github/copilot-instructions.md` for project overview and `docs/guides/git
 Analyze the current issue and provide classification, labels, and an action plan.
 
 **Observability Note:** Use the current repository observability stack if available. Do not use
-legacy `.hypertool` tracing examples.
+deprecated Hypertool-era tracing examples.
 
 ## Analysis Steps
 
@@ -18,20 +18,20 @@ legacy `.hypertool` tracing examples.
    - Priority: critical | high | medium | low
    - Complexity: trivial | simple | moderate | complex
    - Package: Which package(s) does this affect?
-     - tta-dev-primitives
-     - tta-observability-integration
-     - universal-agent-context
-     - keploy-framework
-     - documentation
-     - infrastructure
+      - ttadev
+      - tta-dev-integrations
+      - tta-skill-primitives
+      - documentation
+      - infrastructure
+      - historical/archive
 
 2. **Labels to Add**
-   Suggest appropriate labels:
-   - `bug`, `feature`, `documentation`, `refactor`
-   - `good-first-issue`, `help-wanted`
-   - `priority:high`, `priority:medium`, `priority:low`
-   - `needs-design`, `needs-tests`, `needs-docs`
-   - Package labels: `pkg:primitives`, `pkg:observability`, etc.
+    Suggest appropriate labels:
+    - `bug`, `feature`, `documentation`, `refactor`
+    - `good-first-issue`, `help-wanted`
+    - `priority:high`, `priority:medium`, `priority:low`
+    - `needs-design`, `needs-tests`, `needs-docs`
+    - Package labels: `pkg:ttadev`, `pkg:integrations`, `pkg:skills`, `pkg:docs`, `pkg:infra`
 
 3. **Assignment Recommendations**
    - Is this suitable for new contributors?
@@ -98,7 +98,3 @@ Use these MCP tools:
 - Reference existing patterns in codebase
 - Suggest actionable next steps
 - Be helpful and welcoming to contributors
-
-
----
-**Logseq:** [[TTA.dev/.github/Prompts/Triage-issue.prompt]]

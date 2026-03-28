@@ -7,6 +7,8 @@ import asyncio
 import sys
 from pathlib import Path
 
+from ttadev.control_plane import ControlPlaneService
+
 # Registry of built-in workflow definitions
 _WORKFLOWS: dict[str, object] = {}
 
@@ -43,6 +45,12 @@ def register_workflow_subcommands(sub: argparse._SubParsersAction) -> None:  # t
     run_p.add_argument(
         "--dry-run", dest="dry_run", action="store_true", help="Print step plan without executing"
     )
+    run_p.add_argument(
+        "--track-l0",
+        dest="track_l0",
+        action="store_true",
+        help="Create inspectable L0 task/run tracking for this workflow execution",
+    )
 
 
 def handle_workflow_command(args: argparse.Namespace, data_dir: Path) -> int:
@@ -56,7 +64,7 @@ def handle_workflow_command(args: argparse.Namespace, data_dir: Path) -> int:
         return _cmd_show(workflows, args.name)
 
     if args.workflow_command == "run":
-        return _cmd_run(workflows, args)
+        return _cmd_run(workflows, args, data_dir)
 
     # No subcommand — show help
     print("Usage: tta workflow {list,show,run}", file=sys.stderr)
@@ -91,7 +99,7 @@ def _cmd_show(workflows: dict[str, object], name: str) -> int:
     return 0
 
 
-def _cmd_run(workflows: dict[str, object], args: argparse.Namespace) -> int:
+def _cmd_run(workflows: dict[str, object], args: argparse.Namespace, data_dir: Path) -> int:
     from ttadev.workflows.definition import WorkflowDefinition
 
     defn = workflows.get(args.name)
@@ -106,6 +114,7 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace) -> int:
         return 0
 
     from ttadev.primitives.core.base import WorkflowContext
+    from ttadev.workflows.llm_provider import build_chat_primitive, get_llm_provider_chain
     from ttadev.workflows.orchestrator import WorkflowGoal, WorkflowOrchestrator
 
     # Apply --no-confirm override
@@ -114,11 +123,25 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace) -> int:
 
         defn = dataclasses.replace(defn, auto_approve=True)
 
-    orch = WorkflowOrchestrator(defn)
+    provider_chain = get_llm_provider_chain()
+    model_factory = lambda: build_chat_primitive(provider_chain[0])  # noqa: E731
+
+    control_plane_service = ControlPlaneService(data_dir) if args.track_l0 else None
+    orch = WorkflowOrchestrator(
+        defn,
+        control_plane_service=control_plane_service,
+        track_in_control_plane=args.track_l0,
+        model_factory=model_factory,
+    )
     ctx = WorkflowContext()
     goal = WorkflowGoal(goal=args.goal)
 
     result = asyncio.run(orch.execute(goal, ctx))
+
+    if args.track_l0 and result.tracked_task_id and result.tracked_run_id:
+        print(f"L0 task: {result.tracked_task_id}")
+        print(f"L0 run:  {result.tracked_run_id}")
+        print(f"Inspect with: tta control task show {result.tracked_task_id}")
 
     status = "completed" if result.completed else "stopped early"
     print(f"\nWorkflow {status}: {len(result.steps)} step(s) run")

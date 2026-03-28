@@ -6,7 +6,7 @@ All file I/O uses tmp_path to stay hermetic.
 import json
 import os
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -35,7 +35,7 @@ def _make_span(
         agent_role="backend-engineer",
         workflow_id="wf-1",
         primitive_type=primitive_type,
-        started_at=started_at or datetime.now(timezone.utc).isoformat(),
+        started_at=started_at or datetime.now(UTC).isoformat(),
         duration_ms=150.0,
         status="success",
     )
@@ -193,7 +193,7 @@ def test_get_recently_active_includes_recent_span(mgr: SessionManager) -> None:
 
 def test_get_recently_active_excludes_old_span(mgr: SessionManager) -> None:
     session = mgr.start_session()
-    old_time = (datetime.now(timezone.utc) - timedelta(seconds=60)).isoformat()
+    old_time = (datetime.now(UTC) - timedelta(seconds=60)).isoformat()
     mgr.add_span(session.id, _make_span(primitive_type="RetryPrimitive", started_at=old_time))
     recent = mgr.get_recently_active(session.id, within_seconds=30)
     assert "RetryPrimitive" not in recent
@@ -226,7 +226,7 @@ def test_resolve_session_id_not_found(mgr: SessionManager) -> None:
 def test_resolve_session_id_ambiguous(tmp_path: Path) -> None:
     # Create two sessions whose IDs share the same first character
     # by patching uuid to return known values
-    import unittest.mock as mock
+    from unittest import mock
 
     ids = ["aaaaaaaa-0000-0000-0000-000000000001", "aaaaaaaa-0000-0000-0000-000000000002"]
     id_iter = iter(ids)

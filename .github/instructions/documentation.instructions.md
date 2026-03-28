@@ -81,7 +81,3 @@ result = await workflow.execute(data, WorkflowContext(workflow_id="docs-example"
 - Status reports (use git commits/PRs)
 - Meeting notes (use issues)
 - Implementation details that change frequently
-
-
----
-**Logseq:** [[TTA.dev/.github/Instructions/Documentation.instructions]]

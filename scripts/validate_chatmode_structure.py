@@ -192,9 +192,8 @@ def main():
     if results["failed"] > 0:
         print(f"\n⚠️  {results['failed']} chatmode(s) need attention")
         return 1
-    else:
-        print("\n🎉 All chatmodes validated successfully!")
-        return 0
+    print("\n🎉 All chatmodes validated successfully!")
+    return 0
 
 
 if __name__ == "__main__":

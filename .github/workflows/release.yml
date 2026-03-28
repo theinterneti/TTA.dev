@@ -1,14 +1,15 @@
 name: Release to GitHub
 
 # Triggered by tags in the form: packages/{dir}/v{semver}
-# Example: packages/primitives/v1.3.1
+# Example: packages/ttadev/v0.1.0
 #
-# This is the low-key alternative to PyPI publishing.
-# Built wheel and sdist are uploaded as GitHub Release assets — no PyPI account needed.
+# This is the low-key alternative to PyPI publishing for the active root `ttadev`
+# package. Historical `packages/primitives/v...` tags belonged to an older
+# multi-package layout and are not the current default release path.
 #
 # Install a released package directly:
-#   uv pip install https://github.com/theinterneti/TTA.dev/releases/download/packages/primitives/v1.3.0/tta_dev_primitives-1.3.0-py3-none-any.whl
-#   uv add https://github.com/theinterneti/TTA.dev/releases/download/packages/primitives/v1.3.0/tta_dev_primitives-1.3.0-py3-none-any.whl
+#   uv pip install https://github.com/theinterneti/TTA.dev/releases/download/packages/ttadev/v0.1.0/ttadev-0.1.0-py3-none-any.whl
+#   uv add https://github.com/theinterneti/TTA.dev/releases/download/packages/ttadev/v0.1.0/ttadev-0.1.0-py3-none-any.whl
 
 on:
   push:
@@ -24,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       package-dir: ${{ steps.extract.outputs.package-dir }}
+      package-path: ${{ steps.extract.outputs.package-path }}
       package-name: ${{ steps.extract.outputs.package-name }}
       version: ${{ steps.extract.outputs.version }}
     steps:
@@ -40,27 +42,27 @@ jobs:
             exit 1
           fi
 
-          # Map dir to package name
+          # Map current tag dirs to active package metadata
           declare -A DIR_TO_NAME=(
-            ["primitives"]="tta-dev-primitives"
-            ["observability"]="tta-observability-integration"
-            ["agent-context"]="universal-agent-context"
-            ["integrations"]="tta-dev-integrations"
-            ["agent-coordination"]="tta-agent-coordination"
-            ["dolt"]="tta-dolt-primitives"
+            ["ttadev"]="ttadev"
+          )
+          declare -A DIR_TO_PATH=(
+            ["ttadev"]="."
           )
 
           PKG_NAME="${DIR_TO_NAME[$PKG_DIR]}"
-          if [[ -z "$PKG_NAME" ]]; then
+          PKG_PATH="${DIR_TO_PATH[$PKG_DIR]}"
+          if [[ -z "$PKG_NAME" || -z "$PKG_PATH" ]]; then
             echo "ERROR: Unknown package directory '$PKG_DIR'" >&2
             echo "Known dirs: ${!DIR_TO_NAME[*]}" >&2
             exit 1
           fi
 
           echo "package-dir=$PKG_DIR" >> "$GITHUB_OUTPUT"
+          echo "package-path=$PKG_PATH" >> "$GITHUB_OUTPUT"
           echo "package-name=$PKG_NAME" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Releasing $PKG_NAME v$VERSION from platform/$PKG_DIR"
+          echo "Releasing $PKG_NAME v$VERSION from $PKG_PATH"
 
   build-and-release:
     name: Build and release ${{ needs.extract-package.outputs.package-name }}
@@ -78,11 +80,11 @@ jobs:
         run: uv python install 3.11
 
       - name: Build package
-        working-directory: platform/${{ needs.extract-package.outputs.package-dir }}
+        working-directory: ${{ needs.extract-package.outputs.package-path }}
         run: uv build --out-dir dist
 
       - name: Verify built artifacts
-        working-directory: platform/${{ needs.extract-package.outputs.package-dir }}
+        working-directory: ${{ needs.extract-package.outputs.package-path }}
         run: |
           ls -la dist/
           WHEEL_COUNT=$(ls dist/*.whl 2>/dev/null | wc -l)
@@ -104,7 +106,7 @@ jobs:
           PKG_NAME="${{ needs.extract-package.outputs.package-name }}"
           VERSION="${{ needs.extract-package.outputs.version }}"
           TAG="${GITHUB_REF_NAME}"
-          DIST_DIR="platform/${{ needs.extract-package.outputs.package-dir }}/dist"
+          DIST_DIR="${{ needs.extract-package.outputs.package-path }}/dist"
           REPO="${{ github.repository }}"
 
           WHEEL_FILE=$(ls "$DIST_DIR"/*.whl | head -1 | xargs basename)

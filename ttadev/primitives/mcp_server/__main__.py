@@ -1,6 +1,6 @@
 """TTA.dev MCP Server entry point.
 
-Allows running as: python -m tta_dev_primitives.mcp_server
+Allows running as: python -m ttadev.primitives.mcp_server
 """
 
 from ttadev.primitives.mcp_server.server import run_server

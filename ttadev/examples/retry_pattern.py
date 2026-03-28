@@ -27,8 +27,11 @@ async def flaky_api_call(data: dict, ctx: WorkflowContext) -> dict:
 
 async def main():
     # Wrap the flaky operation with retry logic
+    from ttadev.primitives.recovery.retry import RetryStrategy
+
     resilient_api = RetryPrimitive(
-        primitive=LambdaPrimitive(flaky_api_call), max_attempts=5, backoff_factor=2.0
+        primitive=LambdaPrimitive(flaky_api_call),
+        strategy=RetryStrategy(max_retries=5, backoff_base=2.0),
     )
 
     context = WorkflowContext(workflow_id="retry-example")

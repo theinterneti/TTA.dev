@@ -16,7 +16,7 @@ Set up a pipeline: validate_input → enrich_data → persist_results
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+from ttadev.primitives import SequentialPrimitive, WorkflowContext
 
 class DataProcessingPipeline:
     def __init__(self):
@@ -78,7 +78,7 @@ Each agent passes results to the next agent in the chain.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+from ttadev.primitives import SequentialPrimitive, WorkflowContext
 
 class ResearchWorkflow:
     def __init__(self):
@@ -163,7 +163,7 @@ Include error handling and logging at each step.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+from ttadev.primitives import SequentialPrimitive, WorkflowContext
 
 class APIClient:
     def __init__(self):
@@ -274,7 +274,7 @@ Each step should pass results to the next step.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives import SequentialPrimitive, WorkflowContext
+from ttadev.primitives import SequentialPrimitive, WorkflowContext
 import aiofiles
 import gzip
 import json
@@ -475,7 +475,3 @@ result = await pipeline.execute(data, context)
 ---
 
 **Next Steps:** When cline detects sequential workflow patterns, it should suggest SequentialPrimitive with appropriate step composition and context tracking.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Sequential_primitive]]

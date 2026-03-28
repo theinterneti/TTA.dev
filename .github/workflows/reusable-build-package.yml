@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       package-path:
-        description: 'Path to package (e.g., platform/primitives)'
+        description: 'Path to package (e.g., ., ttadev/integrations)'
         required: true
         type: string
       python-version:

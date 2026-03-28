@@ -94,7 +94,7 @@ async def main():
     print("=" * 60)
 
     collector = TraceCollector()
-    traces = collector.get_recent_traces(limit=10)
+    traces = collector.get_all_traces()[:10]
     print(f"\n✅ Captured {len(traces)} traces")
 
     for i, trace in enumerate(traces, 1):

@@ -1,61 +1,25 @@
-# TTA.dev Batteries-Included Observability Dashboard
+# TTA.dev UI Assets
 
-**Status: ✅ OPERATIONAL**
+This directory contains dashboard assets and legacy compatibility scripts for the observability UI.
 
-Real-time observability dashboard built using TTA.dev's own primitives to prove they work in production.
+## Supported server entrypoint
 
-## Features
-
-- 🔄 **Real-time Updates**: WebSocket-based live metrics
-- 🛡️ **Fault Tolerant**: Built with CircuitBreaker + Retry primitives
-- 📊 **Production Ready**: REST API + health checks
-- 🎨 **Beautiful UI**: Clean, modern dashboard
-- 🚀 **Self-Hosting**: TTA.dev uses TTA.dev primitives
-
-## Quick Start
+Use the unified observability entrypoint:
 
 ```bash
-# From tta-dev directory
-uv run python ui/observability_server.py
+uv run python -m ttadev.observability
 ```
 
-Then open http://localhost:8000 in your browser.
+Then open `http://localhost:8000`.
 
-## Architecture
+## Current API surface
 
-The observability server demonstrates TTA.dev's batteries-included approach:
+- `GET /api/v2/health`
+- `GET /api/v2/spans`
+- `GET /api/v2/sessions`
+- `WS /ws`
 
-```python
-# Metrics fetcher built with TTA.dev primitives
-metrics_workflow = CircuitBreakerPrimitive(
-    RetryPrimitive(
-        LambdaPrimitive(fetch_live_metrics),
-        strategy=RetryStrategy(max_retries=3, backoff_base=2.0),
-    ),
-    config=CircuitBreakerConfig(
-        failure_threshold=5,
-        recovery_timeout=30.0,
-    ),
-)
-```
+## Legacy compatibility
 
-## Endpoints
-
-- `GET /` - Web dashboard
-- `GET /api/metrics` - REST API for metrics
-- `GET /health` - Health check
-- `WS /ws` - WebSocket for real-time updates
-
-## What This Proves
-
-✅ TTA.dev primitives are production-ready
-✅ Composition works (CircuitBreaker + Retry + Lambda)
-✅ Async workflows handle real traffic
-✅ Self-hosting: TTA.dev builds itself
-
-## Next Steps
-
-- [ ] Connect to real OpenTelemetry traces
-- [ ] Add trace visualization
-- [ ] Auto-discover new primitives as they're built
-- [ ] Add metrics persistence
+`ttadev/ui/observability_server.py` is deprecated and retained only as a compatibility path for
+older tooling.

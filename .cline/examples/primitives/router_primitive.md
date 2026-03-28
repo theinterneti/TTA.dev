@@ -16,8 +16,8 @@ requests intelligently based on the user's subscription tier and request complex
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.routing import RouterPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import RouterPrimitive
+from ttadev.primitives import WorkflowContext
 import asyncio
 
 class IntelligentLLMRouter:
@@ -185,8 +185,8 @@ cost-effective LLM provider while maintaining acceptable quality levels.
 **Expected Implementation:**
 
 ```python
-from tta_dev-primitives.core.routing import RouterPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import RouterPrimitive
+from ttadev.primitives import WorkflowContext
 import asyncio
 
 class CostOptimizedLLMRouter:
@@ -403,8 +403,8 @@ and availability, with automatic failover to backup providers.
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.routing import RouterPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import RouterPrimitive
+from ttadev.primitives import WorkflowContext
 import asyncio
 import time
 from collections import deque
@@ -641,8 +641,8 @@ route requests to the closest region to reduce latency and comply with data regu
 **Expected Implementation:**
 
 ```python
-from tta_dev_primitives.core.routing import RouterPrimitive
-from tta_dev_primitives.core.base import WorkflowContext
+from ttadev.primitives import RouterPrimitive
+from ttadev.primitives import WorkflowContext
 import asyncio
 import time
 
@@ -943,7 +943,3 @@ result = await router.execute(data, context)
 ---
 
 **Next Steps:** When cline detects routing scenarios in multi-provider systems, it should automatically suggest RouterPrimitive with intelligent routing strategies based on cost, performance, geography, or user requirements.
-
-
----
-**Logseq:** [[TTA.dev/.cline/Examples/Primitives/Router_primitive]]
