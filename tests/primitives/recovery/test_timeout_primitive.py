@@ -29,7 +29,9 @@ async def test_timeout_raises_when_operation_exceeds_limit_and_no_fallback():
         await asyncio.sleep(10.0)
         return "never"
 
-    primitive = TimeoutPrimitive(LambdaPrimitive(slow_op), timeout_seconds=0.01)
+    primitive = TimeoutPrimitive(
+        LambdaPrimitive(slow_op), timeout_seconds=0.01, track_timeouts=False
+    )
     ctx = WorkflowContext()
 
     # Act / Assert
