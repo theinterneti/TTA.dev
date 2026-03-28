@@ -2,7 +2,7 @@
 
 **Server:** `ttadev/primitives/mcp_server/server.py`
 **Version:** M3.0
-**Total tools:** 24
+**Total tools:** 23
 
 All tools are exposed over the Model Context Protocol. Read-only tools are safe
 to call at any time. Mutating tools change persistent state in `.tta/control/`.
