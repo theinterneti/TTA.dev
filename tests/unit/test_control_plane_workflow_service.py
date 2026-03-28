@@ -262,3 +262,39 @@ async def test_expire_abandoned_workflow_marks_step_and_workflow_failed(tmp_path
     assert task.workflow is not None
     assert task.workflow.status == WorkflowTrackingStatus.FAILED
     assert task.workflow.steps[0].status == WorkflowStepStatus.FAILED
+
+
+def test_cleanup_orphaned_steps_marks_running_steps_failed_when_workflow_terminated(
+    tmp_path: Path,
+) -> None:
+    # Arrange
+    svc = ControlPlaneService(data_dir=tmp_path)
+    claim = svc.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="test orphan cleanup",
+        step_agents=["agent-a", "agent-b"],
+    )
+    task_id = claim.task.id
+
+    # Manually force the workflow to QUIT while step 0 is still RUNNING
+    svc.mark_workflow_step_running(task_id, step_index=0)
+
+    # Simulate a crash that leaves the workflow in an inconsistent state:
+    # workflow QUIT but step still RUNNING. This state is only reachable via
+    # a process crash or external store mutation — intentional use of _store
+    # here to create the precondition for recovery code testing.
+    task = svc.get_task(task_id)
+    assert task is not None
+    assert task.workflow is not None
+    task.workflow.status = WorkflowTrackingStatus.QUIT
+    svc._store.put_task(task)
+
+    # Act
+    cleaned = svc.cleanup_orphaned_steps(task_id)
+
+    # Assert
+    assert cleaned > 0
+    task = svc.get_task(task_id)
+    assert task is not None
+    assert task.workflow is not None
+    assert task.workflow.steps[0].status == WorkflowStepStatus.FAILED

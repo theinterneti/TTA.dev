@@ -763,6 +763,33 @@ class ControlPlaneService:
 
         return affected
 
+    def cleanup_orphaned_steps(self, task_id: str) -> int:
+        """Mark any RUNNING steps as FAILED for a terminated workflow.
+
+        Use when a workflow is QUIT/FAILED but steps were not cleanly transitioned.
+        Returns count of steps cleaned up.
+        """
+        task = self._store.get_task(task_id)
+        if task is None:
+            raise TaskNotFoundError(f"Task not found: {task_id}")
+        if task.workflow is None:
+            return 0
+
+        terminal_statuses = {WorkflowTrackingStatus.QUIT, WorkflowTrackingStatus.FAILED}
+        if task.workflow.status not in terminal_statuses:
+            return 0
+
+        cleaned = 0
+        for step in task.workflow.steps:
+            if step.status == WorkflowStepStatus.RUNNING:
+                step.status = WorkflowStepStatus.FAILED
+                cleaned += 1
+
+        if cleaned > 0:
+            self._store.put_task(task)
+
+        return cleaned
+
     def mark_workflow_step_running(
         self,
         task_id: str,
