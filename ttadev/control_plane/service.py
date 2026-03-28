@@ -1271,6 +1271,18 @@ class ControlPlaneService:
         task.completed_at = now_iso
         task.active_run_id = None
 
+        # Auto-finalize workflow tracking when all steps have reached COMPLETED.
+        if task.workflow is not None and task.workflow.status == WorkflowTrackingStatus.RUNNING:
+            _terminal = {
+                WorkflowStepStatus.COMPLETED,
+                WorkflowStepStatus.QUIT,
+                WorkflowStepStatus.FAILED,
+            }
+            steps = task.workflow.steps
+            if steps and all(s.status in _terminal for s in steps):
+                if all(s.status == WorkflowStepStatus.COMPLETED for s in steps):
+                    task.workflow.status = WorkflowTrackingStatus.COMPLETED
+
         self._store.put_run(run)
         self._store.put_task(task)
         self.release_locks_for_run(run.id)

@@ -212,13 +212,8 @@ async def test_happy_path_two_step_workflow(
     completed = sum(1 for s in task.workflow.steps if s.status == WorkflowStepStatus.COMPLETED)
     assert completed == 2
 
-    # The top-level task is COMPLETED (set by complete_run on the final run).
-    # workflow.status transitions to COMPLETED via finalize_tracked_workflow_run,
-    # which is not yet exposed as an MCP tool — the workflow tracking record
-    # remains RUNNING until explicitly finalized.
-    from ttadev.control_plane.models import TaskStatus
-
-    assert task.status == TaskStatus.COMPLETED
+    # complete_run auto-finalizes the workflow when all steps are COMPLETED
+    assert task.workflow.status == WorkflowTrackingStatus.COMPLETED
 
 
 # ── Low-confidence gate → human QUIT ────────────────────────────────────────

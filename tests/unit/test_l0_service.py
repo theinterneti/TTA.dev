@@ -271,3 +271,79 @@ def test_step_duration_helper_in_progress() -> None:
     result = _step_duration(started, None)
     assert result.endswith("s")
     assert float(result[:-1]) >= 0.0
+
+
+# ── workflow auto-finalization ────────────────────────────────────────────────
+
+
+def test_complete_run_auto_finalizes_workflow_when_all_steps_completed(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    """complete_run sets workflow.status=COMPLETED when all steps are COMPLETED."""
+    from ttadev.control_plane.models import WorkflowStepStatus, WorkflowTrackingStatus
+    from ttadev.observability import agent_identity
+
+    monkeypatch.setattr(agent_identity, "_AGENT_ID", "agent-a")
+    monkeypatch.setenv("TTA_AGENT_TOOL", "copilot")
+
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="auto-fin",
+        workflow_goal="prove auto-finalize",
+        step_agents=["agent-a"],
+    )
+    task_id = claim.run.task_id
+    run_id = claim.run.id
+
+    service.mark_workflow_step_running(task_id, step_index=0)
+    service.record_workflow_step_result(
+        task_id, step_index=0, result_summary="done", confidence=1.0
+    )
+
+    service.complete_run(run_id, summary="all done")
+
+    task = service.get_task(task_id)
+    assert task.workflow is not None
+    assert task.workflow.status == WorkflowTrackingStatus.COMPLETED
+    assert task.workflow.steps[0].status == WorkflowStepStatus.COMPLETED
+
+
+def test_complete_run_does_not_auto_finalize_when_steps_not_all_terminal(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    """complete_run leaves workflow.status=RUNNING when a step is still PENDING."""
+    from ttadev.control_plane.models import WorkflowTrackingStatus
+    from ttadev.observability import agent_identity
+
+    monkeypatch.setattr(agent_identity, "_AGENT_ID", "agent-a")
+    monkeypatch.setenv("TTA_AGENT_TOOL", "copilot")
+
+    service = ControlPlaneService(tmp_path)
+    # Two-step workflow — agent-a only completes step 0
+    claim = service.start_tracked_workflow(
+        workflow_name="partial",
+        workflow_goal="two steps",
+        step_agents=["agent-a", "agent-b"],
+    )
+    task_id = claim.run.task_id
+    run_id = claim.run.id
+
+    service.mark_workflow_step_running(task_id, step_index=0)
+    service.record_workflow_step_result(
+        task_id, step_index=0, result_summary="done", confidence=1.0
+    )
+    # Release rather than complete so agent-b can pick it up (not under test here)
+    service.release_run(run_id, reason="handoff")
+
+    # Simulate agent-b picking up and completing without touching step 1
+    monkeypatch.setattr(agent_identity, "_AGENT_ID", "agent-b")
+    claim2 = service.claim_task(task_id)
+    # Complete without recording step 1 result (step 1 still PENDING)
+    service.complete_run(claim2.run.id, summary="premature complete")
+
+    task = service.get_task(task_id)
+    assert task.workflow is not None
+    # Step 1 is still PENDING — workflow should NOT be auto-finalized
+    assert task.workflow.status == WorkflowTrackingStatus.RUNNING
