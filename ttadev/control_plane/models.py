@@ -278,6 +278,17 @@ class GateRecord:
     decided_by: str | None = None
     decided_at: str | None = None
     summary: str | None = None
+    policy_name: str | None = None
+    """Evaluation rule for POLICY-type gates.
+
+    When set on a ``GateType.POLICY`` gate the service auto-evaluates the gate
+    after a workflow step records its confidence score.
+
+    Supported patterns:
+      ``"auto:always"``           — always approve
+      ``"auto:confidence≥{n}"``   — approve when confidence ≥ n (0.0–1.0)
+      ``"auto:confidence<{n}"``   — request changes when confidence < n
+    """
     history: list[GateHistoryEntry] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -294,6 +305,7 @@ class GateRecord:
             "decided_by": self.decided_by,
             "decided_at": self.decided_at,
             "summary": self.summary,
+            "policy_name": self.policy_name,
             "history": [entry.to_dict() for entry in self.history],
         }
 
@@ -321,6 +333,7 @@ class GateRecord:
             decided_by=data.get("decided_by"),
             decided_at=data.get("decided_at"),
             summary=data.get("summary"),
+            policy_name=data.get("policy_name"),
             history=history,
         )
 

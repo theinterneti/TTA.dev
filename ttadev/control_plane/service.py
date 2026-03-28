@@ -119,6 +119,7 @@ class ControlPlaneService:
             assigned_role = str(gate.get("assigned_role") or "").strip() or None
             assigned_agent_id = str(gate.get("assigned_agent_id") or "").strip() or None
             assigned_decider = str(gate.get("assigned_decider") or "").strip() or None
+            policy_name = str(gate.get("policy_name") or "").strip() or None
 
             normalized.append(
                 GateRecord(
@@ -129,6 +130,7 @@ class ControlPlaneService:
                     assigned_role=assigned_role,
                     assigned_agent_id=assigned_agent_id,
                     assigned_decider=assigned_decider,
+                    policy_name=policy_name,
                 )
             )
             seen_gate_ids.add(gate_id)
@@ -140,6 +142,86 @@ class ControlPlaneService:
             if gate.id == gate_id:
                 return gate
         raise TaskGateError(f"Unknown gate ID: {gate_id}")
+
+    # ── Policy gate auto-evaluation ───────────────────────────────────────────
+
+    @staticmethod
+    def _parse_policy_decision(
+        policy_name: str,
+        confidence: float | None,
+    ) -> tuple[GateStatus, str] | None:
+        """Return (outcome, summary) if policy_name can be evaluated, else None.
+
+        Supported patterns:
+          ``"auto:always"``             — always approve
+          ``"auto:confidence≥{n}"``     — approve if confidence ≥ n
+          ``"auto:confidence<{n}"``     — request changes if confidence < n
+        """
+        if not policy_name:
+            return None
+        if policy_name == "auto:always":
+            return GateStatus.APPROVED, "Policy auto:always — automatically approved"
+
+        # Handle both ASCII >= and the unicode ≥ character
+        for op_str, op_char in ((">=", ">="), ("≥", "≥"), ("<", "<")):
+            prefix = f"auto:confidence{op_char}"
+            if policy_name.startswith(prefix):
+                threshold_str = policy_name[len(prefix) :]
+                try:
+                    threshold = float(threshold_str)
+                except ValueError:
+                    return None
+                if confidence is None:
+                    return None
+                if op_char in (">=", "≥"):
+                    if confidence >= threshold:
+                        return (
+                            GateStatus.APPROVED,
+                            f"Policy {policy_name} — confidence {confidence:.2f} ≥ {threshold}",
+                        )
+                    return None  # condition not met; do not auto-decide
+                # op_char == "<"
+                if confidence < threshold:
+                    return (
+                        GateStatus.CHANGES_REQUESTED,
+                        f"Policy {policy_name} — confidence {confidence:.2f} < {threshold}",
+                    )
+                return None  # condition not met
+        return None
+
+    def _auto_evaluate_policy_gates(
+        self,
+        task: TaskRecord,
+        *,
+        confidence: float | None,
+        now_iso: str,
+    ) -> None:
+        """Auto-decide any pending POLICY gates whose policy_name can be evaluated."""
+        for gate in task.gates:
+            if gate.gate_type != GateType.POLICY:
+                continue
+            if gate.status != GateStatus.PENDING:
+                continue
+            if not gate.policy_name:
+                continue
+            result = self._parse_policy_decision(gate.policy_name, confidence)
+            if result is None:
+                continue
+            outcome, summary = result
+            gate.history.append(
+                self._build_gate_history_entry(
+                    action=GateHistoryAction.DECISION,
+                    from_status=GateStatus.PENDING,
+                    to_status=outcome,
+                    actor=f"policy:{gate.policy_name}",
+                    occurred_at=now_iso,
+                    summary=summary,
+                )
+            )
+            gate.status = outcome
+            gate.decided_at = now_iso
+            gate.decided_by = f"policy:{gate.policy_name}"
+            gate.summary = summary
 
     def _gate_has_assignments(self, gate: GateRecord) -> bool:
         return any(
@@ -583,12 +665,17 @@ class ControlPlaneService:
         workflow_goal: str,
         step_agents: list[str],
         project_name: str | None = None,
+        extra_gates: list[dict[str, Any]] | None = None,
     ) -> ClaimResult:
-        """Create and claim one top-level task for a tracked workflow run."""
+        """Create and claim one top-level task for a tracked workflow run.
+
+        ``extra_gates`` allows callers to attach additional L0 gates (e.g.
+        POLICY-type auto-evaluation gates) alongside the per-step APPROVAL gates.
+        """
         if not step_agents:
             raise ControlPlaneError("Tracked workflow must include at least one step")
 
-        gates = [
+        gates: list[dict[str, Any]] = [
             {
                 "id": self._make_workflow_gate_id(step_index=index, agent_name=agent_name),
                 "gate_type": GateType.APPROVAL.value,
@@ -597,6 +684,8 @@ class ControlPlaneService:
             }
             for index, agent_name in enumerate(step_agents)
         ]
+        if extra_gates:
+            gates.extend(extra_gates)
         task = self.create_task(
             title=f"Workflow {workflow_name}: {workflow_goal.strip() or workflow_name}",
             description=f"Tracked workflow run for {workflow_name}: {workflow_goal}",
@@ -665,6 +754,8 @@ class ControlPlaneService:
         step.completed_at = now_iso
         step.status = WorkflowStepStatus.COMPLETED
         task.updated_at = now_iso
+        # Auto-evaluate any pending POLICY gates now that a confidence value is available.
+        self._auto_evaluate_policy_gates(task, confidence=confidence, now_iso=now_iso)
         self._store.put_task(task)
         return task
 

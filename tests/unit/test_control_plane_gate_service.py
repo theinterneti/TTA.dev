@@ -8,6 +8,7 @@ import pytest
 
 from ttadev.control_plane import ControlPlaneService
 from ttadev.control_plane.models import GateHistoryAction, GateStatus, GateType, TaskRecord
+from ttadev.control_plane.service import ControlPlaneService as _CPService
 from ttadev.observability import agent_identity
 
 
@@ -406,3 +407,206 @@ def test_reopen_gate_preserves_assignments_and_rejects_invalid_states(
         service.reopen_gate(task.id, "review", reopened_by=claim.run.agent_id)
 
     assert len(service.get_task(task.id).gates[0].history) == 3
+
+
+# ── Policy gate auto-evaluation ───────────────────────────────────────────────
+
+
+def test_parse_policy_decision_auto_always() -> None:
+    """auto:always always returns APPROVED regardless of confidence."""
+    result = _CPService._parse_policy_decision("auto:always", confidence=None)
+    assert result is not None
+    status, summary = result
+    assert status == GateStatus.APPROVED
+    assert "auto:always" in summary
+
+
+def test_parse_policy_decision_confidence_threshold_met() -> None:
+    """auto:confidence≥0.8 approves when confidence meets threshold."""
+    result = _CPService._parse_policy_decision("auto:confidence≥0.8", confidence=0.9)
+    assert result is not None
+    status, _ = result
+    assert status == GateStatus.APPROVED
+
+
+def test_parse_policy_decision_confidence_threshold_not_met() -> None:
+    """auto:confidence≥0.8 returns None (no auto-decision) when below threshold."""
+    result = _CPService._parse_policy_decision("auto:confidence≥0.8", confidence=0.5)
+    assert result is None
+
+
+def test_parse_policy_decision_confidence_below_threshold() -> None:
+    """auto:confidence<0.7 requests changes when confidence is below threshold."""
+    result = _CPService._parse_policy_decision("auto:confidence<0.7", confidence=0.5)
+    assert result is not None
+    status, _ = result
+    assert status == GateStatus.CHANGES_REQUESTED
+
+
+def test_parse_policy_decision_confidence_not_below_threshold() -> None:
+    """auto:confidence<0.7 returns None when confidence meets or exceeds threshold."""
+    result = _CPService._parse_policy_decision("auto:confidence<0.7", confidence=0.8)
+    assert result is None
+
+
+def test_parse_policy_decision_no_confidence_for_threshold() -> None:
+    """Threshold policies return None when confidence is not provided."""
+    result = _CPService._parse_policy_decision("auto:confidence≥0.8", confidence=None)
+    assert result is None
+
+
+def test_parse_policy_decision_unknown_policy() -> None:
+    """Unknown policy patterns return None."""
+    result = _CPService._parse_policy_decision("auto:unknown", confidence=0.9)
+    assert result is None
+
+
+def test_policy_gate_auto_approves_on_high_confidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POLICY gate with auto:confidence≥0.8 approves when step result meets threshold."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="verify confidence gate",
+        step_agents=["agent-test"],
+        extra_gates=[
+            {
+                "id": "confidence-check",
+                "gate_type": "policy",
+                "label": "Confidence check",
+                "required": True,
+                "policy_name": "auto:confidence≥0.8",
+            }
+        ],
+    )
+    task_id = claim.run.task_id
+    task = service.get_task(task_id)
+    policy_gate = next(g for g in task.gates if g.id == "confidence-check")
+    assert policy_gate.policy_name == "auto:confidence≥0.8"
+    assert policy_gate.status == GateStatus.PENDING
+
+    service.mark_workflow_step_running(task_id, step_index=0)
+    updated = service.record_workflow_step_result(
+        task_id,
+        step_index=0,
+        result_summary="step complete",
+        confidence=0.9,
+    )
+    gate = next(g for g in updated.gates if g.id == "confidence-check")
+    assert gate.status == GateStatus.APPROVED
+    assert gate.decided_by == "policy:auto:confidence≥0.8"
+    assert len(gate.history) == 1
+    assert gate.history[0].action == GateHistoryAction.DECISION
+    assert gate.history[0].from_status == GateStatus.PENDING
+    assert gate.history[0].to_status == GateStatus.APPROVED
+
+    completed = service.complete_run(claim.run.id, summary="done")
+    assert completed.status.value == "completed"
+
+
+def test_policy_gate_requests_changes_on_low_confidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POLICY gate with auto:confidence<0.7 requests changes when confidence is low."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="verify low-confidence gate",
+        step_agents=["agent-test"],
+        extra_gates=[
+            {
+                "id": "quality-gate",
+                "gate_type": "policy",
+                "label": "Quality gate",
+                "required": True,
+                "policy_name": "auto:confidence<0.7",
+            }
+        ],
+    )
+    task_id = claim.run.task_id
+    service.mark_workflow_step_running(task_id, step_index=0)
+    updated = service.record_workflow_step_result(
+        task_id,
+        step_index=0,
+        result_summary="step complete",
+        confidence=0.5,
+    )
+    gate = next(g for g in updated.gates if g.id == "quality-gate")
+    assert gate.status == GateStatus.CHANGES_REQUESTED
+    assert gate.decided_by == "policy:auto:confidence<0.7"
+
+    with pytest.raises(Exception, match="quality-gate"):
+        service.complete_run(claim.run.id, summary="done")
+
+
+def test_policy_gate_auto_always_approves_immediately(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POLICY gate with auto:always approves on first record_workflow_step_result call."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="verify auto:always gate",
+        step_agents=["agent-test"],
+        extra_gates=[
+            {
+                "id": "auto-gate",
+                "gate_type": "policy",
+                "label": "Auto gate",
+                "required": True,
+                "policy_name": "auto:always",
+            }
+        ],
+    )
+    task_id = claim.run.task_id
+    service.mark_workflow_step_running(task_id, step_index=0)
+    updated = service.record_workflow_step_result(
+        task_id,
+        step_index=0,
+        result_summary="step complete",
+        confidence=0.0,
+    )
+    gate = next(g for g in updated.gates if g.id == "auto-gate")
+    assert gate.status == GateStatus.APPROVED
+
+    completed = service.complete_run(claim.run.id, summary="done")
+    assert completed.status.value == "completed"
+
+
+def test_policy_gate_no_auto_decision_when_threshold_not_met(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """POLICY gate stays pending when confidence does not meet the threshold."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="verify threshold not met",
+        step_agents=["agent-test"],
+        extra_gates=[
+            {
+                "id": "high-bar",
+                "gate_type": "policy",
+                "label": "High confidence bar",
+                "required": True,
+                "policy_name": "auto:confidence≥0.95",
+            }
+        ],
+    )
+    task_id = claim.run.task_id
+    service.mark_workflow_step_running(task_id, step_index=0)
+    updated = service.record_workflow_step_result(
+        task_id,
+        step_index=0,
+        result_summary="step complete",
+        confidence=0.8,
+    )
+    gate = next(g for g in updated.gates if g.id == "high-bar")
+    assert gate.status == GateStatus.PENDING
+
+    with pytest.raises(Exception, match="high-bar"):
+        service.complete_run(claim.run.id, summary="done")
