@@ -967,3 +967,311 @@ async def test_control_mutating_tools_carry_non_destructive_annotation() -> None
         ann = tool_map[name].annotations
         assert ann is not None, f"{name} has no annotations"
         assert ann.destructiveHint is False, f"{name} should have destructiveHint=False"
+
+
+# ── Workflow progression tools ────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_workflow_tools_are_registered() -> None:
+    """New workflow tools are present in the MCP tool registry."""
+    mcp = create_server()
+    tool_names = await _list_tool_names(mcp)
+
+    assert "control_start_workflow" in tool_names
+    assert "control_mark_workflow_step_running" in tool_names
+    assert "control_record_workflow_step_result" in tool_names
+    assert "control_record_workflow_gate_outcome" in tool_names
+    assert "control_mark_workflow_step_failed" in tool_names
+
+
+@pytest.mark.asyncio
+async def test_control_start_workflow_creates_task_and_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """control_start_workflow returns task, run, and lease."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    result = await _call_tool(
+        mcp,
+        "control_start_workflow",
+        {
+            "workflow_name": "feature-dev",
+            "workflow_goal": "ship auth",
+            "step_agents": ["architect", "backend-engineer"],
+            "data_dir": str(tmp_path),
+        },
+    )
+
+    assert "task" in result
+    assert "run" in result
+    assert "lease" in result
+    assert result["task"]["workflow"]["total_steps"] == 2
+    assert result["task"]["workflow"]["steps"][0]["agent_name"] == "architect"
+
+
+@pytest.mark.asyncio
+async def test_control_start_workflow_with_policy_gate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """control_start_workflow attaches POLICY extra gates."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    result = await _call_tool(
+        mcp,
+        "control_start_workflow",
+        {
+            "workflow_name": "feature-dev",
+            "workflow_goal": "ship auth",
+            "step_agents": ["architect"],
+            "policy_gates": [{"id": "quality", "label": "Quality gate", "policy": "auto:always"}],
+            "data_dir": str(tmp_path),
+        },
+    )
+
+    gates = result["task"]["gates"]
+    policy_gates = [g for g in gates if g["gate_type"] == "policy"]
+    assert len(policy_gates) == 1
+    assert policy_gates[0]["id"] == "quality"
+    assert policy_gates[0]["policy_name"] == "auto:always"
+
+
+@pytest.mark.asyncio
+async def test_control_mark_workflow_step_running_stamps_trace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """control_mark_workflow_step_running stamps trace_id/span_id on the step."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    start_result = await _call_tool(
+        mcp,
+        "control_start_workflow",
+        {
+            "workflow_name": "wf",
+            "workflow_goal": "test",
+            "step_agents": ["agent-test"],
+            "data_dir": str(tmp_path),
+        },
+    )
+    task_id = start_result["task"]["id"]
+    fake_trace = "4bf92f3577b34da6a3ce929d0e0e4736"  # pragma: allowlist secret
+    fake_span = "00f067aa0ba902b7"
+
+    result = await _call_tool(
+        mcp,
+        "control_mark_workflow_step_running",
+        {
+            "task_id": task_id,
+            "step_index": 0,
+            "trace_id": fake_trace,
+            "span_id": fake_span,
+            "data_dir": str(tmp_path),
+        },
+    )
+
+    step = result["task"]["workflow"]["steps"][0]
+    assert step["trace_id"] == fake_trace
+    assert step["span_id"] == fake_span
+    assert step["status"] == "running"
+
+
+@pytest.mark.asyncio
+async def test_control_record_workflow_step_result_triggers_policy_gate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """control_record_workflow_step_result auto-evaluates a pending policy gate."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    start_result = await _call_tool(
+        mcp,
+        "control_start_workflow",
+        {
+            "workflow_name": "wf",
+            "workflow_goal": "test",
+            "step_agents": ["agent-test"],
+            "policy_gates": [
+                {
+                    "id": "ci",
+                    "label": "CI gate",
+                    "policy": "auto:confidence>=0.8",
+                }
+            ],
+            "data_dir": str(tmp_path),
+        },
+    )
+    task_id = start_result["task"]["id"]
+    await _call_tool(
+        mcp,
+        "control_mark_workflow_step_running",
+        {"task_id": task_id, "step_index": 0, "data_dir": str(tmp_path)},
+    )
+
+    result = await _call_tool(
+        mcp,
+        "control_record_workflow_step_result",
+        {
+            "task_id": task_id,
+            "step_index": 0,
+            "result_summary": "all checks passed",
+            "confidence": 0.95,
+            "data_dir": str(tmp_path),
+        },
+    )
+
+    gates = result["task"]["gates"]
+    policy_gate = next(g for g in gates if g["id"] == "ci")
+    assert policy_gate["status"] == "approved"
+
+
+@pytest.mark.asyncio
+async def test_control_record_workflow_gate_outcome(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """control_record_workflow_gate_outcome records a gate decision on the step."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    start_result = await _call_tool(
+        mcp,
+        "control_start_workflow",
+        {
+            "workflow_name": "wf",
+            "workflow_goal": "test",
+            "step_agents": ["agent-test"],
+            "data_dir": str(tmp_path),
+        },
+    )
+    task_id = start_result["task"]["id"]
+    await _call_tool(
+        mcp,
+        "control_mark_workflow_step_running",
+        {"task_id": task_id, "step_index": 0, "data_dir": str(tmp_path)},
+    )
+    await _call_tool(
+        mcp,
+        "control_record_workflow_step_result",
+        {
+            "task_id": task_id,
+            "step_index": 0,
+            "result_summary": "done",
+            "confidence": 0.9,
+            "data_dir": str(tmp_path),
+        },
+    )
+
+    result = await _call_tool(
+        mcp,
+        "control_record_workflow_gate_outcome",
+        {
+            "task_id": task_id,
+            "step_index": 0,
+            "decision": "continue",
+            "summary": "looks good",
+            "data_dir": str(tmp_path),
+        },
+    )
+
+    step = result["task"]["workflow"]["steps"][0]
+    assert step["gate_decision"] == "continue"
+
+
+@pytest.mark.asyncio
+async def test_control_mark_workflow_step_failed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """control_mark_workflow_step_failed transitions the step to FAILED."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    start_result = await _call_tool(
+        mcp,
+        "control_start_workflow",
+        {
+            "workflow_name": "wf",
+            "workflow_goal": "test",
+            "step_agents": ["agent-test"],
+            "data_dir": str(tmp_path),
+        },
+    )
+    task_id = start_result["task"]["id"]
+    await _call_tool(
+        mcp,
+        "control_mark_workflow_step_running",
+        {"task_id": task_id, "step_index": 0, "data_dir": str(tmp_path)},
+    )
+
+    result = await _call_tool(
+        mcp,
+        "control_mark_workflow_step_failed",
+        {
+            "task_id": task_id,
+            "step_index": 0,
+            "error_summary": "timed out",
+            "data_dir": str(tmp_path),
+        },
+    )
+
+    step = result["task"]["workflow"]["steps"][0]
+    assert step["status"] == "failed"
+
+
+@pytest.mark.asyncio
+async def test_control_claim_task_forwards_trace_context(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """control_claim_task stores trace_id/span_id on the RunRecord."""
+    _set_agent_identity(monkeypatch, agent_id="agent-test")
+    mcp = create_server()
+
+    create_result = await _call_tool(
+        mcp,
+        "control_create_task",
+        {"title": "traced task", "data_dir": str(tmp_path)},
+    )
+    task_id = create_result["task"]["id"]
+    fake_trace = "4bf92f3577b34da6a3ce929d0e0e4736"  # pragma: allowlist secret
+    fake_span = "00f067aa0ba902b7"
+
+    result = await _call_tool(
+        mcp,
+        "control_claim_task",
+        {
+            "task_id": task_id,
+            "trace_id": fake_trace,
+            "span_id": fake_span,
+            "data_dir": str(tmp_path),
+        },
+    )
+
+    assert result["run"]["trace_id"] == fake_trace
+    assert result["run"]["span_id"] == fake_span
+
+
+@pytest.mark.asyncio
+async def test_workflow_tools_have_correct_annotations() -> None:
+    """Workflow tools carry the right ToolAnnotations hints."""
+    mcp = create_server()
+    tools_result = mcp.list_tools()
+    if asyncio.iscoroutine(tools_result):
+        tools_result = await tools_result
+    tool_map = {t.name: t for t in tools_result}
+
+    # Idempotent: mark_running is safe to retry
+    idem_ann = tool_map["control_mark_workflow_step_running"].annotations
+    assert idem_ann is not None
+    assert idem_ann.idempotentHint is True
+
+    # Mutating but non-destructive
+    for name in (
+        "control_start_workflow",
+        "control_record_workflow_step_result",
+        "control_record_workflow_gate_outcome",
+        "control_mark_workflow_step_failed",
+    ):
+        ann = tool_map[name].annotations
+        assert ann is not None, f"{name} has no annotations"
+        assert ann.destructiveHint is False, f"{name} should be non-destructive"

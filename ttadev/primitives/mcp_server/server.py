@@ -33,7 +33,13 @@ from ttadev.control_plane import (
     RunStatus,
     TaskStatus,
 )
-from ttadev.control_plane.models import LeaseRecord, LockRecord, RunRecord, TaskRecord
+from ttadev.control_plane.models import (
+    LeaseRecord,
+    LockRecord,
+    RunRecord,
+    TaskRecord,
+    WorkflowGateDecisionOutcome,
+)
 from ttadev.observability.project_session import ProjectSessionManager
 from ttadev.observability.session_manager import SessionManager
 from ttadev.primitives.analysis import TTAAnalyzer
@@ -846,9 +852,15 @@ result = await workflow.execute(data, context)
         task_id: str,
         agent_role: str | None = None,
         lease_ttl_seconds: float = 300.0,
+        trace_id: str | None = None,
+        span_id: str | None = None,
         data_dir: str = ".tta",
     ) -> dict[str, Any]:
-        """Claim an L0 control-plane task and create an active run."""
+        """Claim an L0 control-plane task and create an active run.
+
+        Pass ``trace_id`` and ``span_id`` (hex strings) to stamp the current
+        OTel span context onto the run record for attribution.
+        """
         logger.info(
             "mcp_tool_called",
             tool="control_claim_task",
@@ -863,6 +875,8 @@ result = await workflow.execute(data, context)
                 task_id,
                 agent_role=agent_role,
                 lease_ttl_seconds=lease_ttl_seconds,
+                trace_id=trace_id,
+                span_id=span_id,
             )
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
@@ -1196,6 +1210,192 @@ result = await workflow.execute(data, context)
             "active": page["items"],
             **{k: v for k, v in page.items() if k != "items"},
         }
+
+    # ========== WORKFLOW PROGRESSION ==========
+
+    @mcp.tool(annotations=_mut)
+    async def control_start_workflow(
+        workflow_name: str,
+        workflow_goal: str,
+        step_agents: list[str],
+        project_name: str | None = None,
+        policy_gates: list[dict[str, str]] | None = None,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Create and claim a tracked multi-agent workflow task.
+
+        ``step_agents`` is an ordered list of agent names — one entry per
+        workflow step.  ``policy_gates`` is an optional list of extra POLICY
+        gate dicts, each with keys ``id``, ``label``, and ``policy``
+        (e.g. ``"auto:confidence>=0.85"``).
+
+        Returns the same ``{task, run, lease}`` envelope as
+        ``control_claim_task``.
+        """
+        logger.info(
+            "mcp_tool_called",
+            tool="control_start_workflow",
+            data_dir=data_dir,
+            workflow_name=workflow_name,
+            step_agents=step_agents,
+        )
+        try:
+            extra_gates: list[dict[str, Any]] | None = None
+            if policy_gates:
+                extra_gates = [
+                    {
+                        "id": g["id"],
+                        "gate_type": "policy",
+                        "label": g["label"],
+                        "required": True,
+                        "policy_name": g["policy"],
+                    }
+                    for g in policy_gates
+                ]
+            service = _create_control_plane_service(data_dir)
+            claim = service.start_tracked_workflow(
+                workflow_name=workflow_name,
+                workflow_goal=workflow_goal,
+                step_agents=step_agents,
+                project_name=project_name,
+                extra_gates=extra_gates,
+            )
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {
+            "task": _serialize_task(claim.task),
+            "run": _serialize_run(claim.run),
+            "lease": _serialize_lease(claim.lease),
+        }
+
+    @mcp.tool(annotations=_idem)
+    async def control_mark_workflow_step_running(
+        task_id: str,
+        step_index: int,
+        trace_id: str | None = None,
+        span_id: str | None = None,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Transition a tracked workflow step to RUNNING.
+
+        Pass ``trace_id`` and ``span_id`` to stamp the current OTel span
+        context onto the step record.  Safe to call again on retry — the
+        trace context is replaced each time.
+        """
+        logger.info(
+            "mcp_tool_called",
+            tool="control_mark_workflow_step_running",
+            data_dir=data_dir,
+            task_id=task_id,
+            step_index=step_index,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            task = service.mark_workflow_step_running(
+                task_id,
+                step_index=step_index,
+                trace_id=trace_id,
+                span_id=span_id,
+            )
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"task": _serialize_task(task)}
+
+    @mcp.tool(annotations=_mut)
+    async def control_record_workflow_step_result(
+        task_id: str,
+        step_index: int,
+        result_summary: str,
+        confidence: float,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Record the result and confidence score for a completed workflow step.
+
+        ``confidence`` must be in the range 0.0–1.0.  Recording the result
+        automatically evaluates any pending POLICY gates attached to the task.
+        """
+        logger.info(
+            "mcp_tool_called",
+            tool="control_record_workflow_step_result",
+            data_dir=data_dir,
+            task_id=task_id,
+            step_index=step_index,
+            confidence=confidence,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            task = service.record_workflow_step_result(
+                task_id,
+                step_index=step_index,
+                result_summary=result_summary,
+                confidence=confidence,
+            )
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"task": _serialize_task(task)}
+
+    @mcp.tool(annotations=_mut)
+    async def control_record_workflow_gate_outcome(
+        task_id: str,
+        step_index: int,
+        decision: str,
+        summary: str = "",
+        policy_name: str | None = None,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Record the approval-gate decision for a tracked workflow step.
+
+        ``decision`` must be one of: ``continue``, ``skip``, ``edit``, ``quit``.
+        Set ``policy_name`` when the decision was made automatically by a policy
+        rule rather than by a human reviewer.
+        """
+        logger.info(
+            "mcp_tool_called",
+            tool="control_record_workflow_gate_outcome",
+            data_dir=data_dir,
+            task_id=task_id,
+            step_index=step_index,
+            decision=decision,
+        )
+        try:
+            outcome = WorkflowGateDecisionOutcome(decision)
+            service = _create_control_plane_service(data_dir)
+            task = service.record_workflow_gate_outcome(
+                task_id,
+                step_index=step_index,
+                decision=outcome,
+                summary=summary,
+                policy_name=policy_name,
+            )
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"task": _serialize_task(task)}
+
+    @mcp.tool(annotations=_mut)
+    async def control_mark_workflow_step_failed(
+        task_id: str,
+        step_index: int,
+        error_summary: str,
+        data_dir: str = ".tta",
+    ) -> dict[str, Any]:
+        """Mark a tracked workflow step as FAILED with an error summary."""
+        logger.info(
+            "mcp_tool_called",
+            tool="control_mark_workflow_step_failed",
+            data_dir=data_dir,
+            task_id=task_id,
+            step_index=step_index,
+        )
+        try:
+            service = _create_control_plane_service(data_dir)
+            task = service.mark_workflow_step_failed(
+                task_id,
+                step_index=step_index,
+                error_summary=error_summary,
+            )
+        except (ControlPlaneError, ValueError) as exc:
+            return _control_plane_error_payload(exc)
+        return {"task": _serialize_task(task)}
 
     # ========== RESOURCES ==========
 

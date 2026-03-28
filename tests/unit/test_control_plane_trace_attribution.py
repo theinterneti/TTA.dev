@@ -10,7 +10,7 @@ from ttadev.control_plane import ControlPlaneService
 from ttadev.control_plane.models import RunRecord, WorkflowStepRecord
 from ttadev.observability import agent_identity
 
-_FAKE_TRACE_ID = "4bf92f3577b34da6a3ce929d0e0e4736"
+_FAKE_TRACE_ID = "4bf92f3577b34da6a3ce929d0e0e4736"  # pragma: allowlist secret
 _FAKE_SPAN_ID = "00f067aa0ba902b7"
 
 
