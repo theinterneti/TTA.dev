@@ -169,6 +169,10 @@ class WorkflowStepRecord:
     last_confidence: float | None = None
     gate_decision: WorkflowGateDecisionOutcome | None = None
     gate_history: list[WorkflowGateDecisionRecord] = field(default_factory=list)
+    trace_id: str | None = None
+    """OTel trace ID (32-hex) stamped when the step transitions to RUNNING."""
+    span_id: str | None = None
+    """OTel span ID (16-hex) stamped when the step transitions to RUNNING."""
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the workflow step record for JSON persistence."""
@@ -184,6 +188,8 @@ class WorkflowStepRecord:
             "last_confidence": self.last_confidence,
             "gate_decision": self.gate_decision.value if self.gate_decision is not None else None,
             "gate_history": [entry.to_dict() for entry in self.gate_history],
+            "trace_id": self.trace_id,
+            "span_id": self.span_id,
         }
 
     @classmethod
@@ -216,6 +222,8 @@ class WorkflowStepRecord:
                 else None
             ),
             gate_history=gate_history,
+            trace_id=data.get("trace_id"),
+            span_id=data.get("span_id"),
         )
 
 
@@ -434,6 +442,10 @@ class RunRecord:
     session_id: str | None = None
     ended_at: str | None = None
     summary: str | None = None
+    trace_id: str | None = None
+    """OTel trace ID (32-hex) stamped at claim time when a span context is available."""
+    span_id: str | None = None
+    """OTel span ID (16-hex) stamped at claim time when a span context is available."""
 
     def to_dict(self) -> dict[str, str | None]:
         return {
@@ -448,6 +460,8 @@ class RunRecord:
             "session_id": self.session_id,
             "ended_at": self.ended_at,
             "summary": self.summary,
+            "trace_id": self.trace_id,
+            "span_id": self.span_id,
         }
 
     @classmethod
@@ -464,6 +478,8 @@ class RunRecord:
             session_id=data.get("session_id"),
             ended_at=data.get("ended_at"),
             summary=data.get("summary"),
+            trace_id=data.get("trace_id"),
+            span_id=data.get("span_id"),
         )
 
 

@@ -324,12 +324,16 @@ def _handle_task_command(args: argparse.Namespace, service: ControlPlaneService)
                 confidence = (
                     f"{step.last_confidence:.0%}" if step.last_confidence is not None else "-"
                 )
+                trace_ref = ""
+                if step.trace_id:
+                    span_part = f"/{step.span_id}" if step.span_id else ""
+                    trace_ref = f" trace={step.trace_id}{span_part}"
                 print(
                     "      "
                     f"{step.step_index + 1}. {step.agent_name} "
                     f"status={step.status.value} duration={duration} "
                     f"started_at={started_at} gate={decision} linked_gate={linked_gate} "
-                    f"confidence={confidence}"
+                    f"confidence={confidence}{trace_ref}"
                 )
                 print(f"         summary={summary}")
                 if step.gate_history:
@@ -483,6 +487,9 @@ def _handle_run_command(args: argparse.Namespace, service: ControlPlaneService) 
         print(f"  started_at:  {run.started_at}")
         print(f"  updated_at:  {run.updated_at}")
         print(f"  ended_at:    {run.ended_at or '-'}")
+        if run.trace_id:
+            span_part = f"/{run.span_id}" if run.span_id else ""
+            print(f"  trace:       {run.trace_id}{span_part}")
         if run.summary:
             print(f"  summary:     {run.summary}")
         print(f"  lease:       {lease.expires_at if lease else '-'}")

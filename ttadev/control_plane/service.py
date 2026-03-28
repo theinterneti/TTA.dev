@@ -717,7 +717,14 @@ class ControlPlaneService:
         self._store.put_task(stored_task)
         return self.claim_task(stored_task.id, agent_role="workflow-orchestrator")
 
-    def mark_workflow_step_running(self, task_id: str, *, step_index: int) -> TaskRecord:
+    def mark_workflow_step_running(
+        self,
+        task_id: str,
+        *,
+        step_index: int,
+        trace_id: str | None = None,
+        span_id: str | None = None,
+    ) -> TaskRecord:
         """Mark a tracked workflow step as running."""
         self._sweep_expired_leases()
         task = self.get_task(task_id)
@@ -731,6 +738,8 @@ class ControlPlaneService:
         step.started_at = now_iso
         step.completed_at = None
         step.attempts += 1
+        step.trace_id = trace_id
+        step.span_id = span_id
         task.updated_at = now_iso
         self._store.put_task(task)
         return task
@@ -1046,6 +1055,8 @@ class ControlPlaneService:
         *,
         agent_role: str | None = None,
         lease_ttl_seconds: float = 300.0,
+        trace_id: str | None = None,
+        span_id: str | None = None,
     ) -> ClaimResult:
         if lease_ttl_seconds <= 0:
             raise TaskClaimError("lease_ttl_seconds must be > 0")
@@ -1087,6 +1098,8 @@ class ControlPlaneService:
             session_id=active_session.id if active_session else None,
             started_at=now_iso,
             updated_at=now_iso,
+            trace_id=trace_id,
+            span_id=span_id,
         )
         lease = LeaseRecord(
             task_id=task.id,
