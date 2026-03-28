@@ -90,6 +90,7 @@ def test_circuit_breaker_error_preserves_last_error():
 async def test_circuit_breaker_initial_state():
     # Arrange
     async def op(_inp, _ctx):
+        _ = _ctx
         return _inp
 
     # Act
@@ -232,6 +233,7 @@ async def test_circuit_open_blocks_without_calling_wrapped_primitive():
 async def test_circuit_breaker_error_carries_failure_count():
     # Arrange
     async def fails(_inp, _ctx):
+        _, _ = _inp, _ctx
         raise RuntimeError("boom")
 
     cb = CircuitBreakerPrimitive(
@@ -263,6 +265,7 @@ async def test_circuit_breaker_transitions_to_half_open_after_recovery_timeout()
     call_count = 0
 
     async def op(_inp, _ctx):
+        _, _ = _inp, _ctx
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -294,6 +297,7 @@ async def test_circuit_in_half_open_closes_after_success_threshold():
     call_count = 0
 
     async def op(_inp, _ctx):
+        _, _ = _inp, _ctx
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -326,6 +330,7 @@ async def test_circuit_half_open_failure_reopens_circuit():
     call_count = 0
 
     async def op(_inp, _ctx):
+        _, _ = _inp, _ctx
         nonlocal call_count
         call_count += 1
         if call_count in (1, 3):
@@ -363,6 +368,7 @@ async def test_circuit_half_open_failure_reopens_circuit():
 async def test_manual_reset_clears_state():
     # Arrange
     async def fails(_inp, _ctx):
+        _, _ = _inp, _ctx
         raise RuntimeError("boom")
 
     cb = CircuitBreakerPrimitive(
