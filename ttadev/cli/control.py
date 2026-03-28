@@ -158,6 +158,40 @@ def register_control_subcommands(sub: argparse._SubParsersAction) -> None:  # ty
     run_release.add_argument("run_id", help="Run ID")
     run_release.add_argument("--reason", default="", help="Release reason")
 
+    workflow_p = control_sub.add_parser("workflow", help="Manage tracked multi-agent workflows")
+    workflow_sub = workflow_p.add_subparsers(dest="control_workflow_command")
+
+    workflow_start = workflow_sub.add_parser("start", help="Start a tracked multi-agent workflow")
+    workflow_start.add_argument("--name", required=True, help="Workflow name")
+    workflow_start.add_argument("--goal", required=True, help="Workflow goal description")
+    workflow_start.add_argument(
+        "--agents",
+        required=True,
+        help="Ordered comma-separated agent names (e.g. architect,backend-engineer,reviewer)",
+    )
+    workflow_start.add_argument(
+        "--project",
+        dest="project_name",
+        default=None,
+        help="Project name for namespace grouping",
+    )
+    workflow_start.add_argument(
+        "--policy-gate",
+        action="append",
+        default=[],
+        dest="policy_gates",
+        help=(
+            "Add a POLICY gate. Key=value pairs: id=<id>,label=<label>,policy=<pattern>. "
+            "Repeat for multiple gates."
+        ),
+    )
+    workflow_start.add_argument(
+        "--ttl",
+        type=float,
+        default=300.0,
+        help="Orchestrator lease TTL in seconds (default 300)",
+    )
+
     lock_p = control_sub.add_parser("lock", help="Inspect and mutate control-plane locks")
     lock_sub = lock_p.add_subparsers(dest="control_lock_command")
 
@@ -197,11 +231,13 @@ def handle_control_command(args: argparse.Namespace, data_dir: Path) -> int:
             return _handle_run_command(args, service)
         if args.control_command == "lock":
             return _handle_lock_command(args, service)
+        if args.control_command == "workflow":
+            return _handle_workflow_command(args, service)
     except ControlPlaneError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
-    print("Usage: tta control {task,run,lock} ...", file=sys.stderr)
+    print("Usage: tta control {task,run,lock,workflow} ...", file=sys.stderr)
     return 1
 
 
@@ -400,6 +436,64 @@ def _handle_task_command(args: argparse.Namespace, service: ControlPlaneService)
     print(
         "Usage: tta control task {create,list,show,claim,decide-gate,reopen-gate}", file=sys.stderr
     )
+    return 1
+
+
+def _parse_policy_gate_spec(spec: str) -> dict[str, str | bool]:
+    """Parse a ``--policy-gate`` value into a gate payload dict.
+
+    Accepts comma-separated ``key=value`` tokens where the first ``=`` is the
+    delimiter (so ``policy=auto:confidence>=0.85`` is parsed correctly).
+
+    Required keys: ``id``, ``label``, ``policy``.
+    """
+    tokens = spec.split(",")
+    payload: dict[str, str] = {}
+    for token in tokens:
+        key, sep, value = token.strip().partition("=")
+        if not sep:
+            raise ControlPlaneError(f"Policy gate spec token {token!r} must be in key=value form")
+        payload[key.strip()] = value.strip()
+
+    for required_key in ("id", "label", "policy"):
+        if not payload.get(required_key):
+            raise ControlPlaneError(
+                f"Policy gate spec missing required key '{required_key}'. "
+                "Use: id=<id>,label=<label>,policy=<pattern>"
+            )
+    return {
+        "id": payload["id"],
+        "gate_type": "policy",
+        "label": payload["label"],
+        "required": True,
+        "policy_name": payload["policy"],
+    }
+
+
+def _handle_workflow_command(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    if args.control_workflow_command == "start":
+        agents = [a.strip() for a in args.agents.split(",") if a.strip()]
+        if not agents:
+            print("Error: --agents must contain at least one agent name", file=sys.stderr)
+            return 1
+
+        extra_gates = [_parse_policy_gate_spec(spec) for spec in args.policy_gates]
+
+        claim = service.start_tracked_workflow(
+            workflow_name=args.name,
+            workflow_goal=args.goal,
+            step_agents=agents,
+            project_name=args.project_name,
+            extra_gates=extra_gates or None,
+        )
+        print("Workflow started.")
+        print(f"  task_id:  {claim.run.task_id}")
+        print(f"  run_id:   {claim.run.id}")
+        print(f"  agents:   {' → '.join(agents)}")
+        print(f"  lease:    expires {claim.lease.expires_at}")
+        return 0
+
+    print("Usage: tta control workflow {start}", file=sys.stderr)
     return 1
 
 
