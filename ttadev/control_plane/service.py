@@ -846,6 +846,12 @@ class ControlPlaneService:
             workflow.status = WorkflowTrackingStatus.QUIT
             workflow.current_step_index = step_index
             workflow.current_agent = step.agent_name
+        elif decision == WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN:
+            # Pause the workflow — do not advance to the next step.
+            # The step remains RUNNING until a human approves the linked gate.
+            step.status = WorkflowStepStatus.RUNNING
+            step.completed_at = None
+            workflow.status = WorkflowTrackingStatus.ESCALATED
 
         task.updated_at = now_iso
         self._store.put_task(task)
@@ -1178,6 +1184,15 @@ class ControlPlaneService:
         gate.decided_at = now_iso
         gate.decided_by = effective_decider
         gate.summary = summary or None
+
+        # If a human approves a gate on an escalated workflow, restore workflow to RUNNING.
+        if (
+            task.workflow is not None
+            and task.workflow.status == WorkflowTrackingStatus.ESCALATED
+            and status == GateStatus.APPROVED
+        ):
+            task.workflow.status = WorkflowTrackingStatus.RUNNING
+
         task.updated_at = now_iso
         self._store.put_task(task)
         return task

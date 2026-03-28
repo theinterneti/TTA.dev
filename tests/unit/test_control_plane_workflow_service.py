@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ttadev.control_plane import ControlPlaneService
 from ttadev.control_plane.models import (
+    GateStatus,
     RunStatus,
     TaskRecord,
     WorkflowGateDecisionOutcome,
@@ -162,3 +163,72 @@ def test_escalated_is_a_valid_workflow_status() -> None:
     """ESCALATED workflow status enum value exists."""
     assert WorkflowTrackingStatus.ESCALATED is not None
     assert WorkflowTrackingStatus.ESCALATED.value == "escalated"
+
+
+async def test_escalate_to_human_pauses_workflow(tmp_path: Path) -> None:
+    """ESCALATE_TO_HUMAN gate outcome pauses the workflow without advancing the step."""
+    # Arrange
+    svc = ControlPlaneService(data_dir=tmp_path)
+    claim = svc.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="test escalation",
+        step_agents=["agent-a", "agent-b"],
+    )
+    task_id = claim.task.id
+
+    svc.mark_workflow_step_running(task_id, step_index=0)
+    svc.record_workflow_step_result(task_id, step_index=0, result_summary="done", confidence=0.5)
+
+    # Act — record ESCALATE_TO_HUMAN outcome
+    task = svc.record_workflow_gate_outcome(
+        task_id,
+        step_index=0,
+        decision=WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN,
+        summary="Low confidence — needs human review",
+    )
+
+    # Assert — workflow is paused, not advanced
+    from ttadev.control_plane.models import WorkflowStepStatus
+
+    assert task.workflow is not None
+    assert task.workflow.status == WorkflowTrackingStatus.ESCALATED
+    assert task.workflow.steps[0].status == WorkflowStepStatus.RUNNING
+    # Step 1 has NOT started
+    assert task.workflow.steps[1].status == WorkflowStepStatus.PENDING
+
+
+async def test_workflow_resumes_after_human_approves_escalated_gate(tmp_path: Path) -> None:
+    """Workflow status returns to RUNNING when a human approves the gate after escalation."""
+    # Arrange
+    svc = ControlPlaneService(data_dir=tmp_path)
+    claim = svc.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="test escalation resume",
+        step_agents=["agent-a", "agent-b"],
+    )
+    task_id = claim.task.id
+
+    svc.mark_workflow_step_running(task_id, step_index=0)
+    svc.record_workflow_step_result(task_id, step_index=0, result_summary="done", confidence=0.5)
+    svc.record_workflow_gate_outcome(
+        task_id,
+        step_index=0,
+        decision=WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN,
+        summary="needs human",
+    )
+
+    # Act — human approves via the standard gate mechanism
+    task = svc.get_task(task_id)
+    assert task.workflow is not None
+    gate_id = task.workflow.steps[0].linked_gate_id
+    task = svc.decide_gate(
+        task_id,
+        gate_id,
+        status=GateStatus.APPROVED,
+        decided_by="human-reviewer",
+        summary="Looks good",
+    )
+
+    # Assert — workflow status restored to RUNNING after human approval
+    assert task.workflow is not None
+    assert task.workflow.status == WorkflowTrackingStatus.RUNNING
