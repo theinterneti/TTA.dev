@@ -852,6 +852,8 @@ class ControlPlaneService:
             step.status = WorkflowStepStatus.RUNNING
             step.completed_at = None
             workflow.status = WorkflowTrackingStatus.ESCALATED
+            workflow.current_step_index = step_index
+            workflow.current_agent = step.agent_name
 
         task.updated_at = now_iso
         self._store.put_task(task)

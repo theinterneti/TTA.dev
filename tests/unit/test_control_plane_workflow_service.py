@@ -10,6 +10,7 @@ from ttadev.control_plane.models import (
     RunStatus,
     TaskRecord,
     WorkflowGateDecisionOutcome,
+    WorkflowStepStatus,
     WorkflowTrackingStatus,
 )
 
@@ -188,8 +189,6 @@ async def test_escalate_to_human_pauses_workflow(tmp_path: Path) -> None:
     )
 
     # Assert — workflow is paused, not advanced
-    from ttadev.control_plane.models import WorkflowStepStatus
-
     assert task.workflow is not None
     assert task.workflow.status == WorkflowTrackingStatus.ESCALATED
     assert task.workflow.steps[0].status == WorkflowStepStatus.RUNNING
@@ -230,6 +229,7 @@ async def test_workflow_resumes_after_human_approves_escalated_gate(tmp_path: Pa
         summary="Looks good",
     )
 
-    # Assert — workflow status restored to RUNNING after human approval
+    # Assert — workflow status restored to RUNNING after human approval; step still RUNNING
     assert task.workflow is not None
     assert task.workflow.status == WorkflowTrackingStatus.RUNNING
+    assert task.workflow.steps[0].status == WorkflowStepStatus.RUNNING
