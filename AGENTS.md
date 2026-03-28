@@ -142,10 +142,8 @@ When working on L0 from inside `TTA.dev`, prefer this order:
 
 ### Repository TODOs
 
-- TODO Improve ownership telemetry beyond session-linked summaries so active work in the first repeatable multi-agent workflow can be attributed more precisely without forking control-plane state. #dev-todo
-  type:: refactor
-  priority:: medium
-  package:: ttadev-observability
+All three L0 phase-1 TODOs are complete as of 2026-03-27.
+Next natural work: CLI gate commands, MCP control-plane tools, or `tta workflow start`.
 
 ---
 
