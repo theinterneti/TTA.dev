@@ -666,6 +666,7 @@ class ControlPlaneService:
         step_agents: list[str],
         project_name: str | None = None,
         extra_gates: list[dict[str, Any]] | None = None,
+        lease_ttl_seconds: float = 300.0,
     ) -> ClaimResult:
         """Create and claim one top-level task for a tracked workflow run.
 
@@ -715,7 +716,43 @@ class ControlPlaneService:
         )
         stored_task.updated_at = self._now_iso()
         self._store.put_task(stored_task)
-        return self.claim_task(stored_task.id, agent_role="workflow-orchestrator")
+        return self.claim_task(
+            stored_task.id,
+            agent_role="workflow-orchestrator",
+            lease_ttl_seconds=lease_ttl_seconds,
+        )
+
+    def expire_abandoned_workflows(self) -> list[str]:
+        """Find workflows whose active run lease has expired and mark them FAILED.
+
+        Returns list of task IDs that were transitioned to FAILED.
+        Call periodically (e.g., on session start or via a background process).
+        """
+        self._sweep_expired_leases()
+
+        affected: list[str] = []
+        for task in self._store.list_tasks():
+            if task.workflow is None:
+                continue
+            if task.workflow.status != WorkflowTrackingStatus.RUNNING:
+                continue
+            # After the sweep, tasks with expired leases have active_run_id=None.
+            # A RUNNING workflow with no active run has been abandoned.
+            if task.active_run_id is not None:
+                continue
+
+            # Mark current running step as FAILED
+            current_step_idx = task.workflow.current_step_index
+            if current_step_idx is not None:
+                step = task.workflow.steps[current_step_idx]
+                if step.status == WorkflowStepStatus.RUNNING:
+                    step.status = WorkflowStepStatus.FAILED
+
+            task.workflow.status = WorkflowTrackingStatus.FAILED
+            self._store.put_task(task)
+            affected.append(task.id)
+
+        return affected
 
     def mark_workflow_step_running(
         self,

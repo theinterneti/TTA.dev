@@ -233,3 +233,33 @@ async def test_workflow_resumes_after_human_approves_escalated_gate(tmp_path: Pa
     assert task.workflow is not None
     assert task.workflow.status == WorkflowTrackingStatus.RUNNING
     assert task.workflow.steps[0].status == WorkflowStepStatus.RUNNING
+
+
+async def test_expire_abandoned_workflow_marks_step_and_workflow_failed(tmp_path: Path) -> None:
+    # Arrange
+    import asyncio
+
+    svc = ControlPlaneService(data_dir=tmp_path)
+    claim = svc.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="test abandonment",
+        step_agents=["agent-a"],
+        lease_ttl_seconds=0.01,
+    )
+    task_id = claim.task.id
+
+    svc.mark_workflow_step_running(task_id, step_index=0)
+
+    # Wait for lease to expire
+    await asyncio.sleep(0.05)
+
+    # Act — expire abandoned workflows
+    affected = svc.expire_abandoned_workflows()
+
+    # Assert
+    assert task_id in affected
+    task = svc.get_task(task_id)
+    assert task is not None
+    assert task.workflow is not None
+    assert task.workflow.status == WorkflowTrackingStatus.FAILED
+    assert task.workflow.steps[0].status == WorkflowStepStatus.FAILED
