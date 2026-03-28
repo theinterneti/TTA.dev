@@ -328,10 +328,9 @@ class UsageAnalytics:
 
         if correlation > 0.1:
             return "improving"
-        elif correlation < -0.1:
+        if correlation < -0.1:
             return "declining"
-        else:
-            return "stable"
+        return "stable"
 
     def _get_satisfaction_distribution(self, interactions: list[UserInteraction]) -> dict[str, int]:
         """Get satisfaction score distribution."""
@@ -388,8 +387,7 @@ class ContinuousImprovement:
         # Determine variant based on hash and traffic split
         if (hash_value % 100) < (test.traffic_split * 100):
             return "variant_b"
-        else:
-            return "variant_a"
+        return "variant_a"
 
     async def record_test_interaction(
         self, user_id: str, test_id: str, variant: str, interaction: UserInteraction
@@ -476,14 +474,13 @@ class ContinuousImprovement:
         if metric == MetricType.SUCCESS_RATE:
             successful = sum(1 for i in interactions if i.outcome in ["success", "partial_success"])
             return successful / len(interactions)
-        elif metric == MetricType.SATISFACTION_SCORE:
+        if metric == MetricType.SATISFACTION_SCORE:
             return statistics.mean([i.satisfaction_score for i in interactions])
-        elif metric == MetricType.RESPONSE_TIME:
+        if metric == MetricType.RESPONSE_TIME:
             return statistics.mean([i.duration for i in interactions])
-        elif metric == MetricType.PRODUCTIVITY_IMPACT:
+        if metric == MetricType.PRODUCTIVITY_IMPACT:
             return statistics.mean([i.actual_benefit for i in interactions])
-        else:
-            return 0.0
+        return 0.0
 
     def _get_metric_values(
         self, interactions: list[UserInteraction], metric: MetricType
@@ -495,14 +492,13 @@ class ContinuousImprovement:
         """Get a single metric value from an interaction."""
         if metric == MetricType.SUCCESS_RATE:
             return 1.0 if interaction.outcome in ["success", "partial_success"] else 0.0
-        elif metric == MetricType.SATISFACTION_SCORE:
+        if metric == MetricType.SATISFACTION_SCORE:
             return interaction.satisfaction_score
-        elif metric == MetricType.RESPONSE_TIME:
+        if metric == MetricType.RESPONSE_TIME:
             return interaction.duration
-        elif metric == MetricType.PRODUCTIVITY_IMPACT:
+        if metric == MetricType.PRODUCTIVITY_IMPACT:
             return interaction.actual_benefit
-        else:
-            return 0.0
+        return 0.0
 
     def _calculate_confidence(
         self,
@@ -539,10 +535,9 @@ class ContinuousImprovement:
 
         if winning_metrics == total_metrics:
             return "implement_b"
-        elif winning_metrics == 0:
+        if winning_metrics == 0:
             return "keep_a"
-        else:
-            return "inconclusive"
+        return "inconclusive"
 
     async def generate_improvement_suggestions(self) -> list[dict[str, Any]]:
         """Generate improvement suggestions based on analysis."""
@@ -1159,7 +1154,7 @@ class AnalyticsSystem:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logging.error(f"Periodic analysis error: {str(e)}")
+                logging.exception(f"Periodic analysis error: {e!s}")
                 await asyncio.sleep(300)  # Wait 5 minutes before retrying
 
     async def _model_maintenance(self):
@@ -1181,7 +1176,7 @@ class AnalyticsSystem:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logging.error(f"Model maintenance error: {str(e)}")
+                logging.exception(f"Model maintenance error: {e!s}")
                 await asyncio.sleep(3600)  # Wait 1 hour before retrying
 
 

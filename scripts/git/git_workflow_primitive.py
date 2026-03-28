@@ -124,14 +124,11 @@ def conditional_git_workflow(ctx: GitContext) -> GitAction:
         # Then branch: Handle uncommitted changes
         if ctx.has_staged:
             return GitAction.NO_ACTION  # Let user commit via VS Code
-        else:
-            return GitAction.NO_ACTION  # Nothing staged to commit
-    else:
-        # Else branch: No changes, ready for merge operations
-        if ctx.is_main:
-            return GitAction.NO_ACTION  # Already on main
-        else:
-            return GitAction.MERGE_FROM_MAIN  # Update feature branch
+        return GitAction.NO_ACTION  # Nothing staged to commit
+    # Else branch: No changes, ready for merge operations
+    if ctx.is_main:
+        return GitAction.NO_ACTION  # Already on main
+    return GitAction.MERGE_FROM_MAIN  # Update feature branch
 
 
 # ============================================================================

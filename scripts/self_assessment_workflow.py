@@ -101,18 +101,17 @@ class SelfAssessmentWorkflow:
                         "uv_compliance": True,
                     },
                 }
-            else:
-                # Run single assessment
-                result = await self.test_runner.execute({"type": "fast"}, context)
-                return {
-                    "status": "success",
-                    "timestamp": time.time(),
-                    "assessments": [result],
-                    "summary": {
-                        "total_tests": 6,
-                        "passed_tests": 6,
-                    },
-                }
+            # Run single assessment
+            result = await self.test_runner.execute({"type": "fast"}, context)
+            return {
+                "status": "success",
+                "timestamp": time.time(),
+                "assessments": [result],
+                "summary": {
+                    "total_tests": 6,
+                    "passed_tests": 6,
+                },
+            }
         except Exception as e:
             return {
                 "status": "error",

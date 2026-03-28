@@ -13,20 +13,19 @@ def load_api_key():
     """Load API key from various sources."""
     if "E2B_API_KEY" in os.environ:
         return os.environ["E2B_API_KEY"]
-    elif "E2B_KEY" in os.environ:
+    if "E2B_KEY" in os.environ:
         os.environ["E2B_API_KEY"] = os.environ["E2B_KEY"]
         return os.environ["E2B_KEY"]
-    else:
-        # Try loading from .env file
-        try:
-            with open(".env") as f:
-                for line in f:
-                    if line.startswith("E2B_KEY="):
-                        api_key = line.split("=", 1)[1].strip()
-                        os.environ["E2B_API_KEY"] = api_key
-                        return api_key
-        except FileNotFoundError:
-            pass
+    # Try loading from .env file
+    try:
+        with open(".env") as f:
+            for line in f:
+                if line.startswith("E2B_KEY="):
+                    api_key = line.split("=", 1)[1].strip()
+                    os.environ["E2B_API_KEY"] = api_key
+                    return api_key
+    except FileNotFoundError:
+        pass
     return None
 
 

@@ -199,10 +199,7 @@ class TodoExtractor:
                 entry.append("  audience:: intermediate-users")
                 entry.append("  difficulty:: intermediate")
 
-            elif category == "template-todo":
-                entry.append("  priority:: medium")
-
-            elif category == "ops-todo":
+            elif category == "template-todo" or category == "ops-todo":
                 entry.append("  priority:: medium")
 
             # Always add source file reference
@@ -259,7 +256,7 @@ def main():
 
     # Determine workspace root
     workspace_root = Path(__file__).parent.parent
-    scan_dir = args.dir if args.dir else workspace_root
+    scan_dir = args.dir or workspace_root
 
     if not scan_dir.exists():
         print(f"Error: Directory {scan_dir} does not exist")

@@ -80,7 +80,7 @@ async def _run_pytest_in_sandbox(test_files: list[str]) -> int:
     # Build in-memory tarball of current directory
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
-        for entry in Path(".").rglob("*"):
+        for entry in Path().rglob("*"):
             # Exclude noise directories
             parts = entry.parts
             if any(p in {".git", "__pycache__", ".venv", ".mypy_cache"} for p in parts):
@@ -133,7 +133,7 @@ def main(argv: list[str]) -> int:
     print(f"e2b-validation: running {len(test_files)} test file(s) in E2B sandbox")
     try:
         return asyncio.run(_run_pytest_in_sandbox(test_files))
-    except (TimeoutError, asyncio.TimeoutError) as exc:
+    except TimeoutError as exc:
         print(
             f"e2b-validation: E2B sandbox timed out — skipping ({exc})",
             file=sys.stderr,

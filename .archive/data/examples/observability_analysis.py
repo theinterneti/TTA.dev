@@ -1,1 +1,1 @@
-# Logseq: [[TTA.dev/Data/Examples/Observability_analysis]]  # noqa: E501, ERA001
+# Logseq: [[TTA.dev/Data/Examples/Observability_analysis]]

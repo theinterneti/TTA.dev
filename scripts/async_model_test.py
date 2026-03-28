@@ -111,12 +111,11 @@ class AsyncModelTester:
 
         if "qwen" in model_name_lower:
             return f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
-        elif "gemma" in model_name_lower:
+        if "gemma" in model_name_lower:
             return f"<start_of_turn>user\n{prompt}<end_of_turn>\n<start_of_turn>model\n"
-        elif "phi" in model_name_lower:
+        if "phi" in model_name_lower:
             return f"<|user|>\n{prompt}\n<|assistant|>\n"
-        else:
-            return f"User: {prompt}\n\nAssistant: "
+        return f"User: {prompt}\n\nAssistant: "
 
     async def test_model(
         self,
@@ -171,7 +170,7 @@ class AsyncModelTester:
                 model_name,
                 cache_dir=self.model_cache_dir,
                 trust_remote_code=True,
-                token=HF_TOKEN if HF_TOKEN else None,
+                token=HF_TOKEN or None,
             )
 
             # Load model
@@ -187,7 +186,7 @@ class AsyncModelTester:
                 quantization_config=quant_config,
                 # Only use flash attention if explicitly requested and available
                 attn_implementation="eager",  # Default to eager attention
-                token=HF_TOKEN if HF_TOKEN else None,
+                token=HF_TOKEN or None,
             )
             model_load_time = time.time() - model_load_start
 

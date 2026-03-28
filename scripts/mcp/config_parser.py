@@ -226,9 +226,7 @@ class MCPConfigParser:
 
         # Generate name if not provided
         if not name:
-            if self._is_host(repo_uri, "gitmcp.io"):
-                name = urlparse(repo_uri).path.strip("/").split("/")[-1]
-            elif self._is_host(repo_uri, "github.com"):
+            if self._is_host(repo_uri, "gitmcp.io") or self._is_host(repo_uri, "github.com"):
                 name = urlparse(repo_uri).path.strip("/").split("/")[-1]
             elif repo_uri.startswith("npm:"):
                 name = repo_uri[4:].replace("@", "").replace("/", "-")

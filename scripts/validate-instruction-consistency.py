@@ -142,9 +142,8 @@ def main() -> int:
     if all_valid:
         print("\n✅ All instruction files are consistent!")
         return 0
-    else:
-        print("\n❌ Instruction validation failed")
-        return 1
+    print("\n❌ Instruction validation failed")
+    return 1
 
 
 if __name__ == "__main__":

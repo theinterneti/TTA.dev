@@ -180,12 +180,11 @@ class MarkdownChecker:
         if not self.errors and not self.warnings:
             print("\n✅ All checks passed!")
             return 0
-        elif self.errors:
+        if self.errors:
             print(f"\n❌ Found {len(self.errors)} error(s) and {len(self.warnings)} warning(s)")
             return 1
-        else:
-            print(f"\n⚠️  Found {len(self.warnings)} warning(s)")
-            return 0
+        print(f"\n⚠️  Found {len(self.warnings)} warning(s)")
+        return 0
 
 
 def find_markdown_files(root_dir: Path, exclude_dirs: set[str]) -> list[Path]:

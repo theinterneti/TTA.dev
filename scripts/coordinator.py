@@ -39,7 +39,7 @@ def run_agent(prompt_path, context_content):
     """Runs the agent with the given prompt and context."""
 
     # Create a temporary file combining prompt and context
-    with open(prompt_path, "r") as f:
+    with open(prompt_path) as f:
         base_prompt = f.read()
 
     full_prompt = f"{base_prompt}\n\n## Context\n{context_content}\n\n## IMPORTANT INSTRUCTION\nPlease output the code you generate in markdown code blocks (e.g. ```python ... ```). Do not assume tools are available."
@@ -143,7 +143,7 @@ def execute_task(task):
                 for filepath in context_files:
                     if os.path.exists(filepath) and os.path.isfile(filepath):
                         try:
-                            with open(filepath, "r") as f:
+                            with open(filepath) as f:
                                 content = f.read()
                                 logger.info(f"Read content from {filepath} ({len(content)} chars)")
                                 generated_code.append(content)

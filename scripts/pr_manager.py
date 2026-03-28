@@ -312,7 +312,7 @@ class PRManager:
         if failed_checks:
             recommendations.append(f"❌ {len(failed_checks)} failing check(s) - fix before merge")
 
-        return recommendations if recommendations else ["✨ Looking good!"]
+        return recommendations or ["✨ Looking good!"]
 
     async def display_dashboard(self) -> None:
         """

@@ -473,12 +473,11 @@ class SmartContextDetector:
 
         if sum(maintenance_indicators) >= 2:
             return ProjectStage.MAINTENANCE
-        elif sum(production_indicators) >= 2:
+        if sum(production_indicators) >= 2:
             return ProjectStage.PRODUCTION
-        elif file_structure.get("total_files", 0) > 20:
+        if file_structure.get("total_files", 0) > 20:
             return ProjectStage.DEVELOPMENT
-        else:
-            return ProjectStage.PROTOTYPING
+        return ProjectStage.PROTOTYPING
 
     def _calculate_complexity_score(
         self, file_structure: dict[str, Any], patterns: list[CodePattern]

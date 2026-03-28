@@ -5,7 +5,7 @@ import json
 import os
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +33,7 @@ def log_ai_decision(
         raise ValueError(f"confidence_score must be 0.0-1.0, got {confidence_score}")
 
     trace_id = str(uuid.uuid4())
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
 
     # Get CI context
     ci_context = {

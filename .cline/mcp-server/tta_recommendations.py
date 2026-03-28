@@ -23,7 +23,7 @@ from typing import Any
 
 # MCP server imports
 try:
-    import mcp.types as types
+    from mcp import types
     from mcp.server import Server
     from mcp.server.models import InitializationOptions
     from mcp.server.stdio import stdio_server
@@ -204,10 +204,9 @@ class PatternDetector:
 
         if lines_of_code > 200 or pattern_count >= 6:
             return "high"
-        elif lines_of_code > 50 or pattern_count >= 3:
+        if lines_of_code > 50 or pattern_count >= 3:
             return "medium"
-        else:
-            return "low"
+        return "low"
 
 
 class PrimitiveMatcher:
@@ -885,28 +884,27 @@ if Server is not None:
 
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            elif name == "get_primitive_info":
+            if name == "get_primitive_info":
                 result = await tta_service.get_primitive_info(
                     primitive_name=arguments["primitive_name"]
                 )
 
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            elif name == "search_examples":
+            if name == "search_examples":
                 result = await tta_service.search_examples(query=arguments["query"])
 
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            elif name == "get_performance_metrics":
+            if name == "get_performance_metrics":
                 result = tta_service.get_performance_metrics()
 
                 return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            else:
-                return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
+            return [types.TextContent(type="text", text=f"Unknown tool: {name}")]
 
         except Exception as e:
-            return [types.TextContent(type="text", text=f"Error: {str(e)}")]
+            return [types.TextContent(type="text", text=f"Error: {e!s}")]
 
     async def main():
         """Main entry point for MCP server"""

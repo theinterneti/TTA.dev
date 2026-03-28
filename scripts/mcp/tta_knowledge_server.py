@@ -37,7 +37,7 @@ def search_docs(query):
         output = result.stdout
         if len(output) > 2000:
             output = output[:2000] + "\n... (truncated)"
-        return output if output else "No results found."
+        return output or "No results found."
     except Exception as e:
         return f"Error searching docs: {e}"
 

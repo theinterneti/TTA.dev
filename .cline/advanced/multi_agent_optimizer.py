@@ -488,7 +488,7 @@ class AdvancedWorkflowEngine:
         except Exception as e:
             workflow.status = "failed"
             workflow.error = e
-            logging.error(f"Workflow {workflow.id} failed: {str(e)}")
+            logging.exception(f"Workflow {workflow.id} failed: {e!s}")
 
             # Try error handlers if available
             if workflow.error_handlers:
@@ -500,7 +500,7 @@ class AdvancedWorkflowEngine:
                         workflow.result = result
                         return result
                     except Exception as handler_error:
-                        logging.error(f"Error handler failed: {str(handler_error)}")
+                        logging.exception(f"Error handler failed: {handler_error!s}")
 
             raise
 
@@ -561,7 +561,7 @@ class AdvancedWorkflowEngine:
         # Handle any exceptions
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                logging.error(f"Task {assignments[i][1].name} failed: {str(result)}")
+                logging.error(f"Task {assignments[i][1].name} failed: {result!s}")
                 raise result
 
         return results
@@ -709,7 +709,7 @@ class AdvancedWorkflowEngine:
             self.orchestrator.complete_task(
                 agent.id, task.id, None, time.time() - start_time, False
             )
-            logging.error(f"Task {task.name} failed: {str(e)}")
+            logging.exception(f"Task {task.name} failed: {e!s}")
             raise
 
     def _get_agent_type_for_task(self, task: Task) -> AgentType:
@@ -731,10 +731,9 @@ class AdvancedWorkflowEngine:
         try:
             if asyncio.iscoroutinefunction(condition):
                 return await condition(data, workflow)
-            else:
-                return condition(data, workflow)
+            return condition(data, workflow)
         except Exception as e:
-            logging.error(f"Condition evaluation failed: {str(e)}")
+            logging.exception(f"Condition evaluation failed: {e!s}")
             return False
 
 
@@ -794,7 +793,7 @@ class SelfHealingSystem:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logging.error(f"Monitoring loop error: {str(e)}")
+                logging.exception(f"Monitoring loop error: {e!s}")
                 await asyncio.sleep(1)
 
     async def _check_system_health(self):

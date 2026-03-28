@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -255,7 +254,7 @@ class TestMain:
         with patch(
             "scripts.run_e2b_tests._run_pytest_in_sandbox",
             new_callable=AsyncMock,
-            side_effect=asyncio.TimeoutError("sandbox timed out"),
+            side_effect=TimeoutError("sandbox timed out"),
         ):
             result = main([str(f)])
         assert result == 0

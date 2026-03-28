@@ -64,9 +64,8 @@ class TestSpawnAgent:
         ctx = WorkflowContext()
         task = AgentTask(instruction="x", context={}, constraints=[])
 
-        with override_registry(reg):
-            with pytest.raises(KeyError, match="nonexistent"):
-                await ctx.spawn_agent("nonexistent", task)
+        with override_registry(reg), pytest.raises(KeyError, match="nonexistent"):
+            await ctx.spawn_agent("nonexistent", task)
 
     @pytest.mark.asyncio
     async def test_spawn_agent_without_workflow_context(self):

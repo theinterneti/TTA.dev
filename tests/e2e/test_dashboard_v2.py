@@ -49,7 +49,9 @@ def server():
     deadline = time.monotonic() + 20
     while time.monotonic() < deadline:
         try:
-            urllib.request.urlopen(f"{_BASE}/api/v2/health", timeout=1)
+            urllib.request.urlopen(  # nosemgrep: dynamic-urllib-use-detected,insecure-urlopen
+                f"{_BASE}/api/v2/health", timeout=1
+            )
             break
         except Exception:
             time.sleep(0.5)
@@ -64,14 +66,14 @@ def server():
 
 
 @pytest.fixture(scope="module")
-def browser(server) -> Browser:  # noqa: ARG001
+def browser(server) -> Browser:
     with sync_playwright() as p:
         b = p.chromium.launch()
         yield b
         b.close()
 
 
-@pytest.fixture()
+@pytest.fixture
 def page(browser: Browser) -> Page:
     pg = browser.new_page(viewport={"width": 1400, "height": 900})
     pg.goto(_BASE)

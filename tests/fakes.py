@@ -110,7 +110,7 @@ class FakeUnitOfWork:
         self.committed = False
         return self
 
-    async def __aexit__(self, exc_type: type | None, *_: Any) -> None:
+    async def __aexit__(self, exc_type: type | None, *_: object) -> None:
         if exc_type is not None:
             await self.rollback()
 

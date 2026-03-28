@@ -58,10 +58,10 @@ class PAFComplianceValidator:
             return
 
         # Parse coverage percentage from coverage.xml
-        import xml.etree.ElementTree as ET
+        import xml.etree.ElementTree as ET  # nosemgrep: use-defused-xml
 
         try:
-            tree = ET.parse(coverage_file)
+            tree = ET.parse(coverage_file)  # nosemgrep: use-defused-xml-parse
             root = tree.getroot()
             coverage_element = root.find(".//coverage")
 
@@ -202,12 +202,11 @@ class PAFComplianceValidator:
         if self.errors > 0:
             print("\n❌ PAF validation failed with errors")
             return 2
-        elif self.warnings > 0:
+        if self.warnings > 0:
             print("\n⚠️  PAF validation passed with warnings")
             return 1
-        else:
-            print("\n✅ All PAF validations passed")
-            return 0
+        print("\n✅ All PAF validations passed")
+        return 0
 
 
 def main() -> int:

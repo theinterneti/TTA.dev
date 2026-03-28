@@ -1,1 +1,1 @@
-# Logseq: [[TTA.dev/Data/Examples/Cicd_manager_demo]]  # noqa: E501, ERA001
+# Logseq: [[TTA.dev/Data/Examples/Cicd_manager_demo]]

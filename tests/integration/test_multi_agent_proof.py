@@ -101,7 +101,7 @@ async def test_feature_dev_failed_step_recorded(tmp_path: object) -> None:
             handoff_triggers=[],
         )
 
-        def __init__(self, model: object = None) -> None:  # noqa: ARG002
+        def __init__(self, model: object = None) -> None:
             pass
 
         async def execute(self, task: AgentTask, ctx: WorkflowContext) -> AgentResult:

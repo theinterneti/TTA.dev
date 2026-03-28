@@ -34,25 +34,23 @@ async def server_url(observability_server):
 @pytest.mark.asyncio
 async def test_server_starts_and_responds(server_url):
     """Test that server starts and responds to HTTP requests."""
-    async with aiohttp.ClientSession() as session:
-        async with session.get(server_url) as response:
-            assert response.status == 200
-            text = await response.text()
-            assert "TTA.dev Observability" in text
+    async with aiohttp.ClientSession() as session, session.get(server_url) as response:
+        assert response.status == 200
+        text = await response.text()
+        assert "TTA.dev Observability" in text
 
 
 @pytest.mark.asyncio
 async def test_websocket_connection(server_url):
     """Test that WebSocket connections work."""
-    ws_url = server_url.replace("http://", "ws://") + "/ws"
-    async with aiohttp.ClientSession() as session:
-        async with session.ws_connect(ws_url) as ws:
-            # Should connect successfully
-            assert not ws.closed
+    ws_url = server_url.replace("http://", "ws://") + "/ws"  # nosemgrep: detect-insecure-websocket
+    async with aiohttp.ClientSession() as session, session.ws_connect(ws_url) as ws:
+        # Should connect successfully
+        assert not ws.closed
 
-            # Should receive initial state
-            msg = await asyncio.wait_for(ws.receive_json(), timeout=5.0)
-            assert msg["type"] in ["initial_state", "ping"]
+        # Should receive initial state
+        msg = await asyncio.wait_for(ws.receive_json(), timeout=5.0)
+        assert msg["type"] in ["initial_state", "ping"]
 
 
 @pytest.mark.asyncio
@@ -107,16 +105,15 @@ async def test_realtime_trace_broadcast(observability_server):
     collector = observability_server.collector
     ws_url = "ws://localhost:8000/ws"
 
-    async with aiohttp.ClientSession() as session:
-        async with session.ws_connect(ws_url) as ws:
-            # Consume initial state message
-            await ws.receive_json()
+    async with aiohttp.ClientSession() as session, session.ws_connect(ws_url) as ws:
+        # Consume initial state message
+        await ws.receive_json()
 
-            # Send a new trace
-            trace_data = {"trace_id": "broadcast-test", "spans": [{"name": "broadcast_span"}]}
-            await collector.collect_trace(trace_data)
+        # Send a new trace
+        trace_data = {"trace_id": "broadcast-test", "spans": [{"name": "broadcast_span"}]}
+        await collector.collect_trace(trace_data)
 
-            # Should receive broadcast within 2 seconds
-            msg = await asyncio.wait_for(ws.receive_json(), timeout=2.0)
-            assert msg["type"] == "new_trace"
-            assert msg["trace"]["trace_id"] == "broadcast-test"
+        # Should receive broadcast within 2 seconds
+        msg = await asyncio.wait_for(ws.receive_json(), timeout=2.0)
+        assert msg["type"] == "new_trace"
+        assert msg["trace"]["trace_id"] == "broadcast-test"

@@ -14,7 +14,6 @@ import json
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
 
 # Worktree configuration
 WORKTREES = {
@@ -28,7 +27,7 @@ COORDINATION_DIR = ORCHESTRATOR_ROOT / ".worktree" / "coordination"
 SYNC_STATUS_FILE = ORCHESTRATOR_ROOT / ".worktree" / "sync-status.json"
 
 
-def load_sync_status() -> Dict:
+def load_sync_status() -> dict:
     """Load last sync timestamps."""
     if SYNC_STATUS_FILE.exists():
         with open(SYNC_STATUS_FILE) as f:
@@ -36,14 +35,14 @@ def load_sync_status() -> Dict:
     return {}
 
 
-def save_sync_status(status: Dict) -> None:
+def save_sync_status(status: dict) -> None:
     """Save sync timestamps."""
     SYNC_STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(SYNC_STATUS_FILE, "w") as f:
         json.dump(status, f, indent=2)
 
 
-def scan_logseq_patterns(worktree_path: Path) -> List[Path]:
+def scan_logseq_patterns(worktree_path: Path) -> list[Path]:
     """Scan Logseq for pages tagged #ready-to-share."""
     patterns = []
     logseq_pages = worktree_path / "logseq" / "pages"
@@ -59,7 +58,7 @@ def scan_logseq_patterns(worktree_path: Path) -> List[Path]:
     return patterns
 
 
-def sync_agent_patterns(agent_name: str, dry_run: bool = False) -> Dict:
+def sync_agent_patterns(agent_name: str, dry_run: bool = False) -> dict:
     """
     Sync patterns from agent worktree to orchestrator.
 
@@ -118,7 +117,7 @@ def sync_agent_patterns(agent_name: str, dry_run: bool = False) -> Dict:
     return result
 
 
-def generate_sync_report(results: Dict[str, Dict]) -> str:
+def generate_sync_report(results: dict[str, dict]) -> str:
     """Generate human-readable sync report."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
 
@@ -166,7 +165,7 @@ def sync_all_agents(dry_run: bool = False) -> None:
 
     results = {}
 
-    for agent_name in WORKTREES.keys():
+    for agent_name in WORKTREES:
         print(f"📦 Agent: {agent_name}")
 
         # Check if worktree exists
