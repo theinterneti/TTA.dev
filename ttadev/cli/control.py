@@ -195,6 +195,11 @@ def register_control_subcommands(sub: argparse._SubParsersAction) -> None:  # ty
         help="Orchestrator lease TTL in seconds (default 300)",
     )
 
+    workflow_status = workflow_sub.add_parser(
+        "status", help="Show tracked workflow status for a task"
+    )
+    workflow_status.add_argument("task_id", help="Task ID")
+
     gate_p = control_sub.add_parser("gate", help="Inspect and decide control-plane gates")
     gate_sub = gate_p.add_subparsers(dest="control_gate_command")
 
@@ -514,8 +519,51 @@ def _handle_workflow_command(args: argparse.Namespace, service: ControlPlaneServ
         print(f"  lease:    expires {claim.lease.expires_at}")
         return 0
 
-    print("Usage: tta control workflow {start}", file=sys.stderr)
+    if args.control_workflow_command == "status":
+        return _workflow_status(args, service)
+
+    print("Usage: tta control workflow {start,status}", file=sys.stderr)
     return 1
+
+
+def _workflow_status(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    task = service.get_task(args.task_id)
+    if task is None:
+        print(f"Error: task '{args.task_id}' not found", file=sys.stderr)
+        return 1
+    if task.workflow is None:
+        print(f"Error: task {args.task_id} has no workflow tracking.", file=sys.stderr)
+        return 1
+
+    wf = task.workflow
+    print(f"Workflow: {wf.workflow_name}  ({wf.status.value.upper()})")
+    print(f"Goal:     {wf.workflow_goal}")
+
+    if wf.status.value == "running" and wf.current_agent:
+        step_num = wf.current_step_index if wf.current_step_index is not None else "?"
+        print(f"Active:   step {step_num} — {wf.current_agent}")
+
+    print()
+    print("Steps")
+    print("─" * 70)
+    for step in wf.steps:
+        conf = f"{step.last_confidence:.2f}" if step.last_confidence is not None else "-"
+        gate = f"gate={step.gate_decision.value}" if step.gate_decision else ""
+        trace = step.trace_id[:8] + "…" if step.trace_id else ""
+        print(
+            f"  {step.step_index}  {step.agent_name:<20} {step.status.value:<12} "
+            f"{conf:<6}  {gate:<18} {trace}"
+        )
+
+    if task.gates:
+        print()
+        print("Gates")
+        print("─" * 70)
+        for gate in task.gates:
+            decided = f"by {gate.decided_by}" if gate.decided_by else ""
+            print(f"  {gate.id:<38} {gate.gate_type.value:<10} {gate.status.value:<22} {decided}")
+
+    return 0
 
 
 def _parse_gate_spec(spec: str) -> dict[str, str | bool]:

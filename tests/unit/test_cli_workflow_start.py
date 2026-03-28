@@ -171,3 +171,117 @@ def test_workflow_start_service_error_exits_nonzero(
 
     assert rc != 0
     assert "simulated failure" in capsys.readouterr().err
+
+
+# ── workflow status ────────────────────────────────────────────────────────────
+
+
+def _make_status_args(tmp_path: Path, task_id: str):  # type: ignore[no-untyped-def]
+    import argparse
+
+    return argparse.Namespace(
+        control_command="workflow",
+        control_workflow_command="status",
+        task_id=task_id,
+        data_dir=str(tmp_path),
+    )
+
+
+def test_workflow_status_shows_header_and_steps(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """workflow status prints workflow name, status, and step table."""
+    _set_agent_identity(monkeypatch)
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="my-feature",
+        workflow_goal="build it",
+        step_agents=["architect", "developer"],
+    )
+    task_id = claim.run.task_id
+
+    args = _make_status_args(tmp_path, task_id)
+    rc = handle_control_command(args, tmp_path)
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "my-feature" in out
+    assert "build it" in out
+    assert "architect" in out
+    assert "developer" in out
+
+
+def test_workflow_status_shows_active_step_when_running(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """workflow status shows 'Active: step N' when a step is in progress."""
+    _set_agent_identity(monkeypatch)
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="active-wf",
+        workflow_goal="prove active",
+        step_agents=["developer", "reviewer"],
+    )
+    task_id = claim.run.task_id
+    service.mark_workflow_step_running(task_id, step_index=0)
+
+    args = _make_status_args(tmp_path, task_id)
+    rc = handle_control_command(args, tmp_path)
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Active" in out
+    assert "developer" in out
+
+
+def test_workflow_status_shows_completed_workflow(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """workflow status shows COMPLETED after all steps finish."""
+    _set_agent_identity(monkeypatch)
+    service = ControlPlaneService(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="done-wf",
+        workflow_goal="finish",
+        step_agents=["developer"],
+    )
+    task_id = claim.run.task_id
+    run_id = claim.run.id
+    service.mark_workflow_step_running(task_id, step_index=0)
+    service.record_workflow_step_result(
+        task_id, step_index=0, result_summary="done", confidence=0.95
+    )
+    service.complete_run(run_id, summary="all done")
+
+    args = _make_status_args(tmp_path, task_id)
+    rc = handle_control_command(args, tmp_path)
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "COMPLETED" in out
+    assert "0.95" in out
+
+
+def test_workflow_status_unknown_task_exits_1(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """workflow status exits 1 when task_id does not exist."""
+    _set_agent_identity(monkeypatch)
+    args = _make_status_args(tmp_path, "task_nonexistent")
+    rc = handle_control_command(args, tmp_path)
+    assert rc == 1
+
+
+def test_workflow_status_non_workflow_task_exits_1(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """workflow status exits 1 with a clear message for plain tasks."""
+    _set_agent_identity(monkeypatch)
+    service = ControlPlaneService(tmp_path)
+    task = service.create_task("plain task")
+
+    args = _make_status_args(tmp_path, task.id)
+    rc = handle_control_command(args, tmp_path)
+
+    assert rc == 1
+    assert "no workflow" in capsys.readouterr().err.lower()
