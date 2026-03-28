@@ -77,6 +77,12 @@ tdd_guard_project_root = "/home/theinterneti/Repos/TTA.dev"
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
 addopts = "-v --cov=ttadev --cov-report=html --cov-report=term --cov-fail-under=100"
+markers = [
+    "workflow_proof: end-to-end L0 workflow proof tests",
+    "integration: integration tests requiring external services",
+    "slow: slow tests",
+    "external: tests requiring external APIs",
+]
 
 [tool.ruff]
 line-length = 100
