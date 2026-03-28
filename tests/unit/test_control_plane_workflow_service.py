@@ -221,6 +221,7 @@ async def test_workflow_resumes_after_human_approves_escalated_gate(tmp_path: Pa
     task = svc.get_task(task_id)
     assert task.workflow is not None
     gate_id = task.workflow.steps[0].linked_gate_id
+    assert gate_id is not None  # narrow str | None → str for type checker
     task = svc.decide_gate(
         task_id,
         gate_id,
