@@ -55,6 +55,7 @@ class WorkflowTrackingStatus(StrEnum):
     COMPLETED = "completed"
     QUIT = "quit"
     FAILED = "failed"
+    ESCALATED = "escalated"
 
 
 class WorkflowStepStatus(StrEnum):
@@ -75,6 +76,7 @@ class WorkflowGateDecisionOutcome(StrEnum):
     SKIP = "skip"
     EDIT = "edit"
     QUIT = "quit"
+    ESCALATE_TO_HUMAN = "escalate_to_human"
 
 
 class LockScopeType(StrEnum):

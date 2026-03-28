@@ -150,3 +150,15 @@ def test_quit_tracked_workflow_releases_run_without_gate_completion(tmp_path: Pa
     assert persisted_task.status.value == "pending"
     assert persisted_task.workflow is not None
     assert persisted_task.workflow.status == WorkflowTrackingStatus.QUIT
+
+
+def test_escalate_to_human_is_a_valid_gate_outcome() -> None:
+    """ESCALATE_TO_HUMAN gate outcome enum value exists."""
+    assert WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN is not None
+    assert WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN.value == "escalate_to_human"
+
+
+def test_escalated_is_a_valid_workflow_status() -> None:
+    """ESCALATED workflow status enum value exists."""
+    assert WorkflowTrackingStatus.ESCALATED is not None
+    assert WorkflowTrackingStatus.ESCALATED.value == "escalated"
