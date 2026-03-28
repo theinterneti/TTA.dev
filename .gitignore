@@ -237,3 +237,4 @@ templates/
 .mcp.json
 mcp.json
 .superpowers/
+.worktrees/
