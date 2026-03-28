@@ -89,8 +89,8 @@ def test_circuit_breaker_error_preserves_last_error():
 
 async def test_circuit_breaker_initial_state():
     # Arrange
-    async def op(inp, ctx):
-        return inp
+    async def op(_inp, _ctx):
+        return _inp
 
     # Act
     cb = CircuitBreakerPrimitive(LambdaPrimitive(op))
@@ -108,7 +108,7 @@ async def test_circuit_breaker_initial_state():
 
 async def test_circuit_breaker_allows_requests_when_closed():
     # Arrange
-    async def op(inp, ctx):
+    async def op(_inp, _ctx):
         return "ok"
 
     cb = CircuitBreakerPrimitive(
@@ -129,7 +129,7 @@ async def test_circuit_breaker_passes_input_unchanged():
     # Arrange
     received = []
 
-    async def op(inp, ctx):
+    async def op(inp, _ctx):
         received.append(inp)
         return inp * 2
 
@@ -148,7 +148,7 @@ async def test_success_resets_failure_count():
     # Arrange
     call_count = 0
 
-    async def flaky(inp, ctx):
+    async def flaky(_inp, _ctx):
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -180,7 +180,7 @@ async def test_success_resets_failure_count():
 
 async def test_circuit_breaker_opens_after_failure_threshold():
     # Arrange
-    async def always_fails(inp, ctx):
+    async def always_fails(_inp, _ctx):
         raise RuntimeError("fail")
 
     cb = CircuitBreakerPrimitive(
@@ -204,7 +204,7 @@ async def test_circuit_open_blocks_without_calling_wrapped_primitive():
     # Arrange
     call_count = 0
 
-    async def op(inp, ctx):
+    async def op(_inp, _ctx):
         nonlocal call_count
         call_count += 1
         raise RuntimeError("fail")
@@ -231,7 +231,7 @@ async def test_circuit_open_blocks_without_calling_wrapped_primitive():
 
 async def test_circuit_breaker_error_carries_failure_count():
     # Arrange
-    async def fails(inp, ctx):
+    async def fails(_inp, _ctx):
         raise RuntimeError("boom")
 
     cb = CircuitBreakerPrimitive(
@@ -262,7 +262,7 @@ async def test_circuit_breaker_transitions_to_half_open_after_recovery_timeout()
     # Arrange
     call_count = 0
 
-    async def op(inp, ctx):
+    async def op(_inp, _ctx):
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -293,7 +293,7 @@ async def test_circuit_in_half_open_closes_after_success_threshold():
     # Arrange
     call_count = 0
 
-    async def op(inp, ctx):
+    async def op(_inp, _ctx):
         nonlocal call_count
         call_count += 1
         if call_count == 1:
@@ -325,7 +325,7 @@ async def test_circuit_half_open_failure_reopens_circuit():
     # Arrange
     call_count = 0
 
-    async def op(inp, ctx):
+    async def op(_inp, _ctx):
         nonlocal call_count
         call_count += 1
         if call_count in (1, 3):
@@ -362,7 +362,7 @@ async def test_circuit_half_open_failure_reopens_circuit():
 
 async def test_manual_reset_clears_state():
     # Arrange
-    async def fails(inp, ctx):
+    async def fails(_inp, _ctx):
         raise RuntimeError("boom")
 
     cb = CircuitBreakerPrimitive(
@@ -391,7 +391,7 @@ async def test_manual_reset_clears_state():
 
 async def test_circuit_breaker_only_counts_expected_exceptions():
     # Arrange
-    async def raises_value_error(inp, ctx):
+    async def raises_value_error(_inp, _ctx):
         raise ValueError("not tracked")
 
     cb = CircuitBreakerPrimitive(
@@ -414,7 +414,7 @@ async def test_circuit_breaker_only_counts_expected_exceptions():
 
 async def test_circuit_breaker_counts_matching_expected_exceptions():
     # Arrange
-    async def fails(inp, ctx):
+    async def fails(_inp, _ctx):
         raise RuntimeError("expected")
 
     cb = CircuitBreakerPrimitive(
@@ -677,7 +677,7 @@ class TestWithRetryAsync:
 
 async def test_should_attempt_reset_when_no_failure_time_recorded():
     # Arrange — primitive that always succeeds so _last_failure_time stays None
-    async def op(inp, ctx):
+    async def op(_inp, _ctx):
         return "ok"
 
     cb = CircuitBreakerPrimitive(
