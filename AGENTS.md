@@ -142,8 +142,11 @@ When working on L0 from inside `TTA.dev`, prefer this order:
 
 ### Repository TODOs
 
-All three L0 phase-1 TODOs are complete as of 2026-03-27.
-Next natural work: CLI gate commands, MCP control-plane tools, or `tta workflow start`.
+All four L0 phase-1 items are complete as of 2026-03-27:
+- Items 1–3: multi-agent workflow proof, gate deepening, OTel trace attribution
+- Item 4: MCP workflow progression tools (`control_start_workflow`, `control_mark_workflow_step_running`, `control_record_workflow_step_result`, `control_record_workflow_gate_outcome`, `control_mark_workflow_step_failed`) plus `tta control workflow start` CLI command
+
+The L0 surface is ready to run a documented multi-agent workflow end-to-end.
 
 ---
 
