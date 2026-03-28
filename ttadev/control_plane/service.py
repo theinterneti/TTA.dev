@@ -728,20 +728,29 @@ class ControlPlaneService:
         Returns list of task IDs that were transitioned to FAILED.
         Call periodically (e.g., on session start or via a background process).
         """
-        self._sweep_expired_leases()
+        from datetime import datetime
 
+        now = datetime.now(UTC)
         affected: list[str] = []
+
         for task in self._store.list_tasks():
             if task.workflow is None:
                 continue
             if task.workflow.status != WorkflowTrackingStatus.RUNNING:
                 continue
-            # After the sweep, tasks with expired leases have active_run_id=None.
-            # A RUNNING workflow with no active run has been abandoned.
-            if task.active_run_id is not None:
-                continue
+            if task.active_run_id is None:
+                continue  # no active run — cleanly released, not abandoned
 
-            # Mark current running step as FAILED
+            lease = self._store.get_lease_for_run(task.active_run_id)
+            if lease is None:
+                continue  # no lease record — can't determine expiry
+            lease_expires_at = datetime.fromisoformat(lease.expires_at)
+            if lease_expires_at.tzinfo is None:
+                lease_expires_at = lease_expires_at.replace(tzinfo=UTC)
+            if lease_expires_at > now:
+                continue  # lease still valid
+
+            # Lease expired — mark current running step as FAILED
             current_step_idx = task.workflow.current_step_index
             if current_step_idx is not None:
                 step = task.workflow.steps[current_step_idx]

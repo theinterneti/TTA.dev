@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 from ttadev.control_plane import ControlPlaneService
@@ -237,8 +238,6 @@ async def test_workflow_resumes_after_human_approves_escalated_gate(tmp_path: Pa
 
 async def test_expire_abandoned_workflow_marks_step_and_workflow_failed(tmp_path: Path) -> None:
     # Arrange
-    import asyncio
-
     svc = ControlPlaneService(data_dir=tmp_path)
     claim = svc.start_tracked_workflow(
         workflow_name="test-wf",
