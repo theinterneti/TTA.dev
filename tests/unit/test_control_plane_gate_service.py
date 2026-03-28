@@ -461,6 +461,27 @@ def test_parse_policy_decision_unknown_policy() -> None:
     assert result is None
 
 
+def test_gate_policy_is_a_typed_dataclass() -> None:
+    from ttadev.control_plane.models import GatePolicy
+
+    policy = GatePolicy(
+        name="quality-gate",
+        approve_above_confidence=0.8,
+        escalate_below_confidence=0.5,
+    )
+    assert policy.name == "quality-gate"
+    assert policy.approve_above_confidence == 0.8
+    assert policy.escalate_below_confidence == 0.5
+
+
+def test_gate_policy_defaults_are_none() -> None:
+    from ttadev.control_plane.models import GatePolicy
+
+    policy = GatePolicy(name="minimal")
+    assert policy.approve_above_confidence is None
+    assert policy.escalate_below_confidence is None
+
+
 def test_policy_gate_auto_approves_on_high_confidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

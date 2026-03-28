@@ -87,6 +87,28 @@ class LockScopeType(StrEnum):
 
 
 @dataclass
+class GatePolicy:
+    """Named policy governing when a gate auto-approves or escalates.
+
+    Replaces the opaque ``policy_name`` string for callers that want a
+    typed representation. Convert to a ``policy_name`` string for storage:
+    use ``GatePolicy.to_policy_name()`` when passing to service methods.
+    """
+
+    name: str
+    approve_above_confidence: float | None = None
+    escalate_below_confidence: float | None = None
+
+    def to_policy_name(self) -> str:
+        """Serialize to the policy_name string format used by the service."""
+        if self.approve_above_confidence is not None:
+            return f"auto:confidence≥{self.approve_above_confidence}"
+        if self.escalate_below_confidence is not None:
+            return f"auto:escalate_below:{self.escalate_below_confidence}"
+        return "auto:always"
+
+
+@dataclass
 class GateHistoryEntry:
     """Append-only audit entry for a gate mutation."""
 
