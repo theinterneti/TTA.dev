@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__codegraphcontext__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python scripts/hooks/track_cgc_usage.py",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python scripts/hooks/destructive_gate.py",
+            "timeout": 10000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python scripts/hooks/require_cgc_before_edit.py",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

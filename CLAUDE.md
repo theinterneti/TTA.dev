@@ -69,8 +69,25 @@ tests/              # Test suite
 - **Primitives:** Always use for workflows (never manual retry/timeout loops)
 - **State:** Pass via `WorkflowContext` (never globals)
 - **LLM providers:** Groq `openai/gpt-oss-20b` for the live Hindsight runtime by default; keep Gemini 3.1 Flash Lite Preview and local Ollama as fallbacks — see [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md)
-- **Orient before edit:** Run CGC (`find_code` + `analyze_code_relationships`) on any non-trivial target before touching it
+- **Orient before edit:** Run CGC (`find_code` + `analyze_code_relationships`) on any non-trivial target before touching it — **enforced by hook** (`.claude/settings.json`)
 - **Retain after task:** Store cross-project signal in `adam-global` and repo-specific signal in the current derived `project-*` or `workspace-*` Hindsight bank
+
+### Tool Selection: Symbol Lookup
+
+Prefer semantic tools over raw file reads for symbol-level work:
+
+| Goal | Use | Instead of |
+|------|-----|------------|
+| Find where a function/class is defined | `mcp__plugin_serena_serena__find_symbol` | `Grep` + `Read` |
+| Find all callers of a function | `mcp__plugin_serena_serena__find_referencing_symbols` | `Grep` pattern search |
+| Scan all symbols in a file | `mcp__plugin_serena_serena__get_symbols_overview` | `Read` whole file |
+| Replace a function body precisely | `mcp__plugin_serena_serena__replace_symbol_body` | `Edit` with large context |
+| Understand cross-file dependencies | `mcp__codegraphcontext__analyze_code_relationships` | Reading multiple files |
+| Search for a symbol across the repo | `mcp__codegraphcontext__find_code` | `Grep` |
+
+**When to use Serena vs CGC:**
+- Use **Serena** for precise, symbol-level edits (you know the function, you want to read/replace it)
+- Use **CGC** for orientation (you need to understand relationships and impact before touching anything)
 
 ### ⛔ TODO Management — CI-Blocking Rule
 
