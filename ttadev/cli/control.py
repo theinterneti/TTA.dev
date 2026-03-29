@@ -606,8 +606,9 @@ def _workflow_status(args: argparse.Namespace, service: ControlPlaneService) -> 
 
 def _workflow_explain(args: argparse.Namespace, service: ControlPlaneService) -> int:
     """Print a human-readable explanation of the active workflow step."""
-    task = service.get_task(args.task_id)
-    if task is None:
+    try:
+        task = service.get_task(args.task_id)
+    except TaskNotFoundError:
         print(f"Error: task '{args.task_id}' not found", file=sys.stderr)
         return 1
     if task.workflow is None:

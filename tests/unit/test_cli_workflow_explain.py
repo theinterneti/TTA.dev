@@ -113,12 +113,11 @@ def test_workflow_explain_running_step_with_trace(
 
     assert rc == 0
     out = capsys.readouterr().out
-    if step.trace_id is not None:
-        assert "Trace:" in out
-        assert step.trace_id in out
-    else:
-        # No TRACEPARENT was picked up — just verify RUNNING still shows
-        assert "RUNNING" in out
+    # TRACEPARENT env var is now picked up as a fallback when no active OTel span
+    # exists, so trace_id must always be set in this test.
+    assert step.trace_id is not None, "TRACEPARENT env var should have been parsed"
+    assert "Trace:" in out
+    assert step.trace_id in out
 
 
 def test_workflow_explain_with_pending_gates(
@@ -176,9 +175,12 @@ def test_workflow_explain_no_pending_gates(
 def test_workflow_explain_task_not_found(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Unknown task_id → returns exit code 1."""
+    """Unknown task_id → returns exit code 1 with an error on stderr."""
     _set_agent_identity(monkeypatch)
     args = _make_explain_args(tmp_path, "task_nonexistent_xyz")
     rc = handle_control_command(args, tmp_path)
     assert rc == 1
+    err = capsys.readouterr().err
+    assert "task_nonexistent_xyz" in err

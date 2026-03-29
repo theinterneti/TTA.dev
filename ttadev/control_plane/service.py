@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from dataclasses import asdict
 from datetime import UTC, datetime, timedelta
@@ -37,14 +38,30 @@ from ttadev.observability.session_manager import Session, SessionManager
 
 
 def _get_active_otel_context() -> tuple[str | None, str | None]:
-    """Return (trace_id_hex, span_id_hex) from the current OTel span, or (None, None)."""
+    """Return (trace_id_hex, span_id_hex) from the current OTel span, or (None, None).
+
+    Falls back to parsing the W3C ``TRACEPARENT`` environment variable when no
+    active span is present (e.g., CLI invocations that inherit a trace from a
+    parent process).
+    """
     from opentelemetry import trace as _otel_trace  # local import to avoid cost at import time
 
     span = _otel_trace.get_current_span()
     ctx = span.get_span_context()
-    if ctx is None or not ctx.is_valid:
-        return None, None
-    return format(ctx.trace_id, "032x"), format(ctx.span_id, "016x")
+    if ctx is not None and ctx.is_valid:
+        return format(ctx.trace_id, "032x"), format(ctx.span_id, "016x")
+
+    # Fallback: parse W3C traceparent header from environment.
+    # Format: 00-<trace_id_32hex>-<span_id_16hex>-<flags>
+    traceparent = os.environ.get("TRACEPARENT", "")
+    if traceparent:
+        parts = traceparent.split("-")
+        if len(parts) == 4 and parts[0] == "00":
+            trace_id_hex, span_id_hex = parts[1], parts[2]
+            if len(trace_id_hex) == 32 and len(span_id_hex) == 16:
+                return trace_id_hex, span_id_hex
+
+    return None, None
 
 
 class ControlPlaneError(Exception):
