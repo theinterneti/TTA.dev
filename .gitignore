@@ -239,5 +239,9 @@ mcp.json
 .superpowers/
 .worktrees/
 
+# Claude Code runtime data — ephemeral, never commit
+.claude/tdd-guard/data/
+.claude/settings.local.json
+
 # Static analysis raw output
 static_analysis_semgrep_1/
