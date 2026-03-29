@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from ttadev.control_plane import (
+    ActiveStepInfo,
     ControlPlaneError,
     ControlPlaneService,
     GateStatus,
@@ -227,6 +228,11 @@ def register_control_subcommands(sub: argparse._SubParsersAction) -> None:  # ty
         "status", help="Show tracked workflow status for a task"
     )
     workflow_status.add_argument("task_id", help="Task ID")
+
+    workflow_explain = workflow_sub.add_parser(
+        "explain", help="Explain the active step of a tracked workflow"
+    )
+    workflow_explain.add_argument("task_id", help="Task ID")
 
     gate_p = control_sub.add_parser("gate", help="Inspect and decide control-plane gates")
     gate_sub = gate_p.add_subparsers(dest="control_gate_command")
@@ -550,7 +556,10 @@ def _handle_workflow_command(args: argparse.Namespace, service: ControlPlaneServ
     if args.control_workflow_command == "status":
         return _workflow_status(args, service)
 
-    print("Usage: tta control workflow {start,status}", file=sys.stderr)
+    if args.control_workflow_command == "explain":
+        return _workflow_explain(args, service)
+
+    print("Usage: tta control workflow {start,status,explain}", file=sys.stderr)
     return 1
 
 
@@ -591,6 +600,50 @@ def _workflow_status(args: argparse.Namespace, service: ControlPlaneService) -> 
         for gate in task.gates:
             decided = f"by {gate.decided_by}" if gate.decided_by else ""
             print(f"  {gate.id:<38} {gate.gate_type.value:<10} {gate.status.value:<22} {decided}")
+
+    return 0
+
+
+def _workflow_explain(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    """Print a human-readable explanation of the active workflow step."""
+    task = service.get_task(args.task_id)
+    if task is None:
+        print(f"Error: task '{args.task_id}' not found", file=sys.stderr)
+        return 1
+    if task.workflow is None:
+        print(f"Error: task {args.task_id} has no workflow tracking.", file=sys.stderr)
+        return 1
+
+    wf = task.workflow
+    print(f"Workflow:  {wf.workflow_name}  ({wf.status.value.upper()})")
+    print(f"Goal:      {wf.workflow_goal}")
+    print()
+
+    active: ActiveStepInfo | None = service.explain_active_step(args.task_id)
+
+    if active is None:
+        print("No active step.")
+        return 0
+
+    duration = _fmt_seconds(active.duration_s) if active.duration_s is not None else "unknown"
+
+    print("Active Step")
+    print("─" * 65)
+    print(
+        f"  Step {active.step_index + 1} / {wf.total_steps}"
+        f"   {active.agent_name}    RUNNING   for {duration}"
+    )
+    print(f"  Agent:   {active.agent_name}")
+    if active.trace_id is not None:
+        print(f"  Trace:   {active.trace_id}")
+    if active.span_id is not None:
+        print(f"  Span:    {active.span_id}")
+
+    if active.pending_gate_ids:
+        print()
+        print("Pending Gates")
+        for gate_id in active.pending_gate_ids:
+            print(f"  {gate_id}")
 
     return 0
 

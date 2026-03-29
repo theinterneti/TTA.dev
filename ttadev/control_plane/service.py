@@ -987,8 +987,12 @@ class ControlPlaneService:
         else:
             duration_s = None
 
+        # Exclude the step's own linked approval gate — it is inherently PENDING
+        # while the step is running and is not an external blocker.
         pending_gate_ids = tuple(
-            gate.id for gate in task.gates if gate.status == GateStatus.PENDING
+            gate.id
+            for gate in task.gates
+            if gate.status == GateStatus.PENDING and gate.id != step.linked_gate_id
         )
 
         return ActiveStepInfo(
