@@ -17,6 +17,8 @@ from ttadev.control_plane import (
     TaskNotFoundError,
     TaskStatus,
     WorkflowGateDecisionOutcome,
+    WorkflowStepRecord,
+    WorkflowStepStatus,
 )
 
 
@@ -33,6 +35,32 @@ def _step_duration(started_at: str | None, completed_at: str | None) -> str:
     end = datetime.fromisoformat(end_str).replace(tzinfo=UTC)
     secs = (end - start).total_seconds()
     return f"{secs:.1f}s"
+
+
+def _fmt_seconds(s: float) -> str:
+    """Format a duration in seconds as a human-readable string."""
+    if s < 60:
+        return f"{int(s)}s"
+    if s < 3600:
+        return f"{int(s // 60)}m {int(s % 60)}s"
+    return f"{int(s // 3600)}h {int((s % 3600) // 60)}m"
+
+
+def _fmt_step_duration(step: WorkflowStepRecord) -> str:
+    """Return a formatted duration string for a workflow step table row."""
+    if step.status == WorkflowStepStatus.RUNNING and step.started_at is not None:
+        elapsed = (datetime.now(UTC) - datetime.fromisoformat(step.started_at)).total_seconds()
+        return _fmt_seconds(elapsed)
+    if (
+        step.status == WorkflowStepStatus.COMPLETED
+        and step.started_at is not None
+        and step.completed_at is not None
+    ):
+        elapsed = (
+            datetime.fromisoformat(step.completed_at) - datetime.fromisoformat(step.started_at)
+        ).total_seconds()
+        return _fmt_seconds(elapsed)
+    return "-"
 
 
 def register_control_subcommands(sub: argparse._SubParsersAction) -> None:  # type: ignore[type-arg]
@@ -548,11 +576,12 @@ def _workflow_status(args: argparse.Namespace, service: ControlPlaneService) -> 
     print("─" * 70)
     for step in wf.steps:
         conf = f"{step.last_confidence:.2f}" if step.last_confidence is not None else "-"
+        dur = _fmt_step_duration(step)
         gate = f"gate={step.gate_decision.value}" if step.gate_decision else ""
         trace = step.trace_id[:8] + "…" if step.trace_id else ""
         print(
             f"  {step.step_index}  {step.agent_name:<20} {step.status.value:<12} "
-            f"{conf:<6}  {gate:<18} {trace}"
+            f"{conf:<6}  {dur:<10} {gate:<18} {trace}"
         )
 
     if task.gates:
