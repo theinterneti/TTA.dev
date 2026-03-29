@@ -86,7 +86,7 @@ result = await protected.execute(data, context)""",
                 ],
             },
             "CachePrimitive": {
-                "basic": """from tta_dev_primitives.performance import CachePrimitive
+                "basic": """from ttadev.primitives.performance import CachePrimitive
 from primitives import WorkflowContext
 
 # Cache expensive operations
@@ -98,7 +98,7 @@ cached = CachePrimitive(
 
 context = WorkflowContext(workflow_id="cached-llm")
 result = await cached.execute(prompt, context)  # Cached on second call""",
-                "with_custom_key": """from tta_dev_primitives.performance import CachePrimitive
+                "with_custom_key": """from ttadev.primitives.performance import CachePrimitive
 from primitives import WorkflowContext
 
 # Custom cache key function
@@ -265,7 +265,7 @@ result = await protected.execute(data, context)""",
                 ],
             },
             "MemoryPrimitive": {
-                "basic": """from tta_dev_primitives.performance import MemoryPrimitive
+                "basic": """from ttadev.primitives.performance import MemoryPrimitive
 
 # Zero-setup conversational memory
 memory = MemoryPrimitive(max_size=100)

@@ -132,7 +132,7 @@ class AdaptiveMetrics:
 
             # Try to get meter from global meter provider
             meter_provider = metrics.get_meter_provider()
-            self._meter = meter_provider.get_meter("tta_dev_primitives.adaptive")
+            self._meter = meter_provider.get_meter("ttadev.primitives.adaptive")
 
             # Create learning metrics
             self._strategies_created = self._meter.create_counter(

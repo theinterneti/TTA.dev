@@ -73,7 +73,7 @@ class PrimitiveMatcher:
             },
             "CachePrimitive": {
                 "description": "LRU cache with TTL for expensive operations",
-                "import_path": "from tta_dev_primitives.performance import CachePrimitive",
+                "import_path": "from ttadev.primitives.performance import CachePrimitive",
                 "requirements": ["performance_optimization"],
                 "patterns": ["caching_patterns", "api_calls", "llm_patterns"],
                 "use_cases": [
@@ -182,7 +182,7 @@ class PrimitiveMatcher:
             },
             "MemoryPrimitive": {
                 "description": "Conversational memory with zero-setup fallback",
-                "import_path": "from tta_dev_primitives.performance import MemoryPrimitive",
+                "import_path": "from ttadev.primitives.performance import MemoryPrimitive",
                 "requirements": ["llm_reliability", "performance_optimization"],
                 "patterns": ["llm_patterns"],
                 "use_cases": [
@@ -358,7 +358,7 @@ class PrimitiveMatcher:
             },
             "GitCollaborationPrimitive": {
                 "description": "Enforce best practices for multi-agent Git collaboration",
-                "import_path": "from tta_dev_primitives.collaboration import GitCollaborationPrimitive",
+                "import_path": "from ttadev.primitives.collaboration import GitCollaborationPrimitive",
                 "requirements": ["multi_agent"],
                 "patterns": ["workflow_patterns"],
                 "use_cases": [

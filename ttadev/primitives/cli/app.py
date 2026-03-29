@@ -1482,7 +1482,7 @@ def _generate_memory_transformation(code: str, targets: list[dict], info: dict) 
     # Add imports
     import_idx = _find_import_index(lines)
     import_path = info.get(
-        "import_path", "from tta_dev_primitives.performance import MemoryPrimitive"
+        "import_path", "from ttadev.primitives.performance import MemoryPrimitive"
     )
     if import_path not in code:
         lines.insert(import_idx, import_path)

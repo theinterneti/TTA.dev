@@ -5,7 +5,7 @@ all available capabilities from a single entry point, while keeping the
 original import paths intact for backward compatibility.
 
 Core primitives (WorkflowPrimitive, Sequential, Parallel, Router, Conditional,
-Recovery, Performance, Testing) are exported directly from ``tta_dev_primitives``.
+Recovery, Performance, Testing) are exported directly from ``ttadev.primitives``.
 
 Extension modules live here for structured discovery:
 
@@ -60,16 +60,16 @@ from typing import Any
 # Lazy imports — only resolve when accessed to avoid heavy startup costs.
 # Each entry maps a short alias to the full module path.
 EXTENSION_MODULES: dict[str, str] = {
-    "ace": "tta_dev_primitives.ace",
-    "adaptive": "tta_dev_primitives.adaptive",
-    "analysis": "tta_dev_primitives.analysis",
-    "apm": "tta_dev_primitives.apm",
-    "benchmarking": "tta_dev_primitives.benchmarking",
-    "knowledge": "tta_dev_primitives.knowledge",
-    "lifecycle": "tta_dev_primitives.lifecycle",
-    "orchestration": "tta_dev_primitives.orchestration",
-    "research": "tta_dev_primitives.research",
-    "speckit": "tta_dev_primitives.speckit",
+    "ace": "ttadev.primitives.ace",
+    "adaptive": "ttadev.primitives.adaptive",
+    "analysis": "ttadev.primitives.analysis",
+    "apm": "ttadev.primitives.apm",
+    "benchmarking": "ttadev.primitives.benchmarking",
+    "knowledge": "ttadev.primitives.knowledge",
+    "lifecycle": "ttadev.primitives.lifecycle",
+    "orchestration": "ttadev.primitives.orchestration",
+    "research": "ttadev.primitives.research",
+    "speckit": "ttadev.primitives.speckit",
 }
 
 
@@ -82,8 +82,8 @@ def __getattr__(name: str) -> Any:
     if name in EXTENSION_MODULES:
         import importlib
 
-        return importlib.import_module(EXTENSION_MODULES[name])
-    raise AttributeError(f"module 'tta_dev_primitives.extensions' has no attribute {name!r}")
+        return importlib.import_module(EXTENSION_MODULES[name])  # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import  # fmt: skip
+    raise AttributeError(f"module 'ttadev.primitives.extensions' has no attribute {name!r}")
 
 
 def list_extensions() -> list[str]:
