@@ -306,3 +306,146 @@ def test_queue_endpoint_default_instance():
     ep = QueueEndpoint(queue_type="ingester")
     assert ep.instance == "default"
     assert ep.key_segment() == "ingester:default"
+
+
+# ── ImportError branch (lines 88-89) ─────────────────────────────────────────
+
+
+def test_init_raises_import_error_when_redis_unavailable(monkeypatch):
+    """Cover the ImportError branch in __init__ when redis package is missing."""
+    import builtins
+    import sys
+
+    real_import = builtins.__import__
+
+    def mock_import(name, *args, **kwargs):
+        if name == "redis":
+            raise ImportError("no module named redis")
+        return real_import(name, *args, **kwargs)
+
+    # Remove cached redis module so the import is attempted fresh
+    saved = sys.modules.pop("redis", None)
+    try:
+        monkeypatch.setattr(builtins, "__import__", mock_import)
+        with pytest.raises(ImportError, match="redis\\[asyncio\\] is required"):
+            RedisMessageCoordinator(object(), key_prefix="x")
+    finally:
+        monkeypatch.setattr(builtins, "__import__", real_import)
+        if saved is not None:
+            sys.modules["redis"] = saved
+
+
+# ── _subs_key helper (line 110) ───────────────────────────────────────────────
+
+
+def test_subs_key_format(coord, worker):
+    """Cover _subs_key helper directly."""
+    key = coord._subs_key(worker)
+    assert key == f"test:subs:{worker.key_segment()}"
+
+
+# ── send_message exception branch (lines 164-166) ────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_send_message_records_error_on_exception(coord, ingester, worker):
+    """Cover the except branch in send_message (delivered_error counter)."""
+    from unittest.mock import AsyncMock
+
+    # Make llen raise so we hit the except path
+    coord._redis.llen = AsyncMock(side_effect=RuntimeError("redis down"))
+    result = await coord.send_message(
+        sender=ingester,
+        recipient=worker,
+        message_id="err-msg",
+        message_type="job",
+        payload={},
+    )
+    assert result.delivered is False
+    assert result.error is not None
+    assert coord.counters.delivered_error == 1
+
+
+# ── broadcast_message return (line 178) ──────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_broadcast_message_returns_results_for_all_recipients(coord, ingester, redis):
+    """Cover broadcast_message — ensures the list comprehension return is hit."""
+    w1 = QueueEndpoint(queue_type="worker", instance="b1")
+    w2 = QueueEndpoint(queue_type="worker", instance="b2")
+    results = await coord.broadcast_message(
+        sender=ingester,
+        recipients=[w1, w2],
+        message_id="bcast-1",
+        message_type="notify",
+        payload={"k": "v"},
+    )
+    assert len(results) == 2
+    assert all(r.delivered for r in results)
+
+
+# ── subscribe_to_messages (lines 195-204) ────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_subscribe_to_messages_returns_subscription(coord, worker):
+    """Cover the subscribe_to_messages body (sub_id, _store task, return)."""
+    sub = coord.subscribe_to_messages(worker, message_types=["job", "ping"])
+    assert sub.subscription_id.startswith("sub_")
+    assert sub.endpoint_id == worker.key_segment()
+    assert sub.message_types == ["job", "ping"]
+
+
+@pytest.mark.asyncio
+async def test_subscribe_to_messages_empty_types(coord, worker):
+    """Cover the empty message_types branch inside _store (line 199 condition)."""
+    sub = coord.subscribe_to_messages(worker, message_types=[])
+    assert sub.subscription_id.startswith("sub_")
+    assert sub.message_types == []
+
+
+# ── nack unknown token returns False (line 265) ───────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_nack_unknown_token_returns_false(coord, worker):
+    """Cover the early `return False` when nack finds no reserved payload."""
+    ok = await coord.nack(worker, "ghost-token", failure=FailureType.TRANSIENT)
+    assert ok is False
+
+
+# ── nack poison-pill except branch (lines 306-310) ───────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_nack_poison_pill_goes_to_dlq(coord, ingester, worker, redis):
+    """Cover the except block in nack when payload is unparseable JSON."""
+    reserved_key = f"test:reserved:{worker.key_segment()}"
+    deadline_key = f"test:reserved_deadlines:{worker.key_segment()}"
+    # Inject a reservation with corrupt payload
+    await redis.hset(reserved_key, "corrupt-token", b"!!!not-json!!!")
+    await redis.zadd(deadline_key, {"corrupt-token": 0})
+    # nack should catch the parse error and DLQ the payload
+    ok = await coord.nack(worker, "corrupt-token", failure=FailureType.TRANSIENT)
+    assert ok is False
+    dlq_len = await redis.llen(f"test:dlq:{worker.key_segment()}")
+    assert dlq_len == 1
+    assert coord.counters.dlq_enqueued == 1
+
+
+# ── _discover_endpoints: no-colon suffix branch (line 392) ────────────────────
+
+
+@pytest.mark.asyncio
+async def test_discover_endpoints_no_colon_suffix(coord, ingester, redis):
+    """Cover the `else` branch in _discover_endpoints when suffix has no colon."""
+    # Manually insert a reserved_deadlines key whose suffix has no colon
+    # (queue_type only, no instance separator)
+    bare_key = "test:reserved_deadlines:simpletype"
+    await redis.zadd(bare_key, {"tok": 0})
+    endpoints = await coord._discover_endpoints()
+    # The endpoint should be parsed with instance="default"
+    matches = [e for e in endpoints if e.queue_type == "simpletype"]
+    assert len(matches) == 1
+    assert matches[0].instance == "default"
