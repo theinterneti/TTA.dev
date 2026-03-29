@@ -57,6 +57,9 @@ from .recovery.timeout import TimeoutPrimitive
 # ── Core: safety ────────────────────────────────────────────────────
 from .safety import SafetyGateEscalatedError, SafetyGatePrimitive, SeverityLevel
 
+# ── Core: streaming ─────────────────────────────────────────────────
+from .streaming import StreamingPrimitive
+
 # ── Core: testing ───────────────────────────────────────────────────────
 from .testing.mocks import MockPrimitive
 
@@ -99,6 +102,8 @@ __all__ = [
     "UniversalLLMPrimitive",
     # Testing primitives
     "MockPrimitive",
+    # Streaming primitives
+    "StreamingPrimitive",
     # Code graph primitives
     "CodeGraphPrimitive",
     "CodeGraphQuery",
