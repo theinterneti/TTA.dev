@@ -956,10 +956,7 @@ class ControlPlaneService:
         in RUNNING state.  If (unexpectedly) multiple steps are RUNNING,
         the one with the highest ``step_index`` is returned.
         """
-        self._sweep_expired_leases()
-        task = self._store.get_task(task_id)
-        if task is None:
-            raise TaskNotFoundError(f"Task not found: {task_id}")
+        task = self.get_task(task_id)
         if task.workflow is None:
             raise ControlPlaneError(f"Task {task_id} has no workflow")
 
@@ -977,7 +974,9 @@ class ControlPlaneService:
         else:
             duration_s = None
 
-        pending_gate_ids = [gate.id for gate in task.gates if gate.status == GateStatus.PENDING]
+        pending_gate_ids = tuple(
+            gate.id for gate in task.gates if gate.status == GateStatus.PENDING
+        )
 
         return ActiveStepInfo(
             task_id=task_id,

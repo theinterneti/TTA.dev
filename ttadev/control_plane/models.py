@@ -570,7 +570,7 @@ class ActiveStepInfo:
     """Wall-clock seconds since started_at; None if started_at is absent."""
     trace_id: str | None
     span_id: str | None
-    pending_gate_ids: list[str]
+    pending_gate_ids: tuple[str, ...]
     """IDs of GateRecord entries in PENDING state linked to this task."""
 
 
