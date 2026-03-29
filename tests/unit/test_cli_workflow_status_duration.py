@@ -86,6 +86,17 @@ def test_fmt_step_duration_completed_missing_timestamp() -> None:
     assert _fmt_step_duration(step) == "-"
 
 
+def test_fmt_step_duration_completed_missing_completed_at() -> None:
+    """COMPLETED step with completed_at=None returns '-'."""
+    started = datetime.now(UTC).isoformat()
+    step = _make_step(
+        status=WorkflowStepStatus.COMPLETED,
+        started_at=started,
+        completed_at=None,
+    )
+    assert _fmt_step_duration(step) == "-"
+
+
 def test_fmt_step_duration_pending() -> None:
     """PENDING step returns '-'."""
     step = _make_step(status=WorkflowStepStatus.PENDING)
