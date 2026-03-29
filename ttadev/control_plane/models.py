@@ -557,6 +557,23 @@ class LockRecord:
         )
 
 
+@dataclass(frozen=True)
+class ActiveStepInfo:
+    """Read-only view of the currently-running workflow step."""
+
+    task_id: str
+    step_index: int
+    agent_name: str
+    started_at: str | None
+    """ISO-8601 timestamp when the step transitioned to RUNNING."""
+    duration_s: float | None
+    """Wall-clock seconds since started_at; None if started_at is absent."""
+    trace_id: str | None
+    span_id: str | None
+    pending_gate_ids: list[str]
+    """IDs of GateRecord entries in PENDING state linked to this task."""
+
+
 @dataclass
 class ClaimResult:
     """Composite result from claiming a task."""

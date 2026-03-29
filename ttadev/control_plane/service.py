@@ -9,6 +9,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from ttadev.control_plane.models import (
+    ActiveStepInfo,
     ClaimResult,
     GateHistoryAction,
     GateHistoryEntry,
@@ -946,6 +947,48 @@ class ControlPlaneService:
         if task is None:
             raise TaskNotFoundError(f"Task not found: {task_id}")
         return task
+
+    def explain_active_step(self, task_id: str) -> ActiveStepInfo | None:
+        """Return a read-only view of the currently-running workflow step.
+
+        Raises ``ControlPlaneError`` if the task is not found or has no
+        associated workflow.  Returns ``None`` when no step is currently
+        in RUNNING state.  If (unexpectedly) multiple steps are RUNNING,
+        the one with the highest ``step_index`` is returned.
+        """
+        self._sweep_expired_leases()
+        task = self._store.get_task(task_id)
+        if task is None:
+            raise TaskNotFoundError(f"Task not found: {task_id}")
+        if task.workflow is None:
+            raise ControlPlaneError(f"Task {task_id} has no workflow")
+
+        running_steps = [
+            step for step in task.workflow.steps if step.status == WorkflowStepStatus.RUNNING
+        ]
+        if not running_steps:
+            return None
+
+        step = max(running_steps, key=lambda s: s.step_index)
+
+        started_at = step.started_at
+        if started_at is not None:
+            duration_s = (self._now() - self._parse_dt(started_at)).total_seconds()
+        else:
+            duration_s = None
+
+        pending_gate_ids = [gate.id for gate in task.gates if gate.status == GateStatus.PENDING]
+
+        return ActiveStepInfo(
+            task_id=task_id,
+            step_index=step.step_index,
+            agent_name=step.agent_name,
+            started_at=started_at,
+            duration_s=duration_s,
+            trace_id=step.trace_id,
+            span_id=step.span_id,
+            pending_gate_ids=pending_gate_ids,
+        )
 
     def list_runs(self, *, status: RunStatus | None = None) -> list[RunRecord]:
         self._sweep_expired_leases()

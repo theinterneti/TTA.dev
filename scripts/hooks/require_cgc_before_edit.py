@@ -63,7 +63,18 @@ def _is_core_file(file_path: str, cwd: str) -> bool:
 
 
 def _cgc_oriented(session_id: str) -> bool:
-    return _flag_path(session_id).exists()
+    # Check the specific session first (fast path).
+    if _flag_path(session_id).exists():
+        return True
+    # Sub-agent contexts may use a different session ID for MCP tool calls vs
+    # Edit/Write calls.  Accept orientation if any sibling session in the same
+    # flag dir has been marked — the intent (CGC was called this process tree)
+    # is satisfied.
+    if _FLAG_DIR.is_dir():
+        return any(
+            (entry / "cgc_oriented").exists() for entry in _FLAG_DIR.iterdir() if entry.is_dir()
+        )
+    return False
 
 
 _GUIDANCE = """\
