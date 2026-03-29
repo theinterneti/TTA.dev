@@ -309,3 +309,122 @@ def test_explain_active_step_multiple_running_steps(
     assert result is not None
     assert result.step_index == 2
     assert result.agent_name == "agent-3"
+
+
+# ---------------------------------------------------------------------------
+# OTel auto-stamp tests
+# ---------------------------------------------------------------------------
+
+
+def test_auto_stamp_no_active_span(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """When no OTel span is active, trace_id/span_id on the step remain None."""
+    # Arrange
+    _set_agent(monkeypatch)
+    service = _make_service(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="wf",
+        workflow_goal="goal",
+        step_agents=["agent-a"],
+    )
+    task_id = claim.run.task_id
+
+    # Act — no OTel context active
+    task = service.mark_workflow_step_running(task_id, step_index=0)
+
+    # Assert
+    step = task.workflow.steps[0]  # type: ignore[union-attr]
+    assert step.trace_id is None
+    assert step.span_id is None
+
+
+def test_auto_stamp_with_active_span(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """When an active OTel span exists, trace_id/span_id are auto-stamped."""
+    from opentelemetry.sdk.trace import TracerProvider
+
+    # Arrange
+    _set_agent(monkeypatch)
+    service = _make_service(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="wf",
+        workflow_goal="goal",
+        step_agents=["agent-b"],
+    )
+    task_id = claim.run.task_id
+
+    provider = TracerProvider()
+    tracer = provider.get_tracer("test")
+    with tracer.start_as_current_span("test-span") as span:
+        ctx = span.get_span_context()
+        task = service.mark_workflow_step_running(task_id, step_index=0)
+
+    # Assert
+    step = task.workflow.steps[0]  # type: ignore[union-attr]
+    assert step.trace_id == format(ctx.trace_id, "032x")
+    assert step.span_id == format(ctx.span_id, "016x")
+
+
+def test_auto_stamp_explicit_values_not_overridden(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Explicit trace_id/span_id are preserved even when an OTel span is active."""
+    from opentelemetry.sdk.trace import TracerProvider
+
+    # Arrange
+    _set_agent(monkeypatch)
+    service = _make_service(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="wf",
+        workflow_goal="goal",
+        step_agents=["agent-c"],
+    )
+    task_id = claim.run.task_id
+
+    explicit_trace = "aabbccdd" * 4
+    explicit_span = "ddeeff00" * 2
+
+    provider = TracerProvider()
+    tracer = provider.get_tracer("test")
+    with tracer.start_as_current_span("test-span"):
+        task = service.mark_workflow_step_running(
+            task_id,
+            step_index=0,
+            trace_id=explicit_trace,
+            span_id=explicit_span,
+        )
+
+    # Assert — caller-supplied values win
+    step = task.workflow.steps[0]  # type: ignore[union-attr]
+    assert step.trace_id == explicit_trace
+    assert step.span_id == explicit_span
+
+
+def test_auto_stamp_only_trace_id_set(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """When only trace_id is supplied (span_id=None), auto-stamp does NOT fire."""
+    from opentelemetry.sdk.trace import TracerProvider
+
+    # Arrange
+    _set_agent(monkeypatch)
+    service = _make_service(tmp_path)
+    claim = service.start_tracked_workflow(
+        workflow_name="wf",
+        workflow_goal="goal",
+        step_agents=["agent-d"],
+    )
+    task_id = claim.run.task_id
+
+    caller_trace = "ccddee" * 5 + "aabb"
+
+    provider = TracerProvider()
+    tracer = provider.get_tracer("test")
+    with tracer.start_as_current_span("test-span"):
+        task = service.mark_workflow_step_running(
+            task_id,
+            step_index=0,
+            trace_id=caller_trace,
+            # span_id omitted → defaults to None
+        )
+
+    # Assert — only trace_id is set; auto-stamp condition (both None) was not met
+    step = task.workflow.steps[0]  # type: ignore[union-attr]
+    assert step.trace_id == caller_trace
+    assert step.span_id is None

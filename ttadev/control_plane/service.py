@@ -36,6 +36,17 @@ from ttadev.observability.project_session import ProjectSessionManager
 from ttadev.observability.session_manager import Session, SessionManager
 
 
+def _get_active_otel_context() -> tuple[str | None, str | None]:
+    """Return (trace_id_hex, span_id_hex) from the current OTel span, or (None, None)."""
+    from opentelemetry import trace as _otel_trace  # local import to avoid cost at import time
+
+    span = _otel_trace.get_current_span()
+    ctx = span.get_span_context()
+    if ctx is None or not ctx.is_valid:
+        return None, None
+    return format(ctx.trace_id, "032x"), format(ctx.span_id, "016x")
+
+
 class ControlPlaneError(Exception):
     """Base control-plane error."""
 
@@ -739,6 +750,8 @@ class ControlPlaneService:
         step.started_at = now_iso
         step.completed_at = None
         step.attempts += 1
+        if trace_id is None and span_id is None:
+            trace_id, span_id = _get_active_otel_context()
         step.trace_id = trace_id
         step.span_id = span_id
         task.updated_at = now_iso
