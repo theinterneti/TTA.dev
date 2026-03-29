@@ -134,6 +134,24 @@ run ledger, or lease model in another package. Extend this L0 surface.
 3. strengthen ownership and telemetry attribution so active workflow steps can be explained clearly
 4. connect more agent-facing surfaces to the existing L0 state instead of creating parallel coordination systems
 
+## Hindsight Memory
+
+Hindsight MCP server is available at `http://localhost:8888/mcp/`. Use it deliberately.
+
+**Session start** — before any non-trivial task:
+1. Recall from `adam-global` (cross-project directives and user preferences)
+2. Recall from `tta-dev` (TTA.dev architecture, decisions, known failures, patterns)
+
+**During work** — after completing significant tasks:
+- Retain cross-project patterns → `adam-global`
+- Retain TTA.dev-specific decisions, failures, and patterns → `tta-dev`
+
+**Rules:**
+- Use `document_id` for evolving notes (same ID = upsert, prevents duplicates)
+- Include a `context` label when retaining
+- Never retain secrets, tokens, or credentials
+- If Hindsight is unavailable, say so and continue without pretending recall happened
+
 ## Documentation
 
 - [AGENTS.md](../AGENTS.md) - Quick reference for agents
