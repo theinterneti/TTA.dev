@@ -54,6 +54,9 @@ from .recovery.fallback import FallbackPrimitive
 from .recovery.retry import RetryPrimitive, RetryStrategy
 from .recovery.timeout import TimeoutPrimitive
 
+# ── Core: safety ────────────────────────────────────────────────────
+from .safety import SafetyGateEscalatedError, SafetyGatePrimitive, SeverityLevel
+
 # ── Core: testing ───────────────────────────────────────────────────────
 from .testing.mocks import MockPrimitive
 
@@ -74,6 +77,10 @@ __all__ = [
     "MergeStrategy",
     # Performance primitives
     "CachePrimitive",
+    # Safety primitives
+    "SafetyGatePrimitive",
+    "SafetyGateEscalatedError",
+    "SeverityLevel",
     # Recovery primitives
     "CompensationPrimitive",
     "CompensationStrategy",
