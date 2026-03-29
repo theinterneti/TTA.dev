@@ -36,6 +36,9 @@ from .core.parallel import ParallelPrimitive
 from .core.routing import RouterPrimitive
 from .core.sequential import SequentialPrimitive
 
+# ── LLM primitives (runtime provider abstraction) ───────────────────────
+from .llm import LLMProvider, LLMRequest, LLMResponse, UniversalLLMPrimitive
+
 # ── Memory (Hindsight / AgentMemory) ─────────────────────────────────────
 from .memory import AgentMemory, HindsightClient, MemoryResult, RetainResult
 
@@ -82,6 +85,11 @@ __all__ = [
     "AbstractRepository",
     "AbstractUnitOfWork",
     "FakeUnitOfWork",
+    # LLM primitives
+    "LLMProvider",
+    "LLMRequest",
+    "LLMResponse",
+    "UniversalLLMPrimitive",
     # Testing primitives
     "MockPrimitive",
     # Code graph primitives
