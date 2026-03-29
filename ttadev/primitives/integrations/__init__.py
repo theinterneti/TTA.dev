@@ -83,6 +83,17 @@ except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK 
 
 from ttadev.primitives.integrations.together_ai_primitive import TogetherAIPrimitive
 
+try:  # Optional dependency: langgraph
+    from ttadev.primitives.integrations.langgraph_primitive import LangGraphPrimitive
+except (
+    ImportError,
+    ModuleNotFoundError,
+) as exc:  # pragma: no cover - executed only when SDK missing
+    if "langgraph" in str(exc):
+        LangGraphPrimitive = None  # type: ignore[assignment]
+    else:
+        raise
+
 __all__ = [
     "OpenAIPrimitive",
     "AnthropicPrimitive",
@@ -96,4 +107,5 @@ __all__ = [
     "SQLitePrimitive",
     "CodeExecutionPrimitive",
     "E2BPrimitive",
+    "LangGraphPrimitive",
 ]

@@ -60,6 +60,15 @@ from .safety import SafetyGateEscalatedError, SafetyGatePrimitive, SeverityLevel
 # ── Core: streaming ─────────────────────────────────────────────────
 from .streaming import StreamingPrimitive
 
+# ── Integrations: LangGraph ──────────────────────────────────────────────────
+try:
+    from .integrations.langgraph_primitive import LangGraphPrimitive
+except (ImportError, ModuleNotFoundError) as _e:
+    if "langgraph" in str(_e):
+        LangGraphPrimitive = None  # type: ignore[assignment]
+    else:
+        raise
+
 # ── Core: testing ───────────────────────────────────────────────────────
 from .testing.mocks import MockPrimitive
 
@@ -104,6 +113,8 @@ __all__ = [
     "MockPrimitive",
     # Streaming primitives
     "StreamingPrimitive",
+    # LangGraph integration
+    "LangGraphPrimitive",
     # Code graph primitives
     "CodeGraphPrimitive",
     "CodeGraphQuery",

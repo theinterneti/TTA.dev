@@ -1486,6 +1486,131 @@
       ]
     },
     {
+      "moduleId": "tests/primitives/integrations/test_langgraph_primitive.py",
+      "tests": [
+        {
+          "name": "test_raises_import_error_when_langgraph_missing",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestLangGraphPrimitiveConstruction::test_raises_import_error_when_langgraph_missing",
+          "state": "passed"
+        },
+        {
+          "name": "test_is_workflow_primitive_subclass",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestLangGraphPrimitiveConstruction::test_is_workflow_primitive_subclass",
+          "state": "passed"
+        },
+        {
+          "name": "test_default_name_is_class_name",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestLangGraphPrimitiveConstruction::test_default_name_is_class_name",
+          "state": "passed"
+        },
+        {
+          "name": "test_custom_name_stored",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestLangGraphPrimitiveConstruction::test_custom_name_stored",
+          "state": "passed"
+        },
+        {
+          "name": "test_base_config_stored",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestLangGraphPrimitiveConstruction::test_base_config_stored",
+          "state": "passed"
+        },
+        {
+          "name": "test_injects_workflow_id",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestBuildConfig::test_injects_workflow_id",
+          "state": "passed"
+        },
+        {
+          "name": "test_injects_session_id_when_present",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestBuildConfig::test_injects_session_id_when_present",
+          "state": "passed"
+        },
+        {
+          "name": "test_injects_trace_id_when_present",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestBuildConfig::test_injects_trace_id_when_present",
+          "state": "passed"
+        },
+        {
+          "name": "test_merges_with_base_config",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestBuildConfig::test_merges_with_base_config",
+          "state": "passed"
+        },
+        {
+          "name": "test_base_metadata_and_ctx_metadata_are_merged",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestBuildConfig::test_base_metadata_and_ctx_metadata_are_merged",
+          "state": "passed"
+        },
+        {
+          "name": "test_calls_ainvoke_with_input",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestExecute::test_calls_ainvoke_with_input",
+          "state": "passed"
+        },
+        {
+          "name": "test_injects_context_into_config",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestExecute::test_injects_context_into_config",
+          "state": "passed"
+        },
+        {
+          "name": "test_returns_ainvoke_result",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestExecute::test_returns_ainvoke_result",
+          "state": "passed"
+        },
+        {
+          "name": "test_propagates_ainvoke_exception",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestExecute::test_propagates_ainvoke_exception",
+          "state": "passed"
+        },
+        {
+          "name": "test_chains_with_double_arrow",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestExecute::test_chains_with_double_arrow",
+          "state": "passed"
+        },
+        {
+          "name": "test_yields_chunks_from_astream",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestStreamOutput::test_yields_chunks_from_astream",
+          "state": "passed"
+        },
+        {
+          "name": "test_empty_stream_yields_nothing",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestStreamOutput::test_empty_stream_yields_nothing",
+          "state": "passed"
+        },
+        {
+          "name": "test_injects_context_into_astream_config",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestStreamOutput::test_injects_context_into_astream_config",
+          "state": "passed"
+        },
+        {
+          "name": "test_propagates_astream_exception",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestStreamOutput::test_propagates_astream_exception",
+          "state": "passed"
+        },
+        {
+          "name": "test_execute_creates_otel_span",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestOTelTracing::test_execute_creates_otel_span",
+          "state": "passed"
+        },
+        {
+          "name": "test_execute_records_error_on_span",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestOTelTracing::test_execute_records_error_on_span",
+          "state": "passed"
+        },
+        {
+          "name": "test_stream_output_creates_otel_span",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestOTelTracing::test_stream_output_creates_otel_span",
+          "state": "passed"
+        },
+        {
+          "name": "test_no_otel_span_when_tracing_unavailable",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestOTelTracing::test_no_otel_span_when_tracing_unavailable",
+          "state": "passed"
+        },
+        {
+          "name": "test_langgraph_primitive_is_none_in_integrations_init_when_missing",
+          "fullName": "tests/primitives/integrations/test_langgraph_primitive.py::TestImportGuard::test_langgraph_primitive_is_none_in_integrations_init_when_missing",
+          "state": "passed"
+        }
+      ]
+    },
+    {
       "moduleId": "tests/primitives/llm/test_universal_llm_primitive.py",
       "tests": [
         {
