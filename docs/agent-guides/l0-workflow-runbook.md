@@ -232,6 +232,43 @@ After this:
 
 ---
 
+## Escalation Path (ESCALATE_TO_HUMAN)
+
+When an agent determines that a workflow step needs human review before
+proceeding, it records `ESCALATE_TO_HUMAN` as the gate outcome:
+
+```bash
+# MCP tool call
+control_record_workflow_gate_outcome(
+    task_id="task_abc",
+    step_index=0,
+    decision="escalate_to_human",
+    summary="Confidence 0.45 — below threshold for autonomous continuation",
+)
+```
+
+This pauses the workflow (`status = ESCALATED`) without advancing to the next step.
+
+The developer reviews the situation:
+```bash
+tta control workflow status <task_id>
+tta control gate list <task_id>
+```
+
+To resume, approve the linked step gate:
+```bash
+tta control gate approve <task_id> <gate_id> --note "Reviewed — looks good"
+```
+
+The workflow returns to `RUNNING` and the agent can continue from where it paused.
+
+**Known gap:** If a human rejects (rather than approves) the gate on an escalated
+workflow, the workflow remains `ESCALATED`. There is no automated path to resolve
+a rejected escalation — it requires manual intervention (direct store update or
+task force-quit). This will be addressed in a future iteration.
+
+---
+
 ## MCP ↔ CLI tool mapping
 
 | Action | MCP Tool | CLI equivalent |
@@ -252,10 +289,12 @@ After this:
 
 ## Known gaps (future work)
 
-| Gap | Impact |
-|-----|--------|
-| `workflow.status` does not auto-transition to `COMPLETED` when all steps finish | `task show` displays `RUNNING` even after both steps complete; task status is correctly `COMPLETED` |
-| No `tta control gate approve/reject` CLI command | Human gate decisions require direct MCP calls |
-| No `tta control workflow status` command | Status inspection requires `task show` |
+| Gap | Status | Impact |
+|-----|--------|--------|
+| Rejected escalation leaves workflow stuck in `ESCALATED` | Open (M4) | Workflow remains paused indefinitely; requires manual intervention (direct store update or force-quit) to recover |
 
-These are tracked as L0 phase-2 priorities.
+**M3 Resolutions:**
+- ✓ `ESCALATE_TO_HUMAN` gate outcome — now implemented
+- ✓ Abandoned workflow detection — implemented via `expire_abandoned_workflows()`
+- ✓ Orphaned step cleanup — implemented via `cleanup_orphaned_steps()`
+- ✓ MCP tool specs — published at `docs/mcp-tool-specs.md`

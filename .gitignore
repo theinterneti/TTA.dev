@@ -238,3 +238,6 @@ templates/
 mcp.json
 .superpowers/
 .worktrees/
+
+# Static analysis raw output
+static_analysis_semgrep_1/

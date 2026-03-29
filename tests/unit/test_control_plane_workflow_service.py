@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 from ttadev.control_plane import ControlPlaneService
 from ttadev.control_plane.models import (
+    GateStatus,
     RunStatus,
     TaskRecord,
     WorkflowGateDecisionOutcome,
+    WorkflowStepStatus,
     WorkflowTrackingStatus,
 )
 
@@ -150,3 +153,148 @@ def test_quit_tracked_workflow_releases_run_without_gate_completion(tmp_path: Pa
     assert persisted_task.status.value == "pending"
     assert persisted_task.workflow is not None
     assert persisted_task.workflow.status == WorkflowTrackingStatus.QUIT
+
+
+def test_escalate_to_human_is_a_valid_gate_outcome() -> None:
+    """ESCALATE_TO_HUMAN gate outcome enum value exists."""
+    assert WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN is not None
+    assert WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN.value == "escalate_to_human"
+
+
+def test_escalated_is_a_valid_workflow_status() -> None:
+    """ESCALATED workflow status enum value exists."""
+    assert WorkflowTrackingStatus.ESCALATED is not None
+    assert WorkflowTrackingStatus.ESCALATED.value == "escalated"
+
+
+async def test_escalate_to_human_pauses_workflow(tmp_path: Path) -> None:
+    """ESCALATE_TO_HUMAN gate outcome pauses the workflow without advancing the step."""
+    # Arrange
+    svc = ControlPlaneService(data_dir=tmp_path)
+    claim = svc.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="test escalation",
+        step_agents=["agent-a", "agent-b"],
+    )
+    task_id = claim.task.id
+
+    svc.mark_workflow_step_running(task_id, step_index=0)
+    svc.record_workflow_step_result(task_id, step_index=0, result_summary="done", confidence=0.5)
+
+    # Act — record ESCALATE_TO_HUMAN outcome
+    task = svc.record_workflow_gate_outcome(
+        task_id,
+        step_index=0,
+        decision=WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN,
+        summary="Low confidence — needs human review",
+    )
+
+    # Assert — workflow is paused, not advanced
+    assert task.workflow is not None
+    assert task.workflow.status == WorkflowTrackingStatus.ESCALATED
+    assert task.workflow.steps[0].status == WorkflowStepStatus.RUNNING
+    # Step 1 has NOT started
+    assert task.workflow.steps[1].status == WorkflowStepStatus.PENDING
+
+
+async def test_workflow_resumes_after_human_approves_escalated_gate(tmp_path: Path) -> None:
+    """Workflow status returns to RUNNING when a human approves the gate after escalation."""
+    # Arrange
+    svc = ControlPlaneService(data_dir=tmp_path)
+    claim = svc.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="test escalation resume",
+        step_agents=["agent-a", "agent-b"],
+    )
+    task_id = claim.task.id
+
+    svc.mark_workflow_step_running(task_id, step_index=0)
+    svc.record_workflow_step_result(task_id, step_index=0, result_summary="done", confidence=0.5)
+    svc.record_workflow_gate_outcome(
+        task_id,
+        step_index=0,
+        decision=WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN,
+        summary="needs human",
+    )
+
+    # Act — human approves via the standard gate mechanism
+    task = svc.get_task(task_id)
+    assert task.workflow is not None
+    gate_id = task.workflow.steps[0].linked_gate_id
+    assert gate_id is not None  # narrow str | None → str for type checker
+    task = svc.decide_gate(
+        task_id,
+        gate_id,
+        status=GateStatus.APPROVED,
+        decided_by="human-reviewer",
+        summary="Looks good",
+    )
+
+    # Assert — workflow status restored to RUNNING after human approval; step still RUNNING
+    assert task.workflow is not None
+    assert task.workflow.status == WorkflowTrackingStatus.RUNNING
+    assert task.workflow.steps[0].status == WorkflowStepStatus.RUNNING
+
+
+async def test_expire_abandoned_workflow_marks_step_and_workflow_failed(tmp_path: Path) -> None:
+    # Arrange
+    svc = ControlPlaneService(data_dir=tmp_path)
+    claim = svc.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="test abandonment",
+        step_agents=["agent-a"],
+        lease_ttl_seconds=0.01,
+    )
+    task_id = claim.task.id
+
+    svc.mark_workflow_step_running(task_id, step_index=0)
+
+    # Wait for lease to expire
+    await asyncio.sleep(0.05)
+
+    # Act — expire abandoned workflows
+    affected = svc.expire_abandoned_workflows()
+
+    # Assert
+    assert task_id in affected
+    task = svc.get_task(task_id)
+    assert task is not None
+    assert task.workflow is not None
+    assert task.workflow.status == WorkflowTrackingStatus.FAILED
+    assert task.workflow.steps[0].status == WorkflowStepStatus.FAILED
+
+
+def test_cleanup_orphaned_steps_marks_running_steps_failed_when_workflow_terminated(
+    tmp_path: Path,
+) -> None:
+    # Arrange
+    svc = ControlPlaneService(data_dir=tmp_path)
+    claim = svc.start_tracked_workflow(
+        workflow_name="test-wf",
+        workflow_goal="test orphan cleanup",
+        step_agents=["agent-a", "agent-b"],
+    )
+    task_id = claim.task.id
+
+    # Manually force the workflow to QUIT while step 0 is still RUNNING
+    svc.mark_workflow_step_running(task_id, step_index=0)
+
+    # Simulate a crash that leaves the workflow in an inconsistent state:
+    # workflow QUIT but step still RUNNING. This state is only reachable via
+    # a process crash or external store mutation — intentional use of _store
+    # here to create the precondition for recovery code testing.
+    task = svc.get_task(task_id)
+    assert task is not None
+    assert task.workflow is not None
+    task.workflow.status = WorkflowTrackingStatus.QUIT
+    svc._store.put_task(task)
+
+    # Act
+    cleaned = svc.cleanup_orphaned_steps(task_id)
+
+    # Assert
+    assert cleaned > 0
+    task = svc.get_task(task_id)
+    assert task is not None
+    assert task.workflow is not None
+    assert task.workflow.steps[0].status == WorkflowStepStatus.FAILED

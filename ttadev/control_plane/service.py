@@ -666,6 +666,7 @@ class ControlPlaneService:
         step_agents: list[str],
         project_name: str | None = None,
         extra_gates: list[dict[str, Any]] | None = None,
+        lease_ttl_seconds: float = 300.0,
     ) -> ClaimResult:
         """Create and claim one top-level task for a tracked workflow run.
 
@@ -715,7 +716,79 @@ class ControlPlaneService:
         )
         stored_task.updated_at = self._now_iso()
         self._store.put_task(stored_task)
-        return self.claim_task(stored_task.id, agent_role="workflow-orchestrator")
+        return self.claim_task(
+            stored_task.id,
+            agent_role="workflow-orchestrator",
+            lease_ttl_seconds=lease_ttl_seconds,
+        )
+
+    def expire_abandoned_workflows(self) -> list[str]:
+        """Find workflows whose active run lease has expired and mark them FAILED.
+
+        Returns list of task IDs that were transitioned to FAILED.
+        Call periodically (e.g., on session start or via a background process).
+        """
+        from datetime import datetime
+
+        now = datetime.now(UTC)
+        affected: list[str] = []
+
+        for task in self._store.list_tasks():
+            if task.workflow is None:
+                continue
+            if task.workflow.status != WorkflowTrackingStatus.RUNNING:
+                continue
+            if task.active_run_id is None:
+                continue  # no active run — cleanly released, not abandoned
+
+            lease = self._store.get_lease_for_run(task.active_run_id)
+            if lease is None:
+                continue  # no lease record — can't determine expiry
+            lease_expires_at = datetime.fromisoformat(lease.expires_at)
+            if lease_expires_at.tzinfo is None:
+                lease_expires_at = lease_expires_at.replace(tzinfo=UTC)
+            if lease_expires_at > now:
+                continue  # lease still valid
+
+            # Lease expired — mark current running step as FAILED
+            current_step_idx = task.workflow.current_step_index
+            if current_step_idx is not None:
+                step = task.workflow.steps[current_step_idx]
+                if step.status == WorkflowStepStatus.RUNNING:
+                    step.status = WorkflowStepStatus.FAILED
+
+            task.workflow.status = WorkflowTrackingStatus.FAILED
+            self._store.put_task(task)
+            affected.append(task.id)
+
+        return affected
+
+    def cleanup_orphaned_steps(self, task_id: str) -> int:
+        """Mark any RUNNING steps as FAILED for a terminated workflow.
+
+        Use when a workflow is QUIT/FAILED but steps were not cleanly transitioned.
+        Returns count of steps cleaned up.
+        """
+        task = self._store.get_task(task_id)
+        if task is None:
+            raise TaskNotFoundError(f"Task not found: {task_id}")
+        if task.workflow is None:
+            return 0
+
+        terminal_statuses = {WorkflowTrackingStatus.QUIT, WorkflowTrackingStatus.FAILED}
+        if task.workflow.status not in terminal_statuses:
+            return 0
+
+        cleaned = 0
+        for step in task.workflow.steps:
+            if step.status == WorkflowStepStatus.RUNNING:
+                step.status = WorkflowStepStatus.FAILED
+                cleaned += 1
+
+        if cleaned > 0:
+            self._store.put_task(task)
+
+        return cleaned
 
     def mark_workflow_step_running(
         self,
@@ -844,6 +917,14 @@ class ControlPlaneService:
             step.status = WorkflowStepStatus.QUIT
             step.completed_at = now_iso
             workflow.status = WorkflowTrackingStatus.QUIT
+            workflow.current_step_index = step_index
+            workflow.current_agent = step.agent_name
+        elif decision == WorkflowGateDecisionOutcome.ESCALATE_TO_HUMAN:
+            # Pause the workflow — do not advance to the next step.
+            # The step remains RUNNING until a human approves the linked gate.
+            step.status = WorkflowStepStatus.RUNNING
+            step.completed_at = None
+            workflow.status = WorkflowTrackingStatus.ESCALATED
             workflow.current_step_index = step_index
             workflow.current_agent = step.agent_name
 
@@ -1178,6 +1259,15 @@ class ControlPlaneService:
         gate.decided_at = now_iso
         gate.decided_by = effective_decider
         gate.summary = summary or None
+
+        # If a human approves a gate on an escalated workflow, restore workflow to RUNNING.
+        if (
+            task.workflow is not None
+            and task.workflow.status == WorkflowTrackingStatus.ESCALATED
+            and status == GateStatus.APPROVED
+        ):
+            task.workflow.status = WorkflowTrackingStatus.RUNNING
+
         task.updated_at = now_iso
         self._store.put_task(task)
         return task
