@@ -243,14 +243,18 @@ async def test_expire_abandoned_workflow_marks_step_and_workflow_failed(tmp_path
         workflow_name="test-wf",
         workflow_goal="test abandonment",
         step_agents=["agent-a"],
-        lease_ttl_seconds=0.01,
+        # Use 0.3s TTL (not 10ms) so the lease is still valid when
+        # mark_workflow_step_running calls _sweep_expired_leases, even on
+        # Windows where CI job scheduling can add ~100ms of latency between
+        # Python statements.
+        lease_ttl_seconds=0.3,
     )
     task_id = claim.task.id
 
     svc.mark_workflow_step_running(task_id, step_index=0)
 
-    # Wait for lease to expire
-    await asyncio.sleep(0.05)
+    # Wait for lease to expire (0.3s TTL + 0.3s headroom for Windows ~15ms timer)
+    await asyncio.sleep(0.6)
 
     # Act — expire abandoned workflows
     affected = svc.expire_abandoned_workflows()
