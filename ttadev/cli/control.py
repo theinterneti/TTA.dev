@@ -202,6 +202,12 @@ def register_control_subcommands(sub: argparse._SubParsersAction) -> None:  # ty
         help="Ordered comma-separated agent names (e.g. architect,backend-engineer,reviewer)",
     )
     workflow_start.add_argument(
+        "--task-id",
+        dest="existing_task_id",
+        default=None,
+        help="Attach workflow tracking to an existing task instead of creating a new one",
+    )
+    workflow_start.add_argument(
         "--project",
         dest="project_name",
         default=None,
@@ -233,6 +239,47 @@ def register_control_subcommands(sub: argparse._SubParsersAction) -> None:  # ty
         "explain", help="Explain the active step of a tracked workflow"
     )
     workflow_explain.add_argument("task_id", help="Task ID")
+
+    workflow_step_p = workflow_sub.add_parser("step", help="Advance a tracked workflow step")
+    workflow_step_sub = workflow_step_p.add_subparsers(dest="control_workflow_step_command")
+
+    wf_step_start = workflow_step_sub.add_parser("start", help="Mark a workflow step as running")
+    wf_step_start.add_argument("task_id", help="Task ID")
+    wf_step_start.add_argument("step_index", type=int, help="Zero-based step index")
+    wf_step_start.add_argument("--trace-id", default=None, help="Optional OTel trace ID")
+    wf_step_start.add_argument("--span-id", default=None, help="Optional OTel span ID")
+
+    wf_step_done = workflow_step_sub.add_parser(
+        "done", help="Mark a workflow step as completed with a result"
+    )
+    wf_step_done.add_argument("task_id", help="Task ID")
+    wf_step_done.add_argument("step_index", type=int, help="Zero-based step index")
+    wf_step_done.add_argument("--result", required=True, help="Short result summary")
+    wf_step_done.add_argument(
+        "--confidence",
+        type=float,
+        default=1.0,
+        help="Confidence score 0.0–1.0 (default 1.0)",
+    )
+
+    wf_step_fail = workflow_step_sub.add_parser("fail", help="Mark a workflow step as failed")
+    wf_step_fail.add_argument("task_id", help="Task ID")
+    wf_step_fail.add_argument("step_index", type=int, help="Zero-based step index")
+    wf_step_fail.add_argument("--error", required=True, help="Short error summary")
+
+    wf_step_gate = workflow_step_sub.add_parser(
+        "gate", help="Record a gate outcome for a workflow step"
+    )
+    wf_step_gate.add_argument("task_id", help="Task ID")
+    wf_step_gate.add_argument("step_index", type=int, help="Zero-based step index")
+    wf_step_gate.add_argument(
+        "--decision",
+        required=True,
+        choices=[o.value for o in WorkflowGateDecisionOutcome],
+        help="Gate outcome: continue | skip | edit | quit | escalate_to_human",
+    )
+    wf_step_gate.add_argument("--summary", default="", help="Optional decision summary")
+    wf_step_gate.add_argument("--policy-name", default=None, help="Policy name if auto-evaluated")
 
     gate_p = control_sub.add_parser("gate", help="Inspect and decide control-plane gates")
     gate_sub = gate_p.add_subparsers(dest="control_gate_command")
@@ -539,13 +586,24 @@ def _handle_workflow_command(args: argparse.Namespace, service: ControlPlaneServ
 
         extra_gates = [_parse_policy_gate_spec(spec) for spec in args.policy_gates]
 
-        claim = service.start_tracked_workflow(
-            workflow_name=args.name,
-            workflow_goal=args.goal,
-            step_agents=agents,
-            project_name=args.project_name,
-            extra_gates=extra_gates or None,
-        )
+        if getattr(args, "existing_task_id", None):
+            claim = service.attach_workflow_to_task(
+                args.existing_task_id,
+                workflow_name=args.name,
+                workflow_goal=args.goal,
+                step_agents=agents,
+                extra_gates=extra_gates or None,
+                lease_ttl_seconds=args.ttl,
+            )
+        else:
+            claim = service.start_tracked_workflow(
+                workflow_name=args.name,
+                workflow_goal=args.goal,
+                step_agents=agents,
+                project_name=args.project_name,
+                extra_gates=extra_gates or None,
+                lease_ttl_seconds=args.ttl,
+            )
         print("Workflow started.")
         print(f"  task_id:  {claim.run.task_id}")
         print(f"  run_id:   {claim.run.id}")
@@ -559,7 +617,10 @@ def _handle_workflow_command(args: argparse.Namespace, service: ControlPlaneServ
     if args.control_workflow_command == "explain":
         return _workflow_explain(args, service)
 
-    print("Usage: tta control workflow {start,status,explain}", file=sys.stderr)
+    if args.control_workflow_command == "step":
+        return _handle_workflow_step_command(args, service)
+
+    print("Usage: tta control workflow {start,status,explain,step}", file=sys.stderr)
     return 1
 
 
@@ -647,6 +708,71 @@ def _workflow_explain(args: argparse.Namespace, service: ControlPlaneService) ->
             print(f"  {gate_id}")
 
     return 0
+
+
+def _handle_workflow_step_command(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    """Dispatch ``tta control workflow step`` subcommands."""
+    cmd = getattr(args, "control_workflow_step_command", None)
+
+    if cmd == "start":
+        task = service.mark_workflow_step_running(
+            args.task_id,
+            step_index=args.step_index,
+            trace_id=args.trace_id,
+            span_id=args.span_id,
+        )
+        step = task.workflow.steps[args.step_index]  # type: ignore[union-attr]
+        print(f"Step {args.step_index} started.")
+        print(f"  agent:    {step.agent_name}")
+        print(f"  started:  {step.started_at}")
+        if step.trace_id:
+            print(f"  trace:    {step.trace_id}")
+        return 0
+
+    if cmd == "done":
+        task = service.record_workflow_step_result(
+            args.task_id,
+            step_index=args.step_index,
+            result_summary=args.result,
+            confidence=args.confidence,
+        )
+        step = task.workflow.steps[args.step_index]  # type: ignore[union-attr]
+        print(f"Step {args.step_index} completed.")
+        print(f"  agent:      {step.agent_name}")
+        print(f"  result:     {step.last_result_summary}")
+        print(f"  confidence: {step.last_confidence:.2f}")
+        print(f"  completed:  {step.completed_at}")
+        return 0
+
+    if cmd == "fail":
+        task = service.mark_workflow_step_failed(
+            args.task_id,
+            step_index=args.step_index,
+            error_summary=args.error,
+        )
+        step = task.workflow.steps[args.step_index]  # type: ignore[union-attr]
+        print(f"Step {args.step_index} marked failed.")
+        print(f"  agent:  {step.agent_name}")
+        print(f"  error:  {step.last_result_summary}")
+        return 0
+
+    if cmd == "gate":
+        task = service.record_workflow_gate_outcome(
+            args.task_id,
+            step_index=args.step_index,
+            decision=WorkflowGateDecisionOutcome(args.decision),
+            summary=args.summary,
+            policy_name=args.policy_name,
+        )
+        step = task.workflow.steps[args.step_index]  # type: ignore[union-attr]
+        print(f"Step {args.step_index} gate outcome recorded.")
+        print(f"  decision: {args.decision}")
+        print(f"  step status: {step.status.value}")
+        print(f"  workflow status: {task.workflow.status.value}")  # type: ignore[union-attr]
+        return 0
+
+    print("Usage: tta control workflow step {start,done,fail,gate}", file=sys.stderr)
+    return 1
 
 
 def _parse_gate_spec(spec: str) -> dict[str, str | bool]:

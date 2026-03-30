@@ -751,6 +751,77 @@ class ControlPlaneService:
             lease_ttl_seconds=lease_ttl_seconds,
         )
 
+    def attach_workflow_to_task(
+        self,
+        task_id: str,
+        *,
+        workflow_name: str,
+        workflow_goal: str,
+        step_agents: list[str],
+        extra_gates: list[dict[str, Any]] | None = None,
+        lease_ttl_seconds: float = 300.0,
+    ) -> ClaimResult:
+        """Attach tracked workflow tracking to an *existing* task and claim it.
+
+        Use when a task was already created (with its own gates and metadata) and you
+        want to layer workflow step tracking on top without creating a second task.
+        Raises ``ControlPlaneError`` if the task already has workflow tracking attached.
+        """
+        if not step_agents:
+            raise ControlPlaneError("Tracked workflow must include at least one step")
+
+        task = self.get_task(task_id)
+        if task is None:
+            raise TaskNotFoundError(f"Task not found: {task_id}")
+        if task.workflow is not None:
+            raise ControlPlaneError(f"Task {task_id} already has workflow tracking attached.")
+
+        now_iso = self._now_iso()
+        step_gates: list[dict[str, Any]] = [
+            {
+                "id": self._make_workflow_gate_id(step_index=index, agent_name=agent_name),
+                "gate_type": GateType.APPROVAL.value,
+                "label": f"{workflow_name} step {index + 1}: {agent_name}",
+                "required": False,
+            }
+            for index, agent_name in enumerate(step_agents)
+        ]
+        all_extra = list(step_gates) + (extra_gates or [])
+        for gate_spec in all_extra:
+            new_gate = GateRecord(
+                id=str(gate_spec["id"]),
+                gate_type=GateType(str(gate_spec["gate_type"])),
+                label=str(gate_spec.get("label", gate_spec["id"])),
+                required=bool(gate_spec.get("required", False)),
+            )
+            if task.gates is None:
+                task.gates = []
+            task.gates.append(new_gate)
+
+        task.workflow = WorkflowTrackingRecord(
+            workflow_name=workflow_name,
+            workflow_goal=workflow_goal,
+            total_steps=len(step_agents),
+            steps=[
+                WorkflowStepRecord(
+                    step_index=index,
+                    agent_name=agent_name,
+                    linked_gate_id=self._make_workflow_gate_id(
+                        step_index=index,
+                        agent_name=agent_name,
+                    ),
+                )
+                for index, agent_name in enumerate(step_agents)
+            ],
+        )
+        task.updated_at = now_iso
+        self._store.put_task(task)
+        return self.claim_task(
+            task_id,
+            agent_role="workflow-orchestrator",
+            lease_ttl_seconds=lease_ttl_seconds,
+        )
+
     def expire_abandoned_workflows(self) -> list[str]:
         """Find workflows whose active run lease has expired and mark them FAILED.
 
