@@ -1,6 +1,7 @@
 """L0 developer control-plane primitives for TTA.dev."""
 
 from ttadev.control_plane.models import (
+    ActiveStepInfo,
     ClaimResult,
     GateHistoryAction,
     GateHistoryEntry,
@@ -33,6 +34,7 @@ from ttadev.control_plane.service import (
 )
 
 __all__ = [
+    "ActiveStepInfo",
     "ClaimResult",
     "ControlPlaneError",
     "ControlPlaneService",

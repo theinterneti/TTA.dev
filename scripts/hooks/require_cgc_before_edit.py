@@ -19,6 +19,7 @@ Run via .claude/settings.json hooks.PreToolUse.
 from __future__ import annotations
 
 import os
+import time
 from pathlib import Path
 
 from cchooks import create_context
@@ -38,6 +39,9 @@ CORE_PACKAGES = (
 EDIT_TOOLS = {"Edit", "Write"}
 
 _FLAG_DIR = Path(os.environ.get("TMPDIR", "/tmp")) / "tta_hooks"
+
+# Sibling session flags older than this are considered stale and ignored.
+_SIBLING_FLAG_TTL_SECONDS = 4 * 3600  # 4 hours
 
 
 def _flag_path(session_id: str) -> Path:
@@ -63,7 +67,23 @@ def _is_core_file(file_path: str, cwd: str) -> bool:
 
 
 def _cgc_oriented(session_id: str) -> bool:
-    return _flag_path(session_id).exists()
+    # Check the specific session first (fast path).
+    if _flag_path(session_id).exists():
+        return True
+    # Sub-agent contexts may use a different session ID for MCP tool calls vs
+    # Edit/Write calls.  Accept orientation if any sibling session in the same
+    # flag dir has been marked — the intent (CGC was called this process tree)
+    # is satisfied.  Only accept flags that are fresh enough (< _SIBLING_FLAG_TTL_SECONDS
+    # old) to avoid stale flags from previous days permanently bypassing the gate.
+    if _FLAG_DIR.is_dir():
+        cutoff = time.time() - _SIBLING_FLAG_TTL_SECONDS
+        for entry in _FLAG_DIR.iterdir():
+            if not entry.is_dir():
+                continue
+            flag = entry / "cgc_oriented"
+            if flag.exists() and flag.stat().st_mtime >= cutoff:
+                return True
+    return False
 
 
 _GUIDANCE = """\

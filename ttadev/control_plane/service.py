@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from dataclasses import asdict
 from datetime import UTC, datetime, timedelta
@@ -9,6 +10,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from ttadev.control_plane.models import (
+    ActiveStepInfo,
     ClaimResult,
     GateHistoryAction,
     GateHistoryEntry,
@@ -33,6 +35,33 @@ from ttadev.control_plane.store import ControlPlaneStore
 from ttadev.observability.agent_identity import get_agent_id, get_agent_tool
 from ttadev.observability.project_session import ProjectSessionManager
 from ttadev.observability.session_manager import Session, SessionManager
+
+
+def _get_active_otel_context() -> tuple[str | None, str | None]:
+    """Return (trace_id_hex, span_id_hex) from the current OTel span, or (None, None).
+
+    Falls back to parsing the W3C ``TRACEPARENT`` environment variable when no
+    active span is present (e.g., CLI invocations that inherit a trace from a
+    parent process).
+    """
+    from opentelemetry import trace as _otel_trace  # local import to avoid cost at import time
+
+    span = _otel_trace.get_current_span()
+    ctx = span.get_span_context()
+    if ctx is not None and ctx.is_valid:
+        return format(ctx.trace_id, "032x"), format(ctx.span_id, "016x")
+
+    # Fallback: parse W3C traceparent header from environment.
+    # Format: 00-<trace_id_32hex>-<span_id_16hex>-<flags>
+    traceparent = os.environ.get("TRACEPARENT", "")
+    if traceparent:
+        parts = traceparent.split("-")
+        if len(parts) == 4 and parts[0] == "00":
+            trace_id_hex, span_id_hex = parts[1], parts[2]
+            if len(trace_id_hex) == 32 and len(span_id_hex) == 16:
+                return trace_id_hex, span_id_hex
+
+    return None, None
 
 
 class ControlPlaneError(Exception):
@@ -811,6 +840,8 @@ class ControlPlaneService:
         step.started_at = now_iso
         step.completed_at = None
         step.attempts += 1
+        if trace_id is None and span_id is None:
+            trace_id, span_id = _get_active_otel_context()
         step.trace_id = trace_id
         step.span_id = span_id
         task.updated_at = now_iso
@@ -1027,6 +1058,51 @@ class ControlPlaneService:
         if task is None:
             raise TaskNotFoundError(f"Task not found: {task_id}")
         return task
+
+    def explain_active_step(self, task_id: str) -> ActiveStepInfo | None:
+        """Return a read-only view of the currently-running workflow step.
+
+        Raises ``ControlPlaneError`` if the task is not found or has no
+        associated workflow.  Returns ``None`` when no step is currently
+        in RUNNING state.  If (unexpectedly) multiple steps are RUNNING,
+        the one with the highest ``step_index`` is returned.
+        """
+        task = self.get_task(task_id)
+        if task.workflow is None:
+            raise ControlPlaneError(f"Task {task_id} has no workflow")
+
+        running_steps = [
+            step for step in task.workflow.steps if step.status == WorkflowStepStatus.RUNNING
+        ]
+        if not running_steps:
+            return None
+
+        step = max(running_steps, key=lambda s: s.step_index)
+
+        started_at = step.started_at
+        if started_at is not None:
+            duration_s = (self._now() - self._parse_dt(started_at)).total_seconds()
+        else:
+            duration_s = None
+
+        # Exclude the step's own linked approval gate — it is inherently PENDING
+        # while the step is running and is not an external blocker.
+        pending_gate_ids = tuple(
+            gate.id
+            for gate in task.gates
+            if gate.status == GateStatus.PENDING and gate.id != step.linked_gate_id
+        )
+
+        return ActiveStepInfo(
+            task_id=task_id,
+            step_index=step.step_index,
+            agent_name=step.agent_name,
+            started_at=started_at,
+            duration_s=duration_s,
+            trace_id=step.trace_id,
+            span_id=step.span_id,
+            pending_gate_ids=pending_gate_ids,
+        )
 
     def list_runs(self, *, status: RunStatus | None = None) -> list[RunRecord]:
         self._sweep_expired_leases()
