@@ -14,6 +14,7 @@ def _run(
     repo_root = Path(__file__).resolve().parents[2]
     merged_env = os.environ.copy()
     merged_env["PYTHONPATH"] = f"{repo_root}:{merged_env.get('PYTHONPATH', '')}".rstrip(":")
+    merged_env["PYTHONUTF8"] = "1"  # PEP 540: force UTF-8 stdout on Windows (cp1252 breaks ≥/emoji)
     if env:
         merged_env.update(env)
     return subprocess.run(
