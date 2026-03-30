@@ -29,6 +29,7 @@ def test_public_demo_script_runs_successfully(script_path: str, success_marker: 
         if not existing_pythonpath
         else f"{REPO_ROOT}{os.pathsep}{existing_pythonpath}"
     )
+    env["PYTHONUTF8"] = "1"  # PEP 540: force UTF-8 stdout on Windows (cp1252 breaks emoji)
 
     # Act
     completed = subprocess.run(
@@ -36,6 +37,7 @@ def test_public_demo_script_runs_successfully(script_path: str, success_marker: 
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=20,
         check=False,
         env=env,

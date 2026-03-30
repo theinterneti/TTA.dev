@@ -14,12 +14,14 @@ def _run(
     repo_root = Path(__file__).resolve().parents[2]
     merged_env = os.environ.copy()
     merged_env["PYTHONPATH"] = f"{repo_root}:{merged_env.get('PYTHONPATH', '')}".rstrip(":")
+    merged_env["PYTHONUTF8"] = "1"  # PEP 540: force UTF-8 stdout on Windows (cp1252 breaks ≥/emoji)
     if env:
         merged_env.update(env)
     return subprocess.run(
         [sys.executable, "-m", "ttadev.cli", "--data-dir", str(tmp_path), *args],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         env=merged_env,
         cwd=repo_root,
     )
