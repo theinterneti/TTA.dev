@@ -21,6 +21,7 @@ def _run(
         [sys.executable, "-m", "ttadev.cli", "--data-dir", str(tmp_path), *args],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         env=merged_env,
         cwd=repo_root,
     )

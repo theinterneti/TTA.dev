@@ -37,6 +37,7 @@ def test_public_demo_script_runs_successfully(script_path: str, success_marker: 
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=20,
         check=False,
         env=env,
