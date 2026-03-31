@@ -5,7 +5,9 @@ Exposes TTA.dev analysis and primitive recommendations as MCP tools.
 """
 
 import argparse
+import contextlib
 import sys
+from collections.abc import Generator
 from typing import TYPE_CHECKING, Any
 
 import structlog
@@ -159,6 +161,31 @@ def _control_plane_error_payload(exc: Exception) -> dict[str, str]:
         "error": str(exc),
         "error_type": type(exc).__name__,
     }
+
+
+@contextlib.contextmanager
+def _emit_mcp_span(
+    span_name: str,
+    attributes: dict[str, str] | None = None,
+) -> Generator[Any, None, None]:
+    """Emit an OTel span for an MCP workflow tool call.
+
+    Creates a parent span that wraps the service-layer child spans, forming
+    a complete trace hierarchy in Jaeger when an OTLP exporter is configured.
+    Degrades gracefully (yields None) when OpenTelemetry is unavailable or
+    no TracerProvider is active.
+    """
+    try:
+        from opentelemetry import trace as _otel_trace
+
+        tracer = _otel_trace.get_tracer("ttadev.mcp")
+        with tracer.start_as_current_span(span_name) as span:
+            if attributes:
+                for key, value in attributes.items():
+                    span.set_attribute(key, value)
+            yield span
+    except Exception:
+        yield None
 
 
 def _ensure_project_exists(project_id: str, *, data_dir: str) -> None:
@@ -1252,14 +1279,18 @@ result = await workflow.execute(data, context)
                     }
                     for g in policy_gates
                 ]
-            service = _create_control_plane_service(data_dir)
-            claim = service.start_tracked_workflow(
-                workflow_name=workflow_name,
-                workflow_goal=workflow_goal,
-                step_agents=step_agents,
-                project_name=project_name,
-                extra_gates=extra_gates,
-            )
+            with _emit_mcp_span(
+                "tta.l0.mcp.workflow.start",
+                {"workflow.name": workflow_name, "data_dir": data_dir},
+            ):
+                service = _create_control_plane_service(data_dir)
+                claim = service.start_tracked_workflow(
+                    workflow_name=workflow_name,
+                    workflow_goal=workflow_goal,
+                    step_agents=step_agents,
+                    project_name=project_name,
+                    extra_gates=extra_gates,
+                )
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
         return {
@@ -1290,13 +1321,17 @@ result = await workflow.execute(data, context)
             step_index=step_index,
         )
         try:
-            service = _create_control_plane_service(data_dir)
-            task = service.mark_workflow_step_running(
-                task_id,
-                step_index=step_index,
-                trace_id=trace_id,
-                span_id=span_id,
-            )
+            with _emit_mcp_span(
+                "tta.l0.mcp.step.running",
+                {"task.id": task_id, "step.index": str(step_index), "data_dir": data_dir},
+            ):
+                service = _create_control_plane_service(data_dir)
+                task = service.mark_workflow_step_running(
+                    task_id,
+                    step_index=step_index,
+                    trace_id=trace_id,
+                    span_id=span_id,
+                )
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
@@ -1323,13 +1358,22 @@ result = await workflow.execute(data, context)
             confidence=confidence,
         )
         try:
-            service = _create_control_plane_service(data_dir)
-            task = service.record_workflow_step_result(
-                task_id,
-                step_index=step_index,
-                result_summary=result_summary,
-                confidence=confidence,
-            )
+            with _emit_mcp_span(
+                "tta.l0.mcp.step.completed",
+                {
+                    "task.id": task_id,
+                    "step.index": str(step_index),
+                    "step.confidence": str(confidence),
+                    "data_dir": data_dir,
+                },
+            ):
+                service = _create_control_plane_service(data_dir)
+                task = service.record_workflow_step_result(
+                    task_id,
+                    step_index=step_index,
+                    result_summary=result_summary,
+                    confidence=confidence,
+                )
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
@@ -1359,14 +1403,23 @@ result = await workflow.execute(data, context)
         )
         try:
             outcome = WorkflowGateDecisionOutcome(decision)
-            service = _create_control_plane_service(data_dir)
-            task = service.record_workflow_gate_outcome(
-                task_id,
-                step_index=step_index,
-                decision=outcome,
-                summary=summary,
-                policy_name=policy_name,
-            )
+            with _emit_mcp_span(
+                "tta.l0.mcp.gate.outcome",
+                {
+                    "task.id": task_id,
+                    "step.index": str(step_index),
+                    "gate.decision": decision,
+                    "data_dir": data_dir,
+                },
+            ):
+                service = _create_control_plane_service(data_dir)
+                task = service.record_workflow_gate_outcome(
+                    task_id,
+                    step_index=step_index,
+                    decision=outcome,
+                    summary=summary,
+                    policy_name=policy_name,
+                )
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
@@ -1387,12 +1440,28 @@ result = await workflow.execute(data, context)
             step_index=step_index,
         )
         try:
-            service = _create_control_plane_service(data_dir)
-            task = service.mark_workflow_step_failed(
-                task_id,
-                step_index=step_index,
-                error_summary=error_summary,
-            )
+            with _emit_mcp_span(
+                "tta.l0.mcp.step.failed",
+                {
+                    "task.id": task_id,
+                    "step.index": str(step_index),
+                    "error.summary": error_summary,
+                    "data_dir": data_dir,
+                },
+            ) as _span:
+                if _span is not None:
+                    try:
+                        from opentelemetry.trace import Status, StatusCode
+
+                        _span.set_status(Status(StatusCode.ERROR, error_summary))
+                    except Exception:
+                        pass
+                service = _create_control_plane_service(data_dir)
+                task = service.mark_workflow_step_failed(
+                    task_id,
+                    step_index=step_index,
+                    error_summary=error_summary,
+                )
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
