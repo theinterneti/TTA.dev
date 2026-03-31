@@ -14,7 +14,7 @@ Core functionality:
 Example usage:
     ```python
     from ttadev.primitives.speckit import TasksPrimitive
-    from primitives import WorkflowContext
+    from ttadev.primitives.core.base import WorkflowContext
 
     # Generate tasks from plan
     tasks_primitive = TasksPrimitive(
@@ -46,7 +46,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from primitives import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
 from ttadev.primitives.observability import InstrumentedPrimitive
 
 

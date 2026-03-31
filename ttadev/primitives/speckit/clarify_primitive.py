@@ -8,7 +8,7 @@ and updating the specification until target coverage is reached.
 from pathlib import Path
 from typing import Any
 
-from primitives import WorkflowContext
+from ttadev.primitives.core.base import WorkflowContext
 from ttadev.primitives.observability import InstrumentedPrimitive
 
 
