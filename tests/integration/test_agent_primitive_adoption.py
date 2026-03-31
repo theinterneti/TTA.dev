@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-"""
-Integration tests for agent primitive adoption.
+"""Integration tests for agent primitive adoption.
 
 Tests that verify examples and key modules use TTA.dev primitives correctly
 instead of manual asyncio orchestration.
@@ -11,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+
 
 class TestPrimitiveAdoption:
     """Test suite for primitive usage validation."""
@@ -18,12 +18,12 @@ class TestPrimitiveAdoption:
     @pytest.fixture
     def examples_dir(self) -> Path:
         """Get path to examples directory."""
-        return Path("platform/primitives/examples")
+        return REPO_ROOT / "examples"
 
     @pytest.fixture
     def src_dir(self) -> Path:
-        """Get path to src directory."""
-        return Path("platform/primitives/src")
+        """Get path to primitives source directory."""
+        return REPO_ROOT / "ttadev"
 
     def test_examples_import_primitives(self, examples_dir: Path):
         """Verify all examples import from ttadev."""
@@ -42,9 +42,7 @@ class TestPrimitiveAdoption:
 
             # Check for primitive imports
             imports = [node for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)]
-            primitive_imports = [
-                imp for imp in imports if imp.module and "tta_dev_primitives" in imp.module
-            ]
+            primitive_imports = [imp for imp in imports if imp.module and "ttadev" in imp.module]
 
             if not primitive_imports:
                 missing_imports.append(example_file.name)
@@ -150,7 +148,7 @@ class TestPrimitiveAdoption:
 
     def test_core_primitives_extend_base(self, src_dir: Path):
         """Verify core primitives extend WorkflowPrimitive."""
-        primitives_dir = src_dir / "tta_dev_primitives" / "core"
+        primitives_dir = src_dir / "primitives" / "core"
 
         if not primitives_dir.exists():
             pytest.skip(f"Primitives directory not found: {primitives_dir}")
@@ -204,7 +202,7 @@ class TestPrimitiveAdoption:
 
     def test_recovery_primitives_handle_errors(self, src_dir: Path):
         """Verify recovery primitives have error handling."""
-        recovery_dir = src_dir / "tta_dev_primitives" / "recovery"
+        recovery_dir = src_dir / "primitives" / "recovery"
 
         if not recovery_dir.exists():
             pytest.skip(f"Recovery directory not found: {recovery_dir}")
@@ -301,8 +299,3 @@ class TestPreCommitHook:
         setup_script = Path("scripts/setup-git-hooks.sh")
         assert setup_script.exists(), "Setup script not found"
         assert setup_script.is_file(), "Setup path is not a file"
-
-
-if __name__ == "__main__":
-    # Run tests when executed directly
-    pytest.main([__file__, "-v"])

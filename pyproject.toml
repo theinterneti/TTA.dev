@@ -42,6 +42,7 @@ dev = [
     "cchooks>=0.1.0",
     "tdd-guard-pytest>=0.1.0",
     "pip-audit>=2.7.0",
+    "pyyaml>=6.0.3",
 ]
 
 [project.optional-dependencies]
