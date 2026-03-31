@@ -12,6 +12,11 @@ from __future__ import annotations
 
 import pytest
 
+# Skip entire module at collection time if falkordb is not installed.
+# All tests here are @pytest.mark.integration; without the package they'd
+# fail with ModuleNotFoundError before any fixture skip can run.
+pytest.importorskip("falkordb")
+
 from ttadev.primitives.code_graph.client import FalkorDBClient, _falkordb_reachable
 
 _SOCK = FalkorDBClient()._socket_path

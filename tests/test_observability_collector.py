@@ -7,7 +7,7 @@ Tests are based on OBSERVABILITY_UI_SPEC.md Phase 1 requirements.
 
 import asyncio
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pytest
 
@@ -45,7 +45,7 @@ class TestObservabilityCollector:
             trace_id="test-trace-001",
             span_id="span-001",
             event_type="workflow_start",
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             data={
                 "workflow_name": "test_workflow",
                 "provider": "github_copilot",
@@ -77,7 +77,7 @@ class TestObservabilityCollector:
                 trace_id=trace_id,
                 span_id=f"span-{i}",
                 event_type="primitive_execute",
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 data={"primitive": f"Primitive{i}"},
             )
             for i in range(3)
@@ -112,7 +112,7 @@ class TestObservabilityCollector:
                 trace_id=trace_id,
                 span_id="span-001",
                 event_type="workflow_start",
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 data={},
             )
             await collector.record_event(event)
@@ -134,7 +134,7 @@ class TestObservabilityCollector:
                 trace_id=trace_id,
                 span_id=f"span-{i}",
                 event_type="step",
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now(UTC).isoformat(),
                 data={"step": i},
             )
             for i in range(5)
@@ -162,7 +162,7 @@ class TestObservabilityCollector:
                     trace_id=trace_id,
                     span_id=f"span-{i}",
                     event_type="concurrent_test",
-                    timestamp=datetime.utcnow().isoformat(),
+                    timestamp=datetime.now(UTC).isoformat(),
                     data={"index": i},
                 )
                 await collector.record_event(event)
