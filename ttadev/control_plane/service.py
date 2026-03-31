@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import uuid
+from collections.abc import Generator
 from dataclasses import asdict
 from datetime import UTC, datetime, timedelta
 from pathlib import Path, PurePosixPath
@@ -62,6 +64,28 @@ def _get_active_otel_context() -> tuple[str | None, str | None]:
                 return trace_id_hex, span_id_hex
 
     return None, None
+
+
+@contextlib.contextmanager
+def _emit_control_plane_span(
+    span_name: str,
+    attrs: dict[str, str | int | float | bool] | None = None,
+) -> Generator[Any, None, None]:
+    """Emit an OTel span for a control-plane operation.
+
+    Yields the active ``Span`` object so callers can set attributes after
+    the fact, or ``None`` when OpenTelemetry is unavailable or not
+    initialised.  The control plane always functions correctly without
+    tracing — OTel is a pure observability add-on.
+    """
+    try:
+        from opentelemetry import trace as _otel_trace
+
+        tracer = _otel_trace.get_tracer("ttadev.control_plane")
+        with tracer.start_as_current_span(span_name, attributes=attrs or {}) as span:
+            yield span
+    except Exception:  # OTel not installed or not initialised — degrade gracefully
+        yield None
 
 
 class ControlPlaneError(Exception):
@@ -705,51 +729,60 @@ class ControlPlaneService:
         if not step_agents:
             raise ControlPlaneError("Tracked workflow must include at least one step")
 
-        gates: list[dict[str, Any]] = [
+        with _emit_control_plane_span(
+            "tta.l0.workflow.start",
             {
-                "id": self._make_workflow_gate_id(step_index=index, agent_name=agent_name),
-                "gate_type": GateType.APPROVAL.value,
-                "label": f"{workflow_name} step {index + 1}: {agent_name}",
-                "required": False,
-            }
-            for index, agent_name in enumerate(step_agents)
-        ]
-        if extra_gates:
-            gates.extend(extra_gates)
-        task = self.create_task(
-            title=f"Workflow {workflow_name}: {workflow_goal.strip() or workflow_name}",
-            description=f"Tracked workflow run for {workflow_name}: {workflow_goal}",
-            project_name=project_name,
-            requested_role="workflow-orchestrator",
-            gates=gates,
-        )
-        stored_task = self._store.get_task(task.id)
-        if stored_task is None:
-            raise TaskNotFoundError(f"Task not found after workflow creation: {task.id}")
+                "l0.workflow_name": workflow_name,
+                "l0.total_steps": len(step_agents),
+            },
+        ) as _span:
+            gates: list[dict[str, Any]] = [
+                {
+                    "id": self._make_workflow_gate_id(step_index=index, agent_name=agent_name),
+                    "gate_type": GateType.APPROVAL.value,
+                    "label": f"{workflow_name} step {index + 1}: {agent_name}",
+                    "required": False,
+                }
+                for index, agent_name in enumerate(step_agents)
+            ]
+            if extra_gates:
+                gates.extend(extra_gates)
+            task = self.create_task(
+                title=f"Workflow {workflow_name}: {workflow_goal.strip() or workflow_name}",
+                description=f"Tracked workflow run for {workflow_name}: {workflow_goal}",
+                project_name=project_name,
+                requested_role="workflow-orchestrator",
+                gates=gates,
+            )
+            if _span is not None:
+                _span.set_attribute("l0.task_id", task.id)
+            stored_task = self._store.get_task(task.id)
+            if stored_task is None:
+                raise TaskNotFoundError(f"Task not found after workflow creation: {task.id}")
 
-        stored_task.workflow = WorkflowTrackingRecord(
-            workflow_name=workflow_name,
-            workflow_goal=workflow_goal,
-            total_steps=len(step_agents),
-            steps=[
-                WorkflowStepRecord(
-                    step_index=index,
-                    agent_name=agent_name,
-                    linked_gate_id=self._make_workflow_gate_id(
+            stored_task.workflow = WorkflowTrackingRecord(
+                workflow_name=workflow_name,
+                workflow_goal=workflow_goal,
+                total_steps=len(step_agents),
+                steps=[
+                    WorkflowStepRecord(
                         step_index=index,
                         agent_name=agent_name,
-                    ),
-                )
-                for index, agent_name in enumerate(step_agents)
-            ],
-        )
-        stored_task.updated_at = self._now_iso()
-        self._store.put_task(stored_task)
-        return self.claim_task(
-            stored_task.id,
-            agent_role="workflow-orchestrator",
-            lease_ttl_seconds=lease_ttl_seconds,
-        )
+                        linked_gate_id=self._make_workflow_gate_id(
+                            step_index=index,
+                            agent_name=agent_name,
+                        ),
+                    )
+                    for index, agent_name in enumerate(step_agents)
+                ],
+            )
+            stored_task.updated_at = self._now_iso()
+            self._store.put_task(stored_task)
+            return self.claim_task(
+                stored_task.id,
+                agent_role="workflow-orchestrator",
+                lease_ttl_seconds=lease_ttl_seconds,
+            )
 
     def attach_workflow_to_task(
         self,
@@ -903,20 +936,31 @@ class ControlPlaneService:
         task = self.get_task(task_id)
         workflow, step = self._get_workflow_step(task, step_index)
 
-        now_iso = self._now_iso()
-        workflow.status = WorkflowTrackingStatus.RUNNING
-        workflow.current_step_index = step_index
-        workflow.current_agent = step.agent_name
-        step.status = WorkflowStepStatus.RUNNING
-        step.started_at = now_iso
-        step.completed_at = None
-        step.attempts += 1
+        # Capture the caller's OTel context BEFORE we start the control-plane
+        # span — the step attribution should reflect the caller's trace, not ours.
         if trace_id is None and span_id is None:
             trace_id, span_id = _get_active_otel_context()
-        step.trace_id = trace_id
-        step.span_id = span_id
-        task.updated_at = now_iso
-        self._store.put_task(task)
+
+        with _emit_control_plane_span(
+            "tta.l0.step.running",
+            {
+                "l0.task_id": task_id,
+                "l0.step_index": step_index,
+                "l0.step_agent": step.agent_name,
+            },
+        ):
+            now_iso = self._now_iso()
+            workflow.status = WorkflowTrackingStatus.RUNNING
+            workflow.current_step_index = step_index
+            workflow.current_agent = step.agent_name
+            step.status = WorkflowStepStatus.RUNNING
+            step.started_at = now_iso
+            step.completed_at = None
+            step.attempts += 1
+            step.trace_id = trace_id
+            step.span_id = span_id
+            task.updated_at = now_iso
+            self._store.put_task(task)
         return task
 
     def record_workflow_step_result(
@@ -932,15 +976,23 @@ class ControlPlaneService:
         task = self.get_task(task_id)
         _, step = self._get_workflow_step(task, step_index)
 
-        now_iso = self._now_iso()
-        step.last_result_summary = result_summary or None
-        step.last_confidence = confidence
-        step.completed_at = now_iso
-        step.status = WorkflowStepStatus.COMPLETED
-        task.updated_at = now_iso
-        # Auto-evaluate any pending POLICY gates now that a confidence value is available.
-        self._auto_evaluate_policy_gates(task, confidence=confidence, now_iso=now_iso)
-        self._store.put_task(task)
+        with _emit_control_plane_span(
+            "tta.l0.step.completed",
+            {
+                "l0.task_id": task_id,
+                "l0.step_index": step_index,
+                "l0.confidence": confidence,
+            },
+        ):
+            now_iso = self._now_iso()
+            step.last_result_summary = result_summary or None
+            step.last_confidence = confidence
+            step.completed_at = now_iso
+            step.status = WorkflowStepStatus.COMPLETED
+            task.updated_at = now_iso
+            # Auto-evaluate any pending POLICY gates now that a confidence value is available.
+            self._auto_evaluate_policy_gates(task, confidence=confidence, now_iso=now_iso)
+            self._store.put_task(task)
         return task
 
     def record_workflow_gate_outcome(
@@ -1031,7 +1083,15 @@ class ControlPlaneService:
             workflow.current_agent = step.agent_name
 
         task.updated_at = now_iso
-        self._store.put_task(task)
+        with _emit_control_plane_span(
+            "tta.l0.gate.outcome",
+            {
+                "l0.task_id": task_id,
+                "l0.step_index": step_index,
+                "l0.gate_decision": decision.value,
+            },
+        ):
+            self._store.put_task(task)
         return task
 
     def mark_workflow_step_failed(
@@ -1046,15 +1106,31 @@ class ControlPlaneService:
         task = self.get_task(task_id)
         workflow, step = self._get_workflow_step(task, step_index)
 
-        now_iso = self._now_iso()
-        workflow.status = WorkflowTrackingStatus.FAILED
-        workflow.current_step_index = step_index
-        workflow.current_agent = step.agent_name
-        step.status = WorkflowStepStatus.FAILED
-        step.completed_at = now_iso
-        step.last_result_summary = error_summary
-        task.updated_at = now_iso
-        self._store.put_task(task)
+        with _emit_control_plane_span(
+            "tta.l0.step.failed",
+            {
+                "l0.task_id": task_id,
+                "l0.step_index": step_index,
+                "l0.step_agent": step.agent_name,
+                "l0.error_summary": error_summary,
+            },
+        ) as _span:
+            now_iso = self._now_iso()
+            workflow.status = WorkflowTrackingStatus.FAILED
+            workflow.current_step_index = step_index
+            workflow.current_agent = step.agent_name
+            step.status = WorkflowStepStatus.FAILED
+            step.completed_at = now_iso
+            step.last_result_summary = error_summary
+            task.updated_at = now_iso
+            self._store.put_task(task)
+            if _span is not None:
+                try:
+                    from opentelemetry.trace import Status, StatusCode
+
+                    _span.set_status(Status(StatusCode.ERROR, error_summary))
+                except Exception:
+                    pass
         return task
 
     def finalize_tracked_workflow(
