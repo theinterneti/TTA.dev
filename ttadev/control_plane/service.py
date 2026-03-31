@@ -930,6 +930,8 @@ class ControlPlaneService:
         step_index: int,
         trace_id: str | None = None,
         span_id: str | None = None,
+        hindsight_bank_id: str | None = None,
+        hindsight_document_id: str | None = None,
     ) -> TaskRecord:
         """Mark a tracked workflow step as running."""
         self._sweep_expired_leases()
@@ -959,6 +961,8 @@ class ControlPlaneService:
             step.attempts += 1
             step.trace_id = trace_id
             step.span_id = span_id
+            step.hindsight_bank_id = hindsight_bank_id
+            step.hindsight_document_id = hindsight_document_id
             task.updated_at = now_iso
             self._store.put_task(task)
         return task
@@ -970,6 +974,8 @@ class ControlPlaneService:
         step_index: int,
         result_summary: str,
         confidence: float,
+        hindsight_bank_id: str | None = None,
+        hindsight_document_id: str | None = None,
     ) -> TaskRecord:
         """Store a short summary of the latest workflow step result."""
         self._sweep_expired_leases()
@@ -989,6 +995,10 @@ class ControlPlaneService:
             step.last_confidence = confidence
             step.completed_at = now_iso
             step.status = WorkflowStepStatus.COMPLETED
+            if hindsight_bank_id is not None:
+                step.hindsight_bank_id = hindsight_bank_id
+            if hindsight_document_id is not None:
+                step.hindsight_document_id = hindsight_document_id
             task.updated_at = now_iso
             # Auto-evaluate any pending POLICY gates now that a confidence value is available.
             self._auto_evaluate_policy_gates(task, confidence=confidence, now_iso=now_iso)

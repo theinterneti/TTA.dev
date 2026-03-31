@@ -1305,6 +1305,8 @@ result = await workflow.execute(data, context)
         step_index: int,
         trace_id: str | None = None,
         span_id: str | None = None,
+        hindsight_bank_id: str | None = None,
+        hindsight_document_id: str | None = None,
         data_dir: str = ".tta",
     ) -> dict[str, Any]:
         """Transition a tracked workflow step to RUNNING.
@@ -1312,6 +1314,10 @@ result = await workflow.execute(data, context)
         Pass ``trace_id`` and ``span_id`` to stamp the current OTel span
         context onto the step record.  Safe to call again on retry — the
         trace context is replaced each time.
+
+        Pass ``hindsight_bank_id`` and ``hindsight_document_id`` to correlate
+        this step with a Hindsight memory retain operation, so the step record
+        carries a direct link to the retained memory artifact.
         """
         logger.info(
             "mcp_tool_called",
@@ -1331,6 +1337,8 @@ result = await workflow.execute(data, context)
                     step_index=step_index,
                     trace_id=trace_id,
                     span_id=span_id,
+                    hindsight_bank_id=hindsight_bank_id,
+                    hindsight_document_id=hindsight_document_id,
                 )
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
@@ -1342,12 +1350,17 @@ result = await workflow.execute(data, context)
         step_index: int,
         result_summary: str,
         confidence: float,
+        hindsight_bank_id: str | None = None,
+        hindsight_document_id: str | None = None,
         data_dir: str = ".tta",
     ) -> dict[str, Any]:
         """Record the result and confidence score for a completed workflow step.
 
         ``confidence`` must be in the range 0.0–1.0.  Recording the result
         automatically evaluates any pending POLICY gates attached to the task.
+
+        Pass ``hindsight_bank_id`` and ``hindsight_document_id`` to attach a
+        link to the Hindsight memory retain artifact produced by this step.
         """
         logger.info(
             "mcp_tool_called",
@@ -1373,6 +1386,8 @@ result = await workflow.execute(data, context)
                     step_index=step_index,
                     result_summary=result_summary,
                     confidence=confidence,
+                    hindsight_bank_id=hindsight_bank_id,
+                    hindsight_document_id=hindsight_document_id,
                 )
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)

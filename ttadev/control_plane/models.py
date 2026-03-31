@@ -197,6 +197,10 @@ class WorkflowStepRecord:
     """OTel trace ID (32-hex) stamped when the step transitions to RUNNING."""
     span_id: str | None = None
     """OTel span ID (16-hex) stamped when the step transitions to RUNNING."""
+    hindsight_bank_id: str | None = None
+    """Hindsight memory bank ID correlated with this step's retained memory, if any."""
+    hindsight_document_id: str | None = None
+    """Hindsight document ID for the specific memory document retained during this step."""
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the workflow step record for JSON persistence."""
@@ -214,6 +218,8 @@ class WorkflowStepRecord:
             "gate_history": [entry.to_dict() for entry in self.gate_history],
             "trace_id": self.trace_id,
             "span_id": self.span_id,
+            "hindsight_bank_id": self.hindsight_bank_id,
+            "hindsight_document_id": self.hindsight_document_id,
         }
 
     @classmethod
@@ -248,6 +254,8 @@ class WorkflowStepRecord:
             gate_history=gate_history,
             trace_id=data.get("trace_id"),
             span_id=data.get("span_id"),
+            hindsight_bank_id=data.get("hindsight_bank_id"),
+            hindsight_document_id=data.get("hindsight_document_id"),
         )
 
 
