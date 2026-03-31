@@ -8,9 +8,10 @@ lint:
 type-check:
 	uvx pyright
 
-# Full test run with coverage (as configured in pyproject.toml)
+# Full test run with coverage report.
+# pytest.ini wins over pyproject.toml so we pass --cov flags explicitly.
 test:
-	uv run pytest
+	uv run pytest --cov=ttadev --cov-report=term-missing --cov-report=html
 
 # Continuous testing — fast, no coverage overhead
 # Scoped to ttadev/ and tests/ so edits in scripts/, .cline/, .archive/ don't trigger reruns.
