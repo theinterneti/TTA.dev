@@ -66,13 +66,16 @@ assert mock.last_input == expected_input
 ## Commands
 
 ```bash
-# Fast tests (safe for local dev)
-uv run pytest -m "not integration"
+# Continuous TDD loop — fast, fail-fast, no coverage overhead (use during development)
+make watch
 
-# All tests with coverage
-uv run pytest --cov=src --cov-report=html
+# Continuous TDD loop — with live coverage in terminal (use before committing)
+make watch-cov
 
-# Integration tests (requires resources)
+# Full one-shot run with coverage (used by CI and pre-commit)
+make test
+
+# Integration tests (requires external services, opt-in)
 RUN_INTEGRATION=true uv run pytest -m integration
 ```
 

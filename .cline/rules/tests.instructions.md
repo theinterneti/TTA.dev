@@ -298,7 +298,7 @@ tests/
 
 - **Target**: 100% coverage for new code
 - **Minimum**: 80% overall coverage
-- **Command**: `uv run pytest --cov=src --cov-report=html`
+- **Dev loop**: `make watch` (fast, fail-fast) → `make watch-cov` (with coverage) → `make test` (full run before commit)
 
 ## Quality Checklist
 

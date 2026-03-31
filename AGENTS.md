@@ -188,7 +188,9 @@ Load only when agent or skill instructions are insufficient:
 uv run ruff format .        # Format
 uv run ruff check . --fix   # Lint
 uvx pyright platform/       # Type check
-uv run pytest -v            # Test
+make watch                  # Continuous testing during development (fast, fail-fast)
+make watch-cov              # Continuous testing with live coverage (before committing)
+make test                   # Full one-shot run with coverage
 ```
 
 ### Testing (Testing Specialist enforces)

@@ -42,7 +42,9 @@ If quality gates fail:
 
 ```bash
 uv sync --all-extras        # Install dependencies
-uv run pytest -v            # Run tests
+make watch                  # Continuous testing during development (fast, fail-fast)
+make watch-cov              # Continuous testing with live coverage (before committing)
+make test                   # Full one-shot run with coverage
 uv run ruff format .        # Format code
 uv run ruff check . --fix   # Lint code
 ```
@@ -109,7 +111,9 @@ TODOs without all required properties will fail the `validate-todos` CI step.
 | Task | Command |
 |------|---------|
 | Install deps | `uv sync --all-extras` |
-| Run tests | `uv run pytest -v` |
+| Watch tests (TDD loop) | `make watch` |
+| Watch with coverage | `make watch-cov` |
+| Full test run | `make test` |
 | Format | `uv run ruff format .` |
 | Lint | `uv run ruff check . --fix` |
 | Type check | `uvx pyright platform/` |
