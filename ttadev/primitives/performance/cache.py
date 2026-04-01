@@ -65,6 +65,14 @@ class InMemoryBackend:
             return None
         return value
 
+    def has_expired(self, key: str) -> bool:
+        """Return True if *key* exists in the store but is past its TTL."""
+        entry = self._store.get(key)
+        if entry is None:
+            return False
+        _, expiry = entry
+        return time.monotonic() >= expiry
+
     async def set(self, key: str, value: Any, ttl_seconds: float) -> None:
         """Store *value* with an expiry derived from the current monotonic clock."""
         self._store[key] = (value, time.monotonic() + ttl_seconds)
@@ -238,6 +246,10 @@ class CachePrimitive(WorkflowPrimitive[Any, Any]):
             Cached or freshly computed result.
         """
         cache_key = self.cache_key_fn(input_data, context)
+
+        # Check expiry before get() so we can track the expiration stat.
+        if isinstance(self._backend, InMemoryBackend) and self._backend.has_expired(cache_key):
+            self._stats["expirations"] += 1
 
         cached = await self._backend.get(cache_key)
 

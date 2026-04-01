@@ -1253,6 +1253,44 @@ pipeline = gate >> llm_primitive
 result = await pipeline.execute(user_input, WorkflowContext(workflow_id="safe-llm"))
 ```
 
+## Spec-Driven Development (SDD) Pipeline
+
+Five composable speckit primitives drive systematic, reproducible feature development:
+
+| Primitive | Input | Output |
+|-----------|-------|--------|
+| `SpecifyPrimitive` | Free-form requirement | Formal spec (JSON) |
+| `ClarifyPrimitive` | Spec + questions | Refined spec |
+| `PlanPrimitive` | Spec | Implementation plan |
+| `TasksPrimitive` | Plan | Ordered task list |
+| `ValidationGatePrimitive` | Any | Pass-through or raise |
+
+```python
+from ttadev.primitives.speckit import (
+    SpecifyPrimitive, ClarifyPrimitive, PlanPrimitive,
+    TasksPrimitive, ValidationGatePrimitive,
+)
+from ttadev.primitives.core.base import WorkflowContext
+
+pipeline = (
+    SpecifyPrimitive()
+    >> ClarifyPrimitive(max_iterations=2)
+    >> PlanPrimitive()
+    >> TasksPrimitive()
+    >> ValidationGatePrimitive()
+)
+
+result = await pipeline.execute(
+    {"requirement": "Add Redis caching to the LLM pipeline"},
+    WorkflowContext(workflow_id="sdd-demo"),
+)
+print(result["tasks"])  # ordered, dependent task list
+```
+
+See [examples/sdd_workflow.py](examples/sdd_workflow.py) for a full runnable example.
+
+---
+
 ## Related Documentation
 
 - **Getting Started:** [\`GETTING_STARTED.md\`](GETTING_STARTED.md)
