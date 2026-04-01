@@ -220,6 +220,7 @@ migration_plan.md
 htmlcov/
 hello.py
 conftest.py
+TEST_STATUS.md
 
 # Experimental/incomplete
 custom/workflows/

@@ -193,6 +193,18 @@ make watch-cov              # Continuous testing with live coverage (before comm
 make test                   # Full one-shot run with coverage
 ```
 
+### Test Status (No MCP needed)
+
+`TEST_STATUS.md` is auto-generated at the repo root after every pytest run.
+Read it to know the current test state without running anything:
+
+```bash
+cat TEST_STATUS.md
+```
+
+It is gitignored (local only) and kept perpetually fresh by `make watch`.
+If it doesn't exist yet, run `make test` once to generate it.
+
 ### Testing (Testing Specialist enforces)
 
 - 80% minimum coverage (100% on new code)
