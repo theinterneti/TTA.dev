@@ -3,7 +3,7 @@
 import pytest
 
 from ttadev.agents.base import AgentPrimitive
-from ttadev.agents.protocol import ChatMessage
+from ttadev.agents.protocol import ChatMessage, ChatPrimitive
 from ttadev.agents.registry import AgentRegistry, override_registry
 from ttadev.agents.router import AgentRouterPrimitive
 from ttadev.agents.spec import AgentSpec
@@ -52,8 +52,10 @@ class _MockModel:
 
 def _make_agent_class(spec: AgentSpec) -> type[AgentPrimitive]:
     class _Agent(AgentPrimitive):
-        def __init__(self):
-            super().__init__(spec=spec, model=_MockModel())
+        _class_spec: AgentSpec = spec  # expose spec at class level (Fix B)
+
+        def __init__(self, model: ChatPrimitive) -> None:
+            super().__init__(spec=spec, model=model)
 
     _Agent.__name__ = spec.name
     return _Agent
@@ -74,11 +76,15 @@ class TestAgentRouterPrimitive:
         )
         return reg
 
+    def _make_router(self, orchestrator: _MockOrchestrator) -> AgentRouterPrimitive:
+        """Create a router with a shared mock model injected."""
+        return AgentRouterPrimitive(model=_MockModel(), orchestrator=orchestrator)
+
     @pytest.mark.asyncio
     async def test_agent_hint_bypasses_scoring(self):
         reg = self._make_registry()
         orchestrator = _MockOrchestrator("qa")
-        router = AgentRouterPrimitive(orchestrator=orchestrator)
+        router = self._make_router(orchestrator)
 
         task = AgentTask(
             instruction="do something",
@@ -96,7 +102,7 @@ class TestAgentRouterPrimitive:
     async def test_keyword_routing_no_llm_call(self):
         reg = self._make_registry()
         orchestrator = _MockOrchestrator("qa")
-        router = AgentRouterPrimitive(orchestrator=orchestrator)
+        router = self._make_router(orchestrator)
 
         task = AgentTask(
             instruction="our test coverage is too low",
@@ -113,7 +119,7 @@ class TestAgentRouterPrimitive:
     async def test_ambiguous_task_calls_orchestrator(self):
         reg = self._make_registry()
         orchestrator = _MockOrchestrator("developer")
-        router = AgentRouterPrimitive(orchestrator=orchestrator)
+        router = self._make_router(orchestrator)
 
         task = AgentTask(
             instruction="help me with my project",  # no clear keywords
@@ -130,7 +136,7 @@ class TestAgentRouterPrimitive:
     async def test_unknown_hint_falls_back_to_routing(self):
         reg = self._make_registry()
         orchestrator = _MockOrchestrator("qa")
-        router = AgentRouterPrimitive(orchestrator=orchestrator)
+        router = self._make_router(orchestrator)
 
         task = AgentTask(
             instruction="fix flaky tests",
@@ -143,3 +149,22 @@ class TestAgentRouterPrimitive:
 
         # Falls back to keyword routing — "flaky tests" matches qa
         assert result.agent_name == "qa"
+
+    @pytest.mark.asyncio
+    async def test_model_injected_into_routed_agent(self):
+        """Router must not raise TypeError — all agents receive model= kwarg."""
+        reg = self._make_registry()
+        orchestrator = _MockOrchestrator("developer")
+        mock_model = _MockModel()
+        router = AgentRouterPrimitive(model=mock_model, orchestrator=orchestrator)
+
+        task = AgentTask(
+            instruction="review this code",
+            context={},
+            constraints=[],
+        )
+        with override_registry(reg):
+            # Should not raise TypeError: __init__() missing 1 required positional argument
+            result = await router.execute(task, WorkflowContext())
+
+        assert result.agent_name == "developer"

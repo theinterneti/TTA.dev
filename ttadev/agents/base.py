@@ -14,6 +14,17 @@ if TYPE_CHECKING:
     from ttadev.primitives.core.base import WorkflowContext
 
 
+def _stub_handler(tool_name: str):  # type: ignore[return]
+    """Return a placeholder tool handler that raises NotImplementedError when called."""
+
+    def handler(args: dict) -> str:
+        raise NotImplementedError(
+            f"Tool '{tool_name}' has no handler — wire it in a subclass or integration layer"
+        )
+
+    return handler
+
+
 class QualityGateError(RuntimeError):
     """Raised when an agent's quality gate check fails."""
 
@@ -73,8 +84,8 @@ class AgentPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
         tool_handlers: dict[str, Any] = {}
         for tool in self._spec.tools:
             if tool.rule in (ToolRule.ALWAYS, ToolRule.WHEN_INSTRUCTED):
-                # Placeholder handler — subclasses or integration layer wires real ones
-                tool_handlers[tool.name] = lambda args, t=tool: f"[{t.name} executed]"
+                # Stub handler — subclasses or the integration layer must wire real ones.
+                tool_handlers[tool.name] = _stub_handler(tool.name)
 
         # Run the tool call loop
         messages = [{"role": "user", "content": self._build_prompt(task)}]

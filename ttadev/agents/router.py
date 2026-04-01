@@ -50,7 +50,7 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
 
     Example::
 
-        router = AgentRouterPrimitive(orchestrator=AnthropicPrimitive())
+        router = AgentRouterPrimitive(model=AnthropicPrimitive(), orchestrator=AnthropicPrimitive())
         result = await router.execute(
             AgentTask(instruction="our test suite is flaky", context={}),
             WorkflowContext(),
@@ -60,10 +60,12 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
 
     def __init__(
         self,
+        model: ChatPrimitive,
         orchestrator: ChatPrimitive,
         registry: AgentRegistry | None = None,
     ) -> None:
         super().__init__(name="agent_router")
+        self._model = model
         self._orchestrator = orchestrator
         # Registry resolved at call time if not provided at init
         self._registry = registry
@@ -76,18 +78,21 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
         if task.agent_hint:
             try:
                 agent_class = registry.get(task.agent_hint)
-                agent = agent_class()
+                agent = agent_class(model=self._model)
                 result = await agent.execute(task, ctx)
                 return result
             except KeyError:
                 pass  # unknown hint — fall through to scoring
 
-        # 2. Keyword scoring
+        # 2. Keyword scoring — use class-level _class_spec to avoid instantiation
         scores: dict[str, float] = {}
         for agent_class in agent_classes:
-            instance = agent_class()
-            caps = instance.spec.capabilities
-            name = instance.spec.name
+            spec = getattr(agent_class, "_class_spec", None)
+            if spec is None:
+                # Fallback for agents without _class_spec: instantiate temporarily
+                spec = agent_class(model=self._model).spec
+            caps = spec.capabilities
+            name = spec.name
             scores[name] = _score_agent(task.instruction, caps)
 
         if scores:
@@ -97,12 +102,14 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
             margin = best_score - second_score
 
             if best_score > 0 and margin >= _ROUTING_CONFIDENCE_THRESHOLD:
-                agent = registry.get(best_name)()
+                agent = registry.get(best_name)(model=self._model)
                 return await agent.execute(task, ctx)
 
-        # 3. LLM fallback
+        # 3. LLM fallback — read specs from class attribute without instantiation
         agent_descriptions = "\n".join(
-            f"- {ac().spec.name}: {', '.join(ac().spec.capabilities)}" for ac in agent_classes
+            f"- {spec.name}: {', '.join(spec.capabilities)}"
+            for ac in agent_classes
+            for spec in [getattr(ac, "_class_spec", None) or ac(model=self._model).spec]
         )
         prompt = (
             f"Choose the best agent for this task: {task.instruction!r}\n\n"
@@ -117,11 +124,11 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
         chosen_name = chosen_name.strip().lower()
 
         try:
-            agent = registry.get(chosen_name)()
+            agent = registry.get(chosen_name)(model=self._model)
         except KeyError:
             # Fallback: use first registered agent
             if agent_classes:
-                agent = agent_classes[0]()
+                agent = agent_classes[0](model=self._model)
             else:
                 raise RuntimeError("No agents registered in registry.")
 
