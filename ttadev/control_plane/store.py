@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from filelock import BaseFileLock, FileLock
+
 from ttadev.control_plane.models import (
     LeaseRecord,
     LockRecord,
@@ -40,6 +42,9 @@ class ControlPlaneStore:
         tmp.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
         tmp.replace(path)
 
+    def _lock_for(self, path: Path) -> BaseFileLock:
+        return FileLock(str(path) + ".lock", timeout=10)
+
     def list_tasks(self) -> list[TaskRecord]:
         data = self._read_map(self._tasks_file)
         return [TaskRecord.from_dict(value) for value in data.values()]
@@ -50,9 +55,10 @@ class ControlPlaneStore:
         return TaskRecord.from_dict(payload) if isinstance(payload, dict) else None
 
     def put_task(self, task: TaskRecord) -> None:
-        data = self._read_map(self._tasks_file)
-        data[task.id] = task.to_dict()
-        self._write_map(self._tasks_file, data)
+        with self._lock_for(self._tasks_file):
+            data = self._read_map(self._tasks_file)
+            data[task.id] = task.to_dict()
+            self._write_map(self._tasks_file, data)
 
     def list_runs(self) -> list[RunRecord]:
         data = self._read_map(self._runs_file)
@@ -64,9 +70,10 @@ class ControlPlaneStore:
         return RunRecord.from_dict(payload) if isinstance(payload, dict) else None
 
     def put_run(self, run: RunRecord) -> None:
-        data = self._read_map(self._runs_file)
-        data[run.id] = run.to_dict()
-        self._write_map(self._runs_file, data)
+        with self._lock_for(self._runs_file):
+            data = self._read_map(self._runs_file)
+            data[run.id] = run.to_dict()
+            self._write_map(self._runs_file, data)
 
     def list_leases(self) -> list[LeaseRecord]:
         data = self._read_map(self._leases_file)
@@ -84,15 +91,17 @@ class ControlPlaneStore:
         return None
 
     def put_lease(self, lease: LeaseRecord) -> None:
-        data = self._read_map(self._leases_file)
-        data[lease.task_id] = lease.to_dict()
-        self._write_map(self._leases_file, data)
+        with self._lock_for(self._leases_file):
+            data = self._read_map(self._leases_file)
+            data[lease.task_id] = lease.to_dict()
+            self._write_map(self._leases_file, data)
 
     def delete_lease(self, task_id: str) -> None:
-        data = self._read_map(self._leases_file)
-        if task_id in data:
-            del data[task_id]
-            self._write_map(self._leases_file, data)
+        with self._lock_for(self._leases_file):
+            data = self._read_map(self._leases_file)
+            if task_id in data:
+                del data[task_id]
+                self._write_map(self._leases_file, data)
 
     def list_locks(self) -> list[LockRecord]:
         data = self._read_map(self._locks_file)
@@ -113,12 +122,14 @@ class ControlPlaneStore:
         return [lock for lock in self.list_locks() if lock.run_id == run_id]
 
     def put_lock(self, lock: LockRecord) -> None:
-        data = self._read_map(self._locks_file)
-        data[lock.id] = lock.to_dict()
-        self._write_map(self._locks_file, data)
+        with self._lock_for(self._locks_file):
+            data = self._read_map(self._locks_file)
+            data[lock.id] = lock.to_dict()
+            self._write_map(self._locks_file, data)
 
     def delete_lock(self, lock_id: str) -> None:
-        data = self._read_map(self._locks_file)
-        if lock_id in data:
-            del data[lock_id]
-            self._write_map(self._locks_file, data)
+        with self._lock_for(self._locks_file):
+            data = self._read_map(self._locks_file)
+            if lock_id in data:
+                del data[lock_id]
+                self._write_map(self._locks_file, data)
