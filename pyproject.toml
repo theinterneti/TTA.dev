@@ -181,6 +181,14 @@ omit = [
     "ttadev/primitives/benchmarking/__init__.py",
     "*/migrations/*",
     "*/__main__.py",
+    # UI server (FastAPI/WebSocket server, requires a running process to test)
+    "ttadev/ui/*",
+    # External API integrations (require live third-party credentials/services)
+    "ttadev/primitives/integrations/supabase_primitive.py",
+    "ttadev/primitives/integrations/google_ai_studio_primitive.py",
+    "ttadev/primitives/integrations/e2b_primitive.py",
+    # Git repo integration (requires live git operations outside unit test scope)
+    "ttadev/primitives/collaboration/git_integration.py",
 ]
 
 [tool.coverage.report]
