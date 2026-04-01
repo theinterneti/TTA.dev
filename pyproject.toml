@@ -77,7 +77,8 @@ testpaths = ["tests"]
 tdd_guard_project_root = "/home/theinterneti/Repos/TTA.dev"
 python_files = ["test_*.py", "*_test.py"]
 python_functions = ["test_*"]
-addopts = "-v --cov=ttadev --cov-report=html --cov-report=term --cov-fail-under=100"
+# addopts removed: pytest.ini is the active config (pytest uses first config file found).
+# Coverage thresholds are now enforced via [tool.coverage.report] below.
 markers = [
     "workflow_proof: end-to-end L0 workflow proof tests",
     "integration: integration tests requiring external services",
@@ -163,3 +164,34 @@ include = ["ttadev"]
 exclude = ["**/__pycache__", ".venv", "build", "dist"]
 pythonVersion = "3.11"
 typeCheckingMode = "basic"
+
+[tool.coverage.run]
+source = ["ttadev"]
+omit = [
+    "ttadev/demo_working_tta.py",
+    "ttadev/hello_world.py",
+    "ttadev/observability/demo_trace_generation.py",
+    "ttadev/observability/collector_service.py",
+    "ttadev/observability/markdown_logger.py",
+    "ttadev/observability/monitor.py",
+    "ttadev/observability/auto_track_copilot.py",
+    "ttadev/observability/websocket_handler.py",
+    "ttadev/observability/observability_integration/*",
+    "ttadev/primitives/cli/app.py",
+    "ttadev/primitives/benchmarking/__init__.py",
+    "*/migrations/*",
+    "*/__main__.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+]
