@@ -59,7 +59,7 @@ class FalkorDBClient:
     def _get_graph(self) -> Any:
         """Lazy-init FalkorDB connection. Must be called inside the executor."""
         if self._graph is None:
-            import falkordb  # optional dep — present when cgc is installed
+            import falkordb  # type: ignore[import]  # optional dep — present when cgc is installed
 
             db = falkordb.FalkorDB(unix_socket_path=self._socket_path)
             self._graph = db.select_graph(_GRAPH_NAME)

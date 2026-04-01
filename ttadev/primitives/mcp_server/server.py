@@ -440,7 +440,7 @@ result = await workflow.execute(data, context)
 
         import difflib
 
-        from ttadev.primitives.cli.app import (
+        from ttadev.primitives.cli.app import (  # type: ignore[import]
             _find_transform_targets,
             _generate_transformation,
         )
@@ -539,7 +539,7 @@ result = await workflow.execute(data, context)
             }
 
         # Apply transformation
-        from ttadev.primitives.cli.app import (
+        from ttadev.primitives.cli.app import (  # type: ignore[import]
             _find_transform_targets,
             _generate_transformation,
         )
