@@ -294,6 +294,8 @@ class WorkflowContext(BaseModel):
             "workflow.player_id": self.player_id or "unknown",
             "workflow.correlation_id": self.correlation_id,
             "workflow.elapsed_ms": self.elapsed_ms(),
+            "workflow.span_id": self.span_id or "unknown",
+            "workflow.parent_span_id": self.parent_span_id or "unknown",
         }
 
     async def spawn_agent(self, agent_name: str, task: Any) -> Any:

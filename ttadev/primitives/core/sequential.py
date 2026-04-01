@@ -84,6 +84,9 @@ class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
         for i, primitive in enumerate(self.primitives):
             step_name = f"step_{i}_{primitive.__class__.__name__}"
 
+            # Create a child context so each step is a child span of the caller
+            child_ctx = context.create_child_context()
+
             # Log step start
             logger.info(
                 "sequential_step_start",
@@ -107,7 +110,7 @@ class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
                     span.set_attribute("step.total_steps", len(self.primitives))
 
                     try:
-                        result = await primitive.execute(result, context)
+                        result = await primitive.execute(result, child_ctx)
                         span.set_attribute("step.status", "success")
                     except Exception as e:
                         span.set_attribute("step.status", "error")
@@ -116,7 +119,7 @@ class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
                         raise
             else:
                 # Graceful degradation - execute without step span
-                result = await primitive.execute(result, context)
+                result = await primitive.execute(result, child_ctx)
 
             # Record checkpoint and metrics
             context.checkpoint(f"sequential.step_{i}.end")
