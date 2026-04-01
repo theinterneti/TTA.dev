@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from enum import StrEnum
@@ -68,6 +69,12 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         self._provider = provider
         self._api_key = api_key
         self._base_url = base_url
+        # Register a provided Gemini API key once at construction time via the
+        # environment variable.  The google-generativeai SDK reads GOOGLE_API_KEY
+        # automatically, so no per-request genai.configure() call is needed.
+        # os.environ.setdefault avoids overwriting a key the caller already set.
+        if provider == LLMProvider.GEMINI and api_key:
+            os.environ.setdefault("GOOGLE_API_KEY", api_key)
 
     async def execute(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
         """Invoke provider and return a complete response, with OTel tracing."""
@@ -310,13 +317,19 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                 "Install it with: pip install 'ttadev[gemini]' or pip install google-generativeai"
             ) from exc
 
-        if self._api_key:
-            genai.configure(api_key=self._api_key)
-
         model_name = request.model or "gemini-2.0-flash"
         model = genai.GenerativeModel(model_name=model_name)
         parts = [msg.get("content", "") for msg in request.messages]
-        response = await asyncio.to_thread(model.generate_content, parts)
+
+        generation_config: dict[str, object] = {}
+        if request.temperature is not None:
+            generation_config["temperature"] = request.temperature
+
+        response = await asyncio.to_thread(
+            model.generate_content,
+            parts,
+            generation_config=generation_config if generation_config else None,
+        )
 
         usage: dict[str, int] | None = None
         if hasattr(response, "usage_metadata") and response.usage_metadata is not None:
@@ -358,11 +371,17 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                 "Install it with: pip install 'ttadev[gemini]' or pip install google-generativeai"
             ) from exc
 
-        if self._api_key:
-            genai.configure(api_key=self._api_key)
-
         model_name = request.model or "gemini-2.0-flash"
         model = genai.GenerativeModel(model_name=model_name)
         parts = [msg.get("content", "") for msg in request.messages]
-        response = await asyncio.to_thread(model.generate_content, parts)
+
+        generation_config: dict[str, object] = {}
+        if request.temperature is not None:
+            generation_config["temperature"] = request.temperature
+
+        response = await asyncio.to_thread(
+            model.generate_content,
+            parts,
+            generation_config=generation_config if generation_config else None,
+        )
         yield response.text

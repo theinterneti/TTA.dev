@@ -4,9 +4,17 @@ Wraps the official Google Generative AI SDK as a TTA.dev WorkflowPrimitive.
 Provides free access to Gemini Pro and Flash models.
 """
 
+import os
 from typing import Any
 
-import google.generativeai as genai
+try:
+    import google.generativeai as genai  # type: ignore[import-untyped]
+
+    _GENAI_AVAILABLE = True
+except ImportError:
+    genai = None  # type: ignore[assignment]
+    _GENAI_AVAILABLE = False
+
 from pydantic import BaseModel, Field
 
 from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
@@ -84,8 +92,18 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
             api_key: Google AI Studio API key (defaults to GOOGLE_API_KEY env var)
             **kwargs: Additional arguments for configuration
         """
+        if not _GENAI_AVAILABLE:
+            raise ImportError(
+                "google-generativeai is required for GoogleAIStudioPrimitive. "
+                "Install it with: uv add google-generativeai"
+            )
         super().__init__()
-        genai.configure(api_key=api_key)  # type: ignore[attr-defined]  # Private module API
+        # Register the API key via the environment variable once at construction
+        # time.  The google-generativeai SDK reads GOOGLE_API_KEY automatically,
+        # so no per-request genai.configure() call is needed.  Using setdefault
+        # avoids overwriting a key already present in the caller's environment.
+        if api_key:
+            os.environ.setdefault("GOOGLE_API_KEY", api_key)
         self.model = model
         self.generation_config = kwargs.get("generation_config", {})
 
