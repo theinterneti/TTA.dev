@@ -245,3 +245,4 @@ mcp.json
 
 # Static analysis raw output
 static_analysis_semgrep_1/
+coverage.json

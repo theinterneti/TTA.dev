@@ -416,7 +416,7 @@ class ContextEngineeringPrimitive(InstrumentedPrimitive[ContextRequest, ContextB
 
         for line in docstring.split("\n"):
             stripped = line.strip()
-            if stripped.startswith("```python") or stripped.startswith("```"):
+            if stripped.startswith("```") and not in_code_block:
                 in_code_block = True
                 current_block = []
             elif stripped == "```" and in_code_block:
