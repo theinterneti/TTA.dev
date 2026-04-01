@@ -9,10 +9,21 @@ which handles agentic coder budget profiles.
 
 from __future__ import annotations
 
+import json
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from enum import StrEnum
 
 from ttadev.primitives.core import WorkflowContext, WorkflowPrimitive
+
+# ── OpenTelemetry — optional, degrades gracefully when not installed ──────────
+try:
+    from opentelemetry import trace as otel_trace
+
+    OTEL_AVAILABLE = True
+except ImportError:
+    OTEL_AVAILABLE = False
+    otel_trace = None  # type: ignore[assignment]
 
 
 class LLMProvider(StrEnum):
@@ -29,6 +40,7 @@ class LLMRequest:
     temperature: float = 0.7
     max_tokens: int | None = None
     system: str | None = None
+    stream: bool = False
 
 
 @dataclass
@@ -56,13 +68,61 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         self._base_url = base_url
 
     async def execute(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Invoke provider and return a complete response, with OTel tracing."""
         dispatch = {
             LLMProvider.GROQ: self._call_groq,
             LLMProvider.ANTHROPIC: self._call_anthropic,
             LLMProvider.OPENAI: self._call_openai,
             LLMProvider.OLLAMA: self._call_ollama,
         }
-        return await dispatch[self._provider](request, ctx)
+
+        if not (OTEL_AVAILABLE and otel_trace is not None):
+            return await dispatch[self._provider](request, ctx)
+
+        tracer = otel_trace.get_tracer(__name__)
+        span_name = f"gen_ai.{self._provider.value}.invoke"
+        with tracer.start_as_current_span(span_name) as span:
+            span.set_attribute("gen_ai.system", self._provider.value)
+            span.set_attribute("gen_ai.request.model", request.model)
+            span.set_attribute("gen_ai.request.temperature", request.temperature)
+            try:
+                response = await dispatch[self._provider](request, ctx)
+            except Exception as e:
+                span.record_exception(e)
+                from opentelemetry.trace import Status, StatusCode  # noqa: PLC0415
+
+                span.set_status(Status(StatusCode.ERROR, str(e)))
+                raise
+            span.set_attribute("gen_ai.response.model", response.model)
+            if response.usage:
+                pt = response.usage.get("prompt_tokens") or response.usage.get("input_tokens")
+                ct = response.usage.get("completion_tokens") or response.usage.get("output_tokens")
+                if pt is not None:
+                    span.set_attribute("gen_ai.usage.prompt_tokens", pt)
+                if ct is not None:
+                    span.set_attribute("gen_ai.usage.completion_tokens", ct)
+            return response
+
+    async def stream(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
+        """Yield tokens as they arrive from the provider.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Yields:
+            Token strings as they stream from the provider.
+        """
+        dispatch = {
+            LLMProvider.GROQ: self._stream_groq,
+            LLMProvider.ANTHROPIC: self._stream_anthropic,
+            LLMProvider.OPENAI: self._stream_openai,
+            LLMProvider.OLLAMA: self._stream_ollama,
+        }
+        async for token in dispatch[self._provider](request, ctx):
+            yield token
+
+    # ── Non-streaming provider calls ──────────────────────────────────────────
 
     async def _call_groq(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
         from groq import AsyncGroq  # type: ignore[import]
@@ -147,3 +207,80 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             model=request.model,
             provider="ollama",
         )
+
+    # ── Streaming provider calls ───────────────────────────────────────────────
+
+    async def _stream_groq(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
+        """Stream tokens from Groq."""
+        from groq import AsyncGroq  # type: ignore[import]
+
+        client = AsyncGroq(api_key=self._api_key)
+        resp = await client.chat.completions.create(
+            model=request.model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            stream=True,
+        )
+        async for chunk in resp:
+            content = chunk.choices[0].delta.content or ""
+            if content:
+                yield content
+
+    async def _stream_anthropic(
+        self, request: LLMRequest, ctx: WorkflowContext
+    ) -> AsyncIterator[str]:
+        """Stream tokens from Anthropic via messages.stream() context manager."""
+        import anthropic  # type: ignore[import]
+
+        client = anthropic.AsyncAnthropic(api_key=self._api_key)
+        async with client.messages.stream(
+            model=request.model,
+            max_tokens=request.max_tokens or 1024,
+            system=request.system or "",
+            messages=request.messages,  # type: ignore[arg-type]
+        ) as stream:
+            async for text in stream.text_stream:
+                if text:
+                    yield text
+
+    async def _stream_openai(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
+        """Stream tokens from OpenAI."""
+        from openai import AsyncOpenAI  # type: ignore[import]
+
+        client = AsyncOpenAI(api_key=self._api_key, base_url=self._base_url)
+        resp = await client.chat.completions.create(
+            model=request.model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            stream=True,
+        )
+        async for chunk in resp:
+            content = chunk.choices[0].delta.content or ""
+            if content:
+                yield content
+
+    async def _stream_ollama(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
+        """Stream tokens from Ollama via NDJSON chunked response."""
+        import httpx
+
+        base = self._base_url or "http://localhost:11434"
+        payload = {
+            "model": request.model,
+            "messages": request.messages,
+            "stream": True,
+            "options": {"temperature": request.temperature},
+        }
+        async with httpx.AsyncClient() as client:
+            async with client.stream("POST", f"{base}/api/chat", json=payload) as resp:
+                resp.raise_for_status()
+                async for line in resp.aiter_lines():
+                    if not line:
+                        continue
+                    data = json.loads(line)
+                    content = data.get("message", {}).get("content", "")
+                    if content:
+                        yield content
+                    if data.get("done"):
+                        break
