@@ -349,16 +349,30 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
     async def _stream_gemini(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
         """Stream tokens from Google Gemini.
 
-        Yields the full response text as a single chunk. Gemini's generate_content
-        is synchronous; yielding the complete response avoids threading complexity
-        while keeping the AsyncIterator[str] contract intact.
+        NOTE: This method does NOT perform true token-by-token streaming. It
+        buffers the complete response from ``generate_content`` and yields the
+        full text as a single chunk. The ``AsyncIterator[str]`` contract is
+        satisfied but latency-to-first-token is identical to the non-streaming
+        ``_call_gemini`` path.
+
+        # TODO: Implement true token-by-token streaming for Gemini #dev-todo
+        # type:: implementation
+        # priority:: medium
+        # package:: ttadev
+        # Currently buffers the full response because the google-generativeai SDK
+        # async streaming API (generate_content with stream=True) returns a
+        # synchronous iterator that must be consumed in a thread via
+        # asyncio.to_thread, making incremental yielding non-trivial. A proper
+        # implementation would wrap the sync iterator in an async generator using
+        # asyncio.to_thread or switch to the google-genai (v2) SDK which exposes
+        # a native async streaming interface.
 
         Args:
             request: LLM invocation parameters.
             ctx: Workflow execution context.
 
         Yields:
-            Full response content as a single string token.
+            Full response content as a single string (buffered, not streamed).
 
         Raises:
             ImportError: If google-generativeai is not installed.

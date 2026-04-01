@@ -1,4 +1,54 @@
-"""ToolCallLoop — runs the model → tool call → result → model conversation loop."""
+"""ToolCallLoop — runs the model → tool call → result → model conversation loop.
+
+CUSTOM TEXT-BASED TOOL-CALLING PROTOCOL
+----------------------------------------
+This module implements a **custom, text-based** tool-calling convention rather
+than the structured tool-calling APIs provided by LLM providers (OpenAI function
+calling, Anthropic ``tool_use`` blocks, etc.).
+
+Protocol format
+~~~~~~~~~~~~~~~
+The model is expected to signal a tool call by beginning its response with::
+
+    __tool_call__:<tool_name>:<json_args>
+
+For example::
+
+    __tool_call__:ruff:{"path": "ttadev/"}
+
+Requirements
+~~~~~~~~~~~~
+1. **The model MUST be instructed via a system prompt** to use this exact format
+   when it wants to invoke a tool. Without that instruction the model will never
+   produce the ``__tool_call__:`` prefix and tool calls will never fire.
+
+2. This protocol is **NOT compatible** with native structured tool-calling
+   out of the box:
+
+   - OpenAI / Groq return tool calls as structured ``tool_calls`` objects in
+     ``choice.message.tool_calls``, not as text prefixes.
+   - Anthropic returns ``tool_use`` content blocks, not text.
+   - Ollama can return either format depending on the model and ``tools``
+     parameter.
+
+   Using ``ToolCallLoop`` with a provider that emits structured tool-call
+   payloads will silently skip all tool invocations because the text prefix
+   check will never match.
+
+3. The ``ChatPrimitive`` used as ``model`` must surface the raw text content
+   of the assistant turn so that the prefix check in ``_execute_impl`` can work.
+
+Future work
+~~~~~~~~~~~
+# TODO: Add native structured tool-calling support to ToolCallLoop #dev-todo
+# type:: implementation
+# priority:: medium
+# package:: ttadev
+# Replace (or augment) the custom __tool_call__ text protocol with proper
+# provider-specific structured tool-call handling (OpenAI tool_calls objects,
+# Anthropic tool_use blocks) so that ToolCallLoop works with standard provider
+# APIs without requiring a custom system prompt.
+"""
 
 from __future__ import annotations
 

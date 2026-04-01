@@ -1,6 +1,9 @@
 """SQLite integration primitive - SKELETON."""
 
-# TODO: Implement SQLitePrimitive
+# TODO: Implement SQLitePrimitive #dev-todo
+# type:: implementation
+# priority:: high
+# package:: tta-dev-integrations
 # Local SQLite database access via aiosqlite
 
 from primitives import WorkflowContext

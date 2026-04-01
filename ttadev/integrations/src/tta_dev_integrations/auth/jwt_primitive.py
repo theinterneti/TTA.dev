@@ -1,6 +1,9 @@
 """JWT authentication integration primitive - SKELETON."""
 
-# TODO: Implement JWTPrimitive
+# TODO: Implement JWTPrimitive #dev-todo
+# type:: implementation
+# priority:: high
+# package:: tta-dev-integrations
 # Generic JWT token verification
 
 from primitives import WorkflowContext

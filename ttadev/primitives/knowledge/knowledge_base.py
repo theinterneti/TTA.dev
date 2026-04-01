@@ -161,7 +161,10 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         if query.stage:
             search_tags.append(f"stage-{query.stage}")
 
-        # TODO: Call the configured knowledge backend when available.
+        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # type:: implementation
+        # priority:: high
+        # package:: ttadev
         return []
 
     async def _query_common_mistakes_impl(
@@ -182,7 +185,10 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         if query.stage:
             search_tags.append(f"stage-{query.stage}")
 
-        # TODO: Call the configured knowledge backend.
+        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # type:: implementation
+        # priority:: high
+        # package:: ttadev
         return []
 
     async def _query_examples_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
@@ -197,7 +203,10 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of matching KB pages
         """
-        # TODO: Call the configured knowledge backend with tags ["examples", query.topic].
+        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # type:: implementation
+        # priority:: high
+        # package:: ttadev
         return []
 
     async def _query_related_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
@@ -212,7 +221,10 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of related KB pages
         """
-        # TODO: Call the configured knowledge backend for related pages.
+        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # type:: implementation
+        # priority:: high
+        # package:: ttadev
         return []
 
     async def _query_by_tags_impl(self, query: KBQuery, context: WorkflowContext) -> list[KBPage]:
@@ -225,7 +237,10 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of matching KB pages
         """
-        # TODO: Call the configured knowledge backend to search by tags.
+        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # type:: implementation
+        # priority:: high
+        # package:: ttadev
         return []
 
     # Convenience methods for common queries

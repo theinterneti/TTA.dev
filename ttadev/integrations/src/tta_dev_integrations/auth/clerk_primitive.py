@@ -1,6 +1,9 @@
 """Clerk authentication integration primitive - SKELETON."""
 
-# TODO: Implement ClerkAuthPrimitive
+# TODO: Implement ClerkAuthPrimitive #dev-todo
+# type:: implementation
+# priority:: high
+# package:: tta-dev-integrations
 # Clerk.dev authentication service
 
 from primitives import WorkflowContext
