@@ -29,11 +29,67 @@ V = TypeVar("V")
 
 
 class WorkflowContext(BaseModel):
-    """
-    Context passed through workflow execution with full observability support.
+    """Context passed through every primitive execution with full observability support.
 
-    Provides distributed tracing, correlation tracking, and observability metadata
-    following W3C Trace Context and Baggage specifications.
+    ``WorkflowContext`` is the single object that flows through every
+    :meth:`WorkflowPrimitive.execute` call.  It carries distributed-tracing
+    identifiers, correlation/causation chains, agent identity, and arbitrary
+    metadata so that any primitive can participate in a larger observable workflow
+    without needing to know about the surrounding infrastructure.
+
+    **Creating a context:**
+
+    Use the factory class methods rather than the constructor directly:
+
+    .. code-block:: python
+
+        # Root context — start a new workflow
+        ctx = WorkflowContext.root("my-workflow")
+
+        # Child context — derive from a parent for a named sub-step
+        child_ctx = WorkflowContext.child(ctx, step_name="validate-input")
+
+    Attributes:
+        workflow_id: Human-readable identifier for the workflow step or phase.
+            Set to the step name so logs and spans are self-describing.
+        session_id: Optional game/user session identifier (TTA-specific).
+            Propagated unchanged through child contexts.
+        player_id: Optional player identifier (TTA-specific).
+            Propagated unchanged through child contexts.
+        metadata: Arbitrary key-value pairs attached by the workflow creator.
+            Deep-copied into child contexts to prevent cross-step mutation.
+        state: Mutable workflow state dictionary; primitives may read/write
+            here to pass results forward without changing function signatures.
+            Deep-copied into child contexts.
+        trace_id: OpenTelemetry trace ID as a hex string, or ``None`` if
+            observability is not initialised.
+        span_id: Current OTel span ID as a hex string, or ``None``.
+        parent_span_id: Span ID of the parent span, or ``None`` for the root.
+            Set automatically by :meth:`child`.
+        trace_flags: W3C trace flags integer (``1`` = sampled, ``0`` = not sampled).
+            Default is ``1`` (sampled).
+        correlation_id: UUID string that groups all events belonging to a single
+            logical request.  Auto-generated on construction; inherited unchanged
+            by child contexts.
+        causation_id: ``correlation_id`` of the *parent* context, forming a
+            causal chain.  ``None`` for root contexts; set automatically by
+            :meth:`child`.
+        agent_id: Stable per-process UUID identifying the AI agent that created
+            this context.  Auto-populated from :mod:`ttadev.observability.agent_identity`
+            when available.
+        agent_tool: Human-readable agent tool name (``"claude-code"``,
+            ``"copilot"``, …).  Auto-populated when available.
+        project_id: :class:`~ttadev.observability.session.ProjectSession` ID used
+            to group spans across multiple agents working on the same project.
+        baggage: W3C Baggage dictionary for cross-service context propagation.
+            Key-value pairs are propagated to child contexts.
+        tags: Custom string tags for log filtering and grouping (e.g.
+            ``{"env": "prod", "region": "us-east-1"}``).  Propagated to children.
+        start_time: Unix timestamp (seconds) recorded when the context was created.
+        checkpoints: Ordered list of ``(name, timestamp)`` tuples recorded via
+            :meth:`checkpoint`.
+        memory: Workflow memory object set by the orchestrator; ``None`` outside
+            of guided workflows.  Excluded from serialisation.
     """
 
     # Core workflow identifiers
@@ -144,6 +200,57 @@ class WorkflowContext(BaseModel):
             agent_tool=self.agent_tool,
             project_id=self.project_id,
         )
+
+    @classmethod
+    def root(cls, workflow_id: str) -> WorkflowContext:
+        """Create a fresh root context for a new workflow.
+
+        Generates a new ``correlation_id``; ``causation_id`` and
+        ``parent_span_id`` are left as ``None`` to mark this as a root span.
+        Agent identity is auto-populated from the process identity module when
+        available.
+
+        Args:
+            workflow_id: Human-readable identifier for this workflow or step.
+
+        Returns:
+            A new :class:`WorkflowContext` with no parent linkage.
+
+        Example:
+            .. code-block:: python
+
+                ctx = WorkflowContext.root("fetch-user-profile")
+                result = await my_primitive.execute(data, ctx)
+        """
+        return cls(workflow_id=workflow_id)
+
+    @classmethod
+    def child(cls, parent: WorkflowContext, step_name: str) -> WorkflowContext:
+        """Create a child context derived from *parent* for a named sub-step.
+
+        The child inherits the parent's ``correlation_id``, trace identifiers,
+        baggage, tags, and agent identity.  The parent's ``correlation_id``
+        becomes the child's ``causation_id``, and the parent's ``span_id``
+        becomes the child's ``parent_span_id``, forming a complete causal chain.
+
+        The parent context is **not mutated**.
+
+        Args:
+            parent: The parent :class:`WorkflowContext` to derive from.
+            step_name: Human-readable name for this sub-step (used as
+                ``workflow_id`` on the child).
+
+        Returns:
+            A new :class:`WorkflowContext` linked to *parent*.
+
+        Example:
+            .. code-block:: python
+
+                root_ctx = WorkflowContext.root("pipeline")
+                validate_ctx = WorkflowContext.child(root_ctx, "validate-input")
+                transform_ctx = WorkflowContext.child(root_ctx, "transform-data")
+        """
+        return parent.create_child_context().model_copy(update={"workflow_id": step_name})
 
     @classmethod
     def from_project(cls, project: Any, workflow_id: str) -> WorkflowContext:

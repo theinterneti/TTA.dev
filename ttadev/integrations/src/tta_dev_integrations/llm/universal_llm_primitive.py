@@ -23,8 +23,8 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any, Literal
 
-from primitives import WorkflowContext, WorkflowPrimitive
 from pydantic import BaseModel, Field
+from ttadev.primitives import WorkflowContext, WorkflowPrimitive
 
 
 class UserBudgetProfile(StrEnum):
@@ -118,9 +118,14 @@ class LLMResponse(BaseModel):
     )
 
 
-class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
+class BudgetAwareLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
     """
-    Universal LLM primitive supporting any coder, model, modality, and budget profile.
+    Budget-aware abstract LLM primitive for multi-coder, multi-model agentic workflows.
+
+    Distinct from ``ttadev.primitives.llm.UniversalLLMPrimitive`` (the runtime provider
+    dispatcher for Groq/Anthropic/OpenAI/Ollama). This class is an abstract base for
+    budget-profile-aware agentic coders (Cline, Copilot, Augment Code) and must be
+    subclassed to implement ``_execute_with_coder``.
 
     Features:
     - Auto-detect coder (Copilot, Cline, Augment)
@@ -130,10 +135,10 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
     - Empirical model selection
 
     Example:
-        >>> from ttadev.primitives.integrations import UniversalLLMPrimitive
-        >>> from ttadev.primitives.integrations.budget import UserBudgetProfile
+        >>> from tta_dev_integrations.llm import BudgetAwareLLMPrimitive
+        >>> from tta_dev_integrations.llm import UserBudgetProfile
         >>>
-        >>> llm = UniversalLLMPrimitive(
+        >>> llm = BudgetAwareLLMPrimitive(
         ...     coder="auto",
         ...     budget_profile=UserBudgetProfile.CAREFUL,
         ...     monthly_limit=50.00,
@@ -412,3 +417,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             ),
             "justifications_count": len(self.justifications),
         }
+
+
+# Backward-compatibility alias — prefer BudgetAwareLLMPrimitive for new code.
+UniversalLLMPrimitive = BudgetAwareLLMPrimitive

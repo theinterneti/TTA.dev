@@ -1,7 +1,11 @@
 """Error recovery patterns for workflow primitives."""
 
-from .circuit_breaker import (
+from .circuit_breaker_primitive import (
     CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitBreakerError,
+    CircuitBreakerPrimitive,
+    CircuitState,
     ErrorCategory,
     ErrorSeverity,
     RetryConfig,
@@ -10,12 +14,6 @@ from .circuit_breaker import (
     should_retry,
     with_retry,
     with_retry_async,
-)
-from .circuit_breaker_primitive import (
-    CircuitBreakerConfig,
-    CircuitBreakerError,
-    CircuitBreakerPrimitive,
-    CircuitState,
 )
 from .compensation import CompensationStrategy, SagaPrimitive
 from .fallback import FallbackPrimitive, FallbackStrategy

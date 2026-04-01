@@ -10,6 +10,7 @@ Provides universal, budget-aware LLM integration supporting:
 """
 
 from tta_dev_integrations.llm.universal_llm_primitive import (
+    BudgetAwareLLMPrimitive,
     CoderType,
     CostJustification,
     LLMRequest,
@@ -22,7 +23,8 @@ from tta_dev_integrations.llm.universal_llm_primitive import (
 
 __all__ = [
     # Base primitive
-    "UniversalLLMPrimitive",
+    "BudgetAwareLLMPrimitive",
+    "UniversalLLMPrimitive",  # backward-compat alias
     # Enums
     "UserBudgetProfile",
     "CoderType",

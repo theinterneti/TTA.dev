@@ -1,6 +1,6 @@
 # TTA.dev Roadmap
 
-**Last Updated:** March 22, 2026
+**Last Updated:** June 2026 (reality-aligned; see Issue #234)
 
 ---
 
@@ -246,56 +246,41 @@ Pre-built workflows for common tasks:
 
 ---
 
-## Phase 4: Knowledge Integration (Q3 2026) 📋 PLANNED
+## Phase 4: Knowledge Integration (Q3 2026) 🚧 STUB IMPLEMENTED
 
-**Status:** Concept Phase
+**Status:** Partially implemented — core primitive exists, integration is aspirational
 
 **Goal:** Capture and surface best practices contextually throughout the development lifecycle.
 
-### Proposed Components
+### Implemented
 
-#### 1. Knowledge Base Module 📋
+**Location:** `ttadev/primitives/knowledge/`
 
-**Location:** `ttadev/primitives/knowledge/` (proposed)
+- ✅ `KnowledgeBasePrimitive` — query a knowledge backend for contextual guidance
+- ✅ `KBQuery`, `KBResult`, `KBPage` models with Pydantic validation
+- ✅ Graceful degradation when the configured backend is unavailable
+- ✅ Query types: `best_practices`, `common_mistakes`, `examples`, `related`, `tags`
 
-- 📋 `KnowledgeBase` - Store and query domain knowledge
-- 📋 `Topic` - Categorize knowledge domains
-- 📋 `BestPractice` - Capture proven patterns
-- 📋 `CommonMistake` - Document pitfalls
-- 📋 `ContextualQuery` - Retrieve relevant advice
+### Still Needed 📋
 
-#### 2. Knowledge Sources 📋
+- 📋 Populated knowledge content (best practices, common mistakes)
+- 📋 Integration with agent system (Phase 2) for contextual queries
+- 📋 Integration with guided workflows (Phase 3)
+- 📋 CLI commands that surface contextual tips
+- 📋 Lifecycle validation using knowledge base
 
-- 📋 Built-in expert knowledge (curated)
-- 📋 Community contributions (verified)
-- 📋 Project-specific patterns (learned from codebase)
-- 📋 User feedback (what worked/didn't work)
+### Phase 4 Success Criteria
 
-#### 3. Integration Points 📋
-
-- 📋 Agent system (Phase 2) queries knowledge base
-- 📋 Guided workflows (Phase 3) surface best practices
-- 📋 Lifecycle validation uses common mistakes
-- 📋 CLI commands provide contextual tips
-
-### Phase 4 Success Metrics
-
-- [ ] 100+ best practices documented
-- [ ] 50+ common mistakes catalogued
-- [ ] Community contributions >25% of knowledge
-- [ ] 80%+ relevance score on advice
+- [ ] Knowledge base populated with meaningful content (50+ entries)
+- [ ] Agent system queries knowledge base during workflow execution
+- [ ] 80%+ relevance on contextual advice
 
 ### Why Not Earlier?
 
 **Decision:** Need agent system and guided workflows to provide context for knowledge retrieval.
+The primitive exists now but is essentially a stub — there is no populated backend yet.
 
-**Questions:**
-
-- How do users prefer to consume knowledge?
-- What knowledge is most valuable?
-- How to prevent information overload?
-
-**Current approach:** Excellent documentation in markdown files.
+**Current approach:** Documentation in markdown files serves this role for now.
 
 ---
 
@@ -399,32 +384,14 @@ See: Phase 2 specs and examples are still being aligned; do not assume a canonic
 
 ## Contributing to the Roadmap
 
-### How to Influence Priorities
+This is a solo developer project. The roadmap reflects personal priorities and evolving reality — not a community vote.
 
-1. **Open GitHub Discussions** - Share your use cases
-2. **Vote on Issues** - 👍 features you need
-3. **Contribute Examples** - Show what you're building
-4. **Report Pain Points** - Tell us what's hard
+If you're using TTA.dev and hit something broken or missing:
 
-### What We Need to Know
+- **Open a GitHub Issue** with a clear description and reproduction steps
+- **Open a Discussion** to share how you're using primitives or what you wish existed
 
-**For Agent System (Phase 2):**
-
-- What specialized agents would you use?
-- What domain knowledge is most valuable?
-- Do you prefer generic or specialized abstractions?
-
-**For Guided Workflows (Phase 3):**
-
-- What tasks need step-by-step guidance?
-- Would you use interactive workflows or prefer docs?
-- How much hand-holding is helpful?
-
-**For Knowledge Base (Phase 4):**
-
-- What knowledge do you wish was queryable?
-- How should contextual advice be surfaced?
-- Would you contribute to a knowledge base?
+Priority is driven by what actually unblocks building TTA, not by feature requests.
 
 ---
 
@@ -444,11 +411,11 @@ See: Phase 2 specs and examples are still being aligned; do not assume a canonic
 
 | Phase | Status | Target window | Key Deliverable |
 |-------|--------|---------------|-----------------|
-| Phase 1: Foundation | ⚠ Mostly implemented | Q4 2025 | Core primitives + observability foundation |
-| Phase 2: Agents | ⚠ Partially implemented | Q1 2026 | Role-based agent system |
-| Phase 3: Guided Workflows | 📋 Planned | Q2 2026 | Interactive step-by-step guidance |
-| Phase 4: Knowledge Base | 📋 Planned | Q3 2026 | Contextual best practices |
-| Phase 5: IDE Integration | 📋 Concept | Q4 2026 | IDE and editor integrations |
+| Phase 1: Foundation | ⚠ Mostly implemented | Q4 2025 (delivered) | Core primitives + observability foundation |
+| Phase 2: Agents | ⚠ Partially implemented | Q1–Q2 2026 | Role-based agent system + L0 control plane |
+| Phase 3: Guided Workflows | 📋 Planned | Q3 2026 | Interactive step-by-step guidance |
+| Phase 4: Knowledge Base | 🚧 Stub exists | Q4 2026 | Contextual best practices (primitive exists, content doesn't) |
+| Phase 5: IDE Integration | 📋 Concept | 2027 | IDE and editor integrations |
 
 ---
 
@@ -528,4 +495,4 @@ The **Atomic DevOps Architecture** represents the ultimate evolution of TTA.dev 
 - GitHub Discussions: <https://github.com/theinterneti/TTA.dev/discussions>
 - Issues: <https://github.com/theinterneti/TTA.dev/issues>
 
-**Last Updated:** March 22, 2026
+**Last Updated:** June 2026 (reality-aligned; see Issue #234)
