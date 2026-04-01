@@ -30,14 +30,14 @@ class ControlPlaneStore:
         if not path.exists():
             return {}
         try:
-            data = json.loads(path.read_text())
+            data = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             return {}
         return data if isinstance(data, dict) else {}
 
     def _write_map(self, path: Path, payload: dict[str, Any]) -> None:
         tmp = path.with_suffix(path.suffix + ".tmp")
-        tmp.write_text(json.dumps(payload, indent=2, sort_keys=True))
+        tmp.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
         tmp.replace(path)
 
     def list_tasks(self) -> list[TaskRecord]:

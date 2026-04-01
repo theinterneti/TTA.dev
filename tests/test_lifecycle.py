@@ -13,7 +13,6 @@ Tests cover:
 """
 
 import subprocess
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -854,128 +853,118 @@ class TestGitChecks:
     """Tests for git validation checks."""
 
     @pytest.mark.asyncio
-    async def test_working_tree_clean(self, context: WorkflowContext) -> None:
+    async def test_working_tree_clean(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test WORKING_TREE_CLEAN against a clean git repo."""
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "config", "user.email", "test@test.com"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["git", "config", "user.name", "Test"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            (tmp_path / "file.txt").write_text("hello")
-            subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@test.com"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        (tmp_path / "file.txt").write_text("hello")
+        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
 
-            result = await WORKING_TREE_CLEAN.execute(tmp_path, context)
-            assert result.passed
+        result = await WORKING_TREE_CLEAN.execute(tmp_path, context)
+        assert result.passed
 
     @pytest.mark.asyncio
-    async def test_working_tree_dirty(self, context: WorkflowContext) -> None:
+    async def test_working_tree_dirty(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test WORKING_TREE_CLEAN fails with uncommitted changes."""
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "config", "user.email", "test@test.com"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["git", "config", "user.name", "Test"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            (tmp_path / "file.txt").write_text("hello")
-            subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
-            # Now make a dirty change
-            (tmp_path / "dirty.txt").write_text("uncommitted")
+        subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@test.com"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        (tmp_path / "file.txt").write_text("hello")
+        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
+        # Now make a dirty change
+        (tmp_path / "dirty.txt").write_text("uncommitted")
 
-            result = await WORKING_TREE_CLEAN.execute(tmp_path, context)
-            assert not result.passed
+        result = await WORKING_TREE_CLEAN.execute(tmp_path, context)
+        assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_on_correct_branch_main(self, context: WorkflowContext) -> None:
+    async def test_on_correct_branch_main(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test ON_CORRECT_BRANCH passes on main branch."""
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            subprocess.run(["git", "init", "-b", "main"], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "config", "user.email", "test@test.com"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["git", "config", "user.name", "Test"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            (tmp_path / "f.txt").write_text("x")
-            subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "init", "-b", "main"], cwd=tmp_path, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@test.com"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        (tmp_path / "f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
 
-            result = await ON_CORRECT_BRANCH.execute(tmp_path, context)
-            assert result.passed
+        result = await ON_CORRECT_BRANCH.execute(tmp_path, context)
+        assert result.passed
 
     @pytest.mark.asyncio
-    async def test_on_correct_branch_feature(self, context: WorkflowContext) -> None:
+    async def test_on_correct_branch_feature(
+        self, context: WorkflowContext, tmp_path: Path
+    ) -> None:
         """Test ON_CORRECT_BRANCH fails on feature branch."""
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            subprocess.run(["git", "init", "-b", "main"], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "config", "user.email", "test@test.com"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["git", "config", "user.name", "Test"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            (tmp_path / "f.txt").write_text("x")
-            subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "checkout", "-b", "feature/my-branch"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
+        subprocess.run(["git", "init", "-b", "main"], cwd=tmp_path, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@test.com"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        (tmp_path / "f.txt").write_text("x")
+        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
+        subprocess.run(
+            ["git", "checkout", "-b", "feature/my-branch"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
 
-            result = await ON_CORRECT_BRANCH.execute(tmp_path, context)
-            assert not result.passed
+        result = await ON_CORRECT_BRANCH.execute(tmp_path, context)
+        assert not result.passed
 
     @pytest.mark.asyncio
-    async def test_version_bumped_no_tags(self, context: WorkflowContext) -> None:
+    async def test_version_bumped_no_tags(self, context: WorkflowContext, tmp_path: Path) -> None:
         """Test VERSION_BUMPED passes when no tags exist (first release)."""
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_path = Path(tmp)
-            subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
-            subprocess.run(
-                ["git", "config", "user.email", "test@test.com"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            subprocess.run(
-                ["git", "config", "user.name", "Test"],
-                cwd=tmp_path,
-                capture_output=True,
-            )
-            (tmp_path / "pyproject.toml").write_text(
-                '[project]\nname = "test"\nversion = "0.1.0"\n'
-            )
-            subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
-            subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "init"], cwd=tmp_path, capture_output=True)
+        subprocess.run(
+            ["git", "config", "user.email", "test@test.com"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test"],
+            cwd=tmp_path,
+            capture_output=True,
+        )
+        (tmp_path / "pyproject.toml").write_text('[project]\nname = "test"\nversion = "0.1.0"\n')
+        subprocess.run(["git", "add", "."], cwd=tmp_path, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "init"], cwd=tmp_path, capture_output=True)
 
-            result = await VERSION_BUMPED.execute(tmp_path, context)
-            assert result.passed  # No tags = version considered bumped
+        result = await VERSION_BUMPED.execute(tmp_path, context)
+        assert result.passed  # No tags = version considered bumped
 
     @pytest.mark.asyncio
     async def test_version_bumped_no_manifest(
