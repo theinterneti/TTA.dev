@@ -65,6 +65,7 @@ That flow currently proves:
 - [**Contributing**](CONTRIBUTING.md) - development guide
 - [**Feature Dev + L0 Example**](docs/examples/feature-dev-l0-workflow.md) - run
   the current proof workflow and inspect it through `tta control`
+- [**Resilient LLM pipeline**](examples/resilient_llm_pipeline.py) — Groq wrapped in retry + circuit breaker + OTel tracing
 
 ## License
 
