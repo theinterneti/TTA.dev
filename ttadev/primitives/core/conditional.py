@@ -9,7 +9,13 @@ import time
 from collections.abc import Callable
 from typing import Any
 
-from opentelemetry import trace
+try:
+    from opentelemetry import trace
+
+    _TRACING_AVAILABLE = True
+except ImportError:
+    trace = None  # type: ignore[assignment]
+    _TRACING_AVAILABLE = False
 
 from ..observability.enhanced_collector import get_enhanced_metrics_collector
 from ..observability.instrumented_primitive import TRACING_AVAILABLE
@@ -163,7 +169,7 @@ class ConditionalPrimitive(WorkflowPrimitive[Any, Any]):
         branch_start_time = time.time()
 
         # Create branch span (if tracing available)
-        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
+        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE and trace is not None else None
 
         if tracer and TRACING_AVAILABLE:
             with tracer.start_as_current_span(f"conditional.branch_{branch_name}") as span:
@@ -370,7 +376,7 @@ class SwitchPrimitive(WorkflowPrimitive[Any, Any]):
         case_start_time = time.time()
 
         # Create case span (if tracing available)
-        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
+        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE and trace is not None else None
 
         if tracer and TRACING_AVAILABLE:
             with tracer.start_as_current_span(f"switch.{case_name}") as span:

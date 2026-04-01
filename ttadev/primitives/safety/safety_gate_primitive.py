@@ -26,7 +26,13 @@ from collections.abc import Awaitable, Callable
 from enum import Enum, IntEnum
 from typing import Any
 
-from opentelemetry import trace
+try:
+    from opentelemetry import trace
+
+    _TRACING_AVAILABLE = True
+except ImportError:
+    trace = None  # type: ignore[assignment]
+    _TRACING_AVAILABLE = False
 
 from ..core.base import WorkflowContext, WorkflowPrimitive
 from ..observability.instrumented_primitive import TRACING_AVAILABLE
@@ -255,7 +261,7 @@ class SafetyGatePrimitive(WorkflowPrimitive[Any, Any]):
         """
         severity: SeverityLevel = await self.scorer(input_data, context)
 
-        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE else None
+        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE and trace is not None else None
 
         if tracer:
             with tracer.start_as_current_span("safety_gate.execute") as span:
