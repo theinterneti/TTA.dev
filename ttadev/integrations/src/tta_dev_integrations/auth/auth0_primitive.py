@@ -1,6 +1,9 @@
 """Auth0 authentication integration primitive - SKELETON."""
 
-# TODO: Implement Auth0Primitive
+# TODO: Implement Auth0Primitive #dev-todo
+# type:: implementation
+# priority:: high
+# package:: tta-dev-integrations
 # Auth0 authentication service
 
 from primitives import WorkflowContext

@@ -46,7 +46,10 @@ def _get_active_otel_context() -> tuple[str | None, str | None]:
     active span is present (e.g., CLI invocations that inherit a trace from a
     parent process).
     """
-    from opentelemetry import trace as _otel_trace  # local import to avoid cost at import time
+    try:
+        from opentelemetry import trace as _otel_trace  # local import to avoid cost at import time
+    except ImportError:
+        return None, None
 
     span = _otel_trace.get_current_span()
     ctx = span.get_span_context()

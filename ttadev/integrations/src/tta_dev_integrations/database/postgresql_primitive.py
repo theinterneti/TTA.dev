@@ -1,6 +1,9 @@
 """PostgreSQL integration primitive - SKELETON."""
 
-# TODO: Implement PostgreSQLPrimitive
+# TODO: Implement PostgreSQLPrimitive #dev-todo
+# type:: implementation
+# priority:: high
+# package:: tta-dev-integrations
 # Direct PostgreSQL database access via asyncpg
 
 from primitives import WorkflowContext
