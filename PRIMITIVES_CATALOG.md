@@ -2,7 +2,7 @@
 
 **Complete Reference for All Workflow Primitives**
 
-**Last Updated:** 2026-03-26
+**Last Updated:** 2026-04-07
 
 ---
 
@@ -38,6 +38,7 @@ This catalog provides a complete reference for all TTA.dev workflow primitives, 
 7. [Observability Primitives](#observability-primitives) - Tracing and metrics
 8. [ACE Framework Primitives](#ace-framework-primitives) - LLM-powered code generation and learning
 9. [Extension Modules](#extension-modules) - Specialized non-core primitives
+10. [Composition Patterns](#composition-patterns) - Multi-primitive recipes
 
 ---
 
@@ -352,22 +353,30 @@ from ttadev.primitives.recovery import CircuitBreakerPrimitive
 
 **Usage:**
 \`\`\`python
+from ttadev.primitives import WorkflowContext
 from ttadev.primitives.recovery import CircuitBreakerPrimitive
-
-# Protect an unreliable service
-protected_service = CircuitBreakerPrimitive(
-    primitive=unreliable_service_call,
-    failure_threshold=5,      # 5 consecutive failures to open circuit
-    recovery_timeout=60.0,    # 60 seconds before testing recovery
-    success_threshold=2       # 2 successes in half-open to close
+from ttadev.primitives.recovery.circuit_breaker import (
+    CircuitBreakerConfig,
+    CircuitBreakerError,
+    CircuitState,
 )
 
-# Use it - automatic state management
+config = CircuitBreakerConfig(
+    failure_threshold=5,      # 5 consecutive failures to open circuit
+    recovery_timeout=30.0,    # seconds before testing recovery
+    success_threshold=2,      # successes in HALF_OPEN to close
+)
+protected_service = CircuitBreakerPrimitive(primitive=unreliable_service, config=config)
+ctx = WorkflowContext(workflow_id="demo")
+
 try:
-    result = await protected_service.execute(data, context)
-except CircuitBreakerOpenError:
-    # Circuit is open, service unavailable
-    return fallback_response
+    result = await protected_service.execute(data, ctx)
+except CircuitBreakerError as e:
+    print(f"Circuit open: {e.failure_count} failures, last={e.last_error}")
+
+# Inspect and manually reset
+print(protected_service.state)  # CircuitState.CLOSED | OPEN | HALF_OPEN
+protected_service.reset()
 \`\`\`
 
 **Features:**
@@ -1193,6 +1202,57 @@ recovered = await coord.recover_pending(worker)
 
 ---
 
+---
+
+## Composition Patterns
+
+Real-world multi-primitive recipes that combine the building blocks above.
+
+### LLM Fallback Chain
+
+```python
+from ttadev.primitives import (
+    FallbackPrimitive, RetryPrimitive, WorkflowContext,
+    UniversalLLMPrimitive, LLMProvider,
+)
+from ttadev.primitives.recovery.retry import RetryStrategy
+
+groq   = UniversalLLMPrimitive(provider=LLMProvider.GROQ,      api_key="...")
+claude = UniversalLLMPrimitive(provider=LLMProvider.ANTHROPIC, api_key="...")
+ollama = UniversalLLMPrimitive(provider=LLMProvider.OLLAMA)
+
+chain = FallbackPrimitive(
+    primary=RetryPrimitive(groq, strategy=RetryStrategy(max_retries=2)),
+    fallback=FallbackPrimitive(primary=claude, fallback=ollama),
+)
+result = await chain.execute(request, WorkflowContext(workflow_id="fallback-demo"))
+```
+
+### Circuit Breaker + Fallback
+
+```python
+from ttadev.primitives.recovery import CircuitBreakerPrimitive
+from ttadev.primitives.recovery.circuit_breaker import CircuitBreakerConfig
+from ttadev.primitives import FallbackPrimitive
+
+config = CircuitBreakerConfig(failure_threshold=3, recovery_timeout=30.0)
+chain = FallbackPrimitive(
+    primary=CircuitBreakerPrimitive(primitive=groq, config=config),
+    fallback=ollama,
+)
+```
+
+### Safety Gate → LLM
+
+```python
+from ttadev.primitives.safety import SafetyGatePrimitive, ThreatLevel
+from ttadev.primitives import WorkflowContext
+
+gate = SafetyGatePrimitive(threshold=ThreatLevel.MODERATE)
+pipeline = gate >> llm_primitive
+result = await pipeline.execute(user_input, WorkflowContext(workflow_id="safe-llm"))
+```
+
 ## Related Documentation
 
 - **Getting Started:** [\`GETTING_STARTED.md\`](GETTING_STARTED.md)
@@ -1204,6 +1264,6 @@ recovered = await coord.recover_pending(worker)
 
 ---
 
-**Last Updated:** 2026-03-23
+**Last Updated:** 2026-04-07
 **Maintained by:** TTA.dev Team
 **License:** See package licenses
