@@ -1,5 +1,10 @@
 """Performance optimization primitives."""
 
-from .cache import CachePrimitive
+from .cache import CacheBackend, CachePrimitive, InMemoryBackend, RedisBackend
 
-__all__ = ["CachePrimitive"]
+__all__ = [
+    "CacheBackend",
+    "CachePrimitive",
+    "InMemoryBackend",
+    "RedisBackend",
+]

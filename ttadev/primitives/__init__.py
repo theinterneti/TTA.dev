@@ -43,7 +43,7 @@ from .llm import LLMProvider, LLMRequest, LLMResponse, UniversalLLMPrimitive
 from .memory import AgentMemory, HindsightClient, MemoryResult, RetainResult
 
 # ── Core: performance ───────────────────────────────────────────────────
-from .performance.cache import CachePrimitive
+from .performance.cache import CacheBackend, CachePrimitive, InMemoryBackend, RedisBackend
 
 # ── Core: persistence ───────────────────────────────────────────────────
 from .persistence import AbstractRepository, AbstractUnitOfWork, FakeUnitOfWork
@@ -88,7 +88,10 @@ __all__ = [
     "IntegrationFrequency",
     "MergeStrategy",
     # Performance primitives
+    "CacheBackend",
     "CachePrimitive",
+    "InMemoryBackend",
+    "RedisBackend",
     # Safety primitives
     "SafetyGatePrimitive",
     "SafetyGateEscalatedError",
