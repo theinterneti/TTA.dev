@@ -222,8 +222,8 @@ class TestPrimitiveAdoption:
             if not has_try_except:
                 missing_error_handling.append(py_file.name)
 
-        # Allow some exceptions (e.g., pure wrapper classes)
-        allowed_exceptions = {"__init__.py"}
+        # Allow pure re-export / shim modules that contain no logic
+        allowed_exceptions = {"__init__.py", "circuit_breaker.py"}
 
         unexpected_files = [f for f in missing_error_handling if f not in allowed_exceptions]
 
