@@ -11,11 +11,8 @@ from typing import Any
 
 try:
     from opentelemetry import trace
-
-    _TRACING_AVAILABLE = True
 except ImportError:
     trace = None  # type: ignore[assignment]
-    _TRACING_AVAILABLE = False
 
 from ..core.base import WorkflowContext, WorkflowPrimitive
 from ..observability.enhanced_collector import get_enhanced_metrics_collector
@@ -117,7 +114,9 @@ class SagaPrimitive(WorkflowPrimitive[Any, Any]):
 
         # Create forward span (if tracing available)
 
-        tracer = trace.get_tracer(__name__) if TRACING_AVAILABLE and trace is not None else None
+        tracer = None
+        if TRACING_AVAILABLE and trace is not None:
+            tracer = trace.get_tracer(__name__)
 
         try:
             if tracer and TRACING_AVAILABLE:
