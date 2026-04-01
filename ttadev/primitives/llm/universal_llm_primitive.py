@@ -1,7 +1,7 @@
 """UniversalLLMPrimitive — runtime LLM provider abstraction.
 
 Provides a single interface for invoking LLMs across providers
-(Groq, Anthropic, OpenAI, Ollama). Config-driven, swappable backends.
+(Groq, Anthropic, OpenAI, Ollama, Gemini). Config-driven, swappable backends.
 
 Note: Distinct from ttadev/integrations/llm/universal_llm_primitive.py
 which handles agentic coder budget profiles.
@@ -9,6 +9,7 @@ which handles agentic coder budget profiles.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
@@ -31,6 +32,7 @@ class LLMProvider(StrEnum):
     ANTHROPIC = "anthropic"
     OPENAI = "openai"
     OLLAMA = "ollama"
+    GEMINI = "gemini"
 
 
 @dataclass
@@ -74,6 +76,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.ANTHROPIC: self._call_anthropic,
             LLMProvider.OPENAI: self._call_openai,
             LLMProvider.OLLAMA: self._call_ollama,
+            LLMProvider.GEMINI: self._call_gemini,
         }
 
         if not (OTEL_AVAILABLE and otel_trace is not None):
@@ -118,6 +121,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.ANTHROPIC: self._stream_anthropic,
             LLMProvider.OPENAI: self._stream_openai,
             LLMProvider.OLLAMA: self._stream_ollama,
+            LLMProvider.GEMINI: self._stream_gemini,
         }
         async for token in dispatch[self._provider](request, ctx):
             yield token
@@ -284,3 +288,81 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                         yield content
                     if data.get("done"):
                         break
+
+    async def _call_gemini(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Call Google Gemini via the google-generativeai SDK.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Returns:
+            LLMResponse with content, model, provider, and usage metadata.
+
+        Raises:
+            ImportError: If google-generativeai is not installed.
+        """
+        try:
+            import google.generativeai as genai  # type: ignore[import]
+        except ImportError as exc:
+            raise ImportError(
+                "google-generativeai is required for the Gemini provider. "
+                "Install it with: pip install 'ttadev[gemini]' or pip install google-generativeai"
+            ) from exc
+
+        if self._api_key:
+            genai.configure(api_key=self._api_key)
+
+        model_name = request.model or "gemini-2.0-flash"
+        model = genai.GenerativeModel(model_name=model_name)
+        parts = [msg.get("content", "") for msg in request.messages]
+        response = await asyncio.to_thread(model.generate_content, parts)
+
+        usage: dict[str, int] | None = None
+        if hasattr(response, "usage_metadata") and response.usage_metadata is not None:
+            usage = {
+                "prompt_tokens": getattr(response.usage_metadata, "prompt_token_count", 0) or 0,
+                "completion_tokens": getattr(response.usage_metadata, "candidates_token_count", 0)
+                or 0,
+            }
+
+        return LLMResponse(
+            content=response.text,
+            model=model_name,
+            provider="gemini",
+            usage=usage,
+        )
+
+    async def _stream_gemini(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
+        """Stream tokens from Google Gemini.
+
+        Yields the full response text as a single chunk. Gemini's generate_content
+        is synchronous; yielding the complete response avoids threading complexity
+        while keeping the AsyncIterator[str] contract intact.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Yields:
+            Full response content as a single string token.
+
+        Raises:
+            ImportError: If google-generativeai is not installed.
+        """
+        try:
+            import google.generativeai as genai  # type: ignore[import]
+        except ImportError as exc:
+            raise ImportError(
+                "google-generativeai is required for the Gemini provider. "
+                "Install it with: pip install 'ttadev[gemini]' or pip install google-generativeai"
+            ) from exc
+
+        if self._api_key:
+            genai.configure(api_key=self._api_key)
+
+        model_name = request.model or "gemini-2.0-flash"
+        model = genai.GenerativeModel(model_name=model_name)
+        parts = [msg.get("content", "") for msg in request.messages]
+        response = await asyncio.to_thread(model.generate_content, parts)
+        yield response.text

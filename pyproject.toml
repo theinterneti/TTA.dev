@@ -52,6 +52,12 @@ cgc = [
 coordination = [
     "redis[asyncio]>=5.0",
 ]
+redis = [
+    "redis[asyncio]>=5.0",
+]
+gemini = [
+    "google-generativeai>=0.8.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/theinterneti/TTA.dev"
