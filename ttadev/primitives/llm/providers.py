@@ -13,25 +13,37 @@ Adding a new provider
    ``_call_openai_compat()`` helper.
 3. If the provider requires an SDK (``openai_compat=False``), add a
    ``_call_<name>`` method to ``UniversalLLMPrimitive``.
+4. Set ``preferred_path`` to indicate whether the native SDK or the
+   OpenAI-compatible HTTP endpoint is the preferred call path (see below).
 
-Provider contract summary
--------------------------
-+---------------+---------------------------+----------------+------------------+
-| Provider      | Auth env var              | OpenAI-compat? | Notes            |
-+===============+===========================+================+==================+
-| groq          | GROQ_API_KEY              | Yes            | Free tier        |
-| together      | TOGETHER_API_KEY          | Yes            | Free tier        |
-| openrouter    | OPENROUTER_API_KEY        | Yes            | Free models via  |
-|               |                           |                | /free suffix     |
-| gemini        | GOOGLE_API_KEY            | Yes            | Google's OAI-    |
-|               |                           |                | compat endpoint  |
-| xai           | XAI_API_KEY               | Yes            | Grok models via  |
-|               |                           |                | xAI OAI-compat   |
-| openai        | OPENAI_API_KEY            | Yes            | SDK preferred    |
-| ollama        | (none — local daemon)     | Yes            | localhost:11434  |
-| anthropic     | ANTHROPIC_API_KEY         | No (SDK only)  | claude-* models  |
-| huggingface   | HF_TOKEN                  | Yes            | HF Inference API |
-+---------------+---------------------------+----------------+------------------+
+Provider strategy (Option C — explicit dual-path)
+--------------------------------------------------
+TTA.dev uses native provider SDKs where they add value (richer errors,
+provider-specific params, proper streaming) and the OpenAI-compatible HTTP
+endpoint everywhere else.  The ``preferred_path`` field documents which path
+each provider uses *by default*.  Pass ``use_compat=True`` to
+:class:`UniversalLLMPrimitive` to force the OpenAI-compat path for any
+provider that exposes one (useful for testing or when you want a
+provider-agnostic interface).
+
++---------------+---------------------------+----------+---------+------------------+
+| Provider      | Auth env var              | SDK pkg  | Path    | Notes            |
++===============+===========================+==========+=========+==================+
+| groq          | GROQ_API_KEY              | groq     | sdk     | Rich errors,     |
+|               |                           |          |         | free tier        |
+| openai        | OPENAI_API_KEY            | openai   | sdk     | Native OpenAI    |
+| anthropic     | ANTHROPIC_API_KEY         | anthropic| sdk     | No compat; SDK   |
+|               |                           |          |         | required         |
+| gemini        | GOOGLE_API_KEY            | (none)   | compat  | google.genai     |
+|               |                           |          |         | deprecated; use  |
+|               |                           |          |         | OAI-compat       |
+| together      | TOGETHER_API_KEY          | (none)   | compat  | Free tier        |
+| openrouter    | OPENROUTER_API_KEY        | (none)   | compat  | Free models via  |
+|               |                           |          |         | /free suffix     |
+| xai           | XAI_API_KEY               | (none)   | compat  | Grok models      |
+| ollama        | (none — local daemon)     | (none)   | compat  | localhost:11434  |
+| huggingface   | HF_TOKEN                  | (none)   | compat  | HF Inference API |
++---------------+---------------------------+----------+---------+------------------+
 """
 
 from __future__ import annotations
@@ -57,6 +69,14 @@ class ProviderSpec:
         openai_compat: ``True`` if the provider speaks the OpenAI chat
             completions wire format.  ``ModelRouterPrimitive`` only works
             with OpenAI-compatible providers.
+        sdk_package: Python package name for the native SDK (e.g. ``"groq"``,
+            ``"anthropic"``).  ``None`` means no native SDK is used; the
+            OpenAI-compatible HTTP path is the only option.
+        preferred_path: Which call path ``UniversalLLMPrimitive`` uses by
+            default.  ``"sdk"`` means a provider-specific SDK method is
+            called; ``"compat"`` means the generic OpenAI-compat helper is
+            used.  Pass ``use_compat=True`` to ``UniversalLLMPrimitive`` to
+            override this for any ``openai_compat=True`` provider.
     """
 
     name: str
@@ -65,6 +85,8 @@ class ProviderSpec:
     extra_headers: dict[str, str] = field(default_factory=dict)
     default_model: str = ""
     openai_compat: bool = True
+    sdk_package: str | None = None
+    preferred_path: str = "compat"  # "sdk" | "compat"
 
 
 #: Registry of all supported LLM providers.
@@ -78,6 +100,8 @@ PROVIDERS: dict[str, ProviderSpec] = {
         env_var="GROQ_API_KEY",
         default_model="llama-3.1-8b-instant",
         openai_compat=True,
+        sdk_package="groq",
+        preferred_path="sdk",
     ),
     "together": ProviderSpec(
         name="together",
@@ -85,6 +109,8 @@ PROVIDERS: dict[str, ProviderSpec] = {
         env_var="TOGETHER_API_KEY",
         default_model="meta-llama/Llama-3.2-3B-Instruct-Turbo",
         openai_compat=True,
+        sdk_package=None,
+        preferred_path="compat",
     ),
     "openrouter": ProviderSpec(
         name="openrouter",
@@ -96,15 +122,21 @@ PROVIDERS: dict[str, ProviderSpec] = {
         },
         default_model="mistralai/mistral-7b-instruct:free",
         openai_compat=True,
+        sdk_package=None,
+        preferred_path="compat",
     ),
     "gemini": ProviderSpec(
         name="gemini",
         # Google publishes a full OpenAI-compatible endpoint:
         # https://ai.google.dev/gemini-api/docs/openai
+        # google.generativeai is deprecated; google.genai is the new SDK but
+        # the OAI-compat path is simpler and avoids an extra dependency.
         base_url="https://generativelanguage.googleapis.com/v1beta/openai",
         env_var="GOOGLE_API_KEY",
         default_model="models/gemini-2.5-flash",
         openai_compat=True,
+        sdk_package=None,
+        preferred_path="compat",
     ),
     "xai": ProviderSpec(
         name="xai",
@@ -114,6 +146,8 @@ PROVIDERS: dict[str, ProviderSpec] = {
         env_var="XAI_API_KEY",
         default_model="grok-3-mini",
         openai_compat=True,
+        sdk_package=None,
+        preferred_path="compat",
     ),
     "openai": ProviderSpec(
         name="openai",
@@ -121,6 +155,8 @@ PROVIDERS: dict[str, ProviderSpec] = {
         env_var="OPENAI_API_KEY",
         default_model="gpt-4o-mini",
         openai_compat=True,
+        sdk_package="openai",
+        preferred_path="sdk",
     ),
     "ollama": ProviderSpec(
         name="ollama",
@@ -128,13 +164,19 @@ PROVIDERS: dict[str, ProviderSpec] = {
         env_var="",  # no key required for local daemon
         default_model="llama3.2",
         openai_compat=True,
+        sdk_package=None,
+        preferred_path="compat",
     ),
     "anthropic": ProviderSpec(
         name="anthropic",
-        base_url="",  # SDK-only — no OpenAI-compat endpoint
+        # Anthropic does not publish an OpenAI-compatible endpoint.
+        # The anthropic SDK is required.
+        base_url="",
         env_var="ANTHROPIC_API_KEY",
         default_model="claude-3-5-haiku-20241022",
         openai_compat=False,
+        sdk_package="anthropic",
+        preferred_path="sdk",
     ),
     "huggingface": ProviderSpec(
         name="huggingface",
@@ -146,6 +188,8 @@ PROVIDERS: dict[str, ProviderSpec] = {
         env_var="HF_TOKEN",
         default_model="meta-llama/Llama-3.2-3B-Instruct",
         openai_compat=True,
+        sdk_package=None,
+        preferred_path="compat",
     ),
 }
 
@@ -175,3 +219,12 @@ def openai_compat_providers() -> list[ProviderSpec]:
         List of :class:`ProviderSpec` instances where ``openai_compat=True``.
     """
     return [p for p in PROVIDERS.values() if p.openai_compat]
+
+
+def sdk_preferred_providers() -> list[ProviderSpec]:
+    """Return providers whose preferred call path is the native SDK.
+
+    Returns:
+        List of :class:`ProviderSpec` instances where ``preferred_path=="sdk"``.
+    """
+    return [p for p in PROVIDERS.values() if p.preferred_path == "sdk"]

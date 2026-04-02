@@ -33,7 +33,6 @@ Install extras::
 
 from __future__ import annotations
 
-import asyncio
 import json
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
@@ -224,29 +223,43 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         provider: LLMProvider,
         api_key: str | None = None,
         base_url: str | None = None,
+        use_compat: bool = False,
     ) -> None:
+        """Create a :class:`UniversalLLMPrimitive` for the given provider.
+
+        Args:
+            provider: Which LLM provider to route requests to.
+            api_key: Provider API key.  When ``None`` the key is read from the
+                environment variable specified in :data:`~.providers.PROVIDERS`.
+            base_url: Override the provider's base URL (useful for proxies and
+                self-hosted models).
+            use_compat: When ``True``, force the generic OpenAI-compatible HTTP
+                path even for providers whose :attr:`~.providers.ProviderSpec.preferred_path`
+                is ``"sdk"`` (e.g. Groq uses its native SDK by default, but
+                ``use_compat=True`` routes through ``api.groq.com/openai/v1``
+                instead).  Only valid for providers with ``openai_compat=True``
+                in the registry.  Anthropic raises :exc:`ValueError` because it
+                does not expose an OpenAI-compatible endpoint.
+        """
         super().__init__()
         if not isinstance(provider, LLMProvider):
             raise ValueError(f"Unknown provider: {provider!r}. Use LLMProvider enum.")
         self._provider = provider
         self._api_key = api_key
         self._base_url = base_url
+        self._use_compat = use_compat
 
     async def execute(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
-        """Invoke provider and return a complete response, with OTel tracing."""
-        dispatch = {
-            LLMProvider.GROQ: self._call_groq,
-            LLMProvider.ANTHROPIC: self._call_anthropic,
-            LLMProvider.OPENAI: self._call_openai,
-            LLMProvider.OLLAMA: self._call_ollama,
-            LLMProvider.GEMINI: self._call_gemini,
-            LLMProvider.OPENROUTER: self._call_openrouter,
-            LLMProvider.TOGETHER: self._call_together,
-            LLMProvider.XAI: self._call_xai,
-        }
+        """Invoke provider and return a complete response, with OTel tracing.
+
+        Respects ``use_compat``: when ``True`` and the provider has an
+        OpenAI-compatible endpoint, routes through :meth:`_call_openai_compat`
+        instead of the provider-specific SDK method.
+        """
+        call_fn = self._resolve_call_fn(request, ctx)
 
         if not (OTEL_AVAILABLE and otel_trace is not None):
-            return await dispatch[self._provider](request, ctx)
+            return await call_fn(request, ctx)
 
         tracer = otel_trace.get_tracer(__name__)
         span_name = f"gen_ai.{self._provider.value}.invoke"
@@ -255,7 +268,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             span.set_attribute("gen_ai.request.model", request.model)
             span.set_attribute("gen_ai.request.temperature", request.temperature)
             try:
-                response = await dispatch[self._provider](request, ctx)
+                response = await call_fn(request, ctx)
             except Exception as e:
                 span.record_exception(e)
                 from opentelemetry.trace import Status, StatusCode  # noqa: PLC0415
@@ -275,6 +288,10 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
     async def stream(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
         """Yield tokens as they arrive from the provider.
 
+        Respects ``use_compat``: when ``True`` and the provider has an
+        OpenAI-compatible endpoint, routes through :meth:`_stream_openai_compat`
+        instead of the provider-specific SDK stream method.
+
         Args:
             request: LLM invocation parameters.
             ctx: Workflow execution context.
@@ -282,7 +299,62 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         Yields:
             Token strings as they stream from the provider.
         """
-        dispatch = {
+        stream_fn = self._resolve_stream_fn(request, ctx)
+        async for token in stream_fn(request, ctx):
+            yield token
+
+    def _resolve_call_fn(
+        self, request: LLMRequest, ctx: WorkflowContext
+    ):  # -> Callable[..., Awaitable[LLMResponse]]
+        """Return the non-streaming call coroutine for the current configuration.
+
+        When ``use_compat=True``, returns a bound partial of
+        :meth:`_call_openai_compat` if the provider supports it, otherwise
+        falls back to the provider-specific method.
+        """
+        from ttadev.primitives.llm.providers import PROVIDERS  # noqa: PLC0415
+
+        spec = PROVIDERS.get(self._provider.value)
+        if self._use_compat:
+            if not spec or not spec.openai_compat:
+                raise ValueError(
+                    f"Provider {self._provider.value!r} does not expose an OpenAI-compatible "
+                    "endpoint; use_compat=True is not supported for this provider."
+                )
+            import functools  # noqa: PLC0415
+
+            return functools.partial(self._call_openai_compat, provider_name=self._provider.value)
+
+        dispatch: dict = {
+            LLMProvider.GROQ: self._call_groq,
+            LLMProvider.ANTHROPIC: self._call_anthropic,
+            LLMProvider.OPENAI: self._call_openai,
+            LLMProvider.OLLAMA: self._call_ollama,
+            LLMProvider.GEMINI: self._call_gemini,
+            LLMProvider.OPENROUTER: self._call_openrouter,
+            LLMProvider.TOGETHER: self._call_together,
+            LLMProvider.XAI: self._call_xai,
+        }
+        return dispatch[self._provider]
+
+    def _resolve_stream_fn(
+        self, request: LLMRequest, ctx: WorkflowContext
+    ):  # -> Callable[..., AsyncIterator[str]]
+        """Return the streaming call coroutine for the current configuration."""
+        from ttadev.primitives.llm.providers import PROVIDERS  # noqa: PLC0415
+
+        spec = PROVIDERS.get(self._provider.value)
+        if self._use_compat:
+            if not spec or not spec.openai_compat:
+                raise ValueError(
+                    f"Provider {self._provider.value!r} does not expose an OpenAI-compatible "
+                    "endpoint; use_compat=True is not supported for this provider."
+                )
+            import functools  # noqa: PLC0415
+
+            return functools.partial(self._stream_openai_compat, provider_name=self._provider.value)
+
+        dispatch: dict = {
             LLMProvider.GROQ: self._stream_groq,
             LLMProvider.ANTHROPIC: self._stream_anthropic,
             LLMProvider.OPENAI: self._stream_openai,
@@ -292,10 +364,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.TOGETHER: self._stream_together,
             LLMProvider.XAI: self._stream_xai,
         }
-        async for token in dispatch[self._provider](request, ctx):
-            yield token
-
-    # ── Internal helpers ──────────────────────────────────────────────────────
+        return dispatch[self._provider]
 
     @staticmethod
     def _parse_openai_tool_calls(raw_calls: object) -> list[ToolCall] | None:
@@ -343,6 +412,132 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             "tools": [t.to_openai() for t in request.tools],
             "tool_choice": request.tool_choice,
         }
+
+    # ── Non-streaming provider calls ──────────────────────────────────────────
+
+    async def _call_openai_compat(
+        self, request: LLMRequest, ctx: WorkflowContext, *, provider_name: str
+    ) -> LLMResponse:
+        """Generic non-streaming call for any OpenAI-compatible provider.
+
+        Used when ``use_compat=True`` is passed to the constructor, or directly
+        by providers whose :attr:`~.providers.ProviderSpec.preferred_path` is
+        ``"compat"`` (Gemini, OpenRouter, Together, xAI, Ollama, HuggingFace).
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context (unused, kept for interface parity).
+            provider_name: Canonical provider key in :data:`~.providers.PROVIDERS`.
+
+        Returns:
+            LLMResponse with content, model, provider, usage metadata, and
+            optional tool_calls / finish_reason.
+
+        Raises:
+            ValueError: If the provider is not in the registry, does not support
+                OpenAI-compat, or no API key is available.
+            KeyError: If *provider_name* is not in :data:`~.providers.PROVIDERS`.
+        """
+        import os  # noqa: PLC0415
+
+        from openai import AsyncOpenAI  # noqa: PLC0415
+
+        from ttadev.primitives.llm.providers import PROVIDERS  # noqa: PLC0415
+
+        spec = PROVIDERS[provider_name]
+        if not spec.openai_compat:
+            raise ValueError(
+                f"Provider {provider_name!r} does not support the OpenAI-compatible "
+                "HTTP endpoint.  Remove use_compat=True or use the native SDK path."
+            )
+        key = self._api_key or (os.getenv(spec.env_var) if spec.env_var else "no-key")
+        if not key and spec.env_var:
+            raise ValueError(
+                f"{spec.env_var} is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(
+            api_key=key or "no-key",
+            base_url=self._base_url or spec.base_url,
+            default_headers=spec.extra_headers,
+        )
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            **self._build_openai_tool_kwargs(request),
+        )
+        choice = resp.choices[0]
+        raw_tc = getattr(choice.message, "tool_calls", None)
+        return LLMResponse(
+            content=choice.message.content or "",
+            model=resp.model,
+            provider=provider_name,
+            usage={
+                "prompt_tokens": resp.usage.prompt_tokens,
+                "completion_tokens": resp.usage.completion_tokens,
+            }
+            if resp.usage
+            else None,
+            tool_calls=self._parse_openai_tool_calls(raw_tc),
+            finish_reason=getattr(choice, "finish_reason", None),
+        )
+
+    async def _stream_openai_compat(
+        self, request: LLMRequest, ctx: WorkflowContext, *, provider_name: str
+    ) -> AsyncIterator[str]:
+        """Generic streaming call for any OpenAI-compatible provider.
+
+        Used when ``use_compat=True`` is passed to the constructor, or directly
+        by providers whose preferred path is ``"compat"``.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+            provider_name: Canonical provider key in :data:`~.providers.PROVIDERS`.
+
+        Yields:
+            Token strings as they arrive from the provider.
+
+        Raises:
+            ValueError: If the provider does not support OpenAI-compat or
+                no API key is available.
+        """
+        import os  # noqa: PLC0415
+
+        from openai import AsyncOpenAI  # noqa: PLC0415
+
+        from ttadev.primitives.llm.providers import PROVIDERS  # noqa: PLC0415
+
+        spec = PROVIDERS[provider_name]
+        if not spec.openai_compat:
+            raise ValueError(
+                f"Provider {provider_name!r} does not support the OpenAI-compatible "
+                "HTTP endpoint.  Remove use_compat=True or use the native SDK path."
+            )
+        key = self._api_key or (os.getenv(spec.env_var) if spec.env_var else "no-key")
+        if not key and spec.env_var:
+            raise ValueError(
+                f"{spec.env_var} is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(
+            api_key=key or "no-key",
+            base_url=self._base_url or spec.base_url,
+            default_headers=spec.extra_headers,
+        )
+        async with await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            stream=True,
+        ) as stream:
+            async for chunk in stream:
+                delta = chunk.choices[0].delta if chunk.choices else None
+                if delta and delta.content:
+                    yield delta.content
 
     # ── Non-streaming provider calls ──────────────────────────────────────────
 
@@ -696,82 +891,98 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                         break
 
     async def _call_gemini(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
-        """Call Google Gemini via the google-generativeai SDK.
+        """Call Google Gemini via its OpenAI-compatible endpoint.
+
+        Uses ``https://generativelanguage.googleapis.com/v1beta/openai`` — no
+        ``google-generativeai`` SDK required.  Model IDs must carry the
+        ``models/`` prefix (e.g. ``models/gemini-2.5-flash-lite``).
 
         Args:
             request: LLM invocation parameters.
             ctx: Workflow execution context.
 
         Returns:
-            LLMResponse with content, model, provider, and usage metadata.
+            LLMResponse with content, model, provider, usage metadata, and
+            optional tool_calls / finish_reason.
 
         Raises:
-            ImportError: If google-generativeai is not installed.
+            ValueError: If no API key is available from the argument or environment.
         """
-        try:
-            import google.generativeai as genai  # type: ignore[import]
-        except ImportError as exc:
-            raise ImportError(
-                "google-generativeai is required for the Gemini provider. "
-                "Install it with: pip install 'ttadev[gemini]' or pip install google-generativeai"
-            ) from exc
+        import os
 
-        if self._api_key:
-            genai.configure(api_key=self._api_key)
+        from openai import AsyncOpenAI
 
-        model_name = request.model or "gemini-2.0-flash"
-        model = genai.GenerativeModel(model_name=model_name)
-        parts = [msg.get("content", "") for msg in request.messages]
-        response = await asyncio.to_thread(model.generate_content, parts)
+        from ttadev.primitives.llm.providers import PROVIDERS
 
-        usage: dict[str, int] | None = None
-        if hasattr(response, "usage_metadata") and response.usage_metadata is not None:
-            usage = {
-                "prompt_tokens": getattr(response.usage_metadata, "prompt_token_count", 0) or 0,
-                "completion_tokens": getattr(response.usage_metadata, "candidates_token_count", 0)
-                or 0,
-            }
-
+        spec = PROVIDERS["gemini"]
+        key = self._api_key or os.getenv(spec.env_var)
+        if not key:
+            raise ValueError(
+                "GOOGLE_API_KEY is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(api_key=key, base_url=spec.base_url)
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            **self._build_openai_tool_kwargs(request),
+        )
+        choice = resp.choices[0]
+        raw_tc = getattr(choice.message, "tool_calls", None)
         return LLMResponse(
-            content=response.text,
-            model=model_name,
+            content=choice.message.content or "",
+            model=resp.model,
             provider="gemini",
-            usage=usage,
+            usage={
+                "prompt_tokens": resp.usage.prompt_tokens,
+                "completion_tokens": resp.usage.completion_tokens,
+            }
+            if resp.usage
+            else None,
+            tool_calls=self._parse_openai_tool_calls(raw_tc),
+            finish_reason=getattr(choice, "finish_reason", None),
         )
 
     async def _stream_gemini(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
-        """Stream tokens from Google Gemini.
-
-        Yields the full response text as a single chunk. Gemini's generate_content
-        is synchronous; yielding the complete response avoids threading complexity
-        while keeping the AsyncIterator[str] contract intact.
+        """Stream tokens from Google Gemini via its OpenAI-compatible endpoint.
 
         Args:
             request: LLM invocation parameters.
             ctx: Workflow execution context.
 
         Yields:
-            Full response content as a single string token.
+            Token strings as they stream from Gemini.
 
         Raises:
-            ImportError: If google-generativeai is not installed.
+            ValueError: If no API key is available from the argument or environment.
         """
-        try:
-            import google.generativeai as genai  # type: ignore[import]
-        except ImportError as exc:
-            raise ImportError(
-                "google-generativeai is required for the Gemini provider. "
-                "Install it with: pip install 'ttadev[gemini]' or pip install google-generativeai"
-            ) from exc
+        import os
 
-        if self._api_key:
-            genai.configure(api_key=self._api_key)
+        from openai import AsyncOpenAI
 
-        model_name = request.model or "gemini-2.0-flash"
-        model = genai.GenerativeModel(model_name=model_name)
-        parts = [msg.get("content", "") for msg in request.messages]
-        response = await asyncio.to_thread(model.generate_content, parts)
-        yield response.text
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        spec = PROVIDERS["gemini"]
+        key = self._api_key or os.getenv(spec.env_var)
+        if not key:
+            raise ValueError(
+                "GOOGLE_API_KEY is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(api_key=key, base_url=spec.base_url)
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            stream=True,
+        )
+        async for chunk in resp:
+            content = chunk.choices[0].delta.content or ""
+            if content:
+                yield content
 
     # ── OpenRouter (openai SDK, OpenAI-compat) ────────────────────────────────
 

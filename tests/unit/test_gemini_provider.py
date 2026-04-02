@@ -1,12 +1,14 @@
 """Unit tests for the Gemini provider in UniversalLLMPrimitive.
 
-All tests mock google.generativeai — no real API calls are made.
+Gemini is routed through the OpenAI-compatible endpoint
+(https://generativelanguage.googleapis.com/v1beta/openai) using
+``openai.AsyncOpenAI`` — *not* ``google.generativeai``.  All tests mock
+the ``openai`` SDK response objects; no real API calls are made.
 """
 
 from __future__ import annotations
 
-import sys
-from types import ModuleType, SimpleNamespace
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -28,33 +30,37 @@ def _ctx() -> WorkflowContext:
     return WorkflowContext(workflow_id="gemini-unit-test")
 
 
-def _request(model: str = "gemini-2.0-flash") -> LLMRequest:
+def _request(model: str = "models/gemini-2.5-flash-lite") -> LLMRequest:
     return LLMRequest(
         model=model,
         messages=[{"role": "user", "content": "Hello, Gemini!"}],
     )
 
 
-def _make_fake_genai(
+def _make_fake_oai_response(
     *,
-    text: str = "Gemini says hello",
-    prompt_token_count: int = 10,
-    candidates_token_count: int = 20,
-) -> ModuleType:
-    """Return a fake google.generativeai module with a realistic response stub."""
-    usage_meta = SimpleNamespace(
-        prompt_token_count=prompt_token_count,
-        candidates_token_count=candidates_token_count,
-    )
-    fake_response = SimpleNamespace(text=text, usage_metadata=usage_meta)
+    content: str = "Gemini says hello",
+    model: str = "models/gemini-2.5-flash-lite",
+    prompt_tokens: int = 10,
+    completion_tokens: int = 20,
+) -> MagicMock:
+    """Build a fake openai ChatCompletion response object."""
+    message = SimpleNamespace(content=content, tool_calls=None)
+    choice = SimpleNamespace(message=message, finish_reason="stop")
+    usage = SimpleNamespace(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens)
+    return SimpleNamespace(choices=[choice], model=model, usage=usage)
 
-    fake_model = MagicMock()
-    fake_model.generate_content.return_value = fake_response
 
-    fake_genai = MagicMock()
-    fake_genai.GenerativeModel.return_value = fake_model
-    fake_genai.configure = MagicMock()
-    return fake_genai
+def _make_fake_oai_client(response: object) -> MagicMock:
+    """Return a fake AsyncOpenAI client whose completions.create returns *response*."""
+    create = AsyncMock(return_value=response)
+    completions = MagicMock()
+    completions.create = create
+    chat = MagicMock()
+    chat.completions = completions
+    client = MagicMock()
+    client.chat = chat
+    return client
 
 
 # ---------------------------------------------------------------------------
@@ -68,7 +74,7 @@ def test_gemini_provider_enum_value() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 2. Successful _call_gemini
+# 2. Successful _call_gemini via OpenAI-compat endpoint
 # ---------------------------------------------------------------------------
 
 
@@ -76,28 +82,27 @@ def test_gemini_provider_enum_value() -> None:
 async def test_call_gemini_success() -> None:
     """_call_gemini returns LLMResponse with correct content and provider.
 
-    Arrange: fake google.generativeai returning a fixed text response.
+    Arrange: fake openai.AsyncOpenAI returning a fixed text response.
     Act:     call _call_gemini directly.
     Assert:  LLMResponse.content matches; provider == 'gemini'; model correct.
     """
-    fake_genai = _make_fake_genai(text="Hello from Gemini")
+    fake_resp = _make_fake_oai_response(content="Hello from Gemini")
+    fake_client = _make_fake_oai_client(fake_resp)
+
     primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key="fake-key")
     request = _request()
     ctx = _ctx()
 
-    with (
-        patch.dict(sys.modules, {"google": MagicMock(), "google.generativeai": fake_genai}),
-        patch("asyncio.to_thread", new_callable=AsyncMock) as mock_to_thread,
+    with patch(
+        "openai.AsyncOpenAI",
+        return_value=fake_client,
     ):
-        mock_to_thread.return_value = (
-            fake_genai.GenerativeModel.return_value.generate_content.return_value
-        )
         result = await primitive._call_gemini(request, ctx)
 
     assert isinstance(result, LLMResponse)
     assert result.content == "Hello from Gemini"
     assert result.provider == "gemini"
-    assert result.model == "gemini-2.0-flash"
+    assert result.model == "models/gemini-2.5-flash-lite"
 
 
 # ---------------------------------------------------------------------------
@@ -107,28 +112,27 @@ async def test_call_gemini_success() -> None:
 
 @pytest.mark.asyncio
 async def test_call_gemini_maps_usage_metadata() -> None:
-    """_call_gemini populates prompt_tokens and completion_tokens from usage_metadata.
+    """_call_gemini populates prompt_tokens and completion_tokens from usage.
 
-    Arrange: fake genai response with known prompt_token_count / candidates_token_count.
+    Arrange: fake response with known prompt_tokens / completion_tokens.
     Act:     call _call_gemini.
     Assert:  LLMResponse.usage dict contains expected values.
     """
-    fake_genai = _make_fake_genai(
-        text="token count test",
-        prompt_token_count=42,
-        candidates_token_count=17,
+    fake_resp = _make_fake_oai_response(
+        content="token count test",
+        prompt_tokens=42,
+        completion_tokens=17,
     )
+    fake_client = _make_fake_oai_client(fake_resp)
+
     primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key="fake-key")
     request = _request()
     ctx = _ctx()
 
-    with (
-        patch.dict(sys.modules, {"google": MagicMock(), "google.generativeai": fake_genai}),
-        patch("asyncio.to_thread", new_callable=AsyncMock) as mock_to_thread,
+    with patch(
+        "openai.AsyncOpenAI",
+        return_value=fake_client,
     ):
-        mock_to_thread.return_value = (
-            fake_genai.GenerativeModel.return_value.generate_content.return_value
-        )
         result = await primitive._call_gemini(request, ctx)
 
     assert result.usage is not None
@@ -137,31 +141,28 @@ async def test_call_gemini_maps_usage_metadata() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 4. ImportError when google-generativeai not installed
+# 4. Missing API key raises ValueError
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_call_gemini_import_error() -> None:
-    """_call_gemini raises an informative ImportError when the SDK is missing.
+async def test_call_gemini_missing_key_raises() -> None:
+    """_call_gemini raises ValueError when no API key is available.
 
-    Arrange: remove google.generativeai from sys.modules, make import raise.
+    Arrange: no api_key arg; GOOGLE_API_KEY not in environment.
     Act:     call _call_gemini.
-    Assert:  ImportError raised; message mentions install instructions.
+    Assert:  ValueError raised; message mentions GOOGLE_API_KEY.
     """
-    primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key="fake-key")
+    import os
+
+    primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key=None)
     ctx = _ctx()
 
-    modules_patch = {
-        "google": None,
-        "google.generativeai": None,
-    }
-    with patch.dict(sys.modules, modules_patch):
-        with pytest.raises(ImportError) as exc_info:
+    # Ensure GOOGLE_API_KEY is absent from env for this test.
+    env_without_key = {k: v for k, v in os.environ.items() if k != "GOOGLE_API_KEY"}
+    with patch.dict(os.environ, env_without_key, clear=True):
+        with pytest.raises(ValueError, match="GOOGLE_API_KEY"):
             await primitive._call_gemini(_request(), ctx)
-
-    assert "google-generativeai" in str(exc_info.value)
-    assert "pip install" in str(exc_info.value)
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +183,7 @@ async def test_execute_dispatches_gemini() -> None:
     ctx = _ctx()
 
     expected_response = LLMResponse(
-        content="dispatched!", model="gemini-2.0-flash", provider="gemini"
+        content="dispatched!", model="models/gemini-2.5-flash-lite", provider="gemini"
     )
     with patch.object(
         primitive,
@@ -193,4 +194,44 @@ async def test_execute_dispatches_gemini() -> None:
         result = await primitive.execute(request, ctx)
 
     mock_call.assert_awaited_once_with(request, ctx)
+    assert result is expected_response
+
+
+# ---------------------------------------------------------------------------
+# 6. use_compat=True routes through _call_openai_compat
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_use_compat_routes_to_generic_helper() -> None:
+    """use_compat=True bypasses _call_gemini and uses _call_openai_compat.
+
+    Arrange: UniversalLLMPrimitive(GEMINI, use_compat=True).
+    Act:     patch _call_openai_compat; await execute().
+    Assert:  _call_openai_compat called with provider_name='gemini';
+             _call_gemini never called.
+    """
+    primitive = UniversalLLMPrimitive(
+        provider=LLMProvider.GEMINI, api_key="test-key", use_compat=True
+    )
+    request = _request()
+    ctx = _ctx()
+
+    expected_response = LLMResponse(
+        content="compat!", model="models/gemini-2.5-flash-lite", provider="gemini"
+    )
+
+    async def fake_compat(
+        req: LLMRequest, c: WorkflowContext, *, provider_name: str
+    ) -> LLMResponse:
+        return expected_response
+
+    with (
+        patch.object(primitive, "_call_openai_compat", side_effect=fake_compat) as mock_compat,
+        patch.object(primitive, "_call_gemini", new_callable=AsyncMock) as mock_native,
+    ):
+        result = await primitive.execute(request, ctx)
+
+    mock_compat.assert_called_once()
+    mock_native.assert_not_called()
     assert result is expected_response
