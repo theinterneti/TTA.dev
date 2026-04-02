@@ -13,6 +13,13 @@ from ttadev.primitives.llm.model_monitor import (
     MonitorRequest,
     MonitorResponse,
 )
+from ttadev.primitives.llm.model_registry import (
+    ModelEntry,
+    ModelRegistryPrimitive,
+    RegistryRequest,
+    RegistryResponse,
+    SelectionPolicy,
+)
 from ttadev.primitives.llm.model_router import (
     ModelRouterPrimitive,
     ModelRouterRequest,
@@ -62,6 +69,12 @@ __all__ = [
     "ModelStats",
     "MonitorRequest",
     "MonitorResponse",
+    # model registry
+    "ModelEntry",
+    "ModelRegistryPrimitive",
+    "RegistryRequest",
+    "RegistryResponse",
+    "SelectionPolicy",
     # model router
     "ModelRouterPrimitive",
     "ModelRouterRequest",
