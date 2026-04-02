@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 import yaml
 
@@ -33,12 +34,14 @@ _FREE_MODEL = ORModel(
 def _make_router(
     tiers: list[RouterTierConfig],
     tracker: FreeModelTracker | None = None,
+    tier_cooldown_seconds: int = 0,
 ) -> ModelRouterPrimitive:
     modes = {"test": RouterModeConfig(description="Test mode", tiers=tiers)}
     return ModelRouterPrimitive(
         modes,
         free_tracker=tracker,
         openrouter_api_key="test-key",  # pragma: allowlist secret
+        tier_cooldown_seconds=tier_cooldown_seconds,
     )
 
 
@@ -567,3 +570,294 @@ class TestFromYamlNewProviders:
         assert tiers[1].model == "meta-llama/Llama-3-8b-chat-hf"
         assert tiers[2].provider == "auto"
         assert tiers[2].model is None
+
+
+# ── Issue #283: Gemini models/ prefix ─────────────────────────────────────────
+
+
+class TestGeminiModelsPrefix:
+    """Gemini provider must always use the `models/` prefix (Issue #283)."""
+
+    @pytest.mark.asyncio
+    async def test_bare_model_id_gets_models_prefix(self):
+        """A Gemini tier with a bare model ID (no `models/`) auto-prepends it."""
+        router = ModelRouterPrimitive(
+            {
+                "test": RouterModeConfig(
+                    tiers=[RouterTierConfig(provider="gemini", model="gemini-2.5-flash")]
+                )
+            },
+            gemini_api_key="fake-key",  # pragma: allowlist secret
+        )
+        _, mock_client, mock_cm = _mock_openai_compat_response("gemini reply")
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="hello"),
+                _ctx(),
+            )
+
+        # Model returned should have the prefix
+        assert result.model == "models/gemini-2.5-flash"
+        # The POST should have been called with the prefixed model in the payload
+        call_kwargs = mock_client.post.call_args[1]
+        assert call_kwargs["json"]["model"] == "models/gemini-2.5-flash"
+
+    @pytest.mark.asyncio
+    async def test_model_with_prefix_is_not_double_prefixed(self):
+        """A Gemini tier with `models/gemini-…` already set is NOT double-prefixed."""
+        router = ModelRouterPrimitive(
+            {
+                "test": RouterModeConfig(
+                    tiers=[RouterTierConfig(provider="gemini", model="models/gemini-2.5-flash")]
+                )
+            },
+            gemini_api_key="fake-key",  # pragma: allowlist secret
+        )
+        _, mock_client, mock_cm = _mock_openai_compat_response("gemini reply")
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="hello"),
+                _ctx(),
+            )
+
+        assert result.model == "models/gemini-2.5-flash"
+        call_kwargs = mock_client.post.call_args[1]
+        assert call_kwargs["json"]["model"] == "models/gemini-2.5-flash"
+
+    @pytest.mark.asyncio
+    async def test_default_gemini_model_has_prefix(self):
+        """When no model is specified for a Gemini tier, the default includes `models/`."""
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        router = ModelRouterPrimitive(
+            {"test": RouterModeConfig(tiers=[RouterTierConfig(provider="gemini")])},
+            gemini_api_key="fake-key",  # pragma: allowlist secret
+        )
+        _, mock_client, mock_cm = _mock_openai_compat_response("gemini default reply")
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="hello"),
+                _ctx(),
+            )
+
+        default = PROVIDERS["gemini"].default_model
+        assert default.startswith("models/"), (
+            f"providers.py default_model should have prefix: {default!r}"
+        )
+        assert result.model == default
+
+
+# ── Issue #284: Strip <think> reasoning tokens ────────────────────────────────
+
+
+class TestStripThinking:
+    """Per-tier strip_thinking flag removes <think>…</think> blocks (Issue #284)."""
+
+    @pytest.mark.asyncio
+    async def test_think_blocks_stripped_when_strip_thinking_true(self):
+        """<think>…</think> block is removed from content when strip_thinking=True."""
+        raw = "<think>let me reason step by step</think>\nThe answer is 42."
+        router = _make_router(
+            [RouterTierConfig(provider="openrouter", model="some/model:free", strip_thinking=True)]
+        )
+        _, _, mock_cm = _mock_openai_compat_response(raw)
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="what is the answer?"),
+                _ctx(),
+            )
+
+        assert "<think>" not in result.content
+        assert result.content == "The answer is 42."
+
+    @pytest.mark.asyncio
+    async def test_think_blocks_not_stripped_when_strip_thinking_false(self):
+        """<think>…</think> block is preserved when strip_thinking=False."""
+        raw = "<think>internal reasoning</think>Final answer."
+        router = _make_router(
+            [RouterTierConfig(provider="openrouter", model="some/model:free", strip_thinking=False)]
+        )
+        _, _, mock_cm = _mock_openai_compat_response(raw)
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="hi"),
+                _ctx(),
+            )
+
+        assert "<think>" in result.content
+        assert result.content == raw
+
+    @pytest.mark.asyncio
+    async def test_strip_thinking_is_noop_on_normal_response(self):
+        """strip_thinking=True is a no-op when content has no <think> blocks."""
+        normal = "Hello! How can I help you today?"
+        router = _make_router(
+            [RouterTierConfig(provider="openrouter", model="m:free", strip_thinking=True)]
+        )
+        _, _, mock_cm = _mock_openai_compat_response(normal)
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="greet me"),
+                _ctx(),
+            )
+
+        assert result.content == normal
+
+    @pytest.mark.asyncio
+    async def test_strip_thinking_default_is_true(self):
+        """RouterTierConfig.strip_thinking defaults to True."""
+        tier = RouterTierConfig(provider="groq")
+        assert tier.strip_thinking is True
+
+    @pytest.mark.asyncio
+    async def test_multiline_think_block_stripped(self):
+        """Multi-line <think>…</think> blocks spanning newlines are stripped."""
+        raw = "<think>\nStep 1: consider the options.\nStep 2: choose best.\n</think>\nResult: B."
+        router = _make_router(
+            [RouterTierConfig(provider="openrouter", model="m:free", strip_thinking=True)]
+        )
+        _, _, mock_cm = _mock_openai_compat_response(raw)
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="choose"),
+                _ctx(),
+            )
+
+        assert result.content == "Result: B."
+
+
+# ── Issue #285: Per-tier rate-limit cooldown ──────────────────────────────────
+
+
+class TestTierCooldown:
+    """Per-tier 429 cooldown skips throttled tiers for N seconds (Issue #285)."""
+
+    @pytest.mark.asyncio
+    async def test_tier_in_cooldown_is_skipped(self):
+        """A tier that received a 429 is skipped during the cooldown window."""
+        # Arrange: two tiers; tier1 is pre-marked as cooling
+        router = _make_router(
+            [
+                RouterTierConfig(provider="groq", model="llama-3.1-8b-instant"),
+                RouterTierConfig(provider="openrouter", model="fallback:free"),
+            ],
+            tier_cooldown_seconds=30,
+        )
+        # Manually put tier1 into cooldown
+        router._mark_cooling("groq/llama-3.1-8b-instant")
+
+        _, _, mock_cm = _mock_openai_compat_response("fallback reply")
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="hi"),
+                _ctx(),
+            )
+
+        # Should have gone straight to tier2 (openrouter/fallback:free)
+        assert result.content == "fallback reply"
+        assert result.provider == "openrouter"
+
+    @pytest.mark.asyncio
+    async def test_429_response_triggers_cooldown(self):
+        """A 429 HTTPStatusError from a tier marks it as cooling."""
+        router = _make_router(
+            [
+                RouterTierConfig(provider="groq", model="llama-3.1-8b-instant"),
+                RouterTierConfig(provider="openrouter", model="fallback:free"),
+            ],
+            tier_cooldown_seconds=30,
+        )
+
+        # First call to groq raises 429; fallback succeeds
+        or_resp_data = {"choices": [{"message": {"content": "or reply"}}]}
+
+        call_count = 0
+
+        async def mock_post(url: str, **kwargs: Any) -> MagicMock:
+            nonlocal call_count
+            call_count += 1
+            if "groq.com" in url:
+                # Build a fake httpx 429 response
+                fake_request = MagicMock()
+                fake_response = MagicMock()
+                fake_response.status_code = 429
+                raise httpx.HTTPStatusError(
+                    "429 Too Many Requests", request=fake_request, response=fake_response
+                )
+            resp = MagicMock()
+            resp.raise_for_status = MagicMock()
+            resp.json = MagicMock(return_value=or_resp_data)
+            return resp
+
+        mock_client = AsyncMock()
+        mock_client.post = mock_post
+        mock_cm = AsyncMock()
+        mock_cm.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_cm.__aexit__ = AsyncMock(return_value=None)
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="hi"),
+                _ctx(),
+            )
+
+        assert result.content == "or reply"
+        # Groq tier should now be in cooldown
+        assert router._is_cooling("groq/llama-3.1-8b-instant")
+
+    @pytest.mark.asyncio
+    async def test_cooldown_expires_after_timeout(self):
+        """After the cooldown window passes, the tier is available again."""
+        import time as _time
+
+        router = _make_router(
+            [RouterTierConfig(provider="groq", model="llama-3.1-8b-instant")],
+            tier_cooldown_seconds=30,
+        )
+        tier_key = "groq/llama-3.1-8b-instant"
+        router._mark_cooling(tier_key)
+
+        # Should be cooling now
+        assert router._is_cooling(tier_key)
+
+        # Mock monotonic to be 60 seconds in the future (past the 30s window)
+        with patch("ttadev.primitives.llm.model_router.time") as mock_time:
+            mock_time.monotonic.return_value = _time.monotonic() + 60
+            assert not router._is_cooling(tier_key)
+
+    @pytest.mark.asyncio
+    async def test_cooldown_disabled_when_seconds_zero(self):
+        """tier_cooldown_seconds=0 disables cooldown entirely."""
+        router = _make_router(
+            [RouterTierConfig(provider="groq", model="llama-3.1-8b-instant")],
+            tier_cooldown_seconds=0,
+        )
+        tier_key = "groq/llama-3.1-8b-instant"
+        router._mark_cooling(tier_key)
+        # With cooldown disabled, should never report as cooling
+        assert not router._is_cooling(tier_key)
+
+    @pytest.mark.asyncio
+    async def test_cooldown_state_is_instance_level_not_shared(self):
+        """Two separate router instances have independent cooldown state."""
+        router_a = _make_router(
+            [RouterTierConfig(provider="groq", model="model-x")],
+            tier_cooldown_seconds=30,
+        )
+        router_b = _make_router(
+            [RouterTierConfig(provider="groq", model="model-x")],
+            tier_cooldown_seconds=30,
+        )
+
+        router_a._mark_cooling("groq/model-x")
+
+        assert router_a._is_cooling("groq/model-x")
+        assert not router_b._is_cooling("groq/model-x")

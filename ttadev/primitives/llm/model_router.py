@@ -75,8 +75,11 @@ Example YAML (``model_modes.yaml``)::
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
+import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -96,6 +99,10 @@ _GROQ_API_URL = f"{PROVIDERS['groq'].base_url}/chat/completions"
 _TOGETHER_API_URL = f"{PROVIDERS['together'].base_url}/chat/completions"
 _OPENROUTER_API_URL = f"{PROVIDERS['openrouter'].base_url}/chat/completions"
 _GEMINI_API_URL = f"{PROVIDERS['gemini'].base_url}/chat/completions"
+
+# Regex to strip <think>...</think> reasoning tokens emitted by some models
+# (e.g. qwen-qwen3-32b, deepseek-r1).  Applied per-tier when strip_thinking=True.
+_THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
 
 # Well-known free Groq models (fast inference, generous free tier)
 _GROQ_FREE_MODELS: list[str] = [
@@ -122,11 +129,15 @@ class RouterTierConfig:
             Required when ``provider == "ollama"``.
         params: Extra generation parameters forwarded to the provider
             (e.g. ``temperature``, ``max_tokens``).
+        strip_thinking: When ``True`` (default), strip ``<think>…</think>``
+            blocks from the model response before returning.  Safe no-op on
+            models that don't emit reasoning tokens.
     """
 
     provider: str
     model: str | None = None
     params: dict[str, Any] = field(default_factory=dict)
+    strip_thinking: bool = True
 
 
 @dataclass
@@ -190,6 +201,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         groq_api_key: str | None = None,
         together_api_key: str | None = None,
         gemini_api_key: str | None = None,
+        tier_cooldown_seconds: int = 30,
     ) -> None:
         """Initialise the router.
 
@@ -206,6 +218,9 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                 ``TOGETHER_API_KEY`` env var.
             gemini_api_key: Google API key for Gemini.  Defaults to
                 ``GOOGLE_API_KEY`` env var.
+            tier_cooldown_seconds: Seconds to skip a tier after it returns a
+                429 rate-limit response.  Set to ``0`` to disable cooldown
+                (backward compatible).
         """
         super().__init__()
         self._modes = modes
@@ -215,6 +230,10 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         self._gemini_api_key = gemini_api_key or os.getenv(PROVIDERS["gemini"].env_var, "")
         self._ollama_url = (ollama_url or os.getenv("OLLAMA_URL", _OLLAMA_DEFAULT_URL)).rstrip("/")
         self._tracker = free_tracker or FreeModelTracker(api_key=self._or_api_key or None)
+        self._tier_cooldown_seconds = tier_cooldown_seconds
+        # Instance-level cooldown state: tier_key → monotonic deadline
+        self._tier_cooldowns: dict[str, float] = {}
+        self._cooldown_lock: asyncio.Lock = asyncio.Lock()
 
     # ── Factory ───────────────────────────────────────────────────────────────
 
@@ -328,14 +347,27 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
 
         last_exc: Exception = RuntimeError("No tiers configured")
         for i, tier in enumerate(tiers_to_try, start=1):
+            tier_key = f"{tier.provider}/{tier.model or 'auto'}"
+            if self._is_cooling(tier_key):
+                logger.debug(
+                    "tier%d (%s) is in cooldown, skipping",
+                    i,
+                    tier_key,
+                )
+                last_exc = RuntimeError(f"tier{i} ({tier_key}) is cooling down after 429")
+                continue
             try:
                 content, used_model = await self._call_tier(tier, request.prompt, request.system)
+                if tier.strip_thinking:
+                    content = _THINK_RE.sub("", content).strip()
                 return LLMResponse(
                     content=content,
                     model=used_model,
                     provider=tier.provider,
                 )
             except Exception as exc:
+                if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429:
+                    self._mark_cooling(tier_key)
                 last_exc = exc
                 logger.warning(
                     "tier%d (%s / %s) failed: %r — trying next tier",
@@ -348,6 +380,32 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         raise RuntimeError(
             f"All {len(tiers_to_try)} tiers failed for mode {request.mode!r}"
         ) from last_exc
+
+    # ── Cooldown helpers ──────────────────────────────────────────────────────
+
+    def _is_cooling(self, tier_key: str) -> bool:
+        """Return ``True`` if *tier_key* is within its rate-limit cooldown window.
+
+        Args:
+            tier_key: Canonical key ``"provider/model"`` for the tier.
+
+        Returns:
+            ``True`` when the tier should be skipped; ``False`` otherwise.
+        """
+        if self._tier_cooldown_seconds == 0:
+            return False
+        deadline = self._tier_cooldowns.get(tier_key, 0.0)
+        return time.monotonic() < deadline
+
+    def _mark_cooling(self, tier_key: str) -> None:
+        """Record that *tier_key* received a 429 and should be skipped temporarily.
+
+        Args:
+            tier_key: Canonical key ``"provider/model"`` for the tier.
+        """
+        if self._tier_cooldown_seconds == 0:
+            return
+        self._tier_cooldowns[tier_key] = time.monotonic() + self._tier_cooldown_seconds
 
     # ── Tier dispatch ─────────────────────────────────────────────────────────
 
@@ -426,6 +484,10 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
 
         if provider == "gemini":
             model = tier.model or PROVIDERS["gemini"].default_model
+            # Issue #283: Gemini's OpenAI-compat endpoint requires the `models/`
+            # prefix; bare IDs (e.g. "gemini-2.5-flash") return a misleading 429.
+            if not model.startswith("models/"):
+                model = f"models/{model}"
             content = await self._call_openai_compat(
                 _GEMINI_API_URL,
                 self._gemini_api_key,

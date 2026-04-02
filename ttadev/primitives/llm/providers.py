@@ -30,6 +30,7 @@ Provider contract summary
 | openai        | OPENAI_API_KEY            | Yes            | SDK preferred    |
 | ollama        | (none — local daemon)     | Yes            | localhost:11434  |
 | anthropic     | ANTHROPIC_API_KEY         | No (SDK only)  | claude-* models  |
+| huggingface   | HF_TOKEN                  | Yes            | HF Inference API |
 +---------------+---------------------------+----------------+------------------+
 """
 
@@ -102,7 +103,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
         # https://ai.google.dev/gemini-api/docs/openai
         base_url="https://generativelanguage.googleapis.com/v1beta/openai",
         env_var="GOOGLE_API_KEY",
-        default_model="gemini-2.0-flash",
+        default_model="models/gemini-2.5-flash",
         openai_compat=True,
     ),
     "xai": ProviderSpec(
@@ -134,6 +135,17 @@ PROVIDERS: dict[str, ProviderSpec] = {
         env_var="ANTHROPIC_API_KEY",
         default_model="claude-3-5-haiku-20241022",
         openai_compat=False,
+    ),
+    "huggingface": ProviderSpec(
+        name="huggingface",
+        # HuggingFace Inference API exposes an OpenAI-compatible endpoint.
+        # https://huggingface.co/docs/api-inference/tasks/chat-completion
+        # The model ID is appended to the base URL path by the caller, e.g.:
+        #   base_url/models/<org>/<model-id>
+        base_url="https://api-inference.huggingface.co/v1",
+        env_var="HF_TOKEN",
+        default_model="meta-llama/Llama-3.2-3B-Instruct",
+        openai_compat=True,
     ),
 }
 
