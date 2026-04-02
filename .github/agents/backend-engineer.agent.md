@@ -2,6 +2,10 @@
 name: backend-engineer
 description: Python backend development specialist for TTA.dev primitives and workflow orchestration
 tools:
+  - read
+  - edit
+  - search
+  - execute
   - context7
   - github
   - sequential-thinking

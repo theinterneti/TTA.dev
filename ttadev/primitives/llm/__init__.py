@@ -13,6 +13,12 @@ from ttadev.primitives.llm.model_router import (
     RouterModeConfig,
     RouterTierConfig,
 )
+from ttadev.primitives.llm.providers import (
+    PROVIDERS,
+    ProviderSpec,
+    get_provider,
+    openai_compat_providers,
+)
 from ttadev.primitives.llm.universal_llm_primitive import (
     LLMProvider,
     LLMRequest,
@@ -37,4 +43,9 @@ __all__ = [
     "ModelRouterRequest",
     "RouterModeConfig",
     "RouterTierConfig",
+    # provider registry
+    "PROVIDERS",
+    "ProviderSpec",
+    "get_provider",
+    "openai_compat_providers",
 ]

@@ -55,6 +55,8 @@ class LLMProvider(StrEnum):
     OPENAI = "openai"
     OLLAMA = "ollama"
     GEMINI = "gemini"
+    OPENROUTER = "openrouter"
+    TOGETHER = "together"
 
 
 @dataclass
@@ -99,6 +101,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.OPENAI: self._call_openai,
             LLMProvider.OLLAMA: self._call_ollama,
             LLMProvider.GEMINI: self._call_gemini,
+            LLMProvider.OPENROUTER: self._call_openrouter,
+            LLMProvider.TOGETHER: self._call_together,
         }
 
         if not (OTEL_AVAILABLE and otel_trace is not None):
@@ -144,6 +148,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.OPENAI: self._stream_openai,
             LLMProvider.OLLAMA: self._stream_ollama,
             LLMProvider.GEMINI: self._stream_gemini,
+            LLMProvider.OPENROUTER: self._stream_openrouter,
+            LLMProvider.TOGETHER: self._stream_together,
         }
         async for token in dispatch[self._provider](request, ctx):
             yield token
@@ -388,3 +394,199 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         parts = [msg.get("content", "") for msg in request.messages]
         response = await asyncio.to_thread(model.generate_content, parts)
         yield response.text
+
+    # ── OpenRouter (OpenAI-compat, httpx) ─────────────────────────────────────
+
+    async def _call_openrouter(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Call OpenRouter via its OpenAI-compatible endpoint.
+
+        Reads credentials and required headers from the central provider registry.
+        Requires ``OPENROUTER_API_KEY`` in the environment or ``api_key`` argument.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Returns:
+            LLMResponse with content, model, provider, and usage metadata.
+        """
+        import os
+
+        import httpx
+
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        spec = PROVIDERS["openrouter"]
+        key = self._api_key or os.getenv(spec.env_var, "")
+        headers = {"Authorization": f"Bearer {key}", **spec.extra_headers}
+        payload: dict = {
+            "model": request.model or spec.default_model,
+            "messages": request.messages,
+            "temperature": request.temperature,
+        }
+        if request.max_tokens is not None:
+            payload["max_tokens"] = request.max_tokens
+        url = f"{spec.base_url}/chat/completions"
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(url, headers=headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+        choice = data["choices"][0]["message"]["content"]
+        usage_raw = data.get("usage")
+        usage: dict[str, int] | None = None
+        if usage_raw:
+            usage = {
+                "prompt_tokens": usage_raw.get("prompt_tokens", 0),
+                "completion_tokens": usage_raw.get("completion_tokens", 0),
+            }
+        return LLMResponse(
+            content=choice,
+            model=data.get("model", request.model),
+            provider="openrouter",
+            usage=usage,
+        )
+
+    async def _stream_openrouter(
+        self, request: LLMRequest, ctx: WorkflowContext
+    ) -> AsyncIterator[str]:
+        """Stream tokens from OpenRouter via SSE.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Yields:
+            Token strings as they stream from OpenRouter.
+        """
+        import os
+
+        import httpx
+
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        spec = PROVIDERS["openrouter"]
+        key = self._api_key or os.getenv(spec.env_var, "")
+        headers = {"Authorization": f"Bearer {key}", **spec.extra_headers}
+        payload: dict = {
+            "model": request.model or spec.default_model,
+            "messages": request.messages,
+            "temperature": request.temperature,
+            "stream": True,
+        }
+        if request.max_tokens is not None:
+            payload["max_tokens"] = request.max_tokens
+        url = f"{spec.base_url}/chat/completions"
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            async with client.stream("POST", url, headers=headers, json=payload) as resp:
+                resp.raise_for_status()
+                async for line in resp.aiter_lines():
+                    if not line.startswith("data: "):
+                        continue
+                    chunk = line[6:]
+                    if chunk.strip() == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(chunk)
+                        content = data["choices"][0]["delta"].get("content", "") or ""
+                        if content:
+                            yield content
+                    except (json.JSONDecodeError, KeyError, IndexError):
+                        continue
+
+    # ── Together AI (OpenAI-compat, httpx) ────────────────────────────────────
+
+    async def _call_together(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Call Together AI via its OpenAI-compatible endpoint.
+
+        Reads credentials from the central provider registry.
+        Requires ``TOGETHER_API_KEY`` in the environment or ``api_key`` argument.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Returns:
+            LLMResponse with content, model, provider, and usage metadata.
+        """
+        import os
+
+        import httpx
+
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        spec = PROVIDERS["together"]
+        key = self._api_key or os.getenv(spec.env_var, "")
+        headers = {"Authorization": f"Bearer {key}"}
+        payload: dict = {
+            "model": request.model or spec.default_model,
+            "messages": request.messages,
+            "temperature": request.temperature,
+        }
+        if request.max_tokens is not None:
+            payload["max_tokens"] = request.max_tokens
+        url = f"{spec.base_url}/chat/completions"
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(url, headers=headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+        choice = data["choices"][0]["message"]["content"]
+        usage_raw = data.get("usage")
+        usage: dict[str, int] | None = None
+        if usage_raw:
+            usage = {
+                "prompt_tokens": usage_raw.get("prompt_tokens", 0),
+                "completion_tokens": usage_raw.get("completion_tokens", 0),
+            }
+        return LLMResponse(
+            content=choice,
+            model=data.get("model", request.model),
+            provider="together",
+            usage=usage,
+        )
+
+    async def _stream_together(
+        self, request: LLMRequest, ctx: WorkflowContext
+    ) -> AsyncIterator[str]:
+        """Stream tokens from Together AI via SSE.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Yields:
+            Token strings as they stream from Together AI.
+        """
+        import os
+
+        import httpx
+
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        spec = PROVIDERS["together"]
+        key = self._api_key or os.getenv(spec.env_var, "")
+        headers = {"Authorization": f"Bearer {key}"}
+        payload: dict = {
+            "model": request.model or spec.default_model,
+            "messages": request.messages,
+            "temperature": request.temperature,
+            "stream": True,
+        }
+        if request.max_tokens is not None:
+            payload["max_tokens"] = request.max_tokens
+        url = f"{spec.base_url}/chat/completions"
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            async with client.stream("POST", url, headers=headers, json=payload) as resp:
+                resp.raise_for_status()
+                async for line in resp.aiter_lines():
+                    if not line.startswith("data: "):
+                        continue
+                    chunk = line[6:]
+                    if chunk.strip() == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(chunk)
+                        content = data["choices"][0]["delta"].get("content", "") or ""
+                        if content:
+                            yield content
+                    except (json.JSONDecodeError, KeyError, IndexError):
+                        continue

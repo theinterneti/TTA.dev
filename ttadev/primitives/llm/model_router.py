@@ -85,15 +85,17 @@ import httpx
 
 from ttadev.primitives.core import WorkflowContext, WorkflowPrimitive
 from ttadev.primitives.llm.free_model_tracker import FreeModelTracker
+from ttadev.primitives.llm.providers import PROVIDERS
 from ttadev.primitives.llm.universal_llm_primitive import LLMResponse
 
 logger = logging.getLogger(__name__)
 
-_OLLAMA_DEFAULT_URL = "http://localhost:11434"
-_GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-_TOGETHER_API_URL = "https://api.together.xyz/v1/chat/completions"
-_OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-_OR_REFERER = "https://github.com/theinterneti/TTA.dev"
+# URL and credential constants sourced from the central provider registry.
+_OLLAMA_DEFAULT_URL = PROVIDERS["ollama"].base_url.removesuffix("/v1")
+_GROQ_API_URL = f"{PROVIDERS['groq'].base_url}/chat/completions"
+_TOGETHER_API_URL = f"{PROVIDERS['together'].base_url}/chat/completions"
+_OPENROUTER_API_URL = f"{PROVIDERS['openrouter'].base_url}/chat/completions"
+_GEMINI_API_URL = f"{PROVIDERS['gemini'].base_url}/chat/completions"
 
 # Well-known free Groq models (fast inference, generous free tier)
 _GROQ_FREE_MODELS: list[str] = [
@@ -174,6 +176,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
     - ``"groq"``        — Groq cloud, OpenAI-compat (``GROQ_API_KEY``)
     - ``"together"``    — Together AI, OpenAI-compat (``TOGETHER_API_KEY``)
     - ``"openrouter"``  — OpenRouter (pinned model or auto-selected free)
+    - ``"gemini"``      — Google Gemini, OpenAI-compat (``GOOGLE_API_KEY``)
     - ``"auto"``        — ``FreeModelTracker`` picks the best free OpenRouter model
     """
 
@@ -186,6 +189,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         openrouter_api_key: str | None = None,
         groq_api_key: str | None = None,
         together_api_key: str | None = None,
+        gemini_api_key: str | None = None,
     ) -> None:
         """Initialise the router.
 
@@ -200,12 +204,15 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             groq_api_key: Groq API key.  Defaults to ``GROQ_API_KEY`` env var.
             together_api_key: Together AI key.  Defaults to
                 ``TOGETHER_API_KEY`` env var.
+            gemini_api_key: Google API key for Gemini.  Defaults to
+                ``GOOGLE_API_KEY`` env var.
         """
         super().__init__()
         self._modes = modes
-        self._or_api_key = openrouter_api_key or os.getenv("OPENROUTER_API_KEY", "")
-        self._groq_api_key = groq_api_key or os.getenv("GROQ_API_KEY", "")
-        self._together_api_key = together_api_key or os.getenv("TOGETHER_API_KEY", "")
+        self._or_api_key = openrouter_api_key or os.getenv(PROVIDERS["openrouter"].env_var, "")
+        self._groq_api_key = groq_api_key or os.getenv(PROVIDERS["groq"].env_var, "")
+        self._together_api_key = together_api_key or os.getenv(PROVIDERS["together"].env_var, "")
+        self._gemini_api_key = gemini_api_key or os.getenv(PROVIDERS["gemini"].env_var, "")
         self._ollama_url = (ollama_url or os.getenv("OLLAMA_URL", _OLLAMA_DEFAULT_URL)).rstrip("/")
         self._tracker = free_tracker or FreeModelTracker(api_key=self._or_api_key or None)
 
@@ -398,7 +405,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                 prompt,
                 system,
                 tier.params,
-                extra_headers={"HTTP-Referer": _OR_REFERER},
+                extra_headers=PROVIDERS["openrouter"].extra_headers,
             )
             return content, model
 
@@ -413,13 +420,25 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                 prompt,
                 system,
                 tier.params,
-                extra_headers={"HTTP-Referer": _OR_REFERER},
+                extra_headers=PROVIDERS["openrouter"].extra_headers,
+            )
+            return content, model
+
+        if provider == "gemini":
+            model = tier.model or PROVIDERS["gemini"].default_model
+            content = await self._call_openai_compat(
+                _GEMINI_API_URL,
+                self._gemini_api_key,
+                model,
+                prompt,
+                system,
+                tier.params,
             )
             return content, model
 
         raise ValueError(
             f"Unknown provider {provider!r}. "
-            "Use 'ollama', 'groq', 'together', 'openrouter', or 'auto'"
+            "Use 'ollama', 'groq', 'together', 'openrouter', 'gemini', or 'auto'"
         )
 
     # ── Provider calls ────────────────────────────────────────────────────────
