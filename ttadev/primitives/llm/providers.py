@@ -25,6 +25,8 @@ Provider contract summary
 |               |                           |                | /free suffix     |
 | gemini        | GOOGLE_API_KEY            | Yes            | Google's OAI-    |
 |               |                           |                | compat endpoint  |
+| xai           | XAI_API_KEY               | Yes            | Grok models via  |
+|               |                           |                | xAI OAI-compat   |
 | openai        | OPENAI_API_KEY            | Yes            | SDK preferred    |
 | ollama        | (none — local daemon)     | Yes            | localhost:11434  |
 | anthropic     | ANTHROPIC_API_KEY         | No (SDK only)  | claude-* models  |
@@ -101,6 +103,15 @@ PROVIDERS: dict[str, ProviderSpec] = {
         base_url="https://generativelanguage.googleapis.com/v1beta/openai",
         env_var="GOOGLE_API_KEY",
         default_model="gemini-2.0-flash",
+        openai_compat=True,
+    ),
+    "xai": ProviderSpec(
+        name="xai",
+        # xAI's API is fully OpenAI-compatible:
+        # https://docs.x.ai/docs/overview
+        base_url="https://api.x.ai/v1",
+        env_var="XAI_API_KEY",
+        default_model="grok-3-mini",
         openai_compat=True,
     ),
     "openai": ProviderSpec(

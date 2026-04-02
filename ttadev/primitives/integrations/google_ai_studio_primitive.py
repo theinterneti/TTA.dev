@@ -2,14 +2,32 @@
 
 Wraps the official Google Generative AI SDK as a TTA.dev WorkflowPrimitive.
 Provides free access to Gemini Pro and Flash models.
+
+.. deprecated::
+    Use :class:`ttadev.primitives.llm.universal_llm_primitive.UniversalLLMPrimitive`
+    with ``provider=LLMProvider.GEMINI`` instead.  ``UniversalLLMPrimitive`` routes
+    Gemini calls through Google's OpenAI-compatible endpoint
+    (``https://generativelanguage.googleapis.com/v1beta/openai``) via the ``openai``
+    SDK — no ``google-generativeai`` package required.
 """
 
-from typing import Any
+import warnings
 
-import google.generativeai as genai
-from pydantic import BaseModel, Field
+warnings.warn(
+    "GoogleAIStudioPrimitive is deprecated and will be removed in a future release. "
+    "Use UniversalLLMPrimitive(provider=LLMProvider.GEMINI) instead, which calls "
+    "Google's OpenAI-compatible endpoint without the google-generativeai SDK. "
+    "See ttadev.primitives.llm.universal_llm_primitive for details.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+from typing import Any  # noqa: E402
+
+import google.generativeai as genai  # noqa: E402
+from pydantic import BaseModel, Field  # noqa: E402
+
+from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive  # noqa: E402
 
 
 class GoogleAIStudioRequest(BaseModel):
@@ -45,6 +63,9 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
     - Gemini 2.5 Flash: FREE (85/100 quality, 1M context window)
     - 1500 requests per day (RPD) free tier
     - No credit card required
+
+    .. deprecated::
+        Use :class:`UniversalLLMPrimitive` with ``provider=LLMProvider.GEMINI`` instead.
 
     Example:
         ```python

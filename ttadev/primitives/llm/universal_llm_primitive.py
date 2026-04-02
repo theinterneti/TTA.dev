@@ -1,7 +1,8 @@
 """UniversalLLMPrimitive — runtime LLM provider abstraction.
 
 Provides a single interface for invoking LLMs across providers
-(Groq, Anthropic, OpenAI, Ollama, Gemini). Config-driven, swappable backends.
+(Groq, Anthropic, OpenAI, Ollama, Gemini, xAI/Grok). Config-driven,
+swappable backends.
 
 Note: Distinct from ttadev/integrations/llm/universal_llm_primitive.py
 which handles agentic coder budget profiles.
@@ -18,15 +19,16 @@ precedence over the environment variable.
 | Anthropic | ``ANTHROPIC_API_KEY``                    | ``anthropic``           |
 | OpenAI    | ``OPENAI_API_KEY``                       | ``openai``              |
 | Ollama    | *(none — connect to localhost:11434)*    | ``httpx``               |
-| Gemini    | ``GEMINI_API_KEY`` or ``GOOGLE_API_KEY`` | ``google-generativeai`` |
+| Gemini    | ``GOOGLE_API_KEY``                       | ``openai`` (OAI-compat) |
+| xAI       | ``XAI_API_KEY``                          | ``openai`` (OAI-compat) |
 
 Install extras::
 
     uv sync --extra groq        # Groq
     uv sync --extra anthropic   # Anthropic
     uv sync --extra openai      # OpenAI
-    uv sync --extra gemini      # Gemini
     # Ollama: run the daemon locally (https://ollama.com)
+    # Gemini and xAI: openai package is a core dependency — no extra needed
 """
 
 from __future__ import annotations
@@ -57,6 +59,7 @@ class LLMProvider(StrEnum):
     GEMINI = "gemini"
     OPENROUTER = "openrouter"
     TOGETHER = "together"
+    XAI = "xai"
 
 
 @dataclass
@@ -103,6 +106,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.GEMINI: self._call_gemini,
             LLMProvider.OPENROUTER: self._call_openrouter,
             LLMProvider.TOGETHER: self._call_together,
+            LLMProvider.XAI: self._call_xai,
         }
 
         if not (OTEL_AVAILABLE and otel_trace is not None):
@@ -150,6 +154,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.GEMINI: self._stream_gemini,
             LLMProvider.OPENROUTER: self._stream_openrouter,
             LLMProvider.TOGETHER: self._stream_together,
+            LLMProvider.XAI: self._stream_xai,
         }
         async for token in dispatch[self._provider](request, ctx):
             yield token
@@ -645,6 +650,100 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         if not key:
             raise ValueError(
                 "TOGETHER_API_KEY is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(api_key=key, base_url=spec.base_url)
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            stream=True,
+        )
+        async for chunk in resp:
+            content = chunk.choices[0].delta.content or ""
+            if content:
+                yield content
+
+    # ── xAI / Grok (openai SDK, OpenAI-compat) ───────────────────────────────
+
+    async def _call_xai(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Call xAI (Grok) via the openai SDK using its OpenAI-compatible endpoint.
+
+        xAI's API speaks the OpenAI wire format; the ``openai`` SDK works without
+        any modification — just point it at ``https://api.x.ai/v1`` with an
+        ``XAI_API_KEY``.
+
+        Reads credentials from the central provider registry.
+        Requires ``XAI_API_KEY`` in the environment or ``api_key`` argument.
+
+        Args:
+            request: LLM invocation parameters. ``request.model`` defaults to
+                ``grok-3-mini`` when not specified.
+            ctx: Workflow execution context (unused directly, kept for interface parity).
+
+        Returns:
+            LLMResponse with content, model, provider, and usage metadata.
+
+        Raises:
+            ValueError: If no API key is available from the argument or environment.
+        """
+        import os
+
+        from openai import AsyncOpenAI
+
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        spec = PROVIDERS["xai"]
+        key = self._api_key or os.getenv(spec.env_var)
+        if not key:
+            raise ValueError(
+                "XAI_API_KEY is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(api_key=key, base_url=spec.base_url)
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+        )
+        return LLMResponse(
+            content=resp.choices[0].message.content or "",
+            model=resp.model,
+            provider="xai",
+            usage={
+                "prompt_tokens": resp.usage.prompt_tokens,
+                "completion_tokens": resp.usage.completion_tokens,
+            }
+            if resp.usage
+            else None,
+        )
+
+    async def _stream_xai(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
+        """Stream tokens from xAI (Grok) via the openai SDK.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Yields:
+            Token strings as they stream from xAI.
+
+        Raises:
+            ValueError: If no API key is available from the argument or environment.
+        """
+        import os
+
+        from openai import AsyncOpenAI
+
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        spec = PROVIDERS["xai"]
+        key = self._api_key or os.getenv(spec.env_var)
+        if not key:
+            raise ValueError(
+                "XAI_API_KEY is not set. "
                 "Set it in your environment or pass api_key to UniversalLLMPrimitive."
             )
         client = AsyncOpenAI(api_key=key, base_url=spec.base_url)
