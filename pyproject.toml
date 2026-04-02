@@ -58,6 +58,11 @@ redis = [
 gemini = [
     "google-generativeai>=0.8.0",
 ]
+llm-all = [
+    "groq>=0.11.0",
+    "anthropic>=0.40.0",
+    "google-generativeai>=0.8.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/theinterneti/TTA.dev"

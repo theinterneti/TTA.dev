@@ -228,14 +228,18 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             "model": request.model,
             "messages": request.messages,
             "stream": False,
+            "think": False,  # disable chain-of-thought for thinking models (e.g. Qwen3)
             "options": {"temperature": request.temperature},
         }
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             resp = await client.post(f"{base}/api/chat", json=payload)
             resp.raise_for_status()
             data = resp.json()
+        msg = data["message"]
+        # Fallback to thinking field if content is empty (older Ollama versions)
+        content = msg.get("content") or msg.get("thinking", "")
         return LLMResponse(
-            content=data["message"]["content"],
+            content=content,
             model=request.model,
             provider="ollama",
         )
@@ -302,9 +306,10 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             "model": request.model,
             "messages": request.messages,
             "stream": True,
+            "think": False,  # disable chain-of-thought for thinking models (e.g. Qwen3)
             "options": {"temperature": request.temperature},
         }
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             async with client.stream("POST", f"{base}/api/chat", json=payload) as resp:
                 resp.raise_for_status()
                 async for line in resp.aiter_lines():

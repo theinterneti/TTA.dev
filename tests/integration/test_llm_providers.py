@@ -159,7 +159,28 @@ async def test_ollama_llm_round_trip() -> None:
         pytest.skip(f"Ollama daemon not reachable at localhost:11434: {exc}")
 
     primitive = UniversalLLMPrimitive(provider=LLMProvider.OLLAMA)
-    request = LLMRequest(model="llama3.2:1b", messages=_MESSAGES)
+    # Discover which models are actually pulled; skip if none available
+    pulled_models: list[str] = []
+    try:
+        import httpx as _httpx
+
+        tags = (
+            await _httpx.AsyncClient().get("http://localhost:11434/api/tags", timeout=2.0)
+        ).json()
+        pulled_models = [m["name"] for m in tags.get("models", [])]
+    except Exception:
+        pass
+
+    if not pulled_models:
+        pytest.skip("No models pulled in local Ollama — skipping Ollama integration test")
+
+    # Prefer small models for speed; take whatever is first if none match
+    preferred_prefixes = ["qwen3.5", "qwen3", "llama3.2", "gemma3", "mistral"]
+    model = next(
+        (m for p in preferred_prefixes for m in pulled_models if m.startswith(p)),
+        pulled_models[0],
+    )
+    request = LLMRequest(model=model, messages=_MESSAGES)
 
     response = await primitive.execute(request, _ctx("ollama"))
 
