@@ -202,33 +202,11 @@ def _ensure_session_exists(session_id: str, *, data_dir: str) -> None:
         raise ControlPlaneError(f"Session not found: {session_id}")
 
 
-def create_server() -> Any:
-    """Create and configure the MCP server.
+# ── Registration helpers ───────────────────────────────────────────────────────
 
-    Returns:
-        Configured FastMCP server instance
 
-    Raises:
-        ImportError: If MCP package is not installed
-    """
-    if not MCP_AVAILABLE or FastMCP is None:
-        raise ImportError("MCP package not installed. Install with: uv add mcp")
-
-    # Create server
-    mcp = FastMCP(
-        name="TTA.dev Primitives",
-        instructions="TTA.dev provides composable workflow primitives for building reliable AI applications. Use analyze_code to get recommendations, get_primitive_info for documentation, and get_template for code snippets.",
-    )
-
-    # Shared analyzer instance
-    analyzer = TTAAnalyzer()
-
-    # Pre-build annotation objects once per server instance
-    _ro = _read_only_annotations()
-    _mut = _mutating_annotations()
-    _idem = _idempotent_annotations()
-
-    # ========== TOOLS ==========
+def _register_analysis_tools(mcp: Any, analyzer: TTAAnalyzer, _ro: Any) -> None:
+    """Register code-analysis and primitive-recommendation MCP tools."""
 
     @mcp.tool(annotations=_ro)
     async def analyze_code(
@@ -797,6 +775,10 @@ result = await workflow.execute(data, context)
             "diff": "".join(diff),
         }
 
+
+def _register_task_tools(mcp: Any, _ro: Any, _mut: Any) -> None:
+    """Register L0 control-plane task MCP tools."""
+
     @mcp.tool(annotations=_mut)
     async def control_create_task(
         title: str,
@@ -975,6 +957,10 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
 
+
+def _register_lock_tools(mcp: Any, _ro: Any, _mut: Any, _idem: Any) -> None:
+    """Register L0 control-plane lock MCP tools."""
+
     @mcp.tool(annotations=_ro)
     async def control_list_locks(
         scope_type: str | None = None,
@@ -1059,6 +1045,10 @@ result = await workflow.execute(data, context)
         except (ControlPlaneError, ValueError) as exc:
             return _control_plane_error_payload(exc)
         return {"released_lock_id": lock_id}
+
+
+def _register_run_tools(mcp: Any, _ro: Any, _mut: Any, _idem: Any) -> None:
+    """Register L0 control-plane run and ownership MCP tools."""
 
     @mcp.tool(annotations=_ro)
     async def control_list_runs(
@@ -1238,7 +1228,9 @@ result = await workflow.execute(data, context)
             **{k: v for k, v in page.items() if k != "items"},
         }
 
-    # ========== WORKFLOW PROGRESSION ==========
+
+def _register_workflow_tools(mcp: Any, _ro: Any, _mut: Any, _idem: Any) -> None:
+    """Register L0 control-plane workflow progression MCP tools."""
 
     @mcp.tool(annotations=_mut)
     async def control_start_workflow(
@@ -1356,7 +1348,7 @@ result = await workflow.execute(data, context)
     ) -> dict[str, Any]:
         """Record the result and confidence score for a completed workflow step.
 
-        ``confidence`` must be in the range 0.0–1.0.  Recording the result
+        ``confidence`` must be in the range 0.0-1.0.  Recording the result
         automatically evaluates any pending POLICY gates attached to the task.
 
         Pass ``hindsight_bank_id`` and ``hindsight_document_id`` to attach a
@@ -1469,7 +1461,7 @@ result = await workflow.execute(data, context)
                         from opentelemetry.trace import Status, StatusCode
 
                         _span.set_status(Status(StatusCode.ERROR, error_summary))
-                    except Exception:
+                    except Exception:  # noqa: BLE001
                         pass
                 service = _create_control_plane_service(data_dir)
                 task = service.mark_workflow_step_failed(
@@ -1481,7 +1473,9 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
 
-    # ========== RESOURCES ==========
+
+def _register_resources_and_prompts(mcp: Any, analyzer: TTAAnalyzer) -> None:
+    """Register MCP resources and prompts."""
 
     @mcp.resource("tta://catalog")
     def get_catalog() -> str:
@@ -1519,8 +1513,6 @@ result = await workflow.execute(data, context)
             lines.append(f"- {req.replace('_', ' ').title()}")
 
         return "\n".join(lines)
-
-    # ========== PROMPTS ==========
 
     @mcp.prompt()
     def analyze_and_improve(code: str, goal: str = "reliability") -> str:
@@ -1565,6 +1557,43 @@ Please:
 4. Provide a complete working example
 5. Suggest related primitives that might help
 """
+
+
+def create_server() -> Any:
+    """Create and configure the MCP server.
+
+    Returns:
+        Configured FastMCP server instance
+
+    Raises:
+        ImportError: If MCP package is not installed
+    """
+    if not MCP_AVAILABLE or FastMCP is None:
+        raise ImportError("MCP package not installed. Install with: uv add mcp")
+
+    # Create server
+    mcp = FastMCP(
+        name="TTA.dev Primitives",
+        instructions="TTA.dev provides composable workflow primitives for building reliable AI applications. Use analyze_code to get recommendations, get_primitive_info for documentation, and get_template for code snippets.",
+    )
+
+    # Shared analyzer instance
+    analyzer = TTAAnalyzer()
+
+    # Pre-build annotation objects once per server instance
+    _ro = _read_only_annotations()
+    _mut = _mutating_annotations()
+    _idem = _idempotent_annotations()
+
+    # ========== TOOLS ==========
+    _register_analysis_tools(mcp, analyzer, _ro)
+    _register_task_tools(mcp, _ro, _mut)
+    _register_lock_tools(mcp, _ro, _mut, _idem)
+    _register_run_tools(mcp, _ro, _mut, _idem)
+    _register_workflow_tools(mcp, _ro, _mut, _idem)
+
+    # ========== RESOURCES + PROMPTS ==========
+    _register_resources_and_prompts(mcp, analyzer)
 
     return mcp
 
