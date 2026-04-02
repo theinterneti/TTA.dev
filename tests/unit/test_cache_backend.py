@@ -5,7 +5,7 @@ Uses fakeredis for Redis tests — no live Redis required.
 
 from __future__ import annotations
 
-import pickle
+import json
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -92,7 +92,28 @@ class TestRedisBackend:
         await backend.set("mykey", "myvalue", ttl_seconds=60.0)
         raw_bytes: bytes | None = await fake_client.get("tta:mykey")
         assert raw_bytes is not None
-        assert pickle.loads(raw_bytes) == "myvalue"  # noqa: S301
+        assert json.loads(raw_bytes) == "myvalue"
+
+    async def test_redis_backend_get_corrupt_data_returns_none(
+        self, backend: RedisBackend, fake_client
+    ) -> None:
+        """Corrupt (non-JSON) data is treated as a cache miss."""
+        # Simulate legacy pickle data directly in Redis
+        prefixed_key = "tta:corrupt"
+        await fake_client.set(prefixed_key, b"NOT_VALID_JSON")
+        result = await backend.get("corrupt")
+        assert result is None
+
+    async def test_redis_backend_set_non_serializable_skips_caching(
+        self, backend: RedisBackend, fake_client
+    ) -> None:
+        """Non-JSON-serializable values are skipped with a warning."""
+        # Create a non-JSON-serializable object (e.g., a set)
+        non_serializable = {1, 2, 3}  # sets are not JSON-serializable
+        await backend.set("nonser", non_serializable, ttl_seconds=60.0)
+        # The key should NOT be in Redis
+        raw_bytes = await fake_client.get("tta:nonser")
+        assert raw_bytes is None
 
 
 class TestCachePrimitive:
