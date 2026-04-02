@@ -7,6 +7,12 @@ from ttadev.primitives.llm.free_model_tracker import (
     get_free_models,
     rank_models_for_role,
 )
+from ttadev.primitives.llm.model_monitor import (
+    ModelMonitorPrimitive,
+    ModelStats,
+    MonitorRequest,
+    MonitorResponse,
+)
 from ttadev.primitives.llm.model_router import (
     ModelRouterPrimitive,
     ModelRouterRequest,
@@ -51,6 +57,11 @@ __all__ = [
     "fetch_free_models",
     "get_free_models",
     "rank_models_for_role",
+    # model monitor
+    "ModelMonitorPrimitive",
+    "ModelStats",
+    "MonitorRequest",
+    "MonitorResponse",
     # model router
     "ModelRouterPrimitive",
     "ModelRouterRequest",

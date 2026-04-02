@@ -468,61 +468,65 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         response = await asyncio.to_thread(model.generate_content, parts)
         yield response.text
 
-    # ── OpenRouter (OpenAI-compat, httpx) ─────────────────────────────────────
+    # ── OpenRouter (openai SDK, OpenAI-compat) ────────────────────────────────
 
     async def _call_openrouter(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
-        """Call OpenRouter via its OpenAI-compatible endpoint.
+        """Call OpenRouter via the openai SDK using its OpenAI-compatible endpoint.
 
         Reads credentials and required headers from the central provider registry.
         Requires ``OPENROUTER_API_KEY`` in the environment or ``api_key`` argument.
 
         Args:
-            request: LLM invocation parameters.
-            ctx: Workflow execution context.
+            request: LLM invocation parameters. ``request.model`` defaults to the
+                provider's ``default_model`` when not specified.
+            ctx: Workflow execution context (unused directly, kept for interface parity).
 
         Returns:
             LLMResponse with content, model, provider, and usage metadata.
+
+        Raises:
+            ValueError: If no API key is available from the argument or environment.
         """
         import os
 
-        import httpx
+        from openai import AsyncOpenAI
 
         from ttadev.primitives.llm.providers import PROVIDERS
 
         spec = PROVIDERS["openrouter"]
-        key = self._api_key or os.getenv(spec.env_var, "")
-        headers = {"Authorization": f"Bearer {key}", **spec.extra_headers}
-        payload: dict = {
-            "model": request.model or spec.default_model,
-            "messages": request.messages,
-            "temperature": request.temperature,
-        }
-        if request.max_tokens is not None:
-            payload["max_tokens"] = request.max_tokens
-        url = f"{spec.base_url}/chat/completions"
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(url, headers=headers, json=payload)
-            resp.raise_for_status()
-            data = resp.json()
-        choice = data["choices"][0]["message"]["content"]
-        usage_raw = data.get("usage")
-        usage: dict[str, int] | None = None
-        if usage_raw:
-            usage = {
-                "prompt_tokens": usage_raw.get("prompt_tokens", 0),
-                "completion_tokens": usage_raw.get("completion_tokens", 0),
-            }
+        key = self._api_key or os.getenv(spec.env_var)
+        if not key:
+            raise ValueError(
+                "OPENROUTER_API_KEY is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(
+            api_key=key,
+            base_url=spec.base_url,
+            default_headers=spec.extra_headers,
+        )
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+        )
         return LLMResponse(
-            content=choice,
-            model=data.get("model", request.model),
+            content=resp.choices[0].message.content or "",
+            model=resp.model,
             provider="openrouter",
-            usage=usage,
+            usage={
+                "prompt_tokens": resp.usage.prompt_tokens,
+                "completion_tokens": resp.usage.completion_tokens,
+            }
+            if resp.usage
+            else None,
         )
 
     async def _stream_openrouter(
         self, request: LLMRequest, ctx: WorkflowContext
     ) -> AsyncIterator[str]:
-        """Stream tokens from OpenRouter via SSE.
+        """Stream tokens from OpenRouter via the openai SDK.
 
         Args:
             request: LLM invocation parameters.
@@ -530,97 +534,95 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
 
         Yields:
             Token strings as they stream from OpenRouter.
+
+        Raises:
+            ValueError: If no API key is available from the argument or environment.
         """
         import os
 
-        import httpx
+        from openai import AsyncOpenAI
 
         from ttadev.primitives.llm.providers import PROVIDERS
 
         spec = PROVIDERS["openrouter"]
-        key = self._api_key or os.getenv(spec.env_var, "")
-        headers = {"Authorization": f"Bearer {key}", **spec.extra_headers}
-        payload: dict = {
-            "model": request.model or spec.default_model,
-            "messages": request.messages,
-            "temperature": request.temperature,
-            "stream": True,
-        }
-        if request.max_tokens is not None:
-            payload["max_tokens"] = request.max_tokens
-        url = f"{spec.base_url}/chat/completions"
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            async with client.stream("POST", url, headers=headers, json=payload) as resp:
-                resp.raise_for_status()
-                async for line in resp.aiter_lines():
-                    if not line.startswith("data: "):
-                        continue
-                    chunk = line[6:]
-                    if chunk.strip() == "[DONE]":
-                        break
-                    try:
-                        data = json.loads(chunk)
-                        content = data["choices"][0]["delta"].get("content", "") or ""
-                        if content:
-                            yield content
-                    except (json.JSONDecodeError, KeyError, IndexError):
-                        continue
+        key = self._api_key or os.getenv(spec.env_var)
+        if not key:
+            raise ValueError(
+                "OPENROUTER_API_KEY is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(
+            api_key=key,
+            base_url=spec.base_url,
+            default_headers=spec.extra_headers,
+        )
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            stream=True,
+        )
+        async for chunk in resp:
+            content = chunk.choices[0].delta.content or ""
+            if content:
+                yield content
 
-    # ── Together AI (OpenAI-compat, httpx) ────────────────────────────────────
+    # ── Together AI (openai SDK, OpenAI-compat) ───────────────────────────────
 
     async def _call_together(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
-        """Call Together AI via its OpenAI-compatible endpoint.
+        """Call Together AI via the openai SDK using its OpenAI-compatible endpoint.
 
         Reads credentials from the central provider registry.
         Requires ``TOGETHER_API_KEY`` in the environment or ``api_key`` argument.
 
         Args:
-            request: LLM invocation parameters.
-            ctx: Workflow execution context.
+            request: LLM invocation parameters. ``request.model`` defaults to the
+                provider's ``default_model`` when not specified.
+            ctx: Workflow execution context (unused directly, kept for interface parity).
 
         Returns:
             LLMResponse with content, model, provider, and usage metadata.
+
+        Raises:
+            ValueError: If no API key is available from the argument or environment.
         """
         import os
 
-        import httpx
+        from openai import AsyncOpenAI
 
         from ttadev.primitives.llm.providers import PROVIDERS
 
         spec = PROVIDERS["together"]
-        key = self._api_key or os.getenv(spec.env_var, "")
-        headers = {"Authorization": f"Bearer {key}"}
-        payload: dict = {
-            "model": request.model or spec.default_model,
-            "messages": request.messages,
-            "temperature": request.temperature,
-        }
-        if request.max_tokens is not None:
-            payload["max_tokens"] = request.max_tokens
-        url = f"{spec.base_url}/chat/completions"
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(url, headers=headers, json=payload)
-            resp.raise_for_status()
-            data = resp.json()
-        choice = data["choices"][0]["message"]["content"]
-        usage_raw = data.get("usage")
-        usage: dict[str, int] | None = None
-        if usage_raw:
-            usage = {
-                "prompt_tokens": usage_raw.get("prompt_tokens", 0),
-                "completion_tokens": usage_raw.get("completion_tokens", 0),
-            }
+        key = self._api_key or os.getenv(spec.env_var)
+        if not key:
+            raise ValueError(
+                "TOGETHER_API_KEY is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(api_key=key, base_url=spec.base_url)
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+        )
         return LLMResponse(
-            content=choice,
-            model=data.get("model", request.model),
+            content=resp.choices[0].message.content or "",
+            model=resp.model,
             provider="together",
-            usage=usage,
+            usage={
+                "prompt_tokens": resp.usage.prompt_tokens,
+                "completion_tokens": resp.usage.completion_tokens,
+            }
+            if resp.usage
+            else None,
         )
 
     async def _stream_together(
         self, request: LLMRequest, ctx: WorkflowContext
     ) -> AsyncIterator[str]:
-        """Stream tokens from Together AI via SSE.
+        """Stream tokens from Together AI via the openai SDK.
 
         Args:
             request: LLM invocation parameters.
@@ -628,38 +630,32 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
 
         Yields:
             Token strings as they stream from Together AI.
+
+        Raises:
+            ValueError: If no API key is available from the argument or environment.
         """
         import os
 
-        import httpx
+        from openai import AsyncOpenAI
 
         from ttadev.primitives.llm.providers import PROVIDERS
 
         spec = PROVIDERS["together"]
-        key = self._api_key or os.getenv(spec.env_var, "")
-        headers = {"Authorization": f"Bearer {key}"}
-        payload: dict = {
-            "model": request.model or spec.default_model,
-            "messages": request.messages,
-            "temperature": request.temperature,
-            "stream": True,
-        }
-        if request.max_tokens is not None:
-            payload["max_tokens"] = request.max_tokens
-        url = f"{spec.base_url}/chat/completions"
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            async with client.stream("POST", url, headers=headers, json=payload) as resp:
-                resp.raise_for_status()
-                async for line in resp.aiter_lines():
-                    if not line.startswith("data: "):
-                        continue
-                    chunk = line[6:]
-                    if chunk.strip() == "[DONE]":
-                        break
-                    try:
-                        data = json.loads(chunk)
-                        content = data["choices"][0]["delta"].get("content", "") or ""
-                        if content:
-                            yield content
-                    except (json.JSONDecodeError, KeyError, IndexError):
-                        continue
+        key = self._api_key or os.getenv(spec.env_var)
+        if not key:
+            raise ValueError(
+                "TOGETHER_API_KEY is not set. "
+                "Set it in your environment or pass api_key to UniversalLLMPrimitive."
+            )
+        client = AsyncOpenAI(api_key=key, base_url=spec.base_url)
+        resp = await client.chat.completions.create(
+            model=request.model or spec.default_model,
+            messages=request.messages,  # type: ignore[arg-type]
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            stream=True,
+        )
+        async for chunk in resp:
+            content = chunk.choices[0].delta.content or ""
+            if content:
+                yield content
