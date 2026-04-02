@@ -3,9 +3,11 @@
 Curated, read-only scores from public leaderboards and papers.
 Used by ModelRegistryPrimitive to inform model selection.
 
-All scores are expressed as percentages (0.0–100.0). MT-Bench scores
-(native 1–10 scale) are multiplied by 10 to normalise to 0–100; the
-``notes`` field records the original scale.
+All scores are expressed as percentages (0.0–100.0) **except** for the
+``"arena_elo"`` benchmark, which stores raw LMSYS Chatbot Arena ELO scores
+on a 0–2000 scale.  The ``notes`` field on every ``arena_elo`` entry records
+the scale explicitly.  MT-Bench scores (native 1–10 scale) are multiplied
+by 10 to normalise to 0–100; the ``notes`` field records the original scale.
 
 Sources:
     * Qwen2.5 report: https://qwenlm.github.io/blog/qwen2.5/
@@ -21,6 +23,8 @@ Sources:
     * GPT-4o Mini: https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/
     * Claude model cards: https://www.anthropic.com/news/claude-3-5-sonnet
     * Gemini 1.5: https://storage.googleapis.com/deepmind-media/gemini/gemini_v1_5_report.pdf
+    * LMSYS Chatbot Arena: https://lmsys.org/blog/2023-05-03-arena/
+    * LM Market Cap benchmarks: https://lmmarketcap.com/benchmarks
 """
 
 from __future__ import annotations
@@ -39,8 +43,11 @@ __all__ = [
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 KNOWN_BENCHMARKS: frozenset[str] = frozenset(
-    {"mmlu", "humaneval", "math", "mt_bench", "gpqa", "mbpp"}
+    {"mmlu", "humaneval", "math", "mt_bench", "gpqa", "mbpp", "arena_elo"}
 )
+#: ``"arena_elo"`` stores raw LMSYS Chatbot Arena ELO on a **0–2000 scale**,
+#: NOT normalised to 0–100 like all other benchmarks.  This intentional
+#: exception is noted in every ``arena_elo`` entry's ``notes`` field.
 
 
 # ── Data model ────────────────────────────────────────────────────────────────
@@ -87,6 +94,8 @@ _GPT4O_MINI_URL = "https://openai.com/index/gpt-4o-mini-advancing-cost-efficient
 _CLAUDE35_URL = "https://www.anthropic.com/news/claude-3-5-sonnet"
 _CLAUDE3_URL = "https://www.anthropic.com/news/claude-3-family"
 _GEMINI15_URL = "https://storage.googleapis.com/deepmind-media/gemini/gemini_v1_5_report.pdf"
+_LMSYS_URL = "https://lmsys.org/blog/2023-05-03-arena/"
+_LMMARKETCAP_URL = "https://lmmarketcap.com/benchmarks"
 
 BENCHMARK_DATA: list[ModelBenchmarkMetadata] = [
     # ── Qwen2.5 7B ───────────────────────────────────────────────────────────
@@ -646,6 +655,82 @@ BENCHMARK_DATA: list[ModelBenchmarkMetadata] = [
         source_url=_LLAMA33_URL,
         measured_date="2024-12-06",
         notes="pass@1; same weights as llama3.3:70b served via Groq",
+    ),
+    # ── Groq / Llama 3.3 70B Versatile — Arena ELO ──────────────────────────
+    ModelBenchmarkMetadata(
+        model_id="llama-3.3-70b-versatile",
+        benchmark="mmlu",
+        score=86.0,
+        source_url=_LLAMA33_URL,
+        measured_date="2024-12-06",
+        notes="5-shot; Groq-hosted Llama 3.3 70B",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="llama-3.3-70b-versatile",
+        benchmark="humaneval",
+        score=88.4,
+        source_url=_LLAMA33_URL,
+        measured_date="2024-12-06",
+        notes="pass@1; Groq-hosted Llama 3.3 70B",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="llama-3.3-70b-versatile",
+        benchmark="arena_elo",
+        score=1420.0,
+        source_url=_LMSYS_URL,
+        measured_date="2025-01-01",
+        notes="LMSYS Chatbot Arena ELO; 0–2000 scale (NOT a percentage); approximate",
+    ),
+    # ── Groq / Gemma 2 9B IT ─────────────────────────────────────────────────
+    ModelBenchmarkMetadata(
+        model_id="gemma2-9b-it",
+        benchmark="mmlu",
+        score=71.3,
+        source_url=_GEMMA2_URL,
+        measured_date="2024-06-27",
+        notes="5-shot; Groq-hosted Gemma 2 9B IT (same weights as gemma2:9b)",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="gemma2-9b-it",
+        benchmark="arena_elo",
+        score=1355.0,
+        source_url=_LMSYS_URL,
+        measured_date="2025-01-01",
+        notes="LMSYS Chatbot Arena ELO; 0–2000 scale (NOT a percentage); approximate",
+    ),
+    # ── Groq / Mixtral 8x7B 32768 ────────────────────────────────────────────
+    ModelBenchmarkMetadata(
+        model_id="mixtral-8x7b-32768",
+        benchmark="mmlu",
+        score=70.6,
+        source_url=_MIXTRAL_URL,
+        measured_date="2024-01-08",
+        notes="5-shot; Groq-hosted Mixtral 8x7B (same weights as mixtral:8x7b)",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="mixtral-8x7b-32768",
+        benchmark="humaneval",
+        score=40.2,
+        source_url=_MIXTRAL_URL,
+        measured_date="2024-01-08",
+        notes="pass@1; Groq-hosted Mixtral 8x7B",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="mixtral-8x7b-32768",
+        benchmark="arena_elo",
+        score=1350.0,
+        source_url=_LMSYS_URL,
+        measured_date="2025-01-01",
+        notes="LMSYS Chatbot Arena ELO; 0–2000 scale (NOT a percentage); approximate",
+    ),
+    # ── Gemini 2.5 Pro ───────────────────────────────────────────────────────
+    ModelBenchmarkMetadata(
+        model_id="models/gemini-2.5-pro",
+        benchmark="mmlu",
+        score=90.8,
+        source_url=_LMMARKETCAP_URL,
+        measured_date="2025-01-01",
+        notes="5-shot; highest published MMLU for Gemini 2.5 Pro",
     ),
 ]
 

@@ -270,12 +270,22 @@ class TestDataIntegrity:
             assert len(entry.model_id) > 0, f"Empty model_id in entry: {entry}"
 
     def test_all_scores_in_valid_range(self) -> None:
-        """Every benchmark score is between 0.0 and 100.0 inclusive."""
+        """Every benchmark score is within its expected range.
+
+        Most benchmarks use a 0.0–100.0 percentage scale.
+        The ``arena_elo`` benchmark is an exception: it stores raw LMSYS
+        Chatbot Arena ELO values on a 0–2000 scale.
+        """
         # Arrange / Act / Assert
         for entry in BENCHMARK_DATA:
-            assert 0.0 <= entry.score <= 100.0, (
-                f"Score {entry.score} out of range for {entry.model_id}/{entry.benchmark}"
-            )
+            if entry.benchmark == "arena_elo":
+                assert 0.0 <= entry.score <= 2000.0, (
+                    f"Arena ELO {entry.score} out of 0–2000 range for {entry.model_id}"
+                )
+            else:
+                assert 0.0 <= entry.score <= 100.0, (
+                    f"Score {entry.score} out of range for {entry.model_id}/{entry.benchmark}"
+                )
 
     def test_all_benchmark_names_are_in_known_set(self) -> None:
         """Every benchmark field value is a member of KNOWN_BENCHMARKS."""

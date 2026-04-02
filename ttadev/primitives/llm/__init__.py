@@ -15,6 +15,10 @@ from ttadev.primitives.llm.free_model_tracker import (
     get_free_models,
     rank_models_for_role,
 )
+from ttadev.primitives.llm.model_catalog import (
+    PROVIDER_SUMMARY,
+    print_catalog,
+)
 from ttadev.primitives.llm.model_monitor import (
     ModelMonitorPrimitive,
     ModelStats,
@@ -22,6 +26,8 @@ from ttadev.primitives.llm.model_monitor import (
     MonitorResponse,
 )
 from ttadev.primitives.llm.model_registry import (
+    GEMINI_MODELS,
+    GROQ_ROTATION_MODELS,
     ModelEntry,
     ModelRegistryPrimitive,
     RegistryRequest,
@@ -90,6 +96,11 @@ __all__ = [
     "RegistryRequest",
     "RegistryResponse",
     "SelectionPolicy",
+    "GROQ_ROTATION_MODELS",
+    "GEMINI_MODELS",
+    # model catalog
+    "PROVIDER_SUMMARY",
+    "print_catalog",
     # model router
     "ModelRouterPrimitive",
     "ModelRouterRequest",

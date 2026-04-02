@@ -83,8 +83,8 @@ _TEST_CASES: list[TestCase] = [
     # ── Groq ──────────────────────────────────────────────────────────────────
     TestCase("groq", "llama-3.1-8b-instant", _GROQ_URL, "GROQ_API_KEY"),
     TestCase("groq", "llama-3.3-70b-versatile", _GROQ_URL, "GROQ_API_KEY"),
-    TestCase("groq", "gemma2-9b-it", _GROQ_URL, "GROQ_API_KEY"),
-    TestCase("groq", "mixtral-8x7b-32768", _GROQ_URL, "GROQ_API_KEY"),
+    TestCase("groq", "meta-llama/llama-4-scout-17b-16e-instruct", _GROQ_URL, "GROQ_API_KEY"),
+    TestCase("groq", "qwen/qwen3-32b", _GROQ_URL, "GROQ_API_KEY"),
     # ── Gemini (OAI-compat, models/ prefix) ───────────────────────────────────
     TestCase("gemini", "models/gemini-2.5-flash", _GEMINI_URL, "GOOGLE_API_KEY"),
     TestCase("gemini", "models/gemini-2.0-flash", _GEMINI_URL, "GOOGLE_API_KEY"),
@@ -93,7 +93,7 @@ _TEST_CASES: list[TestCase] = [
     # ── OpenRouter (free tier) ────────────────────────────────────────────────
     TestCase(
         "openrouter",
-        "mistralai/mistral-7b-instruct:free",
+        "meta-llama/llama-3.3-70b-instruct:free",
         _OPENROUTER_URL,
         "OPENROUTER_API_KEY",
         extra_headers=_OPENROUTER_HEADERS,
@@ -117,7 +117,7 @@ _TEST_CASES: list[TestCase] = [
     # ── Anthropic (SDK-only — handled separately) ─────────────────────────────
     TestCase(
         "anthropic",
-        "claude-3-5-haiku-20241022",
+        "claude-3-5-haiku-latest",
         "",  # no URL — SDK path
         "ANTHROPIC_API_KEY",
         use_anthropic_sdk=True,

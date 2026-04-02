@@ -846,11 +846,17 @@ class TestPrePopulatedCloudModels:
 
     @pytest.mark.asyncio
     async def test_pre_populated_gemini_flash_lite(self) -> None:
-        """gemini-2.0-flash-lite is pre-registered as cost_tier='free'."""
+        """models/gemini-2.0-flash-lite is pre-registered as cost_tier='free'.
+
+        The model ID uses the ``models/`` prefix required by Google's
+        OpenAI-compatible endpoint (updated June 2026).
+        """
         reg = ModelRegistryPrimitive(prepopulate=True)
         ctx = _ctx()
         resp = await reg.execute(
-            RegistryRequest(action="get", provider="gemini", model_id="gemini-2.0-flash-lite"),
+            RegistryRequest(
+                action="get", provider="gemini", model_id="models/gemini-2.0-flash-lite"
+            ),
             ctx,
         )
         assert resp.entry is not None
