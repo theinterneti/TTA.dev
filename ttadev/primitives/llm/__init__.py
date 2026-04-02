@@ -1,5 +1,13 @@
 """LLM primitives — runtime LLM provider abstraction and routing."""
 
+from ttadev.primitives.llm.eval_harness import (
+    COST_PER_1K_OUTPUT_TOKENS,
+    TASK_TYPE_PROFILES,
+    EvalHarnessPrimitive,
+    EvalRun,
+    EvalTask,
+    ModelEvalResult,
+)
 from ttadev.primitives.llm.free_model_tracker import (
     FreeModelTracker,
     ORModel,
@@ -53,6 +61,13 @@ from ttadev.primitives.llm.universal_llm_primitive import (
 )
 
 __all__ = [
+    # eval harness
+    "EvalTask",
+    "ModelEvalResult",
+    "EvalRun",
+    "EvalHarnessPrimitive",
+    "TASK_TYPE_PROFILES",
+    "COST_PER_1K_OUTPUT_TOKENS",
     # universal primitive
     "LLMProvider",
     "LLMRequest",

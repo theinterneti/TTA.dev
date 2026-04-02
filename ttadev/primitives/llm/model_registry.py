@@ -3,7 +3,7 @@
 Maintains an in-memory registry of known LLM models across all configured
 providers. Pre-populated with well-known cloud models; discovers Ollama
 models on demand. Supports policy-based model selection (prefer local, max
-cost tier, capability requirements, provider preferences).
+cost tier, capability requirements, provider preferences, benchmark thresholds).
 
 Design notes
 ------------
@@ -15,6 +15,9 @@ Design notes
 * **Thread-safe** — all mutations are protected by ``asyncio.Lock``.
 * **Composable** — works alongside :class:`~ttadev.primitives.llm.model_monitor.ModelMonitorPrimitive`
   and :class:`~ttadev.primitives.llm.model_router.ModelRouterPrimitive`.
+* **Benchmark-aware** — :class:`SelectionPolicy` supports filtering and
+  sorting by published benchmark scores via
+  :mod:`~ttadev.primitives.llm.model_benchmarks`.
 """
 
 from __future__ import annotations
@@ -88,6 +91,17 @@ class SelectionPolicy:
             back to any remaining eligible models.
         fallback_providers: Providers to use only when no preferred-provider
             model is available.
+        min_humaneval_score: When set, exclude models whose best published
+            HumanEval score is below this percentage. Models with no HumanEval
+            data in :data:`~ttadev.primitives.llm.model_benchmarks.BENCHMARK_DATA`
+            are also excluded when this threshold is provided.
+        min_mmlu_score: When set, exclude models whose best published MMLU
+            score is below this percentage. Models with no MMLU data are also
+            excluded when this threshold is provided.
+        preferred_benchmark: When set, eligible models are sorted by their
+            best score on this benchmark in descending order (higher is better),
+            applied as a tertiary sort key after local-preference and
+            provider-preference ordering.
     """
 
     prefer_local: bool = True
@@ -96,6 +110,9 @@ class SelectionPolicy:
     require_vision: bool = False
     preferred_providers: list[str] = field(default_factory=list)
     fallback_providers: list[str] = field(default_factory=list)
+    min_humaneval_score: float | None = None
+    min_mmlu_score: float | None = None
+    preferred_benchmark: str | None = None
 
 
 @dataclass
@@ -115,6 +132,12 @@ class RegistryRequest:
         filter_vision: When ``True``, ``"list"`` returns only models that
             support vision.
         policy: :class:`SelectionPolicy` used by the ``"select"`` action.
+        benchmark_filter: When set on a ``"list"`` action, only models that
+            have at least one benchmark entry for this benchmark name are
+            returned.
+        min_benchmark_score: Used together with *benchmark_filter* — further
+            restricts ``"list"`` results to models whose best score on the
+            specified benchmark is >= this value.
     """
 
     action: str
@@ -126,6 +149,8 @@ class RegistryRequest:
     filter_tool_calling: bool | None = None
     filter_vision: bool | None = None
     policy: SelectionPolicy | None = None
+    benchmark_filter: str | None = None
+    min_benchmark_score: float | None = None
 
 
 @dataclass
@@ -229,10 +254,13 @@ class ModelRegistryPrimitive(WorkflowPrimitive[RegistryRequest, RegistryResponse
     * ``register`` — add or update a :class:`ModelEntry`.
     * ``get`` — retrieve a single entry by provider and model ID.
     * ``list`` — list all entries, optionally filtered by provider, cost tier,
-      or capability.
+      capability, or published benchmark score via *benchmark_filter* /
+      *min_benchmark_score*.
     * ``discover_ollama`` — probe Ollama, register each loaded model as
       ``provider="ollama"``, ``is_local=True``, ``cost_tier="free"``.
-    * ``select`` — pick the best model matching a :class:`SelectionPolicy`.
+    * ``select`` — pick the best model matching a :class:`SelectionPolicy`,
+      optionally filtered by minimum HumanEval / MMLU scores and sorted by
+      a preferred benchmark.
     * ``unregister`` — remove an entry from the registry.
 
     Args:
@@ -271,6 +299,19 @@ class ModelRegistryPrimitive(WorkflowPrimitive[RegistryRequest, RegistryResponse
             ctx,
         )
         print(resp.entry)  # ModelEntry or None
+
+        # Select a model with strong coding skills (HumanEval >= 80%)
+        resp = await registry.execute(
+            RegistryRequest(
+                action="select",
+                policy=SelectionPolicy(
+                    min_humaneval_score=80.0,
+                    preferred_benchmark="humaneval",
+                    max_cost_tier="high",
+                ),
+            ),
+            ctx,
+        )
     """
 
     def __init__(
@@ -391,6 +432,23 @@ class ModelRegistryPrimitive(WorkflowPrimitive[RegistryRequest, RegistryResponse
         if request.filter_vision is True:
             entries = [e for e in entries if e.supports_vision]
 
+        # Benchmark-based list filtering — lazy import avoids circular imports.
+        if request.benchmark_filter:
+            from ttadev.primitives.llm.model_benchmarks import get_best_score
+
+            bench = request.benchmark_filter
+            min_score = request.min_benchmark_score
+
+            def _has_benchmark(e: ModelEntry) -> bool:
+                score = get_best_score(e.model_id, bench)
+                if score is None:
+                    return False
+                if min_score is not None and score < min_score:
+                    return False
+                return True
+
+            entries = [e for e in entries if _has_benchmark(e)]
+
         return RegistryResponse(action="list", entries=entries)
 
     async def _discover_ollama(
@@ -444,6 +502,9 @@ class ModelRegistryPrimitive(WorkflowPrimitive[RegistryRequest, RegistryResponse
         return RegistryResponse(action="discover_ollama", discovered_count=count)
 
     async def _select(self, request: RegistryRequest) -> RegistryResponse:
+        # Lazy-import benchmark helpers to avoid circular imports.
+        from ttadev.primitives.llm.model_benchmarks import get_best_score
+
         policy = request.policy or SelectionPolicy()
         max_tier_rank = _COST_TIER_ORDER.get(policy.max_cost_tier, 99)
 
@@ -459,10 +520,31 @@ class ModelRegistryPrimitive(WorkflowPrimitive[RegistryRequest, RegistryResponse
         # Apply cost tier ceiling
         entries = [e for e in entries if _COST_TIER_ORDER.get(e.cost_tier, 99) <= max_tier_rank]
 
+        # Apply benchmark score filters — models with no data are excluded when
+        # a threshold is set, so callers can rely on the guarantee that every
+        # returned model meets the stated minimum.
+        if policy.min_humaneval_score is not None:
+            threshold = policy.min_humaneval_score
+            entries = [
+                e
+                for e in entries
+                if (s := get_best_score(e.model_id, "humaneval")) is not None and s >= threshold
+            ]
+
+        if policy.min_mmlu_score is not None:
+            threshold = policy.min_mmlu_score
+            entries = [
+                e
+                for e in entries
+                if (s := get_best_score(e.model_id, "mmlu")) is not None and s >= threshold
+            ]
+
         if not entries:
             return RegistryResponse(action="select", entry=None)
 
-        def _sort_key(e: ModelEntry) -> tuple[int, int, int, int, str]:
+        def _sort_key(
+            e: ModelEntry,
+        ) -> tuple[int, int, int, float, int, str]:
             # Primary: local models first when prefer_local is True
             local_rank = 0 if (e.is_local and policy.prefer_local) else 1
 
@@ -478,16 +560,23 @@ class ModelRegistryPrimitive(WorkflowPrimitive[RegistryRequest, RegistryResponse
             # Tertiary: lower cost tier preferred
             cost_rank = _COST_TIER_ORDER.get(e.cost_tier, 99)
 
-            # Quaternary: healthy models preferred (requires monitor)
+            # Quaternary: preferred_benchmark score descending (negate for ascending sort)
+            if policy.preferred_benchmark is not None:
+                bench_score = get_best_score(e.model_id, policy.preferred_benchmark)
+                benchmark_rank = -(bench_score if bench_score is not None else 0.0)
+            else:
+                benchmark_rank = 0.0
+
+            # Quinary: healthy models preferred (requires monitor)
             if self._monitor is not None:
                 health_rank = 0 if self._monitor.is_healthy_sync(e.model_id, e.provider) else 1
             else:
                 health_rank = 0
 
-            # Quinary: stable alphabetical tie-break
+            # Senary: stable alphabetical tie-break
             tiebreak = f"{e.provider}:{e.model_id}"
 
-            return (local_rank, provider_rank, cost_rank, health_rank, tiebreak)
+            return (local_rank, provider_rank, cost_rank, benchmark_rank, health_rank, tiebreak)
 
         entries.sort(key=_sort_key)
         return RegistryResponse(action="select", entry=entries[0])

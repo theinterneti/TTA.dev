@@ -38,6 +38,7 @@ import json
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import Any
 
 from ttadev.primitives.core import WorkflowContext, WorkflowPrimitive
 
@@ -63,25 +64,160 @@ class LLMProvider(StrEnum):
 
 
 @dataclass
+class ToolSchema:
+    """Provider-agnostic tool declaration for native LLM tool-calling.
+
+    Describes a single callable tool that can be passed to an LLM so the
+    model may elect to invoke it.  The ``parameters`` field must be a valid
+    JSON Schema object (``{"type": "object", "properties": {...}, ...}``).
+
+    Example::
+
+        weather_tool = ToolSchema(
+            name="get_weather",
+            description="Return current weather for a city.",
+            parameters={
+                "type": "object",
+                "properties": {
+                    "location": {"type": "string", "description": "City name"},
+                    "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+                },
+                "required": ["location"],
+            },
+        )
+    """
+
+    name: str
+    description: str
+    parameters: dict[str, Any]  # JSON Schema object for the tool's parameters
+    strict: bool = False  # OpenAI strict-mode tool calling
+
+    def to_openai(self) -> dict[str, Any]:
+        """Convert to OpenAI function-calling wire format.
+
+        Returns:
+            A dict with ``{"type": "function", "function": {...}}`` structure
+            as expected by the OpenAI (and OpenAI-compatible) chat completions
+            API.  When ``strict=True``, adds the ``"strict": true`` field
+            inside the function object to enable structured outputs.
+        """
+        func: dict[str, Any] = {
+            "name": self.name,
+            "description": self.description,
+            "parameters": self.parameters,
+        }
+        if self.strict:
+            func["strict"] = True
+        return {"type": "function", "function": func}
+
+    def to_anthropic(self) -> dict[str, Any]:
+        """Convert to Anthropic tool_use wire format.
+
+        Returns:
+            A dict with ``{"name": ..., "description": ..., "input_schema": ...}``
+            structure as expected by the Anthropic Messages API.  The
+            ``parameters`` dict is passed verbatim as ``input_schema``; it
+            must already be a valid JSON Schema object.
+        """
+        return {
+            "name": self.name,
+            "description": self.description,
+            "input_schema": self.parameters,
+        }
+
+
+@dataclass
+class ToolCall:
+    """A single tool invocation returned by the model.
+
+    Populated in ``LLMResponse.tool_calls`` when the model decides to call
+    one or more tools instead of (or in addition to) producing text.
+
+    Attributes:
+        id: Provider-assigned call identifier.  Used when sending tool results
+            back to the model in the next turn.
+        name: The name of the tool that the model wants to invoke.
+        arguments: Parsed JSON arguments for the tool call, keyed by parameter
+            name.  Always a ``dict`` — never a raw JSON string.
+    """
+
+    id: str
+    name: str
+    arguments: dict[str, Any]  # Parsed from the provider's JSON string
+
+
+@dataclass
 class LLMRequest:
+    """Parameters for a single LLM invocation.
+
+    Attributes:
+        model: Provider model identifier (e.g. ``"gpt-4o"``, ``"llama3"``).
+        messages: Chat history in OpenAI-compatible ``[{"role": ..., "content": ...}]``
+            format.
+        temperature: Sampling temperature (0–2).  Defaults to ``0.7``.
+        max_tokens: Maximum tokens to generate.  ``None`` lets the provider
+            decide.
+        system: System prompt text.  Injected as a system message for providers
+            that support it.
+        stream: When ``True``, use the streaming interface (``primitive.stream()``).
+        tools: Optional list of tool declarations to expose to the model.
+            When ``None`` (default) no tool-calling behaviour is activated.
+        tool_choice: How the model should select tools.  Accepted values are
+            ``"auto"`` (default), ``"none"``, ``"required"``, or the name of a
+            specific tool.
+    """
+
     model: str
     messages: list[dict[str, str]]
     temperature: float = 0.7
     max_tokens: int | None = None
     system: str | None = None
     stream: bool = False
+    tools: list[ToolSchema] | None = None
+    tool_choice: str = "auto"
 
 
 @dataclass
 class LLMResponse:
+    """Result of a single LLM invocation.
+
+    Attributes:
+        content: Text content returned by the model.  May be an empty string
+            when the model's response consists entirely of tool calls.
+        model: Model identifier echoed from the provider response.
+        provider: Name of the provider that handled the request (e.g.
+            ``"openai"``, ``"anthropic"``).
+        usage: Token usage metadata.  Keys vary by provider
+            (``prompt_tokens``/``input_tokens``, ``completion_tokens``/
+            ``output_tokens``).
+        tool_calls: Populated when the model invokes one or more tools.
+            ``None`` when the response is plain text (backward-compatible
+            default).
+        finish_reason: The reason the model stopped generating.  Common values
+            are ``"stop"`` (natural end), ``"tool_calls"`` (tool invocation),
+            and ``"length"`` (max_tokens reached).  ``None`` for providers
+            that do not report a finish reason.
+    """
+
     content: str
     model: str
     provider: str
     usage: dict[str, int] | None = None
+    tool_calls: list[ToolCall] | None = None
+    finish_reason: str | None = None
 
 
 class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
-    """Route LLM requests to the appropriate provider backend."""
+    """Route LLM requests to the appropriate provider backend.
+
+    Supports native tool-calling for all providers.  Pass a list of
+    ``ToolSchema`` objects in ``LLMRequest.tools``; when the model invokes
+    tools, ``LLMResponse.tool_calls`` will be populated with ``ToolCall``
+    objects.
+
+    Existing callers that omit ``tools`` experience no behaviour change —
+    ``LLMResponse.tool_calls`` remains ``None``.
+    """
 
     def __init__(
         self,
@@ -159,9 +295,70 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         async for token in dispatch[self._provider](request, ctx):
             yield token
 
+    # ── Internal helpers ──────────────────────────────────────────────────────
+
+    @staticmethod
+    def _parse_openai_tool_calls(raw_calls: object) -> list[ToolCall] | None:
+        """Parse OpenAI-compat tool_calls from a response message.
+
+        Handles the OpenAI wire format where ``arguments`` is a JSON string
+        that must be decoded before returning.
+
+        Args:
+            raw_calls: The ``tool_calls`` attribute from an OpenAI-compat
+                response message object.  May be ``None`` or an empty sequence.
+
+        Returns:
+            A list of ``ToolCall`` objects, or ``None`` when no tool calls are
+            present.
+        """
+        if not raw_calls:
+            return None
+        return [
+            ToolCall(
+                id=tc.id,
+                name=tc.function.name,
+                arguments=json.loads(tc.function.arguments),
+            )
+            for tc in raw_calls
+        ]
+
+    @staticmethod
+    def _build_openai_tool_kwargs(request: LLMRequest) -> dict[str, Any]:
+        """Build extra kwargs to pass to OpenAI-compat ``chat.completions.create``.
+
+        When ``request.tools`` is ``None`` returns an empty dict so that
+        existing callers are unaffected.
+
+        Args:
+            request: The current LLM request.
+
+        Returns:
+            A dict containing ``tools`` and ``tool_choice`` keys when tools
+            are declared, otherwise an empty dict.
+        """
+        if not request.tools:
+            return {}
+        return {
+            "tools": [t.to_openai() for t in request.tools],
+            "tool_choice": request.tool_choice,
+        }
+
     # ── Non-streaming provider calls ──────────────────────────────────────────
 
     async def _call_groq(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Call Groq via the groq SDK.
+
+        Supports native tool-calling when ``request.tools`` is provided.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Returns:
+            LLMResponse with content, model, provider, usage metadata, and
+            optional tool_calls / finish_reason.
+        """
         from groq import AsyncGroq  # type: ignore[import]
 
         client = AsyncGroq(api_key=self._api_key)
@@ -170,9 +367,12 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             messages=request.messages,  # type: ignore[arg-type]
             temperature=request.temperature,
             max_tokens=request.max_tokens,
+            **self._build_openai_tool_kwargs(request),
         )
+        choice = resp.choices[0]
+        raw_tc = getattr(choice.message, "tool_calls", None)
         return LLMResponse(
-            content=resp.choices[0].message.content or "",
+            content=choice.message.content or "",
             model=resp.model,
             provider="groq",
             usage={
@@ -181,29 +381,85 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             }
             if resp.usage
             else None,
+            tool_calls=self._parse_openai_tool_calls(raw_tc),
+            finish_reason=getattr(choice, "finish_reason", None),
         )
 
     async def _call_anthropic(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Call Anthropic via the anthropic SDK.
+
+        Supports native tool-calling when ``request.tools`` is provided.
+        When the model returns ``tool_use`` blocks, they are parsed into
+        ``ToolCall`` objects.  Text blocks are returned in ``content``; when
+        there are no text blocks (pure tool-call response), ``content`` is
+        an empty string.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Returns:
+            LLMResponse with content, model, provider, usage metadata, and
+            optional tool_calls / finish_reason.
+        """
         import anthropic  # type: ignore[import]
 
         client = anthropic.AsyncAnthropic(api_key=self._api_key)
+
+        create_kwargs: dict[str, Any] = {}
+        if request.tools:
+            create_kwargs["tools"] = [t.to_anthropic() for t in request.tools]
+
         resp = await client.messages.create(
             model=request.model,
             max_tokens=request.max_tokens or 1024,
             system=request.system or "",
             messages=request.messages,  # type: ignore[arg-type]
+            **create_kwargs,
         )
+
+        # Separate tool_use blocks from text blocks
+        tool_use_blocks = [b for b in resp.content if getattr(b, "type", None) == "tool_use"]
+        tool_calls: list[ToolCall] | None = None
+        if tool_use_blocks:
+            tool_calls = [
+                ToolCall(id=b.id, name=b.name, arguments=b.input) for b in tool_use_blocks
+            ]
+
+        # Extract text: prefer typed text blocks; fall back for mocks without type
+        text_blocks = [b for b in resp.content if getattr(b, "type", None) == "text"]
+        if text_blocks:
+            content = text_blocks[0].text
+        elif resp.content and hasattr(resp.content[0], "text"):
+            content = resp.content[0].text
+        else:
+            content = ""
+
         return LLMResponse(
-            content=resp.content[0].text if resp.content else "",
+            content=content,
             model=resp.model,
             provider="anthropic",
             usage={
                 "input_tokens": resp.usage.input_tokens,
                 "output_tokens": resp.usage.output_tokens,
             },
+            tool_calls=tool_calls,
+            finish_reason=getattr(resp, "stop_reason", None),
         )
 
     async def _call_openai(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Call OpenAI via the openai SDK.
+
+        Supports native tool-calling when ``request.tools`` is provided.
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Returns:
+            LLMResponse with content, model, provider, usage metadata, and
+            optional tool_calls / finish_reason.
+        """
         from openai import AsyncOpenAI  # type: ignore[import]
 
         client = AsyncOpenAI(api_key=self._api_key, base_url=self._base_url)
@@ -212,9 +468,12 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             messages=request.messages,  # type: ignore[arg-type]
             temperature=request.temperature,
             max_tokens=request.max_tokens,
+            **self._build_openai_tool_kwargs(request),
         )
+        choice = resp.choices[0]
+        raw_tc = getattr(choice.message, "tool_calls", None)
         return LLMResponse(
-            content=resp.choices[0].message.content or "",
+            content=choice.message.content or "",
             model=resp.model,
             provider="openai",
             usage={
@@ -223,10 +482,20 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             }
             if resp.usage
             else None,
+            tool_calls=self._parse_openai_tool_calls(raw_tc),
+            finish_reason=getattr(choice, "finish_reason", None),
         )
 
     async def _call_ollama(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
         """Call Ollama /api/chat (non-streaming).
+
+        Supports tool-calling via the ``tools`` key in the JSON payload when
+        ``request.tools`` is provided.  Ollama uses the same OpenAI function
+        schema format (``{"type": "function", "function": {...}}``).
+
+        Note: Not all Ollama models support tool-calling.  When the model
+        returns no ``tool_calls`` in its response message and ``finish_reason``
+        is not ``"tool_calls"``, the response is treated as plain text.
 
         Supports full Ollama options: num_ctx, keep_alive, think mode, system
         messages, structured output via format, and all sampling parameters.
@@ -243,6 +512,14 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                     "num_gpu": -1,           # all GPU layers
                 },
             )
+
+        Args:
+            request: LLM invocation parameters.
+            ctx: Workflow execution context.
+
+        Returns:
+            LLMResponse with content, model, provider, and optional
+            tool_calls / finish_reason.
         """
         import httpx
 
@@ -276,17 +553,40 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         if "format" in extra:
             payload["format"] = extra["format"]
 
+        # Native tool-calling: Ollama uses the same format as OpenAI
+        if request.tools:
+            payload["tools"] = [t.to_openai() for t in request.tools]
+
         async with httpx.AsyncClient(timeout=120.0) as client:
             resp = await client.post(f"{base}/api/chat", json=payload)
             resp.raise_for_status()
             data = resp.json()
 
         msg = data["message"]
+
+        # Parse tool calls when present
+        ollama_tc = msg.get("tool_calls") or []
+        tool_calls: list[ToolCall] | None = None
+        if ollama_tc:
+            tool_calls = [
+                ToolCall(
+                    id=f"ollama_call_{i}",
+                    name=tc["function"]["name"],
+                    # Ollama returns arguments as a dict, not a JSON string
+                    arguments=tc["function"]["arguments"],
+                )
+                for i, tc in enumerate(ollama_tc)
+            ]
+
         content = msg.get("content") or msg.get("thinking", "")
+        finish_reason = "tool_calls" if tool_calls else "stop"
+
         return LLMResponse(
             content=content,
             model=request.model,
             provider="ollama",
+            tool_calls=tool_calls,
+            finish_reason=finish_reason,
         )
 
     # ── Streaming provider calls ───────────────────────────────────────────────
@@ -480,6 +780,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
 
         Reads credentials and required headers from the central provider registry.
         Requires ``OPENROUTER_API_KEY`` in the environment or ``api_key`` argument.
+        Supports native tool-calling when ``request.tools`` is provided.
 
         Args:
             request: LLM invocation parameters. ``request.model`` defaults to the
@@ -487,7 +788,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             ctx: Workflow execution context (unused directly, kept for interface parity).
 
         Returns:
-            LLMResponse with content, model, provider, and usage metadata.
+            LLMResponse with content, model, provider, usage metadata, and
+            optional tool_calls / finish_reason.
 
         Raises:
             ValueError: If no API key is available from the argument or environment.
@@ -515,9 +817,12 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             messages=request.messages,  # type: ignore[arg-type]
             temperature=request.temperature,
             max_tokens=request.max_tokens,
+            **self._build_openai_tool_kwargs(request),
         )
+        choice = resp.choices[0]
+        raw_tc = getattr(choice.message, "tool_calls", None)
         return LLMResponse(
-            content=resp.choices[0].message.content or "",
+            content=choice.message.content or "",
             model=resp.model,
             provider="openrouter",
             usage={
@@ -526,6 +831,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             }
             if resp.usage
             else None,
+            tool_calls=self._parse_openai_tool_calls(raw_tc),
+            finish_reason=getattr(choice, "finish_reason", None),
         )
 
     async def _stream_openrouter(
@@ -580,6 +887,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
 
         Reads credentials from the central provider registry.
         Requires ``TOGETHER_API_KEY`` in the environment or ``api_key`` argument.
+        Supports native tool-calling when ``request.tools`` is provided.
 
         Args:
             request: LLM invocation parameters. ``request.model`` defaults to the
@@ -587,7 +895,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             ctx: Workflow execution context (unused directly, kept for interface parity).
 
         Returns:
-            LLMResponse with content, model, provider, and usage metadata.
+            LLMResponse with content, model, provider, usage metadata, and
+            optional tool_calls / finish_reason.
 
         Raises:
             ValueError: If no API key is available from the argument or environment.
@@ -611,9 +920,12 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             messages=request.messages,  # type: ignore[arg-type]
             temperature=request.temperature,
             max_tokens=request.max_tokens,
+            **self._build_openai_tool_kwargs(request),
         )
+        choice = resp.choices[0]
+        raw_tc = getattr(choice.message, "tool_calls", None)
         return LLMResponse(
-            content=resp.choices[0].message.content or "",
+            content=choice.message.content or "",
             model=resp.model,
             provider="together",
             usage={
@@ -622,6 +934,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             }
             if resp.usage
             else None,
+            tool_calls=self._parse_openai_tool_calls(raw_tc),
+            finish_reason=getattr(choice, "finish_reason", None),
         )
 
     async def _stream_together(
@@ -676,6 +990,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
 
         Reads credentials from the central provider registry.
         Requires ``XAI_API_KEY`` in the environment or ``api_key`` argument.
+        Supports native tool-calling when ``request.tools`` is provided.
 
         Args:
             request: LLM invocation parameters. ``request.model`` defaults to
@@ -683,7 +998,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             ctx: Workflow execution context (unused directly, kept for interface parity).
 
         Returns:
-            LLMResponse with content, model, provider, and usage metadata.
+            LLMResponse with content, model, provider, usage metadata, and
+            optional tool_calls / finish_reason.
 
         Raises:
             ValueError: If no API key is available from the argument or environment.
@@ -707,9 +1023,12 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             messages=request.messages,  # type: ignore[arg-type]
             temperature=request.temperature,
             max_tokens=request.max_tokens,
+            **self._build_openai_tool_kwargs(request),
         )
+        choice = resp.choices[0]
+        raw_tc = getattr(choice.message, "tool_calls", None)
         return LLMResponse(
-            content=resp.choices[0].message.content or "",
+            content=choice.message.content or "",
             model=resp.model,
             provider="xai",
             usage={
@@ -718,6 +1037,8 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             }
             if resp.usage
             else None,
+            tool_calls=self._parse_openai_tool_calls(raw_tc),
+            finish_reason=getattr(choice, "finish_reason", None),
         )
 
     async def _stream_xai(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
