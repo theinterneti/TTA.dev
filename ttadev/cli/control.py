@@ -348,198 +348,219 @@ def handle_control_command(args: argparse.Namespace, data_dir: Path) -> int:
     return 1
 
 
+def _handle_task_create(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    """Handle ``tta control task create``."""
+    gates = [_parse_gate_spec(spec) for spec in args.gate]
+    _apply_gate_assignments(
+        gates,
+        role_specs=args.gate_assign_role,
+        agent_specs=args.gate_assign_agent,
+        decider_specs=args.gate_assign_decider,
+    )
+    task = service.create_task(
+        args.title,
+        description=args.description,
+        project_name=args.project_name,
+        requested_role=args.requested_role,
+        priority=args.priority,
+        gates=gates,
+        workspace_locks=args.workspace_locks,
+        file_locks=args.file_locks,
+    )
+    print(f"Task: {task.id}")
+    print(f"  title:    {task.title}")
+    print(f"  status:   {task.status.value}")
+    if task.project_name:
+        print(f"  project:  {task.project_name}")
+    if task.requested_role:
+        print(f"  role:     {task.requested_role}")
+    if task.gates:
+        print(f"  gates:    {len(task.gates)}")
+    if task.workspace_locks:
+        print(f"  workspace_locks: {', '.join(task.workspace_locks)}")
+    if task.file_locks:
+        print(f"  file_locks: {', '.join(task.file_locks)}")
+    return 0
+
+
+def _handle_task_list(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    """Handle ``tta control task list``."""
+    status = TaskStatus(args.status) if args.status else None
+    tasks = service.list_tasks(status=status, project_name=args.project_name)
+    if not tasks:
+        print("No tasks found.")
+        return 0
+    print(f"{'TASK ID':<18} {'STATUS':<12} {'PRIORITY':<8} {'ROLE':<14} {'PROJECT':<14} TITLE")
+    print("-" * 88)
+    for task in tasks:
+        print(
+            f"{task.id:<18} {task.status.value:<12} {task.priority:<8} "
+            f"{(task.requested_role or '-'): <14} {(task.project_name or '-'): <14} {task.title}"
+        )
+    return 0
+
+
+def _handle_task_show(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    """Handle ``tta control task show``."""
+    task = service.get_task(args.task_id)
+    print(f"Task: {task.id}")
+    print(f"  title:          {task.title}")
+    print(f"  description:    {task.description or '-'}")
+    print(f"  status:         {task.status.value}")
+    print(f"  priority:       {task.priority}")
+    print(f"  project:        {task.project_name or '-'}")
+    print(f"  requested_role: {task.requested_role or '-'}")
+    print(f"  active_run_id:  {task.active_run_id or '-'}")
+    print(f"  claimed_by:     {task.claimed_by_agent_id or '-'}")
+    print(f"  created_at:     {task.created_at}")
+    print(f"  updated_at:     {task.updated_at}")
+    if task.completed_at:
+        print(f"  completed_at:   {task.completed_at}")
+    if task.gates:
+        print("  gates:")
+        for gate in task.gates:
+            decision = gate.decided_by or "-"
+            decided_at = gate.decided_at or "-"
+            summary = gate.summary or "-"
+            required = "required" if gate.required else "optional"
+            assigned_role = gate.assigned_role or "-"
+            assigned_agent_id = gate.assigned_agent_id or "-"
+            assigned_decider = gate.assigned_decider or "-"
+            print(
+                "    "
+                f"{gate.id} [{gate.gate_type.value}] {required} label={gate.label} status={gate.status.value} "
+                f"assigned_role={assigned_role} assigned_agent={assigned_agent_id} "
+                f"assigned_decider={assigned_decider} by={decision} at={decided_at} summary={summary}"
+            )
+            if gate.history:
+                print("      history:")
+                for entry in gate.history:
+                    from_status = entry.from_status.value if entry.from_status is not None else "-"
+                    print(
+                        "        "
+                        f"- {entry.action.value} {from_status} -> {entry.to_status.value} "
+                        f"by {entry.actor} at {entry.occurred_at}"
+                    )
+                    if entry.summary:
+                        print(f"          summary={entry.summary}")
+    if task.workspace_locks:
+        print(f"  workspace_locks: {', '.join(task.workspace_locks)}")
+    if task.file_locks:
+        print(f"  file_locks: {', '.join(task.file_locks)}")
+    if task.workflow is not None:
+        workflow = task.workflow
+        print("  workflow:")
+        print(f"    name:              {workflow.workflow_name}")
+        print(f"    goal:              {workflow.workflow_goal}")
+        print(f"    status:            {workflow.status.value}")
+        print(f"    total_steps:       {workflow.total_steps}")
+        print(
+            "    current_step:      "
+            f"{workflow.current_step_index + 1 if workflow.current_step_index is not None else '-'}"
+        )
+        print(f"    current_agent:     {workflow.current_agent or '-'}")
+        print("    steps:")
+        for step in workflow.steps:
+            linked_gate = step.linked_gate_id or "-"
+            decision = step.gate_decision.value if step.gate_decision is not None else "-"
+            started_at = step.started_at or "-"
+            duration = _step_duration(step.started_at, step.completed_at)
+            summary = step.last_result_summary or "-"
+            confidence = f"{step.last_confidence:.0%}" if step.last_confidence is not None else "-"
+            trace_ref = ""
+            if step.trace_id:
+                span_part = f"/{step.span_id}" if step.span_id else ""
+                trace_ref = f" trace={step.trace_id}{span_part}"
+            print(
+                "      "
+                f"{step.step_index + 1}. {step.agent_name} "
+                f"status={step.status.value} duration={duration} "
+                f"started_at={started_at} gate={decision} linked_gate={linked_gate} "
+                f"confidence={confidence}{trace_ref}"
+            )
+            print(f"         summary={summary}")
+            if step.gate_history:
+                print("         gate_history:")
+                for record in step.gate_history:
+                    entry_summary = record.summary or "-"
+                    policy_part = f" policy={record.policy_name}" if record.policy_name else ""
+                    print(
+                        "           "
+                        f"- {record.decision.value} at {record.occurred_at}"
+                        f" summary={entry_summary}{policy_part}"
+                    )
+    return 0
+
+
+def _handle_task_claim(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    """Handle ``tta control task claim``."""
+    claim = service.claim_task(
+        args.task_id,
+        agent_role=args.agent_role,
+        lease_ttl_seconds=args.ttl,
+    )
+    print(f"Task: {claim.task.id}")
+    print(f"Run:  {claim.run.id}")
+    print(f"  status:      {claim.run.status.value}")
+    print(f"  agent_id:    {claim.run.agent_id}")
+    print(f"  agent_tool:  {claim.run.agent_tool}")
+    print(f"  session_id:  {claim.run.session_id or '-'}")
+    print(f"  expires_at:  {claim.lease.expires_at}")
+    return 0
+
+
+def _handle_task_decide_gate(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    """Handle ``tta control task decide-gate``."""
+    task = service.decide_gate(
+        args.task_id,
+        args.gate_id,
+        status=GateStatus(args.status),
+        decided_by=args.decided_by,
+        decision_role=args.decision_role,
+        summary=args.summary,
+    )
+    gate = next(gate for gate in task.gates if gate.id == args.gate_id)
+    print(f"Task: {task.id}")
+    print(f"Gate: {gate.id}")
+    print(f"  status:     {gate.status.value}")
+    print(f"  decided_by: {gate.decided_by or '-'}")
+    print(f"  role:       {gate.assigned_role or args.decision_role or '-'}")
+    if gate.summary:
+        print(f"  summary:    {gate.summary}")
+    return 0
+
+
+def _handle_task_reopen_gate(args: argparse.Namespace, service: ControlPlaneService) -> int:
+    """Handle ``tta control task reopen-gate``."""
+    task = service.reopen_gate(
+        args.task_id,
+        args.gate_id,
+        reopened_by=args.reopened_by,
+        summary=args.summary,
+    )
+    gate = next(gate for gate in task.gates if gate.id == args.gate_id)
+    print(f"Task: {task.id}")
+    print(f"Gate: {gate.id}")
+    print(f"  status:     {gate.status.value}")
+    if gate.summary:
+        print(f"  summary:    {gate.summary}")
+    return 0
+
+
 def _handle_task_command(args: argparse.Namespace, service: ControlPlaneService) -> int:
-    if args.control_task_command == "create":
-        gates = [_parse_gate_spec(spec) for spec in args.gate]
-        _apply_gate_assignments(
-            gates,
-            role_specs=args.gate_assign_role,
-            agent_specs=args.gate_assign_agent,
-            decider_specs=args.gate_assign_decider,
-        )
-        task = service.create_task(
-            args.title,
-            description=args.description,
-            project_name=args.project_name,
-            requested_role=args.requested_role,
-            priority=args.priority,
-            gates=gates,
-            workspace_locks=args.workspace_locks,
-            file_locks=args.file_locks,
-        )
-        print(f"Task: {task.id}")
-        print(f"  title:    {task.title}")
-        print(f"  status:   {task.status.value}")
-        if task.project_name:
-            print(f"  project:  {task.project_name}")
-        if task.requested_role:
-            print(f"  role:     {task.requested_role}")
-        if task.gates:
-            print(f"  gates:    {len(task.gates)}")
-        if task.workspace_locks:
-            print(f"  workspace_locks: {', '.join(task.workspace_locks)}")
-        if task.file_locks:
-            print(f"  file_locks: {', '.join(task.file_locks)}")
-        return 0
-
-    if args.control_task_command == "list":
-        status = TaskStatus(args.status) if args.status else None
-        tasks = service.list_tasks(status=status, project_name=args.project_name)
-        if not tasks:
-            print("No tasks found.")
-            return 0
-        print(f"{'TASK ID':<18} {'STATUS':<12} {'PRIORITY':<8} {'ROLE':<14} {'PROJECT':<14} TITLE")
-        print("-" * 88)
-        for task in tasks:
-            print(
-                f"{task.id:<18} {task.status.value:<12} {task.priority:<8} "
-                f"{(task.requested_role or '-'): <14} {(task.project_name or '-'): <14} {task.title}"
-            )
-        return 0
-
-    if args.control_task_command == "show":
-        task = service.get_task(args.task_id)
-        print(f"Task: {task.id}")
-        print(f"  title:          {task.title}")
-        print(f"  description:    {task.description or '-'}")
-        print(f"  status:         {task.status.value}")
-        print(f"  priority:       {task.priority}")
-        print(f"  project:        {task.project_name or '-'}")
-        print(f"  requested_role: {task.requested_role or '-'}")
-        print(f"  active_run_id:  {task.active_run_id or '-'}")
-        print(f"  claimed_by:     {task.claimed_by_agent_id or '-'}")
-        print(f"  created_at:     {task.created_at}")
-        print(f"  updated_at:     {task.updated_at}")
-        if task.completed_at:
-            print(f"  completed_at:   {task.completed_at}")
-        if task.gates:
-            print("  gates:")
-            for gate in task.gates:
-                decision = gate.decided_by or "-"
-                decided_at = gate.decided_at or "-"
-                summary = gate.summary or "-"
-                required = "required" if gate.required else "optional"
-                assigned_role = gate.assigned_role or "-"
-                assigned_agent_id = gate.assigned_agent_id or "-"
-                assigned_decider = gate.assigned_decider or "-"
-                print(
-                    "    "
-                    f"{gate.id} [{gate.gate_type.value}] {required} label={gate.label} status={gate.status.value} "
-                    f"assigned_role={assigned_role} assigned_agent={assigned_agent_id} "
-                    f"assigned_decider={assigned_decider} by={decision} at={decided_at} summary={summary}"
-                )
-                if gate.history:
-                    print("      history:")
-                    for entry in gate.history:
-                        from_status = (
-                            entry.from_status.value if entry.from_status is not None else "-"
-                        )
-                        print(
-                            "        "
-                            f"- {entry.action.value} {from_status} -> {entry.to_status.value} "
-                            f"by {entry.actor} at {entry.occurred_at}"
-                        )
-                        if entry.summary:
-                            print(f"          summary={entry.summary}")
-        if task.workspace_locks:
-            print(f"  workspace_locks: {', '.join(task.workspace_locks)}")
-        if task.file_locks:
-            print(f"  file_locks: {', '.join(task.file_locks)}")
-        if task.workflow is not None:
-            workflow = task.workflow
-            print("  workflow:")
-            print(f"    name:              {workflow.workflow_name}")
-            print(f"    goal:              {workflow.workflow_goal}")
-            print(f"    status:            {workflow.status.value}")
-            print(f"    total_steps:       {workflow.total_steps}")
-            print(
-                "    current_step:      "
-                f"{workflow.current_step_index + 1 if workflow.current_step_index is not None else '-'}"
-            )
-            print(f"    current_agent:     {workflow.current_agent or '-'}")
-            print("    steps:")
-            for step in workflow.steps:
-                linked_gate = step.linked_gate_id or "-"
-                decision = step.gate_decision.value if step.gate_decision is not None else "-"
-                started_at = step.started_at or "-"
-                duration = _step_duration(step.started_at, step.completed_at)
-                summary = step.last_result_summary or "-"
-                confidence = (
-                    f"{step.last_confidence:.0%}" if step.last_confidence is not None else "-"
-                )
-                trace_ref = ""
-                if step.trace_id:
-                    span_part = f"/{step.span_id}" if step.span_id else ""
-                    trace_ref = f" trace={step.trace_id}{span_part}"
-                print(
-                    "      "
-                    f"{step.step_index + 1}. {step.agent_name} "
-                    f"status={step.status.value} duration={duration} "
-                    f"started_at={started_at} gate={decision} linked_gate={linked_gate} "
-                    f"confidence={confidence}{trace_ref}"
-                )
-                print(f"         summary={summary}")
-                if step.gate_history:
-                    print("         gate_history:")
-                    for record in step.gate_history:
-                        entry_summary = record.summary or "-"
-                        policy_part = f" policy={record.policy_name}" if record.policy_name else ""
-                        print(
-                            "           "
-                            f"- {record.decision.value} at {record.occurred_at}"
-                            f" summary={entry_summary}{policy_part}"
-                        )
-        return 0
-
-    if args.control_task_command == "claim":
-        claim = service.claim_task(
-            args.task_id,
-            agent_role=args.agent_role,
-            lease_ttl_seconds=args.ttl,
-        )
-        print(f"Task: {claim.task.id}")
-        print(f"Run:  {claim.run.id}")
-        print(f"  status:      {claim.run.status.value}")
-        print(f"  agent_id:    {claim.run.agent_id}")
-        print(f"  agent_tool:  {claim.run.agent_tool}")
-        print(f"  session_id:  {claim.run.session_id or '-'}")
-        print(f"  expires_at:  {claim.lease.expires_at}")
-        return 0
-
-    if args.control_task_command == "decide-gate":
-        task = service.decide_gate(
-            args.task_id,
-            args.gate_id,
-            status=GateStatus(args.status),
-            decided_by=args.decided_by,
-            decision_role=args.decision_role,
-            summary=args.summary,
-        )
-        gate = next(gate for gate in task.gates if gate.id == args.gate_id)
-        print(f"Task: {task.id}")
-        print(f"Gate: {gate.id}")
-        print(f"  status:     {gate.status.value}")
-        print(f"  decided_by: {gate.decided_by or '-'}")
-        print(f"  role:       {gate.assigned_role or args.decision_role or '-'}")
-        if gate.summary:
-            print(f"  summary:    {gate.summary}")
-        return 0
-
-    if args.control_task_command == "reopen-gate":
-        task = service.reopen_gate(
-            args.task_id,
-            args.gate_id,
-            reopened_by=args.reopened_by,
-            summary=args.summary,
-        )
-        gate = next(gate for gate in task.gates if gate.id == args.gate_id)
-        print(f"Task: {task.id}")
-        print(f"Gate: {gate.id}")
-        print(f"  status:     {gate.status.value}")
-        if gate.summary:
-            print(f"  summary:    {gate.summary}")
-        return 0
-
+    cmd = args.control_task_command
+    if cmd == "create":
+        return _handle_task_create(args, service)
+    if cmd == "list":
+        return _handle_task_list(args, service)
+    if cmd == "show":
+        return _handle_task_show(args, service)
+    if cmd == "claim":
+        return _handle_task_claim(args, service)
+    if cmd == "decide-gate":
+        return _handle_task_decide_gate(args, service)
+    if cmd == "reopen-gate":
+        return _handle_task_reopen_gate(args, service)
     print(
         "Usage: tta control task {create,list,show,claim,decide-gate,reopen-gate}", file=sys.stderr
     )
