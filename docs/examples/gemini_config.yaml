@@ -1,0 +1,129 @@
+# gemini_config.yaml — Gemini-first config with Groq fallback
+#
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │  CRITICAL: The `models/` prefix                                         │
+# │                                                                         │
+# │  Gemini's OpenAI-compatible endpoint requires ALL model IDs to be       │
+# │  prefixed with "models/".  Bare IDs such as "gemini-2.5-flash" will     │
+# │  NOT raise a helpful 404 — instead they return a misleading HTTP 429    │
+# │  (Too Many Requests) with no rate-limit headers, making the failure     │
+# │  indistinguishable from a genuine quota exhaustion.                     │
+# │                                                                         │
+# │  Always write:  models/gemini-2.5-flash   ✅                            │
+# │  Never write:   gemini-2.5-flash          ❌ (returns 429, not 404)     │
+# │                                                                         │
+# │  See: https://ai.google.dev/gemini-api/docs/openai (Issue #283)         │
+# └─────────────────────────────────────────────────────────────────────────┘
+#
+# TIER STRATEGY:
+#   1. Gemini 2.5 Flash  — primary; 1 M-token context, vision, tool calling
+#   2. Gemini 2.0 Flash Lite — lighter/cheaper Gemini fallback (free tier)
+#   3. Groq Llama 3.3 70B  — Groq fallback when Gemini quota is exhausted
+#
+# ENV VARS REQUIRED:
+#   GOOGLE_API_KEY      — Gemini API key (get at aistudio.google.com)
+#   GROQ_API_KEY        — Groq API key (fallback tier only)
+#
+# HOW TO LOAD:
+#
+#   from pathlib import Path
+#   from ttadev.primitives.llm.model_router import (
+#       ModelRouterPrimitive, ModelRouterRequest,
+#   )
+#   from ttadev.primitives.core import WorkflowContext
+#
+#   router = ModelRouterPrimitive.from_yaml(
+#       Path("docs/examples/gemini_config.yaml"),
+#       tier_cooldown_seconds=60,   # Gemini free tier resets in ~60 s
+#   )
+#   response = await router.execute(
+#       ModelRouterRequest(mode="chat", prompt="Summarise this document…"),
+#       WorkflowContext(workflow_id="my-app"),
+#   )
+#
+# NOTES:
+#   • ModelRouterPrimitive auto-prepends "models/" if you forget it, but
+#     it is better to be explicit in configuration files to avoid confusion.
+#   • tier_cooldown_seconds is a constructor kwarg — not parsed from YAML.
+
+modes:
+  chat:
+    description: >-
+      General-purpose chat. Gemini 2.5 Flash is the primary model (1 M-token
+      context, multimodal, tool-calling).  Falls back to Gemini 2.0 Flash Lite
+      then Groq Llama 3.3 70B if Gemini quotas are exhausted.
+    tier1:
+      # Gemini 2.5 Flash — Google's best speed/quality balance.
+      # Supports: 1 M token context window, vision, grounding, tool calling.
+      # Free tier: 500 RPD / 10 RPM (as of 2025-Q2).
+      provider: gemini
+      model: models/gemini-2.5-flash
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier2:
+      # Gemini 2.0 Flash Lite — lighter model, still free-tier capable.
+      # Useful when Flash 2.5 quota is hit; trades some quality for headroom.
+      provider: gemini
+      model: models/gemini-2.0-flash-lite
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier3:
+      # Groq Llama 3.3 70B — strong cloud fallback when both Gemini tiers
+      # are in cooldown (e.g., burst traffic or free-tier day-cap hit).
+      # Requires GROQ_API_KEY.
+      provider: groq
+      model: llama-3.3-70b-versatile
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+  # ── Vision / multimodal mode ─────────────────────────────────────────────
+  vision:
+    description: >-
+      Image understanding and document analysis.  Gemini models only — Groq
+      does not support vision inputs at this time.
+    tier1:
+      # Flash 2.5 preferred: best multimodal quality and largest context.
+      provider: gemini
+      model: models/gemini-2.5-flash
+      params:
+        temperature: 0.4
+        max_tokens: 4096
+
+    tier2:
+      # Flash Lite as a cheaper fallback for simple image Q&A tasks.
+      provider: gemini
+      model: models/gemini-2.0-flash-lite
+      params:
+        temperature: 0.4
+        max_tokens: 2048
+
+  # ── Low-temperature extraction mode ──────────────────────────────────────
+  extraction:
+    description: >-
+      Structured data extraction from text or documents.  Deterministic
+      temperature, smaller token budget.
+    tier1:
+      provider: gemini
+      model: models/gemini-2.5-flash
+      params:
+        temperature: 0.1
+        max_tokens: 1024
+
+    tier2:
+      provider: gemini
+      model: models/gemini-2.0-flash-lite
+      params:
+        temperature: 0.1
+        max_tokens: 512
+
+    tier3:
+      provider: groq
+      model: llama-3.3-70b-versatile
+      params:
+        temperature: 0.1
+        max_tokens: 512

@@ -1,0 +1,161 @@
+# multi_provider.yaml — Full swiss-army-knife multi-provider config
+#
+# PHILOSOPHY: Free tiers first, paid tiers as safety net.
+#   Free models handle the vast majority of traffic at zero cost.
+#   Paid tiers activate only when free quotas are exhausted.
+#
+# TIER ORDER  (chat mode):
+#   1. Gemini 2.5 Flash Lite  — gemini  — free tier, 1 M token context
+#   2. Llama 3.1 8B Free      — openrouter — truly free, no per-token cost
+#   3. Llama 3.1 8B Instant   — groq    — cheap, ~800 tok/s, very low latency
+#   4. GPT-4o Mini            — openrouter — capable, low cost per token
+#   5. Gemini 2.5 Pro         — gemini  — premium fallback, highest quality
+#
+# ENV VARS:
+#   GOOGLE_API_KEY        — Gemini tiers (1 and 5)
+#   OPENROUTER_API_KEY    — OpenRouter tiers (2 and 4)
+#   GROQ_API_KEY          — Groq tier (3)
+#
+# HOW TO LOAD:
+#
+#   from pathlib import Path
+#   from ttadev.primitives.llm.model_router import (
+#       ModelRouterPrimitive, ModelRouterRequest,
+#   )
+#   from ttadev.primitives.core import WorkflowContext
+#
+#   router = ModelRouterPrimitive.from_yaml(
+#       Path("docs/examples/multi_provider.yaml"),
+#       # Longer cooldown for OpenRouter free tier which has aggressive
+#       # rate limits and slow quota reset windows.
+#       tier_cooldown_seconds=45,
+#   )
+#   response = await router.execute(
+#       ModelRouterRequest(mode="chat", prompt="Hello!"),
+#       WorkflowContext(workflow_id="my-app"),
+#   )
+#
+# RATE-LIMIT NOTES:
+#   • OpenRouter free tier (#2, #4) resets slowly — hence the 45 s cooldown.
+#   • Gemini free tier (#1) allows 15 RPM / 1 500 RPD (as of 2025-Q2).
+#   • Groq (#3) allows 14 400 RPM for 8B models at free tier.
+#   • tier_cooldown_seconds is a constructor kwarg — not parsed from YAML.
+#
+# OPENROUTER NOTE FOR GPT-4o MINI (tier 4):
+#   The `openai` provider string is not supported by ModelRouterPrimitive's
+#   dispatcher.  Route GPT-4o Mini through OpenRouter instead, using the
+#   namespaced model ID "openai/gpt-4o-mini".  OpenRouter proxies the request
+#   to OpenAI transparently and charges at near-identical rates.
+
+modes:
+  chat:
+    description: >-
+      Cost-optimised general chat. Free tiers handle typical traffic; paid
+      tiers activate only when free quotas are exhausted.
+    tier1:
+      # Gemini 2.5 Flash Lite — Google's lightest free-tier model.
+      # 1 M-token context window; suitable for most chat and summarisation.
+      # Note: gemini-2.5-flash-lite may not appear in ModelRegistryPrimitive
+      # until the model GA; use gemini_config.yaml if you need a stable registry
+      # entry today.
+      provider: gemini
+      model: models/gemini-2.5-flash-lite
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier2:
+      # OpenRouter free Llama 3.1 8B — truly free, no per-token cost.
+      # OpenRouter occasionally rate-limits free models aggressively;
+      # the 45 s tier_cooldown_seconds helps avoid retry storms.
+      provider: openrouter
+      model: meta-llama/llama-3.1-8b-instruct:free
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier3:
+      # Groq Llama 3.1 8B Instant — very cheap, ~800 tok/s.
+      # Best latency of any paid tier here; use Groq when OpenRouter is busy.
+      provider: groq
+      model: llama-3.1-8b-instant
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier4:
+      # GPT-4o Mini via OpenRouter — capable, low cost (~$0.15/M input tokens).
+      # Routed through OpenRouter using the "openai/gpt-4o-mini" model ID.
+      # Requires OPENROUTER_API_KEY; OpenRouter charges at near-identical rates
+      # to direct OpenAI access.
+      provider: openrouter
+      model: openai/gpt-4o-mini
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier5:
+      # Gemini 2.5 Pro — premium fallback of last resort.
+      # Highest quality available but billed at Pro rates.
+      # Activates only when all four cheaper tiers are simultaneously in cooldown.
+      provider: gemini
+      model: models/gemini-2.5-pro
+      params:
+        temperature: 0.7
+        max_tokens: 4096
+
+  # ── Fast / low-latency mode ──────────────────────────────────────────────
+  fast:
+    description: >-
+      Prioritise raw throughput over quality. Skips large models entirely.
+      Ideal for streaming responses, autocomplete, or high-volume pipelines.
+    tier1:
+      # Groq 8B first — fastest inference available at any tier.
+      provider: groq
+      model: llama-3.1-8b-instant
+      params:
+        temperature: 0.5
+        max_tokens: 512
+
+    tier2:
+      provider: openrouter
+      model: meta-llama/llama-3.1-8b-instruct:free
+      params:
+        temperature: 0.5
+        max_tokens: 512
+
+    tier3:
+      provider: gemini
+      model: models/gemini-2.5-flash-lite
+      params:
+        temperature: 0.5
+        max_tokens: 512
+
+  # ── Premium / high-quality mode ──────────────────────────────────────────
+  premium:
+    description: >-
+      Maximum quality. Skips free tiers entirely. Use for code generation,
+      complex reasoning, or document drafting where quality matters most.
+    tier1:
+      # Gemini 2.5 Pro — top-of-line quality with 1 M context.
+      provider: gemini
+      model: models/gemini-2.5-pro
+      params:
+        temperature: 0.4
+        max_tokens: 8192
+
+    tier2:
+      # GPT-4o Mini — reliable OpenAI fallback.
+      provider: openrouter
+      model: openai/gpt-4o-mini
+      params:
+        temperature: 0.4
+        max_tokens: 4096
+
+    tier3:
+      # Groq 70B — strong open-weight fallback with very low latency.
+      provider: groq
+      model: llama-3.3-70b-versatile
+      params:
+        temperature: 0.4
+        max_tokens: 4096

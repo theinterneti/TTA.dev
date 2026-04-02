@@ -1,0 +1,109 @@
+# groq_rotation.yaml — Multi-bucket Groq rotation config
+#
+# WHY ROTATE?  Groq enforces per-model rate limits (requests/min and
+# tokens/min).  By rotating across four distinct models you multiply the
+# effective burst budget while keeping Groq's sub-second TTFT:
+#
+#   llama-3.3-70b-versatile  ~275 tok/s   6 000 RPM  / 6 000 TPM free
+#   llama-3.1-8b-instant     ~800 tok/s  14 400 RPM  / 14 400 TPM free
+#   gemma2-9b-it             ~750 tok/s  14 400 RPM  / 14 400 TPM free
+#   mixtral-8x7b-32768       ~480 tok/s   5 000 RPM  /  5 000 TPM free
+#
+# Combined burst capacity (rough):  ~39 800 requests/min at free tier.
+#
+# HOW TO LOAD:
+#
+#   from pathlib import Path
+#   from ttadev.primitives.llm.model_router import ModelRouterPrimitive
+#
+#   router = ModelRouterPrimitive.from_yaml(
+#       Path("docs/examples/groq_rotation.yaml"),
+#       tier_cooldown_seconds=30,   # skip a tier for 30 s after a 429
+#   )
+#   response = await router.execute(
+#       ModelRouterRequest(mode="chat", prompt="Hello!"),
+#       WorkflowContext(workflow_id="my-app"),
+#   )
+#
+# NOTES:
+#   • tier_cooldown_seconds is passed as a kwarg to from_yaml(), not parsed
+#     from this file.  The value here is documentation only.
+#   • strip_thinking defaults to True in RouterTierConfig; it is not yet
+#     parsed from YAML.  All Groq models here are non-thinking models, so
+#     this has no practical effect.
+#
+# tier_cooldown_seconds: 30   (pass as kwarg — see HOW TO LOAD above)
+
+modes:
+  chat:
+    description: >-
+      General-purpose chat using Groq's free tier. Rotates across four models
+      to maximise combined throughput and avoid per-model rate-limit exhaustion.
+    tier1:
+      # Best quality on Groq — Llama 3.3 70B.  Use as primary; falls through
+      # after a 429 and the 30 s cooldown clock starts.
+      provider: groq
+      model: llama-3.3-70b-versatile
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier2:
+      # Fastest fallback — Llama 3.1 8B Instant (~800 tok/s).  Much smaller
+      # model but excellent for simple Q&A or latency-sensitive pipelines.
+      provider: groq
+      model: llama-3.1-8b-instant
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier3:
+      # Google Gemma 2 9B — different architecture avoids correlated failures
+      # with the Llama family.  Very fast (~750 tok/s) and strong on reasoning.
+      provider: groq
+      model: gemma2-9b-it
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+    tier4:
+      # Mixtral 8x7B MoE — 32 k context window, strong instruction following.
+      # Last resort within Groq before escalating to another provider.
+      provider: groq
+      model: mixtral-8x7b-32768
+      params:
+        temperature: 0.7
+        max_tokens: 2048
+
+  # ── Low-temperature extraction variant ──────────────────────────────────────
+  extraction:
+    description: >-
+      Structured data extraction — same rotation order but deterministic
+      temperature and a tighter token budget.
+    tier1:
+      provider: groq
+      model: llama-3.3-70b-versatile
+      params:
+        temperature: 0.1
+        max_tokens: 512
+
+    tier2:
+      provider: groq
+      model: llama-3.1-8b-instant
+      params:
+        temperature: 0.1
+        max_tokens: 512
+
+    tier3:
+      provider: groq
+      model: gemma2-9b-it
+      params:
+        temperature: 0.1
+        max_tokens: 512
+
+    tier4:
+      provider: groq
+      model: mixtral-8x7b-32768
+      params:
+        temperature: 0.1
+        max_tokens: 512
