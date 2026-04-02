@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-import pickle
+import json
 import time
 from collections.abc import Callable
 from typing import Any, Protocol, runtime_checkable
@@ -110,9 +110,8 @@ class RedisBackend:
 
         pip install "ttadev[redis]"
 
-    Values are serialised with :mod:`pickle` so arbitrary Python objects are
-    supported.  All keys are prefixed to avoid collisions with other Redis
-    consumers.
+    Values are serialised with :mod:`json` for safety and interoperability.
+    All keys are prefixed to avoid collisions with other Redis consumers.
 
     Example:
         ```python
@@ -161,11 +160,25 @@ class RedisBackend:
         data: bytes | None = await self._client.get(self._prefixed(key))
         if data is None:
             return None
-        return pickle.loads(data)  # noqa: S301
+        try:
+            # Decode bytes to string before JSON parsing
+            return json.loads(data.decode("utf-8"))
+        except (json.JSONDecodeError, TypeError, UnicodeDecodeError):
+            # Treat corrupt or legacy (pickle) cached data as a cache miss
+            return None
 
     async def set(self, key: str, value: Any, ttl_seconds: float) -> None:
         """Serialise *value* and store it in Redis with a TTL."""
-        data = pickle.dumps(value)
+        try:
+            data = json.dumps(value)
+        except TypeError:
+            # Skip caching non-JSON-serializable values with a warning
+            logger.warning(
+                "cache_skip_non_serializable",
+                key=key,
+                value_type=type(value).__name__,
+            )
+            return
         ttl = max(1, int(ttl_seconds))
         await self._client.setex(self._prefixed(key), ttl, data)
 
