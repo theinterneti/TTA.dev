@@ -13,6 +13,19 @@ from ttadev.primitives.llm.model_router import (
     RouterModeConfig,
     RouterTierConfig,
 )
+from ttadev.primitives.llm.ollama_primitive import (
+    OllamaEmbeddingsPrimitive,
+    OllamaEmbeddingsRequest,
+    OllamaEmbeddingsResponse,
+    OllamaManagerRequest,
+    OllamaManagerResponse,
+    OllamaModelInfo,
+    OllamaModelManagerPrimitive,
+    OllamaPrimitive,
+    OllamaRequest,
+    OllamaResponse,
+    RunningModel,
+)
 from ttadev.primitives.llm.providers import (
     PROVIDERS,
     ProviderSpec,
@@ -48,4 +61,16 @@ __all__ = [
     "ProviderSpec",
     "get_provider",
     "openai_compat_providers",
+    # Ollama dedicated primitives
+    "OllamaPrimitive",
+    "OllamaRequest",
+    "OllamaResponse",
+    "OllamaModelManagerPrimitive",
+    "OllamaManagerRequest",
+    "OllamaManagerResponse",
+    "OllamaModelInfo",
+    "OllamaEmbeddingsPrimitive",
+    "OllamaEmbeddingsRequest",
+    "OllamaEmbeddingsResponse",
+    "RunningModel",
 ]

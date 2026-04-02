@@ -221,22 +221,62 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         )
 
     async def _call_ollama(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+        """Call Ollama /api/chat (non-streaming).
+
+        Supports full Ollama options: num_ctx, keep_alive, think mode, system
+        messages, structured output via format, and all sampling parameters.
+        Pass extra Ollama options via request.extra (dict).  Example::
+
+            LLMRequest(
+                model="qwen3:1.7b",
+                messages=[...],
+                extra={
+                    "think": True,           # enable chain-of-thought
+                    "keep_alive": "10m",     # keep model loaded for 10 min
+                    "format": "json",        # structured JSON output
+                    "num_ctx": 8192,         # context window size
+                    "num_gpu": -1,           # all GPU layers
+                },
+            )
+        """
         import httpx
 
         base = self._base_url or "http://localhost:11434"
-        payload = {
+        extra: dict = getattr(request, "extra", None) or {}
+
+        # Build Ollama options — allow callers to override any option
+        options: dict = {"temperature": request.temperature}
+        if request.max_tokens:
+            options["num_predict"] = request.max_tokens
+        for key in ("num_ctx", "top_p", "top_k", "repeat_penalty", "seed", "num_gpu", "num_thread"):
+            if key in extra:
+                options[key] = extra[key]
+
+        # Build messages — inject system prompt if present
+        messages = list(request.messages)
+        if request.system and not any(m.get("role") == "system" for m in messages):
+            messages = [{"role": "system", "content": request.system}] + messages
+
+        payload: dict = {
             "model": request.model,
-            "messages": request.messages,
+            "messages": messages,
             "stream": False,
-            "think": False,  # disable chain-of-thought for thinking models (e.g. Qwen3)
-            "options": {"temperature": request.temperature},
+            # Default: disable thinking mode (Qwen3/QwQ put all output in
+            # message.thinking when think=True, leaving content empty)
+            "think": extra.get("think", False),
+            "options": options,
         }
+        if "keep_alive" in extra:
+            payload["keep_alive"] = extra["keep_alive"]
+        if "format" in extra:
+            payload["format"] = extra["format"]
+
         async with httpx.AsyncClient(timeout=120.0) as client:
             resp = await client.post(f"{base}/api/chat", json=payload)
             resp.raise_for_status()
             data = resp.json()
+
         msg = data["message"]
-        # Fallback to thinking field if content is empty (older Ollama versions)
         content = msg.get("content") or msg.get("thinking", "")
         return LLMResponse(
             content=content,
@@ -298,17 +338,41 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                 yield content
 
     async def _stream_ollama(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
-        """Stream tokens from Ollama via NDJSON chunked response."""
+        """Stream tokens from Ollama /api/chat (NDJSON chunks).
+
+        Respects the same ``request.extra`` options as :meth:`_call_ollama`.
+        When ``think=True`` is passed, thinking tokens from the ``thinking``
+        field are also yielded (prefixed with the raw thinking text).
+        """
         import httpx
 
         base = self._base_url or "http://localhost:11434"
-        payload = {
+        extra: dict = getattr(request, "extra", None) or {}
+
+        options: dict = {"temperature": request.temperature}
+        if request.max_tokens:
+            options["num_predict"] = request.max_tokens
+        for key in ("num_ctx", "top_p", "top_k", "repeat_penalty", "seed", "num_gpu", "num_thread"):
+            if key in extra:
+                options[key] = extra[key]
+
+        messages = list(request.messages)
+        if request.system and not any(m.get("role") == "system" for m in messages):
+            messages = [{"role": "system", "content": request.system}] + messages
+
+        think = extra.get("think", False)
+        payload: dict = {
             "model": request.model,
-            "messages": request.messages,
+            "messages": messages,
             "stream": True,
-            "think": False,  # disable chain-of-thought for thinking models (e.g. Qwen3)
-            "options": {"temperature": request.temperature},
+            "think": think,
+            "options": options,
         }
+        if "keep_alive" in extra:
+            payload["keep_alive"] = extra["keep_alive"]
+        if "format" in extra:
+            payload["format"] = extra["format"]
+
         async with httpx.AsyncClient(timeout=120.0) as client:
             async with client.stream("POST", f"{base}/api/chat", json=payload) as resp:
                 resp.raise_for_status()
@@ -316,9 +380,13 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                     if not line:
                         continue
                     data = json.loads(line)
-                    content = data.get("message", {}).get("content", "")
+                    msg = data.get("message", {})
+                    content = msg.get("content", "")
                     if content:
                         yield content
+                    elif think and msg.get("thinking"):
+                        # When thinking mode is on, yield thinking tokens too
+                        yield msg["thinking"]
                     if data.get("done"):
                         break
 
