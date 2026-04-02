@@ -148,11 +148,14 @@ class ModelRouterRequest:
         mode: Name of the routing mode to use (must be in the configured modes).
         prompt: User or assistant prompt text.
         system: Optional system message prepended to the conversation.
+        tier_override: If set (1-based index), skip directly to that tier and
+            don't fall through.  Useful for testing or forcing a specific provider.
     """
 
     mode: str
     prompt: str
     system: str | None = None
+    tier_override: int | None = None
 
 
 # ── Primitive ─────────────────────────────────────────────────────────────────
@@ -305,8 +308,19 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             available = sorted(self._modes)
             raise ValueError(f"Unknown routing mode {request.mode!r}. Available: {available}")
 
+        if request.tier_override is not None:
+            idx = request.tier_override - 1
+            if idx < 0 or idx >= len(mode_cfg.tiers):
+                raise ValueError(
+                    f"tier_override={request.tier_override} out of range for mode "
+                    f"{request.mode!r} (has {len(mode_cfg.tiers)} tier(s))"
+                )
+            tiers_to_try = [mode_cfg.tiers[idx]]
+        else:
+            tiers_to_try = mode_cfg.tiers
+
         last_exc: Exception = RuntimeError("No tiers configured")
-        for i, tier in enumerate(mode_cfg.tiers, start=1):
+        for i, tier in enumerate(tiers_to_try, start=1):
             try:
                 content, used_model = await self._call_tier(tier, request.prompt, request.system)
                 return LLMResponse(
@@ -325,7 +339,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                 )
 
         raise RuntimeError(
-            f"All {len(mode_cfg.tiers)} tiers failed for mode {request.mode!r}"
+            f"All {len(tiers_to_try)} tiers failed for mode {request.mode!r}"
         ) from last_exc
 
     # ── Tier dispatch ─────────────────────────────────────────────────────────

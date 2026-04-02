@@ -382,6 +382,41 @@ class TestTierFallback:
             )
 
 
+# ── tier_override ─────────────────────────────────────────────────────────────
+
+
+class TestTierOverride:
+    @pytest.mark.asyncio
+    async def test_override_skips_to_specified_tier(self):
+        """tier_override=2 should skip tier 1 (Ollama) and go straight to tier 2."""
+        router = _make_router(
+            [
+                RouterTierConfig(provider="ollama", model="local"),
+                RouterTierConfig(provider="openrouter", model="pinned:free"),
+            ]
+        )
+        _, _mock_client, mock_cm = _mock_openai_compat_response("tier2 reply")
+
+        with patch("httpx.AsyncClient", return_value=mock_cm):
+            result = await router.execute(
+                ModelRouterRequest(mode="test", prompt="hi", tier_override=2),
+                _ctx(),
+            )
+
+        assert result.content == "tier2 reply"
+        assert result.model == "pinned:free"
+        assert result.provider == "openrouter"
+
+    @pytest.mark.asyncio
+    async def test_override_out_of_range_raises_value_error(self):
+        router = _make_router([RouterTierConfig(provider="ollama", model="m")])
+        with pytest.raises(ValueError, match="tier_override=5 out of range"):
+            await router.execute(
+                ModelRouterRequest(mode="test", prompt="hi", tier_override=5),
+                _ctx(),
+            )
+
+
 # ── unknown provider ──────────────────────────────────────────────────────────
 
 
@@ -437,7 +472,9 @@ class TestExecuteGroqTier:
         assert result.provider == "groq"
         call_args = mock_client.post.call_args
         assert "groq.com" in call_args[0][0]
-        assert call_args[1]["headers"]["Authorization"] == "Bearer groq-key"  # pragma: allowlist secret
+        assert (
+            call_args[1]["headers"]["Authorization"] == "Bearer groq-key"
+        )  # pragma: allowlist secret
 
     @pytest.mark.asyncio
     async def test_groq_defaults_to_first_free_model_when_no_model(self):
@@ -488,7 +525,9 @@ class TestExecuteTogetherTier:
         assert result.provider == "together"
         call_args = mock_client.post.call_args
         assert "together.xyz" in call_args[0][0]
-        assert call_args[1]["headers"]["Authorization"] == "Bearer ta-key"  # pragma: allowlist secret
+        assert (
+            call_args[1]["headers"]["Authorization"] == "Bearer ta-key"
+        )  # pragma: allowlist secret
 
     @pytest.mark.asyncio
     async def test_together_without_model_raises(self):
