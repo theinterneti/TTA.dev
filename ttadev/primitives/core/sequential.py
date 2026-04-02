@@ -102,24 +102,31 @@ class SequentialPrimitive(InstrumentedPrimitive[Any, Any]):
             step_start_time = time.time()
 
             # Create step span (if tracing available)
-            if self._tracer and TRACING_AVAILABLE:
-                with self._tracer.start_as_current_span(f"sequential.step_{i}") as span:
-                    span.set_attribute("step.index", i)
-                    span.set_attribute("step.name", step_name)
-                    span.set_attribute("step.primitive_type", primitive.__class__.__name__)
-                    span.set_attribute("step.total_steps", len(self.primitives))
+            try:
+                if self._tracer and TRACING_AVAILABLE:
+                    with self._tracer.start_as_current_span(f"sequential.step_{i}") as span:
+                        span.set_attribute("step.index", i)
+                        span.set_attribute("step.name", step_name)
+                        span.set_attribute("step.primitive_type", primitive.__class__.__name__)
+                        span.set_attribute("step.total_steps", len(self.primitives))
 
-                    try:
-                        result = await primitive.execute(result, child_ctx)
-                        span.set_attribute("step.status", "success")
-                    except Exception as e:
-                        span.set_attribute("step.status", "error")
-                        span.set_attribute("step.error", str(e))
-                        span.record_exception(e)
-                        raise
-            else:
-                # Graceful degradation - execute without step span
-                result = await primitive.execute(result, child_ctx)
+                        try:
+                            result = await primitive.execute(result, child_ctx)
+                            span.set_attribute("step.status", "success")
+                        except Exception as e:
+                            span.set_attribute("step.status", "error")
+                            span.set_attribute("step.error", str(e))
+                            span.record_exception(e)
+                            raise
+                else:
+                    # Graceful degradation - execute without step span
+                    result = await primitive.execute(result, child_ctx)
+            except Exception:
+                step_duration_ms = (time.time() - step_start_time) * 1000
+                metrics_collector.record_execution(
+                    f"{self.name}.step_{i}", duration_ms=step_duration_ms, success=False
+                )
+                raise
 
             # Record checkpoint and metrics
             context.checkpoint(f"sequential.step_{i}.end")
