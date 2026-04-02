@@ -50,6 +50,7 @@ repos:
         name: "🔐 Detect Secrets"
         args: ['--baseline', '.secrets.baseline']
         exclude: package-lock\.json|\.secrets\.baseline
+        pass_filenames: false
 
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
