@@ -1,0 +1,503 @@
+"""ModelRouterPrimitive — YAML-configurable multi-tier LLM routing.
+
+Routes LLM requests to the best available provider using an ordered tier list.
+Typical tier order: **local Ollama → Groq (fast) → pinned free cloud model → any free model**.
+On failure the primitive falls through to the next tier; all tiers failing
+raises ``RuntimeError``.
+
+The routing table is driven by a YAML file or plain Python dicts, making it
+trivial to adapt for any application without changing code.
+
+Supported providers
+-------------------
+
++---------------+-------------------------------+------------------------------+
+| Value         | API                           | Auth env var                 |
++===============+===============================+==============================+
+| ``ollama``    | Local Ollama (localhost)      | *(none)*                     |
++---------------+-------------------------------+------------------------------+
+| ``groq``      | Groq cloud (OpenAI-compat)    | ``GROQ_API_KEY``             |
++---------------+-------------------------------+------------------------------+
+| ``together``  | Together AI (OpenAI-compat)   | ``TOGETHER_API_KEY``         |
++---------------+-------------------------------+------------------------------+
+| ``openrouter``| OpenRouter (OpenAI-compat)    | ``OPENROUTER_API_KEY``       |
+| / ``or``      |                               |                              |
++---------------+-------------------------------+------------------------------+
+| ``auto``      | FreeModelTracker → OpenRouter | ``OPENROUTER_API_KEY``       |
++---------------+-------------------------------+------------------------------+
+
+Example (Python)::
+
+    modes = {
+        "chat": RouterModeConfig(
+            tiers=[
+                RouterTierConfig(provider="ollama", model="llama3.2"),
+                RouterTierConfig(provider="groq", model="llama-3.1-8b-instant"),
+                RouterTierConfig(provider="openrouter", model="meta-llama/llama-3.3-70b-instruct:free"),
+                RouterTierConfig(provider="auto"),
+            ]
+        )
+    }
+    router = ModelRouterPrimitive(modes)
+    response = await router.execute(
+        ModelRouterRequest(mode="chat", prompt="Hello!"),
+        WorkflowContext(workflow_id="demo"),
+    )
+
+Example YAML (``model_modes.yaml``)::
+
+    modes:
+      narration:
+        description: "Generate narrative prose"
+        tier1:
+          provider: ollama
+          model: llama3.2
+          params:
+            temperature: 0.8
+        tier2:
+          provider: groq
+          model: llama-3.3-70b-versatile
+          params:
+            temperature: 0.8
+            max_tokens: 512
+        tier3:
+          provider: openrouter
+          model: "nousresearch/hermes-3-llama-3.1-405b:free"
+          params:
+            temperature: 0.8
+            max_tokens: 512
+        tier4:
+          provider: auto
+          params:
+            temperature: 0.8
+            max_tokens: 512
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import httpx
+
+from ttadev.primitives.core import WorkflowContext, WorkflowPrimitive
+from ttadev.primitives.llm.free_model_tracker import FreeModelTracker
+from ttadev.primitives.llm.universal_llm_primitive import LLMResponse
+
+logger = logging.getLogger(__name__)
+
+_OLLAMA_DEFAULT_URL = "http://localhost:11434"
+_GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+_TOGETHER_API_URL = "https://api.together.xyz/v1/chat/completions"
+_OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+_OR_REFERER = "https://github.com/theinterneti/TTA.dev"
+
+# Well-known free Groq models (fast inference, generous free tier)
+_GROQ_FREE_MODELS: list[str] = [
+    "llama-3.1-8b-instant",
+    "llama-3.3-70b-versatile",
+    "gemma2-9b-it",
+    "mistral-saba-24b",
+]
+
+
+# ── Configuration dataclasses ─────────────────────────────────────────────────
+
+
+@dataclass
+class RouterTierConfig:
+    """Configuration for a single routing tier.
+
+    Attributes:
+        provider: Which provider to use.  One of ``"ollama"``, ``"groq"``,
+            ``"together"``, ``"openrouter"``/``"or"``, or ``"auto"``
+            (auto-selected free model via FreeModelTracker → OpenRouter).
+        model: Model identifier.  ``None``/``"auto"`` lets FreeModelTracker
+            choose (only valid for ``openrouter`` and ``auto``).
+            Required when ``provider == "ollama"``.
+        params: Extra generation parameters forwarded to the provider
+            (e.g. ``temperature``, ``max_tokens``).
+    """
+
+    provider: str
+    model: str | None = None
+    params: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class RouterModeConfig:
+    """Configuration for a named routing mode.
+
+    Attributes:
+        description: Human-readable description of the mode.
+        tiers: Ordered list of tiers to try.
+    """
+
+    description: str = ""
+    tiers: list[RouterTierConfig] = field(default_factory=list)
+
+
+@dataclass
+class ModelRouterRequest:
+    """Request for the ModelRouterPrimitive.
+
+    Attributes:
+        mode: Name of the routing mode to use (must be in the configured modes).
+        prompt: User or assistant prompt text.
+        system: Optional system message prepended to the conversation.
+    """
+
+    mode: str
+    prompt: str
+    system: str | None = None
+
+
+# ── Primitive ─────────────────────────────────────────────────────────────────
+
+
+class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
+    """Routes LLM requests through a configurable tier of providers.
+
+    Each named *mode* has an ordered list of tiers.  On failure the primitive
+    logs a warning and falls through to the next tier; it raises ``RuntimeError``
+    only when every tier has been exhausted.
+
+    **Provider values:**
+
+    - ``"ollama"``      — local Ollama (requires ``model`` to be set)
+    - ``"groq"``        — Groq cloud, OpenAI-compat (``GROQ_API_KEY``)
+    - ``"together"``    — Together AI, OpenAI-compat (``TOGETHER_API_KEY``)
+    - ``"openrouter"``  — OpenRouter (pinned model or auto-selected free)
+    - ``"auto"``        — ``FreeModelTracker`` picks the best free OpenRouter model
+    """
+
+    def __init__(
+        self,
+        modes: dict[str, RouterModeConfig],
+        *,
+        free_tracker: FreeModelTracker | None = None,
+        ollama_url: str | None = None,
+        openrouter_api_key: str | None = None,
+        groq_api_key: str | None = None,
+        together_api_key: str | None = None,
+    ) -> None:
+        """Initialise the router.
+
+        Args:
+            modes: Mapping from mode name to ``RouterModeConfig``.
+            free_tracker: Optional pre-configured tracker.  A default instance
+                (keyed from the env) is created when ``None``.
+            ollama_url: Ollama base URL.  Defaults to ``OLLAMA_URL`` env var or
+                ``http://localhost:11434``.
+            openrouter_api_key: OpenRouter key.  Defaults to
+                ``OPENROUTER_API_KEY`` env var.
+            groq_api_key: Groq API key.  Defaults to ``GROQ_API_KEY`` env var.
+            together_api_key: Together AI key.  Defaults to
+                ``TOGETHER_API_KEY`` env var.
+        """
+        super().__init__()
+        self._modes = modes
+        self._or_api_key = openrouter_api_key or os.getenv("OPENROUTER_API_KEY", "")
+        self._groq_api_key = groq_api_key or os.getenv("GROQ_API_KEY", "")
+        self._together_api_key = together_api_key or os.getenv("TOGETHER_API_KEY", "")
+        self._ollama_url = (ollama_url or os.getenv("OLLAMA_URL", _OLLAMA_DEFAULT_URL)).rstrip("/")
+        self._tracker = free_tracker or FreeModelTracker(api_key=self._or_api_key or None)
+
+    # ── Factory ───────────────────────────────────────────────────────────────
+
+    @classmethod
+    def from_yaml(
+        cls,
+        path: Path | str,
+        **kwargs: Any,
+    ) -> ModelRouterPrimitive:
+        """Create a ``ModelRouterPrimitive`` from a YAML configuration file.
+
+        The YAML ``modes`` block maps mode names to tier configs.  Each tier
+        key is ``tier1``, ``tier2``, … (numeric suffix determines order).
+
+        Example YAML::
+
+            modes:
+              extraction:
+                description: "Extract structured data"
+                tier1:
+                  provider: ollama
+                  model: qwen2.5:7b
+                  params:
+                    temperature: 0.1
+                tier2:
+                  provider: openrouter
+                  model: "mistralai/mistral-7b-instruct:free"
+                  params:
+                    temperature: 0.1
+                    max_tokens: 256
+                tier3:
+                  provider: auto
+                  params:
+                    temperature: 0.1
+                    max_tokens: 256
+
+        Args:
+            path: Path to YAML configuration file.
+            **kwargs: Additional keyword arguments forwarded to ``__init__``.
+
+        Returns:
+            Configured ``ModelRouterPrimitive`` instance.
+        """
+        import yaml  # PyYAML — already a core dependency
+
+        loaded = yaml.safe_load(Path(path).read_text())
+        raw: dict[str, Any] = loaded if isinstance(loaded, dict) else {}
+        modes: dict[str, RouterModeConfig] = {}
+
+        for mode_name, mode_data in raw.get("modes", {}).items():
+            tiers: list[RouterTierConfig] = []
+            for i in range(1, 20):
+                tier_key = f"tier{i}"
+                if tier_key not in mode_data:
+                    break
+                td: dict[str, Any] = mode_data[tier_key]
+                model_raw = td.get("model")
+                model = None if (model_raw in (None, "null", "auto", "")) else str(model_raw)
+                tiers.append(
+                    RouterTierConfig(
+                        provider=str(td.get("provider", "openrouter")),
+                        model=model,
+                        params=dict(td.get("params", {})),
+                    )
+                )
+            modes[mode_name] = RouterModeConfig(
+                description=str(mode_data.get("description", "")),
+                tiers=tiers,
+            )
+
+        return cls(modes=modes, **kwargs)
+
+    # ── WorkflowPrimitive interface ───────────────────────────────────────────
+
+    async def execute(
+        self,
+        request: ModelRouterRequest,
+        ctx: WorkflowContext,
+    ) -> LLMResponse:
+        """Route the request to the best available tier.
+
+        Iterates through tiers for the requested mode, trying each in order.
+        Logs a warning on per-tier failure and continues to the next tier.
+
+        Args:
+            request: Mode name, prompt text, and optional system message.
+            ctx: Workflow context for observability.
+
+        Returns:
+            ``LLMResponse`` from the first tier that succeeds.
+
+        Raises:
+            ValueError: If the requested mode is not configured.
+            RuntimeError: If every configured tier fails.
+        """
+        mode_cfg = self._modes.get(request.mode)
+        if mode_cfg is None:
+            available = sorted(self._modes)
+            raise ValueError(f"Unknown routing mode {request.mode!r}. Available: {available}")
+
+        last_exc: Exception = RuntimeError("No tiers configured")
+        for i, tier in enumerate(mode_cfg.tiers, start=1):
+            try:
+                content, used_model = await self._call_tier(tier, request.prompt, request.system)
+                return LLMResponse(
+                    content=content,
+                    model=used_model,
+                    provider=tier.provider,
+                )
+            except Exception as exc:
+                last_exc = exc
+                logger.warning(
+                    "tier%d (%s / %s) failed: %r — trying next tier",
+                    i,
+                    tier.provider,
+                    tier.model or "auto",
+                    exc,
+                )
+
+        raise RuntimeError(
+            f"All {len(mode_cfg.tiers)} tiers failed for mode {request.mode!r}"
+        ) from last_exc
+
+    # ── Tier dispatch ─────────────────────────────────────────────────────────
+
+    async def _call_tier(
+        self,
+        tier: RouterTierConfig,
+        prompt: str,
+        system: str | None,
+    ) -> tuple[str, str]:
+        """Dispatch to the appropriate provider for a single tier.
+
+        Args:
+            tier: Tier configuration.
+            prompt: User prompt text.
+            system: Optional system message.
+
+        Returns:
+            Tuple of ``(content, model_id)``.
+
+        Raises:
+            ValueError: For unknown provider or missing Ollama model.
+            RuntimeError: When FreeModelTracker returns no candidates.
+        """
+        provider = tier.provider.lower().strip()
+
+        if provider == "ollama":
+            if not tier.model:
+                raise ValueError("Ollama tier requires an explicit 'model' name")
+            content = await self._call_ollama(tier.model, prompt, system, tier.params)
+            return content, tier.model
+
+        if provider == "groq":
+            model = tier.model or _GROQ_FREE_MODELS[0]
+            content = await self._call_openai_compat(
+                _GROQ_API_URL, self._groq_api_key, model, prompt, system, tier.params
+            )
+            return content, model
+
+        if provider == "together":
+            if not tier.model:
+                raise ValueError("Together AI tier requires an explicit 'model' name")
+            content = await self._call_openai_compat(
+                _TOGETHER_API_URL, self._together_api_key, tier.model, prompt, system, tier.params
+            )
+            return content, tier.model
+
+        if provider in ("openrouter", "or"):
+            model = tier.model or await self._tracker.recommend()
+            if not model:
+                raise RuntimeError("FreeModelTracker returned no candidate models")
+            content = await self._call_openai_compat(
+                _OPENROUTER_API_URL,
+                self._or_api_key,
+                model,
+                prompt,
+                system,
+                tier.params,
+                extra_headers={"HTTP-Referer": _OR_REFERER},
+            )
+            return content, model
+
+        if provider == "auto":
+            model = await self._tracker.recommend()
+            if not model:
+                raise RuntimeError("FreeModelTracker returned no candidate models")
+            content = await self._call_openai_compat(
+                _OPENROUTER_API_URL,
+                self._or_api_key,
+                model,
+                prompt,
+                system,
+                tier.params,
+                extra_headers={"HTTP-Referer": _OR_REFERER},
+            )
+            return content, model
+
+        raise ValueError(
+            f"Unknown provider {provider!r}. "
+            "Use 'ollama', 'groq', 'together', 'openrouter', or 'auto'"
+        )
+
+    # ── Provider calls ────────────────────────────────────────────────────────
+
+    async def _call_ollama(
+        self,
+        model: str,
+        prompt: str,
+        system: str | None,
+        params: dict[str, Any],
+    ) -> str:
+        """Call a local Ollama endpoint.
+
+        Args:
+            model: Ollama model identifier.
+            prompt: User message.
+            system: Optional system message.
+            params: Extra generation options (temperature, etc.).
+
+        Returns:
+            Generated text content.
+        """
+        messages = _build_messages(prompt, system)
+        payload: dict[str, Any] = {"model": model, "messages": messages, "stream": False}
+        if params:
+            payload["options"] = params
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(f"{self._ollama_url}/api/chat", json=payload)
+            resp.raise_for_status()
+            return str(resp.json()["message"]["content"])
+
+    async def _call_openai_compat(
+        self,
+        api_url: str,
+        api_key: str,
+        model: str,
+        prompt: str,
+        system: str | None,
+        params: dict[str, Any],
+        *,
+        extra_headers: dict[str, str] | None = None,
+    ) -> str:
+        """Call any OpenAI-compatible chat completions endpoint.
+
+        Used by Groq, Together AI, and OpenRouter — all share the same
+        ``/chat/completions`` request/response format.
+
+        Args:
+            api_url: Full URL of the chat completions endpoint.
+            api_key: Bearer token for Authorization header.
+            model: Model identifier for the provider.
+            prompt: User message.
+            system: Optional system message.
+            params: Extra generation parameters (temperature, max_tokens, etc.).
+            extra_headers: Additional HTTP headers (e.g. HTTP-Referer for OR).
+
+        Returns:
+            Generated text content.
+        """
+        messages = _build_messages(prompt, system)
+        headers = {"Authorization": f"Bearer {api_key}"}
+        if extra_headers:
+            headers.update(extra_headers)
+        payload: dict[str, Any] = {"model": model, "messages": messages, **params}
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(api_url, headers=headers, json=payload)
+            resp.raise_for_status()
+            return str(resp.json()["choices"][0]["message"]["content"])
+
+    # ── Utility ───────────────────────────────────────────────────────────────
+
+    @property
+    def modes(self) -> dict[str, RouterModeConfig]:
+        """Return the configured routing modes (read-only view)."""
+        return dict(self._modes)
+
+
+# ── Private helpers ───────────────────────────────────────────────────────────
+
+
+def _build_messages(prompt: str, system: str | None) -> list[dict[str, str]]:
+    """Build an OpenAI-compatible messages list.
+
+    Args:
+        prompt: User turn content.
+        system: Optional system instruction prepended before the user turn.
+
+    Returns:
+        List of ``{role, content}`` dicts.
+    """
+    msgs: list[dict[str, str]] = []
+    if system:
+        msgs.append({"role": "system", "content": system})
+    msgs.append({"role": "user", "content": prompt})
+    return msgs

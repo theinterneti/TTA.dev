@@ -33,12 +33,13 @@ This catalog provides a complete reference for all TTA.dev workflow primitives, 
 2. [Recovery Primitives](#recovery-primitives) - Error handling and resilience
 3. [Performance Primitives](#performance-primitives) - Optimization and caching
 4. [Skill Primitives](#skill-primitives) - SKILL.md-compatible agent capabilities
-5. [Orchestration Primitives](#orchestration-primitives) - Multi-agent coordination
-6. [Testing Primitives](#testing-primitives) - Testing utilities
-7. [Observability Primitives](#observability-primitives) - Tracing and metrics
-8. [ACE Framework Primitives](#ace-framework-primitives) - LLM-powered code generation and learning
-9. [Extension Modules](#extension-modules) - Specialized non-core primitives
-10. [Composition Patterns](#composition-patterns) - Multi-primitive recipes
+5. [LLM Routing Primitives](#llm-routing-primitives) - Free model discovery and multi-tier routing
+6. [Orchestration Primitives](#orchestration-primitives) - Multi-agent coordination
+7. [Testing Primitives](#testing-primitives) - Testing utilities
+8. [Observability Primitives](#observability-primitives) - Tracing and metrics
+9. [ACE Framework Primitives](#ace-framework-primitives) - LLM-powered code generation and learning
+10. [Extension Modules](#extension-modules) - Specialized non-core primitives
+11. [Composition Patterns](#composition-patterns) - Multi-primitive recipes
 
 ---
 
@@ -730,6 +731,124 @@ from ttadev.primitives.adaptive import AdaptiveRetryPrimitive
 | **orchestration** | `ttadev.primitives.orchestration` | Multi-model orchestration and delegation |
 | **research** | `ttadev.primitives.research` | Provider research and free-tier discovery |
 | **speckit** | `ttadev.primitives.speckit` | Specification-driven development workflow |
+
+---
+
+## LLM Routing Primitives
+
+> Extracted and improved from TTA's 3-tier model management system.
+> These primitives make multi-provider LLM routing and free model discovery reusable for any app.
+
+### FreeModelTracker
+
+**Async OpenRouter free-model discovery with local caching.**
+
+```python
+from ttadev.primitives.llm import FreeModelTracker, get_free_models, rank_models_for_role
+
+# Standalone helpers
+models = await get_free_models()                     # list[ORModel] — cached 1 week
+best = rank_models_for_role(models, preferred=["meta-llama/llama-3.1-8b-instruct:free"])
+
+# Stateful tracker (holds in-memory cache)
+tracker = FreeModelTracker(api_key="sk-or-...")
+await tracker.refresh()
+model_id = await tracker.recommend()                 # str | None
+```
+
+**`ORModel` dataclass** — one entry from the `/api/v1/models` response:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `str` | Full model ID (e.g. `"meta-llama/llama-3.1-8b-instruct:free"`) |
+| `context_length` | `int` | Max tokens the model supports |
+| `prompt_price` | `float` | Price per prompt token (0.0 for free) |
+| `completion_price` | `float` | Price per completion token (0.0 for free) |
+| `tags` | `list[str]` | Provider tags |
+| `is_free` | `bool` (computed) | True when both prices are 0 |
+
+**Key features:**
+- Fully async (`httpx.AsyncClient`)
+- Cache lives at `~/.cache/ttadev/or_free_models.json` with a configurable TTL (default 1 week)
+- Returns stale cache on network failure instead of raising
+- Preferred model lists are caller-configurable, not hardcoded
+
+---
+
+### ModelRouterPrimitive
+
+**YAML-configurable 3-tier LLM router: local → pinned → free-pool.**
+
+```python
+from ttadev.primitives.llm import ModelRouterPrimitive, ModelRouterRequest
+
+# Load from YAML config
+router = ModelRouterPrimitive.from_yaml("config/model_modes.yaml")
+
+# Call with a named mode
+response = await router.execute(
+    ModelRouterRequest(
+        mode="summarization",
+        prompt="Summarize the following text...",
+        system="You are a helpful assistant.",
+    ),
+    context,
+)
+print(response.text)      # LLMResponse
+```
+
+**YAML config format:**
+
+```yaml
+# model_modes.yaml
+modes:
+  summarization:
+    tier1:
+      provider: ollama
+      model: llama3.2
+    tier2:
+      provider: groq
+      model: llama-3.3-70b-versatile    # fast, free Groq tier
+    tier3:
+      provider: openrouter
+      model: meta-llama/llama-3.1-8b-instruct:free
+    tier4:
+      provider: auto          # FreeModelTracker picks the model
+  extraction:
+    tier1:
+      provider: groq
+      model: mistral-saba-24b
+      params:
+        temperature: 0.1
+    tier2:
+      provider: together
+      model: mistralai/Mistral-7B-Instruct-v0.3   # model required for Together
+    tier3:
+      provider: openrouter   # null model → tracker selects
+```
+
+**Tier providers:**
+
+| Value | Env var | Behaviour |
+|-------|---------|-----------|
+| `ollama` | — | Calls local Ollama via `/api/chat`. `model` required. |
+| `groq` | `GROQ_API_KEY` | Groq cloud (OpenAI-compat). If `model` is null, defaults to `llama-3.1-8b-instant`. |
+| `together` | `TOGETHER_API_KEY` | Together AI (OpenAI-compat). `model` required. |
+| `openrouter` or `or` | `OPENROUTER_API_KEY` | OpenRouter. If `model` is null/`"auto"`, uses `FreeModelTracker`. |
+| `auto` | `OPENROUTER_API_KEY` | `FreeModelTracker` picks best free model, then calls OpenRouter. |
+
+**Tier fallback:** On any exception the router logs a warning and tries the next tier. Raises `RuntimeError("All N tiers failed")` only when every tier fails.
+
+**Return type:** `LLMResponse` (same as `UniversalLLMPrimitive`).
+
+```python
+from ttadev.primitives.llm import (
+    ModelRouterPrimitive,
+    ModelRouterRequest,
+    RouterModeConfig,
+    RouterTierConfig,
+)
+```
 
 ---
 

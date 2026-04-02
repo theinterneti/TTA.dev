@@ -5,6 +5,28 @@ Provides a single interface for invoking LLMs across providers
 
 Note: Distinct from ttadev/integrations/llm/universal_llm_primitive.py
 which handles agentic coder budget profiles.
+
+Required environment variables
+-------------------------------
+Each provider backend reads its credentials from the environment at call time.
+``UniversalLLMPrimitive`` accepts an explicit ``api_key`` argument that takes
+precedence over the environment variable.
+
+| Provider  | Environment variable(s)                  | SDK package             |
+|-----------|------------------------------------------|-------------------------|
+| Groq      | ``GROQ_API_KEY``                         | ``groq``                |
+| Anthropic | ``ANTHROPIC_API_KEY``                    | ``anthropic``           |
+| OpenAI    | ``OPENAI_API_KEY``                       | ``openai``              |
+| Ollama    | *(none — connect to localhost:11434)*    | ``httpx``               |
+| Gemini    | ``GEMINI_API_KEY`` or ``GOOGLE_API_KEY`` | ``google-generativeai`` |
+
+Install extras::
+
+    uv sync --extra groq        # Groq
+    uv sync --extra anthropic   # Anthropic
+    uv sync --extra openai      # OpenAI
+    uv sync --extra gemini      # Gemini
+    # Ollama: run the daemon locally (https://ollama.com)
 """
 
 from __future__ import annotations

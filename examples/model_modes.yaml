@@ -1,0 +1,90 @@
+# model_modes.yaml — sample config for ModelRouterPrimitive
+#
+# Usage:
+#   from ttadev.primitives.llm import ModelRouterPrimitive, ModelRouterRequest
+#   router = ModelRouterPrimitive.from_yaml("examples/model_modes.yaml")
+#   response = await router.execute(
+#       ModelRouterRequest(mode="summarization", prompt="Summarize: ..."),
+#       context,
+#   )
+#
+# Tier selection order: tier1 → tier2 → tier3 → … (stops at first missing key)
+# On failure the router logs a warning and falls through to the next tier.
+# Raises RuntimeError only if all tiers fail.
+#
+# Supported providers:
+#   ollama      — local Ollama; `model` required
+#   groq        — Groq cloud (OpenAI-compat); reads GROQ_API_KEY
+#   together    — Together AI (OpenAI-compat); reads TOGETHER_API_KEY; `model` required
+#   openrouter  — OpenRouter API; reads OPENROUTER_API_KEY
+#   or          — alias for openrouter
+#   auto        — FreeModelTracker picks best free model → OpenRouter
+
+modes:
+
+  # General-purpose summarization — 4 tiers: local → fast cloud → pinned free → best free
+  summarization:
+    tier1:
+      provider: ollama
+      model: llama3.2
+    tier2:
+      provider: groq
+      model: llama-3.3-70b-versatile
+      params:
+        max_tokens: 512
+    tier3:
+      provider: openrouter
+      model: meta-llama/llama-3.1-8b-instruct:free
+    tier4:
+      provider: auto
+
+  # Structured data extraction / JSON output
+  extraction:
+    tier1:
+      provider: ollama
+      model: mistral
+      params:
+        temperature: 0.1
+    tier2:
+      provider: groq
+      model: mistral-saba-24b
+      params:
+        temperature: 0.1
+        max_tokens: 256
+    tier3:
+      provider: together
+      model: mistralai/Mistral-7B-Instruct-v0.3
+      params:
+        temperature: 0.1
+        max_tokens: 256
+    tier4:
+      provider: auto
+
+  # Creative / long-form generation
+  generation:
+    tier1:
+      provider: ollama
+      model: llama3.2
+      params:
+        temperature: 0.8
+    tier2:
+      provider: groq
+      model: llama-3.3-70b-versatile
+      params:
+        temperature: 0.8
+    tier3:
+      provider: openrouter
+      model: ~   # null → tracker selects highest-context free model
+    tier4:
+      provider: auto
+
+  # Fast classification / triage — put Groq first for speed
+  classify:
+    tier1:
+      provider: groq
+      model: llama-3.1-8b-instant
+    tier2:
+      provider: ollama
+      model: phi3
+    tier3:
+      provider: auto
