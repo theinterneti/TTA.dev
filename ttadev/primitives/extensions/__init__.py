@@ -57,6 +57,11 @@ from __future__ import annotations
 
 from typing import Any
 
+__all__ = [
+    "EXTENSION_MODULES",
+    "list_extensions",
+]
+
 # Lazy imports — only resolve when accessed to avoid heavy startup costs.
 # Each entry maps a short alias to the full module path.
 EXTENSION_MODULES: dict[str, str] = {
