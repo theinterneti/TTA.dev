@@ -71,6 +71,7 @@ tests/              # Test suite
 - **LLM providers:** Groq `openai/gpt-oss-20b` for the live Hindsight runtime by default; keep Gemini 3.1 Flash Lite Preview and local Ollama as fallbacks — see [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md)
 - **Orient before edit:** Run CGC (`find_code` + `analyze_code_relationships`) on any non-trivial target before touching it — **enforced by hook** (`.claude/settings.json`)
 - **Retain after task:** Store cross-project signal in `adam-global` and repo-specific signal in the current derived `project-*` or `workspace-*` Hindsight bank
+- **TTA cross-repo edits:** `~/Repos/TTA` is owned by the local TTA agent — never edit it directly. Clone to `/tmp/TTA-copilot`, commit + push, then `rm -rf /tmp/TTA-copilot`.
 
 ### Tool Selection: Symbol Lookup
 

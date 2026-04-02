@@ -171,6 +171,17 @@ Load only when agent or skill instructions are insufficient:
 - ✅ Follow quality gates (ruff, pyright, pytest)
 - ❌ Never commit secrets or credentials
 
+**Cross-repo TTA edits — mandatory procedure:**
+- ❌ Never edit `~/Repos/TTA` directly — the local TTA agent owns that directory
+- ✅ To push changes to TTA: clone to a temp path, commit + push, then delete
+
+```bash
+git clone https://github.com/theinterneti/TTA /tmp/TTA-copilot
+# make changes inside /tmp/TTA-copilot
+cd /tmp/TTA-copilot && git add -A && git commit -m "..." && git push
+rm -rf /tmp/TTA-copilot
+```
+
 **Territory-Specific:**
 - Backend Engineer: ✅ `platform/**/*.py`, ❌ `apps/frontend/**`
 - Frontend Engineer: ✅ `apps/frontend/**`, ❌ `platform/**/*.py`
