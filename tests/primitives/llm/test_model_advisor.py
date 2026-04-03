@@ -21,7 +21,9 @@ import pytest
 from ttadev.primitives.llm.model_advisor.advisor import (
     _ABSOLUTE_FALLBACK_MODEL,
     _ABSOLUTE_FALLBACK_PROVIDER,
+    _TIER_PRIORITY,
     ModelAdvisor,
+    _classify_entry,
 )
 from ttadev.primitives.llm.model_advisor.recommendation import (
     ROIEstimate,
@@ -38,6 +40,7 @@ from ttadev.primitives.llm.model_advisor.training_estimator import (
     estimate_finetune_cost,
     estimate_quality_improvement,
 )
+from ttadev.primitives.llm.model_registry import ModelEntry
 
 # ---------------------------------------------------------------------------
 # TestTrainingEstimator
@@ -327,6 +330,9 @@ class TestModelAdvisor:
     ) -> dict[str, list[str]]:
         return {
             "ollama": [],
+            "groq": [],
+            "gemini-free": [],
+            "github-models": [],
             "or-free": or_free_models or [],
             "or-specific": [],
             "paid": paid_models or ["llama-3.3-70b-versatile", "gemini-pro"],
@@ -395,6 +401,9 @@ class TestModelAdvisor:
         advisor = ModelAdvisor()
         empty_tier_map: dict[str, list[str]] = {
             "ollama": [],
+            "groq": [],
+            "gemini-free": [],
+            "github-models": [],
             "or-free": [],
             "or-specific": [],
             "paid": [],
@@ -581,3 +590,67 @@ class TestModelAdvisor:
         assert LlmTS is TaskSuggestion
         assert LlmTR is TierRecommendation
         assert isinstance(llm_advisor, ModelAdvisor)
+
+
+# ---------------------------------------------------------------------------
+# TestTierChain — new classification and ordering tests
+# ---------------------------------------------------------------------------
+
+
+class TestTierChain:
+    """Tests for the 7-tier chain ordering and _classify_entry() logic."""
+
+    def test_groq_tier_comes_before_or_free(self) -> None:
+        """Groq should be evaluated before OpenRouter free tier."""
+        idx = _TIER_PRIORITY.index("groq")
+        or_idx = _TIER_PRIORITY.index("or-free")
+        assert idx < or_idx
+
+    def test_gemini_free_tier_classified_correctly(self) -> None:
+        """Gemini free-tier models should map to gemini-free, not paid."""
+        entry = ModelEntry(
+            model_id="gemini-2.0-flash-lite",
+            provider="gemini",
+            display_name="Gemini 2.0 Flash Lite",
+            context_length=1_000_000,
+            cost_tier="free",
+            supports_tool_calling=True,
+        )
+        assert _classify_entry(entry) == "gemini-free"
+
+    def test_groq_classified_as_groq_tier(self) -> None:
+        """All Groq models should map to the groq tier."""
+        entry = ModelEntry(
+            model_id="llama-3.3-70b-versatile",
+            provider="groq",
+            display_name="Llama 3.3 70B (Groq)",
+            context_length=128_000,
+            cost_tier="free",
+            supports_tool_calling=True,
+        )
+        assert _classify_entry(entry) == "groq"
+
+    def test_github_models_classified_correctly(self) -> None:
+        """GitHub Models entries should map to github-models tier."""
+        entry = ModelEntry(
+            model_id="gpt-4o",
+            provider="github",
+            display_name="GPT-4o (GitHub Models)",
+            context_length=128_000,
+            cost_tier="free",
+            supports_tool_calling=True,
+        )
+        assert _classify_entry(entry) == "github-models"
+
+    def test_openai_anthropic_classified_as_paid(self) -> None:
+        """OpenAI and Anthropic have no free API tier — must map to paid."""
+        for provider in ("openai", "anthropic"):
+            entry = ModelEntry(
+                model_id="test-model",
+                provider=provider,
+                display_name="Test",
+                context_length=128_000,
+                cost_tier="medium",
+                supports_tool_calling=True,
+            )
+            assert _classify_entry(entry) == "paid", f"{provider} should be paid"

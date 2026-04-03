@@ -993,9 +993,13 @@ result = await agent.execute(task, ctx)
 **Tier-aware model recommendation engine with ROI analysis.**
 
 Combines live benchmark data, hardware detection, and cost analysis to produce
-actionable `TierRecommendation` objects.  The advisor evaluates five tiers in
-priority order — `ollama` (free, local) → `or-free` (OpenRouter free tier) →
-`or-specific` (OpenRouter paid-but-cheap) → `paid` (Groq / Gemini / OpenAI) →
+actionable `TierRecommendation` objects.  The advisor evaluates seven tiers in
+priority order (cheapest / most-accessible first) —
+`ollama` (free, local) → `groq` (free, rate-limited) →
+`gemini-free` (Gemini free-tier models) →
+`github-models` (GPT-4o/Llama/Phi/DeepSeek free with GITHUB_TOKEN) →
+`or-free` (OpenRouter free tier) →
+`or-specific` (OpenRouter paid-but-cheap) → `paid` (OpenAI / Anthropic) →
 absolute fallback — and returns the cheapest tier whose best model meets the
 caller's `quality_threshold`.
 

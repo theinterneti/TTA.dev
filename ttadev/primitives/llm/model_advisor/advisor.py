@@ -2,11 +2,19 @@
 
 Combines live benchmark data, hardware detection, and cost analysis to
 produce actionable :class:`TierRecommendation` objects with rationale and
-fallback chains.  The advisor evaluates four tiers in priority order —
-``"ollama"`` (free, local) → ``"or-free"`` (OpenRouter free tier) →
-``"or-specific"`` (OpenRouter paid-but-cheap) → ``"paid"`` (Groq / Gemini /
-OpenAI) — and returns the cheapest tier whose best model meets the caller's
-``quality_threshold``.
+fallback chains.  The advisor evaluates seven tiers in priority order
+(cheapest / most-accessible first) —
+
+1. ``"ollama"`` — local models that fit the current hardware (free, private).
+2. ``"groq"`` — Groq cloud free tier (rate-limited, not pay-per-token).
+3. ``"gemini-free"`` — Gemini free-tier models (e.g. gemini-2.0-flash-lite).
+4. ``"github-models"`` — GPT-4o / Llama / Phi / DeepSeek free with GITHUB_TOKEN.
+5. ``"or-free"`` — OpenRouter free-tier models (less reliable than native APIs).
+6. ``"or-specific"`` — OpenRouter paid-but-cheap models (low/medium cost).
+7. ``"paid"`` — cloud APIs with no persistent free tier (OpenAI, Anthropic).
+
+The cheapest tier whose best model meets the caller's ``quality_threshold``
+is returned.
 
 Example::
 
@@ -50,6 +58,9 @@ logger = logging.getLogger(__name__)
 #: per-call price.  Values assume ~100 calls/month as the baseline.
 TIER_COST_DEFAULTS: dict[str, float] = {
     "ollama": 0.0,
+    "groq": 0.0,  # free tier (rate-limited, not pay-per-token)
+    "gemini-free": 0.0,  # free tier models
+    "github-models": 0.0,  # free with GitHub token
     "or-free": 0.0,
     "or-specific": 0.05,
     "paid": 2.50,
@@ -57,7 +68,15 @@ TIER_COST_DEFAULTS: dict[str, float] = {
 }
 
 #: Evaluation order — cheaper / more private tiers first.
-_TIER_PRIORITY: list[str] = ["ollama", "or-free", "or-specific", "paid"]
+_TIER_PRIORITY: list[str] = [
+    "ollama",
+    "groq",
+    "gemini-free",
+    "github-models",
+    "or-free",
+    "or-specific",
+    "paid",
+]
 
 #: Fallback model returned when no models at all are available.
 _ABSOLUTE_FALLBACK_MODEL: str = "llama-3.3-70b-versatile"
@@ -88,19 +107,30 @@ def _classify_entry(entry: ModelEntry) -> str | None:
         entry: A model registry entry to classify.
 
     Returns:
-        One of ``"or-free"``, ``"or-specific"``, or ``"paid"``, or ``None``
+        One of ``"groq"``, ``"gemini-free"``, ``"github-models"``,
+        ``"or-free"``, ``"or-specific"``, or ``"paid"``, or ``None``
         if the entry does not map to any known advisor tier.
     """
+    if entry.provider == "groq":
+        return "groq"  # Groq has a generous free tier (rate-limited, not pay-per-token)
+
+    if entry.provider == "gemini":
+        if entry.cost_tier == "free":
+            return "gemini-free"
+        return "paid"  # gemini-2.5-pro etc. are paid
+
+    if entry.provider == "github":
+        return "github-models"  # GitHub Models is free with GITHUB_TOKEN
+
     if entry.provider == "openrouter":
         if entry.cost_tier == "free":
             return "or-free"
         if entry.cost_tier in ("low", "medium"):
             return "or-specific"
-        # high-cost openrouter models fall into "paid"
         return "paid"
 
-    if entry.provider in ("groq", "gemini", "openai", "anthropic", "together"):
-        return "paid"
+    if entry.provider in ("openai", "anthropic", "together"):
+        return "paid"  # No persistent free API tier
 
     if entry.cost_tier == "high":
         return "paid"
@@ -217,12 +247,15 @@ class ModelAdvisor:
     Combines live benchmark data, hardware detection, and cost analysis to
     produce actionable recommendations with fallbacks.
 
-    The advisor evaluates four tiers in priority order:
+    The advisor evaluates seven tiers in priority order (cheapest first):
 
     1. ``"ollama"`` — local models that fit the current hardware (free).
-    2. ``"or-free"`` — OpenRouter free-tier models (zero cost).
-    3. ``"or-specific"`` — OpenRouter paid-but-cheap models (low/medium cost).
-    4. ``"paid"`` — cloud APIs (Groq, Gemini, OpenAI, Anthropic, Together).
+    2. ``"groq"`` — Groq cloud free tier (rate-limited, not pay-per-token).
+    3. ``"gemini-free"`` — Gemini free-tier models (e.g. gemini-2.0-flash-lite).
+    4. ``"github-models"`` — GPT-4o / Llama / Phi / DeepSeek free with GITHUB_TOKEN.
+    5. ``"or-free"`` — OpenRouter free-tier models (zero cost, less reliable).
+    6. ``"or-specific"`` — OpenRouter paid-but-cheap models (low/medium cost).
+    7. ``"paid"`` — cloud APIs with no persistent free tier (OpenAI, Anthropic).
 
     The cheapest tier whose best model meets ``quality_threshold`` is returned.
     If no tier meets the threshold the tier with the highest-scoring model is
@@ -250,7 +283,8 @@ class ModelAdvisor:
         """Recommend the best model tier for a task.
 
         Evaluates tiers in priority order (cheapest-first):
-        ollama → or-free → or-specific → paid.  Returns the first tier
+        ollama → groq → gemini-free → github-models → or-free → or-specific → paid.
+        Returns the first tier
         whose best model's quality score (0–10) meets *quality_threshold*.
         When no tier satisfies the threshold, returns the tier/model with
         the highest absolute quality score and explains the gap in the
