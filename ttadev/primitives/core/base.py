@@ -140,6 +140,10 @@ class WorkflowContext(BaseModel):
     # Typed as Any to avoid a circular import between primitives and workflows.
     memory: Any = Field(default=None, exclude=True)
 
+    # Default ChatPrimitive model used by spawn_agent when no explicit model is passed.
+    # Typed as Any to avoid a circular import between primitives and agents.
+    default_model: Any = Field(default=None, exclude=True)
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @model_validator(mode="before")
@@ -298,11 +302,21 @@ class WorkflowContext(BaseModel):
             "workflow.parent_span_id": self.parent_span_id or "unknown",
         }
 
-    async def spawn_agent(self, agent_name: str, task: Any) -> Any:
+    async def spawn_agent(self, agent_name: str, task: Any, model: Any | None = None) -> Any:
         """Spawn a sub-agent as a child span of the current workflow.
 
         Looks up ``agent_name`` in the global AgentRegistry, creates a child
-        context (preserving the trace), and executes the agent.
+        context (preserving the trace), resolves a ``ChatPrimitive`` model, and
+        executes the agent.
+
+        **Model resolution order:**
+
+        1. Explicit ``model`` argument passed to this call.
+        2. ``self.default_model`` set on the :class:`WorkflowContext`.
+        3. Auto-discovery: a ``ModelRouterChatAdapter`` wrapping a
+           ``ModelRouterPrimitive`` with an Ollama tier is attempted.
+        4. ``ValueError`` — callers must supply a model or set
+           ``WorkflowContext.default_model``.
 
         Imports are deferred to avoid a circular dependency between
         ``ttadev.primitives.core`` and ``ttadev.agents``.
@@ -310,20 +324,75 @@ class WorkflowContext(BaseModel):
         Args:
             agent_name: Name registered in the AgentRegistry.
             task: An AgentTask instance.
+            model: Optional ``ChatPrimitive`` model to inject into the agent.
+                When ``None``, falls back to ``self.default_model`` and then
+                auto-discovery.
 
         Returns:
             AgentResult from the spawned agent.
 
         Raises:
             KeyError: if no agent with ``agent_name`` is registered.
+            ValueError: if no model can be resolved and the agent requires one.
         """
+        import inspect
+
         from ttadev.agents.registry import get_registry  # deferred — avoids circular import
 
         registry = get_registry()
         agent_class = registry.get(agent_name)  # raises KeyError if not found
         child_ctx = self.create_child_context()
-        agent = agent_class()
+
+        # Determine whether this agent class accepts a `model` keyword argument.
+        sig = inspect.signature(agent_class.__init__)
+        needs_model = "model" in sig.parameters
+
+        if not needs_model:
+            # Legacy agent: hard-wires its own model — call with no arguments.
+            agent = agent_class()
+        else:
+            # Resolve the model to inject: explicit → context default → auto-discover.
+            resolved_model = model if model is not None else self.default_model
+            if resolved_model is None:
+                resolved_model = _resolve_default_model()
+            agent = agent_class(model=resolved_model)
+
         return await agent.execute(task, child_ctx)
+
+
+def _resolve_default_model() -> Any:
+    """Attempt to create a default ``ChatPrimitive`` for ``spawn_agent``.
+
+    Tries to build a :class:`~ttadev.agents.adapter.ModelRouterChatAdapter`
+    backed by a :class:`~ttadev.primitives.llm.ModelRouterPrimitive` with a
+    local Ollama tier.  This requires no API keys and works fully offline.
+
+    Returns:
+        A ``ChatPrimitive``-compatible model adapter.
+
+    Raises:
+        ValueError: if no model can be constructed automatically.  Callers
+            should pass ``model=`` explicitly or set
+            ``WorkflowContext.default_model``.
+    """
+    try:
+        from ttadev.agents.adapter import ModelRouterChatAdapter
+        from ttadev.primitives.llm.model_router import (
+            ModelRouterPrimitive,
+            RouterModeConfig,
+            RouterTierConfig,
+        )
+
+        router = ModelRouterPrimitive(
+            modes={"default": RouterModeConfig(tiers=[RouterTierConfig(provider="ollama")])}
+        )
+        return ModelRouterChatAdapter(router)
+    except Exception as exc:
+        raise ValueError(
+            "spawn_agent: no model was provided and automatic model resolution "
+            "failed.  Pass model= explicitly or set WorkflowContext.default_model "
+            "before calling spawn_agent."
+        ) from exc
 
 
 class WorkflowPrimitive(Generic[T, U], ABC):
