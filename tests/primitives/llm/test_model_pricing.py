@@ -6,6 +6,8 @@ Covers:
 - Provider-specific tier assertions (Groq free, Gemini mixed, GitHub free,
   OpenAI/Anthropic paid)
 - PROVIDER_PRICING catalog integrity (no duplicate keys, rate limit fields)
+- New fields: rate_limit_tpm, rate_limit_tpd
+- New providers: cerebras, cohere
 """
 
 from __future__ import annotations
@@ -38,8 +40,22 @@ class TestModelPricingDataclass:
         assert p.cost_per_1k_output_tokens is None
         assert p.rate_limit_rpm is None
         assert p.rate_limit_rpd is None
+        assert p.rate_limit_tpm is None
+        assert p.rate_limit_tpd is None
         assert p.as_of == ""
         assert p.notes == ""
+
+    def test_rate_limit_tpm_and_tpd_fields_exist(self) -> None:
+        """ModelPricing has rate_limit_tpm and rate_limit_tpd fields."""
+        p = ModelPricing(
+            provider="cerebras",
+            model_id="test",
+            cost_tier="free",
+            rate_limit_tpm=60_000,
+            rate_limit_tpd=1_000_000,
+        )
+        assert p.rate_limit_tpm == 60_000
+        assert p.rate_limit_tpd == 1_000_000
 
 
 # ── get_pricing() ─────────────────────────────────────────────────────────────
@@ -139,6 +155,9 @@ class TestGroqPricing:
         "moonshotai/kimi-k2-instruct",
         "qwen/qwen3-32b",
         "compound-beta",
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-120b",
+        "meta-llama/llama-4-maverick-17b-128e-instruct",
     ]
 
     @pytest.mark.parametrize("model_id", _GROQ_MODELS)
@@ -163,6 +182,37 @@ class TestGroqPricing:
         assert p is not None
         assert p.rate_limit_rpm is not None, f"groq/{model_id} missing rate_limit_rpm"
 
+    @pytest.mark.parametrize("model_id", _GROQ_MODELS)
+    def test_all_groq_models_have_tpm(self, model_id: str) -> None:
+        """Every Groq model in the catalog has rate_limit_tpm set."""
+        p = get_pricing("groq", model_id)
+        assert p is not None
+        assert p.rate_limit_tpm is not None, f"groq/{model_id} missing rate_limit_tpm"
+
+    def test_groq_llama33_70b_rpd_is_1000(self) -> None:
+        """llama-3.3-70b-versatile has corrected RPD of 1000 (not 14400)."""
+        p = get_pricing("groq", "llama-3.3-70b-versatile")
+        assert p is not None
+        assert p.rate_limit_rpd == 1_000
+
+    def test_groq_compound_beta_rpd_is_250(self) -> None:
+        """compound-beta has RPD of 250."""
+        p = get_pricing("groq", "compound-beta")
+        assert p is not None
+        assert p.rate_limit_rpd == 250
+
+    def test_groq_compound_beta_tpm_is_70000(self) -> None:
+        """compound-beta has TPM of 70,000."""
+        p = get_pricing("groq", "compound-beta")
+        assert p is not None
+        assert p.rate_limit_tpm == 70_000
+
+    def test_groq_llama4_scout_rpd_is_1000(self) -> None:
+        """llama-4-scout has corrected RPD of 1000."""
+        p = get_pricing("groq", "meta-llama/llama-4-scout-17b-16e-instruct")
+        assert p is not None
+        assert p.rate_limit_rpd == 1_000
+
 
 # ── Gemini — mixed free / paid ────────────────────────────────────────────────
 
@@ -174,10 +224,25 @@ class TestGeminiPricing:
         assert p.cost_tier == "free"
         assert p.rate_limit_rpd == 1_500
 
+    def test_gemini_flash_lite_has_tpm(self) -> None:
+        p = get_pricing("gemini", "models/gemini-2.0-flash-lite")
+        assert p is not None
+        assert p.rate_limit_tpm == 250_000
+
     def test_gemini_15_flash_is_free(self) -> None:
         p = get_pricing("gemini", "models/gemini-1.5-flash")
         assert p is not None
         assert p.cost_tier == "free"
+
+    def test_gemini_15_flash_has_tpm(self) -> None:
+        p = get_pricing("gemini", "models/gemini-1.5-flash")
+        assert p is not None
+        assert p.rate_limit_tpm == 250_000
+
+    def test_gemini_15_flash_8b_has_tpm(self) -> None:
+        p = get_pricing("gemini", "models/gemini-1.5-flash-8b")
+        assert p is not None
+        assert p.rate_limit_tpm == 250_000
 
     def test_gemini_20_flash_is_low(self) -> None:
         p = get_pricing("gemini", "models/gemini-2.0-flash")
@@ -242,6 +307,45 @@ class TestGitHubModelsPricing:
                 f"github/{entry.model_id} missing rate_limit_rpd"
             )
 
+    def test_github_has_gpt5(self) -> None:
+        """GPT-5 is present in GitHub Models."""
+        p = get_pricing("github", "gpt-5")
+        assert p is not None
+        assert p.cost_tier == "free"
+        assert p.rate_limit_rpd == 50
+
+    def test_github_has_o3(self) -> None:
+        """o3 is present in GitHub Models."""
+        p = get_pricing("github", "o3")
+        assert p is not None
+        assert p.cost_tier == "free"
+
+    def test_github_has_llama4_scout(self) -> None:
+        """Llama-4-Scout is present in GitHub Models."""
+        p = get_pricing("github", "Llama-4-Scout-17B-16E-Instruct")
+        assert p is not None
+        assert p.cost_tier == "free"
+        assert p.rate_limit_rpd == 50
+
+    def test_github_has_grok3(self) -> None:
+        """Grok-3 is present in GitHub Models."""
+        p = get_pricing("github", "grok-3")
+        assert p is not None
+        assert p.cost_tier == "free"
+        assert p.rate_limit_rpd == 50
+
+    def test_github_gpt4_1_mini_before_gpt4_1(self) -> None:
+        """gpt-4.1-mini resolves to the mini entry (ordering correctness)."""
+        p = get_pricing("github", "gpt-4.1-mini")
+        assert p is not None
+        assert p.model_id == "gpt-4.1-mini"
+        assert p.rate_limit_rpd == 150
+
+    def test_github_has_at_least_20_entries(self) -> None:
+        """GitHub Models catalog has been expanded to 20+ entries."""
+        github_entries = [p for p in PROVIDER_PRICING if p.provider == "github"]
+        assert len(github_entries) >= 20
+
 
 # ── OpenAI / Anthropic ────────────────────────────────────────────────────────
 
@@ -279,11 +383,111 @@ class TestOpenRouterPricing:
                 f"openrouter/{model_id} should be 'free'"
             )
 
+    def test_all_openrouter_free_models_have_rpm_20(self) -> None:
+        """All OpenRouter :free models have rpm=20 (shared quota)."""
+        free_entries = [
+            p for p in PROVIDER_PRICING if p.provider == "openrouter" and p.cost_tier == "free"
+        ]
+        assert len(free_entries) > 0
+        for entry in free_entries:
+            assert entry.rate_limit_rpm == 20, (
+                f"openrouter/{entry.model_id} should have rpm=20, got {entry.rate_limit_rpm}"
+            )
+
+    def test_all_openrouter_free_models_have_rpd_50(self) -> None:
+        """All OpenRouter :free models have rpd=50 (shared quota)."""
+        free_entries = [
+            p for p in PROVIDER_PRICING if p.provider == "openrouter" and p.cost_tier == "free"
+        ]
+        assert len(free_entries) > 0
+        for entry in free_entries:
+            assert entry.rate_limit_rpd == 50, (
+                f"openrouter/{entry.model_id} should have rpd=50, got {entry.rate_limit_rpd}"
+            )
+
+    def test_openrouter_has_llama33_70b_free(self) -> None:
+        """New llama-3.3-70b-instruct:free entry exists."""
+        p = get_pricing("openrouter", "meta-llama/llama-3.3-70b-instruct:free")
+        assert p is not None
+        assert p.cost_tier == "free"
+        assert p.rate_limit_rpm == 20
+        assert p.rate_limit_rpd == 50
+
+    def test_openrouter_has_gemma3_12b_free(self) -> None:
+        """New gemma-3-12b-it:free entry exists."""
+        p = get_pricing("openrouter", "google/gemma-3-12b-it:free")
+        assert p is not None
+        assert p.cost_tier == "free"
+
     def test_unknown_openrouter_model_returns_fallback(self) -> None:
         """OpenRouter model without catalog entry → caller's fallback."""
         assert get_effective_cost_tier("openrouter", "some-unknown-paid-model", "medium") == (
             "medium"
         )
+
+
+# ── Cerebras (new provider) ───────────────────────────────────────────────────
+
+
+class TestCerebrasPricing:
+    def test_cerebras_gpt_oss_120b_is_free(self) -> None:
+        """Cerebras GPT-OSS 120B has cost_tier='free'."""
+        p = get_pricing("cerebras", "openai/gpt-oss-120b")
+        assert p is not None
+        assert p.cost_tier == "free"
+        assert p.cost_per_1k_input_tokens == 0.0
+        assert p.cost_per_1k_output_tokens == 0.0
+
+    def test_cerebras_llama_8b_is_free(self) -> None:
+        """Cerebras Llama 3.1 8B has cost_tier='free'."""
+        p = get_pricing("cerebras", "llama3.1-8b")
+        assert p is not None
+        assert p.cost_tier == "free"
+
+    def test_cerebras_has_tpm_and_tpd(self) -> None:
+        """Cerebras entries have TPM and TPD limits."""
+        p = get_pricing("cerebras", "llama3.1-8b")
+        assert p is not None
+        assert p.rate_limit_tpm == 60_000
+        assert p.rate_limit_tpd == 1_000_000
+
+    def test_cerebras_rpd_is_14400(self) -> None:
+        """Cerebras free tier has 14,400 RPD."""
+        p = get_pricing("cerebras", "openai/gpt-oss-120b")
+        assert p is not None
+        assert p.rate_limit_rpd == 14_400
+
+
+# ── Cohere (new provider) ─────────────────────────────────────────────────────
+
+
+class TestCoherePricing:
+    _COHERE_MODELS: ClassVar[list[str]] = [
+        "command-a-03-2025",
+        "command-r-plus-08-2024",
+        "command-r-08-2024",
+    ]
+
+    @pytest.mark.parametrize("model_id", _COHERE_MODELS)
+    def test_cohere_models_are_free(self, model_id: str) -> None:
+        """All Cohere free tier models have cost_tier='free'."""
+        p = get_pricing("cohere", model_id)
+        assert p is not None, f"No pricing entry for cohere/{model_id}"
+        assert p.cost_tier == "free"
+
+    @pytest.mark.parametrize("model_id", _COHERE_MODELS)
+    def test_cohere_models_have_rpm_20(self, model_id: str) -> None:
+        """Cohere free tier has 20 RPM."""
+        p = get_pricing("cohere", model_id)
+        assert p is not None
+        assert p.rate_limit_rpm == 20
+
+    @pytest.mark.parametrize("model_id", _COHERE_MODELS)
+    def test_cohere_models_have_rpd_33(self, model_id: str) -> None:
+        """Cohere free tier has ~33 RPD (~1000/month)."""
+        p = get_pricing("cohere", model_id)
+        assert p is not None
+        assert p.rate_limit_rpd == 33
 
 
 # ── Catalog integrity ─────────────────────────────────────────────────────────
@@ -320,6 +524,16 @@ class TestCatalogIntegrity:
     def test_catalog_has_entries_for_all_major_providers(self) -> None:
         """At least one entry exists for each major provider."""
         providers_in_catalog = {p.provider for p in PROVIDER_PRICING}
-        required = {"groq", "gemini", "github", "openrouter", "openai", "anthropic", "together"}
+        required = {
+            "groq",
+            "gemini",
+            "github",
+            "openrouter",
+            "openai",
+            "anthropic",
+            "together",
+            "cerebras",
+            "cohere",
+        }
         missing = required - providers_in_catalog
         assert not missing, f"Missing providers in catalog: {missing}"
