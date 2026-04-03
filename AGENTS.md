@@ -39,26 +39,44 @@ A Python monorepo providing composable workflow primitives, observability, and m
 
 ```
 TTA.dev/
-├── ttadev/                 # Main Python package
-│   ├── primitives/         # Core workflow primitives (Backend Engineer)
-│   │   ├── core/           # Base classes, WorkflowContext, LambdaPrimitive
-│   │   ├── recovery/       # Retry, Timeout, CircuitBreaker, Fallback
-│   │   ├── integrations/   # Ollama, Groq, OpenRouter, Anthropic
-│   │   └── mcp_server/     # 43-tool MCP server for coding agents
-│   ├── agents/             # Role-based agent system (specs, registry, router)
-│   ├── observability/      # OpenTelemetry + local observability server
-│   ├── workflows/          # LLM provider chain, feature_dev workflow
-│   ├── cli/                # `tta` CLI subcommands
-│   ├── control_plane/      # L0 task/run/lease state (JSON-backed)
-│   └── skills/             # Skill registry utilities
-├── tests/                  # Test suite (unit + integration)
-├── docs/                   # Architecture guides, agent docs
-├── examples/               # Runnable demo scripts
-├── scripts/                # Automation and utility scripts
-└── .github/
-    ├── agents/             # Custom agent definitions
-    ├── skills/             # Multi-agent workflow skills
-    └── workflows/          # CI/CD pipelines (DevOps Engineer)
+├── ttadev/                     # Main Python package
+│   ├── primitives/             # Core workflow primitives (Backend Engineer)
+│   │   ├── core/               # Base classes, WorkflowContext, LambdaPrimitive
+│   │   ├── recovery/           # Retry, Timeout, CircuitBreaker, Fallback
+│   │   ├── integrations/       # LLM provider integrations (Ollama, Groq, etc.)
+│   │   ├── llm/                # ModelRouterPrimitive, TaskProfile, chat adapters
+│   │   ├── coordination/       # Router, Sequential, Parallel primitives
+│   │   ├── performance/        # Cache, Memory, benchmarking primitives
+│   │   ├── orchestration/      # High-level workflow orchestration
+│   │   ├── observability/      # OTel span/metric primitives
+│   │   ├── testing/            # MockPrimitive, test utilities
+│   │   ├── mcp_server/         # 43-tool MCP server for coding agents
+│   │   └── ...                 # (ace, adaptive, analysis, collaboration, etc.)
+│   ├── agents/                 # Role-based agent system (specs, registry, router)
+│   ├── observability/          # OpenTelemetry + local observability server
+│   ├── workflows/              # LLM provider chain, feature_dev workflow
+│   ├── cli/                    # `tta` CLI subcommands
+│   ├── control_plane/          # L0 task/run/lease state (JSON-backed)
+│   ├── integrations/           # External service integrations (auth, db)
+│   ├── skills/                 # Skill registry utilities
+│   └── ui/                     # Web dashboard static assets, VS Code helpers
+├── tests/                      # Test suite (unit + integration)
+├── docs/                       # Architecture guides, agent docs
+│   ├── agent-guides/           # Per-agent deep-reference docs
+│   ├── architecture/           # System design docs
+│   └── kb-exports/             # Agents write knowledge-base exports here
+├── examples/                   # Runnable demo scripts
+├── scripts/                    # Automation and utility scripts
+│   ├── ci/                     # CI helper scripts
+│   ├── git/                    # Git hooks and helpers
+│   └── hooks/                  # Quality-gate hooks
+├── .github/
+│   ├── agents/                 # Custom agent definitions (per-role .agent.md files)
+│   ├── instructions/           # Copilot instruction files
+│   ├── skills/                 # Multi-agent workflow skills
+│   └── workflows/              # CI/CD pipelines (DevOps Engineer)
+└── .claude/
+    └── skills/                 # Single-agent Claude Code skills
 ```
 
 ---
@@ -187,8 +205,8 @@ rm -rf /tmp/TTA-copilot
 ```
 
 **Territory-Specific:**
-- Backend Engineer: ✅ `platform/**/*.py`, ❌ `apps/frontend/**`
-- Frontend Engineer: ✅ `apps/frontend/**`, ❌ `platform/**/*.py`
+- Backend Engineer: ✅ `ttadev/**/*.py`, ❌ `apps/frontend/**`
+- Frontend Engineer: ✅ `apps/frontend/**`, ❌ `ttadev/**/*.py`
 - DevOps Engineer: ✅ `.github/workflows/**`, ❌ source code
 - Testing Specialist: ✅ `tests/**`, ❌ infrastructure
 - Observability Expert: ✅ `monitoring/**`, ❌ business logic
@@ -202,7 +220,7 @@ rm -rf /tmp/TTA-copilot
 ```bash
 uv run ruff format .        # Format
 uv run ruff check . --fix   # Lint
-uvx pyright platform/       # Type check
+uvx pyright ttadev/         # Type check
 make watch                  # Continuous testing during development (fast, fail-fast)
 make watch-cov              # Continuous testing with live coverage (before committing)
 make test                   # Full one-shot run with coverage

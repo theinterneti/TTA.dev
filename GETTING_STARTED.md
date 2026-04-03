@@ -38,6 +38,44 @@ Then pick **one** free provider (no credit card required):
 | **OpenRouter** | Many models | Get a free key at <https://openrouter.ai>, add `OPENROUTER_API_KEY=...` to `.env` |
 | **Ollama** (local, no internet) | Medium | Install at <https://ollama.ai>, then `ollama pull <model>` — TTA.dev auto-detects what's installed |
 
+### Installing Ollama
+
+If you choose the local Ollama option (no API key, no internet required for inference), install it first:
+
+**macOS**
+```bash
+brew install ollama
+```
+
+**Linux**
+```bash
+curl -fsSL https://ollama.ai/install.sh | sh
+```
+
+**Windows**
+
+Download and run the installer from <https://ollama.ai>.
+
+**Start the Ollama daemon** (required before pulling models or running TTA.dev):
+```bash
+ollama serve
+```
+
+> On macOS the menu-bar app starts the daemon automatically. On Linux/Windows, run the command above in a separate terminal or configure it as a system service.
+
+**Pull at least one model** (TTA.dev auto-detects what's installed, but needs at least one):
+```bash
+ollama pull gemma3:4b   # good default — fast and capable
+# other options: llama3.2:3b  phi4-mini:latest  qwen2.5:7b
+```
+
+**Verify Ollama is working:**
+```bash
+ollama list   # should show the model(s) you pulled
+```
+
+---
+
 TTA.dev automatically picks the first model returned by `ollama list`. To pin a specific model,
 set `OLLAMA_MODEL` in your `.env`:
 
