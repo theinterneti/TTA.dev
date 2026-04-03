@@ -34,6 +34,8 @@ class SetupProvider:
     help_what: str
     help_how: list[str]
     is_local: bool = False
+    # Response shape: "openai" → data[].id  |  "google" → models[].name  |  "ollama" → models[].name
+    response_format: str = "openai"
 
 
 SETUP_PROVIDERS: list[SetupProvider] = [
@@ -41,8 +43,9 @@ SETUP_PROVIDERS: list[SetupProvider] = [
         name="Google AI Studio",
         env_var="GOOGLE_API_KEY",
         signup_url="https://aistudio.google.com",
-        validate_url="https://generativelanguage.googleapis.com/v1beta/openai/models",
+        validate_url="https://generativelanguage.googleapis.com/v1beta/models",
         auth_style="query_param",
+        response_format="google",
         help_what="Google AI Studio gives free access to Gemini models.",
         help_how=[
             "Go to https://aistudio.google.com",
@@ -124,7 +127,9 @@ def validate_provider(provider: SetupProvider, key: str | None) -> ValidationRes
         ValidationResult with connection status and up to 3 model names.
     """
     url = provider.validate_url
-    headers: dict[str, str] = {}
+    headers: dict[str, str] = {
+        "User-Agent": "ttadev-cli/0.1.0",
+    }
 
     if provider.auth_style == "query_param" and key:
         url = f"{url}?key={key}"
@@ -150,13 +155,22 @@ def validate_provider(provider: SetupProvider, key: str | None) -> ValidationRes
     except (TimeoutError, urllib.error.URLError, OSError):
         return ValidationResult(connected=False, models=[], error="Connection failed (timeout)")
 
-    # Extract model names
+    # Extract model names — shape depends on provider
     models: list[str] = []
-    if provider.is_local:
+    if provider.response_format == "ollama" or provider.is_local:
         # Ollama: {"models": [{"name": "..."}]}
         for m in data.get("models", []):
             if isinstance(m, dict) and "name" in m:
                 models.append(m["name"])
+    elif provider.response_format == "google":
+        # Google native: {"models": [{"name": "models/gemini-...", "displayName": "..."}]}
+        for m in data.get("models", []):
+            if isinstance(m, dict):
+                label = m.get("displayName") or m.get("name", "")
+                # Strip "models/" prefix for cleaner display
+                label = label.removeprefix("models/")
+                if label:
+                    models.append(label)
     else:
         # OpenAI-compat: {"data": [{"id": "..."}]}
         for m in data.get("data", []):

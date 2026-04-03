@@ -53,11 +53,18 @@ from ttadev.cli.setup import (  # noqa: E402
 class TestValidateProviderConnected:
     def test_google_connected_extracts_models(self):
         google = next(p for p in SETUP_PROVIDERS if p.env_var == "GOOGLE_API_KEY")
-        body = {"data": [{"id": "gemini-pro"}, {"id": "gemini-flash"}, {"id": "gemma-3"}]}
+        # Google native endpoint returns {"models": [{"name": "models/...", "displayName": "..."}]}
+        body = {
+            "models": [
+                {"name": "models/gemini-pro", "displayName": "Gemini Pro"},
+                {"name": "models/gemini-flash", "displayName": "Gemini Flash"},
+                {"name": "models/gemma-3", "displayName": "Gemma 3"},
+            ]
+        }
         with patch("urllib.request.urlopen", return_value=_make_http_response(body)):
             result = validate_provider(google, "fake-key")
         assert result.connected is True
-        assert "gemini-pro" in result.models
+        assert "Gemini Pro" in result.models
         assert result.error is None
 
     def test_groq_connected_extracts_top3_models(self):
