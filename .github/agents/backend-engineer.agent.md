@@ -148,3 +148,48 @@ for primitive in primitives["recovery"]:
 1. **Vibe first** - Build fast, ship fast
 2. **Scale when needed** - Add primitives incrementally
 3. **Use primitives** - Never write manual retry/timeout loops
+
+## Task-Aware Model Selection
+
+TTA.dev now supports **automatic model selection** via `ModelRouterPrimitive` and `TaskProfile`. As a backend engineer, you should use `AgentPrimitive.with_router()` instead of hard-coding model names.
+
+```python
+from ttadev.agents import DeveloperAgent
+from ttadev.primitives.llm import ModelRouterPrimitive, RouterModeConfig, RouterTierConfig
+import os
+
+router = ModelRouterPrimitive(
+    modes={
+        "default": RouterModeConfig(
+            tiers=[
+                RouterTierConfig(provider="ollama"),   # local first
+                RouterTierConfig(provider="groq"),     # fast cloud
+                RouterTierConfig(provider="gemini"),   # capable cloud
+            ]
+        )
+    },
+    groq_api_key=os.environ["GROQ_API_KEY"],
+    gemini_api_key=os.environ["GEMINI_API_KEY"],
+)
+
+# DeveloperAgent automatically uses TaskProfile.coding(COMPLEXITY_COMPLEX)
+agent = DeveloperAgent.with_router(router)
+result = await agent.execute(task, ctx)
+```
+
+**How it works:**
+- Each agent declares a `default_task_profile` (e.g. `coding/complex` for DeveloperAgent)
+- The router benchmarks available models against that profile using the model benchmark DB
+- Ollama handles simple/moderate tasks locally; Groq/Gemini handle complex tasks
+- No model names are ever hard-coded — the system picks the best available
+
+**Task profiles by agent:**
+| Agent | Task Type | Complexity |
+|-------|-----------|------------|
+| DeveloperAgent | coding | complex |
+| SecurityAgent | reasoning | complex |
+| DevOpsAgent | general | moderate |
+| QAAgent | general | moderate |
+| PerformanceAgent | reasoning | moderate |
+| GitAgent | general | simple |
+| GitHubAgent | general | simple |
