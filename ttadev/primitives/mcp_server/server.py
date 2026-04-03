@@ -1761,6 +1761,156 @@ result = await workflow.execute(data, context)
             ),
         }
 
+    # ========== MEMORY TOOLS ==========
+
+    _ro_m = {"readOnlyHint": True}
+    _idem_m = {"idempotentHint": True}
+
+    @mcp.tool(annotations=_ro_m)
+    async def memory_recall(
+        query: str,
+        bank_id: str = "tta-dev",
+        budget: str = "mid",
+    ) -> dict[str, object]:
+        """Recall relevant memories from a Hindsight memory bank.
+
+        Semantically searches the Hindsight bank for memories that match the
+        query. Returns the top matches with text content and optional type.
+
+        Args:
+            query: Semantic search string (must not be empty).
+            bank_id: Hindsight bank identifier (default: ``"tta-dev"``).
+            budget: Recall depth — ``"low"`` (fast), ``"mid"``, or ``"high"`` (thorough).
+
+        Returns:
+            Dict with ``memories`` list (each has ``id``, ``text``, ``type``)
+            and ``count`` integer.
+        """
+        if not query:
+            return {"error": "query must not be empty", "memories": [], "count": 0}
+        if budget not in ("low", "mid", "high"):
+            budget = "mid"
+        try:
+            from ttadev.primitives.memory import AgentMemory
+
+            mem = AgentMemory(bank_id=bank_id)
+            if not mem.is_available():
+                return {
+                    "error": "Hindsight unavailable — start with: docker start hindsight",
+                    "memories": [],
+                    "count": 0,
+                }
+            results = await mem.recall(query, budget=budget)  # type: ignore[arg-type]
+            return {"memories": list(results), "count": len(results)}
+        except Exception as exc:
+            return {"error": str(exc), "memories": [], "count": 0}
+
+    @mcp.tool()
+    async def memory_retain(
+        content: str,
+        bank_id: str = "tta-dev",
+        context: str = "",
+    ) -> dict[str, object]:
+        """Store a new memory in a Hindsight memory bank.
+
+        Persists *content* to the specified bank for future recall. Use the
+        retain format: ``"[type: decision|pattern|failure|insight] <what happened>"``
+        for structured, searchable memories.
+
+        Args:
+            content: Memory content to store (must not be empty).
+            bank_id: Hindsight bank identifier (default: ``"tta-dev"``).
+            context: Optional context label (e.g. module or task name).
+
+        Returns:
+            Dict with ``success`` bool and optional ``operation_id``.
+        """
+        if not content:
+            return {"success": False, "error": "content must not be empty"}
+        if context:
+            content = f"{content}\nContext: {context}"
+        try:
+            from ttadev.primitives.memory import AgentMemory
+
+            mem = AgentMemory(bank_id=bank_id)
+            if not mem.is_available():
+                return {
+                    "success": False,
+                    "error": "Hindsight unavailable — start with: docker start hindsight",
+                }
+            result = await mem.retain(content)
+            return dict(result)
+        except Exception as exc:
+            return {"success": False, "error": str(exc)}
+
+    @mcp.tool(annotations=_ro_m)
+    async def memory_build_context(
+        query: str,
+        bank_id: str = "tta-dev",
+    ) -> dict[str, object]:
+        """Build a system-prompt-friendly context prefix from Hindsight.
+
+        Fetches active directives and semantically relevant memories from the
+        specified bank, returning a formatted string suitable for prepending to
+        an agent's system prompt.
+
+        Args:
+            query: Semantic search string to find relevant memories.
+            bank_id: Hindsight bank identifier (default: ``"tta-dev"``).
+
+        Returns:
+            Dict with ``context`` string (empty string if Hindsight unavailable)
+            and ``available`` bool.
+        """
+        if not query:
+            return {"error": "query must not be empty", "context": "", "available": False}
+        try:
+            from ttadev.primitives.memory import AgentMemory
+
+            mem = AgentMemory(bank_id=bank_id)
+            available = mem.is_available()
+            if not available:
+                return {
+                    "context": "",
+                    "available": False,
+                    "error": "Hindsight unavailable — start with: docker start hindsight",
+                }
+            prefix = await mem.build_context_prefix(query)
+            return {"context": prefix, "available": True}
+        except Exception as exc:
+            return {"context": "", "available": False, "error": str(exc)}
+
+    @mcp.tool(annotations=_ro_m)
+    async def memory_list_banks(
+        base_url: str = "http://localhost:8888",
+    ) -> dict[str, object]:
+        """List all available Hindsight memory banks.
+
+        Queries the Hindsight server for all configured banks. Useful for
+        discovering which banks exist before calling recall or retain.
+
+        Args:
+            base_url: Hindsight server URL (default: ``http://localhost:8888``).
+
+        Returns:
+            Dict with ``banks`` list (each has id, name) and ``count`` integer.
+        """
+        try:
+            import httpx
+
+            resp = httpx.get(f"{base_url.rstrip('/')}/v1/default/banks", timeout=5.0)
+            if resp.status_code == 200:
+                data = resp.json()
+                banks = data if isinstance(data, list) else data.get("banks", [])
+                return {"banks": banks, "count": len(banks)}
+            return {"banks": [], "count": 0, "error": f"HTTP {resp.status_code}"}
+        except Exception as exc:
+            return {
+                "banks": [],
+                "count": 0,
+                "error": f"Hindsight unavailable: {exc}",
+            }
+
     # ========== RESOURCES ==========
 
     @mcp.resource("tta://catalog")

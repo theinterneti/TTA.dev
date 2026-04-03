@@ -481,6 +481,98 @@ This primitive demonstrates the **"Fallback first, enhancement optional"** patte
 
 ---
 
+### AgentMemory
+
+**Durable cross-session memory backed by Hindsight.**
+
+**Import:**
+
+```python
+from ttadev.primitives.memory import AgentMemory, InMemoryBackend
+```
+
+**Source:** [`ttadev/primitives/memory/agent_memory.py`](ttadev/primitives/memory/agent_memory.py)
+
+**Overview:**
+
+`AgentMemory` is a thin, gracefully-degrading wrapper around the Hindsight HTTP memory API. It provides semantic recall, durable retain, directive fetching, and a `build_context_prefix()` helper that produces a system-prompt-friendly string from directives + relevant memories.
+
+For testing and ephemeral sessions, swap in `InMemoryBackend` — it implements the same async interface with no external dependencies.
+
+```python
+from ttadev.primitives.memory import AgentMemory, InMemoryBackend
+
+# ── Production (Hindsight at http://localhost:8888) ──────────────────────────
+memory = AgentMemory(bank_id="tta-dev")
+
+if memory.is_available():
+    # Recall semantically relevant memories
+    results = await memory.recall("retry strategy for LLM calls")
+    for r in results:
+        print(r["text"])  # MemoryResult: {id, text, type}
+
+    # Store a new memory in structured format
+    await memory.retain("[type: decision] Use RetryPrimitive for LLM calls. Rationale: uniform backoff.")
+
+    # Build a system-prompt prefix from directives + relevant memories
+    prefix = await memory.build_context_prefix("which model to use for coding tasks")
+    # → "## Directives\n- Use uv always\n## Relevant context\n- Prefer Groq..."
+
+# ── Testing / no Hindsight ────────────────────────────────────────────────────
+backend = InMemoryBackend(directives=["Use uv, never pip"])
+memory = AgentMemory(bank_id="test", _client=backend)
+await memory.retain("groq is the fastest provider")
+results = await memory.recall("fastest")
+assert results[0]["text"] == "groq is the fastest provider"
+```
+
+**Key features:**
+
+- **Graceful degradation**: All methods return safe defaults and log warnings when Hindsight is unreachable — they never raise on connectivity failures.
+- **`InMemoryBackend`**: Drop-in replacement for unit tests; uses the same async interface.
+- **`build_context_prefix(query)`**: Fetches directives and relevant memories concurrently and returns a markdown string suitable for prepending to agent system prompts.
+- **MCP tools**: The MCP server exposes `memory_recall`, `memory_retain`, `memory_build_context`, and `memory_list_banks` so AI coding agents can interact with Hindsight directly.
+
+**MCP tool usage (for AI agents):**
+
+```
+memory_recall   — semantic search: {query, bank_id, budget}
+memory_retain   — store memory:    {content, bank_id, context}
+memory_build_context — directives + recall as system-prompt prefix
+memory_list_banks    — discover available banks
+```
+
+**Hindsight server:**
+
+```bash
+# Start (Docker)
+docker start hindsight
+# Or: docker run -d --name hindsight -p 8888:8888 -p 9999:9999 \
+#   -e HINDSIGHT_API_LLM_PROVIDER=groq \
+#   -e HINDSIGHT_API_LLM_API_KEY=$GROQ_API_KEY \
+#   ghcr.io/ttadev/hindsight:latest
+
+# Health check
+curl http://localhost:8888/health
+```
+
+**✅ Capabilities:**
+
+- ✅ Semantic recall with `low/mid/high` budget
+- ✅ Durable retain (persists across restarts)
+- ✅ Directive + mental model fetching
+- ✅ Concurrent `build_context_prefix`
+- ✅ `InMemoryBackend` for tests
+- ✅ MCP tools for agent-facing access
+
+**Use when:**
+
+- Agents need to remember decisions, patterns, or failures across sessions
+- You need to inject project-specific context into an LLM system prompt
+- TTA players need per-session therapeutic memory (see TTA #267)
+
+---
+
 ## Collaboration Primitives
 
 ### GitCollaborationPrimitive
