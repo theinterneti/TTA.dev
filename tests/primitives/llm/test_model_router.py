@@ -637,6 +637,13 @@ class TestGeminiModelsPrefix:
         )
         _, mock_client, mock_cm = _mock_openai_compat_response("gemini default reply")
 
+        # Discovery tries GET /models before falling back to the default model.
+        # Return an empty list so the provider default is used instead.
+        empty_models_resp = MagicMock()
+        empty_models_resp.raise_for_status = MagicMock()
+        empty_models_resp.json = MagicMock(return_value={"data": []})
+        mock_client.get = AsyncMock(return_value=empty_models_resp)
+
         with patch("httpx.AsyncClient", return_value=mock_cm):
             result = await router.execute(
                 ModelRouterRequest(mode="test", prompt="hello"),

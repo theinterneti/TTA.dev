@@ -133,7 +133,13 @@ PROVIDERS: dict[str, ProviderSpec] = {
         # the OAI-compat path is simpler and avoids an extra dependency.
         base_url="https://generativelanguage.googleapis.com/v1beta/openai",
         env_var="GOOGLE_API_KEY",
-        default_model="models/gemini-2.5-flash",
+        # Model IDs returned by the OAI-compat /models endpoint include the
+        # "models/" prefix (e.g. "models/gemini-2.5-flash").  Use the alias
+        # "models/gemini-flash-lite-latest" as default — it tracks the latest
+        # lite model and has more generous free-tier quota than 2.5-flash.
+        # Stable pinned options: "models/gemini-2.5-flash",
+        #   "models/gemini-2.0-flash", "models/gemini-3.1-flash-lite-preview"
+        default_model="models/gemini-flash-lite-latest",
         openai_compat=True,
         sdk_package=None,
         preferred_path="compat",

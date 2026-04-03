@@ -88,6 +88,7 @@ import httpx
 
 from ttadev.primitives.core import WorkflowContext, WorkflowPrimitive
 from ttadev.primitives.llm.free_model_tracker import FreeModelTracker
+from ttadev.primitives.llm.model_discovery import ProviderModelDiscovery
 from ttadev.primitives.llm.providers import PROVIDERS
 from ttadev.primitives.llm.universal_llm_primitive import LLMResponse
 
@@ -122,11 +123,26 @@ class RouterTierConfig:
 
     Attributes:
         provider: Which provider to use.  One of ``"ollama"``, ``"groq"``,
-            ``"together"``, ``"openrouter"``/``"or"``, or ``"auto"``
-            (auto-selected free model via FreeModelTracker → OpenRouter).
-        model: Model identifier.  ``None``/``"auto"`` lets FreeModelTracker
-            choose (only valid for ``openrouter`` and ``auto``).
-            Required when ``provider == "ollama"``.
+            ``"together"``, ``"openrouter"``/``"or"``, ``"gemini"``, or
+            ``"auto"`` (auto-selected free model via FreeModelTracker →
+            OpenRouter).
+        model: Primary model identifier.  When *models* is also set, this is
+            tried first.  ``None``/``"auto"`` lets dynamic discovery or
+            FreeModelTracker choose.  Required when ``provider == "ollama"``.
+        models: Ordered fallback list of model IDs to try within this tier.
+            If set, the tier will cycle through all entries before giving up,
+            so a single 429 on the first model doesn't fail the tier entirely.
+            When empty, only *model* (or the provider default) is used.
+            Example for Gemini::
+
+                RouterTierConfig(
+                    provider="gemini",
+                    models=[
+                        "models/gemini-flash-lite-latest",
+                        "models/gemini-3.1-flash-lite-preview",
+                        "models/gemini-2.0-flash-lite",
+                    ],
+                )
         params: Extra generation parameters forwarded to the provider
             (e.g. ``temperature``, ``max_tokens``).
         strip_thinking: When ``True`` (default), strip ``<think>…</think>``
@@ -136,6 +152,7 @@ class RouterTierConfig:
 
     provider: str
     model: str | None = None
+    models: list[str] = field(default_factory=list)
     params: dict[str, Any] = field(default_factory=dict)
     strip_thinking: bool = True
 
@@ -230,6 +247,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         self._gemini_api_key = gemini_api_key or os.getenv(PROVIDERS["gemini"].env_var, "")
         self._ollama_url = (ollama_url or os.getenv("OLLAMA_URL", _OLLAMA_DEFAULT_URL)).rstrip("/")
         self._tracker = free_tracker or FreeModelTracker(api_key=self._or_api_key or None)
+        self._discovery = ProviderModelDiscovery()
         self._tier_cooldown_seconds = tier_cooldown_seconds
         # Instance-level cooldown state: tier_key → monotonic deadline
         self._tier_cooldowns: dict[str, float] = {}
@@ -366,7 +384,13 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                     provider=tier.provider,
                 )
             except Exception as exc:
-                if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429:
+                cause = exc.__cause__
+                is_429 = (
+                    isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429
+                ) or (
+                    isinstance(cause, httpx.HTTPStatusError) and cause.response.status_code == 429
+                )
+                if is_429:
                     self._mark_cooling(tier_key)
                 last_exc = exc
                 logger.warning(
@@ -417,6 +441,13 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
     ) -> tuple[str, str]:
         """Dispatch to the appropriate provider for a single tier.
 
+        When the tier has multiple models (via the ``models`` list), they are
+        tried in order.  A 429 on one model marks it exhausted in
+        :class:`~ttadev.primitives.llm.model_discovery.ProviderModelDiscovery`
+        and causes the next model to be tried before the tier fails.  This means
+        a caller never needs to know about specific model names — the tier
+        self-heals around quota limits.
+
         Args:
             tier: Tier configuration.
             prompt: User prompt text.
@@ -427,7 +458,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
 
         Raises:
             ValueError: For unknown provider or missing Ollama model.
-            RuntimeError: When FreeModelTracker returns no candidates.
+            RuntimeError: When all models in the tier are exhausted/failed.
         """
         provider = tier.provider.lower().strip()
 
@@ -438,21 +469,30 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             return content, tier.model
 
         if provider == "groq":
-            model = tier.model or _GROQ_FREE_MODELS[0]
-            content = await self._call_openai_compat(
-                _GROQ_API_URL, self._groq_api_key, model, prompt, system, tier.params
+            candidates = tier.models or ([tier.model] if tier.model else _GROQ_FREE_MODELS)
+            return await self._try_model_candidates(
+                candidates, _GROQ_API_URL, self._groq_api_key, prompt, system, tier.params
             )
-            return content, model
 
         if provider == "together":
-            if not tier.model:
+            if not tier.model and not tier.models:
                 raise ValueError("Together AI tier requires an explicit 'model' name")
-            content = await self._call_openai_compat(
-                _TOGETHER_API_URL, self._together_api_key, tier.model, prompt, system, tier.params
+            candidates = tier.models or ([tier.model] if tier.model else [])
+            return await self._try_model_candidates(
+                candidates, _TOGETHER_API_URL, self._together_api_key, prompt, system, tier.params
             )
-            return content, tier.model
 
         if provider in ("openrouter", "or"):
+            if tier.models:
+                return await self._try_model_candidates(
+                    tier.models,
+                    _OPENROUTER_API_URL,
+                    self._or_api_key,
+                    prompt,
+                    system,
+                    tier.params,
+                    extra_headers=PROVIDERS["openrouter"].extra_headers,
+                )
             model = tier.model or await self._tracker.recommend()
             if not model:
                 raise RuntimeError("FreeModelTracker returned no candidate models")
@@ -483,25 +523,115 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             return content, model
 
         if provider == "gemini":
-            model = tier.model or PROVIDERS["gemini"].default_model
-            # Issue #283: Gemini's OpenAI-compat endpoint requires the `models/`
-            # prefix; bare IDs (e.g. "gemini-2.5-flash") return a misleading 429.
-            if not model.startswith("models/"):
-                model = f"models/{model}"
-            content = await self._call_openai_compat(
+            # Build candidate list: explicit > discovered > provider default.
+            if tier.models:
+                candidates = tier.models
+            elif tier.model:
+                candidates = [tier.model]
+            else:
+                # No model specified — discover live from the provider endpoint.
+                discovered = await self._discovery.for_provider(
+                    "gemini",
+                    base_url=PROVIDERS["gemini"].base_url,
+                    api_key=self._gemini_api_key or None,
+                )
+                candidates = discovered or [PROVIDERS["gemini"].default_model]
+
+            # Ensure every candidate has the required `models/` prefix.
+            candidates = [m if m.startswith("models/") else f"models/{m}" for m in candidates]
+            return await self._try_model_candidates(
+                candidates,
                 _GEMINI_API_URL,
                 self._gemini_api_key,
-                model,
                 prompt,
                 system,
                 tier.params,
+                discovery_provider="gemini",
             )
-            return content, model
 
         raise ValueError(
             f"Unknown provider {provider!r}. "
             "Use 'ollama', 'groq', 'together', 'openrouter', 'gemini', or 'auto'"
         )
+
+    async def _try_model_candidates(
+        self,
+        candidates: list[str],
+        api_url: str,
+        api_key: str,
+        prompt: str,
+        system: str | None,
+        params: dict[str, Any],
+        *,
+        extra_headers: dict[str, str] | None = None,
+        discovery_provider: str | None = None,
+    ) -> tuple[str, str]:
+        """Try each model in *candidates* until one succeeds.
+
+        On HTTP 429, the model is marked exhausted in
+        :class:`~ttadev.primitives.llm.model_discovery.ProviderModelDiscovery`
+        so subsequent calls in the same session skip it automatically.
+
+        Args:
+            candidates: Ordered list of model IDs to attempt.
+            api_url: OpenAI-compat chat completions endpoint.
+            api_key: Bearer token.
+            prompt: User message.
+            system: Optional system message.
+            params: Extra generation parameters.
+            extra_headers: Additional HTTP headers.
+            discovery_provider: When set, 429 failures are recorded in
+                :attr:`_discovery` for this provider name.
+
+        Returns:
+            Tuple of ``(content, model_id)`` for the first successful model.
+
+        Raises:
+            RuntimeError: When every candidate fails.
+        """
+        last_exc: Exception = RuntimeError("No model candidates provided")
+        all_were_429 = True
+        last_429_exc: httpx.HTTPStatusError | None = None
+        for model_id in candidates:
+            if discovery_provider and self._discovery.is_exhausted(model_id):
+                logger.debug("model_discovery: skipping exhausted %s", model_id)
+                continue
+            try:
+                content = await self._call_openai_compat(
+                    api_url,
+                    api_key,
+                    model_id,
+                    prompt,
+                    system,
+                    params,
+                    extra_headers=extra_headers,
+                )
+                return content, model_id
+            except httpx.HTTPStatusError as exc:
+                status = exc.response.status_code
+                if status == 429:
+                    if discovery_provider:
+                        self._discovery.mark_exhausted(model_id)
+                    last_429_exc = exc
+                else:
+                    all_were_429 = False
+                logger.warning(
+                    "model candidate %s returned HTTP %d — trying next",
+                    model_id,
+                    status,
+                )
+                last_exc = exc
+            except Exception as exc:
+                all_were_429 = False
+                logger.warning("model candidate %s failed: %r — trying next", model_id, exc)
+                last_exc = exc
+
+        # When every failure was a 429, chain the original HTTPStatusError so the
+        # tier-level cooldown logic in `execute` can detect it via __cause__.
+        if all_were_429 and last_429_exc is not None:
+            raise RuntimeError(f"All {len(candidates)} model candidate(s) failed") from last_429_exc
+
+        raise RuntimeError(f"All {len(candidates)} model candidate(s) failed") from last_exc
 
     # ── Provider calls ────────────────────────────────────────────────────────
 
