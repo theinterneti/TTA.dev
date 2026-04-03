@@ -308,6 +308,59 @@ PROVIDER_PRICING: list[ModelPricing] = [
         as_of="2026-04-01",
         notes="Gemini 1.5 Pro — medium tier.",
     ),
+    # ── Google Gemma (via Google AI Studio / Gemini API) ──────────────────────
+    # Same GOOGLE_API_KEY, same endpoint as Gemini.
+    # Notably: 14,400 RPD — far higher than Gemini frontier models (100–1,000 RPD).
+    # Limits do NOT increase on paid tiers (unlike Gemini).
+    # Reference: https://ai.google.dev/gemma/docs/gemma_api/rate_limits
+    ModelPricing(
+        provider="gemini",
+        model_id="gemma-3-27b-it",
+        cost_tier="free",
+        cost_per_1k_input_tokens=0.0,
+        cost_per_1k_output_tokens=0.0,
+        rate_limit_rpm=30,
+        rate_limit_rpd=14_400,
+        rate_limit_tpm=15_000,
+        as_of="2026-04",
+        notes="Gemma 3 27B — Google AI Studio free, 14.4K RPD. Same key as Gemini.",
+    ),
+    ModelPricing(
+        provider="gemini",
+        model_id="gemma-3-12b-it",
+        cost_tier="free",
+        cost_per_1k_input_tokens=0.0,
+        cost_per_1k_output_tokens=0.0,
+        rate_limit_rpm=30,
+        rate_limit_rpd=14_400,
+        rate_limit_tpm=15_000,
+        as_of="2026-04",
+        notes="Gemma 3 12B — Google AI Studio free, 14.4K RPD. Same key as Gemini.",
+    ),
+    ModelPricing(
+        provider="gemini",
+        model_id="gemma-3-4b-it",
+        cost_tier="free",
+        cost_per_1k_input_tokens=0.0,
+        cost_per_1k_output_tokens=0.0,
+        rate_limit_rpm=30,
+        rate_limit_rpd=14_400,
+        rate_limit_tpm=15_000,
+        as_of="2026-04",
+        notes="Gemma 3 4B — Google AI Studio free, 14.4K RPD. Same key as Gemini.",
+    ),
+    ModelPricing(
+        provider="gemini",
+        model_id="gemma-3-1b-it",
+        cost_tier="free",
+        cost_per_1k_input_tokens=0.0,
+        cost_per_1k_output_tokens=0.0,
+        rate_limit_rpm=30,
+        rate_limit_rpd=14_400,
+        rate_limit_tpm=15_000,
+        as_of="2026-04",
+        notes="Gemma 3 1B — Google AI Studio free, 14.4K RPD. Same key as Gemini.",
+    ),
     # ── GitHub Models ─────────────────────────────────────────────────────────
     # Free with GITHUB_TOKEN.  Large models (70B+, GPT-4o, o1, o3): 10 RPM / 50 RPD.
     # Small/medium models: 15 RPM / 150 RPD.
