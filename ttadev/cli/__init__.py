@@ -123,6 +123,27 @@ def _build_parser() -> argparse.ArgumentParser:
 
     register_model_subcommands(sub)
 
+    # ------------------------------------------------------------------ #
+    # setup subcommand                                                     #
+    # ------------------------------------------------------------------ #
+    setup_p = sub.add_parser("setup", help="Interactive setup wizard for LLM providers")
+    setup_p.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Fail if no TTY (CI mode)",
+    )
+
+    # ------------------------------------------------------------------ #
+    # validate-keys subcommand                                             #
+    # ------------------------------------------------------------------ #
+    vk_p = sub.add_parser("validate-keys", help="Test all configured LLM provider connections")
+    vk_p.add_argument(
+        "--json",
+        dest="json_output",
+        action="store_true",
+        help="Output JSON",
+    )
+
     return parser
 
 
@@ -219,6 +240,16 @@ def main() -> None:
         from ttadev.cli.models import handle_model_command
 
         sys.exit(handle_model_command(args))
+
+    elif args.command == "setup":
+        from ttadev.cli.setup import cmd_setup
+
+        sys.exit(cmd_setup(args, project_root=Path(".")))
+
+    elif args.command == "validate-keys":
+        from ttadev.cli.setup import cmd_validate_keys
+
+        sys.exit(cmd_validate_keys(args, project_root=Path(".")))
 
     else:
         parser.print_help()
