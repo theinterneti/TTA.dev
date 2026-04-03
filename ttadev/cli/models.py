@@ -6,6 +6,159 @@ import argparse
 import sys
 
 # ---------------------------------------------------------------------------
+# Natural-language task-type inference
+# ---------------------------------------------------------------------------
+
+#: Keyword → task-type mapping used by :func:`infer_task_type`.
+#: Keys are lowercase substrings that strongly suggest a particular task type.
+_TASK_KEYWORDS: dict[str, list[str]] = {
+    "coding": [
+        "code",
+        "coding",
+        "program",
+        "script",
+        "function",
+        "class",
+        "debug",
+        "refactor",
+        "build",
+        "implement",
+        "develop",
+        "software",
+        "engineer",
+        "api",
+        "backend",
+        "frontend",
+        "automate",
+    ],
+    "chat": [
+        "chat",
+        "chatbot",
+        "bot",
+        "conversation",
+        "talk",
+        "dialogue",
+        "assistant",
+        "customer service",
+        "support",
+        "helpdesk",
+        "qa",
+        "q&a",
+    ],
+    "reasoning": [
+        "reason",
+        "reasoning",
+        "logic",
+        "analys",
+        "analyse",
+        "analyze",
+        "think",
+        "plan",
+        "decision",
+        "deduce",
+        "infer",
+        "argument",
+        "explain",
+        "understand",
+    ],
+    "math": [
+        "math",
+        "maths",
+        "calculat",
+        "equation",
+        "algebra",
+        "statistic",
+        "numeric",
+        "number",
+        "arithmetic",
+        "formula",
+        "solve",
+    ],
+    "function_calling": [
+        "function call",
+        "tool call",
+        "tool use",
+        "agent",
+        "orchestrat",
+        "workflow",
+        "pipeline",
+        "integrat",
+        "plugin",
+    ],
+    "vision": [
+        "vision",
+        "image",
+        "photo",
+        "picture",
+        "visual",
+        "ocr",
+        "diagram",
+        "chart",
+        "screenshot",
+        "video",
+    ],
+    "general": [
+        "general",
+        "summarize",
+        "summary",
+        "translate",
+        "translation",
+        "write",
+        "writing",
+        "content",
+        "creative",
+    ],
+}
+
+#: Priority ordering — more specific task types checked first.
+_TASK_TYPE_PRIORITY: list[str] = [
+    "function_calling",
+    "vision",
+    "math",
+    "coding",
+    "reasoning",
+    "chat",
+    "general",
+]
+
+
+def infer_task_type(description: str) -> str:
+    """Infer a task type from a free-text description.
+
+    Scans *description* for keywords associated with each task type and
+    returns the best match.  Falls back to ``"general"`` when no keywords
+    match.
+
+    Args:
+        description: Natural-language description of the task, e.g.
+            ``"I want to build a chatbot"`` or ``"help me debug my code"``.
+
+    Returns:
+        One of: ``coding``, ``reasoning``, ``math``, ``chat``,
+        ``function_calling``, ``vision``, ``general``.
+
+    Examples:
+        >>> infer_task_type("I want to build a chatbot")
+        'chat'
+        >>> infer_task_type("help me write and debug Python scripts")
+        'coding'
+        >>> infer_task_type("")
+        'general'
+    """
+    lower = description.lower()
+    scores: dict[str, int] = {t: 0 for t in _TASK_TYPE_PRIORITY}
+    for task_type, keywords in _TASK_KEYWORDS.items():
+        for kw in keywords:
+            if kw in lower:
+                scores[task_type] += 1
+    # Return highest-scored type in priority order (priority breaks ties).
+    best = max(_TASK_TYPE_PRIORITY, key=lambda t: scores[t])
+    if scores[best] == 0:
+        return "general"
+    return best
+
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
@@ -65,14 +218,35 @@ def register_model_subcommands(sub: argparse._SubParsersAction) -> None:  # type
     advise_p = models_sub.add_parser(
         "advise",
         help="Recommend the optimal model tier for a task",
+        description=(
+            "Recommend the optimal model tier for a task.\n\n"
+            "Examples:\n"
+            "  tta models advise\n"
+            "  tta models advise 'I want to build a chatbot'\n"
+            "  tta models advise 'help me debug Python code' --threshold 8\n"
+            "  tta models advise --task-type coding --complexity complex\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    advise_p.add_argument(
+        "task_description",
+        nargs="?",
+        default=None,
+        metavar="DESCRIPTION",
+        help=(
+            "Optional free-text description of your task, e.g. "
+            "'I want to build a chatbot'. "
+            "The task type is inferred automatically from keywords. "
+            "Overridden by --task-type when both are provided."
+        ),
     )
     advise_p.add_argument(
         "--task-type",
-        default="coding",
+        default=None,
         metavar="TASK",
         help=(
-            "Task type: coding/reasoning/math/chat/function_calling/vision/general"
-            " (default: coding)"
+            "Explicit task type: coding/reasoning/math/chat/function_calling/vision/general."
+            " When omitted, inferred from DESCRIPTION (or defaults to 'general')."
         ),
     )
     advise_p.add_argument(
@@ -198,16 +372,37 @@ def handle_model_command(args: argparse.Namespace) -> int:
 def _cmd_advise(args: argparse.Namespace) -> int:
     """Handle ``tta models advise``.
 
+    The task type is resolved in the following priority order:
+
+    1. ``--task-type`` flag (explicit, backward-compatible).
+    2. Inferred from the positional ``task_description`` argument using
+       :func:`infer_task_type`.
+    3. Default: ``"general"``.
+
     Args:
-        args: Parsed argument namespace containing ``task_type``,
-            ``threshold``, ``complexity``, and ``monthly_calls``.
+        args: Parsed argument namespace containing ``task_description``,
+            ``task_type``, ``threshold``, ``complexity``, and
+            ``monthly_calls``.
 
     Returns:
         Exit code: ``0`` on success, ``1`` on error.
     """
     from ttadev.primitives.llm.model_advisor.advisor import advisor
 
-    task_type: str = args.task_type
+    # Resolve task type: explicit flag > inferred from description > default.
+    explicit_task_type: str | None = args.task_type
+    description: str | None = args.task_description
+
+    if explicit_task_type is not None:
+        task_type = explicit_task_type
+        label = task_type
+    elif description:
+        task_type = infer_task_type(description)
+        label = f"{task_type} (inferred from: {description!r})"
+    else:
+        task_type = "general"
+        label = task_type
+
     threshold: float = args.threshold
     complexity: str = args.complexity
     monthly_calls: int = args.monthly_calls
@@ -225,7 +420,7 @@ def _cmd_advise(args: argparse.Namespace) -> int:
 
     fallback_str = ", ".join(rec.fallback_models) if rec.fallback_models else "none"
 
-    print(f"Recommendation for {task_type} (threshold: {threshold}/10, {complexity} complexity)")
+    print(f"Recommendation for {label} (threshold: {threshold}/10, {complexity} complexity)")
     print(_DIVIDER)
     print(f"Tier:         {rec.recommended_tier}")
     print(f"Model:        {rec.primary_model}")
