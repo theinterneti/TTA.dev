@@ -14,7 +14,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+> All commits since the `v1.2.0` tag, including the **April 2026 remediation session**
+> (2026-04-03). No version tag has been cut for this work yet.
+
 ### Added
+
+#### 🛠️ GitHub Copilot Skills (April 2026)
+
+- **`.github/skills/`** — ported 8 Claude Code skills to GitHub Copilot-compatible
+  skill files, bringing AI-assistant parity across editors; skills cover primitives
+  usage, anti-pattern detection, workflow orchestration, and testing patterns
+  ([`c32de42`](https://github.com/theinterneti/TTA.dev/commit/c32de42))
+
+- **`ACKNOWLEDGEMENTS.md`** — comprehensive credits for all open-source dependencies,
+  tooling, and inspirations used across TTA.dev
+
+#### 📖 Documentation (April 2026)
+
+- **Ollama install guide** — step-by-step local model setup added to docs; referenced
+  from `GETTING_STARTED.md` so zero-cost local inference is fully documented
+  ([`e136f18`](https://github.com/theinterneti/TTA.dev/commit/e136f18),
+  fixes [#289](https://github.com/theinterneti/TTA.dev/issues/289))
+
+- **`GETTING_STARTED.md`** — added Step 1.5 (`.env.example` copy + free provider
+  table) and Step 3c (MCP server setup with Claude Desktop config); fixes first-run
+  onboarding gaps
+  ([`5d4014c`](https://github.com/theinterneti/TTA.dev/commit/5d4014c),
+  refs [#288](https://github.com/theinterneti/TTA.dev/issues/288),
+  [#295](https://github.com/theinterneti/TTA.dev/issues/295))
 
 #### 🤖 Task-Aware Model Routing
 
@@ -38,6 +65,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `PerformanceAgent` → `TaskProfile(TASK_REASONING, COMPLEXITY_MODERATE)`
   - `GitAgent` → `TaskProfile(TASK_GENERAL, COMPLEXITY_SIMPLE)`
   - `GitHubAgent` → `TaskProfile(TASK_GENERAL, COMPLEXITY_SIMPLE)`
+
+#### 🔍 LLM Provider Enhancements
+
+- **`feat(llm)`** — `ModelPricing` catalog: decoupled cost metadata from `ModelEntry`;
+  refreshed pricing for Groq (RPD corrected), added TPM/TPD limits, Cerebras, Cohere,
+  GitHub Models, OpenRouter
+- **`feat(llm)`** — Google Gemma 3 catalog entries (14.4K RPD free tier)
+- **`feat(llm)`** — `HardwareDetector` + MCP LLM tools
+  ([#279](https://github.com/theinterneti/TTA.dev/issues/279),
+  [#266](https://github.com/theinterneti/TTA.dev/issues/266))
+- **`feat(llm)`** — `ModelAdvisor` tier recommendation and ROI engine
+  ([#282](https://github.com/theinterneti/TTA.dev/issues/282))
+- **`feat(llm)`** — `BenchmarkFetcher` with live Artificial Analysis and HF Leaderboard 2
+  integration
+- **`feat(llm)`** — `ProviderModelDiscovery` and within-tier model rotation
+- **`feat(llm)`** — `use_compat` flag and generic OpenAI-compatible helpers
+- **`feat(llm)`** — native tool-calling, benchmark metadata, eval harness, and
+  integrations package
+- **`feat(cli)`** — `tta models advise` command wired into TTA CLI
+  ([#282](https://github.com/theinterneti/TTA.dev/issues/282))
+
+#### 🧠 Agent Memory
+
+- **`feat(memory)`** — `AgentMemory` MCP tools + catalog docs
+  ([#259](https://github.com/theinterneti/TTA.dev/issues/259))
+
+### Fixed
+
+#### 🩹 April 2026 Remediation
+
+- **demo_workflow logging** — removed noisy debug output from `demo_workflow`; session
+  list now correctly attributes actions to the originating agent
+  ([`90b709b`](https://github.com/theinterneti/TTA.dev/commit/90b709b),
+  fixes [#299](https://github.com/theinterneti/TTA.dev/issues/299),
+  [#301](https://github.com/theinterneti/TTA.dev/issues/301))
+
+- **`tta models advise` natural-language positional arg** — command now accepts a free-form
+  natural-language description as a positional argument so callers no longer need to pass
+  structured flags for simple queries
+  ([`372303f`](https://github.com/theinterneti/TTA.dev/commit/372303f),
+  fixes [#298](https://github.com/theinterneti/TTA.dev/issues/298))
+
+- **P0 CLI usability (milestone [#26](https://github.com/theinterneti/TTA.dev/milestone/26))**
+  ([`1102238`](https://github.com/theinterneti/TTA.dev/commit/1102238)):
+  - `NoLLMProviderError` — actionable error message with provider options and a link to
+    `GETTING_STARTED.md` when no LLM provider is reachable; exit code `1`
+    (fixes [#287](https://github.com/theinterneti/TTA.dev/issues/287))
+  - `--no-confirm` flag — fully suppresses approval-gate prompts; root cause was
+    `_effective_policy()` always returning a fresh `GatePolicy(0.0)` overriding
+    `auto_approve=True`; now returns a high-confidence sentinel with `[auto-approved]`
+    audit trail (fixes [#296](https://github.com/theinterneti/TTA.dev/issues/296))
+  - Ollama model auto-detection via `ollama list` instead of the hardcoded `qwen2.5:7b`
+    model; respects `OLLAMA_MODEL` env-var override; falls back to `gemma3:4b` when Ollama
+    is not installed (fixes [#297](https://github.com/theinterneti/TTA.dev/issues/297))
+  - `ttadev/integrations/README.md` rewritten to accurately describe auth/CRUD utilities;
+    added banner redirecting to `ttadev/primitives/integrations/` for LLM providers;
+    corrected all import paths from legacy `tta_dev_integrations` stubs
+    (fixes [#294](https://github.com/theinterneti/TTA.dev/issues/294))
+
+- **Serena `--project` path** — replaced hardcoded absolute path with `${workspaceFolder}`
+  so MCP config works on any machine without manual edits
+  ([`8fa6945`](https://github.com/theinterneti/TTA.dev/commit/8fa6945))
+
+- **`AGENTS.md` repo layout** — corrected ghost `platform/apps/monitoring` directory
+  references to actual `ttadev/` layout; verified against live repo
+  ([`e136f18`](https://github.com/theinterneti/TTA.dev/commit/e136f18),
+  fixes [#291](https://github.com/theinterneti/TTA.dev/issues/291),
+  [#289](https://github.com/theinterneti/TTA.dev/issues/289))
+
+- **P0 onboarding docs**
+  ([`5d4014c`](https://github.com/theinterneti/TTA.dev/commit/5d4014c)):
+  - Replaced all `platform/` references with `ttadev/` in `copilot-instructions.md`,
+    `python.instructions.md`, and `devops-engineer.agent.md`
+  - Corrected line-length setting `100 → 88` in `python.instructions.md` to match
+    `pyproject.toml`
+  - Removed reference to non-existent `scripts/security_scan.py`
+  - Fixed `.mcp/config.json`: replaced broken `tta-primitives` entry with correct
+    `tta-dev` entry using `uv run python -m`
+  - Closed [#286](https://github.com/theinterneti/TTA.dev/issues/286),
+    [#288](https://github.com/theinterneti/TTA.dev/issues/288),
+    [#289](https://github.com/theinterneti/TTA.dev/issues/289)
+
+- **LLM provider registry** — updated Groq model list, added live discovery, removed dead
+  models; fixed stale registry and smoke test
+- **`ModelRouterPrimitive`** — resolved issues
+  [#283](https://github.com/theinterneti/TTA.dev/issues/283),
+  [#284](https://github.com/theinterneti/TTA.dev/issues/284),
+  [#285](https://github.com/theinterneti/TTA.dev/issues/285)
+
+### Changed
+
+- **Provider naming** — renamed provider `"gemini"` → `"google"` throughout codebase for
+  consistency with the upstream SDK
 
 ---
 
