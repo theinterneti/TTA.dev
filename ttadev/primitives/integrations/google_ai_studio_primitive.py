@@ -24,7 +24,6 @@ warnings.warn(
 
 from typing import Any  # noqa: E402
 
-import google.generativeai as genai  # noqa: E402
 from pydantic import BaseModel, Field  # noqa: E402
 
 from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive  # noqa: E402
@@ -106,7 +105,7 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
             **kwargs: Additional arguments for configuration
         """
         super().__init__()
-        genai.configure(api_key=api_key)  # type: ignore[attr-defined]  # Private module API
+        self._api_key = api_key
         self.model = model
         self.generation_config = kwargs.get("generation_config", {})
 
@@ -125,11 +124,15 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
         Raises:
             Exception: If API call fails
         """
+        import google.generativeai as genai  # type: ignore[import]  # noqa: E402
+
+        genai.configure(api_key=self._api_key)
+
         # Use model from request or fall back to default
         model_name = input_data.model or self.model
 
         # Create model instance
-        model = genai.GenerativeModel(model_name)  # type: ignore[attr-defined]  # Private module API
+        model = genai.GenerativeModel(model_name)  # type: ignore[attr-defined]
 
         # Convert messages to Gemini format
         # Gemini expects alternating user/model messages

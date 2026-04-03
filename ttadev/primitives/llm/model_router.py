@@ -90,6 +90,12 @@ from ttadev.primitives.core import WorkflowContext, WorkflowPrimitive
 from ttadev.primitives.llm.free_model_tracker import FreeModelTracker
 from ttadev.primitives.llm.model_discovery import ProviderModelDiscovery
 from ttadev.primitives.llm.providers import PROVIDERS
+from ttadev.primitives.llm.task_selector import (
+    TaskProfile,
+    _extract_param_size_b,
+    min_ollama_params_for_complexity,
+    rank_models_for_task,
+)
 from ttadev.primitives.llm.universal_llm_primitive import LLMResponse
 
 logger = logging.getLogger(__name__)
@@ -180,12 +186,18 @@ class ModelRouterRequest:
         system: Optional system message prepended to the conversation.
         tier_override: If set (1-based index), skip directly to that tier and
             don't fall through.  Useful for testing or forcing a specific provider.
+        task_profile: Optional :class:`~ttadev.primitives.llm.task_selector.TaskProfile`
+            describing the task type and complexity.  When provided, candidate
+            models within each tier are ranked by benchmark suitability, and
+            Ollama models that are too small for the requested complexity are
+            skipped automatically.
     """
 
     mode: str
     prompt: str
     system: str | None = None
     tier_override: int | None = None
+    task_profile: TaskProfile | None = None
 
 
 # ── Primitive ─────────────────────────────────────────────────────────────────
@@ -375,7 +387,9 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                 last_exc = RuntimeError(f"tier{i} ({tier_key}) is cooling down after 429")
                 continue
             try:
-                content, used_model = await self._call_tier(tier, request.prompt, request.system)
+                content, used_model = await self._call_tier(
+                    tier, request.prompt, request.system, request.task_profile
+                )
                 if tier.strip_thinking:
                     content = _THINK_RE.sub("", content).strip()
                 return LLMResponse(
@@ -438,6 +452,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         tier: RouterTierConfig,
         prompt: str,
         system: str | None,
+        task_profile: TaskProfile | None = None,
     ) -> tuple[str, str]:
         """Dispatch to the appropriate provider for a single tier.
 
@@ -448,28 +463,49 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         a caller never needs to know about specific model names — the tier
         self-heals around quota limits.
 
+        When *task_profile* is provided, multi-candidate tiers (Groq, Gemini) are
+        ranked by benchmark suitability before being passed to
+        :meth:`_try_model_candidates`.  Ollama models that are too small for the
+        requested complexity are skipped (raises ``RuntimeError`` so the caller
+        can fall through to the next tier).
+
         Args:
             tier: Tier configuration.
             prompt: User prompt text.
             system: Optional system message.
+            task_profile: Optional task profile for task-aware ranking.
 
         Returns:
             Tuple of ``(content, model_id)``.
 
         Raises:
             ValueError: For unknown provider or missing Ollama model.
-            RuntimeError: When all models in the tier are exhausted/failed.
+            RuntimeError: When all models in the tier are exhausted/failed,
+                or when an Ollama model is too small for the requested complexity.
         """
         provider = tier.provider.lower().strip()
 
         if provider == "ollama":
             if not tier.model:
                 raise ValueError("Ollama tier requires an explicit 'model' name")
+            # Skip if too small for requested complexity.
+            if task_profile is not None:
+                min_params = min_ollama_params_for_complexity(task_profile.complexity)
+                if min_params is not None:
+                    actual = _extract_param_size_b(tier.model)
+                    if actual is not None and actual < min_params:
+                        raise RuntimeError(
+                            f"Ollama model {tier.model!r} has {actual}B params, "
+                            f"but complexity={task_profile.complexity!r} requires "
+                            f">={min_params}B — skipping to next tier"
+                        )
             content = await self._call_ollama(tier.model, prompt, system, tier.params)
             return content, tier.model
 
         if provider == "groq":
             candidates = tier.models or ([tier.model] if tier.model else _GROQ_FREE_MODELS)
+            if task_profile is not None:
+                candidates = rank_models_for_task(candidates, task_profile)
             return await self._try_model_candidates(
                 candidates, _GROQ_API_URL, self._groq_api_key, prompt, system, tier.params
             )
@@ -539,6 +575,8 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
 
             # Ensure every candidate has the required `models/` prefix.
             candidates = [m if m.startswith("models/") else f"models/{m}" for m in candidates]
+            if task_profile is not None:
+                candidates = rank_models_for_task(candidates, task_profile)
             return await self._try_model_candidates(
                 candidates,
                 _GEMINI_API_URL,

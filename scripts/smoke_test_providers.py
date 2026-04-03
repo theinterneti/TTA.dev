@@ -85,11 +85,10 @@ _TEST_CASES: list[TestCase] = [
     TestCase("groq", "llama-3.3-70b-versatile", _GROQ_URL, "GROQ_API_KEY"),
     TestCase("groq", "meta-llama/llama-4-scout-17b-16e-instruct", _GROQ_URL, "GROQ_API_KEY"),
     TestCase("groq", "qwen/qwen3-32b", _GROQ_URL, "GROQ_API_KEY"),
-    # ── Gemini (OAI-compat, models/ prefix) ───────────────────────────────────
-    TestCase("gemini", "models/gemini-2.5-flash", _GEMINI_URL, "GOOGLE_API_KEY"),
-    TestCase("gemini", "models/gemini-2.0-flash", _GEMINI_URL, "GOOGLE_API_KEY"),
-    # Gemini prefix-bug documentation: bare name expected to fail
-    TestCase("gemini", "gemini-2.5-flash (no prefix)", _GEMINI_URL, "GOOGLE_API_KEY"),
+    # ── Gemini (OAI-compat, models/ prefix required) ──────────────────────────
+    # Free tier: 20 RPD per model. Use lite models to conserve quota.
+    # Confirmed working: gemini-2.5-flash-lite, gemini-3.1-flash-lite-preview
+    TestCase("gemini", "models/gemini-2.5-flash-lite", _GEMINI_URL, "GOOGLE_API_KEY"),
     # ── OpenRouter (free tier) ────────────────────────────────────────────────
     TestCase(
         "openrouter",

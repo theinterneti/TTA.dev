@@ -35,6 +35,8 @@ __all__ = [
     "ModelBenchmarkMetadata",
     "BENCHMARK_DATA",
     "KNOWN_BENCHMARKS",
+    "MODEL_ID_ALIASES",
+    "resolve_model_id",
     "get_benchmarks",
     "get_best_score",
     "models_above_threshold",
@@ -732,23 +734,180 @@ BENCHMARK_DATA: list[ModelBenchmarkMetadata] = [
         measured_date="2025-01-01",
         notes="5-shot; highest published MMLU for Gemini 2.5 Pro",
     ),
+    # ── Gemini 2.5 Flash ─────────────────────────────────────────────────────
+    # Source: Google DeepMind Gemini 2.5 Flash technical report (May 2025)
+    # https://storage.googleapis.com/deepmind-media/gemini/gemini25_flash_technical_report.pdf
+    ModelBenchmarkMetadata(
+        model_id="models/gemini-2.5-flash",
+        benchmark="mmlu",
+        score=90.5,
+        source_url="https://storage.googleapis.com/deepmind-media/gemini/gemini25_flash_technical_report.pdf",
+        measured_date="2025-05-20",
+        notes="5-shot MMLU Pro; canonical ID for all gemini-2.5-flash-* variants",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="models/gemini-2.5-flash",
+        benchmark="humaneval",
+        score=89.6,
+        source_url="https://storage.googleapis.com/deepmind-media/gemini/gemini25_flash_technical_report.pdf",
+        measured_date="2025-05-20",
+        notes="0-shot HumanEval; canonical ID for all gemini-2.5-flash-* variants",
+    ),
+    # ── Gemini 2.5 Flash Lite ────────────────────────────────────────────────
+    # Source: Google DeepMind blog (June 2025)
+    # https://deepmind.google/models/gemini/flash-lite/
+    ModelBenchmarkMetadata(
+        model_id="models/gemini-2.5-flash-lite",
+        benchmark="mmlu",
+        score=84.0,
+        source_url="https://deepmind.google/models/gemini/flash-lite/",
+        measured_date="2025-06-17",
+        notes="MMLU Pro; canonical ID for gemini-2.5-flash-lite-* and gemini-flash-lite-* variants",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="models/gemini-2.5-flash-lite",
+        benchmark="humaneval",
+        score=77.1,
+        source_url="https://deepmind.google/models/gemini/flash-lite/",
+        measured_date="2025-06-17",
+        notes="HumanEval 0-shot; canonical ID for lite variants",
+    ),
+    # ── Gemini 2.0 Flash ─────────────────────────────────────────────────────
+    # Source: Google Gemini 2.0 overview / lmmarketcap.com benchmarks
+    ModelBenchmarkMetadata(
+        model_id="models/gemini-2.0-flash",
+        benchmark="mmlu",
+        score=82.7,
+        source_url=_LMMARKETCAP_URL,
+        measured_date="2025-02-01",
+        notes="5-shot MMLU; canonical ID for gemini-2.0-flash-* variants",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="models/gemini-2.0-flash",
+        benchmark="humaneval",
+        score=77.1,
+        source_url=_LMMARKETCAP_URL,
+        measured_date="2025-02-01",
+        notes="0-shot HumanEval; canonical ID for gemini-2.0-flash-* variants",
+    ),
+    # ── Llama 3.1 8B Instant (Groq API ID) ───────────────────────────────────
+    # Same base model as llama3.1:8b — Groq's serving ID for the Meta release.
+    # Source: Meta LLaMA 3.1 paper (https://ai.meta.com/blog/meta-llama-3-1/)
+    ModelBenchmarkMetadata(
+        model_id="llama-3.1-8b-instant",
+        benchmark="humaneval",
+        score=72.6,
+        source_url=_LLAMA31_URL,
+        measured_date="2024-07-23",
+        notes="0-shot HumanEval; Groq API ID for Meta LLaMA 3.1 8B Instruct",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="llama-3.1-8b-instant",
+        benchmark="mmlu",
+        score=73.0,
+        source_url=_LLAMA31_URL,
+        measured_date="2024-07-23",
+        notes="5-shot MMLU; Groq API ID for Meta LLaMA 3.1 8B Instruct",
+    ),
+    # ── Mistral Saba 24B (Groq API ID) ───────────────────────────────────────
+    # Source: Mistral blog https://mistral.ai/news/mistral-saba/
+    ModelBenchmarkMetadata(
+        model_id="mistral-saba-24b",
+        benchmark="mmlu",
+        score=74.6,
+        source_url="https://mistral.ai/news/mistral-saba/",
+        measured_date="2025-02-17",
+        notes="5-shot MMLU from Mistral blog; Groq API serving ID",
+    ),
 ]
+
+# ── Model ID alias table ──────────────────────────────────────────────────────
+# Maps provider-specific or versioned model IDs → canonical benchmark IDs.
+# ``get_best_score`` and ``get_benchmarks`` resolve these transparently so
+# callers never need to know which versioned string a provider returned.
+#
+# Convention:
+#   - Gemini versioned previews → base ``models/gemini-X.Y-*`` canonical form
+#   - Groq provider-prefixed IDs → bare IDs (already have direct entries)
+#   - Alias lookup is one level only (no chained aliases)
+
+MODEL_ID_ALIASES: dict[str, str] = {
+    # ── Gemini 2.5 Flash variants → canonical ────────────────────────────────
+    "models/gemini-2.5-flash-preview-04-17": "models/gemini-2.5-flash",
+    "models/gemini-2.5-flash-preview-05-20": "models/gemini-2.5-flash",
+    "models/gemini-2.5-flash-exp-native-audio-thinking-dialog": "models/gemini-2.5-flash",
+    "gemini-2.5-flash": "models/gemini-2.5-flash",
+    # ── Gemini 2.5 Flash Lite variants → canonical ───────────────────────────
+    "models/gemini-2.5-flash-lite-preview-06-17": "models/gemini-2.5-flash-lite",
+    "models/gemini-flash-lite-latest": "models/gemini-2.5-flash-lite",
+    "models/gemini-2.5-flash-lite": "models/gemini-2.5-flash-lite",
+    "gemini-2.5-flash-lite": "models/gemini-2.5-flash-lite",
+    # ── Gemini 2.0 Flash variants → canonical ───────────────────────────────
+    "models/gemini-2.0-flash-001": "models/gemini-2.0-flash",
+    "models/gemini-2.0-flash-exp": "models/gemini-2.0-flash",
+    "models/gemini-2.0-flash-latest": "models/gemini-2.0-flash",
+    "gemini-2.0-flash": "models/gemini-2.0-flash",
+    # ── Gemini 2.5 Pro variants → canonical ──────────────────────────────────
+    "models/gemini-2.5-pro-preview-03-25": "models/gemini-2.5-pro",
+    "models/gemini-2.5-pro-preview-05-06": "models/gemini-2.5-pro",
+    "models/gemini-2.5-pro-preview-06-05": "models/gemini-2.5-pro",
+    "gemini-2.5-pro": "models/gemini-2.5-pro",
+    # ── Gemini 1.5 variants → canonical ─────────────────────────────────────
+    "models/gemini-1.5-flash": "gemini/gemini-1.5-flash",
+    "models/gemini-1.5-flash-latest": "gemini/gemini-1.5-flash",
+    "gemini-1.5-flash": "gemini/gemini-1.5-flash",
+    # ── Groq prefixed → bare IDs (bare IDs have direct entries) ─────────────
+    "groq/llama-3.3-70b-versatile": "llama-3.3-70b-versatile",
+    "groq/llama-3.1-8b-instant": "llama-3.1-8b-instant",
+    "groq/gemma2-9b-it": "gemma2-9b-it",
+    "groq/mixtral-8x7b-32768": "mixtral-8x7b-32768",
+    # ── Ollama tag variants → canonical ──────────────────────────────────────
+    "llama3.3:latest": "llama3.3:70b",
+    "llama3.1:latest": "llama3.1:70b",
+}
 
 
 # ── Lookup helpers ────────────────────────────────────────────────────────────
 
 
+def resolve_model_id(model_id: str) -> str:
+    """Resolve a provider-specific or versioned model ID to its canonical form.
+
+    Looks up *model_id* in :data:`MODEL_ID_ALIASES`.  Returns the canonical
+    ID when found, otherwise returns *model_id* unchanged.  Alias resolution
+    is single-level — the returned canonical ID is **not** re-resolved.
+
+    Args:
+        model_id: Any model identifier (bare, prefixed, or versioned).
+
+    Returns:
+        Canonical benchmark ID for the model, or *model_id* if no alias exists.
+
+    Example::
+
+        resolve_model_id("models/gemini-2.5-flash-preview-05-20")
+        # → "models/gemini-2.5-flash"
+
+        resolve_model_id("llama-3.3-70b-versatile")
+        # → "llama-3.3-70b-versatile"  (already canonical)
+    """
+    return MODEL_ID_ALIASES.get(model_id, model_id)
+
+
 def get_benchmarks(model_id: str) -> list[ModelBenchmarkMetadata]:
     """Return all benchmark entries for a given model ID.
 
+    Transparently resolves *model_id* via :func:`resolve_model_id` so that
+    versioned or provider-prefixed IDs (e.g. ``"models/gemini-2.5-flash-preview-05-20"``)
+    automatically find data stored under their canonical form.
+
     Args:
-        model_id: The model identifier to look up (must match
-            ``ModelBenchmarkMetadata.model_id`` exactly).
+        model_id: The model identifier to look up.
 
     Returns:
         A list of all :class:`ModelBenchmarkMetadata` records whose
-        ``model_id`` matches the argument.  Returns an empty list when
-        the model is unknown.
+        ``model_id`` matches the canonical form of *model_id*.  Returns an
+        empty list when the model is unknown.
 
     Example::
 
@@ -756,17 +915,20 @@ def get_benchmarks(model_id: str) -> list[ModelBenchmarkMetadata]:
         for e in entries:
             print(e.benchmark, e.score)
     """
-    return [entry for entry in BENCHMARK_DATA if entry.model_id == model_id]
+    canonical = resolve_model_id(model_id)
+    return [entry for entry in BENCHMARK_DATA if entry.model_id == canonical]
 
 
 def get_best_score(model_id: str, benchmark: str) -> float | None:
     """Return the highest published score for a model on a benchmark.
 
     When a model has multiple entries for the same benchmark (e.g. from
-    different papers), the maximum is returned.
+    different papers), the maximum is returned.  *model_id* is resolved
+    via :func:`resolve_model_id` before lookup, so versioned or prefixed
+    IDs (e.g. ``"models/gemini-2.5-flash-preview-05-20"``) work correctly.
 
     Args:
-        model_id: Model identifier matching ``ModelBenchmarkMetadata.model_id``.
+        model_id: Model identifier — bare, prefixed, or versioned.
         benchmark: Benchmark name, e.g. ``"mmlu"`` or ``"humaneval"``.
 
     Returns:
@@ -779,10 +941,11 @@ def get_best_score(model_id: str, benchmark: str) -> float | None:
         if score is not None and score >= 90.0:
             print("Strong coding model")
     """
+    canonical = resolve_model_id(model_id)
     scores = [
         entry.score
         for entry in BENCHMARK_DATA
-        if entry.model_id == model_id and entry.benchmark == benchmark
+        if entry.model_id == canonical and entry.benchmark == benchmark
     ]
     return max(scores) if scores else None
 
