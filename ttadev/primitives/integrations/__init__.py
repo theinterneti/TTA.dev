@@ -31,15 +31,15 @@ except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK 
         E2BPrimitive = None  # type: ignore[assignment]
     else:
         raise
-try:  # Optional dependency: google-generativeai SDK
-    from ttadev.primitives.integrations.google_ai_studio_primitive import (
-        GoogleAIStudioPrimitive,
-    )
-except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
-    if exc.name and exc.name.startswith("google"):
-        GoogleAIStudioPrimitive = None  # type: ignore[assignment]
-    else:
-        raise
+# GoogleAIStudioPrimitive is intentionally NOT imported eagerly here.
+# Its module emits a DeprecationWarning at import time (module-level warnings.warn),
+# which would fire on every test run and every ``import ttadev`` statement even when
+# the caller has no interest in the deprecated primitive.
+#
+# Instead, it is exposed via ``__getattr__`` below so the warning only fires when
+# a caller explicitly accesses ``GoogleAIStudioPrimitive`` — the correct behaviour
+# for a deprecation notice.  The symbol remains listed in ``__all__`` so that
+# tools like ``dir()`` and auto-completers still discover it.
 from ttadev.primitives.integrations.huggingface_primitive import HuggingFacePrimitive
 from ttadev.primitives.integrations.openrouter_primitive import OpenRouterPrimitive
 
@@ -93,6 +93,30 @@ except (
         LangGraphPrimitive = None  # type: ignore[assignment]
     else:
         raise
+
+
+def __getattr__(name: str) -> object:
+    """Lazily expose symbols that must not be imported at module load time.
+
+    ``GoogleAIStudioPrimitive`` emits a ``DeprecationWarning`` at the *module*
+    level (not inside the class), so importing it eagerly would fire the warning
+    on every ``import ttadev`` — including every test collection pass.  By
+    deferring the import here, the warning fires only when a caller explicitly
+    accesses the symbol, which is the expected UX for a deprecation notice.
+    """
+    if name == "GoogleAIStudioPrimitive":
+        try:
+            from ttadev.primitives.integrations.google_ai_studio_primitive import (
+                GoogleAIStudioPrimitive,
+            )
+        except ModuleNotFoundError as exc:  # pragma: no cover - SDK not installed
+            if exc.name and exc.name.startswith("google"):
+                return None  # type: ignore[return-value]
+            raise
+        return GoogleAIStudioPrimitive
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
+
 
 __all__ = [
     "OpenAIPrimitive",
