@@ -127,9 +127,9 @@
         "--context",
         "ide-assistant",
         "--project",
-        "/home/thein/repos/TTA.dev-cline"
+        "${workspaceFolder}"
       ],
-      "description": "IDE integration and code assistance",
+      "description": "Code analysis via Serena. The --project path auto-resolves via ${workspaceFolder}; customize if your client doesn't support this.",
       "tags": [
         "ide",
         "code-analysis",
