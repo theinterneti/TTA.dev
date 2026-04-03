@@ -12,10 +12,60 @@ All notable changes to TTA.dev will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0-alpha] — 2026-04-03
 
-> All commits since the `v1.2.0` tag, including the **April 2026 remediation session**
-> (2026-04-03). No version tag has been cut for this work yet.
+> First tagged release of the unified `ttadev` package.
+> This is an **alpha** — APIs may change. Feedback welcome.
+
+### Highlights
+
+#### 🚀 Onboarding (`tta setup` / `tta validate-keys`)
+- `tta setup` — interactive wizard: copies `.env`, walks through 4 free providers
+  (Google AI Studio, Groq, OpenRouter, Ollama), merges VS Code MCP config
+- `tta validate-keys` — read-only live health check; `--json` flag for CI use
+- 3-persona flow: `?` at any prompt expands step-by-step guidance
+- Security: `getpass` key entry, atomic `.env` write, `chmod 0o600`, git-tracking warning
+- All 4 providers validated against real endpoints (correct UA + auth)
+
+#### 🤖 LLM Primitives
+- `UniversalLLMPrimitive` — single interface for Groq, OpenRouter, Ollama, Google, xAI, GitHub Models
+- `ModelRouterPrimitive` — free-tier-first routing with benchmark-aware tier selection
+- `TaskProfile` / task-aware routing — routes by `task_type` + `complexity`
+- `ModelAdvisor` CLI (`tta models advise`) — ROI recommendations with live pricing catalog
+- `HardwareDetector` — detects GPU/RAM for Ollama model recommendations
+- `BenchmarkFetcher` — live benchmark data from Artificial Analysis + HF Leaderboard
+- `OllamaPrimitive` / `OllamaModelManagerPrimitive` / `OllamaEmbeddingsPrimitive`
+- `ModelRegistryPrimitive` / `ModelMonitorPrimitive`
+- `ProviderModelDiscovery` — live model list fetching per provider
+- Native tool-calling support in `UniversalLLMPrimitive`
+
+#### 🧰 Core Primitives
+- `CachePrimitive` — pluggable backend (InMemoryBackend, RedisBackend)
+- `SafetyGatePrimitive` — multi-level `ThreatLevel` detection
+- `CircuitBreakerPrimitive` — CLOSED→OPEN→HALF_OPEN→CLOSED lifecycle
+- `FallbackPrimitive` — LLM fallback chain recipes
+- OTel span context propagation through `SequentialPrimitive` + `ParallelPrimitive`
+- Streaming token support in `UniversalLLMPrimitive`
+
+#### 🤝 Agents & Memory
+- `AgentPrimitive.with_router()` — zero-config task-aware agent construction
+- `ModelRouterChatAdapter` — bridges router to `ChatPrimitive` protocol
+- `AgentMemory` MCP tools — persistent cross-session agent memory
+- Role-based agent specs: Backend Engineer, Frontend Engineer, Testing Specialist, etc.
+
+#### 🛠️ CLI & MCP
+- `tta models advise` — natural language model selection
+- `tta control` — L0 developer control plane (task/run/lease/workflow state)
+- MCP server (`ttadev/primitives/mcp_server/`) — full TTA.dev surface via MCP
+- VS Code Copilot skills ported to `.github/skills/` for Copilot parity
+
+#### 🔧 Quality & Tooling
+- 3 000+ tests passing; pre-commit hooks (Ruff, Bandit, Semgrep, detect-secrets)
+- `.github/copilot-hooks/post-generation.sh` quality gate
+- `ACKNOWLEDGEMENTS.md` — full credits for open-source dependencies
+- Pyright clean (≤2 known OTel SDK false positives)
+
+## [Unreleased]
 
 ### Added
 
