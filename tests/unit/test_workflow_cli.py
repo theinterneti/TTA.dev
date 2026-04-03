@@ -96,3 +96,81 @@ class TestWorkflowRunTrackedL0:
         assert "L0 task: task_123" in out
         assert "L0 run:  run_123" in out
         assert f"tta control task show {result.tracked_task_id}" in out
+
+
+class TestWorkflowRunSessionAttribution:
+    """Issue #301 — tta session list must show workflow name instead of 'unknown'."""
+
+    def test_run_creates_session_with_workflow_agent_tool(self, tmp_path: Path):
+        """workflow run writes a session with agent_tool='workflow:<name>'."""
+        result = WorkflowResult(
+            workflow_name="feature_dev",
+            goal="add login",
+            steps=[],
+            artifacts=[],
+            memory_snapshot={},
+            completed=True,
+            total_confidence=0.9,
+            tracked_task_id=None,
+            tracked_run_id=None,
+        )
+
+        with patch(
+            "ttadev.workflows.orchestrator.WorkflowOrchestrator.execute",
+            new=AsyncMock(return_value=result),
+        ):
+            code, _ = _run_cli(
+                [
+                    "--data-dir",
+                    str(tmp_path),
+                    "workflow",
+                    "run",
+                    "feature_dev",
+                    "--goal",
+                    "add login",
+                ]
+            )
+
+        assert code == 0
+
+        from ttadev.observability.session_manager import SessionManager
+
+        mgr = SessionManager(data_dir=tmp_path)
+        sessions = mgr.list_sessions()
+        assert sessions, "Expected at least one session to be created"
+        session = sessions[0]
+        assert session.agent_tool == "workflow:feature_dev", (
+            f"Expected agent_tool='workflow:feature_dev', got {session.agent_tool!r}"
+        )
+        # Session should be ended after the workflow completes
+        assert session.ended_at is not None, "Session should be ended after workflow run"
+
+    def test_run_ends_session_on_provider_error(self, tmp_path: Path):
+        """Session is ended even when the LLM provider is unavailable."""
+        from ttadev.workflows.llm_provider import NoLLMProviderError
+
+        with patch(
+            "ttadev.workflows.orchestrator.WorkflowOrchestrator.execute",
+            new=AsyncMock(side_effect=NoLLMProviderError(reason="no ollama")),
+        ):
+            code, _ = _run_cli(
+                [
+                    "--data-dir",
+                    str(tmp_path),
+                    "workflow",
+                    "run",
+                    "feature_dev",
+                    "--goal",
+                    "add login",
+                ]
+            )
+
+        assert code != 0  # LLM provider error → non-zero exit
+
+        from ttadev.observability.session_manager import SessionManager
+
+        mgr = SessionManager(data_dir=tmp_path)
+        sessions = mgr.list_sessions()
+        assert sessions, "Session should still be created even on error"
+        assert sessions[0].ended_at is not None, "Session should be ended even on error"
+        assert sessions[0].agent_tool == "workflow:feature_dev"

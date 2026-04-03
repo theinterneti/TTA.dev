@@ -113,6 +113,9 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace, data_dir: P
         _print_dry_run(defn, args.goal)
         return 0
 
+    import os
+
+    from ttadev.observability.session_manager import SessionManager
     from ttadev.primitives.core.base import WorkflowContext
     from ttadev.workflows.llm_provider import (
         NoLLMProviderError,
@@ -121,6 +124,18 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace, data_dir: P
         get_llm_provider_chain,
     )
     from ttadev.workflows.orchestrator import WorkflowGoal, WorkflowOrchestrator
+
+    # ── Session attribution (Issue #301) ────────────────────────────────────
+    # Record the workflow name as the agent tool so that `tta session list`
+    # shows meaningful attribution instead of "unknown".
+    agent_tool_label = f"workflow:{args.name}"
+    os.environ["TTA_AGENT_TOOL"] = agent_tool_label
+
+    session_mgr: SessionManager | None = None
+    session = None
+    if data_dir is not None:
+        session_mgr = SessionManager(data_dir=data_dir)
+        session = session_mgr.start_session()
 
     # Apply --no-confirm override
     if args.no_confirm and not defn.auto_approve:
@@ -144,15 +159,22 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace, data_dir: P
     try:
         result = asyncio.run(orch.execute(goal, ctx))
     except NoLLMProviderError as exc:
+        if session_mgr is not None and session is not None:
+            session_mgr.end_session_by_id(session.id)
         print(exc.user_message(), file=sys.stderr)
         return 1
     except Exception as exc:
+        if session_mgr is not None and session is not None:
+            session_mgr.end_session_by_id(session.id)
         if _is_provider_error(exc):
             provider_name = provider_chain[0].provider if provider_chain else "unknown"
             err = NoLLMProviderError(reason=f"{provider_name}: {exc}")
             print(err.user_message(), file=sys.stderr)
             return 1
         raise
+
+    if session_mgr is not None and session is not None:
+        session_mgr.end_session_by_id(session.id)
 
     if args.track_l0 and result.tracked_task_id and result.tracked_run_id:
         print(f"L0 task: {result.tracked_task_id}")

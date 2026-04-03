@@ -7,7 +7,39 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from ttadev.primitives import (
+
+def configure_demo_logging() -> None:
+    """Configure clean human-readable logging for the demo.
+
+    Replaces raw structlog JSON blobs with a ConsoleRenderer and suppresses
+    library noise below WARNING level.  This is intentionally isolated to the
+    demo script — it does NOT change production logging behaviour.
+    """
+    import logging
+
+    # Raise the stdlib root-logger threshold so library INFO/DEBUG chatter is silent.
+    logging.basicConfig(level=logging.WARNING)
+    logging.getLogger().setLevel(logging.WARNING)
+
+    try:
+        import structlog
+
+        structlog.configure(
+            processors=[
+                structlog.dev.ConsoleRenderer(),
+            ],
+            # Only emit WARNING and above so the demo output stays clean.
+            wrapper_class=structlog.make_filtering_bound_logger(logging.WARNING),
+            logger_factory=structlog.PrintLoggerFactory(),
+            cache_logger_on_first_use=False,
+        )
+    except ImportError:
+        pass  # structlog not installed — stdlib logging fallback is fine
+
+
+configure_demo_logging()
+
+from ttadev.primitives import (  # noqa: E402
     CachePrimitive,
     LambdaPrimitive,
     RetryPrimitive,
