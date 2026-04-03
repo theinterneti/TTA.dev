@@ -44,6 +44,7 @@ dev = [
     "tdd-guard-pytest>=0.1.0",
     "pip-audit>=2.7.0",
     "pyyaml>=6.0.3",
+    "falkordb>=1.6.0",
 ]
 
 [project.optional-dependencies]
