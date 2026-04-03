@@ -159,3 +159,53 @@ Do not set `HINDSIGHT_LLM_MODEL=gemini-3.1-flash-lite-preview` unless the repo p
 - If you want to stay on Google free tier: use Gemini `gemini-3.1-flash-lite-preview`
 - Keep Ollama available only as a local emergency fallback
 - Keep global and per-project Hindsight banks separate
+
+---
+
+## TTA.dev Application Routing
+
+For application code inside TTA.dev, `ModelRouterPrimitive` is the recommended way to call LLMs. It provides 3-tier fallback (Ollama → Groq → Gemini) and now supports **task-aware model selection** via `TaskProfile`.
+
+### Recommended: `AgentPrimitive.with_router()`
+
+Instead of constructing agents with a hard-coded model, pass a `ModelRouterPrimitive` and let each agent's `default_task_profile` drive model selection:
+
+```python
+from ttadev.agents import DeveloperAgent
+from ttadev.primitives.llm import ModelRouterPrimitive, RouterModeConfig, RouterTierConfig
+import os
+
+router = ModelRouterPrimitive(
+    modes={
+        "default": RouterModeConfig(
+            tiers=[
+                RouterTierConfig(provider="ollama"),
+                RouterTierConfig(provider="groq"),
+                RouterTierConfig(provider="gemini"),
+            ]
+        )
+    },
+    groq_api_key=os.environ["GROQ_API_KEY"],
+    gemini_api_key=os.environ["GEMINI_API_KEY"],
+)
+
+# DeveloperAgent auto-uses TaskProfile(TASK_CODING, COMPLEXITY_COMPLEX)
+agent = DeveloperAgent.with_router(router)
+result = await agent.execute(task, ctx)
+```
+
+### How Task Profiles Map to Tiers
+
+| Agent | Task type | Complexity | Preferred tier |
+|-------|-----------|------------|----------------|
+| DeveloperAgent | `TASK_CODING` | `COMPLEXITY_COMPLEX` | Groq / Gemini |
+| SecurityAgent | `TASK_REASONING` | `COMPLEXITY_COMPLEX` | Groq / Gemini |
+| PerformanceAgent | `TASK_REASONING` | `COMPLEXITY_MODERATE` | Groq |
+| DevOpsAgent | `TASK_GENERAL` | `COMPLEXITY_MODERATE` | Groq |
+| QAAgent | `TASK_GENERAL` | `COMPLEXITY_MODERATE` | Groq |
+| GitAgent | `TASK_GENERAL` | `COMPLEXITY_SIMPLE` | Ollama |
+| GitHubAgent | `TASK_GENERAL` | `COMPLEXITY_SIMPLE` | Ollama |
+
+Simple tasks are served by the local Ollama tier (fast, free, private); complex coding and reasoning tasks automatically escalate to Groq or Gemini.
+
+The scoring logic that ranks models against a `TaskProfile` lives in `ttadev/primitives/llm/task_selector.py`.

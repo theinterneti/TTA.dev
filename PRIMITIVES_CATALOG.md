@@ -847,7 +847,51 @@ from ttadev.primitives.llm import (
     ModelRouterRequest,
     RouterModeConfig,
     RouterTierConfig,
+    TaskProfile,
+    TASK_CODING, TASK_REASONING, TASK_GENERAL, TASK_SUMMARIZATION, TASK_CREATIVE,
+    COMPLEXITY_SIMPLE, COMPLEXITY_MODERATE, COMPLEXITY_COMPLEX,
 )
+from ttadev.agents import ModelRouterChatAdapter
+```
+
+### Task-Aware Routing
+
+Pass a `TaskProfile` to `ModelRouterRequest` and the router will rank available models by benchmark score for that task type:
+
+```python
+from ttadev.primitives.llm import ModelRouterPrimitive, ModelRouterRequest, TaskProfile, TASK_CODING, COMPLEXITY_COMPLEX
+
+profile = TaskProfile(task_type=TASK_CODING, complexity=COMPLEXITY_COMPLEX)
+response = await router.execute(
+    ModelRouterRequest(mode="default", prompt="...", task_profile=profile),
+    ctx,
+)
+```
+
+**Task types:** `TASK_CODING`, `TASK_REASONING`, `TASK_GENERAL`, `TASK_SUMMARIZATION`, `TASK_CREATIVE`
+**Complexity:** `COMPLEXITY_SIMPLE`, `COMPLEXITY_MODERATE`, `COMPLEXITY_COMPLEX`
+
+Scoring logic lives in `ttadev/primitives/llm/task_selector.py`.
+
+### ModelRouterChatAdapter
+
+Bridges `ModelRouterPrimitive` to the `ChatPrimitive` protocol used by all agents. Usually constructed automatically via `AgentPrimitive.with_router()`.
+
+```python
+from ttadev.agents import ModelRouterChatAdapter
+
+adapter = ModelRouterChatAdapter(router, mode="default", task_profile=profile)
+# adapter now satisfies ChatPrimitive — pass it to any agent constructor
+agent = DeveloperAgent(model=adapter)
+```
+
+The preferred pattern is `AgentPrimitive.with_router()`, which reads each agent's `default_task_profile` automatically:
+
+```python
+from ttadev.agents import DeveloperAgent
+
+agent = DeveloperAgent.with_router(router)   # uses TaskProfile(TASK_CODING, COMPLEXITY_COMPLEX)
+result = await agent.execute(task, ctx)
 ```
 
 ---

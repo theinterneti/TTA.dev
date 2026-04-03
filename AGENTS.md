@@ -282,6 +282,20 @@ ls .github/skills/
 
 ## Examples
 
+**Create an agent with task-aware model routing (preferred):**
+```python
+from ttadev.agents import DeveloperAgent
+from ttadev.primitives.llm import ModelRouterPrimitive
+
+router = ModelRouterPrimitive(...)           # configure tiers once
+agent  = DeveloperAgent.with_router(router)  # auto-selects model via TaskProfile
+result = await agent.execute(task, ctx)
+```
+> `DeveloperAgent.with_router(router)` is the preferred pattern over `DeveloperAgent(model=...)`.
+> Each concrete agent carries a `default_task_profile`; `with_router()` wires them together
+> via `ModelRouterChatAdapter`. See [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md)
+> and [PRIMITIVES_CATALOG § ModelRouterChatAdapter](PRIMITIVES_CATALOG.md) for details.
+
 **Add Primitive:**
 ```
 @backend-engineer "Create RateLimitPrimitive with sliding window algorithm"

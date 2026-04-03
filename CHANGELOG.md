@@ -12,6 +12,35 @@ All notable changes to TTA.dev will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+#### 🤖 Task-Aware Model Routing
+
+- **`feat(llm)`** — `TaskProfile` dataclass with `task_type` and `complexity` fields
+  (`TASK_CODING`, `TASK_REASONING`, `TASK_GENERAL`, `TASK_SUMMARIZATION`, `TASK_CREATIVE`;
+  `COMPLEXITY_SIMPLE`, `COMPLEXITY_MODERATE`, `COMPLEXITY_COMPLEX`)
+- **`feat(llm)`** — `ModelRouterRequest.task_profile` field: pass a `TaskProfile` to rank
+  available models by benchmark score for the requested task type
+- **`feat(llm)`** — `ttadev/primitives/llm/task_selector.py`: scoring and ranking logic
+  that maps `TaskProfile` → preferred provider tier
+- **`feat(agents)`** — `ModelRouterChatAdapter` (`ttadev/agents/adapter.py`): bridges
+  `ModelRouterPrimitive` to the `ChatPrimitive` protocol consumed by all agents
+- **`feat(agents)`** — `AgentPrimitive.with_router(router, mode, task_profile)` classmethod:
+  zero-config agent construction — reads each agent's `default_task_profile` automatically
+- **`feat(agents)`** — `AgentSpec.default_task_profile` field: each concrete agent now
+  declares the task profile that best describes its workload:
+  - `DeveloperAgent` → `TaskProfile(TASK_CODING, COMPLEXITY_COMPLEX)`
+  - `SecurityAgent` → `TaskProfile(TASK_REASONING, COMPLEXITY_COMPLEX)`
+  - `DevOpsAgent` → `TaskProfile(TASK_GENERAL, COMPLEXITY_MODERATE)`
+  - `QAAgent` → `TaskProfile(TASK_GENERAL, COMPLEXITY_MODERATE)`
+  - `PerformanceAgent` → `TaskProfile(TASK_REASONING, COMPLEXITY_MODERATE)`
+  - `GitAgent` → `TaskProfile(TASK_GENERAL, COMPLEXITY_SIMPLE)`
+  - `GitHubAgent` → `TaskProfile(TASK_GENERAL, COMPLEXITY_SIMPLE)`
+
+---
+
 ## [1.3.0] - 2025-12-06
 
 ### Added
