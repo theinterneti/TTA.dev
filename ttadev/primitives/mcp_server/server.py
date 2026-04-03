@@ -1481,6 +1481,286 @@ result = await workflow.execute(data, context)
             return _control_plane_error_payload(exc)
         return {"task": _serialize_task(task)}
 
+    # ========== LLM TOOLS ==========
+
+    @mcp.tool(annotations=_ro)
+    def llm_hardware_profile() -> dict:
+        """Return the detected hardware profile for this machine.
+
+        Reports CPU cores, total RAM, GPU name/VRAM and compute backend
+        (cuda/rocm/metal/cpu), plus the estimated largest model size that
+        will fit in memory at Q4 quantisation.
+
+        Use this to understand what Ollama models are viable before pulling
+        or routing to them.
+
+        Returns:
+            Hardware profile dict with keys: cpu_cores, ram_gb, gpus,
+            backend, total_vram_gb, max_params_b_q4, max_params_b_q8.
+        """
+        from ttadev.primitives.llm.hardware_detector import HardwareDetector
+
+        det = HardwareDetector()
+        profile = det.detect()
+        result = profile.to_dict()
+        result["recommend_size_tag"] = det.recommend_size_tag()
+        return result
+
+    @mcp.tool(annotations=_ro)
+    def llm_viable_ollama_models(model_ids: list[str]) -> dict:
+        """Filter a list of Ollama model IDs to only those that fit in available memory.
+
+        Checks both GPU VRAM and system RAM (Ollama can offload to CPU RAM).
+        Models without a recognised parameter count are assumed viable.
+
+        Args:
+            model_ids: Candidate Ollama model IDs, e.g.
+                ``["llama3.2:1b", "qwen3:14b", "llama3.3:70b"]``.
+
+        Returns:
+            Dict with ``viable`` (list that fits) and ``too_large`` (list that
+            doesn't fit in available memory).
+        """
+        from ttadev.primitives.llm.hardware_detector import HardwareDetector
+
+        det = HardwareDetector()
+        viable = det.filter_ollama_models(model_ids)
+        too_large = [m for m in model_ids if m not in viable]
+        return {
+            "viable": viable,
+            "too_large": too_large,
+            "hardware_summary": det.detect().summary(),
+        }
+
+    @mcp.tool(annotations=_ro)
+    def llm_benchmark_score(model_id: str, benchmark: str | None = None) -> dict:
+        """Look up benchmark scores for a model from the TTA.dev benchmark DB.
+
+        Includes live data sourced from Artificial Analysis and the HuggingFace
+        Open LLM Leaderboard (refreshed every 24 hours).
+
+        Args:
+            model_id: Model identifier as stored in the benchmark DB, e.g.
+                ``"gpt-4o"``, ``"llama-3.3-70b-versatile"``.
+            benchmark: Specific benchmark name (e.g. ``"humaneval"``,
+                ``"mmlu"``, ``"gpqa"``).  When ``None``, all known scores
+                for the model are returned.
+
+        Returns:
+            Dict with ``model_id``, ``benchmark`` (or ``"all"``), and
+            ``scores`` mapping benchmark name → score (0–100 scale).
+        """
+        from ttadev.primitives.llm.model_benchmarks import (
+            get_benchmarks,
+            get_best_score,
+        )
+
+        if benchmark:
+            score = get_best_score(model_id, benchmark)
+            return {
+                "model_id": model_id,
+                "benchmark": benchmark,
+                "score": score,
+                "available": score is not None,
+            }
+
+        # Return all scores for this model
+        entries = get_benchmarks(model_id)
+        scores = {e.benchmark: e.score for e in entries}
+        return {
+            "model_id": model_id,
+            "benchmark": "all",
+            "scores": scores,
+            "best_coding": get_best_score(model_id, "humaneval"),
+            "best_knowledge": get_best_score(model_id, "mmlu"),
+        }
+
+    @mcp.tool(annotations=_idem)
+    async def llm_refresh_benchmarks(force: bool = False) -> dict:
+        """Refresh the live benchmark cache from Artificial Analysis and HuggingFace.
+
+        This is normally done automatically (24-hour TTL) but can be triggered
+        manually here.  Network access is required; the tool is a no-op if no
+        API keys are configured.
+
+        Args:
+            force: When ``True``, ignores the TTL and re-downloads regardless
+                of when the cache was last refreshed.
+
+        Returns:
+            Dict with ``ok`` (bool), ``models_updated`` (int), and
+            ``message`` (str).
+        """
+        try:
+            from ttadev.primitives.llm.benchmark_fetcher import BenchmarkFetcher
+
+            fetcher = BenchmarkFetcher()
+            data = await fetcher.refresh(force=force)
+            return {
+                "ok": True,
+                "models_updated": len(data),
+                "message": f"Refreshed {len(data)} model benchmark records.",
+            }
+        except Exception as exc:
+            return {
+                "ok": False,
+                "models_updated": 0,
+                "message": f"Refresh failed: {exc}",
+            }
+
+    @mcp.tool(annotations=_ro)
+    def llm_list_providers() -> dict:
+        """List all configured LLM providers and their status.
+
+        Returns information about each provider: whether an API key is
+        configured, the default model, and the base URL.  Useful for
+        agents checking which cloud providers are available before routing.
+
+        Returns:
+            Dict with ``providers`` list, each entry having ``name``,
+            ``api_key_configured``, ``default_model``, and ``base_url``.
+        """
+        import os
+
+        from ttadev.primitives.llm.providers import PROVIDERS
+
+        result = []
+        for name, spec in PROVIDERS.items():
+            env_key = f"{name.upper()}_API_KEY"
+            if name == "openrouter":
+                env_key = "OPENROUTER_API_KEY"
+            elif name == "gemini":
+                env_key = "GEMINI_API_KEY"
+            elif name == "groq":
+                env_key = "GROQ_API_KEY"
+            elif name == "ollama":
+                env_key = ""  # no key needed
+
+            result.append(
+                {
+                    "name": name,
+                    "api_key_configured": bool(env_key and os.environ.get(env_key)),
+                    "default_model": getattr(spec, "default_model", None),
+                    "base_url": getattr(spec, "base_url", None),
+                    "is_local": name == "ollama",
+                }
+            )
+
+        return {"providers": result, "count": len(result)}
+
+    @mcp.tool(annotations=_ro)
+    def llm_recommend_model(
+        task: str = "coding",
+        complexity: str = "moderate",
+        prefer_local: bool = False,
+        max_cost_tier: str = "high",
+    ) -> dict:
+        """Recommend the best available model for a given task and complexity.
+
+        Consults the task-aware model selector using live provider data,
+        hardware viability (for Ollama), and benchmark scores.
+
+        Args:
+            task: Task type — one of ``"coding"``, ``"reasoning"``,
+                ``"math"``, ``"chat"``, ``"function_calling"``,
+                ``"vision"``, ``"general"``.
+            complexity: Complexity hint — ``"simple"``, ``"moderate"``,
+                or ``"complex"``.
+            prefer_local: When ``True``, prefers Ollama models if viable.
+            max_cost_tier: Maximum cost tier to consider —
+                ``"free"``, ``"low"``, ``"medium"``, ``"high"``.
+
+        Returns:
+            Dict with ``model_id``, ``provider``, ``rationale``, and
+            ``fallback`` (next-best option).
+        """
+        from ttadev.primitives.llm.task_selector import (
+            COMPLEXITY_COMPLEX,
+            COMPLEXITY_MODERATE,
+            COMPLEXITY_SIMPLE,
+            TASK_CHAT,
+            TASK_CODING,
+            TASK_FUNCTION_CALLING,
+            TASK_GENERAL,
+            TASK_MATH,
+            TASK_REASONING,
+            TASK_VISION,
+            TaskProfile,
+            rank_models_for_task,
+        )
+
+        task_map = {
+            "coding": TASK_CODING,
+            "reasoning": TASK_REASONING,
+            "math": TASK_MATH,
+            "chat": TASK_CHAT,
+            "function_calling": TASK_FUNCTION_CALLING,
+            "vision": TASK_VISION,
+            "general": TASK_GENERAL,
+        }
+        complexity_map = {
+            "simple": COMPLEXITY_SIMPLE,
+            "moderate": COMPLEXITY_MODERATE,
+            "complex": COMPLEXITY_COMPLEX,
+        }
+
+        task_type = task_map.get(task.lower(), TASK_CODING)
+        complexity_level = complexity_map.get(complexity.lower(), COMPLEXITY_MODERATE)
+
+        profile = TaskProfile(task_type=task_type, complexity=complexity_level)
+
+        # Use the static cloud model catalog (no network calls needed)
+        from ttadev.primitives.llm.model_registry import (
+            _COST_TIER_ORDER,
+            _DEFAULT_CLOUD_MODELS,
+        )
+
+        all_entries = list(_DEFAULT_CLOUD_MODELS)
+        ranked = rank_models_for_task(
+            [e.model_id for e in all_entries],
+            profile,
+        )
+
+        # Apply cost tier filter
+        max_rank = _COST_TIER_ORDER.get(max_cost_tier, 99)
+        entry_map = {e.model_id: e for e in all_entries}
+
+        cost_filtered = [
+            model_id
+            for model_id in ranked
+            if model_id in entry_map
+            and _COST_TIER_ORDER.get(entry_map[model_id].cost_tier, 99) <= max_rank
+        ]
+
+        # Apply local preference
+        if prefer_local:
+            local_first = [m for m in cost_filtered if entry_map.get(m) and entry_map[m].is_local]
+            cloud = [m for m in cost_filtered if not (entry_map.get(m) and entry_map[m].is_local)]
+            cost_filtered = local_first + cloud
+
+        top = cost_filtered[0] if cost_filtered else None
+        second = cost_filtered[1] if len(cost_filtered) > 1 else None
+
+        def _provider(mid: str | None) -> str | None:
+            if mid is None:
+                return None
+            e = entry_map.get(mid)
+            return e.provider if e else None
+
+        return {
+            "model_id": top,
+            "provider": _provider(top),
+            "fallback": second,
+            "fallback_provider": _provider(second),
+            "task": task,
+            "complexity": complexity,
+            "rationale": (
+                f"Selected for {task} ({complexity} complexity). "
+                f"Provider: {_provider(top)}. "
+                f"Prefer local: {prefer_local}."
+            ),
+        }
+
     # ========== RESOURCES ==========
 
     @mcp.resource("tta://catalog")

@@ -857,6 +857,15 @@ class ModelRegistryPrimitive(WorkflowPrimitive[RegistryRequest, RegistryResponse
         if policy.require_vision:
             entries = [e for e in entries if e.supports_vision]
 
+        # Filter local (Ollama) models by hardware viability — skip models that
+        # won't fit in available VRAM / RAM, preventing the router from recommending
+        # a model that would OOM or thrash swap.
+        if any(e.is_local for e in entries):
+            from ttadev.primitives.llm.hardware_detector import detector as _hw_detector
+
+            hw_profile = _hw_detector.detect()
+            entries = [e for e in entries if not e.is_local or hw_profile.can_run(e.model_id)]
+
         # Apply cost tier ceiling
         entries = [e for e in entries if _COST_TIER_ORDER.get(e.cost_tier, 99) <= max_tier_rank]
 

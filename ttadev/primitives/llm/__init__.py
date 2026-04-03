@@ -15,6 +15,14 @@ from ttadev.primitives.llm.free_model_tracker import (
     get_free_models,
     rank_models_for_role,
 )
+from ttadev.primitives.llm.hardware_detector import (
+    GPUInfo,
+    HardwareDetector,
+    HardwareProfile,
+)
+from ttadev.primitives.llm.hardware_detector import (
+    detector as hardware_detector,
+)
 from ttadev.primitives.llm.model_catalog import (
     PROVIDER_SUMMARY,
     print_catalog,
@@ -156,4 +164,9 @@ __all__ = [
     "OllamaEmbeddingsRequest",
     "OllamaEmbeddingsResponse",
     "RunningModel",
+    # hardware detection
+    "HardwareDetector",
+    "HardwareProfile",
+    "GPUInfo",
+    "hardware_detector",
 ]
