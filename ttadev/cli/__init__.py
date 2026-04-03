@@ -116,6 +116,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
     register_control_subcommands(sub)
 
+    # ------------------------------------------------------------------ #
+    # models subcommand                                                    #
+    # ------------------------------------------------------------------ #
+    from ttadev.cli.models import register_model_subcommands
+
+    register_model_subcommands(sub)
+
     return parser
 
 
@@ -207,6 +214,11 @@ def main() -> None:
         from ttadev.cli.control import handle_control_command
 
         sys.exit(handle_control_command(args, data_dir))
+
+    elif args.command == "models":
+        from ttadev.cli.models import handle_model_command
+
+        sys.exit(handle_model_command(args))
 
     else:
         parser.print_help()
