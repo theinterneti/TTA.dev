@@ -370,3 +370,25 @@ async def test_fast():
 - **Automate everything**: Manual testing doesn't scale
 - **Quality is everyone's job**: But you enforce the standards
 - **Accessibility matters**: Test for all users
+
+## Task-Aware Model Selection
+
+When writing integration or agent tests, use `with_router()` to create agents without hard-coding model names:
+
+```python
+from ttadev.agents import QAAgent
+from ttadev.primitives.llm import ModelRouterPrimitive, RouterModeConfig, RouterTierConfig
+import os
+
+router = ModelRouterPrimitive(
+    modes={"default": RouterModeConfig(tiers=[
+        RouterTierConfig(provider="ollama"),
+        RouterTierConfig(provider="groq"),
+    ])},
+    groq_api_key=os.environ.get("GROQ_API_KEY", ""),
+)
+# QAAgent auto-uses TaskProfile(general, moderate)
+agent = QAAgent.with_router(router)
+```
+
+For unit tests, use `MockPrimitive` — never a real router.
