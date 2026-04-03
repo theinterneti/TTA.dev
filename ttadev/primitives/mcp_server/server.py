@@ -1763,8 +1763,8 @@ result = await workflow.execute(data, context)
 
     # ========== MEMORY TOOLS ==========
 
-    _ro_m = {"readOnlyHint": True}
-    _idem_m = {"idempotentHint": True}
+    _ro_m = ToolAnnotations(readOnlyHint=True) if ToolAnnotations else None
+    _idem_m = ToolAnnotations(idempotentHint=True) if ToolAnnotations else None
 
     @mcp.tool(annotations=_ro_m)
     async def memory_recall(
