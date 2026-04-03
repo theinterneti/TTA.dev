@@ -22,6 +22,33 @@ cd TTA.dev
 
 The setup script installs dependencies with `uv` and prints the currently supported proof path.
 
+## Step 1.5: Configure your LLM provider
+
+All LLM provider options are documented in `.env.example` — copy it to get started:
+
+```bash
+cp .env.example .env
+```
+
+Then pick **one** free provider (no credit card required):
+
+| Provider | Speed | Setup |
+|----------|-------|-------|
+| **Groq** (recommended) | Fast | Get a free key at <https://console.groq.com>, add `GROQ_API_KEY=...` to `.env` |
+| **OpenRouter** | Many models | Get a free key at <https://openrouter.ai>, add `OPENROUTER_API_KEY=...` to `.env` |
+| **Ollama** (local, no internet) | Medium | Install at <https://ollama.ai>, then run: `ollama pull qwen2.5:7b` |
+
+To force local-only mode with Ollama:
+```bash
+export LLM_FORCE_PROVIDER=ollama
+export OLLAMA_MODEL=qwen2.5:7b   # or whichever model you have installed
+```
+
+To verify your configuration:
+```bash
+uv run tta models advise --task-type coding
+```
+
 ## Step 2: Point your coding agent at the repo
 
 Today the most reliable path is simply opening the repository with your coding agent so it can
@@ -79,8 +106,35 @@ task/step tracking. Uses a deterministic mock LLM — no API keys needed.
 To explore via the CLI (requires Ollama or `OPENROUTER_API_KEY`):
 
 ```bash
-tta workflow run feature_dev --goal "Add a health check endpoint" --track-l0 --no-confirm
+tta workflow run feature_dev --goal "Add a health check endpoint" --track-l0
 tta control task show <task_id>
+```
+
+## Step 3c: Start the MCP server for coding agents
+
+The TTA.dev MCP server gives coding agents (Claude Desktop, Copilot, Cline, etc.) 43 tools
+for code analysis, workflow control, and LLM advisor access:
+
+```bash
+# Start in stdio mode (for IDE integration):
+uv run tta-mcp
+
+# Start in HTTP mode (for remote access):
+uv run tta-mcp --transport sse --port 8080
+```
+
+**VS Code / Copilot** — already configured in `.vscode/settings.json`. Reload the window to activate.
+
+**Claude Desktop** — add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "tta-dev": {
+      "command": "uv",
+      "args": ["run", "--directory", "/path/to/TTA.dev", "tta-mcp"]
+    }
+  }
+}
 ```
 
 ## What is still under repair

@@ -174,14 +174,15 @@
         "llm"
       ]
     },
-    "tta-primitives": {
-      "command": "/home/thein/.local/bin/uv",
+    "tta-dev": {
+      "command": "uv",
       "args": [
         "run",
         "python",
-        ".cline/mcp-server/tta_primitives.py"
+        "-m",
+        "ttadev.primitives.mcp_server"
       ],
-      "description": "Complete TTA.dev primitives ecosystem as MCP tools",
+      "description": "TTA.dev primitives, control plane, LLM advisor, and code analysis as MCP tools",
       "tags": [
         "tta-dev",
         "primitives",

@@ -73,6 +73,7 @@ Issues = "https://github.com/theinterneti/TTA.dev/issues"
 
 [project.scripts]
 tta = "ttadev.cli:main"
+tta-mcp = "ttadev.primitives.mcp_server.server:main"
 tta-observe = "ttadev.ui.observability_server:main"      # deprecated — use tta-dashboard
 tta-dashboard = "ttadev.observability.__main__:main"
 

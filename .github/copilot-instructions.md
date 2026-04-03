@@ -54,7 +54,7 @@ uv run ruff check . --fix   # Lint code
 - Python 3.11+ required
 - Type hints: `str | None` not `Optional[str]`
 - Dicts: `dict[str, Any]` not `Dict[str, Any]`
-- Type check: `uvx pyright platform/` (basic mode)
+- Type check: `uvx pyright ttadev/` (basic mode)
 
 ## Code Style
 
@@ -104,7 +104,7 @@ TODOs without all required properties will fail the `validate-todos` CI step.
 
 - Never log secrets (even partially)
 - URL validation: use `urlparse()`, not substring checks
-- Run `uv run python scripts/security_scan.py` before committing
+- Run `uv run ruff check . --fix` and review for secrets before committing
 
 ## Quick Reference
 
@@ -116,7 +116,7 @@ TODOs without all required properties will fail the `validate-todos` CI step.
 | Full test run | `make test` |
 | Format | `uv run ruff format .` |
 | Lint | `uv run ruff check . --fix` |
-| Type check | `uvx pyright platform/` |
+| Type check | `uvx pyright ttadev/` |
 | Validate TODOs | `uv run python scripts/validate-todos.py` |
 | All checks | Run format, lint, typecheck, test, validate-todos in sequence |
 

@@ -268,11 +268,13 @@ def test_consistent_formatter_guidance():
 
 
 def test_no_conflicting_line_lengths():
-    """All files mentioning line length should agree on 100 characters."""
+    """All files mentioning line length should agree on 88 characters (matching pyproject.toml)."""
     for path in [COPILOT_INSTRUCTIONS, INSTRUCTIONS_DIR / "python.instructions.md"]:
         content = path.read_text(encoding="utf-8")
         if "line length" in content.lower() or "line_length" in content.lower():
-            assert "100" in content, f"{path.name}: line length should be 100"
+            assert "88" in content, (
+                f"{path.name}: line length should be 88 (matches pyproject.toml)"
+            )
 
 
 def test_anti_pattern_examples_present():

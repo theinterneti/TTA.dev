@@ -39,22 +39,26 @@ A Python monorepo providing composable workflow primitives, observability, and m
 
 ```
 TTA.dev/
-├── platform/               # Core packages
+├── ttadev/                 # Main Python package
 │   ├── primitives/         # Core workflow primitives (Backend Engineer)
-│   ├── observability/      # Monitoring integration (Observability Expert)
-│   ├── agent-context/      # Universal context (Backend Engineer)
-│   ├── agent-coordination/ # Multi-agent orchestration
-│   ├── integrations/       # External integrations
-│   └── documentation/      # Auto-generated docs
-├── apps/                   # User-facing applications (Frontend Engineer)
-├── .github/
-│   ├── agents/             # Agent definitions (Custom Agents)
-│   ├── skills/             # Multi-agent workflows
-│   └── workflows/          # CI/CD (DevOps Engineer)
-├── tests/                  # Integration tests (Testing Specialist)
-├── monitoring/             # Dashboards and alerts (Observability + DevOps)
+│   │   ├── core/           # Base classes, WorkflowContext, LambdaPrimitive
+│   │   ├── recovery/       # Retry, Timeout, CircuitBreaker, Fallback
+│   │   ├── integrations/   # Ollama, Groq, OpenRouter, Anthropic
+│   │   └── mcp_server/     # 43-tool MCP server for coding agents
+│   ├── agents/             # Role-based agent system (specs, registry, router)
+│   ├── observability/      # OpenTelemetry + local observability server
+│   ├── workflows/          # LLM provider chain, feature_dev workflow
+│   ├── cli/                # `tta` CLI subcommands
+│   ├── control_plane/      # L0 task/run/lease state (JSON-backed)
+│   └── skills/             # Skill registry utilities
+├── tests/                  # Test suite (unit + integration)
 ├── docs/                   # Architecture guides, agent docs
-└── scripts/                # Automation scripts
+├── examples/               # Runnable demo scripts
+├── scripts/                # Automation and utility scripts
+└── .github/
+    ├── agents/             # Custom agent definitions
+    ├── skills/             # Multi-agent workflow skills
+    └── workflows/          # CI/CD pipelines (DevOps Engineer)
 ```
 
 ---

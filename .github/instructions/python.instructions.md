@@ -11,7 +11,7 @@ applyTo: 'ttadev/**/*.py'
 - Type hints: `str | None` not `Optional[str]`
 - Dicts: `dict[str, Any]` not `Dict[str, Any]`
 - Follow Google-style docstrings
-- Maximum line length: 100 characters
+- Maximum line length: 88 characters (enforced by Ruff)
 
 ## Naming Conventions
 
@@ -117,6 +117,6 @@ Before committing:
 ```bash
 uv run ruff format .
 uv run ruff check . --fix
-uvx pyright platform/
+uvx pyright ttadev/
 uv run pytest -v
 ```

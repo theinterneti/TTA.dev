@@ -119,10 +119,10 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run tests
-        run: uv run pytest -v --cov=platform
+        run: uv run pytest -v --cov=ttadev
 
       - name: Type check
-        run: uvx pyright platform/
+        run: uvx pyright ttadev/
 
       - name: Security scan
         uses: snyk/actions/python@master
@@ -228,7 +228,7 @@ volumes:
 - `scripts/**/*.sh`
 
 **Restricted:**
-- Application source code (`platform/`, `apps/`)
+- Application source code (`ttadev/`)
 - Database data
 - Production secrets
 
