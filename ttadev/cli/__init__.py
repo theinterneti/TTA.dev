@@ -144,6 +144,19 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Output JSON",
     )
 
+    # ------------------------------------------------------------------ #
+    # status subcommand                                                    #
+    # ------------------------------------------------------------------ #
+    status_p = sub.add_parser(
+        "status", help="Show system health: providers, services, and control plane"
+    )
+    status_p.add_argument(
+        "--json",
+        dest="json_output",
+        action="store_true",
+        help="Output JSON (no ANSI colours, no key values)",
+    )
+
     return parser
 
 
@@ -250,6 +263,11 @@ def main() -> None:
         from ttadev.cli.setup import cmd_validate_keys
 
         sys.exit(cmd_validate_keys(args, project_root=Path(".")))
+
+    elif args.command == "status":
+        from ttadev.cli.status import cmd_status
+
+        sys.exit(cmd_status(args, project_root=Path("."), data_dir=data_dir))
 
     else:
         parser.print_help()
