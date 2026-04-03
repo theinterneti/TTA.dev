@@ -138,8 +138,8 @@ class TestGetBestScore:
     def test_returns_none_for_unknown_benchmark_on_known_model(self) -> None:
         """get_best_score returns None when the benchmark has no entries for the model."""
         # Arrange / Act / Assert
-        # qwen2.5:7b has no gpqa data in the curated set
-        assert get_best_score("qwen2.5:7b", "gpqa") is None
+        # Use a synthetic benchmark name that will never appear in curated or live data.
+        assert get_best_score("qwen2.5:7b", "phantom-benchmark-xyz") is None
 
     def test_returns_maximum_when_duplicate_entries_injected(self) -> None:
         """get_best_score returns the highest score when duplicates exist."""
@@ -277,10 +277,19 @@ class TestDataIntegrity:
         Chatbot Arena ELO values on a 0–2000 scale.
         """
         # Arrange / Act / Assert
+        # These benchmarks store raw metrics (not 0–100 scores) and need their own range.
+        raw_metric_benchmarks = {
+            "arena_elo": (0.0, 2000.0),
+            "aa_speed_tok_per_sec": (0.0, 10_000.0),  # tokens/sec — can exceed 100
+            "aa_ttft_seconds": (0.0, 60.0),  # latency in seconds
+            "aa_price_per_1m_input": (0.0, 1_000.0),  # USD per 1M tokens
+        }
         for entry in BENCHMARK_DATA:
-            if entry.benchmark == "arena_elo":
-                assert 0.0 <= entry.score <= 2000.0, (
-                    f"Arena ELO {entry.score} out of 0–2000 range for {entry.model_id}"
+            if entry.benchmark in raw_metric_benchmarks:
+                lo, hi = raw_metric_benchmarks[entry.benchmark]
+                assert lo <= entry.score <= hi, (
+                    f"{entry.benchmark} value {entry.score} out of {lo}–{hi} range "
+                    f"for {entry.model_id}"
                 )
             else:
                 assert 0.0 <= entry.score <= 100.0, (
@@ -344,16 +353,22 @@ class TestDataIntegrity:
             entry.score = 0.0  # type: ignore[misc]
 
     def test_all_models_have_at_least_mmlu_or_humaneval(self) -> None:
-        """Every distinct model in BENCHMARK_DATA has MMLU or HumanEval data."""
+        """Every distinct model in BENCHMARK_DATA has at least one capability baseline benchmark.
+
+        Accepts: mmlu, humaneval (curated static), mmlu_pro, aa_intelligence (live sources).
+        Live data from Artificial Analysis and HF Leaderboard 2 provides mmlu_pro rather
+        than plain mmlu, so both are valid capability baselines.
+        """
         # Arrange
+        capability_baselines = frozenset({"mmlu", "humaneval", "mmlu_pro", "aa_intelligence"})
         all_model_ids = {e.model_id for e in BENCHMARK_DATA}
-        mmlu_or_he_models = {
-            e.model_id for e in BENCHMARK_DATA if e.benchmark in ("mmlu", "humaneval")
+        models_with_baseline = {
+            e.model_id for e in BENCHMARK_DATA if e.benchmark in capability_baselines
         }
 
-        # Assert — every model should have at least one of the two core benchmarks
-        missing = all_model_ids - mmlu_or_he_models
-        assert missing == set(), f"Models with neither MMLU nor HumanEval data: {missing}"
+        # Assert — every model should have at least one capability baseline
+        missing = all_model_ids - models_with_baseline
+        assert missing == set(), f"Models with no capability baseline benchmark: {missing}"
 
 
 # ── SelectionPolicy benchmark filters ─────────────────────────────────────────

@@ -209,3 +209,44 @@ result = await agent.execute(task, ctx)
 Simple tasks are served by the local Ollama tier (fast, free, private); complex coding and reasoning tasks automatically escalate to Groq or Gemini.
 
 The scoring logic that ranks models against a `TaskProfile` lives in `ttadev/primitives/llm/task_selector.py`.
+
+---
+
+## Live Benchmark Data
+
+The model catalog is backed by two live benchmark sources in addition to curated static data:
+
+### Sources
+
+| Source | Coverage | Key scores |
+|--------|----------|-----------|
+| **Artificial Analysis** | 457+ models (cloud + open) | `aa_intelligence`, `aa_coding`, `aa_math`, `aa_speed_tok_per_sec`, `aa_ttft_seconds`, `aa_price_per_1m_input`, `mmlu_pro`, `gpqa`, `livecodebench`, `aime` |
+| **HF Open LLM Leaderboard 2** | Open-source models | `mmlu_pro`, `bbh`, `math_lvl5`, `gpqa`, `musr`, `ifeval`, `hf_avg` |
+
+### Setup
+
+Add your Artificial Analysis key to `.env`:
+
+```bash
+ARTIFICIAL_ANALYSIS_API_KEY=your-aa-key-here
+```
+
+HF Leaderboard 2 requires no auth key.
+
+### Refreshing the Cache
+
+```bash
+uv run python -m ttadev.primitives.llm.benchmark_fetcher          # refresh if >24h old
+uv run python -m ttadev.primitives.llm.benchmark_fetcher --force  # force refresh now
+uv run python -m ttadev.primitives.llm.benchmark_fetcher --list-slugs  # audit slug mapping
+```
+
+Cache lives at `~/.cache/ttadev/benchmark_data.json` (24-hour TTL). The module
+`model_benchmarks.py` loads this cache at import time — static curated entries take
+priority over live data for the same `(model_id, benchmark)` pair.
+
+### Capability Baseline Rule
+
+Every model in `BENCHMARK_DATA` must have at least one capability baseline benchmark:
+`mmlu`, `humaneval`, `mmlu_pro`, or `aa_intelligence`. Live-sourced models typically
+provide `mmlu_pro` or `aa_intelligence`; curated static entries use `mmlu`/`humaneval`.

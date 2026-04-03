@@ -15,6 +15,9 @@ Sources:
     * Llama 3.1 blog: https://ai.meta.com/blog/meta-llama-3-1/
     * Llama 3.2 blog: https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/
     * Llama 3.3 blog: https://ai.meta.com/blog/llama-3-3/
+    * Llama 4 blog: https://ai.meta.com/blog/llama-4-multimodal-intelligence/
+    * Qwen3 technical report: https://arxiv.org/pdf/2505.09388
+    * Kimi K2 GitHub: https://github.com/MoonshotAI/Kimi-K2
     * Gemma 2 technical report: https://storage.googleapis.com/deepmind-media/gemma/gemma2-report.pdf
     * Mistral 7B: https://arxiv.org/abs/2310.06825
     * Mistral Nemo: https://mistral.ai/news/mistral-nemo/
@@ -45,7 +48,31 @@ __all__ = [
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 KNOWN_BENCHMARKS: frozenset[str] = frozenset(
-    {"mmlu", "humaneval", "math", "mt_bench", "gpqa", "mbpp", "arena_elo"}
+    {
+        # Static curated benchmarks
+        "mmlu",
+        "humaneval",
+        "math",
+        "mt_bench",
+        "gpqa",
+        "mbpp",
+        "arena_elo",
+        # Live benchmarks from Artificial Analysis (artificialanalysis.ai)
+        "mmlu_pro",
+        "livebench",
+        "aime",
+        "aa_intelligence",
+        "aa_coding",
+        "aa_math",
+        "aa_speed_tok_per_sec",
+        "aa_ttft_seconds",
+        "aa_price_per_1m_input",
+        # Live benchmarks from HF Open LLM Leaderboard 2
+        "bbh",
+        "musr",
+        "ifeval",
+        "hf_average",
+    }
 )
 #: ``"arena_elo"`` stores raw LMSYS Chatbot Arena ELO on a **0–2000 scale**,
 #: NOT normalised to 0–100 like all other benchmarks.  This intentional
@@ -84,9 +111,12 @@ class ModelBenchmarkMetadata:
 
 _QWEN_URL = "https://qwenlm.github.io/blog/qwen2.5/"
 _QWEN_CODER_URL = "https://qwenlm.github.io/blog/qwen2.5-coder/"
+_QWEN3_URL = "https://arxiv.org/pdf/2505.09388"
 _LLAMA31_URL = "https://ai.meta.com/blog/meta-llama-3-1/"
 _LLAMA32_URL = "https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/"
 _LLAMA33_URL = "https://ai.meta.com/blog/llama-3-3/"
+_LLAMA4_URL = "https://ai.meta.com/blog/llama-4-multimodal-intelligence/"
+_KIMI_K2_URL = "https://github.com/MoonshotAI/Kimi-K2"
 _GEMMA2_URL = "https://storage.googleapis.com/deepmind-media/gemma/gemma2-report.pdf"
 _MISTRAL7B_URL = "https://arxiv.org/abs/2310.06825"
 _MISTRAL_NEMO_URL = "https://mistral.ai/news/mistral-nemo/"
@@ -819,6 +849,64 @@ BENCHMARK_DATA: list[ModelBenchmarkMetadata] = [
         measured_date="2025-02-17",
         notes="5-shot MMLU from Mistral blog; Groq API serving ID",
     ),
+    # ── Llama 4 Scout 17B (Groq API ID) ──────────────────────────────────────
+    # Source: Meta Llama 4 blog https://ai.meta.com/blog/llama-4-multimodal-intelligence/
+    # 17B active parameters (109B total, 16-expert MoE); released April 2025.
+    ModelBenchmarkMetadata(
+        model_id="meta-llama/llama-4-scout-17b-16e-instruct",
+        benchmark="mmlu",
+        score=80.0,
+        source_url=_LLAMA4_URL,
+        measured_date="2025-04-05",
+        notes="MMLU from Meta Llama 4 release; Groq API serving ID",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="meta-llama/llama-4-scout-17b-16e-instruct",
+        benchmark="humaneval",
+        score=79.6,
+        source_url=_LLAMA4_URL,
+        measured_date="2025-04-05",
+        notes="HumanEval pass@1 from Meta Llama 4 release; Groq API serving ID",
+    ),
+    # ── Qwen3-32B (Groq API ID) ───────────────────────────────────────────────
+    # Source: Qwen3 technical report https://arxiv.org/pdf/2505.09388
+    # 32B dense model with optional thinking (chain-of-thought) mode.
+    # HumanEval score is for non-thinking mode; thinking mode scores higher.
+    ModelBenchmarkMetadata(
+        model_id="qwen/qwen3-32b",
+        benchmark="humaneval",
+        score=51.4,
+        source_url=_QWEN3_URL,
+        measured_date="2025-05-01",
+        notes="HumanEval pass@1 non-thinking mode from Qwen3 technical report; Groq API serving ID",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="qwen/qwen3-32b",
+        benchmark="math",
+        score=85.7,
+        source_url=_QWEN3_URL,
+        measured_date="2025-05-01",
+        notes="AIME 2025 score (strong math/reasoning); Groq API serving ID",
+    ),
+    # ── Kimi K2 Instruct (Groq API ID) ───────────────────────────────────────
+    # Source: MoonshotAI Kimi K2 GitHub https://github.com/MoonshotAI/Kimi-K2
+    # ~1T total params MoE, 32B active; strong agentic/coding model released 2025.
+    ModelBenchmarkMetadata(
+        model_id="moonshotai/kimi-k2-instruct",
+        benchmark="mmlu",
+        score=78.6,
+        source_url=_KIMI_K2_URL,
+        measured_date="2025-07-11",
+        notes="MMLU from Kimi K2 GitHub release; Groq API serving ID",
+    ),
+    ModelBenchmarkMetadata(
+        model_id="moonshotai/kimi-k2-instruct",
+        benchmark="humaneval",
+        score=73.2,
+        source_url=_KIMI_K2_URL,
+        measured_date="2025-07-11",
+        notes="HumanEval pass@1 from Kimi K2 GitHub release; Groq API serving ID",
+    ),
 ]
 
 # ── Model ID alias table ──────────────────────────────────────────────────────
@@ -861,6 +949,10 @@ MODEL_ID_ALIASES: dict[str, str] = {
     "groq/llama-3.1-8b-instant": "llama-3.1-8b-instant",
     "groq/gemma2-9b-it": "gemma2-9b-it",
     "groq/mixtral-8x7b-32768": "mixtral-8x7b-32768",
+    # ── Groq-served Llama 4 / Qwen3 / Kimi variants → canonical ─────────────
+    "llama-4-scout-17b-16e-instruct": "meta-llama/llama-4-scout-17b-16e-instruct",
+    "qwen3-32b": "qwen/qwen3-32b",
+    "kimi-k2-instruct": "moonshotai/kimi-k2-instruct",
     # ── Ollama tag variants → canonical ──────────────────────────────────────
     "llama3.3:latest": "llama3.3:70b",
     "llama3.1:latest": "llama3.1:70b",
@@ -975,3 +1067,36 @@ def models_above_threshold(benchmark: str, min_score: float) -> list[str]:
                 seen[entry.model_id] = entry.score
 
     return [mid for mid, score in seen.items() if score >= min_score]
+
+
+# ── Live benchmark cache integration ─────────────────────────────────────────
+# Appends cached data written by BenchmarkFetcher.refresh() into BENCHMARK_DATA
+# so that rank_models_for_task() sees live scores without any API changes.
+# Runs at import time; safe when no cache exists.
+def _load_live_benchmarks() -> None:
+    import json as _json
+    from pathlib import Path as _Path
+
+    cache = _Path("~/.cache/ttadev/benchmark_data.json").expanduser()
+    if not cache.exists():
+        return
+    try:
+        raw = _json.loads(cache.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return
+
+    existing_keys: set[tuple[str, str]] = {(e.model_id, e.benchmark) for e in BENCHMARK_DATA}
+    added = 0
+    for item in raw.get("benchmarks", []):
+        try:
+            entry = ModelBenchmarkMetadata(**item)
+        except (TypeError, ValueError):
+            continue
+        key = (entry.model_id, entry.benchmark)
+        if key not in existing_keys:
+            BENCHMARK_DATA.append(entry)
+            existing_keys.add(key)
+            added += 1
+
+
+_load_live_benchmarks()
