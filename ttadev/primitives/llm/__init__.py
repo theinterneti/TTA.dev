@@ -23,6 +23,13 @@ from ttadev.primitives.llm.hardware_detector import (
 from ttadev.primitives.llm.hardware_detector import (
     detector as hardware_detector,
 )
+from ttadev.primitives.llm.model_advisor import (
+    ModelAdvisor,
+    ROIEstimate,
+    TaskSuggestion,
+    TierRecommendation,
+    advisor,
+)
 from ttadev.primitives.llm.model_catalog import (
     PROVIDER_SUMMARY,
     print_catalog,
@@ -169,4 +176,10 @@ __all__ = [
     "HardwareProfile",
     "GPUInfo",
     "hardware_detector",
+    # model advisor
+    "ModelAdvisor",
+    "TierRecommendation",
+    "ROIEstimate",
+    "TaskSuggestion",
+    "advisor",
 ]

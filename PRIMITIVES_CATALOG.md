@@ -988,6 +988,98 @@ result = await agent.execute(task, ctx)
 
 ---
 
+### ModelAdvisor
+
+**Tier-aware model recommendation engine with ROI analysis.**
+
+Combines live benchmark data, hardware detection, and cost analysis to produce
+actionable `TierRecommendation` objects.  The advisor evaluates five tiers in
+priority order — `ollama` (free, local) → `or-free` (OpenRouter free tier) →
+`or-specific` (OpenRouter paid-but-cheap) → `paid` (Groq / Gemini / OpenAI) →
+absolute fallback — and returns the cheapest tier whose best model meets the
+caller's `quality_threshold`.
+
+**Import:**
+```python
+from ttadev.primitives.llm.model_advisor import (
+    ModelAdvisor,
+    TierRecommendation,
+    ROIEstimate,
+    TaskSuggestion,
+    advisor,         # module-level singleton — use directly
+)
+# or from the llm package:
+from ttadev.primitives.llm import ModelAdvisor, advisor
+```
+
+**Source:** [`ttadev/primitives/llm/model_advisor/`](ttadev/primitives/llm/model_advisor/)
+
+**`recommend_tier()` — select best tier for a task:**
+```python
+from ttadev.primitives.llm.model_advisor import advisor
+
+rec = advisor.recommend_tier("coding", quality_threshold=7.0, monthly_calls=5000)
+print(rec.recommended_tier)      # e.g. "ollama"
+print(rec.primary_model)         # e.g. "qwen2.5:7b"
+print(rec.quality_score)         # e.g. 8.2  (0–10 scale)
+print(rec.cost_usd_per_month)    # e.g. 0.0
+print(rec.fallback_models)       # e.g. ["llama3.1:8b", "gemini-flash"]
+print(rec.rationale)             # human-readable explanation
+```
+
+**`estimate_roi()` — quantify fine-tuning ROI:**
+```python
+roi = advisor.estimate_roi(
+    task_type="coding",
+    current_score=62.0,          # current eval score 0–100
+    current_best_model="gemma2:9b",
+    monthly_calls=5000,
+    base_model="qwen2.5-7b",     # Qwen model to fine-tune
+)
+print(roi.training_cost_usd)        # e.g. 0.20
+print(roi.finetuned_score_estimate) # e.g. 72.6
+print(roi.monthly_savings_usd)      # e.g. 5.0
+print(roi.roi_breakeven_days)       # e.g. 1.2
+print(roi.is_recommended)           # True when breakeven < 90 days
+```
+
+**`suggest_qwen_finetunes()` — rank fine-tuning candidates by ROI:**
+```python
+from ttadev.primitives.llm.model_advisor.strategy import suggest_qwen_finetunes
+
+suggestions = suggest_qwen_finetunes(
+    eval_results={"coding": 62.0, "math": 48.0, "chat": 81.0},
+    monthly_calls_per_task={"coding": 5000, "math": 2000, "chat": 500},
+    max_suggestions=3,
+)
+for s in suggestions:
+    print(s.task_type, f"{s.roi_breakeven_days:.0f}d", f"{s.confidence:.0%}")
+# math   7d  76%
+# coding 3d  64%
+# chat   150d 28%
+```
+
+**MCP Tools:** None yet — the CLI is the primary interface.
+
+**CLI Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `tta models advise <task>` | Print tier recommendation for a task type |
+| `tta models roi <task> <score>` | Estimate fine-tuning ROI for a task and current score |
+| `tta models suggest-qwen` | Rank all task types as Qwen fine-tuning candidates |
+
+**Key sub-modules:**
+
+| Module | Purpose |
+|--------|---------|
+| `advisor.py` | `ModelAdvisor` class + `advisor` singleton |
+| `recommendation.py` | `TierRecommendation`, `ROIEstimate`, `TaskSuggestion` dataclasses |
+| `training_estimator.py` | `estimate_finetune_cost`, `build_roi_estimate`, `FINETUNE_IMPROVEMENT` |
+| `strategy.py` | `suggest_qwen_finetunes()` — ranks candidates by ROI breakeven |
+
+---
+
 ## Orchestration Primitives
 
 ### DelegationPrimitive

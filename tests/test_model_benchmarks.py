@@ -426,8 +426,10 @@ class TestSelectionPolicyBenchmarkFilters:
     async def test_min_mmlu_score_filters_registry(self) -> None:
         """SelectionPolicy.min_mmlu_score removes models below the MMLU threshold."""
         # Arrange — gemma2:2b MMLU=52.2, llama3.1:70b MMLU=86.0
+        # is_local=False bypasses hardware-fit filtering (70B won't fit on small GPUs),
+        # keeping this test focused on benchmark threshold logic only.
         weak = _entry("gemma2:2b")
-        strong = _entry("llama3.1:70b")
+        strong = _entry("llama3.1:70b", is_local=False)
         reg = _registry(weak, strong)
         ctx = _ctx()
 
