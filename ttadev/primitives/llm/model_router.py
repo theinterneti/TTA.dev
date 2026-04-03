@@ -113,11 +113,22 @@ _THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
 
 # Well-known free Groq models (fast inference, generous free tier)
 _GROQ_FREE_MODELS: list[str] = [
-    "llama-3.1-8b-instant",
-    "llama-3.3-70b-versatile",
-    "gemma2-9b-it",
-    "mistral-saba-24b",
+    "llama-3.1-8b-instant",  # fast, low-latency
+    "llama-3.3-70b-versatile",  # high-quality, reliable
+    "meta-llama/llama-4-scout-17b-16e-instruct",  # Llama 4 Scout MoE (fast + capable)
+    "qwen/qwen3-32b",  # strong coding + reasoning
+    "openai/gpt-oss-20b",  # OpenAI OSS
+    "moonshotai/kimi-k2-instruct",  # Moonshot K2 (long-context)
 ]
+
+# Substrings that identify non-chat Groq models to exclude during live discovery.
+_GROQ_NON_CHAT_PATTERNS: tuple[str, ...] = (
+    "whisper",
+    "orpheus",
+    "allam",
+    "guard",
+    "safeguard",
+)
 
 
 # ── Configuration dataclasses ─────────────────────────────────────────────────
@@ -503,7 +514,25 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             return content, tier.model
 
         if provider == "groq":
-            candidates = tier.models or ([tier.model] if tier.model else _GROQ_FREE_MODELS)
+            if tier.models:
+                candidates = tier.models
+            elif tier.model:
+                candidates = [tier.model]
+            else:
+                # No model specified — discover live from the provider endpoint,
+                # falling back to the curated free-model list if discovery fails.
+                discovered = await self._discovery.for_provider(
+                    "groq",
+                    base_url=PROVIDERS["groq"].base_url,
+                    api_key=self._groq_api_key or None,
+                )
+                # Filter out non-chat models (Whisper, Orpheus TTS, guard models, etc.)
+                discovered = [
+                    m
+                    for m in discovered
+                    if not any(pat in m.lower() for pat in _GROQ_NON_CHAT_PATTERNS)
+                ]
+                candidates = discovered or _GROQ_FREE_MODELS
             if task_profile is not None:
                 candidates = rank_models_for_task(candidates, task_profile)
             return await self._try_model_candidates(

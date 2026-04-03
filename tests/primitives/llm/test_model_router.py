@@ -481,7 +481,7 @@ class TestExecuteGroqTier:
 
     @pytest.mark.asyncio
     async def test_groq_defaults_to_first_free_model_when_no_model(self):
-        """When model is None for groq tier, falls back to _GROQ_FREE_MODELS[0]."""
+        """When model is None for groq tier and discovery fails, falls back to _GROQ_FREE_MODELS[0]."""
         from ttadev.primitives.llm.model_router import _GROQ_FREE_MODELS
 
         router = ModelRouterPrimitive(
@@ -490,7 +490,15 @@ class TestExecuteGroqTier:
         )
         _, _mock_client, mock_cm = _mock_openai_compat_response("groq default")
 
-        with patch("httpx.AsyncClient", return_value=mock_cm):
+        # Patch discovery so disk/network cache can't influence model selection.
+        with (
+            patch(
+                "ttadev.primitives.llm.model_router.ProviderModelDiscovery.for_provider",
+                new_callable=AsyncMock,
+                return_value=[],
+            ),
+            patch("httpx.AsyncClient", return_value=mock_cm),
+        ):
             result = await router.execute(
                 ModelRouterRequest(mode="test", prompt="hi"),
                 _ctx(),
