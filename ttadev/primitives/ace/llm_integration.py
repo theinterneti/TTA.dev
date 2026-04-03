@@ -54,12 +54,16 @@ class LLMCodeGenerator:
         """Initialize LLM code generator.
 
         Args:
-            api_key: Google AI Studio API key (defaults to GEMINI_API_KEY or GOOGLE_AI_STUDIO_API_KEY env var)
+            api_key: Google AI Studio API key (defaults to GOOGLE_API_KEY,
+                GEMINI_API_KEY, or GOOGLE_AI_STUDIO_API_KEY env var)
             model_name: Gemini model to use (default: gemini-2.0-flash-exp for best balance)
         """
-        # Check multiple environment variable names
+        # Check multiple environment variable names; GOOGLE_API_KEY is canonical.
         self.api_key = (
-            api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_AI_STUDIO_API_KEY")
+            api_key
+            or os.getenv("GOOGLE_API_KEY")
+            or os.getenv("GEMINI_API_KEY")
+            or os.getenv("GOOGLE_AI_STUDIO_API_KEY")
         )
         self.model_name = model_name
         self.model = None

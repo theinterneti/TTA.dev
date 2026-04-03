@@ -1630,16 +1630,25 @@ result = await workflow.execute(data, context)
             if name == "openrouter":
                 env_key = "OPENROUTER_API_KEY"
             elif name == "google":
-                env_key = "GEMINI_API_KEY"
+                env_key = "GOOGLE_API_KEY"
             elif name == "groq":
                 env_key = "GROQ_API_KEY"
             elif name == "ollama":
                 env_key = ""  # no key needed
 
+            # Google: accept GOOGLE_API_KEY (canonical) or GEMINI_API_KEY
+            # (backward-compat for users who set GEMINI_API_KEY manually).
+            if name == "google":
+                api_key_configured = bool(
+                    os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+                )
+            else:
+                api_key_configured = bool(env_key and os.environ.get(env_key))
+
             result.append(
                 {
                     "name": name,
-                    "api_key_configured": bool(env_key and os.environ.get(env_key)),
+                    "api_key_configured": api_key_configured,
                     "default_model": getattr(spec, "default_model", None),
                     "base_url": getattr(spec, "base_url", None),
                     "is_local": name == "ollama",

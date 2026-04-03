@@ -227,6 +227,69 @@ async def test_list_providers_ollama_is_local() -> None:
     assert ollama["is_local"] is True
 
 
+# ── llm_list_providers: GOOGLE_API_KEY / GEMINI_API_KEY resolution (issue #316) ─
+
+
+@pytest.mark.asyncio
+async def test_google_available_with_google_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Google provider is available when GOOGLE_API_KEY is set.
+
+    Arrange: set only GOOGLE_API_KEY in the environment.
+    Act:     call llm_list_providers via the MCP tool.
+    Assert:  google entry has api_key_configured=True.
+    """
+    monkeypatch.setenv("GOOGLE_API_KEY", "test-key-google")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+
+    mcp = create_server()
+    payload = await _call_tool(mcp, "llm_list_providers", {})
+
+    google = next(p for p in payload["providers"] if p["name"] == "google")
+    assert google["api_key_configured"] is True, (
+        "Google should appear available when GOOGLE_API_KEY is set"
+    )
+
+
+@pytest.mark.asyncio
+async def test_google_available_with_gemini_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Google provider is available when only GEMINI_API_KEY is set (backward compat).
+
+    Arrange: set only GEMINI_API_KEY in the environment (legacy behaviour).
+    Act:     call llm_list_providers via the MCP tool.
+    Assert:  google entry has api_key_configured=True.
+    """
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-gemini")
+
+    mcp = create_server()
+    payload = await _call_tool(mcp, "llm_list_providers", {})
+
+    google = next(p for p in payload["providers"] if p["name"] == "google")
+    assert google["api_key_configured"] is True, (
+        "Google should appear available when GEMINI_API_KEY is set (backward compat)"
+    )
+
+
+@pytest.mark.asyncio
+async def test_google_unavailable_when_no_key_set(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Google provider is unavailable when neither GOOGLE_API_KEY nor GEMINI_API_KEY is set.
+
+    Arrange: remove both GOOGLE_API_KEY and GEMINI_API_KEY from the environment.
+    Act:     call llm_list_providers via the MCP tool.
+    Assert:  google entry has api_key_configured=False.
+    """
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+
+    mcp = create_server()
+    payload = await _call_tool(mcp, "llm_list_providers", {})
+
+    google = next(p for p in payload["providers"] if p["name"] == "google")
+    assert google["api_key_configured"] is False, (
+        "Google should appear unavailable when neither key is set"
+    )
+
+
 # ── llm_recommend_model ───────────────────────────────────────────────────────
 
 
