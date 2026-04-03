@@ -819,6 +819,14 @@ class ModelRegistryPrimitive(WorkflowPrimitive[RegistryRequest, RegistryResponse
                 error="entry is required for register action",
             )
         entry = request.entry
+        # Apply pricing catalog — override cost_tier when the catalog has an entry
+        # for this provider-model pair.  Falls back to the static ModelEntry field
+        # so that unknown or unlisted models are unaffected.
+        from ttadev.primitives.llm.model_pricing import get_effective_cost_tier  # lazy import
+
+        entry.cost_tier = get_effective_cost_tier(
+            entry.provider, entry.model_id, fallback=entry.cost_tier
+        )
         key = self._key(entry.provider, entry.model_id)
         async with self._lock:
             self._registry[key] = entry

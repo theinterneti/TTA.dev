@@ -933,3 +933,67 @@ class TestExportSymbol:
             "SelectionPolicy",
         ):
             assert name in llm_pkg.__all__, f"{name!r} missing from __all__"
+
+
+# ── Pricing catalog integration ───────────────────────────────────────────────
+
+
+class TestPricingCatalogIntegration:
+    @pytest.mark.asyncio
+    async def test_pricing_override_applied_at_registration(self) -> None:
+        """Register a ModelEntry with cost_tier='unknown' for a catalog-known model.
+
+        After registration the entry stored in the registry must reflect the
+        catalog's cost_tier ('free' for groq/llama-3.3-70b-versatile) rather
+        than the caller-supplied 'unknown'.
+        """
+        reg = _registry()
+        ctx = _ctx()
+
+        # Arrange: entry with deliberately wrong cost_tier
+        entry = ModelEntry(
+            model_id="llama-3.3-70b-versatile",
+            provider="groq",
+            cost_tier="unknown",
+        )
+
+        # Act
+        reg_resp = await reg.execute(RegistryRequest(action="register", entry=entry), ctx)
+        assert reg_resp.registered is True
+
+        get_resp = await reg.execute(
+            RegistryRequest(action="get", provider="groq", model_id="llama-3.3-70b-versatile"),
+            ctx,
+        )
+
+        # Assert: catalog overrides the stale static field
+        assert get_resp.entry is not None
+        assert get_resp.entry.cost_tier == "free", (
+            f"Expected 'free' from pricing catalog, got {get_resp.entry.cost_tier!r}"
+        )
+
+    @pytest.mark.asyncio
+    async def test_unknown_model_keeps_static_cost_tier(self) -> None:
+        """Model not in the pricing catalog keeps the cost_tier from ModelEntry.
+
+        This ensures backward-compat — new or unlisted models are not silently
+        downgraded/upgraded by the catalog.
+        """
+        reg = _registry()
+        ctx = _ctx()
+
+        entry = ModelEntry(
+            model_id="my-custom-finetune-v3",
+            provider="groq",
+            cost_tier="low",
+        )
+        await reg.execute(RegistryRequest(action="register", entry=entry), ctx)
+
+        get_resp = await reg.execute(
+            RegistryRequest(action="get", provider="groq", model_id="my-custom-finetune-v3"),
+            ctx,
+        )
+        assert get_resp.entry is not None
+        assert get_resp.entry.cost_tier == "low", (
+            "Unlisted models must keep their static cost_tier as fallback"
+        )

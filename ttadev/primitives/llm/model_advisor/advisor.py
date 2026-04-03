@@ -120,6 +120,11 @@ def _classify_entry(entry: ModelEntry) -> str | None:
         return "paid"  # gemini-2.5-pro etc. are paid
 
     if entry.provider == "github":
+        # GitHub Models is free with GITHUB_TOKEN.
+        # Note: rate limits differ by model size — large models (gpt-4o,
+        # DeepSeek-R1, Llama 3.3-70B) allow 10 RPM / 50 RPD while small
+        # models (gpt-4o-mini, Phi-4, Llama 3.1-8B) allow 15 RPM / 150 RPD.
+        # See ttadev.primitives.llm.model_pricing.PROVIDER_PRICING for details.
         return "github-models"  # GitHub Models is free with GITHUB_TOKEN
 
     if entry.provider == "openrouter":

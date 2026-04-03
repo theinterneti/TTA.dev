@@ -40,6 +40,12 @@ from ttadev.primitives.llm.model_monitor import (
     MonitorRequest,
     MonitorResponse,
 )
+from ttadev.primitives.llm.model_pricing import (
+    PROVIDER_PRICING,
+    ModelPricing,
+    get_effective_cost_tier,
+    get_pricing,
+)
 from ttadev.primitives.llm.model_registry import (
     GEMINI_MODELS,
     GROQ_ROTATION_MODELS,
@@ -133,6 +139,11 @@ __all__ = [
     # model catalog
     "PROVIDER_SUMMARY",
     "print_catalog",
+    # model pricing
+    "ModelPricing",
+    "PROVIDER_PRICING",
+    "get_pricing",
+    "get_effective_cost_tier",
     # model router
     "ModelRouterPrimitive",
     "ModelRouterRequest",

@@ -1084,6 +1084,119 @@ for s in suggestions:
 
 ---
 
+### Model Pricing Catalog
+
+**Single source of truth for cost tiers and rate limits across all providers.**
+
+Pricing is a *time-varying* property of a provider-model relationship, not a fixed
+model attribute.  When Groq reprices a model or Gemini adds a free quota tier, you
+update `PROVIDER_PRICING` in one file — not 11 `ModelEntry` instances.
+
+**Import:**
+```python
+from ttadev.primitives.llm.model_pricing import (
+    ModelPricing,
+    PROVIDER_PRICING,
+    get_pricing,
+    get_effective_cost_tier,
+)
+# or from the llm package:
+from ttadev.primitives.llm import ModelPricing, PROVIDER_PRICING, get_pricing, get_effective_cost_tier
+```
+
+**Source:** [`ttadev/primitives/llm/model_pricing.py`](ttadev/primitives/llm/model_pricing.py)
+
+**`ModelPricing` dataclass** — one row in the pricing catalog:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `provider` | `str` | Provider key matching `ModelEntry.provider` |
+| `model_id` | `str` | Exact model ID or prefix (matched by `startswith`) |
+| `cost_tier` | `str` | `"free"` \| `"low"` \| `"medium"` \| `"high"` \| `"unknown"` |
+| `cost_per_1k_input_tokens` | `float \| None` | USD per 1 000 input tokens; `None` = unknown |
+| `cost_per_1k_output_tokens` | `float \| None` | USD per 1 000 output tokens; `None` = unknown |
+| `rate_limit_rpm` | `int \| None` | Requests per minute; `None` = unknown/unlimited |
+| `rate_limit_rpd` | `int \| None` | Requests per day; `None` = unknown/unlimited |
+| `as_of` | `str` | ISO date when pricing was last verified |
+| `notes` | `str` | Human-readable notes |
+
+**`get_pricing(provider, model_id)`** — full metadata lookup:
+```python
+p = get_pricing("groq", "llama-3.3-70b-versatile")
+assert p is not None
+assert p.cost_tier == "free"
+assert p.rate_limit_rpm == 30
+assert p.rate_limit_rpd == 14_400
+
+# GitHub Models — rate limits differ by model size
+large = get_pricing("github", "gpt-4o")        # rpd=50
+small = get_pricing("github", "gpt-4o-mini")   # rpd=150
+
+# Returns None for unknown models
+p = get_pricing("acme-cloud", "turbo-9000")
+assert p is None
+```
+
+**`get_effective_cost_tier(provider, model_id, fallback="unknown")`** — just the tier:
+```python
+tier = get_effective_cost_tier("openai", "gpt-4o")           # "high"
+tier = get_effective_cost_tier("gemini", "models/gemini-2.0-flash-lite")  # "free"
+tier = get_effective_cost_tier("acme", "mystery-model", fallback="medium")  # "medium"
+```
+
+**Automatic override at registration:**
+
+`ModelRegistryPrimitive._register()` calls `get_effective_cost_tier()` on every
+entry before storing it.  The catalog's `cost_tier` **wins** over the static
+`ModelEntry` field; if the model is not in the catalog the static field is kept
+unchanged (backward compatible).
+
+```python
+from ttadev.primitives.llm import ModelRegistryPrimitive, ModelEntry, RegistryRequest
+from ttadev.primitives.core.base import WorkflowContext
+
+reg = ModelRegistryPrimitive(prepopulate=False)
+ctx = WorkflowContext(workflow_id="demo")
+
+entry = ModelEntry(model_id="llama-3.3-70b-versatile", provider="groq", cost_tier="unknown")
+await reg.execute(RegistryRequest(action="register", entry=entry), ctx)
+# entry.cost_tier is now "free" — sourced from PROVIDER_PRICING
+```
+
+**Provider coverage (April 2026 snapshot):**
+
+| Provider | # Entries | Notes |
+|----------|-----------|-------|
+| `groq` | 10 | All free — rate limits vary by model (30–100 RPM) |
+| `gemini` | 7 | Mixed: flash-lite/1.5-flash free; 2.0-flash/2.5-flash low; pro medium |
+| `github` | 6 | All free — large models 50 RPD, small models 150 RPD |
+| `openrouter` | 10 | `:free` suffix → free; paid models low/high |
+| `together` | 3 | All low |
+| `anthropic` | 3 | haiku→medium, sonnet→high, opus→high |
+| `openai` | 3 | gpt-4o-mini→medium, gpt-4o→high, o3-mini→medium |
+
+**Ordering rule:** entries using prefix matching (`startswith`) must list more
+specific model IDs before shorter prefixes.  For example, `"gpt-4o-mini"` must
+come before `"gpt-4o"` in the same provider block, because
+`"gpt-4o-mini".startswith("gpt-4o")` is `True`.
+
+**Updating pricing:**
+```python
+# In ttadev/primitives/llm/model_pricing.py — change ONE entry:
+ModelPricing(
+    provider="groq",
+    model_id="llama-3.3-70b-versatile",
+    cost_tier="free",          # ← update here if Groq changes pricing
+    rate_limit_rpm=30,         # ← update here if rate limits change
+    as_of="2026-06-01",        # ← bump the date
+    ...
+)
+# All registrations and lookups instantly reflect the new value.
+# DO NOT edit ModelEntry in _DEFAULT_CLOUD_MODELS for pricing changes.
+```
+
+---
+
 ## Orchestration Primitives
 
 ### DelegationPrimitive
