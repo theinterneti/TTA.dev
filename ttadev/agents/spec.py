@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 from collections.abc import Callable
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from ttadev.agents.task import AgentResult, AgentTask
@@ -74,3 +74,7 @@ class AgentSpec:
     tools: list[AgentTool]
     quality_gates: list[QualityGate]
     handoff_triggers: list[HandoffTrigger]
+    # Optional: the task type and complexity this agent normally handles.
+    # Used by ModelRouterChatAdapter to automatically pick the best model.
+    # Import at runtime via ttadev.primitives.llm.TaskProfile.
+    default_task_profile: Any | None = None

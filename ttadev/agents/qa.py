@@ -8,6 +8,7 @@ from ttadev.agents._utils import _matches
 from ttadev.agents.base import AgentPrimitive
 from ttadev.agents.registry import _global_registry
 from ttadev.agents.spec import AgentSpec, AgentTool, HandoffTrigger, QualityGate, ToolRule
+from ttadev.primitives.llm import COMPLEXITY_MODERATE, TASK_GENERAL, TaskProfile
 
 if TYPE_CHECKING:
     from ttadev.agents.protocol import ChatPrimitive
@@ -119,6 +120,7 @@ QA_SPEC = AgentSpec(
             reason="Task involves performance analysis — routing to PerformanceAgent.",
         ),
     ],
+    default_task_profile=TaskProfile(task_type=TASK_GENERAL, complexity=COMPLEXITY_MODERATE),
 )
 
 

@@ -20,6 +20,7 @@ Composable with other primitives::
     workflow = TimeoutPrimitive(30) >> agent
 """
 
+from ttadev.agents.adapter import ModelRouterChatAdapter
 from ttadev.agents.base import AgentPrimitive, QualityGateError
 from ttadev.agents.developer import DEVELOPER_SPEC, DeveloperAgent
 from ttadev.agents.devops import DEVOPS_SPEC, DevOpsAgent
@@ -36,6 +37,8 @@ from ttadev.agents.task import AgentResult, AgentTask, Artifact
 from ttadev.agents.tool_call_loop import ToolCallLoop, ToolCallLoopError, ToolDefinition
 
 __all__ = [
+    # Router adapter
+    "ModelRouterChatAdapter",
     # Core
     "AgentPrimitive",
     "QualityGateError",

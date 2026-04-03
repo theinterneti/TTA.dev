@@ -12,6 +12,7 @@ from ttadev.primitives.observability.instrumented_primitive import InstrumentedP
 if TYPE_CHECKING:
     from ttadev.agents.protocol import ChatPrimitive
     from ttadev.primitives.core.base import WorkflowContext
+    from ttadev.primitives.llm.model_router import ModelRouterPrimitive
 
 
 class QualityGateError(RuntimeError):
@@ -122,3 +123,63 @@ class AgentPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
     @property
     def spec(self) -> AgentSpec:
         return self._spec
+
+    # ------------------------------------------------------------------
+    # Factory: power this agent with a ModelRouterPrimitive
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def with_router(
+        cls,
+        router: ModelRouterPrimitive,
+        mode: str = "default",
+        task_profile: Any | None = None,
+    ) -> AgentPrimitive:
+        """Create an instance of this agent backed by a ``ModelRouterPrimitive``.
+
+        The adapter automatically picks the best available model for the agent's
+        task type and complexity, falling through tiers (Ollama → Groq → Gemini)
+        as configured in the router.
+
+        ``task_profile`` defaults to ``cls._class_spec.default_task_profile`` when
+        the subclass declares one, so callers rarely need to pass it explicitly.
+
+        Example::
+
+            from ttadev.agents import DeveloperAgent
+            from ttadev.primitives.llm import ModelRouterPrimitive, RouterModeConfig, RouterTierConfig
+
+            router = ModelRouterPrimitive(
+                modes={
+                    "default": RouterModeConfig(
+                        tiers=[
+                            RouterTierConfig(provider="ollama"),
+                            RouterTierConfig(provider="groq"),
+                            RouterTierConfig(provider="gemini"),
+                        ]
+                    )
+                },
+                groq_api_key="...",
+                gemini_api_key="...",
+            )
+
+            agent = DeveloperAgent.with_router(router)  # uses TaskProfile.coding(COMPLEX)
+            result = await agent.execute(task, ctx)
+
+        Args:
+            router: A configured ``ModelRouterPrimitive`` instance.
+            mode: Routing mode key in the router (default: ``"default"``).
+            task_profile: Override the task profile from the spec. Pass ``None``
+                to use the spec's ``default_task_profile`` automatically.
+        """
+        from ttadev.agents.adapter import ModelRouterChatAdapter
+
+        # Resolve task_profile: explicit arg → spec default → None
+        resolved_profile = task_profile
+        if resolved_profile is None:
+            class_spec = getattr(cls, "_class_spec", None)
+            if class_spec is not None:
+                resolved_profile = class_spec.default_task_profile
+
+        adapter = ModelRouterChatAdapter(router, mode=mode, task_profile=resolved_profile)
+        return cls(model=adapter)  # type: ignore[call-arg]

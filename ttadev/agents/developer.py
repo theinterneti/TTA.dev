@@ -8,6 +8,7 @@ from ttadev.agents._utils import _matches
 from ttadev.agents.base import AgentPrimitive
 from ttadev.agents.registry import _global_registry
 from ttadev.agents.spec import AgentSpec, AgentTool, HandoffTrigger, QualityGate, ToolRule
+from ttadev.primitives.llm import COMPLEXITY_COMPLEX, TASK_CODING, TaskProfile
 
 if TYPE_CHECKING:
     from ttadev.agents.protocol import ChatPrimitive
@@ -90,6 +91,7 @@ DEVELOPER_SPEC = AgentSpec(
             reason="Task involves GitHub workflow — routing to GitHubAgent.",
         ),
     ],
+    default_task_profile=TaskProfile(task_type=TASK_CODING, complexity=COMPLEXITY_COMPLEX),
 )
 
 

@@ -8,6 +8,7 @@ from ttadev.agents._utils import _matches
 from ttadev.agents.base import AgentPrimitive
 from ttadev.agents.registry import _global_registry
 from ttadev.agents.spec import AgentSpec, AgentTool, HandoffTrigger, QualityGate, ToolRule
+from ttadev.primitives.llm import COMPLEXITY_COMPLEX, TASK_REASONING, TaskProfile
 
 if TYPE_CHECKING:
     from ttadev.agents.protocol import ChatPrimitive
@@ -99,6 +100,7 @@ SECURITY_SPEC = AgentSpec(
             reason="Task requires code changes — routing to DeveloperAgent.",
         ),
     ],
+    default_task_profile=TaskProfile(task_type=TASK_REASONING, complexity=COMPLEXITY_COMPLEX),
 )
 
 
