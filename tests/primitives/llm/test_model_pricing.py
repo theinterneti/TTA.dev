@@ -80,13 +80,13 @@ class TestGetPricing:
 
     def test_returns_correct_entry_for_gemini_flash_lite(self) -> None:
         """Gemini 2.0 Flash Lite is correctly identified as free."""
-        p = get_pricing("gemini", "models/gemini-2.0-flash-lite")
+        p = get_pricing("google", "models/gemini-2.0-flash-lite")
         assert p is not None
         assert p.cost_tier == "free"
 
     def test_returns_correct_entry_for_gemini_25_pro(self) -> None:
         """Gemini 2.5 Pro is correctly identified as medium."""
-        p = get_pricing("gemini", "models/gemini-2.5-pro")
+        p = get_pricing("google", "models/gemini-2.5-pro")
         assert p is not None
         assert p.cost_tier == "medium"
 
@@ -219,45 +219,45 @@ class TestGroqPricing:
 
 class TestGeminiPricing:
     def test_gemini_flash_lite_is_free(self) -> None:
-        p = get_pricing("gemini", "models/gemini-2.0-flash-lite")
+        p = get_pricing("google", "models/gemini-2.0-flash-lite")
         assert p is not None
         assert p.cost_tier == "free"
         assert p.rate_limit_rpd == 1_500
 
     def test_gemini_flash_lite_has_tpm(self) -> None:
-        p = get_pricing("gemini", "models/gemini-2.0-flash-lite")
+        p = get_pricing("google", "models/gemini-2.0-flash-lite")
         assert p is not None
         assert p.rate_limit_tpm == 250_000
 
     def test_gemini_15_flash_is_free(self) -> None:
-        p = get_pricing("gemini", "models/gemini-1.5-flash")
+        p = get_pricing("google", "models/gemini-1.5-flash")
         assert p is not None
         assert p.cost_tier == "free"
 
     def test_gemini_15_flash_has_tpm(self) -> None:
-        p = get_pricing("gemini", "models/gemini-1.5-flash")
+        p = get_pricing("google", "models/gemini-1.5-flash")
         assert p is not None
         assert p.rate_limit_tpm == 250_000
 
     def test_gemini_15_flash_8b_has_tpm(self) -> None:
-        p = get_pricing("gemini", "models/gemini-1.5-flash-8b")
+        p = get_pricing("google", "models/gemini-1.5-flash-8b")
         assert p is not None
         assert p.rate_limit_tpm == 250_000
 
     def test_gemini_20_flash_is_low(self) -> None:
-        p = get_pricing("gemini", "models/gemini-2.0-flash")
+        p = get_pricing("google", "models/gemini-2.0-flash")
         assert p is not None
         assert p.cost_tier == "low"
         assert p.cost_per_1k_input_tokens is not None
         assert p.cost_per_1k_input_tokens > 0
 
     def test_gemini_25_flash_is_low(self) -> None:
-        p = get_pricing("gemini", "models/gemini-2.5-flash")
+        p = get_pricing("google", "models/gemini-2.5-flash")
         assert p is not None
         assert p.cost_tier == "low"
 
     def test_gemini_15_pro_is_medium(self) -> None:
-        p = get_pricing("gemini", "models/gemini-1.5-pro")
+        p = get_pricing("google", "models/gemini-1.5-pro")
         assert p is not None
         assert p.cost_tier == "medium"
 
@@ -526,7 +526,7 @@ class TestCatalogIntegrity:
         providers_in_catalog = {p.provider for p in PROVIDER_PRICING}
         required = {
             "groq",
-            "gemini",
+            "google",
             "github",
             "openrouter",
             "openai",

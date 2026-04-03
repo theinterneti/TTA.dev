@@ -56,7 +56,7 @@ class LLMProvider(StrEnum):
     ANTHROPIC = "anthropic"
     OPENAI = "openai"
     OLLAMA = "ollama"
-    GEMINI = "gemini"
+    GOOGLE = "google"
     OPENROUTER = "openrouter"
     TOGETHER = "together"
     XAI = "xai"
@@ -330,7 +330,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.ANTHROPIC: self._call_anthropic,
             LLMProvider.OPENAI: self._call_openai,
             LLMProvider.OLLAMA: self._call_ollama,
-            LLMProvider.GEMINI: self._call_gemini,
+            LLMProvider.GOOGLE: self._call_google,
             LLMProvider.OPENROUTER: self._call_openrouter,
             LLMProvider.TOGETHER: self._call_together,
             LLMProvider.XAI: self._call_xai,
@@ -359,7 +359,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             LLMProvider.ANTHROPIC: self._stream_anthropic,
             LLMProvider.OPENAI: self._stream_openai,
             LLMProvider.OLLAMA: self._stream_ollama,
-            LLMProvider.GEMINI: self._stream_gemini,
+            LLMProvider.GOOGLE: self._stream_google,
             LLMProvider.OPENROUTER: self._stream_openrouter,
             LLMProvider.TOGETHER: self._stream_together,
             LLMProvider.XAI: self._stream_xai,
@@ -890,7 +890,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                     if data.get("done"):
                         break
 
-    async def _call_gemini(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
+    async def _call_google(self, request: LLMRequest, ctx: WorkflowContext) -> LLMResponse:
         """Call Google Gemini via its OpenAI-compatible endpoint.
 
         Uses ``https://generativelanguage.googleapis.com/v1beta/openai`` — no
@@ -914,7 +914,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
 
         from ttadev.primitives.llm.providers import PROVIDERS
 
-        spec = PROVIDERS["gemini"]
+        spec = PROVIDERS["google"]
         key = self._api_key or os.getenv(spec.env_var)
         if not key:
             raise ValueError(
@@ -934,7 +934,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         return LLMResponse(
             content=choice.message.content or "",
             model=resp.model,
-            provider="gemini",
+            provider="google",
             usage={
                 "prompt_tokens": resp.usage.prompt_tokens,
                 "completion_tokens": resp.usage.completion_tokens,
@@ -945,7 +945,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             finish_reason=getattr(choice, "finish_reason", None),
         )
 
-    async def _stream_gemini(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
+    async def _stream_google(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
         """Stream tokens from Google Gemini via its OpenAI-compatible endpoint.
 
         Args:
@@ -964,7 +964,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
 
         from ttadev.primitives.llm.providers import PROVIDERS
 
-        spec = PROVIDERS["gemini"]
+        spec = PROVIDERS["google"]
         key = self._api_key or os.getenv(spec.env_var)
         if not key:
             raise ValueError(

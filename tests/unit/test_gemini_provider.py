@@ -69,27 +69,27 @@ def _make_fake_oai_client(response: object) -> MagicMock:
 
 
 def test_gemini_provider_enum_value() -> None:
-    """LLMProvider.GEMINI must have string value 'gemini'."""
-    assert LLMProvider.GEMINI.value == "gemini"
+    """LLMProvider.GOOGLE must have string value 'gemini'."""
+    assert LLMProvider.GOOGLE.value == "google"
 
 
 # ---------------------------------------------------------------------------
-# 2. Successful _call_gemini via OpenAI-compat endpoint
+# 2. Successful _call_google via OpenAI-compat endpoint
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
-async def test_call_gemini_success() -> None:
-    """_call_gemini returns LLMResponse with correct content and provider.
+async def test_call_google_success() -> None:
+    """_call_google returns LLMResponse with correct content and provider.
 
     Arrange: fake openai.AsyncOpenAI returning a fixed text response.
-    Act:     call _call_gemini directly.
+    Act:     call _call_google directly.
     Assert:  LLMResponse.content matches; provider == 'gemini'; model correct.
     """
     fake_resp = _make_fake_oai_response(content="Hello from Gemini")
     fake_client = _make_fake_oai_client(fake_resp)
 
-    primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key="fake-key")
+    primitive = UniversalLLMPrimitive(provider=LLMProvider.GOOGLE, api_key="fake-key")
     request = _request()
     ctx = _ctx()
 
@@ -97,11 +97,11 @@ async def test_call_gemini_success() -> None:
         "openai.AsyncOpenAI",
         return_value=fake_client,
     ):
-        result = await primitive._call_gemini(request, ctx)
+        result = await primitive._call_google(request, ctx)
 
     assert isinstance(result, LLMResponse)
     assert result.content == "Hello from Gemini"
-    assert result.provider == "gemini"
+    assert result.provider == "google"
     assert result.model == "models/gemini-2.5-flash-lite"
 
 
@@ -111,11 +111,11 @@ async def test_call_gemini_success() -> None:
 
 
 @pytest.mark.asyncio
-async def test_call_gemini_maps_usage_metadata() -> None:
-    """_call_gemini populates prompt_tokens and completion_tokens from usage.
+async def test_call_google_maps_usage_metadata() -> None:
+    """_call_google populates prompt_tokens and completion_tokens from usage.
 
     Arrange: fake response with known prompt_tokens / completion_tokens.
-    Act:     call _call_gemini.
+    Act:     call _call_google.
     Assert:  LLMResponse.usage dict contains expected values.
     """
     fake_resp = _make_fake_oai_response(
@@ -125,7 +125,7 @@ async def test_call_gemini_maps_usage_metadata() -> None:
     )
     fake_client = _make_fake_oai_client(fake_resp)
 
-    primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key="fake-key")
+    primitive = UniversalLLMPrimitive(provider=LLMProvider.GOOGLE, api_key="fake-key")
     request = _request()
     ctx = _ctx()
 
@@ -133,7 +133,7 @@ async def test_call_gemini_maps_usage_metadata() -> None:
         "openai.AsyncOpenAI",
         return_value=fake_client,
     ):
-        result = await primitive._call_gemini(request, ctx)
+        result = await primitive._call_google(request, ctx)
 
     assert result.usage is not None
     assert result.usage["prompt_tokens"] == 42
@@ -146,48 +146,48 @@ async def test_call_gemini_maps_usage_metadata() -> None:
 
 
 @pytest.mark.asyncio
-async def test_call_gemini_missing_key_raises() -> None:
-    """_call_gemini raises ValueError when no API key is available.
+async def test_call_google_missing_key_raises() -> None:
+    """_call_google raises ValueError when no API key is available.
 
     Arrange: no api_key arg; GOOGLE_API_KEY not in environment.
-    Act:     call _call_gemini.
+    Act:     call _call_google.
     Assert:  ValueError raised; message mentions GOOGLE_API_KEY.
     """
     import os
 
-    primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key=None)
+    primitive = UniversalLLMPrimitive(provider=LLMProvider.GOOGLE, api_key=None)
     ctx = _ctx()
 
     # Ensure GOOGLE_API_KEY is absent from env for this test.
     env_without_key = {k: v for k, v in os.environ.items() if k != "GOOGLE_API_KEY"}
     with patch.dict(os.environ, env_without_key, clear=True):
         with pytest.raises(ValueError, match="GOOGLE_API_KEY"):
-            await primitive._call_gemini(_request(), ctx)
+            await primitive._call_google(_request(), ctx)
 
 
 # ---------------------------------------------------------------------------
-# 5. execute() dispatch to _call_gemini
+# 5. execute() dispatch to _call_google
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
 async def test_execute_dispatches_gemini() -> None:
-    """execute() with provider=GEMINI delegates to _call_gemini.
+    """execute() with provider=GEMINI delegates to _call_google.
 
-    Arrange: UniversalLLMPrimitive(GEMINI), patch _call_gemini.
+    Arrange: UniversalLLMPrimitive(GEMINI), patch _call_google.
     Act:     await primitive.execute(request, ctx).
-    Assert:  _call_gemini was called once with the correct arguments.
+    Assert:  _call_google was called once with the correct arguments.
     """
-    primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key="test-key")
+    primitive = UniversalLLMPrimitive(provider=LLMProvider.GOOGLE, api_key="test-key")
     request = _request()
     ctx = _ctx()
 
     expected_response = LLMResponse(
-        content="dispatched!", model="models/gemini-2.5-flash-lite", provider="gemini"
+        content="dispatched!", model="models/gemini-2.5-flash-lite", provider="google"
     )
     with patch.object(
         primitive,
-        "_call_gemini",
+        "_call_google",
         new_callable=AsyncMock,
         return_value=expected_response,
     ) as mock_call:
@@ -204,21 +204,21 @@ async def test_execute_dispatches_gemini() -> None:
 
 @pytest.mark.asyncio
 async def test_use_compat_routes_to_generic_helper() -> None:
-    """use_compat=True bypasses _call_gemini and uses _call_openai_compat.
+    """use_compat=True bypasses _call_google and uses _call_openai_compat.
 
     Arrange: UniversalLLMPrimitive(GEMINI, use_compat=True).
     Act:     patch _call_openai_compat; await execute().
     Assert:  _call_openai_compat called with provider_name='gemini';
-             _call_gemini never called.
+             _call_google never called.
     """
     primitive = UniversalLLMPrimitive(
-        provider=LLMProvider.GEMINI, api_key="test-key", use_compat=True
+        provider=LLMProvider.GOOGLE, api_key="test-key", use_compat=True
     )
     request = _request()
     ctx = _ctx()
 
     expected_response = LLMResponse(
-        content="compat!", model="models/gemini-2.5-flash-lite", provider="gemini"
+        content="compat!", model="models/gemini-2.5-flash-lite", provider="google"
     )
 
     async def fake_compat(
@@ -228,7 +228,7 @@ async def test_use_compat_routes_to_generic_helper() -> None:
 
     with (
         patch.object(primitive, "_call_openai_compat", side_effect=fake_compat) as mock_compat,
-        patch.object(primitive, "_call_gemini", new_callable=AsyncMock) as mock_native,
+        patch.object(primitive, "_call_google", new_callable=AsyncMock) as mock_native,
     ):
         result = await primitive.execute(request, ctx)
 

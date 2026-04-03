@@ -592,10 +592,10 @@ class TestGeminiModelsPrefix:
         router = ModelRouterPrimitive(
             {
                 "test": RouterModeConfig(
-                    tiers=[RouterTierConfig(provider="gemini", model="gemini-2.5-flash")]
+                    tiers=[RouterTierConfig(provider="google", model="gemini-2.5-flash")]
                 )
             },
-            gemini_api_key="fake-key",  # pragma: allowlist secret
+            google_api_key="fake-key",  # pragma: allowlist secret
         )
         _, mock_client, mock_cm = _mock_openai_compat_response("gemini reply")
 
@@ -617,10 +617,10 @@ class TestGeminiModelsPrefix:
         router = ModelRouterPrimitive(
             {
                 "test": RouterModeConfig(
-                    tiers=[RouterTierConfig(provider="gemini", model="models/gemini-2.5-flash")]
+                    tiers=[RouterTierConfig(provider="google", model="models/gemini-2.5-flash")]
                 )
             },
-            gemini_api_key="fake-key",  # pragma: allowlist secret
+            google_api_key="fake-key",  # pragma: allowlist secret
         )
         _, mock_client, mock_cm = _mock_openai_compat_response("gemini reply")
 
@@ -640,8 +640,8 @@ class TestGeminiModelsPrefix:
         from ttadev.primitives.llm.providers import PROVIDERS
 
         router = ModelRouterPrimitive(
-            {"test": RouterModeConfig(tiers=[RouterTierConfig(provider="gemini")])},
-            gemini_api_key="fake-key",  # pragma: allowlist secret
+            {"test": RouterModeConfig(tiers=[RouterTierConfig(provider="google")])},
+            google_api_key="fake-key",  # pragma: allowlist secret
         )
         _, mock_client, mock_cm = _mock_openai_compat_response("gemini default reply")
 
@@ -658,7 +658,7 @@ class TestGeminiModelsPrefix:
                 _ctx(),
             )
 
-        default = PROVIDERS["gemini"].default_model
+        default = PROVIDERS["google"].default_model
         assert default.startswith("models/"), (
             f"providers.py default_model should have prefix: {default!r}"
         )

@@ -817,7 +817,7 @@ class TestPrePopulatedCloudModels:
         providers = {e.provider for e in resp.entries}
         assert "openai" in providers
         assert "groq" in providers
-        assert "gemini" in providers
+        assert "google" in providers
 
     @pytest.mark.asyncio
     async def test_pre_populated_gpt4o_mini(self) -> None:
@@ -855,7 +855,7 @@ class TestPrePopulatedCloudModels:
         ctx = _ctx()
         resp = await reg.execute(
             RegistryRequest(
-                action="get", provider="gemini", model_id="models/gemini-2.0-flash-lite"
+                action="get", provider="google", model_id="models/gemini-2.0-flash-lite"
             ),
             ctx,
         )

@@ -165,7 +165,7 @@ class TTAChecker(ast.NodeVisitor):
         expensive_patterns = [
             "openai",
             "anthropic",
-            "gemini",
+            "google",
             "llm",
             "model",
             "api",

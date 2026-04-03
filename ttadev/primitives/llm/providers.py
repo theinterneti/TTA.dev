@@ -125,8 +125,8 @@ PROVIDERS: dict[str, ProviderSpec] = {
         sdk_package=None,
         preferred_path="compat",
     ),
-    "gemini": ProviderSpec(
-        name="gemini",
+    "google": ProviderSpec(
+        name="google",
         # Google publishes a full OpenAI-compatible endpoint:
         # https://ai.google.dev/gemini-api/docs/openai
         # google.generativeai is deprecated; google.genai is the new SDK but
@@ -204,7 +204,7 @@ def get_provider(name: str) -> ProviderSpec:
     """Look up a provider by name.
 
     Args:
-        name: Canonical provider name (e.g. ``"groq"``, ``"gemini"``).
+        name: Canonical provider name (e.g. ``"groq"``, ``"google"``).
 
     Returns:
         The matching :class:`ProviderSpec`.

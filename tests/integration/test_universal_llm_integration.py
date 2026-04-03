@@ -352,7 +352,7 @@ async def test_gemini_execute() -> None:
 
     Arrange: GEMINI_API_KEY or GOOGLE_API_KEY set, google-generativeai SDK installed.
     Act:     UniversalLLMPrimitive.execute() against the live Gemini API.
-    Assert:  LLMResponse.content is non-empty, provider == 'gemini', model is set.
+    Assert:  LLMResponse.content is non-empty, provider == 'google', model is set.
     """
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if not api_key:
@@ -364,7 +364,7 @@ async def test_gemini_execute() -> None:
     )
 
     primitive = UniversalLLMPrimitive(
-        provider=LLMProvider.GEMINI,
+        provider=LLMProvider.GOOGLE,
         api_key=api_key,
     )
     request = LLMRequest(
@@ -377,7 +377,7 @@ async def test_gemini_execute() -> None:
 
     assert isinstance(response, LLMResponse)
     assert response.content.strip(), "Expected non-empty content from Gemini"
-    assert response.provider == "gemini"
+    assert response.provider == "google"
     assert response.model
 
 
@@ -402,7 +402,7 @@ async def test_gemini_stream() -> None:
     )
 
     primitive = UniversalLLMPrimitive(
-        provider=LLMProvider.GEMINI,
+        provider=LLMProvider.GOOGLE,
         api_key=api_key,
     )
     request = LLMRequest(

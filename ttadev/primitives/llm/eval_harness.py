@@ -50,7 +50,7 @@ COST_PER_1K_OUTPUT_TOKENS: dict[str, float] = {
     "together": 0.0,  # free tier
     "openrouter": 0.0,  # many free models; default 0
     "ollama": 0.0,  # local
-    "gemini": 0.0,  # gemini flash free tier
+    "google": 0.0,  # gemini flash free tier
 }
 
 

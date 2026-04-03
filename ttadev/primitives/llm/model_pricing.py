@@ -233,7 +233,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
     # e.g. "models/gemini-2.0-flash-lite".startswith("models/gemini-2.0-flash") is True,
     # so the -lite entry must come first.
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="models/gemini-2.5-pro",
         cost_tier="medium",
         cost_per_1k_input_tokens=0.00125,  # $1.25 / 1M tokens
@@ -243,7 +243,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemini 2.5 Pro — most capable Gemini model.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="models/gemini-2.5-flash",
         cost_tier="low",
         cost_per_1k_input_tokens=0.000075,  # $0.075 / 1M tokens
@@ -253,7 +253,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemini 2.5 Flash — pay-per-token, no free tier.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="models/gemini-2.0-flash-lite",
         cost_tier="free",
         cost_per_1k_input_tokens=0.0,
@@ -265,7 +265,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemini 2.0 Flash Lite — free tier with daily limit.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="models/gemini-2.0-flash",
         cost_tier="low",
         cost_per_1k_input_tokens=0.000075,  # $0.075 / 1M tokens
@@ -275,7 +275,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemini 2.0 Flash — pay-per-token.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="models/gemini-1.5-flash-8b",
         cost_tier="free",
         cost_per_1k_input_tokens=0.0,
@@ -287,7 +287,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemini 1.5 Flash 8B — free tier.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="models/gemini-1.5-flash",
         cost_tier="free",
         cost_per_1k_input_tokens=0.0,
@@ -299,7 +299,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemini 1.5 Flash — free tier.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="models/gemini-1.5-pro",
         cost_tier="medium",
         cost_per_1k_input_tokens=0.00125,  # $1.25 / 1M tokens
@@ -314,7 +314,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
     # Limits do NOT increase on paid tiers (unlike Gemini).
     # Reference: https://ai.google.dev/gemma/docs/gemma_api/rate_limits
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="gemma-3-27b-it",
         cost_tier="free",
         cost_per_1k_input_tokens=0.0,
@@ -326,7 +326,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemma 3 27B — Google AI Studio free, 14.4K RPD. Same key as Gemini.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="gemma-3-12b-it",
         cost_tier="free",
         cost_per_1k_input_tokens=0.0,
@@ -338,7 +338,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemma 3 12B — Google AI Studio free, 14.4K RPD. Same key as Gemini.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="gemma-3-4b-it",
         cost_tier="free",
         cost_per_1k_input_tokens=0.0,
@@ -350,7 +350,7 @@ PROVIDER_PRICING: list[ModelPricing] = [
         notes="Gemma 3 4B — Google AI Studio free, 14.4K RPD. Same key as Gemini.",
     ),
     ModelPricing(
-        provider="gemini",
+        provider="google",
         model_id="gemma-3-1b-it",
         cost_tier="free",
         cost_per_1k_input_tokens=0.0,
@@ -1056,7 +1056,7 @@ def get_pricing(provider: str, model_id: str) -> ModelPricing | None:
     The first matching entry wins.
 
     Args:
-        provider: Provider key, e.g. ``"groq"``, ``"gemini"``, ``"openai"``.
+        provider: Provider key, e.g. ``"groq"``, ``"google"``, ``"openai"``.
         model_id: Exact model identifier, e.g. ``"llama-3.3-70b-versatile"``.
 
     Returns:
@@ -1090,7 +1090,7 @@ def get_effective_cost_tier(
     model not yet listed in the catalog.
 
     Args:
-        provider: Provider key, e.g. ``"groq"``, ``"gemini"``, ``"openai"``.
+        provider: Provider key, e.g. ``"groq"``, ``"google"``, ``"openai"``.
         model_id: Exact model identifier.
         fallback: Value to return when no pricing entry exists.  Defaults to
             ``"unknown"``.

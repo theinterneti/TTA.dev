@@ -1629,7 +1629,7 @@ result = await workflow.execute(data, context)
             env_key = f"{name.upper()}_API_KEY"
             if name == "openrouter":
                 env_key = "OPENROUTER_API_KEY"
-            elif name == "gemini":
+            elif name == "google":
                 env_key = "GEMINI_API_KEY"
             elif name == "groq":
                 env_key = "GROQ_API_KEY"

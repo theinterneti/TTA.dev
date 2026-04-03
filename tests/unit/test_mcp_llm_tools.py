@@ -202,7 +202,7 @@ async def test_list_providers_returns_known_providers() -> None:
     assert "providers" in payload
     assert "count" in payload
     provider_names = {p["name"] for p in payload["providers"]}
-    for expected in ("groq", "gemini", "ollama", "openrouter"):
+    for expected in ("groq", "google", "ollama", "openrouter"):
         assert expected in provider_names, f"Provider missing: {expected}"
 
 

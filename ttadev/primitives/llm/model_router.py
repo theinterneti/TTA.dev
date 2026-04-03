@@ -105,7 +105,7 @@ _OLLAMA_DEFAULT_URL = PROVIDERS["ollama"].base_url.removesuffix("/v1")
 _GROQ_API_URL = f"{PROVIDERS['groq'].base_url}/chat/completions"
 _TOGETHER_API_URL = f"{PROVIDERS['together'].base_url}/chat/completions"
 _OPENROUTER_API_URL = f"{PROVIDERS['openrouter'].base_url}/chat/completions"
-_GEMINI_API_URL = f"{PROVIDERS['gemini'].base_url}/chat/completions"
+_GOOGLE_API_URL = f"{PROVIDERS['google'].base_url}/chat/completions"
 
 # Regex to strip <think>...</think> reasoning tokens emitted by some models
 # (e.g. qwen-qwen3-32b, deepseek-r1).  Applied per-tier when strip_thinking=True.
@@ -140,7 +140,7 @@ class RouterTierConfig:
 
     Attributes:
         provider: Which provider to use.  One of ``"ollama"``, ``"groq"``,
-            ``"together"``, ``"openrouter"``/``"or"``, ``"gemini"``, or
+            ``"together"``, ``"openrouter"``/``"or"``, ``"google"``, or
             ``"auto"`` (auto-selected free model via FreeModelTracker →
             OpenRouter).
         model: Primary model identifier.  When *models* is also set, this is
@@ -153,7 +153,7 @@ class RouterTierConfig:
             Example for Gemini::
 
                 RouterTierConfig(
-                    provider="gemini",
+                    provider="google",
                     models=[
                         "models/gemini-flash-lite-latest",
                         "models/gemini-3.1-flash-lite-preview",
@@ -227,7 +227,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
     - ``"groq"``        — Groq cloud, OpenAI-compat (``GROQ_API_KEY``)
     - ``"together"``    — Together AI, OpenAI-compat (``TOGETHER_API_KEY``)
     - ``"openrouter"``  — OpenRouter (pinned model or auto-selected free)
-    - ``"gemini"``      — Google Gemini, OpenAI-compat (``GOOGLE_API_KEY``)
+    - ``"google"``      — Google (Gemini/Gemma), OpenAI-compat, OpenAI-compat (``GOOGLE_API_KEY``)
     - ``"auto"``        — ``FreeModelTracker`` picks the best free OpenRouter model
     """
 
@@ -240,7 +240,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         openrouter_api_key: str | None = None,
         groq_api_key: str | None = None,
         together_api_key: str | None = None,
-        gemini_api_key: str | None = None,
+        google_api_key: str | None = None,
         tier_cooldown_seconds: int = 30,
     ) -> None:
         """Initialise the router.
@@ -256,7 +256,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             groq_api_key: Groq API key.  Defaults to ``GROQ_API_KEY`` env var.
             together_api_key: Together AI key.  Defaults to
                 ``TOGETHER_API_KEY`` env var.
-            gemini_api_key: Google API key for Gemini.  Defaults to
+            google_api_key: Google API key for Gemini.  Defaults to
                 ``GOOGLE_API_KEY`` env var.
             tier_cooldown_seconds: Seconds to skip a tier after it returns a
                 429 rate-limit response.  Set to ``0`` to disable cooldown
@@ -267,7 +267,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         self._or_api_key = openrouter_api_key or os.getenv(PROVIDERS["openrouter"].env_var, "")
         self._groq_api_key = groq_api_key or os.getenv(PROVIDERS["groq"].env_var, "")
         self._together_api_key = together_api_key or os.getenv(PROVIDERS["together"].env_var, "")
-        self._gemini_api_key = gemini_api_key or os.getenv(PROVIDERS["gemini"].env_var, "")
+        self._google_api_key = google_api_key or os.getenv(PROVIDERS["google"].env_var, "")
         self._ollama_url = (ollama_url or os.getenv("OLLAMA_URL", _OLLAMA_DEFAULT_URL)).rstrip("/")
         self._tracker = free_tracker or FreeModelTracker(api_key=self._or_api_key or None)
         self._discovery = ProviderModelDiscovery()
@@ -587,7 +587,7 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             )
             return content, model
 
-        if provider == "gemini":
+        if provider == "google":
             # Build candidate list: explicit > discovered > provider default.
             if tier.models:
                 candidates = tier.models
@@ -596,11 +596,11 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             else:
                 # No model specified — discover live from the provider endpoint.
                 discovered = await self._discovery.for_provider(
-                    "gemini",
-                    base_url=PROVIDERS["gemini"].base_url,
-                    api_key=self._gemini_api_key or None,
+                    "google",
+                    base_url=PROVIDERS["google"].base_url,
+                    api_key=self._google_api_key or None,
                 )
-                candidates = discovered or [PROVIDERS["gemini"].default_model]
+                candidates = discovered or [PROVIDERS["google"].default_model]
 
             # Ensure every candidate has the required `models/` prefix.
             candidates = [m if m.startswith("models/") else f"models/{m}" for m in candidates]
@@ -608,17 +608,17 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                 candidates = rank_models_for_task(candidates, task_profile)
             return await self._try_model_candidates(
                 candidates,
-                _GEMINI_API_URL,
-                self._gemini_api_key,
+                _GOOGLE_API_URL,
+                self._google_api_key,
                 prompt,
                 system,
                 tier.params,
-                discovery_provider="gemini",
+                discovery_provider="google",
             )
 
         raise ValueError(
             f"Unknown provider {provider!r}. "
-            "Use 'ollama', 'groq', 'together', 'openrouter', 'gemini', or 'auto'"
+            "Use 'ollama', 'groq', 'together', 'openrouter', 'google', or 'auto'"
         )
 
     async def _try_model_candidates(

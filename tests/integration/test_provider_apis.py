@@ -384,7 +384,7 @@ async def test_gemini_auto_prefix() -> None:
     Arrange: GOOGLE_API_KEY; ModelRouterPrimitive single-tier mode using
              'models/gemini-2.0-flash' (correctly prefixed by the caller).
     Act:     router.execute() dispatches to the Gemini OAI-compat endpoint.
-    Assert:  Non-empty content, provider == 'gemini'.
+    Assert:  Non-empty content, provider == 'google'.
 
     This is the acceptance baseline for Gemini routing.  When the future
     'auto-prefix' feature lands in ModelRouterPrimitive._call_tier(), the
@@ -395,11 +395,11 @@ async def test_gemini_auto_prefix() -> None:
 
     # Arrange — single tier, correct prefix
     modes = {
-        "gemini": RouterModeConfig(
+        "google": RouterModeConfig(
             description="Gemini auto-prefix acceptance test",
             tiers=[
                 RouterTierConfig(
-                    provider="gemini",
+                    provider="google",
                     model="models/gemini-2.0-flash",
                     params={"max_tokens": 32},
                 )
@@ -407,7 +407,7 @@ async def test_gemini_auto_prefix() -> None:
         )
     }
     router = ModelRouterPrimitive(modes=modes, gemini_api_key=api_key)
-    req = ModelRouterRequest(mode="gemini", prompt=_PROMPT)
+    req = ModelRouterRequest(mode="google", prompt=_PROMPT)
 
     # Act
     t0 = time.perf_counter()
@@ -421,7 +421,7 @@ async def test_gemini_auto_prefix() -> None:
         f"content={response.content.strip()[:60]!r}"
     )
     assert response.content.strip(), "Expected non-empty content from Gemini router tier"
-    assert response.provider == "gemini"
+    assert response.provider == "google"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -654,7 +654,7 @@ async def test_router_gemini_tier() -> None:
 
     Arrange: GOOGLE_API_KEY; single-tier mode for Gemini with models/ prefix.
     Act:     router.execute() dispatches to the Gemini OAI-compat endpoint.
-    Assert:  Non-empty content, provider == 'gemini'.
+    Assert:  Non-empty content, provider == 'google'.
 
     Baseline acceptance test for the Gemini routing tier.  A future
     'auto-prefix' implementation would allow the tier config to omit 'models/'.
@@ -663,11 +663,11 @@ async def test_router_gemini_tier() -> None:
 
     # Arrange
     modes = {
-        "gemini": RouterModeConfig(
+        "google": RouterModeConfig(
             description="Single Gemini tier",
             tiers=[
                 RouterTierConfig(
-                    provider="gemini",
+                    provider="google",
                     model="models/gemini-2.0-flash",
                     params={"max_tokens": 32},
                 )
@@ -675,7 +675,7 @@ async def test_router_gemini_tier() -> None:
         )
     }
     router = ModelRouterPrimitive(modes=modes, gemini_api_key=api_key)
-    req = ModelRouterRequest(mode="gemini", prompt=_PROMPT)
+    req = ModelRouterRequest(mode="google", prompt=_PROMPT)
 
     # Act
     t0 = time.perf_counter()
@@ -689,4 +689,4 @@ async def test_router_gemini_tier() -> None:
         f"content={response.content.strip()[:60]!r}"
     )
     assert response.content.strip(), "Expected non-empty content from Gemini router tier"
-    assert response.provider == "gemini"
+    assert response.provider == "google"

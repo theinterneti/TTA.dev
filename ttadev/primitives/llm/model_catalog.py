@@ -61,7 +61,7 @@ PROVIDER_SUMMARY: dict[str, dict] = {
             "load across rate-limit buckets."
         ),
     },
-    "gemini": {
+    "google": {
         "name": "Google Gemini",
         "type": "cloud",
         "free_tier": True,

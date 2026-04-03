@@ -200,7 +200,7 @@ async def test_gemini_llm_round_trip() -> None:
 
     Arrange: GEMINI_API_KEY (or GOOGLE_API_KEY) env var, google-generativeai SDK.
     Act:     execute() against the live Gemini API using gemini-2.0-flash-lite.
-    Assert:  non-empty content, provider == 'gemini', usage is None or dict.
+    Assert:  non-empty content, provider == 'google', usage is None or dict.
     """
     pytest.importorskip(
         "google.generativeai",
@@ -213,14 +213,14 @@ async def test_gemini_llm_round_trip() -> None:
             "Neither GEMINI_API_KEY nor GOOGLE_API_KEY set — skipping Gemini integration test"
         )
 
-    primitive = UniversalLLMPrimitive(provider=LLMProvider.GEMINI, api_key=api_key)
+    primitive = UniversalLLMPrimitive(provider=LLMProvider.GOOGLE, api_key=api_key)
     request = LLMRequest(model="gemini-2.0-flash-lite", messages=_MESSAGES)
 
-    response = await primitive.execute(request, _ctx("gemini"))
+    response = await primitive.execute(request, _ctx("google"))
 
     assert isinstance(response, LLMResponse)
     assert response.content.strip(), "Expected non-empty content from Gemini"
-    assert response.provider == LLMProvider.GEMINI
+    assert response.provider == LLMProvider.GOOGLE
     assert response.usage is None or isinstance(response.usage, dict)
 
 

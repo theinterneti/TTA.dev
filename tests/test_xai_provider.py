@@ -52,7 +52,7 @@ def test_openai_compat_providers_includes_xai():
 
 def test_gemini_uses_openai_compat_url():
     """Gemini ProviderSpec must point at Google's OpenAI-compatible endpoint."""
-    spec = PROVIDERS["gemini"]
+    spec = PROVIDERS["google"]
     assert "generativelanguage.googleapis.com" in spec.base_url
     assert spec.openai_compat is True
 

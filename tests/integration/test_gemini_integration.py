@@ -30,10 +30,10 @@ async def test_gemini_integration_basic_response() -> None:
 
     Arrange: real GEMINI_API_KEY from environment; simple 'say hi' prompt.
     Act:     execute() against the live Gemini API.
-    Assert:  LLMResponse with non-empty content and provider == 'gemini'.
+    Assert:  LLMResponse with non-empty content and provider == 'google'.
     """
     primitive = UniversalLLMPrimitive(
-        provider=LLMProvider.GEMINI,
+        provider=LLMProvider.GOOGLE,
         api_key=GEMINI_API_KEY,
     )
     request = LLMRequest(
@@ -46,5 +46,5 @@ async def test_gemini_integration_basic_response() -> None:
 
     assert isinstance(result, LLMResponse)
     assert result.content.strip()
-    assert result.provider == "gemini"
+    assert result.provider == "google"
     assert result.model == "gemini-2.0-flash"

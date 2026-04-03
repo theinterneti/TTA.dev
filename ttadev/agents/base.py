@@ -155,7 +155,7 @@ class AgentPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
                         tiers=[
                             RouterTierConfig(provider="ollama"),
                             RouterTierConfig(provider="groq"),
-                            RouterTierConfig(provider="gemini"),
+                            RouterTierConfig(provider="google"),
                         ]
                     )
                 },

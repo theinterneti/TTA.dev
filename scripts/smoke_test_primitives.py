@@ -157,7 +157,7 @@ async def test_router_gemini(prompt: str) -> Result:
     if not api_key:
         return Result("router-gemini+task_profile", "SKIP", 0.0, "GOOGLE_API_KEY not set")
 
-    modes = {"coding": RouterModeConfig(tiers=[RouterTierConfig(provider="gemini")])}
+    modes = {"coding": RouterModeConfig(tiers=[RouterTierConfig(provider="google")])}
     router = ModelRouterPrimitive(modes, gemini_api_key=api_key)
     profile = TaskProfile.coding(COMPLEXITY_MODERATE)
     req = ModelRouterRequest(mode="coding", prompt=prompt, task_profile=profile)

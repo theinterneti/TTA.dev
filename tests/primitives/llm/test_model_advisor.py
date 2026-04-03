@@ -331,7 +331,7 @@ class TestModelAdvisor:
         return {
             "ollama": [],
             "groq": [],
-            "gemini-free": [],
+            "google-free": [],
             "github-models": [],
             "or-free": or_free_models or [],
             "or-specific": [],
@@ -402,7 +402,7 @@ class TestModelAdvisor:
         empty_tier_map: dict[str, list[str]] = {
             "ollama": [],
             "groq": [],
-            "gemini-free": [],
+            "google-free": [],
             "github-models": [],
             "or-free": [],
             "or-specific": [],
@@ -610,13 +610,13 @@ class TestTierChain:
         """Gemini free-tier models should map to gemini-free, not paid."""
         entry = ModelEntry(
             model_id="gemini-2.0-flash-lite",
-            provider="gemini",
+            provider="google",
             display_name="Gemini 2.0 Flash Lite",
             context_length=1_000_000,
             cost_tier="free",
             supports_tool_calling=True,
         )
-        assert _classify_entry(entry) == "gemini-free"
+        assert _classify_entry(entry) == "google-free"
 
     def test_groq_classified_as_groq_tier(self) -> None:
         """All Groq models should map to the groq tier."""

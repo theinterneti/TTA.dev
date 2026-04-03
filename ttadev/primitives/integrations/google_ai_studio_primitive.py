@@ -5,7 +5,7 @@ Provides free access to Gemini Pro and Flash models.
 
 .. deprecated::
     Use :class:`ttadev.primitives.llm.universal_llm_primitive.UniversalLLMPrimitive`
-    with ``provider=LLMProvider.GEMINI`` instead.  ``UniversalLLMPrimitive`` routes
+    with ``provider=LLMProvider.GOOGLE`` instead.  ``UniversalLLMPrimitive`` routes
     Gemini calls through Google's OpenAI-compatible endpoint
     (``https://generativelanguage.googleapis.com/v1beta/openai``) via the ``openai``
     SDK — no ``google-generativeai`` package required.
@@ -15,7 +15,7 @@ import warnings
 
 warnings.warn(
     "GoogleAIStudioPrimitive is deprecated and will be removed in a future release. "
-    "Use UniversalLLMPrimitive(provider=LLMProvider.GEMINI) instead, which calls "
+    "Use UniversalLLMPrimitive(provider=LLMProvider.GOOGLE) instead, which calls "
     "Google's OpenAI-compatible endpoint without the google-generativeai SDK. "
     "See ttadev.primitives.llm.universal_llm_primitive for details.",
     DeprecationWarning,
@@ -64,7 +64,7 @@ class GoogleAIStudioPrimitive(WorkflowPrimitive[GoogleAIStudioRequest, GoogleAIS
     - No credit card required
 
     .. deprecated::
-        Use :class:`UniversalLLMPrimitive` with ``provider=LLMProvider.GEMINI`` instead.
+        Use :class:`UniversalLLMPrimitive` with ``provider=LLMProvider.GOOGLE`` instead.
 
     Example:
         ```python

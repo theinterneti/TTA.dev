@@ -327,7 +327,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     # ── Gemini (models/ prefix for OpenAI-compat endpoint) ────────────────────
     ModelEntry(
         model_id="models/gemini-2.5-flash",
-        provider="gemini",
+        provider="google",
         display_name="Gemini 2.5 Flash",
         context_length=1_048_576,
         supports_tool_calling=True,
@@ -338,7 +338,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     ),
     ModelEntry(
         model_id="models/gemini-2.5-pro",
-        provider="gemini",
+        provider="google",
         display_name="Gemini 2.5 Pro",
         context_length=1_048_576,
         supports_tool_calling=True,
@@ -349,7 +349,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     ),
     ModelEntry(
         model_id="models/gemini-2.0-flash",
-        provider="gemini",
+        provider="google",
         display_name="Gemini 2.0 Flash",
         context_length=1_048_576,
         supports_tool_calling=True,
@@ -360,7 +360,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     ),
     ModelEntry(
         model_id="models/gemini-2.0-flash-lite",
-        provider="gemini",
+        provider="google",
         display_name="Gemini 2.0 Flash Lite",
         context_length=1_048_576,
         supports_tool_calling=False,
@@ -371,7 +371,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     ),
     ModelEntry(
         model_id="models/gemini-1.5-flash",
-        provider="gemini",
+        provider="google",
         display_name="Gemini 1.5 Flash",
         context_length=1_048_576,
         supports_tool_calling=True,
@@ -382,7 +382,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     ),
     ModelEntry(
         model_id="models/gemini-1.5-pro",
-        provider="gemini",
+        provider="google",
         display_name="Gemini 1.5 Pro",
         context_length=2_097_152,
         supports_tool_calling=True,
@@ -395,7 +395,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     # 14,400 RPD / 30 RPM / 15K TPM — much higher RPD than Gemini frontier models.
     ModelEntry(
         model_id="gemma-3-27b-it",
-        provider="gemini",
+        provider="google",
         display_name="Gemma 3 27B (Google AI Studio)",
         context_length=131_072,
         supports_tool_calling=True,
@@ -406,7 +406,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     ),
     ModelEntry(
         model_id="gemma-3-12b-it",
-        provider="gemini",
+        provider="google",
         display_name="Gemma 3 12B (Google AI Studio)",
         context_length=131_072,
         supports_tool_calling=True,
@@ -417,7 +417,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     ),
     ModelEntry(
         model_id="gemma-3-4b-it",
-        provider="gemini",
+        provider="google",
         display_name="Gemma 3 4B (Google AI Studio)",
         context_length=131_072,
         supports_tool_calling=True,
@@ -428,7 +428,7 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
     ),
     ModelEntry(
         model_id="gemma-3-1b-it",
-        provider="gemini",
+        provider="google",
         display_name="Gemma 3 1B (Google AI Studio)",
         context_length=32_768,
         supports_tool_calling=False,

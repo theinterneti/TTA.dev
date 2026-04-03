@@ -15,7 +15,7 @@ Example::
                 tiers=[
                     RouterTierConfig(provider="ollama"),
                     RouterTierConfig(provider="groq"),
-                    RouterTierConfig(provider="gemini"),
+                    RouterTierConfig(provider="google"),
                 ]
             )
         },

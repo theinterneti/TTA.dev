@@ -18,7 +18,7 @@ Example::
 
     # Get an ordered list of Gemini models to try (best → fallback)
     models = await discovery.for_provider(
-        "gemini",
+        "google",
         base_url="https://generativelanguage.googleapis.com/v1beta/openai",
         api_key=os.environ["GOOGLE_API_KEY"],
     )
@@ -30,7 +30,7 @@ Example::
 
     # Get next working model (automatically skips exhausted ones)
     model = await discovery.next_working(
-        "gemini",
+        "google",
         base_url="...",
         api_key="...",
     )
@@ -197,7 +197,7 @@ class ProviderModelDiscovery:
         patterns = (
             prefer_patterns
             if prefer_patterns is not None
-            else (_GEMINI_PREFER_PATTERNS if provider == "gemini" else [])
+            else (_GEMINI_PREFER_PATTERNS if provider == "google" else [])
         )
         ordered = _sort_models(raw, patterns)
 
