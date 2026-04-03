@@ -5,6 +5,8 @@ from __future__ import annotations
 import pytest
 
 from ttadev.workflows.llm_provider import (
+    NoLLMProviderError,
+    _is_provider_error,
     get_llm_client,
     get_llm_provider_chain,
 )
@@ -76,3 +78,253 @@ class TestGetLlmProviderChain:
 
         chain = get_llm_provider_chain()
         assert chain[0].model == "anthropic/claude-3-haiku:free"
+
+
+class TestNoLLMProviderError:
+    """Tests for NoLLMProviderError — issue #287."""
+
+    def test_is_exception(self) -> None:
+        """NoLLMProviderError must be a subclass of Exception."""
+        assert issubclass(NoLLMProviderError, Exception)
+
+    def test_default_message_contains_groq(self) -> None:
+        """Default message mentions Groq as option 1."""
+        err = NoLLMProviderError()
+        assert "Groq" in str(err)
+        assert "GROQ_API_KEY" in str(err)
+
+    def test_default_message_contains_openrouter(self) -> None:
+        """Default message mentions OpenRouter as option 2."""
+        err = NoLLMProviderError()
+        assert "OpenRouter" in str(err)
+        assert "OPENROUTER_API_KEY" in str(err)
+
+    def test_default_message_contains_ollama(self) -> None:
+        """Default message mentions Ollama as option 3."""
+        err = NoLLMProviderError()
+        assert "Ollama" in str(err)
+        assert "ollama pull" in str(err)
+
+    def test_default_message_references_getting_started(self) -> None:
+        """Default message references GETTING_STARTED.md."""
+        err = NoLLMProviderError()
+        assert "GETTING_STARTED.md" in str(err)
+
+    def test_user_message_matches_str(self) -> None:
+        """user_message() returns the same text as str(err)."""
+        err = NoLLMProviderError()
+        assert err.user_message() == str(err)
+
+    def test_reason_stored(self) -> None:
+        """Technical reason is preserved on the error object."""
+        err = NoLLMProviderError(reason="groq: 401 Unauthorized")
+        assert err.reason == "groq: 401 Unauthorized"
+
+    def test_reason_default_empty_string(self) -> None:
+        """reason defaults to empty string when not provided."""
+        err = NoLLMProviderError()
+        assert err.reason == ""
+
+    def test_can_be_raised_and_caught(self) -> None:
+        """NoLLMProviderError can be raised and caught normally."""
+        with pytest.raises(NoLLMProviderError, match="No LLM provider"):
+            raise NoLLMProviderError
+
+    def test_can_be_caught_as_base_exception(self) -> None:
+        """NoLLMProviderError is caught by bare except Exception."""
+        caught: Exception | None = None
+        try:
+            raise NoLLMProviderError(reason="test")
+        except Exception as exc:
+            caught = exc
+        assert isinstance(caught, NoLLMProviderError)
+
+
+class TestIsProviderError:
+    """Tests for _is_provider_error() — issue #287."""
+
+    def test_httpx_connect_error_is_provider_error(self) -> None:
+        """httpx.ConnectError (Ollama not running) → True."""
+        import httpx
+
+        exc = httpx.ConnectError("Connection refused")
+        assert _is_provider_error(exc) is True
+
+    def test_httpx_connect_timeout_is_provider_error(self) -> None:
+        """httpx.ConnectTimeout → True."""
+        import httpx
+
+        exc = httpx.ConnectTimeout("Timed out")
+        assert _is_provider_error(exc) is True
+
+    def test_connection_refused_error_is_provider_error(self) -> None:
+        """stdlib ConnectionRefusedError → True."""
+        exc = ConnectionRefusedError("Connection refused")
+        assert _is_provider_error(exc) is True
+
+    def test_openai_authentication_error_is_provider_error(self) -> None:
+        """openai.AuthenticationError (bad API key) → True."""
+        from unittest.mock import MagicMock
+
+        import openai
+
+        mock_response = MagicMock()
+        mock_response.request = MagicMock()
+        exc = openai.AuthenticationError(
+            message="Incorrect API key",
+            response=mock_response,
+            body=None,
+        )
+        assert _is_provider_error(exc) is True
+
+    def test_openai_not_found_error_is_provider_error(self) -> None:
+        """openai.NotFoundError (model not found / wrong endpoint) → True."""
+        from unittest.mock import MagicMock
+
+        import openai
+
+        mock_response = MagicMock()
+        mock_response.request = MagicMock()
+        exc = openai.NotFoundError(
+            message="Model not found",
+            response=mock_response,
+            body=None,
+        )
+        assert _is_provider_error(exc) is True
+
+    def test_openai_api_connection_error_is_provider_error(self) -> None:
+        """openai.APIConnectionError → True."""
+        import openai
+
+        exc = openai.APIConnectionError(request=None)  # type: ignore[arg-type]
+        assert _is_provider_error(exc) is True
+
+    def test_value_error_is_not_provider_error(self) -> None:
+        """Generic ValueError is not a provider error."""
+        exc = ValueError("something unrelated")
+        assert _is_provider_error(exc) is False
+
+    def test_runtime_error_is_not_provider_error(self) -> None:
+        """Generic RuntimeError is not a provider error."""
+        exc = RuntimeError("workflow failed")
+        assert _is_provider_error(exc) is False
+
+    def test_key_error_is_not_provider_error(self) -> None:
+        """KeyError is not a provider error."""
+        exc = KeyError("missing_key")
+        assert _is_provider_error(exc) is False
+
+
+class TestCliWorkflowRunErrorHandling:
+    """Tests for the CLI _cmd_run error-handling path — issue #287."""
+
+    def _make_fake_args(self, **overrides: object) -> object:
+        """Build a minimal argparse.Namespace-like object for _cmd_run."""
+        import argparse
+
+        defaults = {
+            "name": "feature_dev",
+            "goal": "add login",
+            "dry_run": False,
+            "no_confirm": False,
+            "track_l0": False,
+        }
+        defaults.update(overrides)
+        return argparse.Namespace(**defaults)
+
+    def test_no_provider_error_returns_exit_1(self, capsys: pytest.CaptureFixture) -> None:
+        """When the orchestrator raises NoLLMProviderError, _cmd_run returns 1."""
+        from unittest.mock import AsyncMock, patch
+
+        from ttadev.cli.workflow import _cmd_run
+        from ttadev.workflows.llm_provider import NoLLMProviderError
+        from ttadev.workflows.prebuilt import feature_dev_workflow
+
+        workflows = {"feature_dev": feature_dev_workflow}
+        args = self._make_fake_args()
+
+        with patch(
+            "ttadev.workflows.orchestrator.WorkflowOrchestrator.execute",
+            new=AsyncMock(side_effect=NoLLMProviderError(reason="no key")),
+        ):
+            rc = _cmd_run(workflows, args, None)  # type: ignore[arg-type]
+
+        assert rc == 1
+        captured = capsys.readouterr()
+        assert "No LLM provider" in captured.err
+
+    def test_openai_auth_error_shows_friendly_message(self, capsys: pytest.CaptureFixture) -> None:
+        """openai.AuthenticationError during run → friendly message, rc=1."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
+        import openai
+
+        from ttadev.cli.workflow import _cmd_run
+        from ttadev.workflows.prebuilt import feature_dev_workflow
+
+        workflows = {"feature_dev": feature_dev_workflow}
+        args = self._make_fake_args()
+
+        mock_response = MagicMock()
+        mock_response.request = MagicMock()
+        auth_exc = openai.AuthenticationError(
+            message="Incorrect API key",
+            response=mock_response,
+            body=None,
+        )
+        with patch(
+            "ttadev.workflows.orchestrator.WorkflowOrchestrator.execute",
+            new=AsyncMock(side_effect=auth_exc),
+        ):
+            rc = _cmd_run(workflows, args, None)  # type: ignore[arg-type]
+
+        assert rc == 1
+        captured = capsys.readouterr()
+        assert "No LLM provider" in captured.err
+        assert "GROQ_API_KEY" in captured.err
+
+    def test_httpx_connect_error_shows_friendly_message(
+        self, capsys: pytest.CaptureFixture
+    ) -> None:
+        """httpx.ConnectError (Ollama down) during run → friendly message, rc=1."""
+        from unittest.mock import AsyncMock, patch
+
+        import httpx
+
+        from ttadev.cli.workflow import _cmd_run
+        from ttadev.workflows.prebuilt import feature_dev_workflow
+
+        workflows = {"feature_dev": feature_dev_workflow}
+        args = self._make_fake_args()
+
+        conn_exc = httpx.ConnectError("Connection refused")
+        with patch(
+            "ttadev.workflows.orchestrator.WorkflowOrchestrator.execute",
+            new=AsyncMock(side_effect=conn_exc),
+        ):
+            rc = _cmd_run(workflows, args, None)  # type: ignore[arg-type]
+
+        assert rc == 1
+        captured = capsys.readouterr()
+        assert "No LLM provider" in captured.err
+        assert "ollama pull" in captured.err
+
+    def test_unrelated_error_is_reraised(self) -> None:
+        """Non-provider exceptions (e.g. RuntimeError) propagate unchanged."""
+        from unittest.mock import AsyncMock, patch
+
+        import pytest
+
+        from ttadev.cli.workflow import _cmd_run
+        from ttadev.workflows.prebuilt import feature_dev_workflow
+
+        workflows = {"feature_dev": feature_dev_workflow}
+        args = self._make_fake_args()
+
+        boom = RuntimeError("something completely different")
+        with patch(
+            "ttadev.workflows.orchestrator.WorkflowOrchestrator.execute",
+            new=AsyncMock(side_effect=boom),
+        ):
+            with pytest.raises(RuntimeError, match="something completely different"):
+                _cmd_run(workflows, args, None)  # type: ignore[arg-type]

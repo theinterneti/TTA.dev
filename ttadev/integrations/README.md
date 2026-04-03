@@ -1,323 +1,227 @@
-# tta-dev-integrations
+# ttadev/integrations
 
-**Production-ready integration primitives for TTA.dev**
+**Auth utilities and CRUD helpers for TTA.dev**
 
-**Status:** 🎯 **STRATEGIC PIVOT** - Focus on free models + Cline integration
-
----
-
-## 🎯 What is tta-dev-integrations?
-
-Pre-built primitives for common AI application dependencies with **focus on FREE models and Cline integration**.
-
-**Design Goal:** Enable vibe coders to build production apps in 30 minutes **without paying for API access**.
-
-### 💡 Strategic Direction
-
-**Key Insight:** Cline provides excellent integration with free model providers:
-- **Google AI Studio + Gemini** - Free tier, nearly as effective as paid options
-- **OpenRouter** - Aggregates multiple providers
-- **HuggingFace** - Open source models
-
-**Recommendation:** Use Cline as your LLM integration layer. TTA.dev provides:
-- Database primitives (Supabase, PostgreSQL, SQLite)
-- Auth primitives (Clerk, Auth0, JWT)
-- Model selection guidance (free vs paid)
-- Workflow orchestration with adaptive primitives
-
-### Available Integrations
-
-| Category | Provider | Status | Free Tier | Install |
-|----------|----------|--------|-----------|---------|
-| **LLM** | **Cline** (recommended) | ✅ Use directly | ✅ Yes | Built into VS Code |
-| **LLM** | Google AI Studio + Gemini | ✅ Recommended | ✅ Yes | Via Cline |
-| **LLM** | OpenRouter | ✅ Available | ⚠️ Varies | Via Cline |
-| **LLM** | HuggingFace | ✅ Available | ✅ Yes | Via Cline |
-| **LLM** | Ollama (Local) | 🚧 Future | ✅ Yes | Local install |
-| **Database** | Supabase | ✅ Skeleton | ✅ Yes (generous) | `pip install 'tta-dev-integrations[supabase]'` |
-| **Database** | PostgreSQL | 🚧 Planned | ⚠️ Varies | `pip install 'tta-dev-integrations[database]'` |
-| **Database** | SQLite | 🚧 Planned | ✅ Yes | `pip install 'tta-dev-integrations[database]'` |
-| **Auth** | Clerk | 🚧 Planned | ✅ Yes (10k users) | `pip install 'tta-dev-integrations[auth]'` |
-| **Auth** | JWT | 🚧 Planned | ✅ Yes | `pip install 'tta-dev-integrations[auth]'` |
+> ⚠️ **Looking for LLM integrations (Ollama, Groq, OpenRouter, etc.)?**
+> They live in **`ttadev/primitives/integrations/`** — see the
+> [LLM Primitives section](#-llm-integrations-the-real-ones) below.
 
 ---
 
-## 🚀 Quick Start
+## 📂 What lives where
 
-### Recommended Setup (100% Free)
+| Path | What it is | Import path |
+|------|-----------|-------------|
+| `ttadev/integrations/` | Auth utilities and CRUD helpers (this directory) | `from ttadev.integrations import ...` |
+| `ttadev/primitives/integrations/` | ✅ **Working LLM primitives** (Ollama, Groq, OpenRouter, …) | `from ttadev.primitives.integrations import ...` |
+| `ttadev/integrations/src/tta_dev_integrations/` | Legacy stub package (`tta-dev-integrations`) — kept for compatibility | `from tta_dev_integrations import ...` |
 
-**Prerequisites:**
-- VS Code with Cline extension
-- Google AI Studio API key (free from https://aistudio.google.com/)
+---
 
-**Architecture:**
-```
-Your App → TTA.dev Primitives → Cline → Google Gemini (Free)
-                ↓
-         Supabase (Free Tier)
-```
+## ✅ What `ttadev/integrations/` provides
 
-### Installation
+This directory contains **fully working** auth and database utilities with
+**zero external dependencies**:
 
-```bash
-# Install database integration only
-pip install 'tta-dev-integrations[supabase]'
+### Auth (`ttadev/integrations/auth/`)
 
-# Or install all integrations
-pip install 'tta-dev-integrations[all]'
-```
+| Module | Exports | Description |
+|--------|---------|-------------|
+| `auth/api_key.py` | `generate_api_key`, `verify_api_key`, `ApiKey`, `ApiKeyStore` | SHA-256–hashed API key lifecycle |
+| `auth/session.py` | `create_session`, `verify_session`, `SessionToken`, `SessionPayload` | HMAC-signed stateless session tokens |
 
-### Using Cline for LLM Operations
+### Database (`ttadev/integrations/db/`)
 
-**Instead of writing LLM primitives, use Cline directly:**
+| Module | Exports | Description |
+|--------|---------|-------------|
+| `db/crud.py` | `AsyncCRUDStore[T]` | Generic async CRUD store (in-memory, DB-swappable) |
 
-1. **Install Cline** in VS Code
-2. **Configure Google AI Studio:**
-   - Get free API key from https://aistudio.google.com/
-   - Add to Cline settings
-   - Select Gemini model (gemini-1.5-pro recommended)
-
-3. **Use Cline in your workflow:**
-   - Cline handles LLM requests
-   - TTA.dev handles orchestration, caching, retry
-   - Supabase handles data storage
-
-**Why This Works:**
-- ✅ Cline provides excellent multi-provider support
-- ✅ Google Gemini free tier is generous
-- ✅ No need to manage API keys in your app
-- ✅ TTA.dev primitives handle workflow orchestration
-
-#### Database Integration (Supabase)
+### Quick start
 
 ```python
-from tta_dev_integrations import SupabasePrimitive, DatabaseQuery
-
-# Initialize
-db = SupabasePrimitive(
-    url="https://xxx.supabase.co",  # or use SUPABASE_URL env var
-    key="eyJhbGc..."  # or use SUPABASE_KEY env var
+from ttadev.integrations import (
+    generate_api_key,
+    ApiKeyStore,
+    create_session,
+    verify_session,
+    AsyncCRUDStore,
 )
 
-# Query database
-query = DatabaseQuery(
-    query="SELECT * FROM users WHERE email = :email",
-    params={"email": "user@example.com"}
+# API key lifecycle
+plaintext, record = generate_api_key(scopes=["read", "write"])
+store = ApiKeyStore()
+store.store(record)
+assert store.is_valid(plaintext)
+store.revoke(record.key_id)
+
+# Session tokens (HMAC-signed, no external JWT library required)
+token = create_session(user_id="u_123", scopes=["admin"], secret_key="s3cr3t")
+payload = verify_session(token.token, secret_key="s3cr3t")
+
+# Generic async CRUD store
+from dataclasses import dataclass
+
+@dataclass
+class User:
+    id: str
+    name: str
+
+users: AsyncCRUDStore[User] = AsyncCRUDStore()
+# await users.create(User(id="1", name="Alice"))
+# await users.get("1")
+# await users.update("1", {"name": "Alicia"})
+# await users.delete("1")
+```
+
+---
+
+## 🚀 LLM Integrations — the real ones
+
+All LLM provider primitives are **fully implemented** in
+`ttadev/primitives/integrations/`. The table below reflects their actual
+status as of the current codebase — none of them are stubs or futures.
+
+| Provider | Class | Free Tier | Notes |
+|----------|-------|-----------|-------|
+| **Ollama** | `OllamaPrimitive` | ✅ Yes (local) | Wraps official `ollama` SDK |
+| **Groq** | `GroqPrimitive` | ✅ Yes | Ultra-fast inference via `groq` SDK |
+| **OpenRouter** | `OpenRouterPrimitive` | ⚠️ Varies | HTTP-based; no extra SDK needed |
+| **OpenAI** | `OpenAIPrimitive` | ❌ Paid | Wraps `openai` SDK |
+| **Anthropic** | `AnthropicPrimitive` | ❌ Paid | Wraps `anthropic` SDK |
+| **Google AI Studio** | `GoogleAIStudioPrimitive` | ✅ Yes | Wraps `google-generativeai` SDK |
+| **HuggingFace** | `HuggingFacePrimitive` | ✅ Yes | Inference API |
+| **Together AI** | `TogetherAIPrimitive` | ⚠️ Varies | REST-based |
+| **Supabase** | `SupabasePrimitive` | ✅ Yes | Wraps `supabase` SDK |
+| **SQLite** | `SQLitePrimitive` | ✅ Yes | Wraps `aiosqlite` |
+| **E2B** | `E2BPrimitive`, `CodeExecutionPrimitive` | ⚠️ Trial | Sandbox code execution |
+| **LangGraph** | `LangGraphPrimitive` | ✅ Yes | Wraps `langgraph` |
+
+### Correct import path
+
+```python
+# ✅ Correct — use this
+from ttadev.primitives.integrations import (
+    OllamaPrimitive,
+    GroqPrimitive,
+    OpenRouterPrimitive,
+    OpenAIPrimitive,
+    AnthropicPrimitive,
+    GoogleAIStudioPrimitive,
+    HuggingFacePrimitive,
+    TogetherAIPrimitive,
+    SupabasePrimitive,
+    SQLitePrimitive,
 )
 
-result = await db.execute(query, context)
-print(result.rows)
+# ❌ Wrong — ttadev.integrations only has auth/CRUD helpers
+# from ttadev.integrations import OllamaPrimitive  # ImportError
+```
+
+### Usage examples
+
+```python
+import asyncio
+from ttadev.primitives.integrations import OllamaPrimitive, GroqPrimitive, OpenRouterPrimitive
+from ttadev.primitives.integrations.ollama_primitive import OllamaRequest
+from ttadev.primitives.integrations.groq_primitive import GroqRequest
+from ttadev.primitives.integrations.openrouter_primitive import OpenRouterRequest
+from ttadev.primitives.core.base import WorkflowContext
+
+ctx = WorkflowContext()
+
+# Ollama — local, free, no API key required
+ollama = OllamaPrimitive(model="llama3.2")
+response = await ollama.execute(
+    OllamaRequest(messages=[{"role": "user", "content": "Hello!"}]), ctx
+)
+
+# Groq — fast cloud inference, free tier available
+groq = GroqPrimitive(model="llama-3.3-70b-versatile", api_key="gsk_...")
+response = await groq.execute(
+    GroqRequest(messages=[{"role": "user", "content": "Hello!"}]), ctx
+)
+
+# OpenRouter — route to free flagship models
+router = OpenRouterPrimitive(model="deepseek/deepseek-r1", api_key="sk-or-...")
+response = await router.execute(
+    OpenRouterRequest(messages=[{"role": "user", "content": "Hello!"}]), ctx
+)
+```
+
+### Composing with other primitives
+
+```python
+from ttadev.primitives import CachePrimitive, RetryPrimitive
+from ttadev.primitives.integrations import GroqPrimitive
+
+# Cache + Retry + Groq
+workflow = (
+    CachePrimitive(ttl=3600) >>   # 1-hour response cache
+    RetryPrimitive(max_attempts=3) >>
+    GroqPrimitive(model="llama-3.3-70b-versatile")
+)
 ```
 
 ---
 
 ## 🏗️ Architecture
 
-All integration primitives:
+All LLM integration primitives in `ttadev/primitives/integrations/`:
 
-1. **Inherit from TTA.dev primitive base classes**
-   - Automatic retry with exponential backoff
-   - OpenTelemetry observability
-   - Type-safe interfaces
-
-2. **Follow consistent patterns**
-   - Request/Response models with Pydantic
-   - Environment variable defaults
-   - Graceful degradation
-
-3. **Compose with other primitives**
-   ```python
-   from ttadev.primitives import CachePrimitive, RetryPrimitive
-
-   # Cache + Retry + OpenAI
-   workflow = (
-       CachePrimitive(ttl=3600) >>  # 1 hour cache
-       RetryPrimitive(max_attempts=3) >>
-       OpenAIPrimitive(model="gpt-4")
-   )
-   ```
-
----
-
-## 📦 Package Structure
-
-```
-tta-dev-integrations/
-├── src/tta_dev_integrations/
-│   ├── llm/                    # LLM integrations
-│   │   ├── base.py             # ✅ Base class (complete)
-│   │   ├── openai_primitive.py # ✅ OpenAI (skeleton)
-│   │   ├── anthropic_primitive.py  # 🚧 Anthropic (TODO)
-│   │   └── ollama_primitive.py     # 🚧 Ollama (TODO)
-│   ├── database/               # Database integrations
-│   │   ├── base.py             # ✅ Base class (complete)
-│   │   ├── supabase_primitive.py   # ✅ Supabase (skeleton)
-│   │   ├── postgresql_primitive.py # 🚧 PostgreSQL (TODO)
-│   │   └── sqlite_primitive.py     # 🚧 SQLite (TODO)
-│   └── auth/                   # Auth integrations
-│       ├── base.py             # ✅ Base class (complete)
-│       ├── clerk_primitive.py  # 🚧 Clerk (TODO)
-│       ├── auth0_primitive.py  # 🚧 Auth0 (TODO)
-│       └── jwt_primitive.py    # 🚧 JWT (TODO)
-├── tests/                      # Test suite
-├── examples/                   # Working examples
-└── pyproject.toml              # ✅ Package config (complete)
-```
-
-### Completion Status
-
-- ✅ **Infrastructure (100%)**: Package structure, base classes, pyproject.toml
-- ✅ **OpenAI (40%)**: Skeleton with request/response flow
-- ✅ **Supabase (40%)**: Skeleton with client initialization
-- 🚧 **Other integrations (0%)**: Placeholder files only
-
----
-
-## 🎓 Design Principles
-
-### 1. Fail Gracefully
+1. **Inherit from `WorkflowPrimitive`** — automatic observability, type-safe interfaces
+2. **Use Pydantic request/response models** — validated at runtime
+3. **Read credentials from environment variables by default** — pass explicitly or set env vars
+4. **Degrade gracefully** when optional SDK is not installed — clear `ImportError` with install hint
 
 ```python
-# Optional dependencies with clear error messages
-try:
-    from openai import AsyncOpenAI
-    OPENAI_AVAILABLE = True
-except ImportError:
-    OPENAI_AVAILABLE = False
-
-# Raise helpful error when used
-if not OPENAI_AVAILABLE:
-    raise ImportError(
-        "OpenAI package not installed. "
-        "Install with: pip install 'tta-dev-integrations[openai]'"
-    )
-```
-
-### 2. Environment Variable Defaults
-
-```python
-# Convention: Provider credentials from env vars
-llm = OpenAIPrimitive()  # Uses OPENAI_API_KEY env var
-db = SupabasePrimitive()  # Uses SUPABASE_URL and SUPABASE_KEY
-
-# Or pass explicitly
-llm = OpenAIPrimitive(api_key="sk-...")
-```
-
-### 3. Consistent Interfaces
-
-All primitives follow the same pattern:
-
-```python
-class SomePrimitive(BasePrimitive):
+class SomePrimitive(WorkflowPrimitive[RequestModel, ResponseModel]):
     async def _execute_impl(
         self,
         input_data: RequestModel,
-        context: WorkflowContext
+        context: WorkflowContext,
     ) -> ResponseModel:
         # Implementation
-        pass
+        ...
 ```
 
 ---
 
-## 📝 Contributing
+## 📦 Directory structure
 
-### Adding a New Integration
-
-1. **Create primitive file**
-   ```bash
-   touch src/tta_dev_integrations/category/provider_primitive.py
-   ```
-
-2. **Inherit from base class**
-   ```python
-   from tta_dev_integrations.category.base import BasePrimitive
-
-   class ProviderPrimitive(BasePrimitive):
-       async def _execute_impl(self, input_data, context):
-           # Your implementation
-           pass
-   ```
-
-3. **Add optional dependency**
-   ```toml
-   # pyproject.toml
-   [project.optional-dependencies]
-   provider = ["provider-sdk>=1.0.0"]
-   ```
-
-4. **Update exports**
-   ```python
-   # src/tta_dev_integrations/__init__.py
-   try:
-       from tta_dev_integrations.category.provider_primitive import ProviderPrimitive
-   except ImportError:
-       ProviderPrimitive = None
-   ```
-
-5. **Add tests and examples**
-
-### Testing
-
-```bash
-# Run tests
-uv run pytest -v
-
-# With specific integration
-uv run pytest -v -k openai
-
-# Integration tests (require credentials)
-RUN_INTEGRATION=true uv run pytest -v -m integration
 ```
+ttadev/integrations/          ← YOU ARE HERE (auth/CRUD helpers)
+├── __init__.py               # Exports auth + CRUD utilities
+├── auth/
+│   ├── api_key.py            # ✅ API key generation, hashing, verification
+│   └── session.py            # ✅ HMAC-signed session tokens
+├── db/
+│   └── crud.py               # ✅ Generic async CRUD store
+└── src/tta_dev_integrations/ # Legacy stub package (kept for compatibility)
 
----
-
-## 🎯 Roadmap
-
-### Phase 1: Core LLM (Current)
-- [x] Package infrastructure
-- [x] OpenAI skeleton
-- [ ] OpenAI full implementation
-- [ ] Anthropic implementation
-- [ ] Ollama implementation
-
-### Phase 2: Database
-- [x] Supabase skeleton
-- [ ] Supabase full implementation
-- [ ] PostgreSQL implementation
-- [ ] SQLite implementation
-
-### Phase 3: Auth
-- [ ] Clerk implementation
-- [ ] Auth0 implementation
-- [ ] JWT implementation
-
-### Phase 4: Advanced Features
-- [ ] Streaming support for LLMs
-- [ ] Connection pooling for databases
-- [ ] Token refresh for auth
-- [ ] Cost tracking and budgets
-- [ ] Rate limiting primitives
-
----
-
-## 💡 Examples
-
-See `examples/` directory for complete working examples:
-
-- `examples/openai_basic.py` - Basic OpenAI usage
-- `examples/openai_cached.py` - OpenAI with caching
-- `examples/supabase_crud.py` - Supabase CRUD operations
-- `examples/multi_provider.py` - Using multiple integrations
+ttadev/primitives/integrations/   ← WORKING LLM PRIMITIVES
+├── __init__.py               # Public API for all providers
+├── ollama_primitive.py       # ✅ Ollama (local models)
+├── groq_primitive.py         # ✅ Groq (fast cloud inference)
+├── openrouter_primitive.py   # ✅ OpenRouter (multi-provider routing)
+├── openai_primitive.py       # ✅ OpenAI
+├── anthropic_primitive.py    # ✅ Anthropic
+├── google_ai_studio_primitive.py  # ✅ Google AI Studio / Gemini
+├── huggingface_primitive.py  # ✅ HuggingFace Inference API
+├── together_ai_primitive.py  # ✅ Together AI
+├── sqlite_primitive.py       # ✅ SQLite (aiosqlite)
+├── supabase_primitive.py     # ✅ Supabase
+├── e2b_primitive.py          # ✅ E2B code execution sandboxes
+└── langgraph_primitive.py    # ✅ LangGraph
+```
 
 ---
 
 ## 🔗 Related Documentation
 
+- **Primitives catalog**: [`PRIMITIVES_CATALOG.md`](../../PRIMITIVES_CATALOG.md)
 - **TTA.dev Core**: [`ttadev/primitives/README.md`](../primitives/README.md)
 - **Vibe Coder Guide**: [`docs/guides/VIBE_CODER_QUICKSTART.md`](../../docs/guides/VIBE_CODER_QUICKSTART.md)
-- **Multi-Agent Collaboration**: [`docs/guides/MULTI_AGENT_COLLABORATION.md`](../../docs/guides/MULTI_AGENT_COLLABORATION.md)
+- **Model router**: [`ttadev/primitives/llm/`](../primitives/llm/) (`ModelRouterPrimitive`)
 
 ---
 
@@ -329,5 +233,3 @@ See `examples/` directory for complete working examples:
 ---
 
 **License**: See LICENSE file
-**Version**: 0.1.0 (Skeleton)
-**Status**: Under active development

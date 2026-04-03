@@ -114,7 +114,12 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace, data_dir: P
         return 0
 
     from ttadev.primitives.core.base import WorkflowContext
-    from ttadev.workflows.llm_provider import build_chat_primitive, get_llm_provider_chain
+    from ttadev.workflows.llm_provider import (
+        NoLLMProviderError,
+        _is_provider_error,
+        build_chat_primitive,
+        get_llm_provider_chain,
+    )
     from ttadev.workflows.orchestrator import WorkflowGoal, WorkflowOrchestrator
 
     # Apply --no-confirm override
@@ -136,7 +141,18 @@ def _cmd_run(workflows: dict[str, object], args: argparse.Namespace, data_dir: P
     ctx = WorkflowContext()
     goal = WorkflowGoal(goal=args.goal)
 
-    result = asyncio.run(orch.execute(goal, ctx))
+    try:
+        result = asyncio.run(orch.execute(goal, ctx))
+    except NoLLMProviderError as exc:
+        print(exc.user_message(), file=sys.stderr)
+        return 1
+    except Exception as exc:
+        if _is_provider_error(exc):
+            provider_name = provider_chain[0].provider if provider_chain else "unknown"
+            err = NoLLMProviderError(reason=f"{provider_name}: {exc}")
+            print(err.user_message(), file=sys.stderr)
+            return 1
+        raise
 
     if args.track_l0 and result.tracked_task_id and result.tracked_run_id:
         print(f"L0 task: {result.tracked_task_id}")

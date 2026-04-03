@@ -36,12 +36,21 @@ Then pick **one** free provider (no credit card required):
 |----------|-------|-------|
 | **Groq** (recommended) | Fast | Get a free key at <https://console.groq.com>, add `GROQ_API_KEY=...` to `.env` |
 | **OpenRouter** | Many models | Get a free key at <https://openrouter.ai>, add `OPENROUTER_API_KEY=...` to `.env` |
-| **Ollama** (local, no internet) | Medium | Install at <https://ollama.ai>, then run: `ollama pull qwen2.5:7b` |
+| **Ollama** (local, no internet) | Medium | Install at <https://ollama.ai>, then `ollama pull <model>` — TTA.dev auto-detects what's installed |
 
-To force local-only mode with Ollama:
+TTA.dev automatically picks the first model returned by `ollama list`. To pin a specific model,
+set `OLLAMA_MODEL` in your `.env`:
+
+```bash
+# Override auto-detection — use whichever model you have pulled
+OLLAMA_MODEL=qwen2.5:7b    # or llama3.2:3b, phi4-mini:latest, gemma3:4b …
+```
+
+To force local-only mode with Ollama (auto-detects installed model):
 ```bash
 export LLM_FORCE_PROVIDER=ollama
-export OLLAMA_MODEL=qwen2.5:7b   # or whichever model you have installed
+# Optionally pin a model; if unset, the first result of `ollama list` is used:
+# export OLLAMA_MODEL=gemma3:4b
 ```
 
 To verify your configuration:

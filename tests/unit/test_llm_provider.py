@@ -1,9 +1,12 @@
 """Tests for get_llm_client() provider helper — Task T3."""
 
 import os
+import subprocess
 from unittest.mock import patch
 
-from ttadev.workflows.llm_provider import LLMClientConfig, get_llm_client
+import pytest
+
+from ttadev.workflows.llm_provider import LLMClientConfig, get_default_ollama_model, get_llm_client
 
 
 class TestGetLlmClient:
@@ -59,3 +62,100 @@ class TestGetLlmClient:
             cfg = get_llm_client()
         assert cfg.model  # some non-empty default
         assert cfg.provider == "openrouter"
+
+
+class TestGetDefaultOllamaModel:
+    """Tests for get_default_ollama_model() auto-detection logic."""
+
+    def test_env_var_wins_over_everything(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """OLLAMA_MODEL env var is always returned first, no subprocess called."""
+        monkeypatch.setenv("OLLAMA_MODEL", "llama3.2:3b")
+        with patch("subprocess.run") as mock_run:
+            result = get_default_ollama_model()
+        assert result == "llama3.2:3b"
+        mock_run.assert_not_called()
+
+    def test_auto_detects_first_model_from_ollama_list(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """When OLLAMA_MODEL is unset, first model from `ollama list` is returned."""
+        monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+        fake_output = (
+            "NAME                ID              SIZE    MODIFIED\n"
+            "phi4-mini:latest    abc123def456    2.5 GB  2 hours ago\n"
+            "gemma3:4b           def456abc123    3.1 GB  1 day ago\n"
+        )
+        mock_result = subprocess.CompletedProcess(
+            args=["ollama", "list"], returncode=0, stdout=fake_output, stderr=""
+        )
+        with patch("subprocess.run", return_value=mock_result) as mock_run:
+            result = get_default_ollama_model()
+        assert result == "phi4-mini:latest"
+        mock_run.assert_called_once_with(
+            ["ollama", "list"], capture_output=True, text=True, timeout=5
+        )
+
+    def test_falls_back_when_ollama_not_installed(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """FileNotFoundError (ollama not on PATH) → returns ultimate fallback."""
+        monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+        with patch("subprocess.run", side_effect=FileNotFoundError):
+            result = get_default_ollama_model()
+        assert result == "gemma3:4b"
+
+    def test_falls_back_when_ollama_times_out(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """TimeoutExpired → returns ultimate fallback without raising."""
+        monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+        with patch(
+            "subprocess.run",
+            side_effect=subprocess.TimeoutExpired(cmd=["ollama", "list"], timeout=5),
+        ):
+            result = get_default_ollama_model()
+        assert result == "gemma3:4b"
+
+    def test_falls_back_when_ollama_returns_nonzero(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Non-zero return code (e.g. daemon not running) → ultimate fallback."""
+        monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+        mock_result = subprocess.CompletedProcess(
+            args=["ollama", "list"], returncode=1, stdout="", stderr="connection refused"
+        )
+        with patch("subprocess.run", return_value=mock_result):
+            result = get_default_ollama_model()
+        assert result == "gemma3:4b"
+
+    def test_falls_back_when_ollama_list_is_empty(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Empty model list (header only) → ultimate fallback."""
+        monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+        fake_output = "NAME    ID    SIZE    MODIFIED\n"
+        mock_result = subprocess.CompletedProcess(
+            args=["ollama", "list"], returncode=0, stdout=fake_output, stderr=""
+        )
+        with patch("subprocess.run", return_value=mock_result):
+            result = get_default_ollama_model()
+        assert result == "gemma3:4b"
+
+    def test_logs_debug_on_auto_detect(
+        self, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """A debug log message is emitted when a model is auto-detected."""
+        import logging
+
+        monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+        fake_output = (
+            "NAME                ID              SIZE    MODIFIED\n"
+            "gemma3:4b           abc123def456    3.1 GB  1 day ago\n"
+        )
+        mock_result = subprocess.CompletedProcess(
+            args=["ollama", "list"], returncode=0, stdout=fake_output, stderr=""
+        )
+        with patch("subprocess.run", return_value=mock_result):
+            with caplog.at_level(logging.DEBUG, logger="ttadev.workflows.llm_provider"):
+                result = get_default_ollama_model()
+        assert result == "gemma3:4b"
+        assert any("Auto-detected ollama model" in r.message for r in caplog.records)
+
+    def test_falls_back_on_oserror(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Generic OSError (e.g. permission denied) → ultimate fallback."""
+        monkeypatch.delenv("OLLAMA_MODEL", raising=False)
+        with patch("subprocess.run", side_effect=OSError("permission denied")):
+            result = get_default_ollama_model()
+        assert result == "gemma3:4b"

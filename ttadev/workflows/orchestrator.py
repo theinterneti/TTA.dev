@@ -67,7 +67,20 @@ class WorkflowOrchestrator(InstrumentedPrimitive[WorkflowGoal, WorkflowResult]):
         self._model_factory = model_factory
 
     def _effective_policy(self, step: WorkflowStep) -> GatePolicy:
-        """Return the gate policy for a step: step-level overrides workflow-level."""
+        """Return the gate policy for a step: step-level overrides workflow-level.
+
+        When ``definition.auto_approve`` is True (set by ``--no-confirm``), it
+        unconditionally takes precedence over both step- and workflow-level
+        policies so that **all** gates in the workflow are auto-approved.
+        Without this guard, the orchestrator always passes a non-None policy to
+        ``ApprovalGate.check()``, which silently overrides the gate's own
+        ``auto_approve=True`` setting and causes interactive prompts to appear
+        even when ``--no-confirm`` was supplied (GitHub issue #296).
+        """
+        if self._definition.auto_approve:
+            # Sentinel value ≥ 2.0 matches _ALWAYS_AUTO_CONFIDENCE in gate.py,
+            # guaranteeing unconditional auto-approval for every gate in the run.
+            return GatePolicy(min_confidence=2.0, require_quality_gates=False)
         if step.gate_policy is not None:
             return step.gate_policy
         return self._definition.gate_policy
@@ -156,6 +169,14 @@ class WorkflowOrchestrator(InstrumentedPrimitive[WorkflowGoal, WorkflowResult]):
                         policy=self._effective_policy(step),
                     )
                     sr.gate_decision = decision.value
+
+                    if policy_name is not None:
+                        # Automatic decision — print so CI / non-interactive runs
+                        # have a visible audit trail (required by --no-confirm).
+                        print(
+                            f"[auto-approved] Quality gate: Step {i + 1} complete"
+                            f" ({step.agent}) — {policy_name}"
+                        )
 
                     if tracked_task_id is not None and self._control_plane is not None:
                         self._control_plane.record_workflow_gate_outcome(

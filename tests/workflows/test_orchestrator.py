@@ -254,6 +254,75 @@ class TestMemoryPropagation:
         assert isinstance(contexts_seen[0].memory, WorkflowMemory)
 
 
+class TestNoConfirmFlag:
+    """Regression tests for GitHub issue #296.
+
+    --no-confirm (auto_approve=True on WorkflowDefinition) must suppress ALL
+    interactive gate prompts throughout the entire workflow.  The bug was that
+    _effective_policy() always passed a non-None GatePolicy to gate.check(),
+    which overrode the gate's own auto_approve=True initialisation and caused
+    the human-prompt path to be reached even with --no-confirm.
+    """
+
+    @pytest.mark.asyncio
+    async def test_no_confirm_never_calls_prompt_user(self, monkeypatch):
+        """auto_approve=True must not invoke _prompt_user on any gate."""
+        prompt_called = False
+
+        orig_prompt = ApprovalGate._prompt_user
+
+        async def _spy(self, *args, **kwargs):  # type: ignore[override]
+            nonlocal prompt_called
+            prompt_called = True
+            return await orig_prompt(self, *args, **kwargs)
+
+        monkeypatch.setattr(ApprovalGate, "_prompt_user", _spy)
+
+        registry = _three_step_registry()
+        defn = _three_step_workflow(auto_approve=True)
+
+        with override_registry(registry):
+            orch = WorkflowOrchestrator(defn)
+            ctx = WorkflowContext()
+            result = await orch.execute(WorkflowGoal(goal="add feature"), ctx)
+
+        assert result.completed is True
+        assert len(result.steps) == 3
+        assert not prompt_called, "_prompt_user was called despite auto_approve=True"
+
+    @pytest.mark.asyncio
+    async def test_no_confirm_prints_auto_approved_messages(self, capsys):
+        """auto_approve=True must print [auto-approved] lines for each gate."""
+        registry = _three_step_registry()
+        defn = _three_step_workflow(auto_approve=True)
+
+        with override_registry(registry):
+            orch = WorkflowOrchestrator(defn)
+            ctx = WorkflowContext()
+            await orch.execute(WorkflowGoal(goal="add feature"), ctx)
+
+        out = capsys.readouterr().out
+        assert "[auto-approved]" in out, "Expected [auto-approved] output with --no-confirm"
+
+    @pytest.mark.asyncio
+    async def test_no_confirm_completes_all_steps_without_tty(self, monkeypatch):
+        """Workflow with auto_approve=True completes even on a non-TTY stdin."""
+        import sys
+
+        monkeypatch.setattr(sys.stdin, "isatty", lambda: False)
+
+        registry = _three_step_registry()
+        defn = _three_step_workflow(auto_approve=True)
+
+        with override_registry(registry):
+            orch = WorkflowOrchestrator(defn)
+            ctx = WorkflowContext()
+            result = await orch.execute(WorkflowGoal(goal="add feature"), ctx)
+
+        assert result.completed is True
+        assert len(result.steps) == 3
+
+
 class TestComposability:
     def test_sequential_composition(self):
         defn = _three_step_workflow()
