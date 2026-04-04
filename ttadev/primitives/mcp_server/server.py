@@ -5,8 +5,10 @@ Exposes TTA.dev analysis and primitive recommendations as MCP tools.
 """
 
 import argparse
+import asyncio
 import contextlib
 import sys
+import uuid
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Any
 
@@ -202,6 +204,82 @@ def _ensure_session_exists(session_id: str, *, data_dir: str) -> None:
         raise ControlPlaneError(f"Session not found: {session_id}")
 
 
+# ── Fleet store — in-process v1 persistence (keyed by fleet_id) ───────────────
+# Persistence (Redis/DB) is planned for v2; this is intentionally simple.
+_FLEET_STORE: dict[str, dict[str, Any]] = {}
+
+# Valid agent names in the registry — used to validate hints without importing
+# every agent module at startup.
+_KNOWN_AGENTS: frozenset[str] = frozenset(
+    ["developer", "devops", "git", "github", "performance", "qa", "security"]
+)
+
+
+async def _run_fleet_task(
+    fleet_id: str,
+    task_idx: int,
+    task_text: str,
+    agent_hint: str | None,
+    provider: str,
+) -> None:
+    """Execute a single fleet sub-task and persist the result in ``_FLEET_STORE``.
+
+    v1 implementation uses a stub executor (no real LLM call) so the end-to-end
+    MCP contract is correct.  Wire a real ``ChatPrimitive`` in the follow-up
+    milestone.
+
+    Args:
+        fleet_id: Parent fleet identifier.
+        task_idx: Zero-based position of this task within the fleet.
+        task_text: Natural-language task description.
+        agent_hint: Preferred agent name, or ``None`` for auto-select.
+        provider: LLM provider hint passed through for future use.
+    """
+    fleet = _FLEET_STORE.get(fleet_id)
+    if fleet is None:
+        return  # fleet was evicted or never created — nothing to do
+
+    # Resolve agent name — validate hint against the known registry.
+    agent_name: str
+    if agent_hint and agent_hint in _KNOWN_AGENTS:
+        agent_name = agent_hint
+    else:
+        # Auto-select: pick the first registered agent as a deterministic default.
+        try:
+            from ttadev.agents.registry import get_registry
+
+            registered = get_registry().all()
+            agent_name = (
+                registered[0].__name__.lower().replace("agent", "") if registered else "auto"
+            )
+        except Exception:
+            agent_name = "auto"
+
+    fleet["results"][task_idx]["status"] = "running"
+    fleet["results"][task_idx]["agent"] = agent_name
+
+    try:
+        # ── v1 stub: echo task back with the selected agent name ──────────────
+        # Replace this block with a real AgentPrimitive.execute() call in v2.
+        output = f"[{agent_name}] Task acknowledged: {task_text}"
+        fleet["results"][task_idx]["output"] = output
+        fleet["results"][task_idx]["status"] = "complete"
+    except Exception as exc:
+        fleet["results"][task_idx]["output"] = None
+        fleet["results"][task_idx]["status"] = "failed"
+        fleet["results"][task_idx]["error"] = str(exc)
+        logger.warning(
+            "fleet_task_failed",
+            fleet_id=fleet_id,
+            task_idx=task_idx,
+            error=str(exc),
+        )
+    finally:
+        fleet["completed_count"] = sum(
+            1 for r in fleet["results"] if r["status"] in ("complete", "failed")
+        )
+
+
 def create_server() -> Any:
     """Create and configure the MCP server.
 
@@ -229,6 +307,317 @@ def create_server() -> Any:
     _idem = _idempotent_annotations()
 
     # ========== TOOLS ==========
+
+    # ── Orientation ────────────────────────────────────────────────────────────
+
+    @mcp.tool(annotations=_ro)
+    async def tta_bootstrap(agent_id: str = "", task_hint: str = "") -> dict[str, Any]:
+        """One-call orientation for coding agents. Returns primitives, tools, patterns, and provider status.
+
+        Call this FIRST at the start of any TTA.dev agent session to get full context.
+
+        Args:
+            agent_id: Identifier for this agent session (used for logging, optional)
+            task_hint: Brief description of what you're trying to build (used to rank primitives)
+
+        Returns:
+            Complete TTA.dev orientation package: primitives catalog, MCP tool index,
+            quick-start patterns, and live provider status.
+        """
+        import re
+        from importlib.metadata import version as _pkg_version
+        from pathlib import Path
+
+        logger.info("mcp_tool_called", tool="tta_bootstrap", agent_id=agent_id, task_hint=task_hint)
+
+        # ── 1. Package version ────────────────────────────────────────────────
+        try:
+            pkg_version = _pkg_version("ttadev")
+        except Exception:
+            pkg_version = "0.1.0"
+
+        # ── 2. Parse PRIMITIVES_CATALOG.md ────────────────────────────────────
+        _max_primitives = 15  # keep response within token budget
+        _desc_len = 70  # max chars for when_to_use description
+
+        primitives: list[dict[str, str]] = []
+        catalog_path = Path(__file__).parents[4] / "PRIMITIVES_CATALOG.md"
+        if not catalog_path.exists():
+            catalog_path = Path(__file__).parents[3] / "PRIMITIVES_CATALOG.md"
+
+        _import_re = re.compile(r"from\s+(ttadev[\w.]*)\s+import\s+(\w+)")
+        _section_re = re.compile(r"^## (.+)")
+        _primitive_re = re.compile(r"^### ([\w\[\], ]+)")
+        # Line prefixes to skip when collecting a human-readable description
+        _skip_pfx = (
+            "```",
+            "#",
+            "|",
+            "- ",
+            "* ",
+            "> ",
+            "!",
+            "**Source",
+            "**Import",
+            "**Status",
+            "**Test",
+            "**Type",
+            "**Key",
+            "**Prop",
+            "**Feature",
+            "**Usage",
+            "**State",
+            "**Param",
+        )
+
+        _category_map: dict[str, str] = {
+            "core workflow primitives": "core",
+            "recovery primitives": "recovery",
+            "performance primitives": "performance",
+            "skill primitives": "skill",
+            "llm routing primitives": "llm_routing",
+            "orchestration primitives": "orchestration",
+            "testing primitives": "testing",
+            "observability primitives": "observability",
+            "adaptive/self-improving primitives": "adaptive",
+            "ace framework primitives": "ace",
+            "coordination primitives": "coordination",
+            "collaboration primitives": "collaboration",
+        }
+        # Allowlist: only emit these names to keep the payload focused
+        _emit_names: set[str] = {
+            "WorkflowPrimitive",
+            "SequentialPrimitive",
+            "ParallelPrimitive",
+            "ConditionalPrimitive",
+            "RouterPrimitive",
+            "RetryPrimitive",
+            "FallbackPrimitive",
+            "TimeoutPrimitive",
+            "CompensationPrimitive",
+            "CircuitBreakerPrimitive",
+            "CachePrimitive",
+            "MemoryPrimitive",
+            "ModelRouterPrimitive",
+            "DelegationPrimitive",
+            "TaskClassifierPrimitive",
+            "MockPrimitive",
+            "InstrumentedPrimitive",
+            "AdaptivePrimitive",
+            "AdaptiveRetryPrimitive",
+            "SelfLearningCodePrimitive",
+            "GitCollaborationPrimitive",
+        }
+
+        if catalog_path.exists():
+            raw = catalog_path.read_text(encoding="utf-8")
+            current_category = "core"
+            current_name: str | None = None
+            current_desc_lines: list[str] = []
+            current_import: str = ""
+
+            def _flush_primitive() -> None:
+                if not current_name:
+                    return
+                clean = current_name.split("[")[0].strip()
+                if clean not in _emit_names:
+                    return
+                desc = " ".join(current_desc_lines).strip()
+                if not desc:
+                    desc = f"A {current_category} primitive."
+                imp = current_import or f"from ttadev.primitives import {clean}"
+                primitives.append(
+                    {
+                        "name": clean,
+                        "category": current_category,
+                        "when_to_use": desc[:_desc_len],
+                        "import": imp,
+                    }
+                )
+
+            for line in raw.splitlines():
+                sec = _section_re.match(line)
+                if sec:
+                    _flush_primitive()
+                    current_name = None
+                    current_desc_lines = []
+                    current_import = ""
+                    current_category = _category_map.get(
+                        sec.group(1).strip().lower(), current_category
+                    )
+                    continue
+
+                prim = _primitive_re.match(line)
+                if prim:
+                    _flush_primitive()
+                    current_name = prim.group(1).strip()
+                    current_desc_lines = []
+                    current_import = ""
+                    continue
+
+                if current_name:
+                    imp_match = _import_re.search(line)
+                    if imp_match and not current_import:
+                        current_import = f"from {imp_match.group(1)} import {imp_match.group(2)}"
+                        continue
+                    # Collect human-readable description lines only.
+                    # Bold lines like "**Auto retry with exponential backoff.**" are good;
+                    # code fence lines (```python) and bullet lists are not.
+                    stripped = line.strip()
+                    if (
+                        stripped
+                        and not stripped.startswith(_skip_pfx)
+                        and stripped not in ("-", "---")
+                        and "`" not in stripped  # skip inline code
+                        and len(current_desc_lines) < 2
+                    ):
+                        # Strip markdown bold markers
+                        cleaned = stripped.strip("*").strip()
+                        if cleaned and len(cleaned) > 10:
+                            current_desc_lines.append(cleaned)
+
+            _flush_primitive()
+
+        # Deduplicate, preserve catalog order, cap at _max_primitives
+        seen: set[str] = set()
+        deduped: list[dict[str, str]] = []
+        for p in primitives:
+            if p["name"] not in seen:
+                seen.add(p["name"])
+                deduped.append(p)
+            if len(deduped) >= _max_primitives:
+                break
+        primitives = deduped
+
+        # Fallback: use analyzer when catalog parse yielded nothing
+        if not primitives:
+            for p in analyzer.list_primitives()[:_max_primitives]:
+                desc = p.get("description") or (p.get("use_cases") or [""])[0] or ""
+                primitives.append(
+                    {
+                        "name": p.get("name", ""),
+                        "category": p.get("category", "core"),
+                        "when_to_use": desc[:_desc_len],
+                        "import": p.get("import_path", ""),
+                    }
+                )
+
+        # ── 3. MCP tool index grouped by domain ───────────────────────────────
+        try:
+            all_tools = await mcp.list_tools()
+            all_tool_names = [t.name for t in all_tools]
+        except Exception:
+            all_tool_names = list(mcp._tool_manager._tools.keys())
+
+        def _domain(name: str) -> str:
+            if name == "tta_bootstrap":
+                return "orientation"
+            if "_" in name:
+                prefix = name.split("_")[0]
+                if prefix in {"control", "llm", "memory", "workflow"}:
+                    return prefix
+            return "analysis"
+
+        mcp_tools: dict[str, list[str]] = {}
+        for tool_name in all_tool_names:
+            domain = _domain(tool_name)
+            mcp_tools.setdefault(domain, []).append(tool_name)
+
+        # ── 4. Provider status ────────────────────────────────────────────────
+        try:
+            provider_status = llm_list_providers()
+        except Exception as exc:
+            provider_status = {"error": str(exc), "providers": []}
+
+        # ── 5. Quick-start guide (≈150 words, stays in token budget) ─────────
+        quick_start = (
+            "TTA.dev: composable workflow primitives for reliable AI apps.\n\n"
+            "GETTING STARTED:\n"
+            "1. Import: `from ttadev.primitives import RetryPrimitive, WorkflowContext`\n"
+            "2. Compose with >> (sequential) or | (parallel):\n"
+            "   `workflow = fetch >> parse >> store`\n"
+            "   `parallel = step_a | step_b | step_c`\n"
+            "3. Execute: `await workflow.execute(data, WorkflowContext(workflow_id='...'))`\n\n"
+            "PRIMITIVE GROUPS:\n"
+            "- Recovery: Retry, Fallback, Timeout, CircuitBreaker\n"
+            "- Performance: Cache, Memory\n"
+            "- Core: Sequential, Parallel, Conditional\n"
+            "- Orchestration: Delegation, MultiModel\n\n"
+            "KEY MCP TOOLS:\n"
+            "- tta_bootstrap: this tool — call first\n"
+            "- list_primitives / get_primitive_info\n"
+            "- llm_list_providers / llm_recommend_model\n"
+            "- analyze_code: scan code for opportunities\n\n"
+            "RULES: Never write manual retry loops (RetryPrimitive). "
+            "Never use time.sleep for timeouts (TimeoutPrimitive)."
+        )
+
+        # ── 6. Key patterns (concise) ─────────────────────────────────────────
+        patterns = (
+            "Sequential: a >> b >> c\n"
+            "Parallel:   a | b | c\n"
+            "Retry:      RetryPrimitive(primitive=p, max_retries=3)\n"
+            "Cache:      CachePrimitive(primitive=p, ttl_seconds=300)\n"
+            "Timeout:    TimeoutPrimitive(primitive=p, timeout_seconds=30.0)\n"
+            "Fallback:   FallbackPrimitive(primary=p1, fallbacks=[p2, p3])\n"
+            "Circuit:    CircuitBreakerPrimitive(primitive=p, config=CircuitBreakerConfig(...))\n"
+            "Context:    WorkflowContext(workflow_id='my-wf')\n"
+        )
+
+        # ── 7. Task-hint relevance ranking ────────────────────────────────────
+        # Common words that appear in almost every primitive description — skip them
+        _stop_words = {
+            "a",
+            "an",
+            "the",
+            "and",
+            "or",
+            "to",
+            "of",
+            "in",
+            "for",
+            "with",
+            "build",
+            "create",
+            "use",
+            "using",
+            "that",
+            "this",
+            "is",
+            "it",
+            "my",
+        }
+        top_for_task: list[dict[str, str]] = []
+        if task_hint and primitives:
+            hint_words = {w for w in task_hint.lower().split() if w not in _stop_words}
+
+            def _score(p: dict[str, str]) -> tuple[int, int]:
+                name_lower = p["name"].lower()
+                text = (name_lower + " " + p["category"] + " " + p["when_to_use"]).lower()
+                base = sum(1 for w in hint_words if w in text)
+                # Bonus: name *starts with* a hint word (e.g. "retry" → RetryPrimitive wins
+                # over AdaptiveRetryPrimitive for the "retry" hint)
+                prefix_bonus = sum(1 for w in hint_words if name_lower.startswith(w))
+                # Tie-break: prefer shorter (more specific) names
+                return (base + prefix_bonus, -len(p["name"]))
+
+            scored = sorted(primitives, key=_score, reverse=True)
+            top_for_task = [p for p in scored if _score(p)[0] > 0][:3]
+            if not top_for_task:
+                top_for_task = scored[:3]
+
+        return {
+            "version": pkg_version,
+            "agent_id": agent_id,
+            "primitives": primitives,
+            "mcp_tools": mcp_tools,
+            "quick_start": quick_start,
+            "patterns": patterns,
+            "provider_status": provider_status,
+            "top_primitives_for_task": top_for_task,
+        }
+
+    # ── Analysis / recommendations ─────────────────────────────────────────────
 
     @mcp.tool(annotations=_ro)
     async def analyze_code(
@@ -1919,6 +2308,144 @@ result = await workflow.execute(data, context)
                 "count": 0,
                 "error": f"Hindsight unavailable: {exc}",
             }
+
+    # ========== AGENT FLEET TOOLS ==========
+
+    @mcp.tool(annotations=_mut)
+    async def agent_spawn_fleet(
+        tasks: list[str],
+        agent_hints: list[str | None] | None = None,
+        provider: str = "auto",
+    ) -> dict[str, Any]:
+        """Dispatch multiple agent tasks concurrently and return a fleet ID.
+
+        Each task runs in parallel via asyncio background tasks.  Results are
+        stored in the in-process fleet store and are retrievable via
+        :func:`agent_poll_fleet`.
+
+        Args:
+            tasks: List of task descriptions (natural language).  Must be
+                non-empty; maximum 50 tasks per fleet.
+            agent_hints: Optional list of agent names to use, parallel-indexed
+                with ``tasks``.  ``None`` entries mean auto-select.  When
+                omitted, all tasks are auto-assigned.  Valid names:
+                ``developer``, ``devops``, ``git``, ``github``,
+                ``performance``, ``qa``, ``security``.
+            provider: LLM provider hint — ``'groq'``, ``'google'``,
+                ``'ollama'``, or ``'auto'``.  Passed through to the agent
+                executor for future model-routing support.
+
+        Returns:
+            ``{'fleet_id': str, 'task_count': int, 'status': 'dispatched'}``
+        """
+        logger.info(
+            "mcp_tool_called",
+            tool="agent_spawn_fleet",
+            task_count=len(tasks),
+            provider=provider,
+        )
+
+        if not tasks:
+            return {"error": "tasks must be a non-empty list"}
+        if len(tasks) > 50:
+            return {"error": f"Too many tasks: {len(tasks)} (maximum 50 per fleet)"}
+
+        # Normalise hints to a list the same length as tasks.
+        hints: list[str | None]
+        if agent_hints is None:
+            hints = [None] * len(tasks)
+        elif len(agent_hints) != len(tasks):
+            return {
+                "error": (
+                    f"agent_hints length ({len(agent_hints)}) must match "
+                    f"tasks length ({len(tasks)}) when provided"
+                )
+            }
+        else:
+            hints = list(agent_hints)
+
+        fleet_id = "fleet-" + uuid.uuid4().hex[:8]
+
+        # Initialise fleet entry before spawning tasks so poll can see it
+        # immediately even if the background tasks haven't started yet.
+        _FLEET_STORE[fleet_id] = {
+            "fleet_id": fleet_id,
+            "task_count": len(tasks),
+            "completed_count": 0,
+            "provider": provider,
+            "results": [
+                {
+                    "task_id": f"{fleet_id}-{i}",
+                    "task": task,
+                    "agent": hints[i] or "auto",
+                    "output": None,
+                    "status": "pending",
+                }
+                for i, task in enumerate(tasks)
+            ],
+        }
+
+        # Fire-and-forget — one asyncio Task per fleet member.
+        for i, (task_text, hint) in enumerate(zip(tasks, hints)):
+            asyncio.create_task(
+                _run_fleet_task(fleet_id, i, task_text, hint, provider),
+                name=f"{fleet_id}-task-{i}",
+            )
+
+        logger.info("fleet_dispatched", fleet_id=fleet_id, task_count=len(tasks))
+        return {"fleet_id": fleet_id, "task_count": len(tasks), "status": "dispatched"}
+
+    @mcp.tool(annotations=_ro)
+    async def agent_poll_fleet(fleet_id: str) -> dict[str, Any]:
+        """Poll the status of a previously spawned agent fleet.
+
+        Args:
+            fleet_id: The ``fleet_id`` returned by :func:`agent_spawn_fleet`.
+
+        Returns:
+            ::
+
+                {
+                    'status': 'pending' | 'running' | 'partial' | 'complete',
+                    'task_count': int,
+                    'completed_count': int,
+                    'results': [
+                        {
+                            'task_id': str,
+                            'task': str,
+                            'agent': str,
+                            'output': str | None,
+                            'status': str,
+                        }
+                    ]
+                }
+
+            Returns ``{'error': str}`` when the ``fleet_id`` is unknown.
+        """
+        logger.info("mcp_tool_called", tool="agent_poll_fleet", fleet_id=fleet_id)
+
+        fleet = _FLEET_STORE.get(fleet_id)
+        if fleet is None:
+            return {"error": f"Unknown fleet_id: {fleet_id!r}"}
+
+        task_count: int = fleet["task_count"]
+        completed: int = fleet["completed_count"]
+        results: list[dict[str, Any]] = fleet["results"]
+
+        if completed == 0:
+            any_running = any(r["status"] == "running" for r in results)
+            status = "running" if any_running else "pending"
+        elif completed < task_count:
+            status = "partial"
+        else:
+            status = "complete"
+
+        return {
+            "status": status,
+            "task_count": task_count,
+            "completed_count": completed,
+            "results": list(results),
+        }
 
     # ========== RESOURCES ==========
 
