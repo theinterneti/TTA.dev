@@ -4,6 +4,10 @@ import asyncio
 import sys
 from pathlib import Path
 
+# Ensure emoji in print() work on Windows (CP1252 console → UTF-8).
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in {"utf-8", "utf8"}:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[union-attr]
+
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 

@@ -147,6 +147,8 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run tests with coverage enforcement
+        env:
+          PYTHONUTF8: '1'  # Ensure emoji in print() work on Windows runners
         run: >
           uv run pytest -v --tb=short
           -m "not integration and not slow and not external and not quarantine"
