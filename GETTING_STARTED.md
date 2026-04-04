@@ -238,6 +238,13 @@ if __name__ == "__main__":
 - inspect [`scripts/test_realtime_traces.py`](scripts/test_realtime_traces.py) as the current
   working example
 
+## Observability
+
+Start the dashboard with `uv run python -m ttadev.observability` (port 8000). It shows live
+session trees, span timelines, and WebSocket-streamed updates as workflows execute. For a
+detailed walkthrough — including trace anatomy, Langfuse integration, and troubleshooting —
+see 📖 **[docs/observability-quickstart.md](docs/observability-quickstart.md)**.
+
 ## Troubleshooting
 
 ### `/api/v2/spans` is empty

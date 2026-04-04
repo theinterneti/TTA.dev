@@ -58,6 +58,7 @@ That flow currently proves:
 
 - [**Getting Started Guide**](GETTING_STARTED.md) - current, step-by-step setup and proof path
 - [**Quickstart**](QUICKSTART.md) - shortest honest verification flow
+- 📖 **[Observability Quickstart →](docs/observability-quickstart.md)** — start the dashboard, watch live traces, connect Langfuse
 - [**User Journey**](USER_JOURNEY.md) - vision plus current-reality framing
 - [**Roadmap**](ROADMAP.md) - what is implemented, partial, and still aspirational
 - [**Primitives Catalog**](PRIMITIVES_CATALOG.md) - available primitives and API surface
