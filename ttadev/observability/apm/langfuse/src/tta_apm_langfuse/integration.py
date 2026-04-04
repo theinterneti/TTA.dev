@@ -10,7 +10,6 @@ from datetime import datetime
 from typing import Any
 
 from langfuse import Langfuse
-from langfuse.decorators import langfuse_context, observe
 from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
 
 
@@ -77,8 +76,9 @@ class LangFuseIntegration:
             LANGFUSE_SECRET_KEY: Langfuse secret API key (starts with ``sk-lf-``)
 
         Optional environment variables:
-            LANGFUSE_HOST: Langfuse host URL
-                           (default: ``https://cloud.langfuse.com``)
+            LANGFUSE_BASE_URL: Langfuse host URL — used by the Langfuse SDK natively.
+                               (default: ``https://cloud.langfuse.com``)
+            LANGFUSE_HOST: Alias for LANGFUSE_BASE_URL (checked if BASE_URL is absent).
 
         Returns:
             Configured :class:`LangFuseIntegration` instance.
@@ -91,7 +91,7 @@ class LangFuseIntegration:
             ```bash
             export LANGFUSE_PUBLIC_KEY="pk-lf-..."
             export LANGFUSE_SECRET_KEY="sk-lf-..."
-            # LANGFUSE_HOST is optional
+            export LANGFUSE_BASE_URL="https://cloud.langfuse.com"  # optional
             ```
 
             ```python
@@ -102,10 +102,15 @@ class LangFuseIntegration:
         """
         import os
 
+        host = (
+            os.environ.get("LANGFUSE_BASE_URL")
+            or os.environ.get("LANGFUSE_HOST")
+            or "https://cloud.langfuse.com"
+        )
         return cls(
             public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
             secret_key=os.environ["LANGFUSE_SECRET_KEY"],
-            host=os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com"),
+            host=host,
         )
 
     def instrument(
@@ -131,45 +136,52 @@ class LangFuseIntegration:
             return primitive
 
         original_execute = primitive.execute
+        client = self.client
+        name = trace_name or primitive.__class__.__name__
 
-        @observe(name=trace_name or primitive.__class__.__name__)
         async def traced_execute(input_data: Any, context: WorkflowContext) -> Any:
-            """Traced execution wrapper."""
+            """Traced execution wrapper using Langfuse v4 API."""
             start_time = datetime.now()
 
-            try:
-                # Add LangFuse trace ID to context
-                if langfuse_context.get_current_trace_id():
-                    context.metadata["langfuse_trace_id"] = langfuse_context.get_current_trace_id()
+            with client.start_as_current_observation(
+                name=name,
+                as_type="span",
+                input=str(input_data)[:1000],
+                metadata={"primitive_type": primitive.__class__.__name__},
+            ) as span:
+                try:
+                    # Capture trace ID in workflow context metadata
+                    trace_id = client.get_current_trace_id()
+                    if trace_id:
+                        context.metadata["langfuse_trace_id"] = trace_id
 
-                # Execute primitive
-                result = await original_execute(input_data, context)
+                    result = await original_execute(input_data, context)
 
-                # Record success metrics
-                duration = (datetime.now() - start_time).total_seconds()
-                langfuse_context.update_current_observation(
-                    metadata={
-                        "primitive_type": primitive.__class__.__name__,
-                        "duration_seconds": duration,
-                        "status": "success",
-                    }
-                )
+                    duration = (datetime.now() - start_time).total_seconds()
+                    span.update(
+                        output=str(result)[:1000],
+                        metadata={
+                            "primitive_type": primitive.__class__.__name__,
+                            "duration_seconds": duration,
+                            "status": "success",
+                        },
+                    )
+                    return result
 
-                return result
-
-            except Exception as e:
-                # Record failure metrics
-                duration = (datetime.now() - start_time).total_seconds()
-                langfuse_context.update_current_observation(
-                    metadata={
-                        "primitive_type": primitive.__class__.__name__,
-                        "duration_seconds": duration,
-                        "status": "error",
-                        "error_type": type(e).__name__,
-                        "error_message": str(e),
-                    }
-                )
-                raise
+                except Exception as e:
+                    duration = (datetime.now() - start_time).total_seconds()
+                    span.update(
+                        level="ERROR",
+                        status_message=f"{type(e).__name__}: {e}",
+                        metadata={
+                            "primitive_type": primitive.__class__.__name__,
+                            "duration_seconds": duration,
+                            "status": "error",
+                            "error_type": type(e).__name__,
+                            "error_message": str(e),
+                        },
+                    )
+                    raise
 
         primitive.execute = traced_execute
         return primitive
@@ -194,9 +206,15 @@ class LangFuseIntegration:
         if not self.enabled or not self.client:
             return
 
-        self.client.generation(
-            name=name, model=model, input=input_data, output=output_data, metadata=metadata or {}
-        )
+        with self.client.start_as_current_observation(
+            name=name,
+            as_type="generation",
+            model=model,
+            input=input_data,
+            output=output_data,
+            metadata=metadata or {},
+        ):
+            pass  # observation is ended on context manager exit
 
     def flush(self) -> None:
         """Flush pending traces to LangFuse."""
