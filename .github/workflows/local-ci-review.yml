@@ -1,0 +1,82 @@
+name: Local CI & OpenHands Review
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ttadev/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+
+  quality-gates:
+    name: Quality Gates
+    runs-on: [self-hosted, local]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ruff lint
+        working-directory: /home/theinterneti/Repos/TTA.dev
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        working-directory: /home/theinterneti/Repos/TTA.dev
+        run: uv run ruff format --check .
+
+      - name: Pyright type check
+        working-directory: /home/theinterneti/Repos/TTA.dev
+        continue-on-error: true
+        run: uvx pyright ttadev/
+
+      - name: Fast tests
+        working-directory: /home/theinterneti/Repos/TTA.dev
+        run: |
+          uv run pytest -x -q \
+            -m "not integration and not slow and not external and not quarantine" \
+            --tb=short \
+            --no-header \
+            -p no:warnings
+
+  openhands-review:
+    name: OpenHands Code Review
+    runs-on: [self-hosted, local]
+    timeout-minutes: 20
+    needs: quality-gates
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run OpenHands PR review
+        working-directory: /home/theinterneti/Repos/TTA.dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          OLLAMA_BASE_URL: http://localhost:11434
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          uv run python scripts/ci/openhands_pr_review.py \
+            --pr "$PR_NUMBER" \
+            --base "$BASE_REF" \
+            --head "$HEAD_SHA"
