@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": ".venv/bin/python3 .github/hooks/langfuse_hook.py",
+        "cwd": ".",
+        "env": { "LF_EVENT": "sessionStart" },
+        "timeoutSec": 15
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": ".venv/bin/python3 .github/hooks/langfuse_hook.py",
+        "cwd": ".",
+        "env": { "LF_EVENT": "sessionEnd" },
+        "timeoutSec": 15
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": ".venv/bin/python3 .github/hooks/langfuse_hook.py",
+        "cwd": ".",
+        "env": { "LF_EVENT": "userPromptSubmitted" },
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": ".venv/bin/python3 .github/hooks/langfuse_hook.py",
+        "cwd": ".",
+        "env": { "LF_EVENT": "postToolUse" },
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
