@@ -385,6 +385,16 @@ class MyPrimitive(InstrumentedPrimitive[dict, dict]):
 
 ## Grafana Dashboard Setup
 
+> [!WARNING]
+> **Out of scope for v0.2.**
+> The OTel Collector → Tempo → Grafana pipeline is **not** implemented in the current release.
+> The supported APM integration is **Langfuse** (see the
+> [Langfuse README](../../ttadev/observability/apm/langfuse/README.md)).
+> Grafana integration is planned for a future release — track progress in GitHub issue #57.
+
+<details>
+<summary>Historical reference (future implementation guide)</summary>
+
 ### Step 1: Run Prometheus + Grafana
 
 ```bash
@@ -435,6 +445,8 @@ histogram_quantile(0.95,
 rate(cache_hits_total[5m])
 / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m]))
 ```
+
+</details>
 
 ---
 
@@ -524,6 +536,7 @@ result = await workflow.execute(data, context)
    - Set up alerts for error rates
    - Track latency trends
    - Monitor cache efficiency
+   > **Note:** Grafana integration is not available in v0.2. Use Langfuse for APM tracing.
 
 ### DON'T ❌
 
@@ -619,7 +632,8 @@ Before deploying to production:
 - [ ] Using current `ttadev` observability and primitive imports
 - [ ] All workflows create `WorkflowContext` with correlation IDs
 - [ ] Prometheus scraping configured
-- [ ] Grafana dashboards created
+- [ ] Langfuse APM configured (set `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` in `.env`)
+- [ ] Grafana dashboards created _(planned — not available in v0.2)_
 - [ ] Alerts configured for error rates
 - [ ] Log aggregation configured (if using)
 - [ ] Traces exported to backend (if using)

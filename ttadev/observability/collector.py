@@ -9,6 +9,7 @@ This module provides file-based trace collection that:
 
 import asyncio
 import json
+import logging
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
@@ -17,6 +18,8 @@ from typing import Any
 
 import aiofiles
 import aiofiles.os
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -161,8 +164,8 @@ class TraceCollector:
         for queue in self._subscribers:
             try:
                 await queue.put({"type": "new_trace", "trace": trace_data})
-            except Exception:
-                pass  # Subscriber queue full or closed
+            except Exception as e:
+                logger.warning("Failed to broadcast trace to subscriber: %s", e)
 
     def subscribe(self) -> asyncio.Queue:
         """Subscribe to trace updates.
@@ -190,7 +193,8 @@ class TraceCollector:
             try:
                 with open(trace_file) as f:
                     traces.append(json.load(f))
-            except Exception:
+            except Exception as e:
+                logger.warning("Failed to read trace file %s: %s", trace_file, e)
                 continue  # Skip corrupted files
         return traces
 

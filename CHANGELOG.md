@@ -553,7 +553,7 @@ This is the first production-ready release of TTA.dev, featuring self-improving 
 
 **Benefits:**
 - 30-40% cost reduction via Cache + Router optimization
-- Real-time metrics in Prometheus/Grafana
+- Real-time metrics in Prometheus/Grafana _(Grafana stack planned; not in v0.2 — use Langfuse APM)_
 - Distributed tracing across workflows
 - Automatic span creation for all operations
 
@@ -573,7 +573,7 @@ This is the first production-ready release of TTA.dev, featuring self-improving 
    - OpenTelemetry + Prometheus integration
    - Enhanced primitives with metrics
    - Prometheus exporter on port 9464
-   - Grafana dashboard templates
+   - Grafana dashboard templates _(planned for future release)_
 
 3. **universal-agent-context** (v1.0.0)
    - Agent context management

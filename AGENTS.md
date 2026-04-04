@@ -265,7 +265,7 @@ Native MCP servers available to agents: [.mcp/config.json](.mcp/config.json)
 - **e2b**: Secure sandboxed code execution
 - **github**: Repository operations
 - **playwright**: Browser automation
-- **grafana**: Monitoring and metrics
+- **grafana**: Monitoring and metrics MCP server (note: the Grafana OTel Collector → Tempo → Grafana _stack_ is planned for a future release; current APM is Langfuse)
 - **gitmcp**: Git operations
 - **hindsight**: Long-term memory and recall
 - **serena**: Code analysis

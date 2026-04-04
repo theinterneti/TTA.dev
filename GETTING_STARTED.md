@@ -195,6 +195,44 @@ to the canonical proof path above:
 - `uv run python examples/demo_workflow.py`
 - `uv run python ttadev/hello_world.py`
 
+## Step 3d: Enable Langfuse APM (optional)
+
+Langfuse is the APM integration available in v0.2 — it records execution traces for every workflow
+primitive so you can inspect timing, errors, and LLM calls in the Langfuse UI.
+
+> **Note:** The OTel Collector → Tempo → Grafana pipeline is **not** implemented in v0.2.
+> Langfuse is the current APM integration. Grafana stack support is planned for a future release.
+
+### 1. Get free Langfuse keys
+
+Sign up at <https://cloud.langfuse.com> (free tier — no credit card required) and copy your
+`Public Key` and `Secret Key` from the project settings.
+
+### 2. Add keys to `.env`
+
+```bash
+# Langfuse APM — traces your workflow executions
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+# LANGFUSE_HOST=https://cloud.langfuse.com  # optional, this is the default
+```
+
+### 3. Instrument your workflow
+
+```python
+from tta_apm_langfuse import LangFuseIntegration
+
+# Reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_HOST from env
+apm = LangFuseIntegration.from_env()
+
+# Wrap any primitive — tracing is automatic
+instrumented = apm.instrument(my_workflow)
+result = await instrumented.execute(data, context)
+apm.flush()  # ensure traces are sent before process exit
+```
+
+Then open <https://cloud.langfuse.com> to see the trace timeline for every execution.
+
 ## Step 4: Build a small workflow with the current API
 
 ```python

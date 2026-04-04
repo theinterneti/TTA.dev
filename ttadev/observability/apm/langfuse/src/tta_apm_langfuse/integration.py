@@ -65,6 +65,49 @@ class LangFuseIntegration:
             else None
         )
 
+    @classmethod
+    def from_env(cls) -> "LangFuseIntegration":
+        """Create integration from LANGFUSE_* environment variables.
+
+        Reads credentials from the environment so callers don't need to
+        hard-code or manually pass API keys.
+
+        Required environment variables:
+            LANGFUSE_PUBLIC_KEY: Langfuse public API key (starts with ``pk-lf-``)
+            LANGFUSE_SECRET_KEY: Langfuse secret API key (starts with ``sk-lf-``)
+
+        Optional environment variables:
+            LANGFUSE_HOST: Langfuse host URL
+                           (default: ``https://cloud.langfuse.com``)
+
+        Returns:
+            Configured :class:`LangFuseIntegration` instance.
+
+        Raises:
+            KeyError: If ``LANGFUSE_PUBLIC_KEY`` or ``LANGFUSE_SECRET_KEY``
+                      are not set.
+
+        Example:
+            ```bash
+            export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+            export LANGFUSE_SECRET_KEY="sk-lf-..."
+            # LANGFUSE_HOST is optional
+            ```
+
+            ```python
+            from tta_apm_langfuse import LangFuseIntegration
+
+            apm = LangFuseIntegration.from_env()
+            ```
+        """
+        import os
+
+        return cls(
+            public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
+            secret_key=os.environ["LANGFUSE_SECRET_KEY"],
+            host=os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com"),
+        )
+
     def instrument(
         self, primitive: WorkflowPrimitive, trace_name: str | None = None
     ) -> WorkflowPrimitive:

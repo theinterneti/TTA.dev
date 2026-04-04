@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import time
 from pathlib import Path
 from typing import Any
@@ -46,6 +47,8 @@ except ImportError:
 
 from ..core.base import WorkflowContext, WorkflowPrimitive
 
+_logger = logging.getLogger(__name__)
+
 
 class FileSpanExporter(SpanExporter):
     """Export spans to a JSONL file."""
@@ -86,7 +89,7 @@ class FileSpanExporter(SpanExporter):
                     f.write(json.dumps(span_dict) + "\n")
             return SpanExportResult.SUCCESS
         except Exception as e:
-            print(f"Error exporting spans: {e}")
+            _logger.warning("Failed to export spans to file %s: %s", self.file_path, e)
             return SpanExportResult.FAILURE
 
     def shutdown(self) -> None:
