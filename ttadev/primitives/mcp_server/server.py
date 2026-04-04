@@ -9,6 +9,7 @@ import asyncio
 import contextlib
 import sys
 import uuid
+import warnings
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Any
 
@@ -2028,9 +2029,17 @@ result = await workflow.execute(data, context)
             # Google: accept GOOGLE_API_KEY (canonical) or GEMINI_API_KEY
             # (backward-compat for users who set GEMINI_API_KEY manually).
             if name == "google":
-                api_key_configured = bool(
-                    os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
-                )
+                google_key = os.environ.get("GOOGLE_API_KEY")
+                gemini_key = os.environ.get("GEMINI_API_KEY")
+                if gemini_key and not google_key:
+                    warnings.warn(
+                        "GEMINI_API_KEY is deprecated; set GOOGLE_API_KEY instead "
+                        "(matches Google AI Studio convention). "
+                        "Support for GEMINI_API_KEY will be removed in a future release.",
+                        DeprecationWarning,
+                        stacklevel=2,
+                    )
+                api_key_configured = bool(google_key or gemini_key)
             else:
                 api_key_configured = bool(env_key and os.environ.get(env_key))
 

@@ -290,6 +290,35 @@ async def test_google_unavailable_when_no_key_set(monkeypatch: pytest.MonkeyPatc
     )
 
 
+@pytest.mark.asyncio
+async def test_gemini_api_key_emits_deprecation_warning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A DeprecationWarning is issued when GEMINI_API_KEY is set but GOOGLE_API_KEY is not.
+
+    Arrange: set only GEMINI_API_KEY (legacy) and remove GOOGLE_API_KEY.
+    Act:     call llm_list_providers via the MCP tool.
+    Assert:  a DeprecationWarning mentioning GOOGLE_API_KEY is raised.
+    """
+    import warnings
+
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.setenv("GEMINI_API_KEY", "test-legacy-key")
+
+    mcp = create_server()
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        await _call_tool(mcp, "llm_list_providers", {})
+
+    deprecation_warnings = [w for w in caught if issubclass(w.category, DeprecationWarning)]
+    assert deprecation_warnings, "Expected a DeprecationWarning when GEMINI_API_KEY is set"
+    messages = [str(w.message) for w in deprecation_warnings]
+    assert any("GOOGLE_API_KEY" in msg for msg in messages), (
+        "DeprecationWarning should mention GOOGLE_API_KEY as the canonical variable"
+    )
+
+
 # ── llm_recommend_model ───────────────────────────────────────────────────────
 
 

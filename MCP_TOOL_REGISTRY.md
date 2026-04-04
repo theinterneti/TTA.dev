@@ -27,6 +27,90 @@ For more details on agent context and tooling, refer to [`AGENTS.md`](AGENTS.md)
 
 ---
 
+## TTA.dev Built-in MCP Tools
+
+### `tta_bootstrap` — Recommended First Call
+
+> **Start every TTA.dev agent session with `tta_bootstrap`.** It returns a complete
+> orientation package in a single call so agents avoid multiple round-trips to learn
+> the repository.
+
+**Tool:** `tta_bootstrap`
+**Domain group:** `orientation`
+**Annotations:** read-only, idempotent
+
+**Signature:**
+
+```python
+tta_bootstrap(agent_id: str = "", task_hint: str = "") -> dict
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `agent_id` | `str` | Identifier for the calling agent (logged for telemetry, optional) |
+| `task_hint` | `str` | Brief description of what you're building — used to rank the top 3 primitives |
+
+**Response Schema:**
+
+```json
+{
+  "version": "0.x.y",
+  "agent_id": "<echoed>",
+  "primitives": [
+    { "name": "RetryPrimitive", "category": "recovery",
+      "when_to_use": "...", "import": "from ttadev.primitives.recovery import RetryPrimitive" }
+  ],
+  "mcp_tools": {
+    "orientation": ["tta_bootstrap"],
+    "analysis":    ["analyze_code", "get_primitive_info", "list_primitives", "search_templates"],
+    "llm":         ["llm_list_providers", "llm_recommend_model", ...],
+    "control":     ["control_create_task", "control_update_task_status", ...]
+  },
+  "patterns": "Sequential: a >> b >> c\nParallel: a | b | c\n...",
+  "quick_start": "TTA.dev: composable workflow primitives...",
+  "provider_status": { "providers": [...], "count": 4 },
+  "top_primitives_for_task": [
+    { "name": "RetryPrimitive", "category": "recovery", "when_to_use": "...", "import": "..." }
+  ]
+}
+```
+
+**Key fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `primitives` | `list[dict]` | Up to 15 primitives with `name`, `category`, `when_to_use`, `import` |
+| `mcp_tools` | `dict[str, list[str]]` | All registered tools grouped by domain prefix |
+| `patterns` | `str` | Concise composition patterns (Sequential, Parallel, Retry, Cache, Timeout, Fallback, Circuit) |
+| `quick_start` | `str` | ~150-word primer: imports, composition operators, key rules |
+| `provider_status` | `dict` | Live provider availability from `llm_list_providers()` |
+| `top_primitives_for_task` | `list[dict]` | 0–3 primitives ranked by `task_hint` relevance |
+
+**Example usage:**
+
+```python
+# At the start of an agent session
+result = await mcp_client.call_tool("tta_bootstrap", {
+    "agent_id": "my-coding-agent",
+    "task_hint": "build a retry workflow with caching"
+})
+
+# Immediately know which primitives to use
+top = result["top_primitives_for_task"]
+# → [{"name": "RetryPrimitive", ...}, {"name": "CachePrimitive", ...}]
+```
+
+**Why use it:**
+
+- Replaces 5+ separate tool calls (`list_primitives`, `llm_list_providers`, etc.) with one
+- Response stays under 8 KB (token budget enforced)
+- `task_hint` surfaces the 3 most relevant primitives so agents skip irrelevant ones
+- Logged with `agent_id` for telemetry and debugging
+
+---
+
 ## Available MCP Servers
 
 ### 1. Context7 - Library Documentation
