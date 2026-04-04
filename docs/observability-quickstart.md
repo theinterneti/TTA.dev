@@ -143,17 +143,16 @@ then export your keys:
 ```bash
 export LANGFUSE_PUBLIC_KEY="pk-lf-..."
 export LANGFUSE_SECRET_KEY="sk-lf-..."
-export LANGFUSE_HOST="https://cloud.langfuse.com"   # or your self-hosted URL
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com"   # or your self-hosted URL
 ```
 
 ### 5c. Instrument a primitive
 
-`LangFuseIntegration` is initialised with explicit credentials (no `from_env()` shortcut
-exists — read the env vars yourself):
+Use `LangFuseIntegration.from_env()` — it reads `LANGFUSE_PUBLIC_KEY`,
+`LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` automatically:
 
 ```python
 import asyncio
-import os
 
 from tta_apm_langfuse import LangFuseIntegration
 from ttadev.primitives.core.base import LambdaPrimitive, WorkflowContext
@@ -166,12 +165,8 @@ async def my_task(data: dict, ctx: WorkflowContext) -> dict:
 
 
 async def main() -> None:
-    # Initialise Langfuse with explicit keys (read from env)
-    apm = LangFuseIntegration(
-        public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
-        secret_key=os.environ["LANGFUSE_SECRET_KEY"],
-        host=os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com"),
-    )
+    # Reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL from env
+    apm = LangFuseIntegration.from_env()
 
     # Instrument the primitive — wraps execute() with @observe tracing
     base = LambdaPrimitive(my_task)

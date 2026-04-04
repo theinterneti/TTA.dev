@@ -190,18 +190,18 @@ class LangFuseIntegration:
         self,
         name: str,
         model: str,
-        input_data: Any,
-        output_data: Any,
+        input: Any,  # noqa: A002
+        output: Any,
         metadata: dict[str, Any] | None = None,
     ) -> None:
         """Record an LLM generation event.
 
         Args:
-            name: Generation name
-            model: Model identifier
-            input_data: Input prompt/data
-            output_data: Generated output
-            metadata: Additional metadata
+            name: Generation name (e.g. ``"groq/llama-3.3-70b-versatile"``).
+            model: Model identifier string.
+            input: Input prompt or messages list sent to the model.
+            output: Generated output string returned by the model.
+            metadata: Optional extra metadata (usage, cost, tier, …).
         """
         if not self.enabled or not self.client:
             return
@@ -210,11 +210,35 @@ class LangFuseIntegration:
             name=name,
             as_type="generation",
             model=model,
-            input=input_data,
-            output=output_data,
+            input=input,
+            output=output,
             metadata=metadata or {},
         ):
             pass  # observation is ended on context manager exit
+
+    def score_response(
+        self,
+        trace_id: str,
+        score: float,
+        name: str = "quality",
+        comment: str | None = None,
+    ) -> None:
+        """Record a quality score for a completed trace.
+
+        Args:
+            trace_id: The Langfuse trace ID (from ``context.metadata["langfuse_trace_id"]``).
+            score: Numeric score (0.0–1.0 typical, but Langfuse accepts any float).
+            name: Score category name (e.g. ``"quality"``, ``"accuracy"``, ``"latency"``).
+            comment: Optional human-readable explanation.
+        """
+        if not self.enabled or self.client is None:
+            return
+        self.client.create_score(
+            trace_id=trace_id,
+            name=name,
+            value=score,
+            comment=comment,
+        )
 
     def flush(self) -> None:
         """Flush pending traces to LangFuse."""

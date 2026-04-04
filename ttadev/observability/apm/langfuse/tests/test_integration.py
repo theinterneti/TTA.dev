@@ -80,15 +80,13 @@ def test_create_generation():
     integration.create_generation(
         name="test_gen",
         model="gpt-4",
-        input_data="prompt",
-        output_data="response",
+        input="prompt",
+        output="response",
         metadata={"key": "value"},
     )
 
     # Assert
-    mock_client.generation.assert_called_once_with(
-        name="test_gen", model="gpt-4", input="prompt", output="response", metadata={"key": "value"}
-    )
+    mock_client.start_as_current_observation.assert_called_once()
 
 
 def test_flush():

@@ -403,6 +403,21 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                 )
                 if tier.strip_thinking:
                     content = _THINK_RE.sub("", content).strip()
+                # Langfuse router-tier annotation (optional — fails silently)
+                try:
+                    from tta_apm_langfuse import get_integration  # noqa: PLC0415
+
+                    _lf = get_integration()
+                    if _lf is not None and _lf.client is not None:
+                        _lf.client.update_current_observation(
+                            metadata={
+                                "router.selected_tier": tier_key,
+                                "router.model_id": used_model,
+                                "router.fallback": i > 1,
+                            }
+                        )
+                except Exception:
+                    pass
                 return LLMResponse(
                     content=content,
                     model=used_model,
