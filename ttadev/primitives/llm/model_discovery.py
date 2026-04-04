@@ -6,27 +6,34 @@ for the *next* available model without knowing its name in advance.
 
 Supported providers (any that expose an OpenAI-compatible ``/models`` endpoint):
 
-- **Gemini** — ``https://generativelanguage.googleapis.com/v1beta/openai/models``
+- **Gemini (native)** — ``for_google()`` uses ``/v1beta/models?key=...``
+  (non-OpenAI-compat, full authoritative model list)
 - **Groq**   — ``https://api.groq.com/openai/v1/models``
 - **OpenRouter** — ``https://openrouter.ai/api/v1/models``
 
 Ollama uses a different format (``GET /api/tags``) and is handled separately.
 
+.. note::
+    For Gemini, prefer :meth:`ProviderModelDiscovery.for_google` and the
+    :func:`best_google_free_model` helper over ``for_provider()``.  The native
+    endpoint returns the **full** model list (not the OpenAI-compat subset) and
+    uses a ``?key=...`` query-param instead of a Bearer token — matching how
+    LiteLLM calls Gemini when the ``gemini/`` prefix is used.
+
 Example::
 
     discovery = ProviderModelDiscovery()
 
-    # Get an ordered list of Gemini models to try (best → fallback)
-    models = await discovery.for_provider(
-        "google",
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai",
-        api_key=os.environ["GOOGLE_API_KEY"],
-    )
+    # Get an ordered list of Gemini models via the native API (recommended)
+    models = await discovery.for_google(api_key=os.environ["GOOGLE_API_KEY"])
     print(models)
-    # ['models/gemini-flash-lite-latest', 'models/gemini-3.1-flash-lite-preview', ...]
+    # ['gemini/gemini-flash-lite-latest', 'gemini/gemini-3.1-flash-lite-preview', ...]
+
+    # Get the single best available model (skips exhausted ones)
+    best = await best_google_free_model(api_key=os.environ["GOOGLE_API_KEY"])
 
     # Mark a model as exhausted (429); next call skips it for ttl_seconds
-    discovery.mark_exhausted("models/gemini-2.5-flash", ttl_seconds=86400)
+    discovery.mark_exhausted("gemini/gemini-2.5-flash", ttl_seconds=86400)
 
     # Get next working model (automatically skips exhausted ones)
     model = await discovery.next_working(
@@ -55,16 +62,22 @@ _DEFAULT_CACHE_DIR = Path("~/.cache/ttadev/model_discovery")
 # Priority ordering hints: prefer aliases (always-latest) then recency.
 # Models matching these substrings are sorted to the front.
 _GEMINI_PREFER_PATTERNS: list[str] = [
-    "flash-lite-latest",  # alias, tracks best lite model
-    "flash-latest",  # alias, tracks best flash
-    "3.1-flash-lite",  # latest generation lite (good quota)
+    "flash-lite-latest",  # alias, always tracks best lite
+    "flash-latest",  # alias, always tracks best flash
+    "3.1-flash-lite",  # gen 3.1 lite (newest, great free quota)
     "3-flash",  # gen 3 flash
-    "2.0-flash-lite",  # gen 2 lite (known free tier)
-    "2.5-flash-lite",  # gen 2.5 lite
-    "2.0-flash",  # gen 2 flash
-    "2.5-flash",  # gen 2.5 flash (good but quota-heavy)
+    "2.5-flash-lite",  # gen 2.5 lite (newer than 2.0)
+    "2.0-flash-lite",  # gen 2.0 lite (known good free tier)
+    "2.5-flash",  # gen 2.5 flash
+    "2.0-flash",  # gen 2.0 flash
+    "3.1-pro",  # gen 3.1 pro
+    "3-pro",  # gen 3 pro
     "2.5-pro",  # gen 2.5 pro
 ]
+
+# Native Google Generative Language API — returns the full authoritative model list.
+# Auth uses a ?key=... query param, NOT a Bearer token.
+_GOOGLE_NATIVE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
 
 # ── Data structures ───────────────────────────────────────────────────────────
@@ -291,6 +304,60 @@ class ProviderModelDiscovery:
         else:
             self._exhausted.pop(model_id, None)
 
+    async def for_google(
+        self,
+        api_key: str,
+        *,
+        force_refresh: bool = False,
+    ) -> list[str]:
+        """Return an ordered list of Gemini model IDs using the native Google API.
+
+        Unlike ``for_provider()``, this uses Google's non-OpenAI-compat endpoint
+        which returns the full authoritative model list and requires a ``?key=...``
+        query param instead of a Bearer token.
+
+        Model IDs are returned in LiteLLM ``gemini/`` prefix format (e.g.
+        ``"gemini/gemini-3.1-flash-lite-preview"``) ready to pass to LiteLLM or
+        OpenHands.
+
+        Args:
+            api_key: Google AI Studio API key.
+            force_refresh: Bypass cache and fetch live.
+
+        Returns:
+            Priority-ordered list of model IDs (best free/lite models first).
+        """
+        cache_key = "google-native"
+        cache = self._mem_cache.get(cache_key)
+        if cache and cache.is_fresh(self._cache_ttl) and not force_refresh:
+            return cache.models
+
+        disk_cache = self._load_disk_cache(cache_key)
+        if disk_cache and disk_cache.is_fresh(self._cache_ttl) and not force_refresh:
+            self._mem_cache[cache_key] = disk_cache
+            return disk_cache.models
+
+        logger.info("model_discovery: fetching live Google native model list")
+        try:
+            raw = await self._fetch_google_native_models(api_key)
+        except Exception as exc:
+            logger.warning(
+                "model_discovery: failed to fetch Google native models: %s — using cached/fallback",
+                exc,
+            )
+            if disk_cache:
+                return disk_cache.models
+            if cache:
+                return cache.models
+            return []
+
+        ordered = _sort_models(raw, _GEMINI_PREFER_PATTERNS)
+        entry = _ProviderCache(models=[m.id for m in ordered], fetched_at=time.time())
+        self._mem_cache[cache_key] = entry
+        self._save_disk_cache(cache_key, entry)
+        logger.info("model_discovery: discovered %d Google models", len(entry.models))
+        return entry.models
+
     # ── Internal helpers ──────────────────────────────────────────────────────
 
     async def _fetch_models(
@@ -333,6 +400,38 @@ class ProviderModelDiscovery:
                     created=int(entry.get("created") or 0),
                 )
             )
+        return results
+
+    async def _fetch_google_native_models(self, api_key: str) -> list[DiscoveredModel]:
+        """Fetch models from Google's native (non-OpenAI-compat) endpoint.
+
+        Uses ``GET https://generativelanguage.googleapis.com/v1beta/models?key=...``
+        which is the authoritative full model list, not the OpenAI-compat shim.
+        Filters to models supporting ``generateContent`` (text generation).
+        Returns IDs in ``gemini/`` LiteLLM prefix format.
+
+        Args:
+            api_key: Google AI Studio API key.
+
+        Returns:
+            List of :class:`DiscoveredModel` with IDs as ``gemini/<model-name>``.
+        """
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            resp = await client.get(_GOOGLE_NATIVE_URL, params={"key": api_key})
+            resp.raise_for_status()
+            data: dict[str, Any] = resp.json()
+
+        results: list[DiscoveredModel] = []
+        for m in data.get("models", []):
+            name = m.get("name", "")  # e.g. "models/gemini-3.1-flash-lite-preview"
+            if not name.startswith("models/gemini"):
+                continue
+            # Must support generateContent for text generation
+            if "generateContent" not in m.get("supportedGenerationMethods", []):
+                continue
+            # Convert to LiteLLM format: "models/gemini-X" → "gemini/gemini-X"
+            model_id = "gemini/" + name.removeprefix("models/")
+            results.append(DiscoveredModel(id=model_id, owned_by="google", created=0))
         return results
 
     def _cache_path(self, provider: str) -> Path:
@@ -402,3 +501,37 @@ def _sort_models(
 
 #: Shared instance — importers can use this directly without constructing their own.
 default_discovery = ProviderModelDiscovery()
+
+
+async def best_google_free_model(
+    api_key: str,
+    *,
+    exclude: list[str] | None = None,
+    discovery: ProviderModelDiscovery | None = None,
+) -> str | None:
+    """Return the best available non-exhausted Gemini model ID for LiteLLM.
+
+    Uses the native Google API (not the OpenAI-compat shim) for an accurate,
+    up-to-date model list.  Returns model IDs in ``gemini/`` prefix format.
+
+    Args:
+        api_key: Google AI Studio API key.
+        exclude: Model IDs to skip (e.g. ones that just returned 429).
+        discovery: Optional :class:`ProviderModelDiscovery` instance; uses the
+            module-level :data:`default_discovery` singleton when not provided.
+
+    Returns:
+        Best available model ID (e.g. ``"gemini/gemini-flash-lite-latest"``),
+        or ``None`` if all models are exhausted or the API is unreachable.
+    """
+    disc = discovery or default_discovery
+    models = await disc.for_google(api_key)
+    skip = set(exclude or [])
+    for model_id in models:
+        if model_id in skip:
+            continue
+        if disc.is_exhausted(model_id):
+            continue
+        return model_id
+    logger.warning("best_google_free_model: all Google models are exhausted or excluded")
+    return None

@@ -94,6 +94,14 @@ except (
     else:
         raise
 
+from ttadev.primitives.integrations.openhands_primitive import (
+    _OPENHANDS_DENYLIST,
+    OPENHANDS_COMPATIBLE_FREE_MODELS,
+    OpenHandsAgentError,
+    OpenHandsPrimitive,
+    get_ranked_openhands_free_models,
+)
+
 
 def __getattr__(name: str) -> object:
     """Lazily expose symbols that must not be imported at module load time.
@@ -132,4 +140,9 @@ __all__ = [
     "CodeExecutionPrimitive",
     "E2BPrimitive",
     "LangGraphPrimitive",
+    "OpenHandsPrimitive",
+    "OpenHandsAgentError",
+    "OPENHANDS_COMPATIBLE_FREE_MODELS",
+    "_OPENHANDS_DENYLIST",
+    "get_ranked_openhands_free_models",
 ]
