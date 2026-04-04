@@ -647,6 +647,7 @@ BENCHMARK_DATA: list[ModelBenchmarkMetadata] = [
         notes="4-shot, chain-of-thought",
     ),
     # ── Gemini 1.5 Flash ─────────────────────────────────────────────────────
+    # Historical benchmark data — model removed from API. Kept for comparison purposes only.
     ModelBenchmarkMetadata(
         model_id="gemini/gemini-1.5-flash",
         benchmark="mmlu",
@@ -941,6 +942,7 @@ MODEL_ID_ALIASES: dict[str, str] = {
     "models/gemini-2.5-pro-preview-06-05": "models/gemini-2.5-pro",
     "gemini-2.5-pro": "models/gemini-2.5-pro",
     # ── Gemini 1.5 variants → canonical ─────────────────────────────────────
+    # Removed from API but benchmark data still valid
     "models/gemini-1.5-flash": "gemini/gemini-1.5-flash",
     "models/gemini-1.5-flash-latest": "gemini/gemini-1.5-flash",
     "gemini-1.5-flash": "gemini/gemini-1.5-flash",

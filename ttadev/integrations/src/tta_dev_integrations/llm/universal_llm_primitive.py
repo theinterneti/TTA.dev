@@ -142,7 +142,7 @@ class BudgetAwareLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         ...     coder="auto",
         ...     budget_profile=UserBudgetProfile.CAREFUL,
         ...     monthly_limit=50.00,
-        ...     free_models=["gemini-1.5-pro", "gemini-1.5-flash"],
+        ...     free_models=["gemini/gemini-2.0-flash-lite", "gemini/gemini-2.5-flash-lite"],
         ...     paid_models=["claude-3.5-sonnet"],
         ... )
         >>>
@@ -152,7 +152,7 @@ class BudgetAwareLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         ...         complexity="high",
         ...         justification=CostJustification(
         ...             reason="Dashboard requires complex visualization logic",
-        ...             free_alternatives_tried=["gemini-1.5-pro"],
+        ...             free_alternatives_tried=["gemini/gemini-2.0-flash-lite"],
         ...             expected_quality_delta="+25%",
         ...         )
         ...     ),
@@ -193,9 +193,9 @@ class BudgetAwareLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         self.require_justification_for_paid = require_justification_for_paid
 
         # Default free models (based on user's stack)
+        # NOTE: Use ProviderModelDiscovery.for_google() for a live-fetched ranked list
         self.free_models = free_models or [
-            "gemini-1.5-pro",  # Primary free (Google AI Studio)
-            "gemini-1.5-flash",  # Fast free
+            "gemini/gemini-2.0-flash-lite",  # Current stable free (Google AI Studio)
             "kimi",  # Cline fallback
             "deepseek",  # Cline fallback
         ]
@@ -302,37 +302,37 @@ class BudgetAwareLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         # FREE mode: Only use free models
         if self.budget_profile == UserBudgetProfile.FREE:
             if complexity == "simple":
-                return "gemini-1.5-flash", ModelTier.FREE
+                return "gemini/gemini-2.0-flash-lite", ModelTier.FREE
             else:
-                return "gemini-1.5-pro", ModelTier.FREE
+                return "gemini/gemini-2.5-flash-lite", ModelTier.FREE
 
         # UNLIMITED mode: Always use best model
         if self.budget_profile == UserBudgetProfile.UNLIMITED:
             if complexity == "high":
                 return "claude-3.5-sonnet", ModelTier.PAID
             elif complexity == "medium":
-                return "gemini-1.5-pro", ModelTier.FREE  # Good enough for medium
+                return "gemini/gemini-2.5-flash-lite", ModelTier.FREE  # Good enough for medium
             else:
-                return "gemini-1.5-flash", ModelTier.FREE
+                return "gemini/gemini-2.0-flash-lite", ModelTier.FREE
 
         # CAREFUL mode: Balance free and paid based on complexity
         if complexity == "simple":
-            return "gemini-1.5-flash", ModelTier.FREE
+            return "gemini/gemini-2.0-flash-lite", ModelTier.FREE
 
         if complexity == "medium":
             # Use free unless justification shows significant quality delta
             if justification and self._quality_delta_justifies_paid(justification):
                 return "claude-3.5-sonnet", ModelTier.PAID
-            return "gemini-1.5-pro", ModelTier.FREE
+            return "gemini/gemini-2.5-flash-lite", ModelTier.FREE
 
         if complexity == "high":
             # High complexity: Use paid if budget allows and justified
             if self._budget_allows_paid() and justification:
                 return "claude-3.5-sonnet", ModelTier.PAID
             # Fallback to best free model
-            return "gemini-1.5-pro", ModelTier.FREE
+            return "gemini/gemini-2.5-flash-lite", ModelTier.FREE
 
-        return "gemini-1.5-pro", ModelTier.FREE
+        return "gemini/gemini-2.5-flash-lite", ModelTier.FREE
 
     def _quality_delta_justifies_paid(self, justification: CostJustification) -> bool:
         """Check if quality delta justifies paid usage."""

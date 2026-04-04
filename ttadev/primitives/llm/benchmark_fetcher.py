@@ -94,6 +94,11 @@ _AA_SLUG_MAP: dict[str, str] = {
     "qwen3-32b-instruct": "qwen/qwen3-32b",
     "gpt-oss-20b": "openai/gpt-oss-20b",
     "gpt-oss-120b": "openai/gpt-oss-120b",
+    # Qwen3.6 Plus — confirmed working with OpenHands tool-use (April 2026).
+    # AA may track this under "qwen3-6-plus" or "qwen3.6-plus"; add both so
+    # whichever slug appears in the live API response is captured.
+    "qwen3-6-plus": "qwen/qwen3.6-plus",
+    "qwen3.6-plus": "qwen/qwen3.6-plus",
     # ── Gemini (Google) ───────────────────────────────────────────────────────
     "gemini-2-5-flash": "models/gemini-2.5-flash",
     "gemini-2-5-pro": "models/gemini-2.5-pro",

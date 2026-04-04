@@ -7,14 +7,25 @@ can try the most appropriate model first.
 
 Scoring is based on published benchmark data from
 :mod:`~ttadev.primitives.llm.model_benchmarks`.  When no benchmark data exists
-for a model, a param-size heuristic is used as a graceful fallback.
+for a model, a param-size heuristic is used as a graceful fallback.  Live
+Artificial Analysis benchmarks (populated by ``benchmark_fetcher.py``) are
+incorporated via :data:`_TASK_WEIGHTS` and are used automatically when the
+benchmark cache is present at ``~/.cache/ttadev/benchmark_data.json``.
 
 Benchmark normalization
 -----------------------
-All benchmarks are treated as 0–100 percentages **except** ``arena_elo``,
-which stores raw LMSYS ELO on a 0–2000 scale.  The scoring code divides
-``arena_elo`` by 20 before combining it with other benchmarks so all terms
-live on a comparable scale.
+All benchmarks are treated as 0–100 percentages **except**:
+
+* ``arena_elo`` — raw LMSYS ELO on a 0–2000 scale; divided by **20** before
+  weighting so values land on a comparable 0–100 scale.
+* ``aa_speed_tok_per_sec`` — median output tokens/second from Artificial
+  Analysis (typical range 10–200+); divided by **2** before weighting
+  (200 tok/s → 100 pts).  Higher is better.
+* ``aa_ttft_seconds`` — median time-to-first-token in seconds from Artificial
+  Analysis (typical range 0.0–4.0); **inverted** via
+  ``max(0.0, 100.0 - raw * 25.0)`` before weighting so that faster models
+  (lower seconds) receive higher scores.  At 0 s → 100 pts, 2 s → 50 pts,
+  4 s → 0 pts.
 
 Example::
 
@@ -74,47 +85,83 @@ COMPLEXITY_MODERATE: str = "moderate"
 COMPLEXITY_COMPLEX: str = "complex"
 
 # ── Benchmark weights per task type ───────────────────────────────────────────
-# Each inner dict maps benchmark_name → weight.  Weights within a task sum ≤ 1.
-# arena_elo values are divided by 20 before weighting (normalization).
+# Each inner dict maps benchmark_name → weight.  Weights within a task sum ≈ 1.
+# Special normalization applied in score_model_for_task() before weighting:
+#   arena_elo        → divided by 20   (0–2000 ELO scale → 0–100)
+#   aa_speed_tok_per_sec → divided by 2    (0–200+ tok/s   → 0–100)
+#   aa_ttft_seconds  → max(0, 100 − raw * 25)  (lower seconds → higher score)
+# All AA intelligence/coding/math indices are already 0–100 from the fetcher.
+# Live benchmarks (aa_*, mmlu_pro, livebench, aime) are populated by
+# benchmark_fetcher.py and loaded at import time from the benchmark cache;
+# they silently contribute 0 weight when no cache entry exists for a model.
 
 _TASK_WEIGHTS: dict[str, dict[str, float]] = {
     TASK_CODING: {
-        "humaneval": 0.45,
-        "mbpp": 0.20,
-        "mmlu": 0.20,
-        "arena_elo": 0.15,
+        # AA live benchmarks (40 % of weight)
+        "aa_coding": 0.25,  # Artificial Analysis coding index  (0–100)
+        "aa_intelligence": 0.10,  # Composite quality index           (0–100)
+        # Static benchmarks (60 % of weight)
+        "humaneval": 0.35,
+        "mbpp": 0.15,
+        "mmlu": 0.10,
+        "arena_elo": 0.05,
     },
     TASK_REASONING: {
-        "gpqa": 0.35,
-        "mmlu": 0.35,
-        "arena_elo": 0.20,
-        "humaneval": 0.10,
-    },
-    TASK_MATH: {
-        "math": 0.55,
+        # AA live benchmarks (45 % of weight)
+        "aa_intelligence": 0.20,  # Composite quality index           (0–100)
+        "mmlu_pro": 0.15,  # MMLU-Pro from AA                  (0–100)
+        "livebench": 0.10,  # LiveBench from AA                 (0–100)
+        # Static benchmarks (55 % of weight)
         "gpqa": 0.25,
         "mmlu": 0.20,
+        "arena_elo": 0.10,
+    },
+    TASK_MATH: {
+        # AA live benchmarks (40 % of weight)
+        "aa_math": 0.25,  # Artificial Analysis math index    (0–100)
+        "aime": 0.15,  # AIME advanced math from AA        (0–100)
+        # Static benchmarks (60 % of weight)
+        "math": 0.35,
+        "gpqa": 0.15,
+        "mmlu": 0.10,
     },
     TASK_CHAT: {
-        "arena_elo": 0.50,
-        "mt_bench": 0.30,
-        "mmlu": 0.20,
+        # AA live benchmarks — latency matters for chat (40 % of weight)
+        "aa_intelligence": 0.15,  # Composite quality index           (0–100)
+        "aa_speed_tok_per_sec": 0.15,  # Higher tok/s → better UX   (÷2 norm)
+        "aa_ttft_seconds": 0.10,  # Lower TTFT → better UX           (inverted)
+        # Static benchmarks (60 % of weight)
+        "arena_elo": 0.30,
+        "mt_bench": 0.20,
+        "mmlu": 0.10,
     },
     TASK_FUNCTION_CALLING: {
-        "humaneval": 0.35,
-        "mmlu": 0.35,
-        "arena_elo": 0.30,
+        # AA live benchmarks (30 % of weight)
+        "aa_intelligence": 0.20,  # Composite quality index           (0–100)
+        "aa_coding": 0.10,  # Coding ability aids tool-calling  (0–100)
+        # Static benchmarks (70 % of weight)
+        "humaneval": 0.25,
+        "mmlu": 0.25,
+        "arena_elo": 0.20,
     },
     TASK_VISION: {
-        "mmlu": 0.50,
-        "arena_elo": 0.30,
-        "humaneval": 0.20,
+        # AA live benchmarks (25 % of weight)
+        "aa_intelligence": 0.25,  # Composite quality index           (0–100)
+        # Static benchmarks (75 % of weight)
+        "mmlu": 0.40,
+        "arena_elo": 0.20,
+        "humaneval": 0.15,
     },
     TASK_GENERAL: {
-        "mmlu": 0.35,
-        "arena_elo": 0.35,
-        "humaneval": 0.20,
+        # AA live benchmarks (45 % of weight)
+        "aa_intelligence": 0.20,  # Composite quality index           (0–100)
+        "mmlu_pro": 0.15,  # MMLU-Pro from AA                  (0–100)
+        "livebench": 0.10,  # LiveBench from AA                 (0–100)
+        # Static benchmarks (55 % of weight)
+        "mmlu": 0.20,
+        "arena_elo": 0.20,
         "mt_bench": 0.10,
+        "humaneval": 0.05,
     },
 }
 
@@ -304,7 +351,12 @@ def score_model_for_task(model_id: str, profile: TaskProfile) -> float:
     """Compute a 0.0–1.0 suitability score for a model on a given task profile.
 
     Benchmark scores are weighted by :data:`_TASK_WEIGHTS` for the task type.
-    ``arena_elo`` values are divided by 20 before combining.
+    Before combining, out-of-scale benchmarks are normalized:
+
+    * ``arena_elo`` is divided by 20 (0–2000 ELO → 0–100).
+    * ``aa_speed_tok_per_sec`` is divided by 2 (200 tok/s → 100 pts).
+    * ``aa_ttft_seconds`` is inverted via ``max(0, 100 − raw × 25)`` so lower
+      latency yields a higher score (0 s → 100, 2 s → 50, ≥4 s → 0).
 
     When no benchmark data is available for a model, falls back to a
     param-size heuristic: larger → higher score, capped at 0.5 to ensure
@@ -326,8 +378,21 @@ def score_model_for_task(model_id: str, profile: TaskProfile) -> float:
         raw = get_best_score(model_id, benchmark)
         if raw is None:
             continue
-        # Normalize arena_elo from 0-2000 to 0-100
-        normalized = raw / 20.0 if benchmark == "arena_elo" else raw
+        # Normalize benchmarks that use non-0-100 scales before combining.
+        if benchmark == "arena_elo":
+            # Raw LMSYS ELO is 0–2000; divide by 20 → 0–100.
+            normalized = raw / 20.0
+        elif benchmark == "aa_speed_tok_per_sec":
+            # Raw value is median output tokens/second (typically 10–200+).
+            # Divide by 2 so that 200 tok/s → 100 pts.
+            normalized = raw / 2.0
+        elif benchmark == "aa_ttft_seconds":
+            # Raw value is time-to-first-token in seconds (lower is better).
+            # Invert: 0 s → 100 pts, 2 s → 50 pts, ≥4 s → 0 pts.
+            normalized = max(0.0, 100.0 - raw * 25.0)
+        else:
+            # All other benchmarks are already on a 0–100 percentage scale.
+            normalized = raw
         weighted_sum += normalized * weight
         total_weight += weight
 

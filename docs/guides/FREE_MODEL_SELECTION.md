@@ -8,8 +8,8 @@
 
 ## 🎯 TL;DR - Recommended Setup
 
-**Best Free Combination (2025):**
-- **LLM:** Google AI Studio + Gemini 1.5 Pro (via Cline)
+**Best Free Combination (2026):**
+- **LLM:** Google AI Studio + Gemini Flash Lite (via `best_google_free_model()`)
 - **Database:** Supabase Free Tier
 - **Auth:** Clerk Free Tier (10k users)
 - **Orchestration:** TTA.dev primitives
@@ -27,10 +27,10 @@
 **Cost:** FREE (generous quota)
 **Integration:** Via Cline
 
-**Models Available:**
-- `gemini-1.5-pro` - Best balance (recommended)
-- `gemini-1.5-flash` - Faster, good for simple tasks
-- `gemini-2.0-flash-exp` - Experimental, cutting edge
+**Models Available (use `gemini/gemini-flash-lite-latest` alias for always-current):**
+- `gemini-flash-lite-latest` — best lite model alias (always tracks latest) ⭐ recommended
+- `gemini-2.5-flash` — fast, capable
+- `gemini-2.5-pro` — most capable (higher quota usage)
 
 **Quota:**
 - Free tier: 15 requests/minute, 1 million tokens/minute
@@ -53,9 +53,16 @@
 ```json
 {
   "provider": "google",
-  "model": "gemini-1.5-pro",
+  "model": "gemini-flash-lite-latest",
   "apiKey": "YOUR_API_KEY_HERE"
 }
+```
+
+**Or use `ProviderModelDiscovery` to always get the best available model:**
+```python
+from ttadev.primitives.llm.model_discovery import best_google_free_model
+model = await best_google_free_model(api_key="YOUR_API_KEY_HERE")
+# → "gemini/gemini-flash-lite-latest"
 ```
 
 **Proven Results:**
@@ -223,18 +230,18 @@ ollama run llama3.2:3b
 
 **For Free Tier Users:**
 ```
-I recommend starting with Google AI Studio + Gemini 1.5 Pro via Cline.
+I recommend starting with Google AI Studio + Gemini Flash Lite via Cline.
 
 Reasoning:
 - FREE with generous quota (15 req/min, 1M tokens/min)
+- Use `gemini-flash-lite-latest` alias — always tracks the best lite model
 - Nearly as effective as paid GPT-4 for most tasks
-- Proven in TTA.dev development
 - Easy setup (5 minutes)
 
 Setup:
 1. Get API key: https://aistudio.google.com/
 2. Install Cline in VS Code
-3. Configure Gemini in Cline settings
+3. Configure Gemini in Cline settings (model: gemini-flash-lite-latest)
 4. Start building!
 ```
 
@@ -280,8 +287,8 @@ Trade-off: Slower than cloud APIs, but zero data leaves your control.
 
 | Provider | Model | Input Cost | Output Cost | Rate Limit | Context Window |
 |----------|-------|------------|-------------|------------|----------------|
-| **Google AI Studio** | Gemini 1.5 Pro | FREE | FREE | 15 req/min | 2M tokens |
-| **Google AI Studio** | Gemini 1.5 Flash | FREE | FREE | 15 req/min | 1M tokens |
+| **Google AI Studio** | Gemini Flash Lite (latest) | FREE | FREE | 15 req/min | 1M tokens |
+| **Google AI Studio** | Gemini 2.5 Flash | FREE | FREE | 15 req/min | 1M tokens |
 | **OpenRouter** | Gemini Flash | FREE | FREE | Varies | 1M tokens |
 | **OpenRouter** | Llama 3.1 8B | FREE | FREE | Varies | 128k tokens |
 | **HuggingFace** | Mistral 7B | FREE (limited) | FREE (limited) | Limited | 8k tokens |
@@ -351,8 +358,8 @@ Trade-off: Slower than cloud APIs, but zero data leaves your control.
 **Best for Development (FREE):**
 ```
 Provider: Google AI Studio
-Model: Gemini 1.5 Pro
-Via: Cline
+Model: gemini-flash-lite-latest  (always-current alias)
+Via: Cline or best_google_free_model()
 Cost: $0
 Setup Time: 5 minutes
 ```
@@ -375,9 +382,13 @@ Privacy: 100% local
 
 ---
 
-**Last Updated:** November 12, 2025
+**Last Updated:** April 2026
 **Next Review:** Monthly (check for new free models)
 **Maintained by:** TTA.dev Team
+
+> **OpenHands + Free Models:** For running AI coding agents with free OpenRouter models, see
+> [`examples/openhands_with_free_models.py`](../../examples/openhands_with_free_models.py)
+> and [`docs/kb-exports/openhands-provider-compatibility.md`](../kb-exports/openhands-provider-compatibility.md).
 
 
 ---

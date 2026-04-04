@@ -369,28 +369,8 @@ _DEFAULT_CLOUD_MODELS: list[ModelEntry] = [
         cost_tier="free",
         is_local=False,
     ),
-    ModelEntry(
-        model_id="models/gemini-1.5-flash",
-        provider="google",
-        display_name="Gemini 1.5 Flash",
-        context_length=1_048_576,
-        supports_tool_calling=True,
-        supports_vision=True,
-        supports_streaming=True,
-        cost_tier="free",
-        is_local=False,
-    ),
-    ModelEntry(
-        model_id="models/gemini-1.5-pro",
-        provider="google",
-        display_name="Gemini 1.5 Pro",
-        context_length=2_097_152,
-        supports_tool_calling=True,
-        supports_vision=True,
-        supports_streaming=True,
-        cost_tier="medium",
-        is_local=False,
-    ),
+    # Gemini 1.5 models were removed by Google (404). Use ProviderModelDiscovery.for_google()
+    # for current model list.
     # ── Google Gemma (via Google AI Studio — same GOOGLE_API_KEY as Gemini) ────
     # 14,400 RPD / 30 RPM / 15K TPM — much higher RPD than Gemini frontier models.
     ModelEntry(
@@ -1000,8 +980,8 @@ GEMINI_MODELS: list[str] = [
     "models/gemini-2.5-pro",
     "models/gemini-2.0-flash",
     "models/gemini-2.0-flash-lite",
-    "models/gemini-1.5-flash",
-    "models/gemini-1.5-pro",
+    # Gemini 1.5 models were removed by Google (404). Use ProviderModelDiscovery.for_google()
+    # for current model list.
 ]
 
 

@@ -1755,14 +1755,136 @@ See [examples/sdd_workflow.py](examples/sdd_workflow.py) for a full runnable exa
 
 ---
 
+## Integration Primitives
+
+SDK wrappers that expose third-party AI services as first-class `WorkflowPrimitive` instances so they compose naturally with retry, timeout, circuit-breaker, and other TTA.dev primitives.
+
+### OpenHandsPrimitive
+
+**Run an [OpenHands](https://github.com/All-Hands-AI/OpenHands) AI coding agent as a `WorkflowPrimitive`.**
+
+```python
+from ttadev.primitives.integrations.openhands_primitive import (
+    OpenHandsPrimitive,
+    OPENHANDS_COMPATIBLE_FREE_MODELS,
+)
+from ttadev.primitives.core.base import WorkflowContext
+
+# Use a confirmed-compatible free model (default)
+prim = OpenHandsPrimitive(model=OPENHANDS_COMPATIBLE_FREE_MODELS[0])
+ctx = WorkflowContext(workflow_id="my-task")
+result = await prim.execute("Write a haiku about recursion.", ctx)
+print(result["result"])   # final agent message
+print(result["status"])   # "finished" | "stuck" | "error"
+```
+
+**Compose with Retry + Timeout (recommended for production):**
+
+```python
+from ttadev.primitives import RetryPrimitive, TimeoutPrimitive
+
+workflow = TimeoutPrimitive(
+    RetryPrimitive(prim, max_retries=2),
+    timeout_seconds=120.0,
+)
+result = await workflow.execute("Fix the failing tests in src/", ctx)
+```
+
+**Constructor args:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `model` | `str` | `"openrouter/qwen/qwen3.6-plus:free"` | LiteLLM model string |
+| `api_key` | `str \| None` | `None` | Provider API key (discovered from env when `None`) |
+| `base_url` | `str \| None` | `None` | Optional LLM endpoint override |
+| `tools` | `list[str]` | `[]` | Additional tool names beyond SDK built-ins |
+| `workspace_dir` | `Path \| None` | `None` | Agent working directory (temp dir per-execution when `None`) |
+| `max_iterations` | `int` | `50` | Hard cap on agent reasoning steps |
+| `raise_on_stuck` | `bool` | `True` | Raise `OpenHandsAgentError` on non-success status |
+
+**Return type:** `dict[str, Any]` with keys `result`, `status`, `events_count`, `conversation_id`.
+
+**`OPENHANDS_COMPATIBLE_FREE_MODELS`** — verified list of free OpenRouter models that support both function calling and array-content message format (empirically confirmed 2026-04-04):
+
+```python
+OPENHANDS_COMPATIBLE_FREE_MODELS = [
+    "openrouter/qwen/qwen3.6-plus:free",    # ✅ confirmed (status=finished)
+    "openrouter/openai/gpt-oss-20b:free",   # ✅ confirmed (status=finished)
+]
+```
+
+**Observability:** Automatically emits a Langfuse generation record (model, input, output, duration, status) when `tta_apm_langfuse` is installed and `LANGFUSE_*` env vars are set. Fails silently when Langfuse is unavailable.
+
+**Known-incompatible model families:**
+- Gemma (any version/provider) — function calling not enabled
+- Groq free tier — 12K TPM limit; OpenHands needs ~36K tokens/request
+- `openrouter/openai/gpt-oss-120b:free` — rejects array-content messages (HTTP 422)
+
+See `docs/kb-exports/openhands-provider-compatibility.md` for the full compatibility matrix.
+
+**Integrate with Artificial Analysis benchmark ranking:**
+
+```python
+from ttadev.primitives.llm.free_model_tracker import get_free_models, rank_models_for_role
+
+models = await get_free_models(api_key=os.environ["OPENROUTER_API_KEY"])
+ranked = rank_models_for_role(models, task_type="coding")
+compatible = {m.removeprefix("openrouter/") for m in OPENHANDS_COMPATIBLE_FREE_MODELS}
+best = next(
+    (f"openrouter/{m.id}" for m in ranked if m.id in compatible),
+    OPENHANDS_COMPATIBLE_FREE_MODELS[0],
+)
+prim = OpenHandsPrimitive(model=best)
+```
+
+See **[`examples/openhands_with_free_models.py`](examples/openhands_with_free_models.py)** for a full runnable demo.
+
+---
+
+### ProviderModelDiscovery
+
+**Live model list discovery with exhaustion tracking and disk caching.**
+
+```python
+from ttadev.primitives.llm.model_discovery import ProviderModelDiscovery, best_google_free_model
+
+discovery = ProviderModelDiscovery()
+
+# Native Google API (recommended — returns full model list, not OpenAI-compat subset)
+models = await discovery.for_google(api_key=os.environ["GOOGLE_API_KEY"])
+# → ['gemini/gemini-flash-lite-latest', 'gemini/gemini-3.1-flash-lite-preview', ...]
+
+# Convenience helper — returns the single best non-exhausted Google free model
+best = await best_google_free_model(api_key=os.environ["GOOGLE_API_KEY"])
+# → "gemini/gemini-flash-lite-latest"   (always-tracking alias, preferred)
+
+# Mark a model as quota-exhausted (skipped by next_working() for ttl_seconds)
+discovery.mark_exhausted("gemini/gemini-2.5-flash", ttl_seconds=86400)
+```
+
+**Key design notes:**
+
+- `for_google()` uses the **native Google REST API** (`/v1beta/models?key=…`), not the OpenAI-compat shim. This returns the authoritative full model list and uses `?key=` auth — matching how LiteLLM calls Gemini when the `gemini/` prefix is used.
+- `best_google_free_model()` is a module-level convenience wrapper around `for_google()` + `next_working()`.
+- **Recommended Google alias:** `gemini/gemini-flash-lite-latest` — always tracks the current best lite model without requiring manual ID updates.
+- Disk cache: `~/.cache/ttadev/model_discovery/<provider>.json` (6-hour TTL by default).
+- Module-level singleton: `from ttadev.primitives.llm.model_discovery import default_discovery`.
+
+**Google Gemini free tier status (as of 2026-04-04):**
+- `gemini/gemini-flash-lite-latest` ✅ confirmed working (rate-limited on free tier — use `best_google_free_model()` to auto-skip exhausted models)
+
+---
+
 ## Related Documentation
 
-- **Getting Started:** [\`GETTING_STARTED.md\`](GETTING_STARTED.md)
-- **Quickstart:** [\`QUICKSTART.md\`](QUICKSTART.md)
-- **Primitive Patterns:** [\`docs/architecture/PRIMITIVE_PATTERNS.md\`](docs/architecture/PRIMITIVE_PATTERNS.md)
-- **Git Collaboration Reference:** [\`docs/reference/GIT_COLLABORATION_PRIMITIVE_COMPLETE.md\`](docs/reference/GIT_COLLABORATION_PRIMITIVE_COMPLETE.md)
-- **Package README:** [\`ttadev/README.md\`](ttadev/README.md)
-- **Agent Instructions:** [\`AGENTS.md\`](AGENTS.md)
+- **Getting Started:** [`GETTING_STARTED.md`](GETTING_STARTED.md)
+- **Quickstart:** [`QUICKSTART.md`](QUICKSTART.md)
+- **Primitive Patterns:** [`docs/architecture/PRIMITIVE_PATTERNS.md`](docs/architecture/PRIMITIVE_PATTERNS.md)
+- **Git Collaboration Reference:** [`docs/reference/GIT_COLLABORATION_PRIMITIVE_COMPLETE.md`](docs/reference/GIT_COLLABORATION_PRIMITIVE_COMPLETE.md)
+- **Package README:** [`ttadev/README.md`](ttadev/README.md)
+- **Agent Instructions:** [`AGENTS.md`](AGENTS.md)
+- **OpenHands Compatibility Matrix:** [`docs/kb-exports/openhands-provider-compatibility.md`](docs/kb-exports/openhands-provider-compatibility.md)
+- **Free Model Demo:** [`examples/openhands_with_free_models.py`](examples/openhands_with_free_models.py)
 
 ---
 

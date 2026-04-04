@@ -49,14 +49,16 @@ class LLMCodeGenerator:
     """
 
     def __init__(
-        self, api_key: str | None = None, model_name: str = "gemini-2.0-flash-exp"
+        self, api_key: str | None = None, model_name: str = "gemini-2.0-flash-lite"
     ) -> None:
         """Initialize LLM code generator.
 
         Args:
             api_key: Google AI Studio API key (defaults to GOOGLE_API_KEY,
                 GEMINI_API_KEY, or GOOGLE_AI_STUDIO_API_KEY env var)
-            model_name: Gemini model to use (default: gemini-2.0-flash-exp for best balance)
+            model_name: Gemini model to use (default: gemini-2.0-flash-lite — stable
+                free-tier model; use ProviderModelDiscovery.for_google() for a
+                live-ranked list of current models)
         """
         # Check multiple environment variable names; GOOGLE_API_KEY is canonical.
         self.api_key = (
