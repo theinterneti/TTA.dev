@@ -1,20 +1,29 @@
 """Phase 1: Foundation Tests - Stable Server & Basic Data Flow."""
 
 import asyncio
+import socket
 from pathlib import Path
 
 import aiohttp
 import pytest
 
 
+def _free_port() -> int:
+    """Return a free TCP port on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
 @pytest.fixture
 async def observability_server():
-    """Fixture that starts and stops the observability server."""
+    """Fixture that starts and stops the observability server on a free port."""
     from ttadev.observability.collector import TraceCollector
     from ttadev.observability.server import ObservabilityServer
 
     collector = TraceCollector()
-    server = ObservabilityServer(collector=collector, port=8000)
+    port = _free_port()
+    server = ObservabilityServer(collector=collector, port=port)
     await server.start()
 
     # Wait for server to be ready
@@ -28,7 +37,7 @@ async def observability_server():
 @pytest.fixture
 async def server_url(observability_server):
     """Fixture providing the observability server URL."""
-    return "http://localhost:8000"
+    return f"http://localhost:{observability_server.port}"
 
 
 @pytest.mark.asyncio
@@ -103,7 +112,7 @@ async def test_api_serves_collected_traces(server_url):
 async def test_realtime_trace_broadcast(observability_server):
     """Test that new traces are broadcast via WebSocket."""
     collector = observability_server.collector
-    ws_url = "ws://localhost:8000/ws"
+    ws_url = f"ws://localhost:{observability_server.port}/ws"
 
     async with aiohttp.ClientSession() as session, session.ws_connect(ws_url) as ws:
         # Consume initial state message
