@@ -6,11 +6,14 @@ and performance monitoring.
 """
 
 import asyncio
+import logging
 from datetime import datetime
 from typing import Any
 
 from langfuse import Langfuse
 from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+
+_log = logging.getLogger(__name__)
 
 
 class LangFuseIntegration:
@@ -46,6 +49,8 @@ class LangFuseIntegration:
         secret_key: str,
         host: str = "https://cloud.langfuse.com",
         enabled: bool = True,
+        session_id: str | None = None,
+        user_id: str | None = None,
         **kwargs: Any,
     ):
         """Initialize LangFuse integration.
@@ -55,9 +60,13 @@ class LangFuseIntegration:
             secret_key: LangFuse secret API key
             host: LangFuse host URL (default: cloud.langfuse.com)
             enabled: Enable/disable tracing (default: True)
+            session_id: Optional session ID to associate with all observations.
+            user_id: Optional user/agent ID to associate with all observations.
             **kwargs: Additional LangFuse client configuration
         """
         self.enabled = enabled
+        self.session_id = session_id
+        self.user_id = user_id
         self.client = (
             Langfuse(public_key=public_key, secret_key=secret_key, host=host, **kwargs)
             if enabled
@@ -107,11 +116,32 @@ class LangFuseIntegration:
             or os.environ.get("LANGFUSE_HOST")
             or "https://cloud.langfuse.com"
         )
-        return cls(
+        instance = cls(
             public_key=os.environ["LANGFUSE_PUBLIC_KEY"],
             secret_key=os.environ["LANGFUSE_SECRET_KEY"],
             host=host,
         )
+
+        # Auto-detect agent identity for user attribution
+        try:
+            from ttadev.observability.agent_identity import get_agent_id  # noqa: PLC0415
+
+            instance.user_id = get_agent_id()
+        except Exception:
+            pass
+
+        # Auto-detect active L0 run for session attribution
+        try:
+            from ttadev.control_plane.service import ControlPlaneService  # noqa: PLC0415
+
+            svc = ControlPlaneService()
+            active_runs = svc.list_runs()
+            if active_runs:
+                instance.session_id = active_runs[0].id
+        except Exception:
+            pass
+
+        return instance
 
     def instrument(
         self, primitive: WorkflowPrimitive, trace_name: str | None = None
@@ -138,6 +168,8 @@ class LangFuseIntegration:
         original_execute = primitive.execute
         client = self.client
         name = trace_name or primitive.__class__.__name__
+        session_id = self.session_id
+        user_id = self.user_id
 
         async def traced_execute(input_data: Any, context: WorkflowContext) -> Any:
             """Traced execution wrapper using Langfuse v4 API."""
@@ -148,6 +180,8 @@ class LangFuseIntegration:
                 as_type="span",
                 input=str(input_data)[:1000],
                 metadata={"primitive_type": primitive.__class__.__name__},
+                session_id=session_id,
+                user_id=user_id,
             ) as span:
                 try:
                     # Capture trace ID in workflow context metadata
@@ -193,7 +227,9 @@ class LangFuseIntegration:
         input: Any,  # noqa: A002
         output: Any,
         metadata: dict[str, Any] | None = None,
-    ) -> None:
+        session_id: str | None = None,
+        user_id: str | None = None,
+    ) -> str | None:
         """Record an LLM generation event.
 
         Args:
@@ -202,9 +238,19 @@ class LangFuseIntegration:
             input: Input prompt or messages list sent to the model.
             output: Generated output string returned by the model.
             metadata: Optional extra metadata (usage, cost, tier, …).
+            session_id: Override session ID for this generation (falls back to
+                ``self.session_id`` if not provided).
+            user_id: Override user/agent ID (falls back to ``self.user_id``).
+
+        Returns:
+            The Langfuse trace ID string, or ``None`` if tracing is disabled or
+            an error occurs.
         """
         if not self.enabled or not self.client:
-            return
+            return None
+
+        effective_session_id = session_id or self.session_id
+        effective_user_id = user_id or self.user_id
 
         with self.client.start_as_current_observation(
             name=name,
@@ -213,8 +259,44 @@ class LangFuseIntegration:
             input=input,
             output=output,
             metadata=metadata or {},
+            session_id=effective_session_id,
+            user_id=effective_user_id,
         ):
             pass  # observation is ended on context manager exit
+
+        trace_id: str | None = None
+        try:
+            trace_id = self.client.get_current_trace_id()
+            if trace_id:
+                url = self.client.get_trace_url(trace_id)
+                _log.debug("Langfuse trace: %s", url)
+        except Exception:
+            pass
+
+        return trace_id
+
+    def score_inline(
+        self,
+        score: float,
+        name: str = "quality",
+        comment: str | None = None,
+    ) -> None:
+        """Score the current trace without needing a trace_id.
+
+        Call this immediately after create_generation() while still in the
+        same observation context. Uses Langfuse's score_current_trace().
+
+        Args:
+            score: Numeric score value (0.0–1.0 typical).
+            name: Score category (e.g. "quality", "accuracy", "latency").
+            comment: Optional explanation.
+        """
+        if not self.enabled or self.client is None:
+            return
+        try:
+            self.client.score_current_trace(name=name, value=score, comment=comment)
+        except Exception:
+            pass
 
     def score_response(
         self,

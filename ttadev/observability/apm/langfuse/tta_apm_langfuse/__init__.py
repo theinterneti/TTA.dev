@@ -3,7 +3,7 @@
 from tta_apm_langfuse.integration import LangFuseIntegration, auto_instrument
 
 __all__ = ["LangFuseIntegration", "auto_instrument", "get_integration"]
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 _integration: "LangFuseIntegration | None" = None
 _init_attempted: bool = False

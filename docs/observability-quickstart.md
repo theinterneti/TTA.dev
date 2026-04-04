@@ -193,6 +193,117 @@ asyncio.run(main())
 
 ---
 
+## 5e. Session & User Attribution (Automatic)
+
+When `from_env()` is called, TTA.dev auto-populates **session_id** and **user_id** on the
+integration singleton so every observation is attributed without manual setup:
+
+| Attribute | Source | Example value |
+|-----------|--------|---------------|
+| `user_id` | `get_agent_id()` from `ttadev.observability.agent_identity` | `"copilot"`, `"cline"`, `"adam"` |
+| `session_id` | Active L0 run ID from `ControlPlaneService` | `"run-abc123"` |
+
+If either source is unavailable the attribute stays `None` — Langfuse simply omits it.
+
+You can also set them explicitly:
+
+```python
+apm = LangFuseIntegration.from_env()
+apm.user_id = "my-agent"
+apm.session_id = "run-xyz"
+```
+
+Or per-call on `create_generation()`:
+
+```python
+apm.create_generation(
+    name="my-gen", model="llama-3", input=prompt, output=reply,
+    session_id="run-xyz", user_id="my-agent",
+)
+```
+
+---
+
+## 5f. Trace URL Logging
+
+After each `create_generation()` call, the integration logs the Langfuse trace URL at
+`DEBUG` level so you can jump straight to the trace in the Langfuse UI:
+
+```
+DEBUG tta_apm_langfuse.integration Langfuse trace: https://cloud.langfuse.com/project/...
+```
+
+Enable debug logging in your script:
+
+```python
+import logging
+logging.basicConfig(level=logging.DEBUG)
+```
+
+`create_generation()` also returns the trace ID string (or `None` if tracing is off),
+which you can pass to other systems:
+
+```python
+trace_id = apm.create_generation(name="gen", model="llama-3", input=p, output=r)
+print("Trace ID:", trace_id)
+```
+
+---
+
+## 5g. Inline Scoring
+
+Score the current trace immediately after a generation — no `trace_id` bookkeeping required:
+
+```python
+import asyncio
+from tta_apm_langfuse import LangFuseIntegration
+
+
+async def main() -> None:
+    apm = LangFuseIntegration.from_env()
+
+    # Record the LLM generation
+    apm.create_generation(
+        name="my-gen",
+        model="llama-3.3-70b",
+        input="Summarise this article …",
+        output="The article discusses …",
+    )
+
+    # Score immediately — uses score_current_trace() internally
+    apm.score_inline(score=0.9, name="quality", comment="Concise and accurate")
+
+    await apm.aflush()
+
+
+asyncio.run(main())
+```
+
+`score_inline()` fails silently — it will never raise even if Langfuse is unreachable.
+
+---
+
+## 5h. L0 Runs as Langfuse Sessions
+
+When your code calls `ControlPlaneService.claim_task()`, TTA.dev automatically binds the
+new run's ID as the Langfuse `session_id` on the global singleton.  Every subsequent LLM
+call made during that run therefore appears under a single session in the Langfuse UI —
+no manual wiring required.
+
+```python
+from ttadev.control_plane.service import ControlPlaneService
+
+svc = ControlPlaneService()
+result = svc.claim_task("task-123")
+# → Langfuse session_id is now result.run.id
+# → All LLM generations within this run are grouped under that session
+```
+
+The hook is guarded in a `try/except` so a missing or misconfigured Langfuse installation
+never breaks the control plane.
+
+---
+
 ## 6. Troubleshooting
 
 | Symptom | Likely cause | Fix |

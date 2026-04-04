@@ -1450,6 +1450,19 @@ class ControlPlaneService:
             if agent_role:
                 self._projects.assign_role(task.project_id, agent_role, current_agent_id)
 
+        # Emit Langfuse session for this run so all LLM calls nest under it
+        try:
+            from tta_apm_langfuse import get_integration  # noqa: PLC0415
+
+            _lf = get_integration()
+            if _lf is not None:
+                _lf.session_id = run.id
+                import logging as _logging  # noqa: PLC0415
+
+                _logging.getLogger(__name__).debug("Langfuse session bound to run %s", run.id)
+        except Exception:
+            pass
+
         return ClaimResult(task=task, run=run, lease=lease)
 
     def decide_gate(
