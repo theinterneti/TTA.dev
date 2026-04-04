@@ -10,6 +10,12 @@ resolution-markers = [
     "(python_full_version < '3.12' and sys_platform != 'win32') or (python_full_version < '3.13' and sys_platform == 'win32')",
 ]
 
+[manifest]
+members = [
+    "tta-apm-langfuse",
+    "ttadev",
+]
+
 [[package]]
 name = "aiofiles"
 version = "25.1.0"
@@ -3272,6 +3278,34 @@ wheels = [
 ]
 
 [[package]]
+name = "tta-apm-langfuse"
+version = "0.1.0"
+source = { editable = "ttadev/observability/apm/langfuse" }
+dependencies = [
+    { name = "langfuse" },
+    { name = "ttadev" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "langfuse", specifier = ">=4.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.1.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.3.0" },
+    { name = "ttadev", editable = "." },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "ttadev"
 version = "0.1.0"
 source = { editable = "." }
@@ -3292,6 +3326,7 @@ dependencies = [
 [package.optional-dependencies]
 apm = [
     { name = "langfuse" },
+    { name = "tta-apm-langfuse" },
 ]
 cgc = [
     { name = "codegraphcontext" },
@@ -3348,6 +3383,7 @@ requires-dist = [
     { name = "redis", extras = ["asyncio"], marker = "extra == 'coordination'", specifier = ">=5.0" },
     { name = "redis", extras = ["asyncio"], marker = "extra == 'redis'", specifier = ">=5.0" },
     { name = "structlog", specifier = ">=25.5.0" },
+    { name = "tta-apm-langfuse", marker = "extra == 'apm'", editable = "ttadev/observability/apm/langfuse" },
 ]
 provides-extras = ["cgc", "coordination", "redis", "gemini", "llm-all", "apm"]
 
