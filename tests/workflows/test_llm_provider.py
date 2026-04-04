@@ -5,11 +5,63 @@ from __future__ import annotations
 import pytest
 
 from ttadev.workflows.llm_provider import (
+    _PROVIDER_REGISTRY,
     NoLLMProviderError,
+    ProviderSpec,
+    _config_from_spec,
     _is_provider_error,
     get_llm_client,
     get_llm_provider_chain,
 )
+
+
+class TestProviderRegistry:
+    """Tests for the declarative _PROVIDER_REGISTRY."""
+
+    def test_registry_is_nonempty(self) -> None:
+        assert len(_PROVIDER_REGISTRY) >= 1
+
+    def test_registry_entries_are_provider_specs(self) -> None:
+        for spec in _PROVIDER_REGISTRY:
+            assert isinstance(spec, ProviderSpec)
+
+    def test_groq_is_first(self) -> None:
+        """Groq must be the highest-priority cloud provider."""
+        cloud = [s for s in _PROVIDER_REGISTRY if not s.is_local]
+        assert cloud[0].name == "groq"
+
+    def test_ollama_is_local(self) -> None:
+        local = [s for s in _PROVIDER_REGISTRY if s.is_local]
+        assert any(s.name == "ollama" for s in local)
+
+    def test_all_names_unique(self) -> None:
+        names = [s.name for s in _PROVIDER_REGISTRY]
+        assert len(names) == len(set(names))
+
+
+class TestConfigFromSpec:
+    """Tests for _config_from_spec()."""
+
+    def test_groq_spec_reads_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("GROQ_API_KEY", "gsk-test")  # pragma: allowlist secret
+        groq_spec = next(s for s in _PROVIDER_REGISTRY if s.name == "groq")
+        cfg = _config_from_spec(groq_spec)
+        assert cfg.provider == "groq"
+        assert cfg.api_key == "gsk-test"  # pragma: allowlist secret
+        assert "groq.com" in cfg.base_url
+
+    def test_openrouter_spec_reads_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")  # pragma: allowlist secret
+        or_spec = next(s for s in _PROVIDER_REGISTRY if s.name == "openrouter")
+        cfg = _config_from_spec(or_spec)
+        assert cfg.provider == "openrouter"
+        assert cfg.api_key == "or-test"  # pragma: allowlist secret
+
+    def test_ollama_spec_uses_name_as_key(self) -> None:
+        ollama_spec = next(s for s in _PROVIDER_REGISTRY if s.name == "ollama")
+        cfg = _config_from_spec(ollama_spec)
+        assert cfg.provider == "ollama"
+        assert cfg.api_key == "ollama"  # pragma: allowlist secret
 
 
 class TestGetLlmProviderChain:
@@ -18,8 +70,9 @@ class TestGetLlmProviderChain:
     def test_chain_openrouter_then_ollama_when_key_set(
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """OPENROUTER_API_KEY set → chain is [openrouter, ollama]."""
+        """OPENROUTER_API_KEY set (no GROQ) → chain is [openrouter, ollama]."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "test-key-123")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
         monkeypatch.delenv("LLM_FORCE_PROVIDER", raising=False)
 
         chain = get_llm_provider_chain()
@@ -29,9 +82,39 @@ class TestGetLlmProviderChain:
         assert chain[1].provider == "ollama"
         assert chain[0].api_key == "test-key-123"  # pragma: allowlist secret
 
-    def test_chain_ollama_only_when_no_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """No OPENROUTER_API_KEY → chain is [ollama] only."""
+    def test_chain_groq_then_openrouter_then_ollama_when_both_keys_set(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Both GROQ_API_KEY and OPENROUTER_API_KEY set → [groq, openrouter, ollama]."""
+        monkeypatch.setenv("GROQ_API_KEY", "gsk-test")  # pragma: allowlist secret
+        monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")  # pragma: allowlist secret
+        monkeypatch.delenv("LLM_FORCE_PROVIDER", raising=False)
+
+        chain = get_llm_provider_chain()
+
+        assert len(chain) == 3
+        assert chain[0].provider == "groq"
+        assert chain[1].provider == "openrouter"
+        assert chain[2].provider == "ollama"
+
+    def test_chain_groq_then_ollama_when_only_groq_key(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Only GROQ_API_KEY set → [groq, ollama]."""
+        monkeypatch.setenv("GROQ_API_KEY", "gsk-only")  # pragma: allowlist secret
         monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+        monkeypatch.delenv("LLM_FORCE_PROVIDER", raising=False)
+
+        chain = get_llm_provider_chain()
+
+        assert len(chain) == 2
+        assert chain[0].provider == "groq"
+        assert chain[1].provider == "ollama"
+
+    def test_chain_ollama_only_when_no_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """No cloud keys → chain is [ollama] only."""
+        monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
         monkeypatch.delenv("LLM_FORCE_PROVIDER", raising=False)
 
         chain = get_llm_provider_chain()
@@ -40,8 +123,9 @@ class TestGetLlmProviderChain:
         assert chain[0].provider == "ollama"
 
     def test_chain_force_ollama_overrides_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """LLM_FORCE_PROVIDER=ollama → [ollama] even if key is set."""
+        """LLM_FORCE_PROVIDER=ollama → [ollama] even if keys are set."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "test-key-123")
+        monkeypatch.setenv("GROQ_API_KEY", "gsk-test")  # pragma: allowlist secret
         monkeypatch.setenv("LLM_FORCE_PROVIDER", "ollama")
 
         chain = get_llm_provider_chain()
@@ -49,19 +133,44 @@ class TestGetLlmProviderChain:
         assert len(chain) == 1
         assert chain[0].provider == "ollama"
 
+    def test_chain_force_groq_overrides_other_keys(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """LLM_FORCE_PROVIDER=groq → [groq] only, ignores openrouter."""
+        monkeypatch.setenv("GROQ_API_KEY", "gsk-test")  # pragma: allowlist secret
+        monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")  # pragma: allowlist secret
+        monkeypatch.setenv("LLM_FORCE_PROVIDER", "groq")
+
+        chain = get_llm_provider_chain()
+
+        assert len(chain) == 1
+        assert chain[0].provider == "groq"
+
+    def test_chain_force_unknown_provider_falls_through(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """LLM_FORCE_PROVIDER=nonexistent → warning logged, normal chain returned."""
+        monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")  # pragma: allowlist secret
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
+        monkeypatch.setenv("LLM_FORCE_PROVIDER", "nonexistent-provider")
+
+        chain = get_llm_provider_chain()
+
+        # Should fall through to normal resolution
+        assert chain[0].provider == "openrouter"
+
     def test_chain_ollama_when_key_is_empty_string(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Empty string OPENROUTER_API_KEY falls back to [ollama] (same as unset)."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
         monkeypatch.delenv("LLM_FORCE_PROVIDER", raising=False)
-        from ttadev.workflows.llm_provider import get_llm_provider_chain
 
         chain = get_llm_provider_chain()
         assert len(chain) == 1
         assert chain[0].provider == "ollama"
 
     def test_get_llm_client_still_works(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """get_llm_client() is unaffected by the new function."""
+        """get_llm_client() returns the first item from get_llm_provider_chain()."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "test-key-456")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
         monkeypatch.delenv("LLM_FORCE_PROVIDER", raising=False)
 
         cfg = get_llm_client()
@@ -73,8 +182,8 @@ class TestGetLlmProviderChain:
         """HINDSIGHT_LLM_MODEL env var sets the openrouter model."""
         monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test")  # pragma: allowlist secret
         monkeypatch.setenv("HINDSIGHT_LLM_MODEL", "anthropic/claude-3-haiku:free")
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
         monkeypatch.delenv("LLM_FORCE_PROVIDER", raising=False)
-        from ttadev.workflows.llm_provider import get_llm_provider_chain
 
         chain = get_llm_provider_chain()
         assert chain[0].model == "anthropic/claude-3-haiku:free"
