@@ -114,14 +114,7 @@ async def test_spans_recorded_after_primitive_run(obs_server, base_url):
     Verifies the v2/spans endpoint responds correctly — actual OTel span
     recording depends on the exporter being wired, which is an integration
     concern. Here we confirm the endpoint returns a valid list.
-
-    Note: we patch _ingest_otel_jsonl to return [] so the test doesn't
-    block the event loop reading a potentially large accumulated JSONL file.
-    See #350 for the proper fix (run ingestion in an executor).
     """
-    # Patch the blocking JSONL reader to avoid event-loop stalls.
-    obs_server._ingest_otel_jsonl = list
-
     from ttadev.primitives import LambdaPrimitive, RetryPrimitive, WorkflowContext
     from ttadev.primitives.recovery.retry import RetryStrategy
 

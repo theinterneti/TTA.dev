@@ -72,7 +72,11 @@ class ObservabilityServer:
         self._cgc_available: bool = False
         self._cgc_probe_time: float = 0.0  # epoch seconds of last probe
         self._CGC_PROBE_TTL: float = 30.0  # re-probe every 30 s
-        self._ingested_keys: set[str] = set()  # dedup tracker for file ingestion
+        # Per-file byte offsets for incremental JSONL reads (O(new lines) not O(total))
+        self._otel_jsonl_offset: int = 0
+        self._tracker_jsonl_offset: int = 0
+        # Activity logs are one JSON file per trace — dedup by filename
+        self._ingested_activity_files: set[str] = set()
 
         self.app = web.Application()
         self.runner: web.AppRunner | None = None
@@ -127,6 +131,14 @@ class ObservabilityServer:
 
     async def _init_state(self) -> None:
         """Start session and probe CGC. Call before accepting requests."""
+        # Initialise JSONL offsets to current file sizes so the ingestion loop
+        # only picks up spans written *after* this server instance starts.
+        # Historical spans belong to prior sessions and are not replayed into
+        # the live dashboard — they can be loaded via the sessions API instead.
+        if _OTEL_JSONL.exists():
+            self._otel_jsonl_offset = _OTEL_JSONL.stat().st_size
+        if _AGENT_TRACKER_JSONL.exists():
+            self._tracker_jsonl_offset = _AGENT_TRACKER_JSONL.stat().st_size
         self._current_session = self._session_mgr.start_session()
         # Probe CGC in background — don't block server startup or graph requests
         asyncio.create_task(self._probe_cgc())
@@ -503,7 +515,12 @@ class ObservabilityServer:
             raise
 
     async def _file_ingestion_loop(self) -> None:
-        """Poll file-based span sources every second and ingest new spans."""
+        """Poll file-based span sources every second and ingest new spans.
+
+        All synchronous I/O runs in a thread-pool executor so the event loop
+        is never blocked, even when large JSONL files are present.
+        """
+        loop = asyncio.get_running_loop()
         while True:
             try:
                 await asyncio.sleep(1)
@@ -511,16 +528,7 @@ class ObservabilityServer:
                 if current is None:
                     continue
 
-                new_spans = []
-
-                # Source 1: OTEL JSONL
-                new_spans.extend(self._ingest_otel_jsonl())
-
-                # Source 2: ActivityLogger JSON files
-                new_spans.extend(self._ingest_activity_logs())
-
-                # Source 3: AgentTracker JSONL
-                new_spans.extend(self._ingest_agent_tracker())
+                new_spans = await loop.run_in_executor(None, self._ingest_all_sync)
 
                 for span in new_spans:
                     # Route to agent-specific session when the span carries an
@@ -562,19 +570,36 @@ class ObservabilityServer:
             except Exception:
                 pass  # Never crash the ingestion loop
 
+    def _ingest_all_sync(self) -> list:
+        """Collect new spans from all file-based sources (runs in thread executor)."""
+        spans: list = []
+        spans.extend(self._ingest_otel_jsonl())
+        spans.extend(self._ingest_activity_logs())
+        spans.extend(self._ingest_agent_tracker())
+        return spans
+
     def _ingest_otel_jsonl(self) -> list:
+        """Read only the bytes appended since the last call (offset-based)."""
         if not _OTEL_JSONL.exists():
             return []
         spans = []
         try:
-            for i, line in enumerate(_OTEL_JSONL.read_text().splitlines()):
-                key = f"otel:{i}"
-                if key in self._ingested_keys or not line.strip():
+            file_size = _OTEL_JSONL.stat().st_size
+            if file_size < self._otel_jsonl_offset:
+                # File was rotated/truncated — reset and re-read from start
+                self._otel_jsonl_offset = 0
+            if file_size <= self._otel_jsonl_offset:
+                return []
+            with _OTEL_JSONL.open("rb") as f:
+                f.seek(self._otel_jsonl_offset)
+                new_bytes = f.read()
+                self._otel_jsonl_offset = f.tell()
+            for line in new_bytes.decode("utf-8", errors="replace").splitlines():
+                if not line.strip():
                     continue
                 try:
                     raw = json.loads(line)
                     spans.append(self._span_proc.from_otel_jsonl(raw))
-                    self._ingested_keys.add(key)
                 except Exception:
                     continue
         except Exception:
@@ -586,30 +611,38 @@ class ObservabilityServer:
             return []
         spans = []
         for trace_file in _HOME_TTA_TRACES.glob("*.json"):
-            key = f"activity:{trace_file.name}"
-            if key in self._ingested_keys:
+            key = trace_file.name
+            if key in self._ingested_activity_files:
                 continue
             try:
                 raw = json.loads(trace_file.read_text())
                 spans.append(self._span_proc.from_activity_log(raw))
-                self._ingested_keys.add(key)
+                self._ingested_activity_files.add(key)
             except Exception:
                 continue
         return spans
 
     def _ingest_agent_tracker(self) -> list:
+        """Read only the bytes appended since the last call (offset-based)."""
         if not _AGENT_TRACKER_JSONL.exists():
             return []
         spans = []
         try:
-            for i, line in enumerate(_AGENT_TRACKER_JSONL.read_text().splitlines()):
-                key = f"tracker:{i}"
-                if key in self._ingested_keys or not line.strip():
+            file_size = _AGENT_TRACKER_JSONL.stat().st_size
+            if file_size < self._tracker_jsonl_offset:
+                self._tracker_jsonl_offset = 0
+            if file_size <= self._tracker_jsonl_offset:
+                return []
+            with _AGENT_TRACKER_JSONL.open("rb") as f:
+                f.seek(self._tracker_jsonl_offset)
+                new_bytes = f.read()
+                self._tracker_jsonl_offset = f.tell()
+            for line in new_bytes.decode("utf-8", errors="replace").splitlines():
+                if not line.strip():
                     continue
                 try:
                     raw = json.loads(line)
                     spans.append(self._span_proc.from_agent_tracker(raw))
-                    self._ingested_keys.add(key)
                 except Exception:
                     continue
         except Exception:
