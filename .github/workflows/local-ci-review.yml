@@ -1,16 +1,25 @@
 name: Local CI & OpenHands Review
 
+# Runs ONLY on pull requests — quality gates on push are handled by ci.yml
+# (GitHub-hosted) and consolidated-merge-gate.yml.  This workflow provides
+# what only the local self-hosted runner can: an Ollama-backed OpenHands
+# AI code review posted as a PR comment.
+#
+# Model priority (openhands_pr_review.py):
+#   1. ollama/gemma3:4b  — local GPU, non-thinking, no quota
+#   2. openrouter free   — cloud fallback if OPENROUTER_API_KEY is set
+#   3. gemini free       — cloud fallback if GOOGLE_API_KEY is set
+#   Always exits 0 — never blocks CI.
+
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
     branches: [main]
     paths:
       - 'ttadev/**'
       - 'tests/**'
       - 'pyproject.toml'
       - 'uv.lock'
-  pull_request:
-    types: [opened, synchronize, ready_for_review]
-    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,47 +28,14 @@ concurrency:
 permissions:
   contents: read
   pull-requests: write
-  checks: write
 
 jobs:
-
-  quality-gates:
-    name: Quality Gates
-    runs-on: [self-hosted, local]
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Ruff lint
-        working-directory: /home/theinterneti/Repos/TTA.dev
-        run: uv run ruff check .
-
-      - name: Ruff format check
-        working-directory: /home/theinterneti/Repos/TTA.dev
-        run: uv run ruff format --check .
-
-      - name: Pyright type check
-        working-directory: /home/theinterneti/Repos/TTA.dev
-        continue-on-error: true
-        run: uvx pyright ttadev/
-
-      - name: Fast tests
-        working-directory: /home/theinterneti/Repos/TTA.dev
-        run: |
-          uv run pytest -x -q \
-            -m "not integration and not slow and not external and not quarantine" \
-            --tb=short \
-            --no-header \
-            -p no:warnings
 
   openhands-review:
     name: OpenHands Code Review
     runs-on: [self-hosted, local]
     timeout-minutes: 20
-    needs: quality-gates
-    if: github.event_name == 'pull_request'
+    if: github.event.pull_request.draft == false
     steps:
       - uses: actions/checkout@v4
         with:

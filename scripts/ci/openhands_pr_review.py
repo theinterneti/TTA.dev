@@ -21,11 +21,18 @@ logger = logging.getLogger(__name__)
 REPO_ROOT = Path(__file__).parent.parent.parent
 SKILL_PATH = REPO_ROOT / ".agents" / "skills" / "code-review.md"
 
-# Ordered list of Ollama model tags to try (best quality first)
+# Ordered list of Ollama model tags to try (best quality first).
+#
+# qwen3/qwen3.5 are thinking models. The OpenAI-compatible endpoint
+# (/v1/chat/completions) uses ``reasoning_effort`` (not ``think``) to control
+# thinking. We pass ``reasoning_effort: "none"`` via ``extra_body`` so that
+# thinking is disabled and ``message.content`` is populated with the actual
+# answer. Without this, the model auto-enables thinking, all tokens go to the
+# reasoning trace, and content is empty (silent failure).
 _OLLAMA_CANDIDATES = [
-    "qwen3.5:2b",
-    "qwen3:1.7b",
-    "qwen3.5:0.8b",
+    "qwen3.5:2b",  # 2.7 GB — best quality on this GPU
+    "qwen3:1.7b",  # 1.4 GB — fallback
+    "qwen3.5:0.8b",  # 1.0 GB — last local resort
 ]
 
 # Max diff chars to send — small local models can't handle huge diffs
@@ -58,15 +65,23 @@ def _ollama_available_tags() -> set[str]:
         return set()
 
 
-def _select_model() -> tuple[str, str | None, str | None]:
-    """Return (model_id, base_url, api_key) for the best available free model.
+def _select_model() -> tuple[str, str | None, str | None, dict]:
+    """Return (model_id, base_url, api_key, extra_body) for the best available model.
 
     Priority:
-      1. Local Ollama qwen3.5:2b (GPU, no quota)
+      1. Local Ollama qwen3.5:2b (GPU, thinking-capable, no quota)
       2. Local Ollama qwen3:1.7b
       3. Local Ollama qwen3.5:0.8b
       4. OpenRouter free model (cloud)
       5. Google Gemini free model (cloud)
+
+    For Ollama thinking models (qwen3/qwen3.5), we pass
+    ``extra_body={"reasoning_effort": "none"}`` through LiteLLM to the
+    OpenAI-compatible endpoint so that thinking is disabled and
+    ``message.content`` is populated with the actual answer.
+
+    See https://docs.ollama.com/capabilities/thinking — the OpenAI-compat
+    endpoint uses ``reasoning_effort`` (not ``think``) to control reasoning.
     """
     ollama_base = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
     available = _ollama_available_tags()
@@ -74,26 +89,29 @@ def _select_model() -> tuple[str, str | None, str | None]:
     for candidate in _OLLAMA_CANDIDATES:
         if candidate in available:
             logger.info("selected local ollama model", extra={"model": candidate})
-            return f"ollama/{candidate}", ollama_base, "ollama"
+            # Disable thinking so content is populated; qwen3/qwen3.5 default
+            # to auto-thinking which leaves content empty on the OpenAI endpoint.
+            extra_body = {"reasoning_effort": "none"}
+            return f"ollama/{candidate}", ollama_base, "ollama", extra_body
 
     openrouter_key = os.environ.get("OPENROUTER_API_KEY")
     if openrouter_key:
         model = "openrouter/qwen/qwen3.6-plus:free"
         logger.info("selected openrouter model", extra={"model": model})
-        return model, None, openrouter_key
+        return model, None, openrouter_key, {}
 
     google_key = os.environ.get("GOOGLE_API_KEY")
     if google_key:
         model = "gemini/gemini-flash-lite-latest"
         logger.info("selected google model", extra={"model": model})
-        return model, None, google_key
+        return model, None, google_key, {}
 
     # Last resort — anonymous OpenRouter (heavily rate-limited but won't crash)
     fallback = "openrouter/qwen/qwen3.6-plus:free"
     logger.warning(
         "no preferred model available, using anonymous fallback", extra={"model": fallback}
     )
-    return fallback, None, None
+    return fallback, None, None, {}
 
 
 # ---------------------------------------------------------------------------
@@ -144,6 +162,7 @@ async def _run_review(
     model_id: str,
     base_url: str | None,
     api_key: str | None,
+    extra_body: dict,
 ) -> str:
     """Run OpenHands review and return the review text."""
     skill_content = ""
@@ -179,6 +198,7 @@ If no issues are found, say "✅ No issues found." and APPROVE.
             base_url=base_url,
             api_key=api_key,
             raise_on_stuck=False,
+            extra_body=extra_body if extra_body else None,
         )
         context = WorkflowContext(workflow_id=f"pr-review-{pr_number}")
 
@@ -192,8 +212,8 @@ If no issues are found, say "✅ No issues found." and APPROVE.
         return str(result)
 
     except ImportError:
-        logger.warning("openhands_primitive not available, using direct SDK")
-        return await _run_review_sdk_direct(task, model_id, base_url, api_key)
+        logger.warning("openhands_primitive not available, using litellm direct")
+        return await _run_review_litellm_direct(task, model_id, base_url, api_key, extra_body)
     except TimeoutError:
         return "⚠️ Review timed out (14 min). No feedback posted."
     except Exception as exc:
@@ -201,27 +221,39 @@ If no issues are found, say "✅ No issues found." and APPROVE.
         return f"⚠️ Review failed: {exc}"
 
 
-async def _run_review_sdk_direct(
+async def _run_review_litellm_direct(
     task: str,
     model_id: str,
     base_url: str | None,
     api_key: str | None,
+    extra_body: dict,
 ) -> str:
-    """Fallback: call OpenHands SDK directly without our primitive wrapper."""
+    """Fallback: call the model directly via LiteLLM with extra_body support.
+
+    Passes ``extra_body`` (e.g. ``{"reasoning_effort": "none"}``) so that
+    Ollama thinking models return populated ``content`` rather than an empty
+    field with all tokens consumed by the reasoning trace.
+    """
     try:
-        from openhands.sdk import OpenHandsClient  # type: ignore[import-untyped]
+        import litellm
 
-        config: dict[str, str] = {"llm_model": model_id}
+        kwargs: dict = {
+            "model": model_id,
+            "messages": [{"role": "user", "content": task}],
+            "max_tokens": 2048,
+        }
         if base_url:
-            config["llm_base_url"] = base_url
+            kwargs["api_base"] = base_url
         if api_key:
-            config["llm_api_key"] = api_key
+            kwargs["api_key"] = api_key
+        if extra_body:
+            kwargs["extra_body"] = extra_body
 
-        client = OpenHandsClient(**config)
-        response = await client.run(task)
-        return str(response)
+        response = await litellm.acompletion(**kwargs)
+        content = response.choices[0].message.content or ""
+        return content or "⚠️ Model returned empty content."
     except Exception as exc:
-        return f"⚠️ SDK fallback also failed: {exc}"
+        return f"⚠️ LiteLLM fallback failed: {exc}"
 
 
 # ---------------------------------------------------------------------------
@@ -279,7 +311,7 @@ async def main() -> None:
     args = _parse_args()
 
     try:
-        model_id, base_url, api_key = _select_model()
+        model_id, base_url, api_key, extra_body = _select_model()
         logger.info(
             "starting pr review",
             extra={"pr": args.pr, "model": model_id},
@@ -296,6 +328,7 @@ async def main() -> None:
             model_id=model_id,
             base_url=base_url,
             api_key=api_key,
+            extra_body=extra_body,
         )
 
         posted = _post_review_comment(args.pr, review_text)
