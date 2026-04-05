@@ -362,9 +362,9 @@ Rules:
 ### Invalid examples (flag as 🔴)
 
 ```python
-# TODO: add retry logic here        ← missing #dev-todo, missing properties
+# TODO: add retry logic here        ← missing the dev-todo tag and properties
 # FIXME: this is broken             ← not in TODO block format
-# TODO improve performance          ← missing #dev-todo tag
+# TODO improve performance          ← missing the dev-todo tag
 ```
 
 ---
