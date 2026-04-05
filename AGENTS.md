@@ -1,351 +1,58 @@
-# TTA.dev Multi-Agent Coordination
+# TTA.dev — Agent Instructions
 
-> **Universal entry point for all AI agents working in this repository**
-
-## Before You Begin
-
-Start the observability dashboard (idempotent — safe to run if already running):
-
-```bash
-uv run python -m ttadev.observability
-```
-
-Dashboard: **http://localhost:8000** — shows live primitive usage, sessions, and the CGC code graph.
-This gives you and the developer real-time visibility into all workflow executions during your session.
-
----
+> Universal entry point. All AI coding agents read this first.
+> OpenCode users: this is your primary instruction file.
 
 ## What is TTA.dev?
 
-A Python monorepo providing composable workflow primitives, observability, and multi-agent coordination for building reliable AI applications.
+A Python library of composable workflow primitives, observability tooling, and multi-agent
+coordination infrastructure. The sole developer uses Claude Code, GitHub Copilot, and OpenCode.
 
----
-
-## Quick Reference
-
-| Agent | Use For | Location |
-|-------|---------|----------|
-| **Backend Engineer** | Python primitives, APIs, workflows | [.github/agents/backend-engineer.agent.md](.github/agents/backend-engineer.agent.md) |
-| **Frontend Engineer** | React UI, TypeScript components | [.github/agents/frontend-engineer.agent.md](.github/agents/frontend-engineer.agent.md) |
-| **DevOps Engineer** | CI/CD, infrastructure, deployment | [.github/agents/devops-engineer.agent.md](.github/agents/devops-engineer.agent.md) |
-| **Testing Specialist** | Tests, QA, validation | [.github/agents/testing-specialist.agent.md](.github/agents/testing-specialist.agent.md) |
-| **Observability Expert** | Monitoring, metrics, traces | [.github/agents/observability-expert.agent.md](.github/agents/observability-expert.agent.md) |
-| **Data Scientist** | Analytics, ML, research | [.github/agents/data-scientist.agent.md](.github/agents/data-scientist.agent.md) |
-| **Architect** | System design, patterns | [.github/agents/architect.agent.md](.github/agents/architect.agent.md) |
-
----
-
-## Repository Structure
-
-```
-TTA.dev/
-├── ttadev/                     # Main Python package
-│   ├── primitives/             # Core workflow primitives (Backend Engineer)
-│   │   ├── core/               # Base classes, WorkflowContext, LambdaPrimitive
-│   │   ├── recovery/           # Retry, Timeout, CircuitBreaker, Fallback
-│   │   ├── integrations/       # LLM provider integrations (Ollama, Groq, etc.)
-│   │   ├── llm/                # ModelRouterPrimitive, TaskProfile, chat adapters
-│   │   ├── coordination/       # Router, Sequential, Parallel primitives
-│   │   ├── performance/        # Cache, Memory, benchmarking primitives
-│   │   ├── orchestration/      # High-level workflow orchestration
-│   │   ├── observability/      # OTel span/metric primitives
-│   │   ├── testing/            # MockPrimitive, test utilities
-│   │   ├── mcp_server/         # 43-tool MCP server for coding agents
-│   │   └── ...                 # (ace, adaptive, analysis, collaboration, etc.)
-│   ├── agents/                 # Role-based agent system (specs, registry, router)
-│   ├── observability/          # OpenTelemetry + local observability server
-│   ├── workflows/              # LLM provider chain, feature_dev workflow
-│   ├── cli/                    # `tta` CLI subcommands
-│   ├── control_plane/          # L0 task/run/lease state (JSON-backed)
-│   ├── integrations/           # External service integrations (auth, db)
-│   ├── skills/                 # Skill registry utilities
-│   └── ui/                     # Web dashboard static assets, VS Code helpers
-├── tests/                      # Test suite (unit + integration)
-├── docs/                       # Architecture guides, agent docs
-│   ├── agent-guides/           # Per-agent deep-reference docs
-│   ├── architecture/           # System design docs
-│   └── kb-exports/             # Agents write knowledge-base exports here
-├── examples/                   # Runnable demo scripts
-├── scripts/                    # Automation and utility scripts
-│   ├── ci/                     # CI helper scripts
-│   ├── git/                    # Git hooks and helpers
-│   └── hooks/                  # Quality-gate hooks
-├── .github/
-│   ├── agents/                 # Custom agent definitions (per-role .agent.md files)
-│   ├── instructions/           # Copilot instruction files
-│   ├── skills/                 # Multi-agent workflow skills
-│   └── workflows/              # CI/CD pipelines (DevOps Engineer)
-└── .claude/
-    └── skills/                 # Single-agent Claude Code skills
-```
-
----
-
-## Agent Skills (Multi-Agent Workflows)
-
-Coordinated workflows involving multiple agents:
-
-| Skill | Agents | Duration | Use |
-|-------|--------|----------|-----|
-| [package-release](.github/skills/package-release/SKILL.md) | Backend → Testing → DevOps | ~30 min | Release to PyPI |
-| [feature-development](.github/skills/feature-development/SKILL.md) | Backend → Frontend → Testing | 4-6 hr | Full-stack features |
-| [incident-response](.github/skills/incident-response/SKILL.md) | DevOps + Observability | Variable | Production emergencies |
-
-### Single-Agent Skills
-
-Load these for specific tasks:
-
-| Skill | Agent | When to Use |
-|-------|-------|-------------|
-| [build-test-verify](.claude/skills/build-test-verify/SKILL.md) | Any | Building, testing, linting |
-| [git-commit](.claude/skills/git-commit/SKILL.md) | Any | Making git commits |
-| [create-pull-request](.claude/skills/create-pull-request/SKILL.md) | Any | Creating PRs |
-| [core-conventions](.claude/skills/core-conventions/SKILL.md) | Backend Engineer | Python code standards |
-| [self-review-checklist](.claude/skills/self-review-checklist/SKILL.md) | Any | Pre-merge review |
-| [sdd-workflow](.claude/skills/sdd-workflow/SKILL.md) | Backend Engineer | SDD feature process |
-
----
-
-## Agent Coordination
-
-### Communication Protocols
-
-**1. API Contract Handoff (Backend → Frontend)**
-- Backend creates API, shares OpenAPI schema
-- Frontend generates TypeScript types
-- Both work from shared contract
-
-**2. Quality Gate (Testing → All)**
-- Testing validates all code changes
-- Blocks release if quality gates fail
-- 80%+ coverage, all tests pass, CI green
-
-**3. Deployment Handoff (DevOps → Observability)**
-- DevOps deploys infrastructure
-- Observability configures monitoring
-- Both verify system health
-
-### When to Use Each Agent
-
-| Task Type | Primary Agent | Supporting Agents |
-|-----------|--------------|-------------------|
-| Add primitive | Backend Engineer | Testing Specialist |
-| Build API | Backend Engineer | Testing Specialist |
-| Add UI component | Frontend Engineer | Testing Specialist |
-| Fix CI pipeline | DevOps Engineer | - |
-| Troubleshoot issue | Observability Expert | DevOps Engineer |
-| Analyze data | Data Scientist | - |
-| System design | Architect | All (for input) |
-
----
-
-## L0 Control Plane Status
-
-The first local L0 slice now exists in:
-
-- `ttadev/control_plane/` — JSON-backed task, run, and lease state
-- `ttadev/cli/control.py` — `tta control task ...` and `tta control run ...`
-- `ttadev/primitives/mcp_server/server.py` — MCP tools for the current task/run lifecycle
-
-Interpret this as the beginning of a **developer-agent control plane** for Claude,
-Copilot, Cline, and future coding agents.
-
-Current rule: **extend this L0 surface instead of creating parallel task/run
-systems elsewhere in the repo.**
-
-### L0 Continuation Priorities
-
-When working on L0 from inside `TTA.dev`, prefer this order:
-
-1. use the current L0 surface to prove one documented, repeatable multi-agent workflow
-2. deepen approval/policy/review workflows only where that workflow needs richer coordination
-3. strengthen ownership and telemetry attribution so active workflow steps can be explained clearly
-4. connect more agent-facing surfaces to the existing L0 state instead of creating parallel coordination models
-
-### Repository TODOs
-
-All four L0 phase-1 items are complete as of 2026-03-27:
-- Items 1–3: multi-agent workflow proof, gate deepening, OTel trace attribution
-- Item 4: MCP workflow progression tools (`control_start_workflow`, `control_mark_workflow_step_running`, `control_record_workflow_step_result`, `control_record_workflow_gate_outcome`, `control_mark_workflow_step_failed`) plus `tta control workflow start` CLI command
-
-The L0 surface is ready to run a documented multi-agent workflow end-to-end.
-
----
-
-## Deep Reference Guides
-
-Load only when agent or skill instructions are insufficient:
-
-| Guide | Content |
-|-------|---------|
-| [testing-architecture](docs/agent-guides/testing-architecture.md) | Testing standards, MockPrimitive, CI pipeline |
-| [primitives-patterns](docs/agent-guides/primitives-patterns.md) | All primitives, composition, recovery patterns |
-| [python-standards](docs/agent-guides/python-standards.md) | Type hints, naming, imports, docstrings |
-| [observability-integration](docs/agent-guides/observability-integration.md) | OpenTelemetry, metrics, tracing |
-
----
-
-## Boundary Rules
-
-**All Agents:**
-- ✅ Write docs to `docs/kb-exports/`
-- ❌ Never create .md files in project root unless explicitly requested
-- ✅ Follow quality gates (ruff, pyright, pytest)
-- ❌ Never commit secrets or credentials
-
-**Cross-repo TTA edits — mandatory procedure:**
-- ❌ Never edit `~/Repos/TTA` directly — the local TTA agent owns that directory
-- ✅ To push changes to TTA: clone to a temp path, commit + push, then delete
+## Commands
 
 ```bash
-git clone https://github.com/theinterneti/TTA /tmp/TTA-copilot
-# make changes inside /tmp/TTA-copilot
-cd /tmp/TTA-copilot && git add -A && git commit -m "..." && git push
-rm -rf /tmp/TTA-copilot
+uv sync --all-extras    # Install (uv only — never pip or poetry)
+make watch              # TDD loop (fast, fail-fast, use during development)
+make test               # Full run with coverage (use before committing)
+uv run ruff format . && uv run ruff check . --fix   # Format + lint
+uvx pyright ttadev/     # Type check
+.github/copilot-hooks/post-generation.sh            # Full quality gate
 ```
 
-**Territory-Specific:**
-- Backend Engineer: ✅ `ttadev/**/*.py`, ❌ `apps/frontend/**`
-- Frontend Engineer: ✅ `apps/frontend/**`, ❌ `ttadev/**/*.py`
-- DevOps Engineer: ✅ `.github/workflows/**`, ❌ source code
-- Testing Specialist: ✅ `tests/**`, ❌ infrastructure
-- Observability Expert: ✅ `monitoring/**`, ❌ business logic
+## Rules (non-negotiable)
 
----
+- `uv` only — never `pip` or `poetry`
+- Python 3.12+, `str | None` not `Optional[str]`, `dict[str, Any]` not `Dict`
+- Always use primitives for retry/timeout/circuit-breaker — never write manual loops
+- Pass state via `WorkflowContext` — no globals
+- 100% test coverage on new code; AAA pattern; `MockPrimitive` for mocking
+- Conventional Commits format (`feat:`, `fix:`, `docs:`, etc.)
+- Never edit `~/Repos/TTA` directly — clone to `/tmp/TTA-copilot`, push, then delete
 
-## Standards
+## Routing: When working on…
 
-### Code Quality (All Agents)
+| Topic | Read before touching code |
+|-------|--------------------------|
+| Primitives / architecture | `docs/agents/dev/architecture.md` |
+| Retry / timeout / circuit breaker | `docs/agents/dev/reliability.md` |
+| OTel / Langfuse tracing | `docs/agents/dev/observability.md` |
+| Tests / coverage / MockPrimitive | `docs/agents/dev/testing.md` |
+| L0 task coordination / leases | `docs/agents/dev/l0-coordination.md` |
+| Agent roles / roster | `docs/agents/runtime/l0-roster.md` |
 
-```bash
-uv run ruff format .        # Format
-uv run ruff check . --fix   # Lint
-uvx pyright ttadev/         # Type check
-make watch                  # Continuous testing during development (fast, fail-fast)
-make watch-cov              # Continuous testing with live coverage (before committing)
-make test                   # Full one-shot run with coverage
-```
+## Skills (on-demand HOW-TO workflows)
 
-### Test Status (No MCP needed)
+`build-test-verify` · `core-conventions` · `git-commit` · `create-pull-request`
+`self-review-checklist` · `sdd-workflow` · `session-start`
 
-`TEST_STATUS.md` is auto-generated at the repo root after every pytest run.
-Read it to know the current test state without running anything:
+Skills live in `.github/skills/`. Before creating a new skill, search `github/awesome-copilot` first.
 
-```bash
-cat TEST_STATUS.md
-```
+## L0 Directive
 
-It is gitignored (local only) and kept perpetually fresh by `make watch`.
-If it doesn't exist yet, run `make test` once to generate it.
+Agent coordination, task ownership, and leases live in `ttadev/control_plane/` and
+`ttadev/cli/control.py`. Extend there — do not build parallel systems.
 
-### Testing (Testing Specialist enforces)
+## Maintenance
 
-- 80% minimum coverage (100% on new code)
-- AAA pattern (Arrange, Act, Assert)
-- Use `MockPrimitive` for mocking
-- `@pytest.mark.asyncio` for async tests
-
-### Documentation
-
-- Google-style docstrings
-- Update README when features change
-- Document decisions in repo docs or Hindsight
-- Keep CHANGELOG.md current
-- When touching L0, update the shared handoff guidance in `AGENTS.md`, `CLAUDE.md`, and `.github/copilot-instructions.md`
-
----
-
-## MCP Server Configuration
-
-Native MCP servers available to agents: [.mcp/config.json](.mcp/config.json)
-
-**Core Servers:**
-- **context7**: Library documentation
-- **codegraphcontext**: Code graph analysis and repository context
-- **e2b**: Secure sandboxed code execution
-- **github**: Repository operations
-- **playwright**: Browser automation
-- **grafana**: Monitoring and metrics MCP server (note: the Grafana OTel Collector → Tempo → Grafana _stack_ is planned for a future release; current APM is Langfuse)
-- **gitmcp**: Git operations
-- **hindsight**: Long-term memory and recall
-- **serena**: Code analysis
-- **sequential-thinking**: Problem decomposition
-
----
-
----
-
-## Getting Started
-
-### Invoke an Agent
-
-```bash
-@backend-engineer "create CircuitBreakerPrimitive"
-@frontend-engineer "add user profile page"
-@testing-specialist "validate quality gates"
-```
-
-### Use a Skill
-
-```bash
-@backend-engineer use skill "package-release"
-@backend-engineer use skill "feature-development"
-@devops-engineer use skill "incident-response"
-```
-
-### View Agent Capabilities
-
-```bash
-cat .github/agents/backend-engineer.agent.md
-ls .github/skills/
-```
-
----
-
-## Examples
-
-**Create an agent with task-aware model routing (preferred):**
-```python
-from ttadev.agents import DeveloperAgent
-from ttadev.primitives.llm import ModelRouterPrimitive
-
-router = ModelRouterPrimitive(...)           # configure tiers once
-agent  = DeveloperAgent.with_router(router)  # auto-selects model via TaskProfile
-result = await agent.execute(task, ctx)
-```
-> `DeveloperAgent.with_router(router)` is the preferred pattern over `DeveloperAgent(model=...)`.
-> Each concrete agent carries a `default_task_profile`; `with_router()` wires them together
-> via `ModelRouterChatAdapter`. See [llm-provider-strategy](docs/agent-guides/llm-provider-strategy.md)
-> and [PRIMITIVES_CATALOG § ModelRouterChatAdapter](PRIMITIVES_CATALOG.md) for details.
-
-**Add Primitive:**
-```
-@backend-engineer "Create RateLimitPrimitive with sliding window algorithm"
-→ Design, implement, test, document
-```
-
-**Build Feature:**
-```
-@backend-engineer use skill "feature-development"
-→ Backend API → Frontend UI → Testing validation
-```
-
-**Handle Incident:**
-```
-@devops-engineer use skill "incident-response"
-→ Detect → Investigate → Mitigate → Resolve → Postmortem
-```
-
----
-
-## Related Documentation
-
-- [Contributing Guide](CONTRIBUTING.md)
-- [Getting Started](GETTING_STARTED.md)
-- [Primitives Catalog](PRIMITIVES_CATALOG.md)
-- [Vibe Coding Guide](VIBE_CODING.md)
----
-
-**Version:** 2.0.0
-**Last Updated:** 2026-03-18
-**Status:** Active
+See `docs/agents/MAINTENANCE.md` — budget enforcement, how to update this tree,
+and cross-repo sync rules with the TTA repository.
