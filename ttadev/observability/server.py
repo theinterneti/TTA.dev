@@ -21,6 +21,7 @@ Routes:
 
 import asyncio
 import json
+import threading
 import time
 from dataclasses import asdict
 from pathlib import Path
@@ -77,6 +78,10 @@ class ObservabilityServer:
         self._tracker_jsonl_offset: int = 0
         # Activity logs are one JSON file per trace — dedup by filename
         self._ingested_activity_files: set[str] = set()
+        # Protects all mutable ingest state accessed from the thread-pool executor.
+        # _ingest_all_sync() runs inside run_in_executor(); this lock ensures
+        # the offset counters and dedup set are never mutated concurrently.
+        self._ingest_lock: threading.Lock = threading.Lock()
 
         self.app = web.Application()
         self.runner: web.AppRunner | None = None
@@ -135,10 +140,11 @@ class ObservabilityServer:
         # only picks up spans written *after* this server instance starts.
         # Historical spans belong to prior sessions and are not replayed into
         # the live dashboard — they can be loaded via the sessions API instead.
-        if _OTEL_JSONL.exists():
-            self._otel_jsonl_offset = _OTEL_JSONL.stat().st_size
-        if _AGENT_TRACKER_JSONL.exists():
-            self._tracker_jsonl_offset = _AGENT_TRACKER_JSONL.stat().st_size
+        with self._ingest_lock:
+            if _OTEL_JSONL.exists():
+                self._otel_jsonl_offset = _OTEL_JSONL.stat().st_size
+            if _AGENT_TRACKER_JSONL.exists():
+                self._tracker_jsonl_offset = _AGENT_TRACKER_JSONL.stat().st_size
         self._current_session = self._session_mgr.start_session()
         # Probe CGC in background — don't block server startup or graph requests
         asyncio.create_task(self._probe_cgc())
@@ -571,12 +577,19 @@ class ObservabilityServer:
                 pass  # Never crash the ingestion loop
 
     def _ingest_all_sync(self) -> list:
-        """Collect new spans from all file-based sources (runs in thread executor)."""
-        spans: list = []
-        spans.extend(self._ingest_otel_jsonl())
-        spans.extend(self._ingest_activity_logs())
-        spans.extend(self._ingest_agent_tracker())
-        return spans
+        """Collect new spans from all file-based sources (runs in thread executor).
+
+        Acquires ``_ingest_lock`` so that the mutable offset counters and the
+        activity-file dedup set are never read/written concurrently if, for
+        example, a future caller schedules multiple executor invocations or
+        accesses the state from a different thread.
+        """
+        with self._ingest_lock:
+            spans: list = []
+            spans.extend(self._ingest_otel_jsonl())
+            spans.extend(self._ingest_activity_logs())
+            spans.extend(self._ingest_agent_tracker())
+            return spans
 
     def _ingest_otel_jsonl(self) -> list:
         """Read only the bytes appended since the last call (offset-based)."""
