@@ -16,6 +16,32 @@ Before any non-trivial task:
 1. Call `tta_bootstrap` (MCP) for full project orientation
 2. Check `TEST_STATUS.md` for current test state
 3. Use `codegraphcontext` to orient on code relationships
+4. Read `tta://catalog` (MCP resource) for the live primitives catalog
+5. Read `tta://patterns` (MCP resource) for detectable workflow patterns
+
+---
+
+## MCP Resources — Read These First
+
+The TTA.dev MCP server (`ttadev/primitives/mcp_server/server.py`) exposes two key resources:
+
+| Resource | What it returns |
+|----------|----------------|
+| `tta://catalog` | Full primitives catalog — name, description, import path, use cases |
+| `tta://patterns` | Detectable code patterns and inferred workflow requirements |
+
+**To verify primitives available in this repo**, fetch `tta://catalog` via the MCP server.
+It reads `PRIMITIVES_CATALOG.md` live and returns structured data, so it is always current.
+
+**Quick verification (no MCP required):**
+```bash
+uv run python -c "
+from ttadev.primitives.analysis.analyzer import PrimitiveAnalyzer
+a = PrimitiveAnalyzer()
+for p in a.list_primitives():
+    print(p['name'], '-', p['category'])
+"
+```
 
 ---
 
@@ -38,7 +64,7 @@ uv run python scripts/validate-todos.py  # Validate TODOs
 
 ## Python Standards
 
-- **Python 3.11+** (3.12 preferred)
+- **Python 3.12+** (required — see `pyproject.toml: requires-python = ">=3.12"`)
 - **New union syntax ONLY:**
   - ✅ `str | None`, `dict[str, Any]`, `list[str]`, `tuple[int, ...]`
   - ❌ `Optional[str]`, `Dict[str, Any]`, `List[str]`
@@ -205,16 +231,32 @@ Never present results until all gates pass.
 ## Key Directories
 
 ```
-ttadev/primitives/      # Workflow primitives (main surface — edit here)
-ttadev/control_plane/   # L0 task/run/lease state
-ttadev/agents/          # Role-based agent system
-ttadev/observability/   # OpenTelemetry integration
-ttadev/cli/             # `tta` CLI subcommands
-tests/                  # Test suite
-docs/agent-guides/      # Deep-reference guides per topic
-.github/agents/         # Per-role agent definition files
-.github/workflows/      # CI/CD pipelines
+ttadev/primitives/         # Workflow primitives (main surface — edit here)
+ttadev/primitives/mcp_server/server.py  # MCP server — exposes tta://catalog, tta://patterns
+ttadev/control_plane/      # L0 task/run/lease state
+ttadev/agents/             # Role-based agent system
+ttadev/observability/      # OpenTelemetry integration
+ttadev/cli/                # `tta` CLI subcommands
+tests/                     # Test suite (mirrors ttadev/ structure)
+docs/agent-guides/         # Deep-reference guides per topic
+.github/agents/            # Per-role agent definition files
+.github/workflows/         # CI/CD pipelines
 ```
+
+---
+
+## Integration Smoke Test
+
+**To verify this config is working:** Ask the agent "what primitives does TTA.dev have?"
+The agent should be able to answer using one of these sources (in priority order):
+
+1. `tta://catalog` MCP resource (live, always current)
+2. `tta_bootstrap` MCP tool — returns `primitives` field in its response
+3. `PRIMITIVES_CATALOG.md` — static reference
+
+Expected answer includes: `RetryPrimitive`, `TimeoutPrimitive`, `CachePrimitive`,
+`CircuitBreakerPrimitive`, `LambdaPrimitive`, `SequentialPrimitive`, `ParallelPrimitive`,
+`ModelRouterPrimitive`, `MockPrimitive`.
 
 ---
 

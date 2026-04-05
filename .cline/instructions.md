@@ -24,13 +24,40 @@ Full constitution: [docs/agent-guides/sdd-constitution.md](docs/agent-guides/sdd
 
 Before any non-trivial task:
 1. Call `tta_bootstrap` (MCP) — returns full project orientation in one call
-2. Check `TEST_STATUS.md` for current test state
-3. Run `mcp__codegraphcontext__get_repository_stats` to orient the code graph
-4. Recall from `hindsight` — `adam-global` (cross-project) + `tta-dev` bank (repo-specific)
+2. Read `tta://catalog` MCP resource — live primitives catalog (always current)
+3. Read `tta://patterns` MCP resource — detectable workflow patterns
+4. Check `TEST_STATUS.md` for current test state
+5. Run `mcp__codegraphcontext__get_repository_stats` to orient the code graph
+6. Recall from `hindsight` — `adam-global` (cross-project) + `tta-dev` bank (repo-specific)
 
 After completing significant tasks:
 - Retain cross-project patterns → `adam-global` Hindsight bank
 - Retain repo-specific decisions → `tta-dev` Hindsight bank
+
+---
+
+## MCP Resources — Read These First
+
+The TTA.dev MCP server (`ttadev/primitives/mcp_server/server.py`) exposes two key resources
+that give you the complete picture of available primitives and patterns:
+
+| Resource | What it returns |
+|----------|----------------|
+| `tta://catalog` | Full primitives catalog — name, description, import path, use cases |
+| `tta://patterns` | Detectable code patterns and inferred workflow requirements |
+
+**To verify primitives available in this repo**, fetch `tta://catalog` via the MCP server.
+It reads `PRIMITIVES_CATALOG.md` live and returns structured data.
+
+**Quick verification (no MCP required):**
+```bash
+uv run python -c "
+from ttadev.primitives.analysis.analyzer import PrimitiveAnalyzer
+a = PrimitiveAnalyzer()
+for p in a.list_primitives():
+    print(p['name'], '-', p['category'])
+"
+```
 
 ---
 
@@ -53,7 +80,7 @@ uv run python scripts/validate-todos.py  # Validate TODO format
 
 ## Python Standards
 
-- **Python 3.11+** (3.12 preferred — see `pyproject.toml`)
+- **Python 3.12+** (required — see `pyproject.toml: requires-python = ">=3.12"`)
 - **Type hints — new union syntax only:**
   - ✅ `str | None`, `dict[str, Any]`, `list[str]`, `tuple[int, ...]`
   - ❌ `Optional[str]`, `Dict[str, Any]`, `List[str]`, `Tuple[int, ...]`
@@ -336,6 +363,21 @@ docs/agent-guides/      # Deep-reference guides per topic
 | [core-conventions](.claude/skills/core-conventions/SKILL.md) | Writing/reviewing Python code |
 | [self-review-checklist](.claude/skills/self-review-checklist/SKILL.md) | Pre-merge review |
 | [sdd-workflow](.claude/skills/sdd-workflow/SKILL.md) | New feature development |
+
+---
+
+## Integration Smoke Test
+
+**To verify this config is working:** Ask the agent "what primitives does TTA.dev have?"
+The agent should answer using one of these sources (in priority order):
+
+1. `tta://catalog` MCP resource (live, always current)
+2. `tta_bootstrap` MCP tool — `primitives` field in its response
+3. `PRIMITIVES_CATALOG.md` — static reference
+
+Expected answer includes: `RetryPrimitive`, `TimeoutPrimitive`, `CachePrimitive`,
+`CircuitBreakerPrimitive`, `LambdaPrimitive`, `SequentialPrimitive`, `ParallelPrimitive`,
+`ModelRouterPrimitive`, `MockPrimitive`.
 
 ---
 
