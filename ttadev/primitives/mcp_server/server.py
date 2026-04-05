@@ -2006,9 +2006,29 @@ result = await workflow.execute(data, context)
         configured, the default model, and the base URL.  Useful for
         agents checking which cloud providers are available before routing.
 
+        **Environment variable names (issue #316):**
+
+        +--------------+-----------------------------+---------------------------+
+        | Provider     | Canonical env var           | Legacy / alias            |
+        +==============+=============================+===========================+
+        | Google       | ``GOOGLE_API_KEY``          | ``GEMINI_API_KEY`` (dep.) |
+        +--------------+-----------------------------+---------------------------+
+        | Groq         | ``GROQ_API_KEY``            | —                         |
+        +--------------+-----------------------------+---------------------------+
+        | OpenRouter   | ``OPENROUTER_API_KEY``      | —                         |
+        +--------------+-----------------------------+---------------------------+
+        | Ollama       | *(no key required)*         | —                         |
+        +--------------+-----------------------------+---------------------------+
+
+        The ``tta setup`` wizard stores the Google key as ``GOOGLE_API_KEY``
+        (matching Google AI Studio's own convention).  ``GEMINI_API_KEY`` is
+        accepted as a backward-compatible fallback but emits a
+        ``DeprecationWarning``; support will be removed in a future release.
+
         Returns:
             Dict with ``providers`` list, each entry having ``name``,
-            ``api_key_configured``, ``default_model``, and ``base_url``.
+            ``api_key_configured``, ``default_model``, ``base_url``, and
+            ``is_local`` (``True`` only for Ollama).
         """
         import os
 
