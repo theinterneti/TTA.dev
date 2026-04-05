@@ -363,9 +363,9 @@ class WorkflowContext(BaseModel):
 def _resolve_default_model() -> Any:
     """Attempt to create a default ``ChatPrimitive`` for ``spawn_agent``.
 
-    Tries to build a :class:`~ttadev.agents.adapter.ModelRouterChatAdapter`
-    backed by a :class:`~ttadev.primitives.llm.ModelRouterPrimitive` with a
-    local Ollama tier.  This requires no API keys and works fully offline.
+    Uses :class:`~ttadev.primitives.llm.smart_router.SmartRouterPrimitive`
+    to build a cascade through the best available free providers
+    (Groq → Google Gemini → OpenRouter → Ollama) based on env vars.
 
     Returns:
         A ``ChatPrimitive``-compatible model adapter.
@@ -377,15 +377,9 @@ def _resolve_default_model() -> Any:
     """
     try:
         from ttadev.agents.adapter import ModelRouterChatAdapter
-        from ttadev.primitives.llm.model_router import (
-            ModelRouterPrimitive,
-            RouterModeConfig,
-            RouterTierConfig,
-        )
+        from ttadev.primitives.llm.smart_router import SmartRouterPrimitive
 
-        router = ModelRouterPrimitive(
-            modes={"default": RouterModeConfig(tiers=[RouterTierConfig(provider="ollama")])}
-        )
+        router = SmartRouterPrimitive.make()
         return ModelRouterChatAdapter(router)
     except Exception as exc:
         raise ValueError(
