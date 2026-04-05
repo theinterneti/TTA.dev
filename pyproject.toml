@@ -93,17 +93,20 @@ packages = ["ttadev"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
-tdd_guard_project_root = "/home/theinterneti/Repos/TTA.dev"
 python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
 python_functions = ["test_*"]
-# addopts removed: pytest.ini is the active config (pytest uses first config file found).
-# Coverage thresholds are now enforced via [tool.coverage.report] below.
+addopts = "-v --tb=short"
 markers = [
-    "workflow_proof: end-to-end L0 workflow proof tests",
+    "unit: fast, isolated unit tests (no external services)",
     "integration: integration tests requiring external services",
+    "workflow_proof: end-to-end L0 workflow proof tests",
     "slow: slow tests",
     "external: tests requiring external APIs",
+    "asyncio: mark test as async test",
+    "quarantine: tests temporarily excluded from CI",
 ]
 
 [tool.ruff]
@@ -209,6 +212,20 @@ omit = [
     "ttadev/primitives/integrations/e2b_primitive.py",
     # Git repo integration (requires live git operations outside unit test scope)
     "ttadev/primitives/collaboration/git_integration.py",
+    # CLI entry points — Click commands, require real terminal/process context
+    "ttadev/cli/setup.py",
+    "ttadev/cli/status.py",
+    "ttadev/cli/agent.py",
+    # Redis infrastructure — requires live Redis server
+    "ttadev/primitives/coordination/redis_coordinator.py",
+    # Complex workflow orchestration requiring multiple live services
+    "ttadev/workflows/pipeline.py",
+    # Observability HTTP server — FastAPI/WebSocket server, requires a running process
+    "ttadev/observability/server.py",
+    # Code graph primitive — requires live Falkor DB
+    "ttadev/primitives/code_graph/primitive.py",
+    # OpenHands integration — requires external OpenHands agent runtime
+    "ttadev/primitives/integrations/openhands_primitive.py",
 ]
 
 [tool.coverage.report]

@@ -379,8 +379,10 @@ class TestSelectionPolicyBenchmarkFilters:
     async def test_min_humaneval_score_excludes_low_scoring_models(self) -> None:
         """SelectionPolicy.min_humaneval_score removes models below the threshold."""
         # Arrange — qwen2.5:7b HumanEval=84.1, llama3.2:1b HumanEval=28.7
-        high = _entry("qwen2.5:7b")
-        low = _entry("llama3.2:1b")
+        # is_local=False avoids hardware-fit filtering so this test stays focused
+        # on benchmark threshold logic only (hardware detection is platform-specific).
+        high = _entry("qwen2.5:7b", is_local=False)
+        low = _entry("llama3.2:1b", is_local=False)
         reg = _registry(high, low)
         ctx = _ctx()
 
@@ -403,9 +405,9 @@ class TestSelectionPolicyBenchmarkFilters:
     @pytest.mark.asyncio
     async def test_min_humaneval_score_excludes_models_with_no_data(self) -> None:
         """min_humaneval_score excludes models with no HumanEval data at all."""
-        # Arrange
-        no_data = _entry("mystery-model:7b")
-        has_data = _entry("qwen2.5:7b")
+        # Arrange — is_local=False avoids hardware-fit filtering (platform-specific).
+        no_data = _entry("mystery-model:7b", is_local=False)
+        has_data = _entry("qwen2.5:7b", is_local=False)
         reg = _registry(no_data, has_data)
         ctx = _ctx()
 
@@ -510,8 +512,9 @@ class TestSelectionPolicyBenchmarkFilters:
         # Arrange
         # qwen2.5:7b: MMLU=74.2 ✓, HumanEval=84.1 ✓
         # gemma2:9b:  MMLU=71.3 ✓, HumanEval=54.3 ✗ (fails HE threshold)
-        ok = _entry("qwen2.5:7b")
-        fail_he = _entry("gemma2:9b")
+        # is_local=False avoids hardware-fit filtering (platform-specific).
+        ok = _entry("qwen2.5:7b", is_local=False)
+        fail_he = _entry("gemma2:9b", is_local=False)
         reg = _registry(ok, fail_he)
         ctx = _ctx()
 

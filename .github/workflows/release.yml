@@ -77,7 +77,7 @@ jobs:
           version: "latest"
 
       - name: Set up Python
-        run: uv python install 3.11
+        run: uv python install 3.12
 
       - name: Build package
         working-directory: ${{ needs.extract-package.outputs.package-path }}

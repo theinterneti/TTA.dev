@@ -458,7 +458,7 @@ class OpenHandsPrimitive(WorkflowPrimitive[str | dict[str, Any], dict[str, Any]]
                     span.set_attribute("openhands.model", self.model)
                     span.set_attribute("openhands.primitive_name", self.name)
                     span.set_attribute("openhands.max_iterations", self.max_iterations)
-                    span.set_attribute("ttadev.workflow_id", context.workflow_id)
+                    span.set_attribute("ttadev.workflow_id", context.workflow_id or "")
                     return await self._execute_with_workspace(task, workspace_path)
             return await self._execute_with_workspace(task, workspace_path)
 
@@ -469,7 +469,9 @@ class OpenHandsPrimitive(WorkflowPrimitive[str | dict[str, Any], dict[str, Any]]
         ) -> None:
             """Emit a Langfuse generation record (fails silently)."""
             try:
-                from tta_apm_langfuse import get_integration  # noqa: PLC0415
+                from tta_apm_langfuse import (
+                    get_integration,  # noqa: PLC0415  # type: ignore[import-untyped]
+                )
 
                 _lf = get_integration()
                 if _lf is not None:

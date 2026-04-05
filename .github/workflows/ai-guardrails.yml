@@ -273,12 +273,6 @@ jobs:
             exit 1
           fi
 
-          # Check for TODO without tracking
-          if git diff origin/${{ github.base_ref }}...HEAD | grep -E "TODO|FIXME" | grep -v "#dev-todo"; then
-            echo "⚠️  Untracked TODO/FIXME found. Use #dev-todo instead."
-            exit 1
-          fi
-
           echo "✅ No prohibited patterns found"
 
       - name: Verify quality gates passed

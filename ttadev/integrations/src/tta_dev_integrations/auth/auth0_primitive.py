@@ -1,6 +1,6 @@
 """Auth0 authentication integration primitive - SKELETON."""
 
-# TODO: Implement Auth0Primitive #dev-todo
+# TODO: Implement Auth0Primitive
 # type:: implementation
 # priority:: high
 # package:: tta-dev-integrations

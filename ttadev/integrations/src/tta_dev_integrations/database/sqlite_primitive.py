@@ -1,6 +1,6 @@
 """SQLite integration primitive - SKELETON."""
 
-# TODO: Implement SQLitePrimitive #dev-todo
+# TODO: Implement SQLitePrimitive
 # type:: implementation
 # priority:: high
 # package:: tta-dev-integrations

@@ -1,6 +1,6 @@
 """Clerk authentication integration primitive - SKELETON."""
 
-# TODO: Implement ClerkAuthPrimitive #dev-todo
+# TODO: Implement ClerkAuthPrimitive
 # type:: implementation
 # priority:: high
 # package:: tta-dev-integrations
