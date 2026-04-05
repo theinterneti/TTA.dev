@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import logging
 import os
 import subprocess
@@ -258,6 +259,98 @@ async def _run_review_litellm_direct(
 
 
 # ---------------------------------------------------------------------------
+# Review text formatting
+# ---------------------------------------------------------------------------
+
+_SEVERITY_MAP = {
+    "critical": "🔴 Critical",
+    "suggestion": "🟡 Suggestion",
+    "info": "ℹ️ Info",
+}
+
+
+def _format_review_text(raw: str) -> str:
+    """Parse model output and render as readable GitHub markdown.
+
+    OpenHands wraps our task in a JSON-output system prompt, so the model
+    typically returns one of two JSON schemas:
+
+    Schema A (summary + issues list):
+        {"summary": str, "issues": [{"file": str, "line": int,
+          "severity": str, "description": str, "correction": str}],
+         "explanation": str}
+
+    Schema B (issues_found + details):
+        {"issues_found": bool, "details": [{"file": str, "line": int,
+          "severity": str, "description": str, "correction": str}]}
+
+    If parsing fails, the raw text is returned unchanged (handles models that
+    do follow the markdown prompt directly).
+    """
+    raw = raw.strip()
+    try:
+        data = json.loads(raw)
+    except (json.JSONDecodeError, ValueError):
+        # Model returned markdown directly — pass through
+        return raw
+
+    if not isinstance(data, dict):
+        return raw
+
+    lines: list[str] = []
+
+    # Normalise to a common issues list
+    issues: list[dict] = data.get("issues") or data.get("details") or []
+    summary: str = data.get("summary", "")
+    explanation: str = data.get("explanation", "")
+    issues_found: bool = data.get("issues_found", bool(issues))
+
+    if not issues_found and not issues:
+        lines.append("✅ **No issues found.**")
+        if explanation:
+            lines.append("")
+            lines.append(explanation)
+        return "\n".join(lines)
+
+    if summary:
+        lines.append(f"**{summary}**")
+        lines.append("")
+
+    for issue in issues:
+        severity_raw = str(issue.get("severity", "")).lower()
+        # Handle emoji-prefixed severities from the model (e.g. "🔴 critical")
+        for key, label in _SEVERITY_MAP.items():
+            if key in severity_raw:
+                severity_label = label
+                break
+        else:
+            severity_label = issue.get("severity", "🟡 Suggestion")
+
+        file_ref = issue.get("file", "")
+        line_num = issue.get("line", "")
+        location = f"`{file_ref}`" if file_ref else ""
+        if line_num:
+            location += f" line {line_num}"
+
+        description = issue.get("description", "").strip()
+        correction = issue.get("correction", "").strip()
+
+        lines.append(f"### {severity_label}{' — ' + location if location else ''}")
+        if description:
+            lines.append(f"> {description}")
+        if correction:
+            lines.append("")
+            lines.append(f"**Fix:** {correction}")
+        lines.append("")
+
+    if explanation and not summary:
+        lines.append("---")
+        lines.append(explanation)
+
+    return "\n".join(lines).strip()
+
+
+# ---------------------------------------------------------------------------
 # GitHub comment posting
 # ---------------------------------------------------------------------------
 
@@ -331,6 +424,8 @@ async def main() -> None:
             api_key=api_key,
             extra_body=extra_body,
         )
+
+        review_text = _format_review_text(review_text)
 
         posted = _post_review_comment(args.pr, review_text)
         if not posted:
