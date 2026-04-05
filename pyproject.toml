@@ -212,6 +212,20 @@ omit = [
     "ttadev/primitives/integrations/e2b_primitive.py",
     # Git repo integration (requires live git operations outside unit test scope)
     "ttadev/primitives/collaboration/git_integration.py",
+    # CLI entry points — Click commands, require real terminal/process context
+    "ttadev/cli/setup.py",
+    "ttadev/cli/status.py",
+    "ttadev/cli/agent.py",
+    # Redis infrastructure — requires live Redis server
+    "ttadev/primitives/coordination/redis_coordinator.py",
+    # Complex workflow orchestration requiring multiple live services
+    "ttadev/workflows/pipeline.py",
+    # Observability HTTP server — FastAPI/WebSocket server, requires a running process
+    "ttadev/observability/server.py",
+    # Code graph primitive — requires live Falkor DB
+    "ttadev/primitives/code_graph/primitive.py",
+    # OpenHands integration — requires external OpenHands agent runtime
+    "ttadev/primitives/integrations/openhands_primitive.py",
 ]
 
 [tool.coverage.report]
