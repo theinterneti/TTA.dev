@@ -157,6 +157,27 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Output JSON (no ANSI colours, no key values)",
     )
 
+    # ------------------------------------------------------------------ #
+    # observe subcommand                                                   #
+    # ------------------------------------------------------------------ #
+    observe_p = sub.add_parser(
+        "observe",
+        help="Start the TTA.dev observability dashboard (idempotent)",
+    )
+    observe_p.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        metavar="PORT",
+        help="Port to serve the dashboard on (default: 8000)",
+    )
+    observe_p.add_argument(
+        "--no-browser",
+        dest="no_browser",
+        action="store_true",
+        help="Start the server but do not open a browser tab",
+    )
+
     return parser
 
 
@@ -268,6 +289,43 @@ def main() -> None:
         from ttadev.cli.status import cmd_status
 
         sys.exit(cmd_status(args, project_root=Path("."), data_dir=data_dir))
+
+    elif args.command == "observe":
+        import asyncio
+        import socket
+        import webbrowser
+
+        port = args.port
+        no_browser = args.no_browser
+
+        def _port_in_use(p: int) -> bool:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                return s.connect_ex(("localhost", p)) == 0
+
+        if _port_in_use(port):
+            url = f"http://localhost:{port}"
+            print(f"Dashboard already running → {url}")
+            if not no_browser:
+                webbrowser.open(url)
+            sys.exit(0)
+
+        async def _run() -> None:
+            from ttadev.observability.server import ObservabilityServer
+
+            server = ObservabilityServer(port=port)
+            await server.start()
+            url = f"http://localhost:{port}"
+            print(f"TTA.dev Observability Dashboard → {url}")
+            print("Press Ctrl+C to stop.")
+            if not no_browser:
+                webbrowser.open(url)
+            try:
+                await asyncio.Event().wait()
+            except (KeyboardInterrupt, asyncio.CancelledError):
+                print("\nShutting down...")
+                await server.stop()
+
+        asyncio.run(_run())
 
     else:
         parser.print_help()

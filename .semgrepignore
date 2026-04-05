@@ -32,8 +32,7 @@ build/
 package-lock.json
 
 # Test files (may contain intentional security patterns)
-# Comment out if you want to scan tests too
-# tests/
+tests/
 
 # Documentation
 docs/
