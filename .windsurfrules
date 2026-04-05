@@ -1,0 +1,230 @@
+# TTA.dev — Windsurf Project Rules
+
+## Project Identity
+
+TTA.dev is a **Python library of composable workflow primitives** for building reliable,
+observable AI applications. Primitives include retry, timeout, cache, circuit-breaker,
+LLM routing, and multi-agent coordination — all composable via `>>` and `|` operators.
+
+Repository: https://github.com/theinterneti/TTA.dev
+
+---
+
+## Session Start
+
+Before any non-trivial task:
+1. Call `tta_bootstrap` (MCP) for full project orientation
+2. Check `TEST_STATUS.md` for current test state
+3. Use `codegraphcontext` to orient on code relationships
+
+---
+
+## Package Manager — `uv` Only
+
+```bash
+uv sync --all-extras        # Install dependencies
+make watch                  # TDD loop (fast, fail-fast)
+make watch-cov              # TDD loop with coverage
+make test                   # Full test run
+uv run ruff format .        # Format
+uv run ruff check . --fix   # Lint
+uvx pyright ttadev/         # Type check
+uv run python scripts/validate-todos.py  # Validate TODOs
+```
+
+**Never use `pip`, `pip3`, `poetry`, or `conda`.**
+
+---
+
+## Python Standards
+
+- **Python 3.11+** (3.12 preferred)
+- **New union syntax ONLY:**
+  - ✅ `str | None`, `dict[str, Any]`, `list[str]`, `tuple[int, ...]`
+  - ❌ `Optional[str]`, `Dict[str, Any]`, `List[str]`
+- **Ruff** — line length **100**, strict mode
+- **Google-style docstrings** — all public APIs
+- **Pyright basic mode** — `uvx pyright ttadev/`
+- **Conventional Commits:** `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
+
+---
+
+## Primitives Pattern — Core Rule
+
+> **Always use primitives. Never write manual retry/timeout/cache loops.**
+
+### ✅ Correct
+
+```python
+from ttadev.primitives import LambdaPrimitive, WorkflowContext
+from ttadev.primitives.recovery import RetryPrimitive
+from ttadev.primitives.performance import CachePrimitive
+
+base = LambdaPrimitive(my_function)
+workflow = RetryPrimitive(
+    CachePrimitive(base, cache_key_fn=lambda d, ctx: str(d), ttl_seconds=3600.0)
+)
+result = await workflow.execute(input_data, WorkflowContext(workflow_id="demo"))
+```
+
+### ❌ Wrong — Manual Loops
+
+```python
+for attempt in range(3):    # NEVER — use RetryPrimitive
+    try:
+        result = call_api()
+    except Exception:
+        time.sleep(2 ** attempt)
+```
+
+### Composition Operators
+
+```python
+workflow = step1 >> step2 >> step3                       # Sequential
+workflow = branch1 | branch2 | branch3                   # Parallel
+workflow = preprocessor >> (fast | slow) >> aggregator   # Mixed
+```
+
+### Primitive Catalog
+
+| Category | Primitives |
+|----------|-----------|
+| **Core** | `WorkflowPrimitive`, `SequentialPrimitive`, `ParallelPrimitive`, `ConditionalPrimitive`, `RouterPrimitive`, `LambdaPrimitive` |
+| **Recovery** | `RetryPrimitive`, `TimeoutPrimitive`, `CircuitBreakerPrimitive`, `FallbackPrimitive`, `CompensationPrimitive` |
+| **Performance** | `CachePrimitive`, `MemoryPrimitive` |
+| **LLM** | `ModelRouterPrimitive`, `ModelRouterChatAdapter`, `TaskProfile` |
+| **Testing** | `MockPrimitive` |
+
+Import from `ttadev.primitives` or subcategory modules.
+
+---
+
+## State Management
+
+- ✅ Pass all state via `WorkflowContext` (workflow_id, session_id, metadata, state)
+- ❌ No global state for workflow data
+
+---
+
+## Testing Standards
+
+- **pytest** + AAA pattern (Arrange, Act, Assert)
+- **`@pytest.mark.asyncio`** for async tests
+- **`MockPrimitive`** for mocking primitives
+- **Coverage:** 80%+ project-wide; **100% for new code**
+
+```python
+@pytest.mark.asyncio
+async def test_retry_on_failure():
+    # Arrange
+    call_count = 0
+    async def flaky(data: str, ctx: WorkflowContext) -> str:
+        nonlocal call_count
+        call_count += 1
+        if call_count < 3:
+            raise ValueError("transient error")
+        return "ok"
+
+    workflow = RetryPrimitive(LambdaPrimitive(flaky), max_attempts=3)
+    context = WorkflowContext(workflow_id="test-retry")
+
+    # Act
+    result = await workflow.execute("input", context)
+
+    # Assert
+    assert result == "ok"
+    assert call_count == 3
+```
+
+---
+
+## ⛔ TODO Format — CI-Blocking
+
+**Malformed TODOs block CI.** Required format:
+
+```markdown
+- TODO <description> #dev-todo
+  type:: <bug|implementation|refactor|documentation>
+  priority:: <critical|high|medium|low>
+  package:: <package-name>
+```
+
+- ❌ `# TODO: fix this` — BLOCKS CI
+- ❌ `# FIXME: broken` — BLOCKS CI
+- ✅ `# TODO fix cache TTL edge case #dev-todo` + properties
+
+---
+
+## Quality Gates
+
+After every code change:
+
+```bash
+.github/copilot-hooks/post-generation.sh
+```
+
+| Gate | Tool | Requirement |
+|------|------|-------------|
+| Lint | `uv run ruff check .` | Zero violations |
+| Types | `uvx pyright ttadev/` | ≤2 known OTel errors |
+| Tests | `uv run pytest -m "not integration"` | All pass |
+
+**Self-correction:** Read error → fix minimally → re-run → repeat until green.
+Never present results until all gates pass.
+
+---
+
+## L0 Control Plane — Extend, Don't Duplicate
+
+- `ttadev/control_plane/` — JSON-backed task/run/lease state
+- `ttadev/cli/control.py` — `tta control task|run|workflow ...`
+- `ttadev/primitives/mcp_server/server.py` — MCP tools
+
+**Rule:** Agent coordination = extend L0. Do not create parallel orchestration.
+
+---
+
+## MCP Servers Available
+
+| Server | Key Tools |
+|--------|----------|
+| `tta_bootstrap` | Full orientation — call first every session |
+| **codegraphcontext** | `find_code`, `analyze_code_relationships`, `get_repository_stats` |
+| **hindsight** | `recall` (session start), `retain` (after tasks) |
+| **serena** | `find_symbol`, `replace_symbol_body`, `get_symbols_overview` |
+| **context7** | Library documentation |
+| **github** | Issues, PRs, workflow management |
+| **playwright** | Browser automation |
+| **grafana** | Metrics and dashboards |
+| **gitmcp** | Git operations |
+| **sequential-thinking** | Problem decomposition |
+| **e2b** | Sandboxed execution |
+
+---
+
+## Key Directories
+
+```
+ttadev/primitives/      # Workflow primitives (main surface — edit here)
+ttadev/control_plane/   # L0 task/run/lease state
+ttadev/agents/          # Role-based agent system
+ttadev/observability/   # OpenTelemetry integration
+ttadev/cli/             # `tta` CLI subcommands
+tests/                  # Test suite
+docs/agent-guides/      # Deep-reference guides per topic
+.github/agents/         # Per-role agent definition files
+.github/workflows/      # CI/CD pipelines
+```
+
+---
+
+## Key Reference Files
+
+- [AGENTS.md](AGENTS.md) — Universal agent hub for all roles
+- [PRIMITIVES_CATALOG.md](PRIMITIVES_CATALOG.md) — Full primitive API reference
+- [MCP_TOOL_REGISTRY.md](MCP_TOOL_REGISTRY.md) — MCP tool catalog
+- [docs/agent-guides/primitives-patterns.md](docs/agent-guides/primitives-patterns.md)
+- [docs/agent-guides/python-standards.md](docs/agent-guides/python-standards.md)
+- [docs/agent-guides/testing-architecture.md](docs/agent-guides/testing-architecture.md)
+- [docs/agent-guides/todo-management.md](docs/agent-guides/todo-management.md)
+- [docs/agent-guides/sdd-constitution.md](docs/agent-guides/sdd-constitution.md)
