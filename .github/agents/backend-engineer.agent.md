@@ -104,6 +104,48 @@ git push origin <branch>
 - **gitmcp**: Git operations and history
 - **serena**: Code analysis and refactoring
 
+### First 3 MCP calls to make
+
+At the start of every backend engineering session, make these calls in order:
+
+1. **`tta_bootstrap`** — One-call orientation: returns primitives, tools, patterns, and provider status. Always the first call.
+2. **`analyze_code`** — Pass your target file or snippet; receive concrete primitive recommendations before writing a single line.
+3. **`rewrite_code`** — Apply AST-based transformation to replace manual loops/retries with the correct TTA primitive automatically.
+
+### MCP Resources
+
+- **`tta://catalog`** — Complete primitives catalog with import paths; reference before choosing a primitive.
+- **`tta://patterns`** — Detectable code patterns; use to confirm your code is following established patterns.
+
+```python
+# Typical session start
+ctx = await mcp.call("tta_bootstrap", {"task_hint": "implement CircuitBreakerPrimitive"})
+recs = await mcp.call("analyze_code", {"code": open("ttadev/my_module.py").read()})
+# recs shows which primitives to apply and where
+```
+
+### Multi-Agent Fleet Spawning
+
+**backend-engineer** is the primary agent that may spawn a fleet for large parallel tasks (e.g., migrating multiple modules simultaneously):
+
+```python
+# Spawn parallel sub-tasks across multiple files
+fleet = await mcp.call("agent_spawn_fleet", {
+    "tasks": [
+        {"agent": "backend-engineer", "prompt": "Wrap retry logic in payments.py"},
+        {"agent": "backend-engineer", "prompt": "Wrap retry logic in notifications.py"},
+        {"agent": "testing-specialist", "prompt": "Write tests for payments.py changes"},
+    ],
+    "max_concurrency": 3
+})
+fleet_result = await mcp.call("agent_poll_fleet", {"fleet_id": fleet["fleet_id"]})
+```
+
+Use `agent_spawn_fleet` when:
+- Migrating >3 independent modules to primitives
+- Running analysis on many files in parallel
+- Coordinating backend + testing work simultaneously
+
 ### Programmatic Tool Calling (PTC) Support
 
 **Enabled March 2026** - The following MCP tools support direct code execution via `allowed_callers`:
@@ -148,6 +190,20 @@ for primitive in primitives["recovery"]:
 1. **Vibe first** - Build fast, ship fast
 2. **Scale when needed** - Add primitives incrementally
 3. **Use primitives** - Never write manual retry/timeout loops
+
+---
+
+## Handoffs
+
+| Situation | Hand off to |
+|-----------|-------------|
+| Implementation complete, needs tests | **testing-specialist** — write unit + integration tests, enforce quality gates |
+| New API ready, needs UI | **frontend-engineer** — provide OpenAPI schema as contract |
+| Code needs review before merge | **code-reviewer** — request review via PR |
+| Deployment needed after merge | **devops-engineer** — trigger CI/CD pipeline |
+| Performance bottleneck identified | **observability-expert** — instrument and profile |
+
+**Handoff note to testing-specialist:** Provide the list of new/changed modules, the `tta://catalog` entries used, and expected coverage targets.
 
 ## Task-Aware Model Selection
 

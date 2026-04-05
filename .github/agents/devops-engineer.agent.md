@@ -216,6 +216,35 @@ volumes:
 - **gitmcp**: Repository operations
 - **sequential-thinking**: Deployment planning
 
+### First 3 MCP calls to make
+
+At the start of every DevOps session, make these calls in order:
+
+1. **`tta_bootstrap`** — One-call orientation: confirms current tool and primitive state before you touch any pipeline or deployment config.
+2. **`control_start_workflow`** — Create and claim a tracked multi-agent deployment workflow so every step, gate, and result is recorded in the L0 control plane.
+3. **`control_decide_gate`** — Record approval/rejection decisions for deployment gates (staging → production promotions) with evidence so the audit trail is complete.
+
+### MCP Resources
+
+- **`tta://catalog`** — Primitives catalog; check before writing custom retry/timeout logic in shell scripts — prefer TTA primitives in Python scripts over hand-rolled bash loops.
+- **`tta://patterns`** — Detectable patterns; helps identify where application code could be improved before a deployment is blocked by quality gate failures.
+
+```python
+# Typical deployment workflow session
+ctx = await mcp.call("tta_bootstrap", {"task_hint": "deploy v1.2.3 to staging"})
+wf = await mcp.call("control_start_workflow", {
+    "title": "Deploy v1.2.3",
+    "steps": ["build", "test", "staging-deploy", "smoke-test", "prod-deploy"],
+    "agent_id": "devops-engineer"
+})
+# ... after smoke tests pass:
+gate = await mcp.call("control_decide_gate", {
+    "task_id": wf["task_id"],
+    "decision": "approved",
+    "evidence": "Smoke tests passed, error rate 0%"
+})
+```
+
 ## File Access
 
 **Allowed:**
@@ -292,3 +321,16 @@ rate(container_cpu_usage_seconds_total{container="tta-dev"}[5m])
 - **Security first**: Never compromise security for speed
 - **Observability**: If you can't measure it, you can't improve it
 - **Fail fast**: Detect issues early in pipeline
+
+---
+
+## Handoffs
+
+| Situation | Hand off to |
+|-----------|-------------|
+| Pre-deployment quality gate check | **testing-specialist** — validate all test suites pass before staging deploy |
+| Deployment complete, monitor rollout | **observability-expert** — watch dashboards and confirm SLOs hold |
+| Performance regression found post-deploy | **backend-engineer** — investigate and hotfix |
+| Architecture change requires infra redesign | **architect** — design new topology before implementing |
+
+**Handoff note to observability-expert:** Provide the deploy timestamp, the service version, and the Grafana dashboard URL. Ask them to confirm error rate and p95 latency are within SLO for 15 minutes post-deploy.

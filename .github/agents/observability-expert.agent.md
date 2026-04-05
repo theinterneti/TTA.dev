@@ -305,6 +305,29 @@ groups:
 - **gitmcp**: Review code for observability gaps
 - **sequential-thinking**: Troubleshooting planning
 
+### First 3 MCP calls to make
+
+At the start of every observability session, make these calls in order:
+
+1. **`tta_bootstrap`** — One-call orientation: confirms active primitives and any LLM provider status changes that might explain anomalous latency.
+2. **`control_list_runs`** — List active L0 control-plane runs to see which workflows are live, who owns them, and whether any are stuck or overdue on heartbeat.
+3. **`memory_recall`** — Recall past incidents, known failure modes, or established alert thresholds from the `tta-dev` Hindsight bank before starting investigation.
+
+### MCP Resources
+
+- **`tta://catalog`** — Primitives catalog; use to verify which primitives wrap the services you're instrumenting — confirms where `CircuitBreakerPrimitive`, `RetryPrimitive`, and `TimeoutPrimitive` emit built-in OTel spans.
+- **`tta://patterns`** — Detectable patterns; shows which code patterns the analyzer tracks so you can correlate static analysis findings with live trace anomalies.
+
+```python
+# Typical investigation start
+ctx = await mcp.call("tta_bootstrap", {"task_hint": "investigate p95 latency spike"})
+runs = await mcp.call("control_list_runs", {"status": "active"})
+history = await mcp.call("memory_recall", {
+    "query": "p95 latency spike root cause patterns",
+    "bank_id": "tta-dev"
+})
+```
+
 ## File Access
 
 **Allowed:**
@@ -364,3 +387,16 @@ docker logs tta-dev --tail=100 --since=30m
 - **Context is key**: Add rich metadata to traces and logs
 - **Alert on symptoms, not causes**: Alert on user impact
 - **Observability is a feature**: Build it in from the start
+
+---
+
+## Handoffs
+
+| Situation | Hand off to |
+|-----------|-------------|
+| Incident confirmed, needs rollback | **devops-engineer** — execute rollback and pipeline remediation |
+| Code missing instrumentation (spans/metrics) | **backend-engineer** — add OTel spans to specific functions |
+| New service added, no dashboards yet | **devops-engineer** — add service to monitoring stack |
+| SLO breach caused by architectural issue | **architect** — review system design and scaling strategy |
+
+**Handoff note to devops-engineer:** Provide the Grafana dashboard link, the specific metric that breached threshold, the time range, and the Prometheus query that confirms the issue. Include a recommended rollback target version if available.

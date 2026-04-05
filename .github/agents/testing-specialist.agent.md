@@ -238,6 +238,31 @@ test('keyboard navigation works', async ({ page }) => {
 - **serena**: Code quality analysis
 - **sequential-thinking**: Test strategy planning
 
+### First 3 MCP calls to make
+
+At the start of every testing session, make these calls in order:
+
+1. **`tta_bootstrap`** — One-call orientation: surfaces all active primitives so you know which ones need test coverage and which test helpers (`MockPrimitive`, etc.) are available.
+2. **`analyze_and_fix`** — Pass the code under review; receive the best primitive fix automatically applied, so you can write tests against the corrected implementation rather than the anti-pattern.
+3. **`control_decide_gate`** — After running the full test suite, record the gate decision (approved / changes_requested) in the L0 control plane so the workflow unblocks or halts with evidence.
+
+### MCP Resources
+
+- **`tta://catalog`** — Primitives catalog; tells you which primitives are in scope for the PR so you know which `MockPrimitive` configurations to prepare.
+- **`tta://patterns`** — Detectable patterns; use to confirm the code you're testing follows recognized patterns — any unrecognized pattern is a gap worth a dedicated test case.
+
+```python
+# Typical testing session start
+ctx = await mcp.call("tta_bootstrap", {"task_hint": "test RetryPrimitive changes"})
+fixed = await mcp.call("analyze_and_fix", {"code": pr_diff, "auto_apply": False})
+# After test suite passes:
+gate = await mcp.call("control_decide_gate", {
+    "task_id": current_task_id,
+    "decision": "approved",
+    "evidence": "pytest: 247 passed, 0 failed, coverage 94%"
+})
+```
+
 ## File Access
 
 **Allowed:**
@@ -370,6 +395,19 @@ async def test_fast():
 - **Automate everything**: Manual testing doesn't scale
 - **Quality is everyone's job**: But you enforce the standards
 - **Accessibility matters**: Test for all users
+
+---
+
+## Handoffs
+
+| Situation | Hand off to |
+|-----------|-------------|
+| All quality gates pass, ready to deploy | **devops-engineer** — trigger deployment pipeline with gate evidence |
+| Tests reveal bugs in implementation | **backend-engineer** — provide specific failing test + expected behavior |
+| E2E tests reveal UI regressions | **frontend-engineer** — provide Playwright trace and screenshot |
+| Coverage gap requires design rethink | **architect** — raise testability concern before more code is written |
+
+**Handoff note to devops-engineer:** Attach the `pytest` JUnit XML report, coverage percentage, and the `control_decide_gate` task ID that records the approval. Deployment should not proceed without a gate ID in the L0 control plane.
 
 ## Task-Aware Model Selection
 

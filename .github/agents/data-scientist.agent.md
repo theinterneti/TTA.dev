@@ -128,6 +128,26 @@ print(importance)
 - **gitmcp**: Version control for experiments
 - **sequential-thinking**: Experiment planning
 
+### First 3 MCP calls to make
+
+At the start of every data science session, make these calls in order:
+
+1. **`tta_bootstrap`** — One-call orientation: confirms which primitives and tools are available; surfaces any provider/model status changes that affect your pipeline.
+2. **`search_templates`** — Search for existing workflow templates (e.g., `"batch processing"`, `"model training"`) before building a custom pipeline.
+3. **`memory_recall`** — Recall prior experiment results, dataset notes, or model decisions from the `tta-dev` Hindsight bank so you don't repeat prior analysis.
+
+### MCP Resources
+
+- **`tta://catalog`** — Primitives catalog; use when wrapping data pipelines with `RetryPrimitive`, `CachePrimitive`, or `ParallelPrimitive`.
+- **`tta://patterns`** — Detectable patterns; confirm your data pipeline code follows recognized patterns before submitting for productionization.
+
+```python
+# Typical session start
+ctx = await mcp.call("tta_bootstrap", {"task_hint": "analyze churn model dataset"})
+templates = await mcp.call("search_templates", {"query": "batch data processing"})
+prior = await mcp.call("memory_recall", {"query": "churn model experiment results", "bank_id": "tta-dev"})
+```
+
 ## File Access
 
 **Allowed:**
@@ -153,3 +173,16 @@ print(importance)
 - **Reproducibility first**: Always set random seeds
 - **Validate everything**: Never trust results without validation
 - **Document thoroughly**: Future you will thank present you
+
+---
+
+## Handoffs
+
+| Situation | Hand off to |
+|-----------|-------------|
+| Model validated, ready to productionize | **backend-engineer** — wrap pipeline in TTA primitives, expose via API |
+| Need to monitor model metrics in production | **observability-expert** — define model performance SLIs and dashboards |
+| Data pipeline needs CI/CD automation | **devops-engineer** — schedule pipeline runs, containerize training |
+| Need statistical validation of A/B test results | **architect** — design experiment framework and decision criteria |
+
+**Handoff note to backend-engineer:** Provide the notebook, requirements, input/output schema, and target latency. Reference any `tta://catalog` primitives you recommend wrapping the pipeline with.

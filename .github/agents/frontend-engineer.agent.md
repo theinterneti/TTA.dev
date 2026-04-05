@@ -198,6 +198,27 @@ describe('UserProfile', () => {
 - **gitmcp**: Git operations
 - **serena**: Code analysis and refactoring
 
+### First 3 MCP calls to make
+
+At the start of every frontend engineering session, make these calls in order:
+
+1. **`tta_bootstrap`** — One-call orientation: confirms current tool state and any backend API changes that affect your component contracts.
+2. **`detect_anti_patterns`** — Scan frontend utility/integration code for patterns that should use TTA primitives (e.g., manual fetch retry loops, unguarded async calls).
+3. **`analyze_code`** — Get quality recommendations for the specific component or module you are working on before writing new code.
+
+### MCP Resources
+
+- **`tta://catalog`** — Primitives catalog; relevant when frontend code calls backend APIs — confirm which primitives protect those APIs so error handling in the UI matches the backend contract.
+- **`tta://patterns`** — Detectable patterns; use to check that API integration code follows established patterns recognized by the static analyzer.
+
+```typescript
+// Example: before adding a new API client, check if retry is already handled
+// Call tta_bootstrap to see if RetryPrimitive wraps the endpoint you're calling
+// so the frontend doesn't double-retry
+const ctx = await mcpClient.callTool("tta_bootstrap", { task_hint: "frontend API integration" });
+const issues = await mcpClient.callTool("detect_anti_patterns", { code: myApiClient });
+```
+
 ## File Access
 
 **Allowed:**
@@ -279,3 +300,16 @@ After completing UI:
 - **Accessible by default**: WCAG AA compliance
 - **Performance matters**: Optimize bundles, lazy load
 - **Type safety**: Use TypeScript strictly
+
+---
+
+## Handoffs
+
+| Situation | Hand off to |
+|-----------|-------------|
+| Component complete, needs E2E coverage | **testing-specialist** — write Playwright E2E tests and accessibility checks |
+| Need to clarify API contract or backend behavior | **backend-engineer** — request OpenAPI schema or endpoint docs |
+| UI performance regression found | **observability-expert** — instrument front-end metrics (Core Web Vitals) |
+| Major component architecture decision needed | **architect** — design component hierarchy and state management strategy |
+
+**Handoff note to testing-specialist:** Provide the list of new/changed components, the user flows to cover, and the target viewport sizes. Confirm that `npm run build` passes before handing off.
