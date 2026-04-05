@@ -10,7 +10,11 @@ from __future__ import annotations
 
 import ast
 
+from opentelemetry import trace
+
 from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+
+tracer = trace.get_tracer(__name__)
 
 
 class QAAgent(WorkflowPrimitive[str, str]):
@@ -29,56 +33,64 @@ class QAAgent(WorkflowPrimitive[str, str]):
         Returns:
             A markdown quality report.
         """
-        findings: list[str] = []
+        with tracer.start_as_current_span("showcase.qa_agent.execute") as span:
+            span.set_attribute("code.length", len(input_data))
+            span.set_attribute("agent.name", "QAAgent")
+            span.set_attribute("workflow.id", context.workflow_id or "")
 
-        # Long lines
-        for i, line in enumerate(input_data.splitlines(), start=1):
-            if len(line) > 88:
-                findings.append(f"- Line {i}: Line too long ({len(line)} chars)")
+            findings: list[str] = []
 
-        # AST-based checks
-        try:
-            tree = ast.parse(input_data)
-        except SyntaxError as exc:
-            return f"## Quality Review\n\n❌ Syntax error: {exc}"
+            # Long lines
+            for i, line in enumerate(input_data.splitlines(), start=1):
+                if len(line) > 88:
+                    findings.append(f"- Line {i}: Line too long ({len(line)} chars)")
 
-        for node in ast.walk(tree):
-            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                continue
+            # AST-based checks
+            try:
+                tree = ast.parse(input_data)
+            except SyntaxError as exc:
+                span.set_attribute("findings.count", 1)
+                return f"## Quality Review\n\n❌ Syntax error: {exc}"
 
-            lineno = node.lineno
+            for node in ast.walk(tree):
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
 
-            # Missing docstring
-            if not (
-                node.body
-                and isinstance(node.body[0], ast.Expr)
-                and isinstance(node.body[0].value, ast.Constant)
-                and isinstance(node.body[0].value.value, str)
-            ):
-                findings.append(f"- Line {lineno}: `{node.name}` is missing a docstring")
+                lineno = node.lineno
 
-            # Missing return annotation
-            if node.returns is None and node.name != "__init__":
-                findings.append(
-                    f"- Line {lineno}: `{node.name}` is missing a return type annotation"
-                )
+                # Missing docstring
+                if not (
+                    node.body
+                    and isinstance(node.body[0], ast.Expr)
+                    and isinstance(node.body[0].value, ast.Constant)
+                    and isinstance(node.body[0].value.value, str)
+                ):
+                    findings.append(f"- Line {lineno}: `{node.name}` is missing a docstring")
 
-            # Missing argument annotations (skip self/cls)
-            unannotated = [
-                a.arg
-                for a in node.args.args
-                if a.annotation is None and a.arg not in ("self", "cls")
-            ]
-            if unannotated:
-                findings.append(
-                    f"- Line {lineno}: `{node.name}` has unannotated args: "
-                    + ", ".join(f"`{a}`" for a in unannotated)
-                )
+                # Missing return annotation
+                if node.returns is None and node.name != "__init__":
+                    findings.append(
+                        f"- Line {lineno}: `{node.name}` is missing a return type annotation"
+                    )
 
-        if not findings:
-            return "## Quality Review\n\n✅ No issues detected."
+                # Missing argument annotations (skip self/cls)
+                unannotated = [
+                    a.arg
+                    for a in node.args.args
+                    if a.annotation is None and a.arg not in ("self", "cls")
+                ]
+                if unannotated:
+                    findings.append(
+                        f"- Line {lineno}: `{node.name}` has unannotated args: "
+                        + ", ".join(f"`{a}`" for a in unannotated)
+                    )
 
-        return "## Quality Review\n\n" + "\n".join(findings)
+            span.set_attribute("findings.count", len(findings))
+
+            if not findings:
+                return "## Quality Review\n\n✅ No issues detected."
+
+            return "## Quality Review\n\n" + "\n".join(findings)
 
 
 __all__ = ["QAAgent"]

@@ -11,7 +11,11 @@ from __future__ import annotations
 
 import re
 
+from opentelemetry import trace
+
 from ttadev.primitives.core.base import WorkflowContext, WorkflowPrimitive
+
+tracer = trace.get_tracer(__name__)
 
 _SECRET_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"(?i)(api_key|secret|password|token)\s*=\s*['\"][^'\"]{4,}['\"]"),
@@ -45,24 +49,31 @@ class SecurityAgent(WorkflowPrimitive[str, str]):
         Returns:
             A markdown security report.
         """
-        findings: list[str] = []
+        with tracer.start_as_current_span("showcase.security_agent.execute") as span:
+            span.set_attribute("code.length", len(input_data))
+            span.set_attribute("agent.name", "SecurityAgent")
+            span.set_attribute("workflow.id", context.workflow_id or "")
 
-        for i, line in enumerate(input_data.splitlines(), start=1):
-            for pat in _SECRET_PATTERNS:
-                if pat.search(line):
-                    findings.append(f"- Line {i}: Possible hardcoded secret — `{line.strip()}`")
+            findings: list[str] = []
 
-            for pat in _UNSAFE_CALLS:
-                if pat.search(line):
-                    findings.append(f"- Line {i}: Unsafe call — `{line.strip()}`")
+            for i, line in enumerate(input_data.splitlines(), start=1):
+                for pat in _SECRET_PATTERNS:
+                    if pat.search(line):
+                        findings.append(f"- Line {i}: Possible hardcoded secret — `{line.strip()}`")
 
-            if _SQL_CONCAT.search(line):
-                findings.append(f"- Line {i}: Possible SQL injection — `{line.strip()}`")
+                for pat in _UNSAFE_CALLS:
+                    if pat.search(line):
+                        findings.append(f"- Line {i}: Unsafe call — `{line.strip()}`")
 
-        if not findings:
-            return "## Security Review\n\n✅ No issues detected."
+                if _SQL_CONCAT.search(line):
+                    findings.append(f"- Line {i}: Possible SQL injection — `{line.strip()}`")
 
-        return "## Security Review\n\n" + "\n".join(findings)
+            span.set_attribute("findings.count", len(findings))
+
+            if not findings:
+                return "## Security Review\n\n✅ No issues detected."
+
+            return "## Security Review\n\n" + "\n".join(findings)
 
 
 __all__ = ["SecurityAgent"]
