@@ -94,12 +94,12 @@ uv run pytest
 _MAIN_PY = '''\
 """{app_name} — built with TTA.dev primitives."""
 import asyncio
-from ttadev.primitives.core.base import LambdaPrimitive, WorkflowContext
+from ttadev.primitives import LambdaPrimitive, WorkflowContext
 
 
 async def process(data: str, ctx: WorkflowContext) -> str:
     """Replace this with your actual logic."""
-    return f"Processed: {{data}}"
+    return f"Processed: {data}"
 
 
 async def main() -> None:
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
 _TEST_MAIN_PY = """\
 import pytest
-from ttadev.primitives.core.base import WorkflowContext
+from ttadev.primitives import WorkflowContext
 from main import process
 
 
@@ -186,12 +186,15 @@ def _git_init(app_dir: Path) -> bool:
     Returns:
         ``True`` if the command succeeded, ``False`` otherwise.
     """
-    result = subprocess.run(
-        ["git", "init"],
-        cwd=app_dir,
-        capture_output=True,
-    )
-    return result.returncode == 0
+    try:
+        result = subprocess.run(
+            ["git", "init"],
+            cwd=app_dir,
+            capture_output=True,
+        )
+        return result.returncode == 0
+    except (OSError, FileNotFoundError):
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -277,7 +280,11 @@ def cmd_new(
             print("\n   ⚠  git init failed — you can run it manually.")
 
     print("\n🚀  Next steps:\n")
-    print(f"   cd {app_name}")
+    try:
+        cd_target = app_dir.resolve().relative_to(Path.cwd().resolve())
+    except ValueError:
+        cd_target = app_dir.resolve()
+    print(f"   cd {cd_target}")
     print("   uv run python main.py")
     print("   uv run pytest\n")
 

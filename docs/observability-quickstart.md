@@ -72,8 +72,8 @@ To output raw JSON instead of Markdown:
 uv run python -m examples.showcase.main examples/showcase/router.py --mock --json
 ```
 
-To use a real LLM (requires at least one of `GROQ_API_KEY`, `GEMINI_API_KEY`, or a running
-Ollama instance):
+To use a real LLM (requires at least one of `GROQ_API_KEY`, `GOOGLE_API_KEY`, or a running
+Ollama instance; `GEMINI_API_KEY` is accepted but deprecated — use `GOOGLE_API_KEY`):
 
 ```bash
 uv run python -m examples.showcase.main path/to/your_file.py

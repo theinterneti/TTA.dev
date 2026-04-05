@@ -54,8 +54,9 @@ GROQ_API_KEY=gsk_... uv run python -m examples.showcase.main examples/resilient_
 ```
 
 The showcase wires together `ParallelPrimitive`, `RetryPrimitive`, and
-`CircuitBreakerPrimitive` with automatic OTel tracing — see
+`SmartRouterPrimitive` with automatic OTel tracing — see
 [`examples/showcase/`](examples/showcase/) for the full source.
+(For a `CircuitBreakerPrimitive` example see [`examples/resilient_llm_pipeline.py`](examples/resilient_llm_pipeline.py).)
 
 ---
 

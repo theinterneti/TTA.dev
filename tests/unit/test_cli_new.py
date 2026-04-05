@@ -317,7 +317,7 @@ class TestCmdNewHappyPath:
         args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
         cmd_new(args)
         captured = capsys.readouterr()
-        assert "cd my-app" in captured.out
+        assert "cd " in captured.out and "my-app" in captured.out
         assert "uv run python main.py" in captured.out
 
 
