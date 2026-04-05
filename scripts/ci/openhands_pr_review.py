@@ -208,7 +208,8 @@ If no issues are found, say "✅ No issues found." and APPROVE.
         )
 
         if isinstance(result, dict):
-            return str(result.get("output", result))
+            # OpenHandsPrimitive returns {"result": str, "status": str, ...}
+            return str(result.get("result", result.get("output", result)))
         return str(result)
 
     except ImportError:
