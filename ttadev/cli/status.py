@@ -2,9 +2,28 @@
 
 No external dependencies beyond stdlib (json, os, pathlib, socket, time) and
 internal TTA.dev modules.
+
+Public API
+----------
+cmd_status
+    Entry point called by ``tta status``; returns 0 (healthy) or 1 (all down).
+_check_port
+    Thin TCP probe helper; tested independently so mocks patch at this level.
+_count_control_plane
+    Reads active task/run counts from the control-plane store; safe to call
+    when the store has not been initialised yet.
+_provider_slug
+    Derives a short display name from a :class:`~ttadev.cli.setup.SetupProvider`.
 """
 
 from __future__ import annotations
+
+__all__ = [
+    "cmd_status",
+    "_check_port",
+    "_count_control_plane",
+    "_provider_slug",
+]
 
 import json
 import socket
