@@ -80,6 +80,7 @@ from ttadev.primitives.llm.providers import (
     get_provider,
     openai_compat_providers,
 )
+from ttadev.primitives.llm.smart_router import SmartRouterPrimitive
 from ttadev.primitives.llm.task_selector import (
     COMPLEXITY_COMPLEX,
     COMPLEXITY_MODERATE,
@@ -149,6 +150,8 @@ __all__ = [
     "ModelRouterRequest",
     "RouterModeConfig",
     "RouterTierConfig",
+    # smart router (zero-config cascade)
+    "SmartRouterPrimitive",
     # task-aware selection
     "TaskProfile",
     "TASK_CODING",

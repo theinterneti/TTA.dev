@@ -48,20 +48,29 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
     2. Keyword scoring — if top agent's score margin exceeds threshold, dispatch
     3. LLM fallback — ask orchestrator model to choose from agent descriptions
 
+    When ``model`` or ``orchestrator`` are ``None``, a
+    :class:`~ttadev.primitives.llm.smart_router.SmartRouterPrimitive` is built
+    automatically — cascading through Groq, Google, OpenRouter, and Ollama based
+    on available API keys.  No configuration required.
+
     Example::
 
-        router = AgentRouterPrimitive(model=AnthropicPrimitive(), orchestrator=AnthropicPrimitive())
+        # Zero-config: auto-selects best free provider
+        router = AgentRouterPrimitive()
         result = await router.execute(
             AgentTask(instruction="our test suite is flaky", context={}),
             WorkflowContext(),
         )
         # Routes to QAAgent automatically
+
+        # Or inject explicit models:
+        router = AgentRouterPrimitive(model=AnthropicPrimitive(), orchestrator=AnthropicPrimitive())
     """
 
     def __init__(
         self,
-        model: ChatPrimitive,
-        orchestrator: ChatPrimitive,
+        model: ChatPrimitive | None = None,
+        orchestrator: ChatPrimitive | None = None,
         registry: AgentRegistry | None = None,
     ) -> None:
         super().__init__(name="agent_router")
@@ -70,15 +79,31 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
         # Registry resolved at call time if not provided at init
         self._registry = registry
 
+    def _get_model(self) -> ChatPrimitive:
+        """Return the model, building SmartRouter default if none was injected."""
+        if self._model is not None:
+            return self._model
+        from ttadev.agents.adapter import ModelRouterChatAdapter
+        from ttadev.primitives.llm.smart_router import SmartRouterPrimitive
+
+        return ModelRouterChatAdapter(SmartRouterPrimitive.make())
+
+    def _get_orchestrator(self) -> ChatPrimitive:
+        """Return the orchestrator, reusing the model if none was injected."""
+        if self._orchestrator is not None:
+            return self._orchestrator
+        return self._get_model()
+
     async def _execute_impl(self, task: AgentTask, ctx: WorkflowContext) -> AgentResult:
         registry = self._registry or get_registry()
         agent_classes = registry.all()
+        model = self._get_model()
 
         # 1. agent_hint short-circuit
         if task.agent_hint:
             try:
                 agent_class = registry.get(task.agent_hint)
-                agent = agent_class(model=self._model)
+                agent = agent_class(model=model)
                 result = await agent.execute(task, ctx)
                 return result
             except KeyError:
@@ -90,7 +115,7 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
             spec = getattr(agent_class, "_class_spec", None)
             if spec is None:
                 # Fallback for agents without _class_spec: instantiate temporarily
-                spec = agent_class(model=self._model).spec
+                spec = agent_class(model=model).spec
             caps = spec.capabilities
             name = spec.name
             scores[name] = _score_agent(task.instruction, caps)
@@ -102,21 +127,23 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
             margin = best_score - second_score
 
             if best_score > 0 and margin >= _ROUTING_CONFIDENCE_THRESHOLD:
-                agent = registry.get(best_name)(model=self._model)
+                agent = registry.get(best_name)(model=model)
                 return await agent.execute(task, ctx)
+
+        orchestrator = self._get_orchestrator()
 
         # 3. LLM fallback — read specs from class attribute without instantiation
         agent_descriptions = "\n".join(
             f"- {spec.name}: {', '.join(spec.capabilities)}"
             for ac in agent_classes
-            for spec in [getattr(ac, "_class_spec", None) or ac(model=self._model).spec]
+            for spec in [getattr(ac, "_class_spec", None) or ac(model=model).spec]
         )
         prompt = (
             f"Choose the best agent for this task: {task.instruction!r}\n\n"
             f"Available agents:\n{agent_descriptions}\n\n"
             "Reply with only the agent name."
         )
-        chosen_name = await self._orchestrator.chat(
+        chosen_name = await orchestrator.chat(
             [{"role": "user", "content": prompt}],
             system=None,
             ctx=ctx,
@@ -124,11 +151,11 @@ class AgentRouterPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
         chosen_name = chosen_name.strip().lower()
 
         try:
-            agent = registry.get(chosen_name)(model=self._model)
+            agent = registry.get(chosen_name)(model=model)
         except KeyError:
             # Fallback: use first registered agent
             if agent_classes:
-                agent = agent_classes[0](model=self._model)
+                agent = agent_classes[0](model=model)
             else:
                 raise RuntimeError("No agents registered in registry.")
 
