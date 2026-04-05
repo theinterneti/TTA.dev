@@ -124,6 +124,28 @@ def _build_parser() -> argparse.ArgumentParser:
     register_model_subcommands(sub)
 
     # ------------------------------------------------------------------ #
+    # new subcommand                                                       #
+    # ------------------------------------------------------------------ #
+    new_p = sub.add_parser(
+        "new",
+        help="Scaffold a new TTA.dev project in a fresh directory",
+    )
+    new_p.add_argument("name", help="App name (alphanumeric, hyphens, underscores)")
+    new_p.add_argument(
+        "--output-dir",
+        dest="output_dir",
+        default=None,
+        metavar="DIR",
+        help="Parent directory for the new app (default: current directory)",
+    )
+    new_p.add_argument(
+        "--no-git",
+        dest="no_git",
+        action="store_true",
+        help="Skip running `git init` in the new directory",
+    )
+
+    # ------------------------------------------------------------------ #
     # setup subcommand                                                     #
     # ------------------------------------------------------------------ #
     setup_p = sub.add_parser("setup", help="Interactive setup wizard for LLM providers")
@@ -274,6 +296,11 @@ def main() -> None:
         from ttadev.cli.models import handle_model_command
 
         sys.exit(handle_model_command(args))
+
+    elif args.command == "new":
+        from ttadev.cli.new import cmd_new
+
+        sys.exit(cmd_new(args, project_root=Path(".")))
 
     elif args.command == "setup":
         from ttadev.cli.setup import cmd_setup
