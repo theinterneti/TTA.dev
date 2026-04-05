@@ -828,8 +828,159 @@ from ttadev.primitives.adaptive import AdaptiveRetryPrimitive
 
 ## LLM Routing Primitives
 
+> **Primary path:** `LiteLLMPrimitive` (100+ providers via a single interface).
+> **Fallback:** `UniversalLLMPrimitive` (direct provider SDKs — kept for Ollama-specific features).
 > Extracted and improved from TTA's 3-tier model management system.
 > These primitives make multi-provider LLM routing and free model discovery reusable for any app.
+
+### LiteLLMPrimitive ✨ **(Primary)**
+
+**Unified LLM gateway covering 100+ providers via [litellm](https://github.com/BerriAI/litellm).**
+
+**Import:**
+```python
+from ttadev.primitives import LiteLLMPrimitive, make_resilient_llm
+from ttadev.primitives.llm import LiteLLMPrimitive, make_resilient_llm, ToolCall, ToolSchema
+```
+
+**Source:** [`ttadev/primitives/llm/litellm_primitive.py`](ttadev/primitives/llm/litellm_primitive.py)
+
+**Why use this instead of UniversalLLMPrimitive?**
+- One call, 100+ providers — Groq, Anthropic, OpenAI, Google, OpenRouter, Together, xAI, Ollama, and more.
+- litellm is maintained by professionals and tracks upstream API changes for you.
+- Built-in Langfuse callback when `LANGFUSE_SECRET_KEY` is set — zero config.
+- litellm-native `fallbacks` param lets you specify a provider cascade inside a single call.
+- Fully backward-compatible: same `LLMRequest` / `LLMResponse` types.
+
+**Constructor:**
+```python
+LiteLLMPrimitive(
+    provider: str | LLMProvider | None = None,  # e.g. LLMProvider.GROQ or "groq"
+    model: str | None = None,                   # e.g. "llama-3.1-8b-instant"
+    temperature: float = 0.7,
+    max_tokens: int | None = None,
+    system_prompt: str | None = None,
+    litellm_fallbacks: list[str] | None = None, # e.g. ["anthropic/claude-3-haiku-20240307"]
+    metadata: dict[str, str] | None = None,     # forwarded to litellm (tags, trace IDs, etc.)
+)
+```
+
+**Model string formats — all accepted:**
+```python
+# Full litellm string (preferred)
+LiteLLMPrimitive(model="groq/llama-3.1-8b-instant")
+
+# Provider enum + short name
+LiteLLMPrimitive(provider=LLMProvider.GROQ, model="llama-3.1-8b-instant")
+
+# String provider name + short model
+LiteLLMPrimitive(provider="groq", model="llama-3.1-8b-instant")
+
+# String provider only — model resolved at call time from LLMRequest
+LiteLLMPrimitive(provider=LLMProvider.ANTHROPIC)
+```
+
+**Basic usage:**
+```python
+from ttadev.primitives import LiteLLMPrimitive, WorkflowContext
+from ttadev.primitives.llm import LLMRequest, LLMProvider
+
+llm = LiteLLMPrimitive(provider=LLMProvider.GROQ, model="llama-3.1-8b-instant")
+ctx = WorkflowContext(workflow_id="demo")
+
+request = LLMRequest(
+    messages=[{"role": "user", "content": "What is 2 + 2?"}],
+    model="llama-3.1-8b-instant",
+)
+response = await llm.execute(request, ctx)
+print(response.content)   # "4"
+print(response.provider)  # "groq"
+print(response.usage)     # {"prompt_tokens": 12, "completion_tokens": 3, "total_tokens": 15}
+```
+
+**Streaming:**
+```python
+async for chunk in llm.stream(request, ctx):
+    print(chunk, end="", flush=True)
+```
+
+**Tool calls:**
+```python
+from ttadev.primitives.llm import ToolSchema
+
+tools = [
+    ToolSchema(
+        name="get_weather",
+        description="Get current weather for a location.",
+        parameters={
+            "type": "object",
+            "properties": {"location": {"type": "string"}},
+            "required": ["location"],
+        },
+    )
+]
+request = LLMRequest(messages=[...], tools=tools)
+response = await llm.execute(request, ctx)
+for tc in response.tool_calls or []:
+    print(tc.name, tc.arguments)
+```
+
+**Multi-provider fallbacks (litellm-native):**
+```python
+llm = LiteLLMPrimitive(
+    model="groq/llama-3.1-8b-instant",
+    litellm_fallbacks=["anthropic/claude-3-haiku-20240307", "ollama/llama3.2"],
+)
+# litellm automatically tries fallbacks on rate-limit / connection errors
+```
+
+**Factory — resilient LLM with retry + optional cache:**
+```python
+from ttadev.primitives import make_resilient_llm
+
+# Returns CachePrimitive(RetryPrimitive(LiteLLMPrimitive(...)))
+llm = make_resilient_llm(
+    provider="groq",
+    model="llama-3.1-8b-instant",
+    cache_ttl_seconds=300.0,           # None to skip caching
+    max_retries=3,
+    litellm_fallbacks=["anthropic/claude-3-haiku-20240307"],
+)
+response = await llm.execute(request, ctx)
+```
+
+**Langfuse observability (zero config):**
+```bash
+export LANGFUSE_SECRET_KEY=sk-lf-...
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+# That's it — all LiteLLMPrimitive calls are logged automatically.
+```
+
+**`LLMResponse` fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `content` | `str` | Response text |
+| `model` | `str` | Model name echoed by the API |
+| `provider` | `str` | Provider prefix string (e.g. `"groq"`) |
+| `usage` | `dict[str, int] \| None` | `prompt_tokens`, `completion_tokens`, `total_tokens` |
+| `tool_calls` | `list[ToolCall] \| None` | Parsed tool invocations |
+| `finish_reason` | `str \| None` | `"stop"`, `"tool_calls"`, `"length"`, etc. |
+
+**Provider prefix mapping (`LLMProvider` → litellm prefix):**
+
+| Enum | litellm prefix |
+|------|---------------|
+| `GROQ` | `groq/` |
+| `ANTHROPIC` | `anthropic/` |
+| `OPENAI` | `openai/` |
+| `OLLAMA` | `ollama/` |
+| `GOOGLE` | `gemini/` |
+| `OPENROUTER` | `openrouter/` |
+| `TOGETHER` | `together_ai/` |
+| `XAI` | `xai/` |
+
+---
 
 ### FreeModelTracker
 
@@ -1672,18 +1823,42 @@ recovered = await coord.recover_pending(worker)
 
 Real-world multi-primitive recipes that combine the building blocks above.
 
-### LLM Fallback Chain
+### LLM Resilient Chain
+
+Use `make_resilient_llm()` for the recommended pattern — retry, cache, and multi-provider fallbacks
+via litellm-native cascade:
+
+```python
+from ttadev.primitives import make_resilient_llm, WorkflowContext
+from ttadev.primitives.llm import LLMRequest
+
+llm = make_resilient_llm(
+    model="groq/llama-3.1-8b-instant",
+    cache_ttl_seconds=300.0,
+    max_retries=3,
+    litellm_fallbacks=[
+        "anthropic/claude-3-haiku-20240307",
+        "ollama/llama3.2",
+    ],
+)
+result = await llm.execute(
+    LLMRequest(messages=[{"role": "user", "content": "Hello!"}]),
+    WorkflowContext(workflow_id="resilient-demo"),
+)
+```
+
+**Manual FallbackPrimitive wiring (advanced):**
 
 ```python
 from ttadev.primitives import (
     FallbackPrimitive, RetryPrimitive, WorkflowContext,
-    UniversalLLMPrimitive, LLMProvider,
+    LiteLLMPrimitive,
 )
 from ttadev.primitives.recovery.retry import RetryStrategy
 
-groq   = UniversalLLMPrimitive(provider=LLMProvider.GROQ,      api_key="...")
-claude = UniversalLLMPrimitive(provider=LLMProvider.ANTHROPIC, api_key="...")
-ollama = UniversalLLMPrimitive(provider=LLMProvider.OLLAMA)
+groq   = LiteLLMPrimitive(model="groq/llama-3.1-8b-instant")
+claude = LiteLLMPrimitive(model="anthropic/claude-3-haiku-20240307")
+ollama = LiteLLMPrimitive(model="ollama/llama3.2")
 
 chain = FallbackPrimitive(
     primary=RetryPrimitive(groq, strategy=RetryStrategy(max_retries=2)),

@@ -164,11 +164,50 @@ Do not set `HINDSIGHT_LLM_MODEL=gemini-3.1-flash-lite-preview` unless the repo p
 
 ## TTA.dev Application Routing
 
-For application code inside TTA.dev, `ModelRouterPrimitive` is the recommended way to call LLMs. It provides 3-tier fallback (Ollama → Groq → Gemini) and now supports **task-aware model selection** via `TaskProfile`.
+### Primary: `LiteLLMPrimitive`
 
-### Recommended: `AgentPrimitive.with_router()`
+`LiteLLMPrimitive` is now the **recommended** way to call LLMs from TTA.dev application code.
+It covers 100+ providers through a single, maintained interface without custom glue code.
 
-Instead of constructing agents with a hard-coded model, pass a `ModelRouterPrimitive` and let each agent's `default_task_profile` drive model selection:
+```python
+from ttadev.primitives import LiteLLMPrimitive, make_resilient_llm, WorkflowContext
+from ttadev.primitives.llm import LLMRequest
+
+# One-liner resilient LLM
+llm = make_resilient_llm(
+    model="groq/llama-3.1-8b-instant",
+    cache_ttl_seconds=300.0,
+    max_retries=3,
+    litellm_fallbacks=["anthropic/claude-3-haiku-20240307", "ollama/llama3.2"],
+)
+
+request = LLMRequest(messages=[{"role": "user", "content": "Hello!"}])
+response = await llm.execute(request, WorkflowContext(workflow_id="demo"))
+print(response.content, response.provider)
+```
+
+**Provider selection order (recommended):**
+1. Groq — fast, cheap, widely supported (`GROQ_API_KEY`)
+2. Anthropic — high quality reasoning (`ANTHROPIC_API_KEY`)
+3. OpenRouter — large free-tier pool (`OPENROUTER_API_KEY`)
+4. Ollama — local fallback, always available
+
+**Langfuse observability:** set `LANGFUSE_SECRET_KEY` + `LANGFUSE_PUBLIC_KEY` and all calls are
+logged automatically — no code changes needed.
+
+### Fallback: `UniversalLLMPrimitive`
+
+Keep `UniversalLLMPrimitive` when you need Ollama-specific features:
+- Hardware detection (GPU/CPU selection)
+- Model auto-pulling
+- Fine-grained local model management
+
+For all other use cases, prefer `LiteLLMPrimitive`.
+
+### Agent routing: `ModelRouterPrimitive` + `AgentPrimitive.with_router()`
+
+For agents that need task-aware model selection (choosing heavy vs. light models based on task
+complexity), `ModelRouterPrimitive` remains the recommended pattern:
 
 ```python
 from ttadev.agents import DeveloperAgent
