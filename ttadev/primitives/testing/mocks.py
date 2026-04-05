@@ -107,6 +107,42 @@ class MockPrimitive(WorkflowPrimitive[Any, Any]):
         if context is not None:
             assert last_context == context, f"Expected context {context}, got {last_context}"
 
+    def assert_not_called(self) -> None:
+        """Assert the mock was never called."""
+        assert self.call_count == 0, (
+            f"Mock {self.name} was called {self.call_count} time(s), expected 0"
+        )
+
+    def assert_call_count(self, expected: int) -> None:
+        """Assert the mock was called exactly ``expected`` times.
+
+        Args:
+            expected: Expected number of calls.
+        """
+        assert self.call_count == expected, (
+            f"Mock {self.name} called {self.call_count} time(s), expected {expected}"
+        )
+
+    @property
+    def last_input(self) -> Any:
+        """Return the input from the most recent call.
+
+        Raises:
+            AssertionError: If the mock has not been called yet.
+        """
+        assert self.calls, f"Mock {self.name} has not been called"
+        return self.calls[-1][0]
+
+    @property
+    def last_context(self) -> WorkflowContext:
+        """Return the context from the most recent call.
+
+        Raises:
+            AssertionError: If the mock has not been called yet.
+        """
+        assert self.calls, f"Mock {self.name} has not been called"
+        return self.calls[-1][1]
+
     def reset(self) -> None:
         """Reset call tracking."""
         self.call_count = 0
