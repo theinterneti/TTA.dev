@@ -30,9 +30,10 @@ _WORKFLOWS: dict[str, object] = {}
 
 def _get_workflows() -> dict[str, object]:
     if not _WORKFLOWS:
-        from ttadev.workflows.prebuilt import feature_dev_workflow
+        from ttadev.workflows.prebuilt import ALL_WORKFLOWS
 
-        _WORKFLOWS["feature_dev"] = feature_dev_workflow
+        for wf in ALL_WORKFLOWS:
+            _WORKFLOWS[wf.name] = wf
     return _WORKFLOWS
 
 
