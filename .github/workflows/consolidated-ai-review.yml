@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     env:
-      GEMINI_API_KEY_PRESENT: ${{ secrets.GEMINI_API_KEY }}
+      GOOGLE_API_KEY_PRESENT: ${{ secrets.GOOGLE_API_KEY }}
       GEMINI_MODEL_PRESENT: ${{ vars.GEMINI_MODEL }}
     outputs:
       gemini-available: ${{ steps.gemini-configured.outcome == 'success' }}
@@ -37,7 +37,7 @@ jobs:
     steps:
       - name: Check Gemini configuration
         id: gemini-configured
-        if: ${{ env.GEMINI_API_KEY_PRESENT != '' && env.GEMINI_MODEL_PRESENT != '' }}
+        if: ${{ env.GOOGLE_API_KEY_PRESENT != '' && env.GEMINI_MODEL_PRESENT != '' }}
         run: echo "Gemini configuration check step executed"
 
   # Gemini AI review (with retry mechanism)
