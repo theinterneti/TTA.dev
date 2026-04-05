@@ -1,8 +1,18 @@
-"""Unit tests for `tta new <app-name>` CLI command.
+"""Unit tests for `tta new <app-name>` CLI command — issue #333.
 
 Pattern: AAA (Arrange / Act / Assert).
 Isolation: all filesystem I/O uses the ``tmp_path`` pytest fixture.
 No real ``git init`` is ever executed — mocked via ``unittest.mock``.
+
+Scaffold structure produced by `tta new`:
+
+    <project-name>/
+    ├── pyproject.toml          # uv-ready, ttadev>=0.1.0 as dependency
+    ├── .env.example            # Placeholder keys for supported providers
+    ├── .gitignore              # Python + .env
+    ├── README.md               # Getting-started instructions
+    └── workflows/
+        └── hello.py            # Minimal working workflow using make_resilient_llm
 """
 
 from __future__ import annotations
@@ -14,6 +24,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from ttadev.cli.new import (
+    _PROVIDER_MODELS,
     _git_init,
     _render,
     _write_scaffold,
@@ -27,12 +38,13 @@ from ttadev.cli.new import (
 
 
 def _args(
-    name: str = "my-app",
+    name: str = "my-project",
     output_dir: str | None = None,
     no_git: bool = True,
+    provider: str = "groq",
 ) -> argparse.Namespace:
     """Build a minimal Namespace that mimics parsed CLI args for `tta new`."""
-    return argparse.Namespace(name=name, output_dir=output_dir, no_git=no_git)
+    return argparse.Namespace(name=name, output_dir=output_dir, no_git=no_git, provider=provider)
 
 
 # ---------------------------------------------------------------------------
@@ -120,36 +132,56 @@ class TestRender:
         result = _render("No placeholder here.", "irrelevant")
         assert result == "No placeholder here."
 
+    def test_substitutes_provider_model(self) -> None:
+        """``{provider_model}`` placeholder is replaced."""
+        result = _render('model="{provider_model}"', "app", "groq/llama-3.1-8b-instant")
+        assert result == 'model="groq/llama-3.1-8b-instant"'
+
+    def test_both_placeholders(self) -> None:
+        """Both ``{app_name}`` and ``{provider_model}`` can be substituted together."""
+        tmpl = "name={app_name} model={provider_model}"
+        result = _render(tmpl, "my-app", "ollama/llama3.2")
+        assert result == "name=my-app model=ollama/llama3.2"
+
 
 # ---------------------------------------------------------------------------
-# _write_scaffold
+# _write_scaffold — issue #333 five-file structure
 # ---------------------------------------------------------------------------
 
 
 class TestWriteScaffold:
-    """Tests for :func:`_write_scaffold` — file creation."""
+    """Tests for :func:`_write_scaffold` — file creation (issue #333 structure)."""
 
     def test_creates_expected_files(self, tmp_path: Path) -> None:
-        """All four scaffold files are created."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
+        """All five scaffold files from issue #333 are created."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
 
         expected = [
             app_dir / "pyproject.toml",
+            app_dir / ".env.example",
+            app_dir / ".gitignore",
             app_dir / "README.md",
-            app_dir / "main.py",
-            app_dir / "tests" / "test_main.py",
+            app_dir / "workflows" / "hello.py",
         ]
         for f in expected:
             assert f.exists(), f"{f} was not created"
 
-    def test_returns_written_paths(self, tmp_path: Path) -> None:
-        """Return value lists every file that was written."""
-        app_dir = tmp_path / "my-app"
-        written = _write_scaffold(app_dir, "my-app")
-        assert len(written) == 4
+    def test_returns_five_written_paths(self, tmp_path: Path) -> None:
+        """Return value lists exactly five files."""
+        app_dir = tmp_path / "my-project"
+        written = _write_scaffold(app_dir, "my-project")
+        assert len(written) == 5
         for path in written:
             assert path.is_file()
+
+    def test_workflows_directory_created(self, tmp_path: Path) -> None:
+        """The workflows/ subdirectory is created automatically."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        assert (app_dir / "workflows").is_dir()
+
+    # pyproject.toml ------------------------------------------------------- #
 
     def test_pyproject_contains_app_name(self, tmp_path: Path) -> None:
         """pyproject.toml has the app name substituted."""
@@ -159,68 +191,168 @@ class TestWriteScaffold:
         assert 'name = "cool-project"' in content
 
     def test_pyproject_contains_ttadev_dependency(self, tmp_path: Path) -> None:
-        """pyproject.toml declares ttadev as a dependency."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
+        """pyproject.toml declares ttadev>=0.1.0 as a dependency."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
         content = (app_dir / "pyproject.toml").read_text()
         assert "ttadev" in content
 
     def test_pyproject_requires_python_312(self, tmp_path: Path) -> None:
         """pyproject.toml pins requires-python to >=3.12."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
         content = (app_dir / "pyproject.toml").read_text()
         assert ">=3.12" in content
 
+    def test_pyproject_build_system_hatchling(self, tmp_path: Path) -> None:
+        """pyproject.toml uses hatchling as build backend."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / "pyproject.toml").read_text()
+        assert "hatchling" in content
+
+    # .env.example --------------------------------------------------------- #
+
+    def test_env_example_has_groq_key(self, tmp_path: Path) -> None:
+        """.env.example contains a GROQ_API_KEY placeholder."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / ".env.example").read_text()
+        assert "GROQ_API_KEY=" in content
+
+    def test_env_example_has_anthropic_key(self, tmp_path: Path) -> None:
+        """.env.example contains an ANTHROPIC_API_KEY placeholder."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / ".env.example").read_text()
+        assert "ANTHROPIC_API_KEY=" in content
+
+    def test_env_example_has_openrouter_key(self, tmp_path: Path) -> None:
+        """.env.example contains an OPENROUTER_API_KEY placeholder."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / ".env.example").read_text()
+        assert "OPENROUTER_API_KEY=" in content
+
+    # .gitignore ----------------------------------------------------------- #
+
+    def test_gitignore_ignores_dotenv(self, tmp_path: Path) -> None:
+        """.gitignore includes .env so secrets are not committed."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / ".gitignore").read_text()
+        assert ".env" in content
+
+    def test_gitignore_ignores_pycache(self, tmp_path: Path) -> None:
+        """.gitignore includes __pycache__/."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / ".gitignore").read_text()
+        assert "__pycache__/" in content
+
+    def test_gitignore_ignores_venv(self, tmp_path: Path) -> None:
+        """.gitignore includes .venv/."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / ".gitignore").read_text()
+        assert ".venv/" in content
+
+    # README.md ------------------------------------------------------------ #
+
     def test_readme_contains_app_name(self, tmp_path: Path) -> None:
         """README.md has the app name in the heading."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
         content = (app_dir / "README.md").read_text()
-        assert "# my-app" in content
+        assert "# my-project" in content
 
-    def test_main_py_contains_app_name(self, tmp_path: Path) -> None:
-        """main.py references the app name in the docstring and WorkflowContext."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
-        content = (app_dir / "main.py").read_text()
-        assert "my-app" in content
+    def test_readme_has_uv_sync_instruction(self, tmp_path: Path) -> None:
+        """README.md instructs the user to run `uv sync`."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / "README.md").read_text()
+        assert "uv sync" in content
 
-    def test_main_py_imports_lambda_primitive(self, tmp_path: Path) -> None:
-        """main.py imports LambdaPrimitive and WorkflowContext."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
-        content = (app_dir / "main.py").read_text()
-        assert "LambdaPrimitive" in content
+    def test_readme_has_env_example_copy(self, tmp_path: Path) -> None:
+        """README.md instructs the user to copy .env.example."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / "README.md").read_text()
+        assert ".env.example" in content
+
+    def test_readme_has_hello_py_run(self, tmp_path: Path) -> None:
+        """README.md shows how to run workflows/hello.py."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / "README.md").read_text()
+        assert "workflows/hello.py" in content
+
+    # workflows/hello.py --------------------------------------------------- #
+
+    def test_hello_py_is_valid_python(self, tmp_path: Path) -> None:
+        """workflows/hello.py compiles without syntax errors."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        source = (app_dir / "workflows" / "hello.py").read_text()
+        compile(source, "hello.py", "exec")  # raises SyntaxError on failure
+
+    def test_hello_py_imports_make_resilient_llm(self, tmp_path: Path) -> None:
+        """workflows/hello.py imports make_resilient_llm."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / "workflows" / "hello.py").read_text()
+        assert "make_resilient_llm" in content
+
+    def test_hello_py_imports_workflow_context(self, tmp_path: Path) -> None:
+        """workflows/hello.py imports WorkflowContext."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / "workflows" / "hello.py").read_text()
         assert "WorkflowContext" in content
 
-    def test_main_py_has_async_main(self, tmp_path: Path) -> None:
-        """main.py defines an async main() function."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
-        content = (app_dir / "main.py").read_text()
-        assert "async def main()" in content
+    def test_hello_py_imports_llm_request(self, tmp_path: Path) -> None:
+        """workflows/hello.py imports LLMRequest."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / "workflows" / "hello.py").read_text()
+        assert "LLMRequest" in content
+
+    def test_hello_py_has_async_main(self, tmp_path: Path) -> None:
+        """workflows/hello.py defines an async main() entry point."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project")
+        content = (app_dir / "workflows" / "hello.py").read_text()
+        assert "async def main" in content
         assert "asyncio.run(main())" in content
 
-    def test_test_main_py_imports_process(self, tmp_path: Path) -> None:
-        """tests/test_main.py imports the process function."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
-        content = (app_dir / "tests" / "test_main.py").read_text()
-        assert "from main import process" in content
+    def test_hello_py_default_provider_groq(self, tmp_path: Path) -> None:
+        """workflows/hello.py uses the groq provider model by default."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project", provider="groq")
+        content = (app_dir / "workflows" / "hello.py").read_text()
+        assert "groq/" in content
 
-    def test_test_main_py_has_asyncio_mark(self, tmp_path: Path) -> None:
-        """tests/test_main.py uses @pytest.mark.asyncio."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
-        content = (app_dir / "tests" / "test_main.py").read_text()
-        assert "pytest.mark.asyncio" in content
+    def test_hello_py_provider_ollama(self, tmp_path: Path) -> None:
+        """--provider ollama sets an ollama model in hello.py."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project", provider="ollama")
+        content = (app_dir / "workflows" / "hello.py").read_text()
+        assert "ollama/" in content
 
-    def test_tests_directory_created(self, tmp_path: Path) -> None:
-        """The tests/ subdirectory is created automatically."""
-        app_dir = tmp_path / "my-app"
-        _write_scaffold(app_dir, "my-app")
-        assert (app_dir / "tests").is_dir()
+    def test_hello_py_provider_openrouter(self, tmp_path: Path) -> None:
+        """--provider openrouter sets an openrouter model in hello.py."""
+        app_dir = tmp_path / "my-project"
+        _write_scaffold(app_dir, "my-project", provider="openrouter")
+        content = (app_dir / "workflows" / "hello.py").read_text()
+        assert "openrouter/" in content
+
+    def test_hello_py_valid_python_all_providers(self, tmp_path: Path) -> None:
+        """workflows/hello.py compiles cleanly for every supported provider."""
+        for provider in _PROVIDER_MODELS:
+            app_dir = tmp_path / f"proj-{provider}"
+            _write_scaffold(app_dir, f"proj-{provider}", provider=provider)
+            source = (app_dir / "workflows" / "hello.py").read_text()
+            compile(source, f"hello-{provider}.py", "exec")
 
 
 # ---------------------------------------------------------------------------
@@ -252,6 +384,14 @@ class TestGitInit:
             ok = _git_init(app_dir)
         assert ok is False
 
+    def test_returns_false_when_git_not_found(self, tmp_path: Path) -> None:
+        """Returns False gracefully when the git binary is missing."""
+        app_dir = tmp_path / "repo"
+        app_dir.mkdir()
+        with patch("ttadev.cli.new.subprocess.run", side_effect=FileNotFoundError):
+            ok = _git_init(app_dir)
+        assert ok is False
+
 
 # ---------------------------------------------------------------------------
 # cmd_new — happy path
@@ -263,7 +403,7 @@ class TestCmdNewHappyPath:
 
     def test_returns_zero_on_success(self, tmp_path: Path) -> None:
         """Exit code is 0 when everything succeeds."""
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         rc = cmd_new(args)
         assert rc == 0
 
@@ -273,12 +413,18 @@ class TestCmdNewHappyPath:
         cmd_new(args)
         assert (tmp_path / "hello-world").is_dir()
 
-    def test_creates_all_expected_files(self, tmp_path: Path) -> None:
-        """All four scaffold files are present after cmd_new."""
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+    def test_creates_all_five_expected_files(self, tmp_path: Path) -> None:
+        """All five scaffold files from issue #333 are present after cmd_new."""
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         cmd_new(args)
-        app_dir = tmp_path / "my-app"
-        for rel in ["pyproject.toml", "README.md", "main.py", "tests/test_main.py"]:
+        app_dir = tmp_path / "my-project"
+        for rel in [
+            "pyproject.toml",
+            ".env.example",
+            ".gitignore",
+            "README.md",
+            "workflows/hello.py",
+        ]:
             assert (app_dir / rel).exists(), f"Missing: {rel}"
 
     def test_output_dir_flag(self, tmp_path: Path) -> None:
@@ -289,16 +435,24 @@ class TestCmdNewHappyPath:
         cmd_new(args)
         assert (custom_parent / "sub-app").is_dir()
 
+    def test_path_flag_creates_at_right_path(self, tmp_path: Path) -> None:
+        """--path (alias for --output-dir) creates the project at the specified path."""
+        target_parent = tmp_path / "some" / "dir"
+        target_parent.mkdir(parents=True)
+        args = _args(name="my-project", output_dir=str(target_parent), no_git=True)
+        cmd_new(args)
+        assert (target_parent / "my-project").is_dir()
+
     def test_no_git_skips_git_init(self, tmp_path: Path) -> None:
         """--no-git ensures git init is never called."""
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         with patch("ttadev.cli.new._git_init") as mock_git:
             cmd_new(args)
         mock_git.assert_not_called()
 
     def test_git_init_called_by_default(self, tmp_path: Path) -> None:
         """git init is called when --no-git is not set."""
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=False)
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=False)
         with patch("ttadev.cli.new._git_init", return_value=True) as mock_git:
             rc = cmd_new(args)
         assert rc == 0
@@ -306,19 +460,67 @@ class TestCmdNewHappyPath:
 
     def test_prints_success_message(self, tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
         """A success message with the app name is printed to stdout."""
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         cmd_new(args)
         captured = capsys.readouterr()
-        assert "my-app" in captured.out
+        assert "my-project" in captured.out
         assert "✅" in captured.out
 
     def test_prints_next_steps(self, tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
-        """Next steps instructions (cd, uv run) are printed to stdout."""
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+        """Next steps instructions (cd, uv sync, hello.py) are printed to stdout."""
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         cmd_new(args)
         captured = capsys.readouterr()
-        assert "cd " in captured.out and "my-app" in captured.out
-        assert "uv run python main.py" in captured.out
+        assert "cd " in captured.out
+        assert "my-project" in captured.out
+        assert "uv sync" in captured.out
+        assert "workflows/hello.py" in captured.out
+
+    def test_name_with_hyphens_works(self, tmp_path: Path) -> None:
+        """Project names with hyphens are created successfully."""
+        args = _args(name="my-cool-project", output_dir=str(tmp_path), no_git=True)
+        rc = cmd_new(args)
+        assert rc == 0
+        assert (tmp_path / "my-cool-project").is_dir()
+
+    def test_name_with_underscores_works(self, tmp_path: Path) -> None:
+        """Project names with underscores are created successfully."""
+        args = _args(name="my_cool_project", output_dir=str(tmp_path), no_git=True)
+        rc = cmd_new(args)
+        assert rc == 0
+        assert (tmp_path / "my_cool_project").is_dir()
+
+    def test_provider_groq_default(self, tmp_path: Path) -> None:
+        """The default provider is groq."""
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True, provider="groq")
+        cmd_new(args)
+        content = (tmp_path / "my-project" / "workflows" / "hello.py").read_text()
+        assert "groq/" in content
+
+    def test_provider_ollama(self, tmp_path: Path) -> None:
+        """--provider ollama sets an ollama model in hello.py."""
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True, provider="ollama")
+        rc = cmd_new(args)
+        assert rc == 0
+        content = (tmp_path / "my-project" / "workflows" / "hello.py").read_text()
+        assert "ollama/" in content
+
+    def test_provider_openrouter(self, tmp_path: Path) -> None:
+        """--provider openrouter sets an openrouter model in hello.py."""
+        args = _args(
+            name="my-project", output_dir=str(tmp_path), no_git=True, provider="openrouter"
+        )
+        rc = cmd_new(args)
+        assert rc == 0
+        content = (tmp_path / "my-project" / "workflows" / "hello.py").read_text()
+        assert "openrouter/" in content
+
+    def test_workflows_hello_py_is_valid_python(self, tmp_path: Path) -> None:
+        """workflows/hello.py in the generated project compiles without errors."""
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
+        cmd_new(args)
+        source = (tmp_path / "my-project" / "workflows" / "hello.py").read_text()
+        compile(source, "hello.py", "exec")
 
 
 # ---------------------------------------------------------------------------
@@ -360,8 +562,23 @@ class TestCmdNewInvalidName:
         """No directory is created when the name is invalid."""
         args = _args(name="bad name!", output_dir=str(tmp_path), no_git=True)
         cmd_new(args)
-        # No new directories should appear in tmp_path
         assert list(tmp_path.iterdir()) == []
+
+    def test_invalid_provider_returns_one(self, tmp_path: Path) -> None:
+        """An unrecognised provider causes cmd_new to return exit code 1."""
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True, provider="azure")
+        rc = cmd_new(args)
+        assert rc == 1
+
+    def test_invalid_provider_prints_to_stderr(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture
+    ) -> None:
+        """An error about the bad provider is written to stderr."""
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True, provider="azure")
+        cmd_new(args)
+        captured = capsys.readouterr()
+        assert "error:" in captured.err
+        assert "azure" in captured.err
 
 
 # ---------------------------------------------------------------------------
@@ -374,9 +591,9 @@ class TestCmdNewExistingDirectory:
 
     def test_existing_dir_returns_one(self, tmp_path: Path) -> None:
         """Exit code is 1 when the target directory already exists."""
-        existing = tmp_path / "my-app"
+        existing = tmp_path / "my-project"
         existing.mkdir()
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         rc = cmd_new(args)
         assert rc == 1
 
@@ -384,22 +601,22 @@ class TestCmdNewExistingDirectory:
         self, tmp_path: Path, capsys: pytest.CaptureFixture
     ) -> None:
         """An error message mentioning the directory is written to stderr."""
-        existing = tmp_path / "my-app"
+        existing = tmp_path / "my-project"
         existing.mkdir()
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         cmd_new(args)
         captured = capsys.readouterr()
         assert "error:" in captured.err
-        assert "my-app" in captured.err
+        assert "my-project" in captured.err
 
     def test_existing_dir_not_modified(self, tmp_path: Path) -> None:
         """Files inside the existing directory are not touched."""
-        existing = tmp_path / "my-app"
+        existing = tmp_path / "my-project"
         existing.mkdir()
         sentinel = existing / "sentinel.txt"
         sentinel.write_text("do not touch", encoding="utf-8")
 
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         cmd_new(args)
 
         assert sentinel.read_text(encoding="utf-8") == "do not touch"
@@ -416,46 +633,59 @@ class TestCmdNewFileContents:
     @pytest.fixture
     def app_dir(self, tmp_path: Path) -> Path:
         """Run cmd_new and return the created app directory."""
-        args = _args(name="my-app", output_dir=str(tmp_path), no_git=True)
+        args = _args(name="my-project", output_dir=str(tmp_path), no_git=True)
         cmd_new(args)
-        return tmp_path / "my-app"
+        return tmp_path / "my-project"
 
     def test_pyproject_name(self, app_dir: Path) -> None:
         content = (app_dir / "pyproject.toml").read_text()
-        assert 'name = "my-app"' in content
+        assert 'name = "my-project"' in content
 
     def test_pyproject_ttadev_dep(self, app_dir: Path) -> None:
         content = (app_dir / "pyproject.toml").read_text()
-        assert '"ttadev"' in content
+        assert "ttadev" in content
+
+    def test_pyproject_ttadev_version_pinned(self, app_dir: Path) -> None:
+        """ttadev dependency should carry a minimum version pin."""
+        content = (app_dir / "pyproject.toml").read_text()
+        assert "ttadev>=0.1.0" in content
 
     def test_pyproject_build_system(self, app_dir: Path) -> None:
         content = (app_dir / "pyproject.toml").read_text()
         assert "hatchling" in content
 
+    def test_env_example_keys_present(self, app_dir: Path) -> None:
+        content = (app_dir / ".env.example").read_text()
+        for key in ("GROQ_API_KEY", "ANTHROPIC_API_KEY", "OPENROUTER_API_KEY"):
+            assert key in content
+
+    def test_gitignore_dotenv_entry(self, app_dir: Path) -> None:
+        content = (app_dir / ".gitignore").read_text()
+        assert ".env" in content
+
     def test_readme_heading(self, app_dir: Path) -> None:
         content = (app_dir / "README.md").read_text()
-        assert "# my-app" in content
+        assert "# my-project" in content
 
     def test_readme_has_quick_start(self, app_dir: Path) -> None:
         content = (app_dir / "README.md").read_text()
         assert "Quick start" in content
 
-    def test_main_py_module_docstring(self, app_dir: Path) -> None:
-        content = (app_dir / "main.py").read_text()
-        assert "my-app" in content
+    def test_readme_uv_sync(self, app_dir: Path) -> None:
+        content = (app_dir / "README.md").read_text()
+        assert "uv sync" in content
 
-    def test_main_py_process_function(self, app_dir: Path) -> None:
-        content = (app_dir / "main.py").read_text()
-        assert "async def process" in content
+    def test_hello_py_make_resilient_llm(self, app_dir: Path) -> None:
+        content = (app_dir / "workflows" / "hello.py").read_text()
+        assert "make_resilient_llm" in content
 
-    def test_main_py_workflow_context_id(self, app_dir: Path) -> None:
-        content = (app_dir / "main.py").read_text()
-        assert "my-app-run" in content
+    def test_hello_py_workflow_context(self, app_dir: Path) -> None:
+        content = (app_dir / "workflows" / "hello.py").read_text()
+        assert 'workflow_id="hello"' in content
 
-    def test_test_main_py_assertion(self, app_dir: Path) -> None:
-        content = (app_dir / "tests" / "test_main.py").read_text()
-        assert "assert isinstance(result, str)" in content
-        assert '"input" in result' in content
+    def test_hello_py_compiles(self, app_dir: Path) -> None:
+        source = (app_dir / "workflows" / "hello.py").read_text()
+        compile(source, "hello.py", "exec")
 
 
 # ---------------------------------------------------------------------------
@@ -471,7 +701,6 @@ class TestCliParserRegistration:
         from ttadev.cli import _build_parser
 
         parser = _build_parser()
-        # Argparse does not expose subparser names easily; we probe by parsing.
         args = parser.parse_args(["new", "test-app", "--no-git"])
         assert args.command == "new"
         assert args.name == "test-app"
@@ -485,6 +714,14 @@ class TestCliParserRegistration:
         args = parser.parse_args(["new", "test-app", "--output-dir", "/tmp", "--no-git"])
         assert args.output_dir == "/tmp"
 
+    def test_new_path_flag_alias(self) -> None:
+        """--path is an alias for --output-dir and parses into args.output_dir."""
+        from ttadev.cli import _build_parser
+
+        parser = _build_parser()
+        args = parser.parse_args(["new", "test-app", "--path", "/tmp/projects", "--no-git"])
+        assert args.output_dir == "/tmp/projects"
+
     def test_new_no_git_default_false(self) -> None:
         """--no-git defaults to False when not supplied."""
         from ttadev.cli import _build_parser
@@ -492,3 +729,27 @@ class TestCliParserRegistration:
         parser = _build_parser()
         args = parser.parse_args(["new", "test-app"])
         assert args.no_git is False
+
+    def test_new_provider_default_groq(self) -> None:
+        """--provider defaults to 'groq'."""
+        from ttadev.cli import _build_parser
+
+        parser = _build_parser()
+        args = parser.parse_args(["new", "test-app", "--no-git"])
+        assert args.provider == "groq"
+
+    def test_new_provider_ollama(self) -> None:
+        """--provider ollama is accepted."""
+        from ttadev.cli import _build_parser
+
+        parser = _build_parser()
+        args = parser.parse_args(["new", "test-app", "--provider", "ollama", "--no-git"])
+        assert args.provider == "ollama"
+
+    def test_new_provider_openrouter(self) -> None:
+        """--provider openrouter is accepted."""
+        from ttadev.cli import _build_parser
+
+        parser = _build_parser()
+        args = parser.parse_args(["new", "test-app", "--provider", "openrouter", "--no-git"])
+        assert args.provider == "openrouter"

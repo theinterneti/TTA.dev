@@ -103,6 +103,13 @@ def _build_parser() -> argparse.ArgumentParser:
     register_agent_subcommands(sub)
 
     # ------------------------------------------------------------------ #
+    # agents subcommand (plural — tta agents run / tta agents list)        #
+    # ------------------------------------------------------------------ #
+    from ttadev.cli.agents import register_agents_subcommands
+
+    register_agents_subcommands(sub)
+
+    # ------------------------------------------------------------------ #
     # workflow subcommand                                                  #
     # ------------------------------------------------------------------ #
     from ttadev.cli.workflow import register_workflow_subcommands
@@ -144,6 +151,20 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="DIR",
         help="Parent directory for the new app (default: current directory)",
+    )
+    new_p.add_argument(
+        "--path",
+        dest="output_dir",
+        metavar="DIR",
+        help="Alias for --output-dir: parent directory for the new app",
+    )
+    new_p.add_argument(
+        "--provider",
+        dest="provider",
+        default="groq",
+        choices=["groq", "ollama", "openrouter"],
+        metavar="PROVIDER",
+        help="Default LLM provider in hello.py: groq, ollama, or openrouter (default: groq)",
     )
     new_p.add_argument(
         "--no-git",
@@ -288,6 +309,11 @@ def main() -> None:
         from ttadev.cli.agent import handle_agent_command
 
         sys.exit(handle_agent_command(args))
+
+    elif args.command == "agents":
+        from ttadev.cli.agents import handle_agents_command
+
+        sys.exit(handle_agents_command(args))
 
     elif args.command == "workflow":
         from ttadev.cli.workflow import handle_workflow_command

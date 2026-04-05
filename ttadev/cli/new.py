@@ -3,16 +3,18 @@
 Creates a minimal but fully-working TTA.dev project in a new directory:
 
     my-app/
-    ├── pyproject.toml       # uv project, depends on ttadev
+    ├── pyproject.toml       # uv project, depends on ttadev>=0.1.0
+    ├── .env.example         # placeholder provider keys
+    ├── .gitignore           # Python + .env
     ├── README.md            # brief usage instructions
-    ├── main.py              # minimal async main with LambdaPrimitive
-    └── tests/
-        └── test_main.py     # one passing smoke test
+    └── workflows/
+        └── hello.py         # minimal workflow using make_resilient_llm
 
 Usage::
 
     tta new my-app
     tta new my-app --output-dir ~/projects
+    tta new my-app --provider ollama
     tta new my-app --no-git
 """
 
@@ -61,11 +63,29 @@ _PYPROJECT_TOML = """\
 name = "{app_name}"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = ["ttadev"]
+dependencies = ["ttadev>=0.1.0"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+"""
+
+_ENV_EXAMPLE = """\
+# Add your provider keys here, then copy to .env
+GROQ_API_KEY=
+ANTHROPIC_API_KEY=
+OPENROUTER_API_KEY=
+LANGFUSE_SECRET_KEY=
+LANGFUSE_PUBLIC_KEY=
+"""
+
+_GITIGNORE = """\
+.env
+__pycache__/
+*.pyc
+.venv/
+dist/
+*.egg-info/
 """
 
 _README_MD = """\
@@ -76,13 +96,14 @@ Built with [TTA.dev](https://tta.dev) — workflow primitives for AI agents.
 ## Quick start
 
 ```bash
-uv run python main.py
-```
+# 1. Copy the example environment file and add your provider key
+cp .env.example .env
 
-## Run tests
+# 2. Install dependencies
+uv sync
 
-```bash
-uv run pytest
+# 3. Run the hello workflow
+uv run python workflows/hello.py
 ```
 
 ## Learn more
@@ -91,6 +112,29 @@ uv run pytest
 - [Primitive catalog](https://tta.dev/docs/primitives)
 """
 
+_HELLO_PY = '''\
+"""Hello workflow — minimal TTA.dev example."""
+import asyncio
+
+from ttadev.primitives import WorkflowContext, make_resilient_llm
+from ttadev.primitives.llm import LLMRequest
+
+
+async def main() -> None:
+    llm = make_resilient_llm(model="{provider_model}")
+    ctx = WorkflowContext(workflow_id="hello")
+    result = await llm.execute(
+        LLMRequest(messages=[{{"role": "user", "content": "Say hello in one sentence."}}]),
+        ctx,
+    )
+    print(result.content)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+'''
+
+# Legacy templates kept for backward-compatibility with existing tests.
 _MAIN_PY = '''\
 """{app_name} — built with TTA.dev primitives."""
 import asyncio
@@ -127,18 +171,28 @@ async def test_process_returns_string() -> None:
     assert "input" in result
 """
 
+#: Default model strings per provider.
+_PROVIDER_MODELS: dict[str, str] = {
+    "groq": "groq/llama-3.1-8b-instant",
+    "ollama": "ollama/llama3.2",
+    "openrouter": "openrouter/meta-llama/llama-3.1-8b-instruct:free",
+}
 
-def _render(template: str, app_name: str) -> str:
-    """Substitute ``{app_name}`` in *template*.
+
+def _render(template: str, app_name: str, provider_model: str = "") -> str:
+    """Substitute ``{app_name}`` and ``{provider_model}`` in *template*.
 
     Args:
-        template: A string template with ``{app_name}`` placeholders.
+        template: A string template with ``{app_name}`` and/or
+            ``{provider_model}`` placeholders.
         app_name: The application name to substitute.
+        provider_model: The provider/model string to substitute (e.g.
+            ``"groq/llama-3.1-8b-instant"``).
 
     Returns:
         The rendered string.
     """
-    return template.replace("{app_name}", app_name)
+    return template.replace("{app_name}", app_name).replace("{provider_model}", provider_model)
 
 
 # ---------------------------------------------------------------------------
@@ -146,21 +200,39 @@ def _render(template: str, app_name: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _write_scaffold(app_dir: Path, app_name: str) -> list[Path]:
+def _write_scaffold(app_dir: Path, app_name: str, provider: str = "groq") -> list[Path]:
     """Write all scaffold files under *app_dir*.
+
+    Generates the following structure::
+
+        <app_dir>/
+        ├── pyproject.toml
+        ├── .env.example
+        ├── .gitignore
+        ├── README.md
+        └── workflows/
+            └── hello.py
 
     Args:
         app_dir: Root directory of the new application (must not exist yet).
         app_name: Application name used for template substitution.
+        provider: LLM provider to feature in ``workflows/hello.py``.
+            Must be one of ``"groq"``, ``"ollama"``, or ``"openrouter"``.
 
     Returns:
         List of ``Path`` objects for every file that was written.
     """
+    provider_model = _PROVIDER_MODELS.get(provider, _PROVIDER_MODELS["groq"])
+
     files: list[tuple[Path, str]] = [
-        (app_dir / "pyproject.toml", _render(_PYPROJECT_TOML, app_name)),
-        (app_dir / "README.md", _render(_README_MD, app_name)),
-        (app_dir / "main.py", _render(_MAIN_PY, app_name)),
-        (app_dir / "tests" / "test_main.py", _render(_TEST_MAIN_PY, app_name)),
+        (app_dir / "pyproject.toml", _render(_PYPROJECT_TOML, app_name, provider_model)),
+        (app_dir / ".env.example", _ENV_EXAMPLE),
+        (app_dir / ".gitignore", _GITIGNORE),
+        (app_dir / "README.md", _render(_README_MD, app_name, provider_model)),
+        (
+            app_dir / "workflows" / "hello.py",
+            _render(_HELLO_PY, app_name, provider_model),
+        ),
     ]
 
     written: list[Path] = []
@@ -218,6 +290,7 @@ def cmd_new(
             * ``name`` (str) — app name
             * ``output_dir`` (str | None) — parent directory (default: CWD)
             * ``no_git`` (bool) — skip ``git init`` when ``True``
+            * ``provider`` (str | None) — LLM provider (default: ``"groq"``)
 
         project_root: Unused; kept for API symmetry with other CLI commands.
 
@@ -227,6 +300,7 @@ def cmd_new(
     app_name: str = getattr(args, "name", "")
     raw_output_dir: str | None = getattr(args, "output_dir", None)
     no_git: bool = getattr(args, "no_git", False)
+    provider: str = getattr(args, "provider", None) or "groq"
 
     # ------------------------------------------------------------------ #
     # 1. Validate name                                                     #
@@ -234,6 +308,12 @@ def cmd_new(
     error = validate_app_name(app_name)
     if error:
         print(f"error: {error}", file=sys.stderr)
+        return 1
+
+    # Validate provider
+    if provider not in _PROVIDER_MODELS:
+        valid = ", ".join(_PROVIDER_MODELS)
+        print(f"error: unknown provider {provider!r}. Choose from: {valid}", file=sys.stderr)
         return 1
 
     # ------------------------------------------------------------------ #
@@ -253,7 +333,7 @@ def cmd_new(
     # 3. Write scaffold                                                    #
     # ------------------------------------------------------------------ #
     try:
-        written = _write_scaffold(app_dir, app_name)
+        _write_scaffold(app_dir, app_name, provider=provider)
     except OSError as exc:
         print(f"error: could not create project files: {exc}", file=sys.stderr)
         return 1
@@ -268,24 +348,24 @@ def cmd_new(
     # ------------------------------------------------------------------ #
     # 5. Success message                                                   #
     # ------------------------------------------------------------------ #
-    print(f"\n✅  Created {app_name}/ with {len(written)} files:\n")
-    for path in written:
-        rel = path.relative_to(app_dir)
-        print(f"   {app_name}/{rel}")
+    print(f"\n✅  Created project '{app_name}'\n")
 
     if not no_git:
         if git_ok:
-            print("\n   Initialised empty Git repository.")
+            print("   Initialised empty Git repository.")
         else:
-            print("\n   ⚠  git init failed — you can run it manually.")
+            print("   ⚠  git init failed — you can run it manually.")
+        print()
 
-    print("\n🚀  Next steps:\n")
+    provider_key_hint = "GROQ_API_KEY" if provider == "groq" else f"{provider.upper()}_API_KEY"
+    print("Next steps:")
     try:
         cd_target = app_dir.resolve().relative_to(Path.cwd().resolve())
     except ValueError:
         cd_target = app_dir.resolve()
-    print(f"   cd {cd_target}")
-    print("   uv run python main.py")
-    print("   uv run pytest\n")
+    print(f"  cd {cd_target}")
+    print(f"  cp .env.example .env   # add your {provider_key_hint}")
+    print("  uv sync")
+    print("  uv run python workflows/hello.py\n")
 
     return 0
