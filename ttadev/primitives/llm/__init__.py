@@ -23,6 +23,10 @@ from ttadev.primitives.llm.hardware_detector import (
 from ttadev.primitives.llm.hardware_detector import (
     detector as hardware_detector,
 )
+from ttadev.primitives.llm.litellm_primitive import (
+    LiteLLMPrimitive,
+    make_resilient_llm,
+)
 from ttadev.primitives.llm.model_advisor import (
     ModelAdvisor,
     ROIEstimate,
@@ -102,10 +106,15 @@ from ttadev.primitives.llm.universal_llm_primitive import (
     LLMProvider,
     LLMRequest,
     LLMResponse,
+    ToolCall,
+    ToolSchema,
     UniversalLLMPrimitive,
 )
 
 __all__ = [
+    # litellm primitive (primary LLM path)
+    "LiteLLMPrimitive",
+    "make_resilient_llm",
     # eval harness
     "EvalTask",
     "ModelEvalResult",
@@ -113,10 +122,12 @@ __all__ = [
     "EvalHarnessPrimitive",
     "TASK_TYPE_PROFILES",
     "COST_PER_1K_OUTPUT_TOKENS",
-    # universal primitive
+    # universal primitive (preserved as fallback)
     "LLMProvider",
     "LLMRequest",
     "LLMResponse",
+    "ToolCall",
+    "ToolSchema",
     "UniversalLLMPrimitive",
     # free model tracker
     "FreeModelTracker",

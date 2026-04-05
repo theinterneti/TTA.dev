@@ -37,7 +37,16 @@ from .core.routing import RouterPrimitive
 from .core.sequential import SequentialPrimitive
 
 # ── LLM primitives (runtime provider abstraction) ───────────────────────
-from .llm import LLMProvider, LLMRequest, LLMResponse, UniversalLLMPrimitive
+from .llm import (
+    LiteLLMPrimitive,
+    LLMProvider,
+    LLMRequest,
+    LLMResponse,
+    ToolCall,
+    ToolSchema,
+    UniversalLLMPrimitive,
+    make_resilient_llm,
+)
 
 # ── Memory (Hindsight / AgentMemory) ─────────────────────────────────────
 from .memory import AgentMemory, HindsightClient, MemoryResult, RetainResult
@@ -108,9 +117,13 @@ __all__ = [
     "AbstractUnitOfWork",
     "FakeUnitOfWork",
     # LLM primitives
+    "LiteLLMPrimitive",
+    "make_resilient_llm",
     "LLMProvider",
     "LLMRequest",
     "LLMResponse",
+    "ToolCall",
+    "ToolSchema",
     "UniversalLLMPrimitive",
     # Testing primitives
     "MockPrimitive",
