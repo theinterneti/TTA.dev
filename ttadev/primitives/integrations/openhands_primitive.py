@@ -232,6 +232,7 @@ class OpenHandsPrimitive(WorkflowPrimitive[str | dict[str, Any], dict[str, Any]]
         max_iterations: int = 50,
         name: str = "openhands",
         raise_on_stuck: bool = True,
+        extra_body: dict | None = None,
     ) -> None:
         """Initialize the OpenHands primitive.
 
@@ -255,6 +256,11 @@ class OpenHandsPrimitive(WorkflowPrimitive[str | dict[str, Any], dict[str, Any]]
             max_iterations: Hard cap on agent reasoning steps.
             name: Identifier used in logs and traces.
             raise_on_stuck: Raise on stuck/error status if True.
+            extra_body: Extra fields forwarded to the LLM provider via
+                LiteLLM's ``extra_body`` mechanism.  Use
+                ``{"reasoning_effort": "none"}`` for Ollama thinking models
+                (qwen3, qwen3.5, deepseek-r1) to disable the reasoning trace
+                and ensure ``message.content`` is populated.
         """
         _require_sdk()
         self.model = model
@@ -265,6 +271,7 @@ class OpenHandsPrimitive(WorkflowPrimitive[str | dict[str, Any], dict[str, Any]]
         self.max_iterations = max_iterations
         self.name = name
         self.raise_on_stuck = raise_on_stuck
+        self.extra_body = extra_body or {}
 
     def _build_llm(self) -> Any:
         """Construct the LiteLLM-backed LLM config.
@@ -307,9 +314,15 @@ class OpenHandsPrimitive(WorkflowPrimitive[str | dict[str, Any], dict[str, Any]]
             kwargs["base_url"] = self.base_url
         llm_config = LLM(**kwargs)
 
-        # Ollama does not support reasoning_effort — clear it to avoid API rejection.
+        # Ollama thinking models (qwen3, qwen3.5, deepseek-r1) auto-enable thinking
+        # via the OpenAI-compat endpoint unless explicitly disabled.  Python None
+        # means "omit the field" → auto-thinking fires → message.content is empty.
+        # The string "none" explicitly disables the reasoning trace.
         if self.model.startswith("ollama"):
-            llm_config.reasoning_effort = None
+            if self.extra_body.get("reasoning_effort") == "none":
+                llm_config.reasoning_effort = "none"
+            else:
+                llm_config.reasoning_effort = None
 
         return llm_config
 
