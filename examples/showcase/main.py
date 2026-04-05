@@ -17,11 +17,15 @@ import json
 import sys
 from pathlib import Path
 
+from opentelemetry import trace
+
 from examples.showcase.agents.qa_agent import QAAgent
 from examples.showcase.agents.security_agent import SecurityAgent
 from examples.showcase.router import build_router
 from ttadev.primitives.core.base import WorkflowContext
 from ttadev.primitives.core.parallel import ParallelPrimitive
+
+tracer = trace.get_tracer(__name__)
 
 
 async def review(file_path: Path, *, mock_mode: bool = False) -> dict[str, str]:
@@ -34,28 +38,35 @@ async def review(file_path: Path, *, mock_mode: bool = False) -> dict[str, str]:
     Returns:
         A dict with keys ``security``, ``quality``, and ``llm`` review strings.
     """
-    code = file_path.read_text(encoding="utf-8")
-    ctx = WorkflowContext(workflow_id=f"showcase-{file_path.stem}")
+    with tracer.start_as_current_span("showcase.review") as span:
+        span.set_attribute("file.path", str(file_path))
+        span.set_attribute("file.name", file_path.name)
+        span.set_attribute("mock_mode", mock_mode)
 
-    # Static agents run in parallel — no LLM call, always fast
-    static_pipeline = ParallelPrimitive([SecurityAgent(), QAAgent()])
-    static_results: list[str] = await static_pipeline.execute(code, ctx)
+        code = file_path.read_text(encoding="utf-8")
+        span.set_attribute("code.length", len(code))
 
-    # LLM-backed review: Groq -> Google Gemini -> Ollama -> MockLLM
-    llm_router = build_router(
-        mock_mode=mock_mode,
-        prompt_prefix=(
-            "You are a senior Python developer doing a code review. "
-            "Identify bugs, design issues, and improvements. Be concise."
-        ),
-    )
-    llm_review: str = await llm_router.execute(code, ctx)
+        ctx = WorkflowContext(workflow_id=f"showcase-{file_path.stem}")
 
-    return {
-        "security": static_results[0],
-        "quality": static_results[1],
-        "llm": llm_review,
-    }
+        # Static agents run in parallel — no LLM call, always fast
+        static_pipeline = ParallelPrimitive([SecurityAgent(), QAAgent()])
+        static_results: list[str] = await static_pipeline.execute(code, ctx)
+
+        # LLM-backed review: Groq -> Google Gemini -> Ollama -> MockLLM
+        llm_router = build_router(
+            mock_mode=mock_mode,
+            prompt_prefix=(
+                "You are a senior Python developer doing a code review. "
+                "Identify bugs, design issues, and improvements. Be concise."
+            ),
+        )
+        llm_review: str = await llm_router.execute(code, ctx)
+
+        return {
+            "security": static_results[0],
+            "quality": static_results[1],
+            "llm": llm_review,
+        }
 
 
 def _render_markdown(results: dict[str, str], file_path: Path) -> str:
