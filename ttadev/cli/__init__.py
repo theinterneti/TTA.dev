@@ -124,6 +124,13 @@ def _build_parser() -> argparse.ArgumentParser:
     register_model_subcommands(sub)
 
     # ------------------------------------------------------------------ #
+    # primitives subcommand                                                #
+    # ------------------------------------------------------------------ #
+    from ttadev.cli.primitives import register_primitives_subcommands
+
+    register_primitives_subcommands(sub)
+
+    # ------------------------------------------------------------------ #
     # new subcommand                                                       #
     # ------------------------------------------------------------------ #
     new_p = sub.add_parser(
@@ -296,6 +303,11 @@ def main() -> None:
         from ttadev.cli.models import handle_model_command
 
         sys.exit(handle_model_command(args))
+
+    elif args.command == "primitives":
+        from ttadev.cli.primitives import handle_primitives_command
+
+        sys.exit(handle_primitives_command(args))
 
     elif args.command == "new":
         from ttadev.cli.new import cmd_new
