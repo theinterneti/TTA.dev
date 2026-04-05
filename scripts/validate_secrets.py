@@ -13,7 +13,7 @@ def main() -> int:
     errors: list[str] = []
 
     # Optional secrets — warn but don't fail
-    optional = ["GEMINI_API_KEY", "E2B_API_KEY", "N8N_API_KEY"]
+    optional = ["GOOGLE_API_KEY", "E2B_API_KEY", "N8N_API_KEY"]
     for key in optional:
         val = os.environ.get(key, "")
         if val:
