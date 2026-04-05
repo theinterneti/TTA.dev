@@ -1,6 +1,6 @@
 """PostgreSQL integration primitive - SKELETON."""
 
-# TODO: Implement PostgreSQLPrimitive #dev-todo
+# TODO: Implement PostgreSQLPrimitive
 # type:: implementation
 # priority:: high
 # package:: tta-dev-integrations

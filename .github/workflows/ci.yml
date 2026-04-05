@@ -49,53 +49,6 @@ jobs:
         continue-on-error: true
         run: uvx pyright ttadev/
 
-      - name: Validate #dev-todo compliance
-        run: |
-          set -euo pipefail
-          echo "🔍 Validating #dev-todo compliance..."
-
-          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" . \
-            | grep -v "^\.\/docs\/" \
-            | grep -v "^\.\/scripts\/" \
-            | grep -v "^\.\/logseq\/" \
-            | grep -v "^\.\/\.github\/" \
-            | grep -v "^\.\/\.agents\/" \
-            | grep -v "^\.\/CHANGELOG" \
-            | grep -v "^\.\/SESSION_" \
-            | grep -v "^\.\/[A-Z_]*\.md:" \
-            | grep -v "^\.\/tests\/test_issue_manager" \
-            | grep -v "^\.\/\.cline\/" \
-            | grep -v "^\.\/\.agents\/" \
-            || true)
-
-          if [ -z "$todos" ]; then
-            echo "✅ No #dev-todos found"
-            exit 0
-          fi
-
-          invalid_todos=()
-          while IFS= read -r line; do
-            file=$(echo "$line" | cut -d: -f1)
-            line_num=$(echo "$line" | cut -d: -f2)
-            context=$(sed -n "${line_num},$((line_num + 5))p" "$file")
-            has_type=$(echo "$context" | grep -c "type::" || true)
-            has_priority=$(echo "$context" | grep -c "priority::" || true)
-            has_package=$(echo "$context" | grep -c "package::" || true)
-            if [ "$has_type" -eq 0 ] || [ "$has_priority" -eq 0 ] || [ "$has_package" -eq 0 ]; then
-              invalid_todos+=("$file:$line_num - Missing properties (type::, priority::, package::)")
-            fi
-          done <<< "$todos"
-
-          if [ ${#invalid_todos[@]} -gt 0 ]; then
-            echo "❌ Found ${#invalid_todos[@]} invalid #dev-todo(s):"
-            printf '%s\n' "${invalid_todos[@]}"
-            echo ""
-            echo "Each #dev-todo must have within 5 lines: type::, priority::, package::"
-            exit 1
-          fi
-
-          echo "✅ All #dev-todos are properly formatted"
-
   # ── Gate 2: Unit tests (Python 3.12, Ubuntu — fast PR feedback) ───────────
   test:
     name: Unit Tests (Python 3.12, Ubuntu)

@@ -161,7 +161,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         if query.stage:
             search_tags.append(f"stage-{query.stage}")
 
-        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # TODO: Connect to configured knowledge backend to return results
         # type:: implementation
         # priority:: high
         # package:: ttadev
@@ -185,7 +185,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         if query.stage:
             search_tags.append(f"stage-{query.stage}")
 
-        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # TODO: Connect to configured knowledge backend to return results
         # type:: implementation
         # priority:: high
         # package:: ttadev
@@ -203,7 +203,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of matching KB pages
         """
-        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # TODO: Connect to configured knowledge backend to return results
         # type:: implementation
         # priority:: high
         # package:: ttadev
@@ -221,7 +221,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of related KB pages
         """
-        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # TODO: Connect to configured knowledge backend to return results
         # type:: implementation
         # priority:: high
         # package:: ttadev
@@ -237,7 +237,7 @@ class KnowledgeBasePrimitive(InstrumentedPrimitive[KBQuery, KBResult]):
         Returns:
             List of matching KB pages
         """
-        # TODO: Connect to configured knowledge backend to return results #dev-todo
+        # TODO: Connect to configured knowledge backend to return results
         # type:: implementation
         # priority:: high
         # package:: ttadev

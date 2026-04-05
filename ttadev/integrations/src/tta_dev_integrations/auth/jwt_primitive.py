@@ -1,6 +1,6 @@
 """JWT authentication integration primitive - SKELETON."""
 
-# TODO: Implement JWTPrimitive #dev-todo
+# TODO: Implement JWTPrimitive
 # type:: implementation
 # priority:: high
 # package:: tta-dev-integrations
