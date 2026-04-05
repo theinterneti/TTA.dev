@@ -12,6 +12,18 @@ All notable changes to TTA.dev will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **P0 bug #316** — `llm_list_providers()` (MCP tool) now correctly detects Google
+  AI Studio availability.  The MCP server previously checked only `GEMINI_API_KEY`,
+  while `tta setup` stores the key as `GOOGLE_API_KEY` (matching Google AI Studio's
+  own convention).  The lookup now checks `GOOGLE_API_KEY` first and falls back to
+  `GEMINI_API_KEY` for backward compatibility (emitting a `DeprecationWarning`).
+  `llm_recommend_model` will now correctly route to Gemini models when a valid
+  `GOOGLE_API_KEY` is present.
+
 ## [0.1.0-alpha] — 2026-04-03
 
 > First tagged release of the unified `ttadev` package.
