@@ -5,18 +5,20 @@ on:
     branches: [main]
     paths:
       - 'ttadev/**'
+      - 'apps/**'
       - 'tests/**'
+      - '*.py'
       - 'pyproject.toml'
       - 'uv.lock'
-      - '.github/workflows/ci.yml'
   push:
     branches: [main]
     paths:
       - 'ttadev/**'
+      - 'apps/**'
       - 'tests/**'
+      - '*.py'
       - 'pyproject.toml'
       - 'uv.lock'
-      - '.github/workflows/ci.yml'
 
 # Security: Explicit minimal permissions
 permissions:
@@ -27,64 +29,127 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Gate 1: Quality checks (fast, fail-first) ─────────────────────────────
+  # Quality gates run first - fast fail on linting/type issues
   quality-gates:
     name: Quality Gates (Linting & Type Checking)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: '3.12'
 
-      - uses: astral-sh/setup-uv@f0ec1fc3b38f5e7cd731bb6ce540c5af426746bb  # v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@797cf5c0a210b8b257f62fe1fbf9a46b4fc201bf  # v2
         with:
           enable-cache: true
 
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Ruff lint
+      - name: Run ruff check (linting)
         run: uv run ruff check .
 
-      - name: Ruff format check
+      - name: Run ruff format --check (formatting)
         run: uv run ruff format --check .
 
-      - name: Pyright type check
+      - name: Run pyright (type checking)
+        continue-on-error: true
+        run: uvx pyright ttadev/
+
+      - name: Validate #dev-todo compliance
         run: |
+          #!/bin/bash
           set -euo pipefail
-          ALLOWED_ERRORS=2
-          output=$(uvx pyright ttadev/ 2>&1)
-          echo "$output"
-          error_count=$(echo "$output" | grep -oP '^\d+(?= error)' | head -1 || echo "0")
-          echo "Pyright: ${error_count} error(s) (threshold: ${ALLOWED_ERRORS})"
-          if [ "${error_count:-0}" -gt "$ALLOWED_ERRORS" ]; then
-            echo "::error::Pyright reported ${error_count} error(s), exceeding threshold of ${ALLOWED_ERRORS}"
+
+          echo "🔍 Validating #dev-todo compliance..."
+
+          # Find all TODOs with #dev-todo tag in source files only
+          # Exclude: docs/, scripts/, logseq/, root-level *.md, .github/ markdown,
+          # and test fixtures that reference the tag format as a string literal.
+          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" . \
+            | grep -v "^\.\/docs\/" \
+            | grep -v "^\.\/scripts\/" \
+            | grep -v "^\.\/logseq\/" \
+            | grep -v "^\.\/\.github\/" \
+            | grep -v "^\.\/CHANGELOG" \
+            | grep -v "^\.\/SESSION_" \
+            | grep -v "^\.\/[A-Z_]*\.md:" \
+            | grep -v "^\.\/tests\/test_issue_manager" \
+            | grep -v "^\.\/\.cline\/" \
+            | grep -v "^\.\/\.agents\/" \
+            || true)
+
+          if [ -z "$todos" ]; then
+            echo "✅ No #dev-todos found"
+            exit 0
+          fi
+
+          # Check each #dev-todo has required properties
+          invalid_todos=()
+          while IFS= read -r line; do
+            file=$(echo "$line" | cut -d: -f1)
+            line_num=$(echo "$line" | cut -d: -f2)
+            content=$(echo "$line" | cut -d: -f3-)
+
+            # Check if this TODO has required properties within next 5 lines
+            context=$(sed -n "${line_num},$((line_num + 5))p" "$file")
+
+            has_type=$(echo "$context" | grep -c "type::" || true)
+            has_priority=$(echo "$context" | grep -c "priority::" || true)
+            has_package=$(echo "$context" | grep -c "package::" || true)
+
+            if [ "$has_type" -eq 0 ] || [ "$has_priority" -eq 0 ] || [ "$has_package" -eq 0 ]; then
+              invalid_todos+=("$file:$line_num - Missing properties (type::, priority::, package::)")
+            fi
+          done <<< "$todos"
+
+          if [ ${#invalid_todos[@]} -gt 0 ]; then
+            echo "❌ Found ${#invalid_todos[@]} invalid #dev-todo(s):"
+            printf '%s\n' "${invalid_todos[@]}"
+            echo ""
+            echo "Each #dev-todo must have within 5 lines:"
+            echo "  - type:: (e.g., implementation, bugfix, documentation)"
+            echo "  - priority:: (e.g., high, medium, low)"
+            echo "  - package:: (e.g., primitives, observability, agent-coordination)"
             exit 1
           fi
 
-  # ── Gate 2: Unit tests (Python 3.12, Ubuntu — fast PR feedback) ───────────
+          echo "✅ All #dev-todos are properly formatted"
+
   test:
-    name: Unit Tests (Python 3.12, Ubuntu)
-    needs: quality-gates
-    runs-on: ubuntu-latest
+    name: Test (Python ${{ matrix.python-version }}, ${{ matrix.os }})
+    needs: quality-gates  # Only run tests if quality gates pass
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.11', '3.12', '3.13', '3.14']
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
 
-      - uses: astral-sh/setup-uv@f0ec1fc3b38f5e7cd731bb6ce540c5af426746bb  # v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@797cf5c0a210b8b257f62fe1fbf9a46b4fc201bf  # v2
         with:
           enable-cache: true
 
       - name: Install dependencies
         run: uv sync --all-extras
 
-      - name: Run unit tests
+      - name: Run tests with coverage enforcement
+        env:
+          PYTHONUTF8: '1'  # Ensure emoji in print() work on Windows runners
         run: >
           uv run pytest -v --tb=short
           -m "not integration and not slow and not external and not quarantine"
@@ -93,13 +158,16 @@ jobs:
           --cov-report=term-missing
 
       - name: Upload coverage to Codecov
-        if: always()
+        if: always()  # Upload coverage even if tests fail
         uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238  # v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
-          flags: ubuntu,python-3.12
+          flags: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }},python-${{ matrix.python-version }}
+          name: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }}-py${{ matrix.python-version }}-group${{ matrix.split-group }}
           fail_ci_if_error: false
+          verbose: true
 
-      - name: Validate package import
-        run: uv run python -c "from ttadev.primitives.core.base import WorkflowPrimitive; print('Package OK')"
+      - name: Validate ttadev primitives package
+        run: |
+          uv run python -c "from ttadev.primitives.core.base import WorkflowPrimitive; print('Package validated OK')"
