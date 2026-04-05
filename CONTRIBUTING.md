@@ -58,6 +58,21 @@ See [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for det
 
 This project and everyone participating in it is governed by the [TTA.dev Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior.
 
+## File Length Guideline
+
+Files in `ttadev/` should not exceed **500 lines** (excluding blank lines and comments).
+
+**Why:** Large files are hard to navigate, review, and test. Keeping files focused makes the codebase more maintainable.
+
+**When to split:** When a file grows beyond 500 lines, extract focused modules:
+- Group related classes/functions into their own files
+- Create a package directory with `__init__.py` re-exporting the public API
+- Keep the public API surface unchanged (no breaking imports)
+
+**Known violations:** 30 files currently exceed this limit. They are tracked individually as refactoring issues. New code should not introduce new violations.
+
+A warn-only CI check (`scripts/ci/check_file_length.py`) runs automatically via the pre-commit hook and reports violations without blocking commits.
+
 ## Any questions?
 
 Feel free to open an issue or start a discussion on the [GitHub repository](https://github.com/theinterneti/TTA.dev).
