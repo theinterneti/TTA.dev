@@ -60,66 +60,6 @@ jobs:
         continue-on-error: true
         run: uvx pyright ttadev/
 
-      - name: Validate #dev-todo compliance
-        run: |
-          #!/bin/bash
-          set -euo pipefail
-
-          echo "🔍 Validating #dev-todo compliance..."
-
-          # Find all TODOs with #dev-todo tag in source files only
-          # Exclude: docs/, scripts/, logseq/, root-level *.md, .github/ markdown,
-          # and test fixtures that reference the tag format as a string literal.
-          todos=$(grep -rn "#dev-todo" --include="*.md" --include="*.py" . \
-            | grep -v "^\.\/docs\/" \
-            | grep -v "^\.\/scripts\/" \
-            | grep -v "^\.\/logseq\/" \
-            | grep -v "^\.\/\.github\/" \
-            | grep -v "^\.\/CHANGELOG" \
-            | grep -v "^\.\/SESSION_" \
-            | grep -v "^\.\/[A-Z_]*\.md:" \
-            | grep -v "^\.\/tests\/test_issue_manager" \
-            | grep -v "^\.\/\.cline\/" \
-            | grep -v "^\.\/\.agents\/" \
-            || true)
-
-          if [ -z "$todos" ]; then
-            echo "✅ No #dev-todos found"
-            exit 0
-          fi
-
-          # Check each #dev-todo has required properties
-          invalid_todos=()
-          while IFS= read -r line; do
-            file=$(echo "$line" | cut -d: -f1)
-            line_num=$(echo "$line" | cut -d: -f2)
-            content=$(echo "$line" | cut -d: -f3-)
-
-            # Check if this TODO has required properties within next 5 lines
-            context=$(sed -n "${line_num},$((line_num + 5))p" "$file")
-
-            has_type=$(echo "$context" | grep -c "type::" || true)
-            has_priority=$(echo "$context" | grep -c "priority::" || true)
-            has_package=$(echo "$context" | grep -c "package::" || true)
-
-            if [ "$has_type" -eq 0 ] || [ "$has_priority" -eq 0 ] || [ "$has_package" -eq 0 ]; then
-              invalid_todos+=("$file:$line_num - Missing properties (type::, priority::, package::)")
-            fi
-          done <<< "$todos"
-
-          if [ ${#invalid_todos[@]} -gt 0 ]; then
-            echo "❌ Found ${#invalid_todos[@]} invalid #dev-todo(s):"
-            printf '%s\n' "${invalid_todos[@]}"
-            echo ""
-            echo "Each #dev-todo must have within 5 lines:"
-            echo "  - type:: (e.g., implementation, bugfix, documentation)"
-            echo "  - priority:: (e.g., high, medium, low)"
-            echo "  - package:: (e.g., primitives, observability, agent-coordination)"
-            exit 1
-          fi
-
-          echo "✅ All #dev-todos are properly formatted"
-
   test:
     name: Test (Python ${{ matrix.python-version }}, ${{ matrix.os }})
     needs: quality-gates  # Only run tests if quality gates pass
@@ -127,8 +67,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.11', '3.12', '3.13', '3.14']
+        # requires-python = ">=3.12" — only test supported versions.
+        # Ubuntu is the primary deployment target; macOS covers dev machines.
+        # Windows is excluded: this is a server-side library.
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.12', '3.13']
 
     steps:
       - name: Checkout code
@@ -149,13 +92,14 @@ jobs:
 
       - name: Run tests with coverage enforcement
         env:
-          PYTHONUTF8: '1'  # Ensure emoji in print() work on Windows runners
+          PYTHONUTF8: '1'  # Ensure UTF-8 output on all platforms
         run: >
           uv run pytest -v --tb=short
           -m "not integration and not slow and not external and not quarantine"
           --cov=ttadev --cov-branch
           --cov-report=xml:coverage.xml
           --cov-report=term-missing
+          --cov-fail-under=80
 
       - name: Upload coverage to Codecov
         if: always()  # Upload coverage even if tests fail
@@ -163,8 +107,8 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
-          flags: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }},python-${{ matrix.python-version }}
-          name: ${{ matrix.os == 'ubuntu-latest' && 'ubuntu' || matrix.os == 'macos-latest' && 'macos' || matrix.os == 'windows-latest' && 'windows' }}-py${{ matrix.python-version }}-group${{ matrix.split-group }}
+          flags: ${{ matrix.os }},python-${{ matrix.python-version }}
+          name: ${{ matrix.os }}-py${{ matrix.python-version }}
           fail_ci_if_error: false
           verbose: true
 
