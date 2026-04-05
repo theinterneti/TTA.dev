@@ -3,6 +3,12 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'ttadev/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/ci.yml'
   push:
     branches: [main]
     paths:
@@ -46,8 +52,17 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Pyright type check
-        continue-on-error: true
-        run: uvx pyright ttadev/
+        run: |
+          set -euo pipefail
+          ALLOWED_ERRORS=2
+          output=$(uvx pyright ttadev/ 2>&1)
+          echo "$output"
+          error_count=$(echo "$output" | grep -oP '^\d+(?= error)' | head -1 || echo "0")
+          echo "Pyright: ${error_count} error(s) (threshold: ${ALLOWED_ERRORS})"
+          if [ "${error_count:-0}" -gt "$ALLOWED_ERRORS" ]; then
+            echo "::error::Pyright reported ${error_count} error(s), exceeding threshold of ${ALLOWED_ERRORS}"
+            exit 1
+          fi
 
   # ── Gate 2: Unit tests (Python 3.12, Ubuntu — fast PR feedback) ───────────
   test:

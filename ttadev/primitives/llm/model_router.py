@@ -405,7 +405,9 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
                     content = _THINK_RE.sub("", content).strip()
                 # Langfuse router-tier annotation (optional — fails silently)
                 try:
-                    from tta_apm_langfuse import get_integration  # noqa: PLC0415
+                    from tta_apm_langfuse import (
+                        get_integration,  # noqa: PLC0415  # type: ignore[import-untyped]
+                    )
 
                     _lf = get_integration()
                     if _lf is not None and _lf.client is not None:

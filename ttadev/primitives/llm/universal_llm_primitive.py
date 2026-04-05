@@ -337,7 +337,9 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                     span.set_attribute("gen_ai.usage.completion_tokens", ct)
             # Langfuse generation tracking (optional — fails silently)
             try:
-                from tta_apm_langfuse import get_integration  # noqa: PLC0415
+                from tta_apm_langfuse import (
+                    get_integration,  # noqa: PLC0415  # type: ignore[import-untyped]
+                )
 
                 _lf = get_integration()
                 if _lf is not None:
@@ -434,7 +436,7 @@ class UniversalLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         return dispatch[self._provider]
 
     @staticmethod
-    def _parse_openai_tool_calls(raw_calls: object) -> list[ToolCall] | None:
+    def _parse_openai_tool_calls(raw_calls: list[Any] | None) -> list[ToolCall] | None:
         """Parse OpenAI-compat tool_calls from a response message.
 
         Handles the OpenAI wire format where ``arguments`` is a JSON string

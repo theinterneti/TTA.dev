@@ -1452,7 +1452,9 @@ class ControlPlaneService:
 
         # Emit Langfuse session for this run so all LLM calls nest under it
         try:
-            from tta_apm_langfuse import get_integration  # noqa: PLC0415
+            from tta_apm_langfuse import (
+                get_integration,  # noqa: PLC0415  # type: ignore[import-untyped]
+            )
 
             _lf = get_integration()
             if _lf is not None:
