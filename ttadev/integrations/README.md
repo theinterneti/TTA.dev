@@ -14,7 +14,6 @@
 |------|-----------|-------------|
 | `ttadev/integrations/` | Auth utilities and CRUD helpers (this directory) | `from ttadev.integrations import ...` |
 | `ttadev/primitives/integrations/` | ✅ **Working LLM primitives** (Ollama, Groq, OpenRouter, …) | `from ttadev.primitives.integrations import ...` |
-| `ttadev/integrations/src/tta_dev_integrations/` | Legacy stub package (`tta-dev-integrations`) — kept for compatibility | `from tta_dev_integrations import ...` |
 
 ---
 
@@ -194,9 +193,8 @@ ttadev/integrations/          ← YOU ARE HERE (auth/CRUD helpers)
 ├── auth/
 │   ├── api_key.py            # ✅ API key generation, hashing, verification
 │   └── session.py            # ✅ HMAC-signed session tokens
-├── db/
-│   └── crud.py               # ✅ Generic async CRUD store
-└── src/tta_dev_integrations/ # Legacy stub package (kept for compatibility)
+└── db/
+    └── crud.py               # ✅ Generic async CRUD store
 
 ttadev/primitives/integrations/   ← WORKING LLM PRIMITIVES
 ├── __init__.py               # Public API for all providers
