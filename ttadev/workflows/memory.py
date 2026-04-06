@@ -100,12 +100,12 @@ class PersistentMemory:
 
     # -- async API ---------------------------------------------------------
 
-    async def async_retain(self, bank_id: str, content: str) -> None:
-        """Store a memory in Hindsight (async, non-blocking)."""
+    async def async_retain(self, bank_id: str, content: str) -> str | None:
+        """Store a memory in Hindsight (async, non-blocking). Returns operation_id."""
         if not self._available:
             self._warn_once()
-            return
-        await _AsyncHindsightShim(self._base_url).retain(bank_id, content)
+            return None
+        return await _AsyncHindsightShim(self._base_url).retain(bank_id, content)
 
     async def async_recall(self, bank_id: str, query: str) -> list[str]:
         """Retrieve memories matching *query* from Hindsight (async)."""
@@ -131,14 +131,16 @@ class _HttpHindsightShim:
     def _url(self, bank_id: str, path: str) -> str:
         return f"{self._base_url}/v1/default/banks/{bank_id}/{path}"
 
-    def retain(self, bank_id: str, content: str) -> None:
+    def retain(self, bank_id: str, content: str) -> str | None:
+        """Store a memory async (fire-and-forget). Returns operation_id or None."""
         import httpx  # noqa: PLC0415
 
-        httpx.post(
+        resp = httpx.post(
             self._url(bank_id, "memories"),
-            json={"items": [{"content": content}]},
+            json={"items": [{"content": content}], "async": True},
             timeout=10.0,
         )
+        return resp.json().get("operation_id")
 
     def recall(self, bank_id: str, query: str) -> list[str]:
         import httpx  # noqa: PLC0415
@@ -146,7 +148,7 @@ class _HttpHindsightShim:
         resp = httpx.post(
             self._url(bank_id, "memories/recall"),
             json={"query": query},
-            timeout=10.0,
+            timeout=30.0,
         )
         data = resp.json()
         return [r.get("text", "") for r in data.get("results", [])]
@@ -157,7 +159,7 @@ class _HttpHindsightShim:
         resp = httpx.post(
             self._url(bank_id, "reflect"),
             json={"query": query},
-            timeout=30.0,
+            timeout=60.0,
         )
         return resp.json().get("text", "")
 
@@ -171,15 +173,17 @@ class _AsyncHindsightShim:
     def _url(self, bank_id: str, path: str) -> str:
         return f"{self._base_url}/v1/default/banks/{bank_id}/{path}"
 
-    async def retain(self, bank_id: str, content: str) -> None:
+    async def retain(self, bank_id: str, content: str) -> str | None:
+        """Store a memory async (fire-and-forget). Returns operation_id or None."""
         import httpx  # noqa: PLC0415
 
         async with httpx.AsyncClient() as client:
-            await client.post(
+            resp = await client.post(
                 self._url(bank_id, "memories"),
-                json={"items": [{"content": content}]},
+                json={"items": [{"content": content}], "async": True},
                 timeout=10.0,
             )
+        return resp.json().get("operation_id")
 
     async def recall(self, bank_id: str, query: str) -> list[str]:
         import httpx  # noqa: PLC0415
@@ -188,7 +192,7 @@ class _AsyncHindsightShim:
             resp = await client.post(
                 self._url(bank_id, "memories/recall"),
                 json={"query": query},
-                timeout=10.0,
+                timeout=30.0,
             )
         data = resp.json()
         return [r.get("text", "") for r in data.get("results", [])]
@@ -200,6 +204,6 @@ class _AsyncHindsightShim:
             resp = await client.post(
                 self._url(bank_id, "reflect"),
                 json={"query": query},
-                timeout=30.0,
+                timeout=60.0,
             )
         return resp.json().get("text", "")
