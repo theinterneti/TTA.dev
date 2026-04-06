@@ -9,8 +9,8 @@ import pytest
 from ttadev.agents.router import AgentRouterPrimitive
 from ttadev.agents.task import AgentResult, AgentTask
 from ttadev.primitives.core.base import WorkflowContext
-from ttadev.primitives.llm.model_router import ModelRouterPrimitive, RouterTierConfig
-from ttadev.primitives.llm.smart_router import SmartRouterPrimitive
+from ttadev.primitives.llm.model_router import RouterTierConfig
+from ttadev.primitives.llm.smart_router import LiteLLMSmartAdapter, SmartRouterPrimitive
 
 # ---------------------------------------------------------------------------
 # SmartRouterPrimitive tests
@@ -18,15 +18,15 @@ from ttadev.primitives.llm.smart_router import SmartRouterPrimitive
 
 
 class TestSmartRouterBuild:
-    """SmartRouterPrimitive.build() returns a ModelRouterPrimitive."""
+    """SmartRouterPrimitive.build() returns a LiteLLMSmartAdapter."""
 
-    def test_build_returns_model_router(self):
+    def test_build_returns_litellm_smart_adapter(self):
         router = SmartRouterPrimitive().build()
-        assert isinstance(router, ModelRouterPrimitive)
+        assert isinstance(router, LiteLLMSmartAdapter)
 
-    def test_make_classmethod_returns_model_router(self):
+    def test_make_classmethod_returns_litellm_smart_adapter(self):
         router = SmartRouterPrimitive.make()
-        assert isinstance(router, ModelRouterPrimitive)
+        assert isinstance(router, LiteLLMSmartAdapter)
 
     def test_default_mode_name(self):
         router = SmartRouterPrimitive().build()
@@ -123,6 +123,229 @@ class TestSmartRouterBuild:
         router = SmartRouterPrimitive().build()
         for tier in router.modes["default"].tiers:
             assert isinstance(tier, RouterTierConfig)
+
+    def test_adapter_has_execute_method(self):
+        """LiteLLMSmartAdapter exposes the execute() interface."""
+        router = SmartRouterPrimitive().build()
+        assert hasattr(router, "execute")
+        import asyncio
+
+        assert asyncio.iscoroutinefunction(router.execute)
+
+
+# ---------------------------------------------------------------------------
+# LiteLLMSmartAdapter unit tests
+# ---------------------------------------------------------------------------
+
+
+class TestLiteLLMSmartAdapter:
+    """Unit tests for LiteLLMSmartAdapter delegation to LiteLLMPrimitive."""
+
+    @pytest.mark.asyncio
+    async def test_execute_delegates_to_litellm(self):
+        """execute() calls LiteLLMPrimitive.execute() with translated LLMRequest."""
+        from unittest.mock import AsyncMock, patch
+
+        from ttadev.primitives.llm.model_router import RouterModeConfig, RouterTierConfig
+        from ttadev.primitives.llm.smart_router import LiteLLMSmartAdapter
+        from ttadev.primitives.llm.universal_llm_primitive import LLMResponse
+
+        modes = {
+            "default": RouterModeConfig(
+                tiers=[RouterTierConfig(provider="groq", model="llama-3.3-70b-versatile")]
+            )
+        }
+        adapter = LiteLLMSmartAdapter(modes=modes)
+
+        fake_response = LLMResponse(
+            content="Hello from litellm",
+            model="groq/llama-3.3-70b-versatile",
+            provider="groq",
+        )
+
+        ctx = WorkflowContext(workflow_id="test-litellm-delegation")
+        from ttadev.primitives.llm.model_router import ModelRouterRequest
+
+        request = ModelRouterRequest(mode="default", prompt="Hi!")
+
+        with patch.object(
+            adapter._mode_primitives["default"][1],
+            "execute",
+            new=AsyncMock(return_value=fake_response),
+        ) as mock_exec:
+            result = await adapter.execute(request, ctx)
+
+        mock_exec.assert_called_once()
+        call_args = mock_exec.call_args[0]
+        llm_req = call_args[0]
+        assert llm_req.model == "groq/llama-3.3-70b-versatile"
+        assert llm_req.messages == [{"role": "user", "content": "Hi!"}]
+        assert result.content == "Hello from litellm"
+
+    @pytest.mark.asyncio
+    async def test_execute_passes_system_prompt(self):
+        """System prompt from ModelRouterRequest is forwarded to LLMRequest."""
+        from unittest.mock import AsyncMock, patch
+
+        from ttadev.primitives.llm.model_router import (
+            ModelRouterRequest,
+            RouterModeConfig,
+            RouterTierConfig,
+        )
+        from ttadev.primitives.llm.smart_router import LiteLLMSmartAdapter
+        from ttadev.primitives.llm.universal_llm_primitive import LLMResponse
+
+        modes = {
+            "default": RouterModeConfig(
+                tiers=[RouterTierConfig(provider="ollama", model="qwen2.5:7b")]
+            )
+        }
+        adapter = LiteLLMSmartAdapter(modes=modes)
+        fake_response = LLMResponse(content="ok", model="ollama/qwen2.5:7b", provider="ollama")
+        ctx = WorkflowContext(workflow_id="test-system")
+        request = ModelRouterRequest(mode="default", prompt="task", system="You are helpful.")
+
+        with patch.object(
+            adapter._mode_primitives["default"][1],
+            "execute",
+            new=AsyncMock(return_value=fake_response),
+        ) as mock_exec:
+            await adapter.execute(request, ctx)
+
+        llm_req = mock_exec.call_args[0][0]
+        assert llm_req.system == "You are helpful."
+
+    @pytest.mark.asyncio
+    async def test_execute_raises_on_unknown_mode(self):
+        """KeyError raised when mode is not in modes dict."""
+        from ttadev.primitives.llm.model_router import (
+            ModelRouterRequest,
+            RouterModeConfig,
+            RouterTierConfig,
+        )
+        from ttadev.primitives.llm.smart_router import LiteLLMSmartAdapter
+
+        modes = {
+            "default": RouterModeConfig(
+                tiers=[RouterTierConfig(provider="ollama", model="qwen2.5:7b")]
+            )
+        }
+        adapter = LiteLLMSmartAdapter(modes=modes)
+        ctx = WorkflowContext(workflow_id="test-unknown")
+        request = ModelRouterRequest(mode="nonexistent", prompt="Hi")
+
+        with pytest.raises(KeyError, match="nonexistent"):
+            await adapter.execute(request, ctx)
+
+    def test_mode_primitives_prebuilt_for_each_mode(self):
+        """_mode_primitives is populated at init time for each mode."""
+        from ttadev.primitives.llm.model_router import RouterModeConfig, RouterTierConfig
+        from ttadev.primitives.llm.smart_router import LiteLLMSmartAdapter
+
+        modes = {
+            "default": RouterModeConfig(
+                tiers=[RouterTierConfig(provider="groq", model="llama-3.3-70b-versatile")]
+            ),
+            "coding": RouterModeConfig(
+                tiers=[RouterTierConfig(provider="ollama", model="qwen2.5:7b")]
+            ),
+        }
+        adapter = LiteLLMSmartAdapter(modes=modes)
+        assert "default" in adapter._mode_primitives
+        assert "coding" in adapter._mode_primitives
+
+    def test_litellm_model_string_groq(self):
+        """Groq tier resolves to 'groq/<model>' litellm string."""
+        from ttadev.primitives.llm.model_router import RouterTierConfig
+        from ttadev.primitives.llm.smart_router import _tier_to_litellm_model
+
+        tier = RouterTierConfig(provider="groq", model="llama-3.3-70b-versatile")
+        assert _tier_to_litellm_model(tier) == "groq/llama-3.3-70b-versatile"
+
+    def test_litellm_model_string_google_default(self):
+        """Google tier without explicit model resolves to gemini default."""
+        from ttadev.primitives.llm.model_router import RouterTierConfig
+        from ttadev.primitives.llm.smart_router import _tier_to_litellm_model
+
+        tier = RouterTierConfig(provider="google")
+        result = _tier_to_litellm_model(tier)
+        assert result is not None
+        assert result.startswith("gemini/")
+
+    def test_litellm_model_string_openrouter(self):
+        """OpenRouter tier prepends 'openrouter/' prefix."""
+        from ttadev.primitives.llm.model_router import RouterTierConfig
+        from ttadev.primitives.llm.smart_router import _tier_to_litellm_model
+
+        tier = RouterTierConfig(provider="openrouter", model="google/gemma-3-27b-it:free")
+        assert _tier_to_litellm_model(tier) == "openrouter/google/gemma-3-27b-it:free"
+
+    def test_litellm_model_string_ollama(self):
+        """Ollama tier prepends 'ollama/' prefix."""
+        from ttadev.primitives.llm.model_router import RouterTierConfig
+        from ttadev.primitives.llm.smart_router import _tier_to_litellm_model
+
+        tier = RouterTierConfig(provider="ollama", model="llama3.2")
+        assert _tier_to_litellm_model(tier) == "ollama/llama3.2"
+
+    def test_litellm_fallbacks_set_from_tier_order(self):
+        """Fallbacks passed to LiteLLMPrimitive match tiers[1:]."""
+        from ttadev.primitives.llm.model_router import RouterModeConfig, RouterTierConfig
+        from ttadev.primitives.llm.smart_router import LiteLLMSmartAdapter, _tier_to_litellm_model
+
+        tiers = [
+            RouterTierConfig(provider="groq", model="llama-3.3-70b-versatile"),
+            RouterTierConfig(provider="google"),
+            RouterTierConfig(provider="ollama"),
+        ]
+        modes = {"default": RouterModeConfig(tiers=tiers)}
+        adapter = LiteLLMSmartAdapter(modes=modes)
+
+        primary, litellm_prim = adapter._mode_primitives["default"]
+        assert primary == "groq/llama-3.3-70b-versatile"
+        # fallbacks should be the remaining tiers
+        expected_fallbacks = [
+            _tier_to_litellm_model(tiers[1]),
+            _tier_to_litellm_model(tiers[2]),
+        ]
+        assert litellm_prim._fallbacks == expected_fallbacks
+
+    @pytest.mark.asyncio
+    async def test_think_tokens_stripped(self):
+        """<think>...</think> blocks are stripped from the response content."""
+        from unittest.mock import AsyncMock, patch
+
+        from ttadev.primitives.llm.model_router import (
+            ModelRouterRequest,
+            RouterModeConfig,
+            RouterTierConfig,
+        )
+        from ttadev.primitives.llm.smart_router import LiteLLMSmartAdapter
+        from ttadev.primitives.llm.universal_llm_primitive import LLMResponse
+
+        modes = {
+            "default": RouterModeConfig(
+                tiers=[RouterTierConfig(provider="groq", model="qwen3-32b", strip_thinking=True)]
+            )
+        }
+        adapter = LiteLLMSmartAdapter(modes=modes)
+        raw_response = LLMResponse(
+            content="<think>internal reasoning</think>Final answer",
+            model="groq/qwen3-32b",
+            provider="groq",
+        )
+        ctx = WorkflowContext(workflow_id="test-think")
+        request = ModelRouterRequest(mode="default", prompt="Solve it")
+
+        with patch.object(
+            adapter._mode_primitives["default"][1],
+            "execute",
+            new=AsyncMock(return_value=raw_response),
+        ):
+            result = await adapter.execute(request, ctx)
+
+        assert "<think>" not in result.content
+        assert result.content == "Final answer"
 
 
 # ---------------------------------------------------------------------------

@@ -38,15 +38,24 @@ if TYPE_CHECKING:
     from ttadev.agents.protocol import ChatMessage
     from ttadev.primitives.core.base import WorkflowContext
 
+# Union type for the router parameter — accepts both the legacy ModelRouterPrimitive
+# and the new LiteLLMSmartAdapter (which shares the same execute() interface).
+_RouterT = "ModelRouterPrimitive | LiteLLMSmartAdapter"
+
 
 class ModelRouterChatAdapter:
-    """Adapts ``ModelRouterPrimitive`` to satisfy the ``ChatPrimitive`` protocol.
+    """Adapts a router primitive to satisfy the ``ChatPrimitive`` protocol.
+
+    Accepts either a :class:`~ttadev.primitives.llm.model_router.ModelRouterPrimitive`
+    or a :class:`~ttadev.primitives.llm.smart_router.LiteLLMSmartAdapter`.  Both
+    expose ``execute(ModelRouterRequest, ctx) -> LLMResponse``.
 
     Converts the ``chat(messages, system, ctx)`` call into a ``ModelRouterRequest``
     and returns the response content as a plain string.
 
     Args:
-        router: A configured ``ModelRouterPrimitive`` instance.
+        router: A configured router instance (``ModelRouterPrimitive`` or
+            ``LiteLLMSmartAdapter``).
         mode: The routing mode key (must exist in ``router``'s modes config).
         task_profile: Optional ``TaskProfile`` to pass to the router for
             benchmark-based model ranking.  Usually set automatically from
@@ -55,7 +64,7 @@ class ModelRouterChatAdapter:
 
     def __init__(
         self,
-        router: ModelRouterPrimitive,
+        router: ModelRouterPrimitive | Any,  # Any covers LiteLLMSmartAdapter at runtime
         mode: str = "default",
         task_profile: Any | None = None,
     ) -> None:

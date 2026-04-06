@@ -84,7 +84,7 @@ from ttadev.primitives.llm.providers import (
     get_provider,
     openai_compat_providers,
 )
-from ttadev.primitives.llm.smart_router import SmartRouterPrimitive
+from ttadev.primitives.llm.smart_router import LiteLLMSmartAdapter, SmartRouterPrimitive
 from ttadev.primitives.llm.task_selector import (
     COMPLEXITY_COMPLEX,
     COMPLEXITY_MODERATE,
@@ -162,6 +162,7 @@ __all__ = [
     "RouterModeConfig",
     "RouterTierConfig",
     # smart router (zero-config cascade)
+    "LiteLLMSmartAdapter",
     "SmartRouterPrimitive",
     # task-aware selection
     "TaskProfile",
