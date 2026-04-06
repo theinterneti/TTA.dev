@@ -148,6 +148,7 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         api_base: str | None = None,
         timeout: float | None = None,
         metadata: dict[str, Any] | None = None,
+        max_budget: float | None = None,
     ) -> None:
         """Create a :class:`LiteLLMPrimitive`.
 
@@ -168,6 +169,11 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                 default.
             metadata: Extra key/value pairs forwarded to litellm as
                 ``metadata`` (appears in Langfuse traces, cost tracking, etc.).
+            max_budget: Optional spending cap in USD for the lifetime of this
+                primitive instance.  Accumulated across ``execute()`` calls via
+                ``WorkflowContext.metadata["llm_cost_usd"]``.  When the running
+                total exceeds this value a :class:`BudgetExceededError` is raised
+                before the call is dispatched.  ``None`` disables the check.
         """
         super().__init__()
         if provider is None:
@@ -182,6 +188,7 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         self._api_base = api_base
         self._timeout = timeout
         self._metadata: dict[str, Any] = metadata or {}
+        self._max_budget = max_budget
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -284,23 +291,36 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
 
         Args:
             request: LLM invocation parameters.
-            ctx: Workflow context (used for OTel span attribution).
+            ctx: Workflow context (used for OTel span attribution and cost
+                accumulation via ``ctx.metadata["llm_cost_usd"]``).
 
         Returns:
             The model's response wrapped in :class:`LLMResponse`.
 
         Raises:
+            BudgetExceededError: When a ``max_budget`` was set and the running
+                cost total would exceed it.
             Exception: Re-raises any litellm exception with its original type
                 and message preserved.
         """
         _maybe_configure_langfuse()
+
+        if self._max_budget is not None:
+            import litellm  # noqa: PLC0415
+
+            spent = float(ctx.metadata.get("llm_cost_usd", 0.0))
+            if spent >= self._max_budget:
+                raise litellm.BudgetExceededError(
+                    current_cost=spent,
+                    max_budget=self._max_budget,
+                )
 
         model = self._resolve_model(request)
         provider = self._extract_provider(model)
         kwargs = self._build_kwargs(request, model)
 
         if not (OTEL_AVAILABLE and otel_trace is not None):
-            return await self._call(kwargs, model, provider)
+            return await self._call(kwargs, model, provider, ctx)
 
         tracer = otel_trace.get_tracer(__name__)
         span_name = f"gen_ai.litellm.{provider}.invoke"
@@ -309,7 +329,7 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             span.set_attribute("gen_ai.request.model", model)
             span.set_attribute("gen_ai.request.temperature", request.temperature)
             try:
-                response = await self._call(kwargs, model, provider)
+                response = await self._call(kwargs, model, provider, ctx)
             except Exception as exc:
                 span.record_exception(exc)
                 from opentelemetry.trace import Status, StatusCode  # noqa: PLC0415
@@ -324,6 +344,8 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                     span.set_attribute("gen_ai.usage.prompt_tokens", pt)
                 if ct is not None:
                     span.set_attribute("gen_ai.usage.completion_tokens", ct)
+            if response.cost_usd is not None:
+                span.set_attribute("gen_ai.usage.cost_usd", response.cost_usd)
             return response
 
     async def stream(self, request: LLMRequest, ctx: WorkflowContext) -> AsyncIterator[str]:
@@ -356,6 +378,7 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         kwargs: dict[str, Any],
         model: str,
         provider: str,
+        ctx: WorkflowContext,
     ) -> LLMResponse:
         """Issue the ``litellm.acompletion()`` call and map to :class:`LLMResponse`.
 
@@ -364,9 +387,12 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             model: Resolved litellm model string (used as fallback in the
                 response when the API doesn't echo the model name).
             provider: Provider prefix string (stored as ``LLMResponse.provider``).
+            ctx: Workflow context — cost is accumulated into
+                ``ctx.metadata["llm_cost_usd"]`` after each successful call.
 
         Returns:
-            Mapped :class:`LLMResponse`.
+            Mapped :class:`LLMResponse` with ``cost_usd`` populated when
+            litellm can compute it for the model.
         """
         import litellm  # noqa: PLC0415
 
@@ -385,6 +411,16 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
                 "total_tokens": raw.usage.total_tokens or 0,
             }
 
+        cost_usd: float | None = None
+        try:
+            cost_usd = litellm.completion_cost(completion_response=raw)
+            if cost_usd is not None:
+                ctx.metadata["llm_cost_usd"] = (
+                    float(ctx.metadata.get("llm_cost_usd", 0.0)) + cost_usd
+                )
+        except Exception:
+            pass  # Cost calculation unsupported for this model — not fatal
+
         return LLMResponse(
             content=content,
             model=raw.model or model,
@@ -392,6 +428,7 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
             usage=usage,
             tool_calls=tool_calls,
             finish_reason=choice.finish_reason,
+            cost_usd=cost_usd,
         )
 
 

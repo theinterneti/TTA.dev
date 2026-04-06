@@ -223,3 +223,66 @@ async def test_child_metadata_is_deep_copy():
     child = WorkflowContext.child(parent, "step-1")
     child.metadata["key"] = "changed"
     assert parent.metadata["key"] == "val"
+
+
+# ---------------------------------------------------------------------------
+# root() memory auto-init
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_root_initialises_workflow_memory():
+    from ttadev.workflows.memory import WorkflowMemory
+
+    ctx = WorkflowContext.root("wf")
+    assert isinstance(ctx.memory, WorkflowMemory)
+
+
+@pytest.mark.asyncio
+async def test_root_memory_is_usable():
+    ctx = WorkflowContext.root("wf")
+    ctx.memory.set("x", 42)
+    assert ctx.memory.get("x") == 42
+
+
+@pytest.mark.asyncio
+async def test_root_persistent_memory_none_by_default():
+    ctx = WorkflowContext.root("wf")
+    assert ctx.persistent_memory is None
+
+
+@pytest.mark.asyncio
+async def test_root_with_bank_id_creates_persistent_memory(monkeypatch):
+    """PersistentMemory is created when bank_id is provided (even if Hindsight is down)."""
+    from ttadev.workflows.memory import PersistentMemory
+
+    ctx = WorkflowContext.root("wf", bank_id="test-bank")
+    assert isinstance(ctx.persistent_memory, PersistentMemory)
+    assert ctx.metadata.get("hindsight_bank_id") == "test-bank"
+
+
+@pytest.mark.asyncio
+async def test_child_inherits_workflow_memory():
+    ctx = WorkflowContext.root("wf")
+    ctx.memory.set("shared", "value")
+    child = ctx.create_child_context()
+    assert child.memory is ctx.memory  # Same object shared across the workflow
+    assert child.memory.get("shared") == "value"
+
+
+@pytest.mark.asyncio
+async def test_child_memory_mutations_visible_in_parent():
+    """Changes to memory in a child context propagate back (shared reference)."""
+    ctx = WorkflowContext.root("wf")
+    child = ctx.create_child_context()
+    child.memory.set("written_by_child", True)
+    assert ctx.memory.get("written_by_child") is True
+
+
+@pytest.mark.asyncio
+async def test_child_inherits_persistent_memory():
+
+    ctx = WorkflowContext.root("wf", bank_id="test-bank")
+    child = ctx.create_child_context()
+    # Same PersistentMemory instance shared — children can persist cross-session data.
+    assert child.persistent_memory is ctx.persistent_memory

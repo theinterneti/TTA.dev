@@ -80,41 +80,50 @@ class TestPersistentMemoryNoOp:
             for r in caplog.records
         )
 
-    def test_retain_with_mock_client(self):
+    def test_retain_with_mock_shim(self, monkeypatch):
         retained = []
 
-        class _FakeClient:
+        class _FakeShim:
+            def __init__(self, base_url: str) -> None:
+                pass
+
             def retain(self, bank_id: str, content: str) -> None:
                 retained.append((bank_id, content))
 
-            def recall(self, bank_id: str, query: str) -> list[str]:
-                return ["result"]
+        import ttadev.workflows.memory as _mem
 
-            def reflect(self, bank_id: str, query: str) -> str:
-                return "synthesis"
-
+        monkeypatch.setattr(_mem, "_HttpHindsightShim", _FakeShim)
         pm = PersistentMemory(base_url="http://localhost:9999")
-        pm._client = _FakeClient()
         pm._available = True
         pm.retain("tta.test", "hello")
         assert retained == [("tta.test", "hello")]
 
-    def test_recall_with_mock_client(self):
-        class _FakeClient:
+    def test_recall_with_mock_shim(self, monkeypatch):
+        class _FakeShim:
+            def __init__(self, base_url: str) -> None:
+                pass
+
             def recall(self, bank_id: str, query: str) -> list[str]:
                 return ["hit1", "hit2"]
 
+        import ttadev.workflows.memory as _mem
+
+        monkeypatch.setattr(_mem, "_HttpHindsightShim", _FakeShim)
         pm = PersistentMemory(base_url="http://localhost:9999")
-        pm._client = _FakeClient()
         pm._available = True
         assert pm.recall("tta.test", "search") == ["hit1", "hit2"]
 
-    def test_reflect_with_mock_client(self):
-        class _FakeClient:
+    def test_reflect_with_mock_shim(self, monkeypatch):
+        class _FakeShim:
+            def __init__(self, base_url: str) -> None:
+                pass
+
             def reflect(self, bank_id: str, query: str) -> str:
                 return "synthesized answer"
 
+        import ttadev.workflows.memory as _mem
+
+        monkeypatch.setattr(_mem, "_HttpHindsightShim", _FakeShim)
         pm = PersistentMemory(base_url="http://localhost:9999")
-        pm._client = _FakeClient()
         pm._available = True
         assert pm.reflect("tta.test", "what happened?") == "synthesized answer"

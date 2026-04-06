@@ -43,14 +43,16 @@ class WorkflowMemory:
 class PersistentMemory:
     """Tier-2: cross-session memory backed by Hindsight.
 
-    Wraps the Hindsight HTTP client with graceful degradation:
-    if the server is unreachable or the client library is missing,
-    all methods are no-ops and a warning is logged once per instance.
+    Wraps the Hindsight HTTP API with graceful degradation:
+    if the server is unreachable, all methods are no-ops and a warning
+    is logged once per instance.
+
+    Both sync and async variants are available; the async variants are
+    preferred when called from within an asyncio event loop.
     """
 
     def __init__(self, base_url: str = "http://localhost:8888") -> None:
-        self._base_url = base_url
-        self._client: object | None = None
+        self._base_url = base_url.rstrip("/")
         self._available: bool = False
         self._warned: bool = False
         self._try_connect()
@@ -62,14 +64,6 @@ class PersistentMemory:
             resp = httpx.get(f"{self._base_url}/health", timeout=2.0)
             if resp.status_code == 200:
                 self._available = True
-                # Lazy-import the Hindsight client if available
-                try:
-                    from hindsight_client import Hindsight  # type: ignore[import]
-
-                    self._client = Hindsight(base_url=self._base_url)
-                except ImportError:
-                    # No dedicated client — use raw HTTP shim
-                    self._client = _HttpHindsightShim(base_url=self._base_url)
         except Exception:
             self._available = False
 
@@ -81,37 +75,68 @@ class PersistentMemory:
             )
             self._warned = True
 
+    # -- sync API ----------------------------------------------------------
+
     def retain(self, bank_id: str, content: str) -> None:
-        if not self._available or self._client is None:
+        """Store a memory in Hindsight (sync)."""
+        if not self._available:
             self._warn_once()
             return
-        self._client.retain(bank_id, content)  # type: ignore[union-attr]
+        _HttpHindsightShim(self._base_url).retain(bank_id, content)
 
     def recall(self, bank_id: str, query: str) -> list[str]:
-        if not self._available or self._client is None:
+        """Retrieve memories matching *query* from Hindsight (sync)."""
+        if not self._available:
             self._warn_once()
             return []
-        return self._client.recall(bank_id, query)  # type: ignore[union-attr]
+        return _HttpHindsightShim(self._base_url).recall(bank_id, query)
 
     def reflect(self, bank_id: str, query: str) -> str:
-        if not self._available or self._client is None:
+        """Generate a synthesized reflection over stored memories (sync)."""
+        if not self._available:
             self._warn_once()
             return ""
-        return self._client.reflect(bank_id, query)  # type: ignore[union-attr]
+        return _HttpHindsightShim(self._base_url).reflect(bank_id, query)
+
+    # -- async API ---------------------------------------------------------
+
+    async def async_retain(self, bank_id: str, content: str) -> None:
+        """Store a memory in Hindsight (async, non-blocking)."""
+        if not self._available:
+            self._warn_once()
+            return
+        await _AsyncHindsightShim(self._base_url).retain(bank_id, content)
+
+    async def async_recall(self, bank_id: str, query: str) -> list[str]:
+        """Retrieve memories matching *query* from Hindsight (async)."""
+        if not self._available:
+            self._warn_once()
+            return []
+        return await _AsyncHindsightShim(self._base_url).recall(bank_id, query)
+
+    async def async_reflect(self, bank_id: str, query: str) -> str:
+        """Generate a synthesized reflection over stored memories (async)."""
+        if not self._available:
+            self._warn_once()
+            return ""
+        return await _AsyncHindsightShim(self._base_url).reflect(bank_id, query)
 
 
 class _HttpHindsightShim:
-    """Minimal HTTP shim for Hindsight when the dedicated client isn't installed."""
+    """Minimal synchronous HTTP shim for the Hindsight REST API."""
 
     def __init__(self, base_url: str) -> None:
         self._base_url = base_url.rstrip("/")
+
+    def _url(self, bank_id: str, path: str) -> str:
+        return f"{self._base_url}/v1/default/banks/{bank_id}/{path}"
 
     def retain(self, bank_id: str, content: str) -> None:
         import httpx  # noqa: PLC0415
 
         httpx.post(
-            f"{self._base_url}/api/memories",
-            json={"bank_id": bank_id, "content": content},
+            self._url(bank_id, "memories"),
+            json={"items": [{"content": content}]},
             timeout=10.0,
         )
 
@@ -119,19 +144,62 @@ class _HttpHindsightShim:
         import httpx  # noqa: PLC0415
 
         resp = httpx.post(
-            f"{self._base_url}/api/search",
-            json={"bank_id": bank_id, "query": query},
+            self._url(bank_id, "memories/recall"),
+            json={"query": query},
             timeout=10.0,
         )
         data = resp.json()
-        return [r.get("content", "") for r in data.get("results", [])]
+        return [r.get("text", "") for r in data.get("results", [])]
 
     def reflect(self, bank_id: str, query: str) -> str:
         import httpx  # noqa: PLC0415
 
         resp = httpx.post(
-            f"{self._base_url}/api/reflect",
-            json={"bank_id": bank_id, "query": query},
+            self._url(bank_id, "reflect"),
+            json={"query": query},
             timeout=30.0,
         )
-        return resp.json().get("synthesis", "")
+        return resp.json().get("text", "")
+
+
+class _AsyncHindsightShim:
+    """Minimal async HTTP shim for the Hindsight REST API."""
+
+    def __init__(self, base_url: str) -> None:
+        self._base_url = base_url.rstrip("/")
+
+    def _url(self, bank_id: str, path: str) -> str:
+        return f"{self._base_url}/v1/default/banks/{bank_id}/{path}"
+
+    async def retain(self, bank_id: str, content: str) -> None:
+        import httpx  # noqa: PLC0415
+
+        async with httpx.AsyncClient() as client:
+            await client.post(
+                self._url(bank_id, "memories"),
+                json={"items": [{"content": content}]},
+                timeout=10.0,
+            )
+
+    async def recall(self, bank_id: str, query: str) -> list[str]:
+        import httpx  # noqa: PLC0415
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                self._url(bank_id, "memories/recall"),
+                json={"query": query},
+                timeout=10.0,
+            )
+        data = resp.json()
+        return [r.get("text", "") for r in data.get("results", [])]
+
+    async def reflect(self, bank_id: str, query: str) -> str:
+        import httpx  # noqa: PLC0415
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                self._url(bank_id, "reflect"),
+                json={"query": query},
+                timeout=30.0,
+            )
+        return resp.json().get("text", "")

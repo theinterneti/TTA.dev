@@ -187,8 +187,9 @@ class TestPersistentMemoryUnavailable:
     def test_available_false(self) -> None:
         assert self._make()._available is False
 
-    def test_client_is_none(self) -> None:
-        assert self._make()._client is None
+    def test_no_client_attribute(self) -> None:
+        # _client was removed; availability is signalled solely via _available
+        assert not hasattr(self._make(), "_client")
 
     def test_retain_no_raise(self) -> None:
         self._make().retain("bank", "content")  # must not raise
@@ -234,43 +235,52 @@ class TestPersistentMemoryUnavailable:
 
 
 class TestPersistentMemoryAvailable:
-    def _make(self) -> tuple[PersistentMemory, MagicMock]:
+    """PersistentMemory delegates to _HttpHindsightShim (created per-call)."""
+
+    def _make_available(self) -> PersistentMemory:
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         with patch("httpx.get", return_value=mock_resp):
-            with patch("ttadev.workflows.memory._HttpHindsightShim") as mock_shim:
-                shim = MagicMock()
-                mock_shim.return_value = shim
-                mem = PersistentMemory(base_url="http://localhost:8888")
-                return mem, shim
+            return PersistentMemory(base_url="http://localhost:8888")
 
     def test_available_true(self) -> None:
-        mem, _ = self._make()
+        mem = self._make_available()
         assert mem._available is True
 
-    def test_retain_delegates_to_client(self) -> None:
-        mem, shim = self._make()
-        mem.retain("bank", "content")
+    def test_retain_delegates_to_shim(self) -> None:
+        mem = self._make_available()
+        with patch("ttadev.workflows.memory._HttpHindsightShim") as mock_cls:
+            shim = MagicMock()
+            mock_cls.return_value = shim
+            mem.retain("bank", "content")
         shim.retain.assert_called_once_with("bank", "content")
 
-    def test_recall_delegates_to_client(self) -> None:
-        mem, shim = self._make()
-        shim.recall.return_value = ["m1", "m2"]
-        result = mem.recall("bank", "query")
+    def test_recall_delegates_to_shim(self) -> None:
+        mem = self._make_available()
+        with patch("ttadev.workflows.memory._HttpHindsightShim") as mock_cls:
+            shim = MagicMock()
+            shim.recall.return_value = ["m1", "m2"]
+            mock_cls.return_value = shim
+            result = mem.recall("bank", "query")
         shim.recall.assert_called_once_with("bank", "query")
         assert result == ["m1", "m2"]
 
-    def test_reflect_delegates_to_client(self) -> None:
-        mem, shim = self._make()
-        shim.reflect.return_value = "synthesis"
-        result = mem.reflect("bank", "q")
+    def test_reflect_delegates_to_shim(self) -> None:
+        mem = self._make_available()
+        with patch("ttadev.workflows.memory._HttpHindsightShim") as mock_cls:
+            shim = MagicMock()
+            shim.reflect.return_value = "synthesis"
+            mock_cls.return_value = shim
+            result = mem.reflect("bank", "q")
         shim.reflect.assert_called_once_with("bank", "q")
         assert result == "synthesis"
 
     def test_no_warning_logged(self, caplog: pytest.LogCaptureFixture) -> None:
-        mem, _ = self._make()
-        with caplog.at_level(logging.WARNING):
-            mem.retain("bank", "content")
+        mem = self._make_available()
+        with patch("ttadev.workflows.memory._HttpHindsightShim") as mock_cls:
+            mock_cls.return_value = MagicMock()
+            with caplog.at_level(logging.WARNING):
+                mem.retain("bank", "content")
         assert not any("Hindsight unavailable" in r.message for r in caplog.records)
 
 
@@ -282,21 +292,21 @@ class TestHttpHindsightShim:
         shim = _HttpHindsightShim(base_url="http://localhost:8888/")
         assert not shim._base_url.endswith("/")
 
-    def test_retain_posts_to_api_memories(self) -> None:
+    def test_retain_posts_to_correct_endpoint(self) -> None:
         shim = _HttpHindsightShim(base_url="http://localhost:8888")
         with patch("httpx.post", return_value=MagicMock()) as mock_post:
             shim.retain("bank1", "content")
         url = mock_post.call_args[0][0]
-        assert "/api/memories" in url
+        assert "/v1/default/banks/bank1/memories" in url
 
-    def test_recall_posts_to_api_search(self) -> None:
+    def test_recall_posts_to_correct_endpoint(self) -> None:
         shim = _HttpHindsightShim(base_url="http://localhost:8888")
         resp = MagicMock()
-        resp.json.return_value = {"results": [{"content": "found"}]}
+        resp.json.return_value = {"results": [{"text": "found"}]}
         with patch("httpx.post", return_value=resp) as mock_post:
             result = shim.recall("bank1", "query")
         url = mock_post.call_args[0][0]
-        assert "/api/search" in url
+        assert "/v1/default/banks/bank1/memories/recall" in url
         assert result == ["found"]
 
     def test_recall_empty_results(self) -> None:
@@ -306,12 +316,12 @@ class TestHttpHindsightShim:
         with patch("httpx.post", return_value=resp):
             assert shim.recall("bank", "q") == []
 
-    def test_reflect_posts_to_api_reflect(self) -> None:
+    def test_reflect_posts_to_correct_endpoint(self) -> None:
         shim = _HttpHindsightShim(base_url="http://localhost:8888")
         resp = MagicMock()
-        resp.json.return_value = {"synthesis": "the answer"}
+        resp.json.return_value = {"text": "the answer"}
         with patch("httpx.post", return_value=resp) as mock_post:
             result = shim.reflect("bank", "question")
         url = mock_post.call_args[0][0]
-        assert "/api/reflect" in url
+        assert "/v1/default/banks/bank/reflect" in url
         assert result == "the answer"

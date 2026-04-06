@@ -136,9 +136,14 @@ class WorkflowContext(BaseModel):
     start_time: float = Field(default_factory=time.time)
     checkpoints: list[tuple[str, float]] = Field(default_factory=list)
 
-    # Workflow memory — set by WorkflowOrchestrator; None outside of guided workflows.
-    # Typed as Any to avoid a circular import between primitives and workflows.
+    # Tier-1 in-context memory (WorkflowMemory). Always available; auto-initialised
+    # by WorkflowContext.root(). Typed as Any to avoid a circular import.
     memory: Any = Field(default=None, exclude=True)
+
+    # Tier-2 persistent memory (PersistentMemory backed by Hindsight). Opt-in via
+    # the `bank_id` parameter on WorkflowContext.root(). None when not configured.
+    # Typed as Any to avoid a circular import between primitives and workflows.
+    persistent_memory: Any = Field(default=None, exclude=True)
 
     # Default ChatPrimitive model used by spawn_agent when no explicit model is passed.
     # Typed as Any to avoid a circular import between primitives and agents.
@@ -187,7 +192,7 @@ class WorkflowContext(BaseModel):
         Returns:
             New WorkflowContext with inherited trace context
         """
-        return WorkflowContext(
+        child = WorkflowContext(
             workflow_id=self.workflow_id,
             session_id=self.session_id,
             player_id=self.player_id,
@@ -204,9 +209,19 @@ class WorkflowContext(BaseModel):
             agent_tool=self.agent_tool,
             project_id=self.project_id,
         )
+        # Share the same memory objects so child steps see parent's in-flight data.
+        child.memory = self.memory
+        child.persistent_memory = self.persistent_memory
+        return child
 
     @classmethod
-    def root(cls, workflow_id: str) -> WorkflowContext:
+    def root(
+        cls,
+        workflow_id: str,
+        *,
+        bank_id: str | None = None,
+        hindsight_url: str = "http://localhost:8888",
+    ) -> WorkflowContext:
         """Create a fresh root context for a new workflow.
 
         Generates a new ``correlation_id``; ``causation_id`` and
@@ -214,8 +229,20 @@ class WorkflowContext(BaseModel):
         Agent identity is auto-populated from the process identity module when
         available.
 
+        Tier-1 in-context memory (``WorkflowMemory``) is always initialised
+        so that all primitives in the workflow can share transient state via
+        ``ctx.memory.set()`` / ``ctx.memory.get()``.
+
+        Tier-2 persistent memory (``PersistentMemory``) is initialised when
+        *bank_id* is provided.  If Hindsight is unreachable it degrades
+        gracefully (all calls become no-ops with a single warning).
+
         Args:
             workflow_id: Human-readable identifier for this workflow or step.
+            bank_id: Hindsight bank ID for cross-session persistent memory.
+                     When ``None`` (default), ``ctx.persistent_memory`` is ``None``.
+            hindsight_url: Base URL of the Hindsight server. Defaults to
+                           ``http://localhost:8888``.
 
         Returns:
             A new :class:`WorkflowContext` with no parent linkage.
@@ -223,10 +250,35 @@ class WorkflowContext(BaseModel):
         Example:
             .. code-block:: python
 
+                # Ephemeral in-context memory only
                 ctx = WorkflowContext.root("fetch-user-profile")
+
+                # With cross-session persistent memory
+                ctx = WorkflowContext.root("fetch-user-profile", bank_id="my-project")
                 result = await my_primitive.execute(data, ctx)
         """
-        return cls(workflow_id=workflow_id)
+        ctx = cls(workflow_id=workflow_id)
+
+        # Tier-1: always available, zero-cost in-context store.
+        try:
+            from ttadev.workflows.memory import WorkflowMemory  # noqa: PLC0415
+
+            ctx.memory = WorkflowMemory()
+        except Exception:  # noqa: BLE001
+            pass  # Never block workflow creation due to memory issues
+
+        # Tier-2: optional, Hindsight-backed cross-session store.
+        if bank_id is not None:
+            try:
+                from ttadev.workflows.memory import PersistentMemory  # noqa: PLC0415
+
+                ctx.persistent_memory = PersistentMemory(base_url=hindsight_url)
+                # Store bank_id in metadata so downstream code can find it.
+                ctx.metadata["hindsight_bank_id"] = bank_id
+            except Exception:  # noqa: BLE001
+                pass  # Never block workflow creation due to memory issues
+
+        return ctx
 
     @classmethod
     def child(cls, parent: WorkflowContext, step_name: str) -> WorkflowContext:

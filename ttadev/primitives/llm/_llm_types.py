@@ -164,3 +164,5 @@ class LLMResponse:
     usage: dict[str, int] | None = None
     tool_calls: list[ToolCall] | None = None
     finish_reason: str | None = None
+    cost_usd: float | None = None
+    """Estimated cost of this call in USD (populated by LiteLLMPrimitive)."""
