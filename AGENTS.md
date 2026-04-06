@@ -42,10 +42,75 @@ uvx pyright ttadev/     # Type check
 
 ## Skills (on-demand HOW-TO workflows)
 
-`build-test-verify` · `core-conventions` · `git-commit` · `create-pull-request`
-`self-review-checklist` · `sdd-workflow` · `session-start`
+Skills live in `.github/skills/`. Invoke by name when relevant.
 
-Skills live in `.github/skills/`. Before creating a new skill, search `github/awesome-copilot` first.
+| Skill | Purpose |
+|-------|---------|
+| `session-start` | Orient at session start — load context, warm up |
+| `build-test-verify` | Build, test, lint, type-check, verify quality |
+| `core-conventions` | Python code conventions (uv, types, primitives, state) |
+| `git-commit` | Conventional Commits format and pre-commit checks |
+| `create-pull-request` | PR title, description, review checklist |
+| `self-review-checklist` | Pre-merge quality audit |
+| `sdd-workflow` | Spec-Driven Development 4-phase workflow |
+| `ttadev-primitives` | Compose workflows with `>>` operator and primitives |
+| `ttadev-llm` | Call LLMs via LiteLLMPrimitive / UniversalLLMPrimitive |
+| `feature-development` | Full-stack feature workflow (API → UI → tests) |
+| `package-release` | PyPI release workflow with validation |
+| `incident-response` | Emergency production response |
+| `create-atomic-note` | Save a KB note to `docs/kb-exports/` |
+
+Before creating a new skill, search `github/awesome-copilot` first.
+
+## Agent-Specific Guides (`docs/agent-guides/`)
+
+Deep-dive references for specific topics:
+
+| Guide | Content |
+|-------|---------|
+| `testing-architecture.md` | Testing standards, CI pipeline |
+| `primitives-patterns.md` | Composition, all primitives |
+| `python-standards.md` | Types, naming, imports |
+| `sdd-constitution.md` | Full SDD §1-§4 |
+| `observability-guide.md` | OpenTelemetry integration |
+| `todo-management.md` | Repository TODO format |
+| `secrets-guide.md` | API keys, `.env`, 1Password CLI |
+| `llm-provider-strategy.md` | Provider routing and fallback |
+| `l0-workflow-runbook.md` | L0 control plane walkthrough |
+
+## Custom Agents (`.github/agents/`)
+
+Copilot Chat agents with specialized roles:
+
+| Agent | Specialty |
+|-------|-----------|
+| `architect` | System design, patterns, trade-offs |
+| `backend-engineer` | Python primitives and workflows |
+| `frontend-engineer` | React/TypeScript UI |
+| `testing-specialist` | QA, test automation, validation |
+| `code-reviewer` | Post-implementation quality audit |
+| `project-planner` | SDD specs and task breakdowns |
+| `devops-engineer` | Infrastructure, CI/CD, deployment |
+| `data-scientist` | Data analysis, ML workflows |
+| `observability-expert` | Monitoring, tracing, metrics |
+
+## Copilot Instructions (`.github/instructions/`)
+
+Auto-applied by file pattern — agents don't need to reference these directly:
+
+| File | Applies to |
+|------|-----------|
+| `python.instructions.md` | `ttadev/**/*.py` |
+| `testing.instructions.md` | `**/tests/**/*.py` |
+| `scripts.instructions.md` | `scripts/**/*.py` |
+| `documentation.instructions.md` | `**/*.md` |
+| `agents.instructions.md` | `**/*.agent.md` |
+| `agent-skills.instructions.md` | `**/.github/skills/**/SKILL.md` |
+| `instructions.instructions.md` | `**/*.instructions.md` |
+| `agent-safety.instructions.md` | `**` (all files) |
+| `context-engineering.instructions.md` | `**` (all files) |
+| `ai-prompt-engineering-safety-best-practices.instructions.md` | `**` (all files) |
+| `github-actions-ci-cd-best-practices.instructions.md` | `.github/workflows/*.yml` |
 
 ## L0 Directive
 
