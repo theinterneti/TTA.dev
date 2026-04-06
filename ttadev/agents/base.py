@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from ttadev.agents.spec import AgentSpec, ToolRule
+from ttadev.agents.spec import AgentSpec, HandoffTrigger, ToolRule
 from ttadev.agents.task import AgentResult, AgentTask
 from ttadev.agents.tool_call_loop import ToolCallLoop, ToolCallRequest
 from ttadev.primitives.observability.instrumented_primitive import InstrumentedPrimitive
@@ -13,6 +13,14 @@ if TYPE_CHECKING:
     from ttadev.agents.protocol import ChatPrimitive
     from ttadev.primitives.core.base import WorkflowContext
     from ttadev.primitives.llm.model_router import ModelRouterPrimitive
+
+try:
+    from opentelemetry import trace as _otel_trace
+
+    _TRACING_AVAILABLE = True
+except ImportError:
+    _TRACING_AVAILABLE = False
+    _otel_trace = None  # type: ignore[assignment]
 
 
 def _stub_handler(tool_name: str):  # type: ignore[return]
@@ -65,10 +73,17 @@ class AgentPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
     async def _execute_impl(self, task: AgentTask, ctx: WorkflowContext) -> AgentResult:
         spawned_agents: list[str] = []
 
+        # Tag the current span (created by InstrumentedPrimitive.execute) with agent identity.
+        if _TRACING_AVAILABLE and _otel_trace is not None:
+            current_span = _otel_trace.get_current_span()
+            if current_span.is_recording():
+                current_span.set_attribute("agent.role", self._spec.role)
+                current_span.set_attribute("agent.name", self._spec.name)
+
         # Check handoff triggers — spawn sub-agents before running main task
         for trigger in self._spec.handoff_triggers:
             if trigger.condition(task):
-                sub_result = await ctx.spawn_agent(trigger.target_agent, task)
+                sub_result = await self._spawn_with_handoff_span(trigger, task, ctx)
                 spawned_agents.append(trigger.target_agent)
                 # Return sub-agent result directly if it was triggered
                 return AgentResult(
@@ -118,6 +133,32 @@ class AgentPrimitive(InstrumentedPrimitive[AgentTask, AgentResult]):
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+
+    async def _spawn_with_handoff_span(
+        self, trigger: HandoffTrigger, task: AgentTask, ctx: WorkflowContext
+    ) -> AgentResult:
+        """Spawn a sub-agent and emit an OTel span describing the handoff.
+
+        The span name ``"agent.handoff"`` is the stable key used by the
+        observability server to build the workflow DAG.  Attributes:
+          - ``handoff.from_agent``  — name of this agent
+          - ``handoff.to_agent``    — target agent name from the trigger
+          - ``handoff.task_id``     — workflow/task identifier from context
+          - ``handoff.reason``      — human-readable reason from the trigger
+
+        When tracing is unavailable the call degrades gracefully to a direct
+        ``ctx.spawn_agent()`` call with no span overhead.
+        """
+        task_id = ctx.workflow_id or ""
+        if _TRACING_AVAILABLE and _otel_trace is not None:
+            tracer = _otel_trace.get_tracer(__name__)
+            with tracer.start_as_current_span("agent.handoff") as handoff_span:
+                handoff_span.set_attribute("handoff.from_agent", self._spec.name)
+                handoff_span.set_attribute("handoff.to_agent", trigger.target_agent)
+                handoff_span.set_attribute("handoff.task_id", task_id)
+                handoff_span.set_attribute("handoff.reason", trigger.reason)
+                return await ctx.spawn_agent(trigger.target_agent, task)
+        return await ctx.spawn_agent(trigger.target_agent, task)
 
     def _build_prompt(self, task: AgentTask) -> str:
         parts = [task.instruction]
