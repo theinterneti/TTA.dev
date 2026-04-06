@@ -18,6 +18,7 @@
     <button class="tab-btn" data-tab="live" role="tab" aria-selected="false">
       <span class="live-dot" aria-hidden="true"></span>Live
     </button>
+    <button class="tab-btn" data-tab="fleet" role="tab" aria-selected="false">Fleet</button>
   </nav>
 
   <!-- Sessions tab content -->
@@ -47,6 +48,32 @@
       <div class="panel-heading">🟢 Active Agents</div>
       <div id="live-agents-grid">
         <!-- Agent cards rendered by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Fleet status tab content -->
+  <div id="tab-fleet" class="tab-panel" role="tabpanel" hidden>
+    <div id="fleet-panel">
+      <div class="panel-heading">🚀 Fleet Status</div>
+      <table id="fleet-runs-table">
+        <thead>
+          <tr>
+            <th>Agent Role</th>
+            <th>Task ID</th>
+            <th>Status</th>
+            <th>Elapsed</th>
+            <th>Lease TTL</th>
+          </tr>
+        </thead>
+        <tbody id="fleet-runs-body">
+          <!-- Rows rendered by app.js -->
+        </tbody>
+      </table>
+      <div id="fleet-empty-state" class="live-empty-state" hidden>
+        <div class="empty-icon">🚀</div>
+        <p>No active runs.</p>
+        <small>Start an agent workflow to see fleet activity.</small>
       </div>
     </div>
   </div>

@@ -15,6 +15,10 @@ Routes:
   GET  /api/v2/projects/{id}      → project session detail
   GET  /api/v2/projects/{id}/sessions → sessions belonging to a project
   GET  /api/v2/agents/active      → currently active agents (live agent panel)
+  GET  /api/v2/control/tasks      → all tasks with gate status (L0 control plane)
+  GET  /api/v2/control/runs       → active agent runs (L0 control plane)
+  GET  /api/v2/control/locks      → active workspace + file locks (L0 control plane)
+  GET  /api/v2/control/workflows  → workflow steps with timing (L0 control plane)
   WS   /ws                        → real-time span/session/agent events
 
   Legacy v1 routes preserved for backward compatibility.
@@ -31,6 +35,7 @@ from typing import Any
 from aiohttp import web
 
 from ttadev.control_plane import ControlPlaneService
+from ttadev.control_plane.store import ControlPlaneStore
 from ttadev.observability.agent_tracker import AgentTracker
 from ttadev.observability.cgc_integration import CGCIntegration
 from ttadev.observability.collector import TraceCollector
@@ -112,6 +117,10 @@ class ObservabilityServer:
         self.app.router.add_get("/api/v2/cgc/{view}", self._v2_cgc_graph)
         self.app.router.add_get("/api/v2/primitives", self._v2_primitives)
         self.app.router.add_get("/api/v2/control/ownership", self._v2_control_ownership)
+        self.app.router.add_get("/api/v2/control/tasks", self._v2_control_tasks)
+        self.app.router.add_get("/api/v2/control/runs", self._v2_control_runs)
+        self.app.router.add_get("/api/v2/control/locks", self._v2_control_locks)
+        self.app.router.add_get("/api/v2/control/workflows", self._v2_control_workflows)
         self.app.router.add_get("/api/v2/projects", self._v2_projects)
         self.app.router.add_get("/api/v2/projects/{id}/sessions", self._v2_project_sessions)
         self.app.router.add_get("/api/v2/projects/{id}/ownership", self._v2_project_ownership)
@@ -301,6 +310,75 @@ class ObservabilityServer:
         """Return active control-plane ownership summaries."""
         service = ControlPlaneService(self._data_dir)
         return web.json_response({"active": service.list_active_ownership()})
+
+    def _get_control_store(self) -> ControlPlaneStore:
+        """Return a ControlPlaneStore rooted at this server's data directory."""
+        return ControlPlaneStore(data_dir=self._data_dir)
+
+    async def _v2_control_tasks(self, request: web.Request) -> web.Response:
+        """Return all L0 control-plane tasks with gate status.
+
+        Always returns ``{"tasks": [...]}`` — never 404 or error on empty state.
+        """
+        loop = asyncio.get_running_loop()
+
+        def _load() -> list[dict]:
+            store = self._get_control_store()
+            return [t.to_dict() for t in store.list_tasks()]
+
+        tasks = await loop.run_in_executor(None, _load)
+        return web.json_response({"tasks": tasks})
+
+    async def _v2_control_runs(self, request: web.Request) -> web.Response:
+        """Return all active L0 agent runs.
+
+        Always returns ``{"runs": [...]}`` — never 404 or error on empty state.
+        """
+        loop = asyncio.get_running_loop()
+
+        def _load() -> list[dict]:
+            store = self._get_control_store()
+            return [r.to_dict() for r in store.list_runs()]
+
+        runs = await loop.run_in_executor(None, _load)
+        return web.json_response({"runs": runs})
+
+    async def _v2_control_locks(self, request: web.Request) -> web.Response:
+        """Return all active workspace and file locks.
+
+        Always returns ``{"locks": [...]}`` — never 404 or error on empty state.
+        """
+        loop = asyncio.get_running_loop()
+
+        def _load() -> list[dict]:
+            store = self._get_control_store()
+            return [lk.to_dict() for lk in store.list_locks()]
+
+        locks = await loop.run_in_executor(None, _load)
+        return web.json_response({"locks": locks})
+
+    async def _v2_control_workflows(self, request: web.Request) -> web.Response:
+        """Return workflow steps with timing from tasks that carry workflow tracking data.
+
+        Always returns ``{"workflows": [...]}`` — never 404 or error on empty state.
+        """
+        loop = asyncio.get_running_loop()
+
+        def _load() -> list[dict]:
+            store = self._get_control_store()
+            result: list[dict] = []
+            for task in store.list_tasks():
+                if task.workflow is not None:
+                    entry = {
+                        "task_id": task.id,
+                        "task_title": task.title,
+                        "workflow": task.workflow.to_dict(),
+                    }
+                    result.append(entry)
+            return result
+
+        workflows = await loop.run_in_executor(None, _load)
+        return web.json_response({"workflows": workflows})
 
     async def _v2_projects(self, request: web.Request) -> web.Response:
         """Return all project sessions, newest first."""

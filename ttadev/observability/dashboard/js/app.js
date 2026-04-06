@@ -86,6 +86,8 @@ class App extends EventEmitter {
     });
     if (tabName === 'live') {
       this._activateLiveTab();
+    } else if (tabName === 'fleet') {
+      this._activateFleetTab();
     }
   }
 
@@ -204,6 +206,90 @@ class App extends EventEmitter {
       const grid = document.getElementById('live-agents-grid');
       if (grid && grid.children.length === 0) this._renderLiveEmptyState(grid);
     }, 5000);
+  }
+
+  // ------------------------------------------------------------------
+  // Fleet status panel
+  // ------------------------------------------------------------------
+  async _activateFleetTab() {
+    const tbody = document.getElementById('fleet-runs-body');
+    const emptyState = document.getElementById('fleet-empty-state');
+    if (!tbody) return;
+    try {
+      const [runsData, tasksData, locksData] = await Promise.all([
+        this.fetchJSON('/api/v2/control/runs'),
+        this.fetchJSON('/api/v2/control/tasks'),
+        this.fetchJSON('/api/v2/control/locks'),
+      ]);
+      const runs = runsData.runs || [];
+      const tasks = tasksData.tasks || [];
+      const locks = locksData.locks || [];
+
+      // Build lookup maps
+      const taskMap = Object.fromEntries(tasks.map(t => [t.id, t]));
+      const locksByRun = {};
+      locks.forEach(lk => {
+        if (!locksByRun[lk.run_id]) locksByRun[lk.run_id] = [];
+        locksByRun[lk.run_id].push(lk);
+      });
+
+      tbody.innerHTML = '';
+      if (runs.length === 0) {
+        emptyState && (emptyState.hidden = false);
+        return;
+      }
+      emptyState && (emptyState.hidden = true);
+
+      const now = Date.now();
+      runs.forEach(run => {
+        const task = taskMap[run.task_id] || {};
+        const agentRole = run.agent_role || '—';
+        const taskId = run.task_id || '—';
+        const status = run.status || '—';
+
+        const startedMs = run.started_at ? new Date(run.started_at).getTime() : now;
+        const elapsedSec = Math.floor((now - startedMs) / 1000);
+        const elapsed = elapsedSec < 60
+          ? `${elapsedSec}s`
+          : `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`;
+
+        let ttlCell = '—';
+        if (run.lease_expires_at) {
+          const expiresMs = new Date(run.lease_expires_at).getTime();
+          const ttlSec = Math.max(0, Math.floor((expiresMs - now) / 1000));
+          ttlCell = ttlSec > 0 ? `${ttlSec}s` : 'expired';
+        }
+
+        const tr = document.createElement('tr');
+        tr.dataset.runId = run.id;
+        tr.innerHTML = `
+          <td>${this._esc(agentRole)}</td>
+          <td><code>${this._esc(taskId)}</code></td>
+          <td><span class="run-status run-status--${this._esc(status)}">${this._esc(status)}</span></td>
+          <td>${elapsed}</td>
+          <td class="fleet-ttl">${ttlCell}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Auto-refresh TTL countdown every 5s
+      if (this._fleetRefreshTimer) clearInterval(this._fleetRefreshTimer);
+      this._fleetRefreshTimer = setInterval(() => {
+        if (document.getElementById('tab-fleet') && !document.getElementById('tab-fleet').hidden) {
+          this._activateFleetTab();
+        } else {
+          clearInterval(this._fleetRefreshTimer);
+        }
+      }, 5000);
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="5" class="live-empty-state">Could not load fleet data: ${err.message}</td></tr>`;
+    }
+  }
+
+  _esc(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[c]);
   }
 
   // ------------------------------------------------------------------
