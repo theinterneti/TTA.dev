@@ -37,9 +37,6 @@ Extension Categories:
     **Benchmarking (benchmarking)**
         Performance benchmarking utilities.
 
-    **Knowledge (knowledge)**
-        Logseq knowledge base querying.
-
     **Lifecycle (lifecycle)**
         Stage management and validation gates.
 
@@ -70,7 +67,6 @@ EXTENSION_MODULES: dict[str, str] = {
     "analysis": "ttadev.primitives.analysis",
     "apm": "ttadev.primitives.apm",
     "benchmarking": "ttadev.primitives.benchmarking",
-    "knowledge": "ttadev.primitives.knowledge",
     "lifecycle": "ttadev.primitives.lifecycle",
     "orchestration": "ttadev.primitives.orchestration",
     "research": "ttadev.primitives.research",

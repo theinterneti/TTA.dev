@@ -38,7 +38,7 @@ for the longer-term design direction.
 
 - not every package-local or historical doc has been reconciled with the current proof path yet
 - Pyright still reports significant type issues
-- some integrations and knowledge-base surfaces remain partial or stubbed
+- some integrations remain partial or stubbed
 - the “one canonical proof path” story is now in place, but broader supporting examples still lag
 
 ---
@@ -246,41 +246,14 @@ Pre-built workflows for common tasks:
 
 ---
 
-## Phase 4: Knowledge Integration (Q3 2026) 🚧 STUB IMPLEMENTED
+## Phase 4: Knowledge Integration (Q3 2026) 📋 DEFERRED
 
-**Status:** Partially implemented — core primitive exists, integration is aspirational
+**Status:** Removed — the original `KnowledgeBasePrimitive` was a stub with no backend and has
+been deleted. When knowledge integration is needed, it should be designed from scratch with a
+real backend (e.g., Hindsight MCP, vector store, or RAG pipeline) rather than reviving the old
+logseq-oriented stub.
 
-**Goal:** Capture and surface best practices contextually throughout the development lifecycle.
-
-### Implemented
-
-**Location:** `ttadev/primitives/knowledge/`
-
-- ✅ `KnowledgeBasePrimitive` — query a knowledge backend for contextual guidance
-- ✅ `KBQuery`, `KBResult`, `KBPage` models with Pydantic validation
-- ✅ Graceful degradation when the configured backend is unavailable
-- ✅ Query types: `best_practices`, `common_mistakes`, `examples`, `related`, `tags`
-
-### Still Needed 📋
-
-- 📋 Populated knowledge content (best practices, common mistakes)
-- 📋 Integration with agent system (Phase 2) for contextual queries
-- 📋 Integration with guided workflows (Phase 3)
-- 📋 CLI commands that surface contextual tips
-- 📋 Lifecycle validation using knowledge base
-
-### Phase 4 Success Criteria
-
-- [ ] Knowledge base populated with meaningful content (50+ entries)
-- [ ] Agent system queries knowledge base during workflow execution
-- [ ] 80%+ relevance on contextual advice
-
-### Why Not Earlier?
-
-**Decision:** Need agent system and guided workflows to provide context for knowledge retrieval.
-The primitive exists now but is essentially a stub — there is no populated backend yet.
-
-**Current approach:** Documentation in markdown files serves this role for now.
+**Current approach:** Documentation in markdown files and Hindsight memory serve this role.
 
 ---
 

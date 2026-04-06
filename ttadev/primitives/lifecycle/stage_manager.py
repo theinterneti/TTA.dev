@@ -109,7 +109,6 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
         target_stage: Stage,
         project_path: Path,
         context: WorkflowContext,
-        kb: WorkflowPrimitive | None = None,
     ) -> StageReadiness:
         """Check if project is ready to transition to target stage.
 
@@ -118,7 +117,6 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
             target_stage: Target lifecycle stage
             project_path: Path to project root
             context: Workflow context
-            kb: Optional KnowledgeBasePrimitive for contextual guidance
 
         Returns:
             StageReadiness assessment with detailed feedback
@@ -165,58 +163,6 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
             if critical.fix_command:
                 next_steps.append(f"{critical.check_name}: {critical.fix_command}")
 
-        # Query KB for contextual guidance if available
-        kb_recommendations: list[dict[str, object]] = []
-        if kb:
-            try:
-                # Query for target stage best practices
-                from ttadev.primitives.knowledge import KBQuery
-
-                best_practices_query = KBQuery(
-                    query_type="best_practices",
-                    topic=target_stage.value,
-                    stage=target_stage.value,
-                    max_results=3,
-                    include_content=False,
-                )
-                best_practices_result = await kb.execute(best_practices_query, context)
-
-                # Query for common mistakes in current stage
-                mistakes_query = KBQuery(
-                    query_type="common_mistakes",
-                    topic=current_stage.value,
-                    stage=current_stage.value,
-                    max_results=3,
-                    include_content=False,
-                )
-                mistakes_result = await kb.execute(mistakes_query, context)
-
-                # Normalize KB pages into a simple dict structure expected by
-                # StageReadiness.get_summary() and downstream tests.
-                for page in best_practices_result.pages:
-                    kb_recommendations.append(
-                        {
-                            "title": page.title,
-                            "type": "best_practice",
-                            "tags": list(page.tags),
-                            "url": page.url or "",
-                        }
-                    )
-
-                for page in mistakes_result.pages:
-                    kb_recommendations.append(
-                        {
-                            "title": page.title,
-                            "type": "common_mistake",
-                            "tags": list(page.tags),
-                            "url": page.url or "",
-                        }
-                    )
-
-            except Exception:
-                # Gracefully ignore KB errors - don't fail validation
-                pass
-
         return StageReadiness(
             current_stage=current_stage,
             target_stage=target_stage,
@@ -228,7 +174,6 @@ class StageManager(WorkflowPrimitive[StageRequest, StageReadiness]):
             all_results=check_result.all_results,
             recommended_actions=recommended_actions,
             next_steps=next_steps,
-            kb_recommendations=kb_recommendations,
         )
 
     async def transition(

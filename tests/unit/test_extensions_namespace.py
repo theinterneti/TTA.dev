@@ -40,7 +40,7 @@ def test_list_extensions_contains_known_names() -> None:
     from ttadev.primitives.extensions import list_extensions
 
     exts = list_extensions()
-    for name in ("ace", "adaptive", "analysis", "apm", "knowledge", "lifecycle"):
+    for name in ("ace", "adaptive", "analysis", "apm", "lifecycle"):
         assert name in exts, f"{name!r} missing from list_extensions()"
 
 

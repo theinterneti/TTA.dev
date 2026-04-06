@@ -19,18 +19,6 @@ def _has_example(relative: str) -> bool:
 
 
 @pytest.mark.skipif(
-    not _has_example("mcp/knowledge_resource_server.py"),
-    reason="examples/mcp/knowledge_resource_server.py not present",
-)
-def test_knowledge_resource_server_instantiation():
-    """Knowledge Resource MCP server imports cleanly and exposes expected attributes."""
-    from examples.mcp.knowledge_resource_server import mcp  # type: ignore[import]
-
-    assert mcp.name, "Server must have a non-empty name"
-    assert hasattr(mcp, "run"), "Server must expose a run() method"
-
-
-@pytest.mark.skipif(
     not _has_example("mcp/agent_tool_server.py"),
     reason="examples/mcp/agent_tool_server.py not present",
 )

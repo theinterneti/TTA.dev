@@ -17,17 +17,6 @@ def _has_example(relative: str) -> bool:
 
 
 @pytest.mark.skipif(
-    not _has_example("mcp/knowledge_resource_server.py"),
-    reason="examples/mcp/knowledge_resource_server.py not present",
-)
-def test_knowledge_resource_server_import():
-    """Knowledge Resource MCP server imports cleanly."""
-    from examples.mcp.knowledge_resource_server import mcp  # type: ignore[import]
-
-    assert mcp.name
-
-
-@pytest.mark.skipif(
     not _has_example("mcp/agent_tool_server.py"),
     reason="examples/mcp/agent_tool_server.py not present",
 )

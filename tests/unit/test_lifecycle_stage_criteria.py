@@ -3,7 +3,7 @@
 Covers:
 - StageCriteria: creation, defaults, get_all_checks(), factory isolation
 - StageReadiness: creation, get_summary() — every branch (blockers, critical,
-  warnings, info, next_steps, recommended_actions, kb_recommendations)
+  warnings, info, next_steps, recommended_actions)
 - TransitionResult: creation, __post_init__ timestamp logic, get_summary()
 """
 
@@ -221,7 +221,6 @@ class TestStageReadiness:
         assert r.all_results == []
         assert r.recommended_actions == []
         assert r.next_steps == []
-        assert r.kb_recommendations == []
 
     def test_get_summary_returns_string(self) -> None:
         assert isinstance(_bare_readiness().get_summary(), str)
@@ -363,29 +362,6 @@ class TestStageReadiness:
         summary = r.get_summary()
         assert "RECOMMENDED ACTIONS" in summary
         assert "Action alpha" in summary
-
-    def test_get_summary_shows_kb_recommendations_with_type_uppercased(self) -> None:
-        r = StageReadiness(
-            current_stage=Stage.TESTING,
-            target_stage=Stage.STAGING,
-            ready=True,
-            kb_recommendations=[{"title": "Best Practices Guide", "type": "guide"}],
-        )
-        summary = r.get_summary()
-        assert "KNOWLEDGE BASE" in summary
-        assert "Best Practices Guide" in summary
-        assert "GUIDE" in summary
-
-    def test_get_summary_kb_rec_missing_type_defaults_to_general(self) -> None:
-        r = StageReadiness(
-            current_stage=Stage.TESTING,
-            target_stage=Stage.STAGING,
-            ready=True,
-            kb_recommendations=[{"title": "My Doc"}],  # no "type" key
-        )
-        summary = r.get_summary()
-        assert "GENERAL" in summary
-        assert "My Doc" in summary
 
     def test_get_summary_contains_separator_lines(self) -> None:
         summary = _bare_readiness().get_summary()

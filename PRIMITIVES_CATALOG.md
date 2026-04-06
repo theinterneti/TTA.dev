@@ -818,7 +818,6 @@ from ttadev.primitives.adaptive import AdaptiveRetryPrimitive
 | **analysis** | `ttadev.primitives.analysis` | AST-based pattern detection and transformation |
 | **apm** | `ttadev.primitives.apm` | Application performance monitoring helpers |
 | **benchmarking** | `ttadev.primitives.benchmarking` | Performance benchmarking utilities |
-| **knowledge** | `ttadev.primitives.knowledge` | Knowledge and memory-oriented primitives |
 | **lifecycle** | `ttadev.primitives.lifecycle` | Stage management and validation gates |
 | **orchestration** | `ttadev.primitives.orchestration` | Multi-model orchestration and delegation |
 | **research** | `ttadev.primitives.research` | Provider research and free-tier discovery |
@@ -1608,8 +1607,8 @@ If you need durable strategy storage today, prefer one of these patterns:
 
 - keep the adaptive primitive in memory and export strategy snapshots yourself
 - store learned strategy metadata in your own persistence layer
-- build an explicit adapter around the current knowledge or memory primitives instead of assuming a
-  built-in Logseq bridge
+- build an explicit adapter around memory primitives instead of assuming a
+  built-in knowledge bridge
 
 ---
 

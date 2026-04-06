@@ -6,7 +6,7 @@ Core primitives are exported directly from this package:
     RetryPrimitive, FallbackPrimitive, TimeoutPrimitive, CompensationPrimitive,
     CachePrimitive, MockPrimitive, GitCollaborationPrimitive.
 
-Extension modules (ace, adaptive, analysis, apm, benchmarking, knowledge,
+Extension modules (ace, adaptive, analysis, apm, benchmarking,
 lifecycle, orchestration, research, speckit) are accessible via their original
 import paths or through the ``extensions`` namespace::
 

@@ -50,7 +50,7 @@ That flow currently proves:
 - broader example coverage beyond the narrow proof path is still catching up
 - some package-local and historical docs still need follow-up cleanup for full consistency
 - type-checking still fails in several areas
-- some integrations and knowledge-base surfaces remain partial or stubbed
+- some integrations remain partial or stubbed
 - the first documented multi-agent proof path exists, but the repo still needs
   broader workflow coverage and stronger validation of what is stable vs experimental
 

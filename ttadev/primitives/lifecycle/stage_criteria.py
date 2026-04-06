@@ -54,7 +54,6 @@ class StageReadiness:
         all_results: All validation results
         recommended_actions: List of recommended actions to reach target stage
         next_steps: Specific next steps to take
-        kb_recommendations: Knowledge base pages with contextual guidance
     """
 
     current_stage: Stage
@@ -67,7 +66,6 @@ class StageReadiness:
     all_results: list[ValidationResult] = field(default_factory=list)
     recommended_actions: list[str] = field(default_factory=list)
     next_steps: list[str] = field(default_factory=list)
-    kb_recommendations: list[dict[str, object]] = field(default_factory=list)
 
     def get_summary(self) -> str:
         """Get human-readable summary of readiness assessment.
@@ -116,13 +114,6 @@ class StageReadiness:
             summary_lines.append("\n💡 RECOMMENDED ACTIONS:")
             for action in self.recommended_actions:
                 summary_lines.append(f"  • {action}")
-
-        if self.kb_recommendations:
-            summary_lines.append("\n📚 KNOWLEDGE BASE RECOMMENDATIONS:")
-            for rec in self.kb_recommendations:
-                title = rec.get("title", "Unknown")
-                rec_type = str(rec.get("type", "general"))
-                summary_lines.append(f"  • [{rec_type.upper()}] {title}")
 
         summary_lines.append(f"\n{'=' * 60}\n")
         return "\n".join(summary_lines)
