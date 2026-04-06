@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import os
 import re
+from pathlib import Path
 from typing import Any
 
 from ttadev.primitives.core import WorkflowContext, WorkflowPrimitive
@@ -219,9 +220,11 @@ class SmartRouterPrimitive:
         self,
         mode: str = "default",
         or_free_model: str = _OR_FREE_MODEL,
+        data_dir: Path | None = None,
     ) -> None:
         self._mode = mode
         self._or_free_model = or_free_model
+        self._data_dir = data_dir or Path(".tta")
 
     def build(self) -> LiteLLMSmartAdapter:
         """Build and return the configured :class:`LiteLLMSmartAdapter`.
@@ -251,7 +254,20 @@ class SmartRouterPrimitive:
         return LiteLLMSmartAdapter(modes=modes)
 
     def _build_tiers(self) -> list[RouterTierConfig]:
-        """Return ordered tier list based on available API keys."""
+        """Return ordered tier list based on available API keys and benchmark data.
+
+        When benchmark data exists in ``.tta/benchmarks.json``:
+
+        - ``"quality"`` mode sorts tiers by ``quality_score`` descending.
+        - ``"fast"`` mode sorts tiers by ``p50_ms`` ascending.
+        - Any other mode uses the static default quality order.
+
+        Benchmark data is advisory — tiers with no benchmark entry retain
+        their default position (sorted to the end when all others have data).
+
+        Returns:
+            Ordered list of :class:`RouterTierConfig` instances.
+        """
         tiers: list[RouterTierConfig] = []
 
         if os.environ.get("GROQ_API_KEY"):
@@ -266,7 +282,60 @@ class SmartRouterPrimitive:
         # Ollama is always the final fallback (no key required).
         tiers.append(RouterTierConfig(provider="ollama"))
 
+        # Apply benchmark-driven reordering when data is available.
+        if self._mode in {"quality", "fast"}:
+            tiers = self._sort_tiers_by_benchmarks(tiers)
+
         return tiers
+
+    def _sort_tiers_by_benchmarks(self, tiers: list[RouterTierConfig]) -> list[RouterTierConfig]:
+        """Reorder *tiers* using benchmark data from ``.tta/benchmarks.json``.
+
+        Falls back to the original order when no benchmark file exists or when
+        no tier has benchmark data.
+
+        Args:
+            tiers: Tiers in their default order.
+
+        Returns:
+            Reordered tiers (original order preserved as tiebreaker).
+        """
+        from ttadev.cli.benchmark import load_benchmarks
+
+        benchmarks = load_benchmarks(self._data_dir)
+        if not benchmarks:
+            return tiers
+
+        def _model_key(tier: RouterTierConfig) -> str:
+            """Resolve tier to a litellm model string for benchmark lookup."""
+            result = _tier_to_litellm_model(tier)
+            return result if result is not None else ""
+
+        if self._mode == "quality":
+            # Higher quality_score is better → sort descending; unbenchmarked last.
+            def quality_sort_key(idx_tier: tuple[int, RouterTierConfig]) -> tuple[float, int]:
+                idx, tier = idx_tier
+                model_str = _model_key(tier)
+                entry = benchmarks.get(model_str)
+                score = entry.quality_score if entry is not None else -1.0
+                return (-score, idx)  # negated for descending; idx for stable tiebreak
+
+            sorted_pairs = sorted(enumerate(tiers), key=quality_sort_key)
+
+        else:  # "fast"
+            # Lower p50_ms is better → sort ascending; unbenchmarked last.
+            _big = float("inf")
+
+            def fast_sort_key(idx_tier: tuple[int, RouterTierConfig]) -> tuple[float, int]:
+                idx, tier = idx_tier
+                model_str = _model_key(tier)
+                entry = benchmarks.get(model_str)
+                latency = entry.p50_ms if entry is not None else _big
+                return (latency, idx)  # ascending; idx for stable tiebreak
+
+            sorted_pairs = sorted(enumerate(tiers), key=fast_sort_key)
+
+        return [tier for _, tier in sorted_pairs]
 
     @classmethod
     def make(cls, **kwargs: object) -> LiteLLMSmartAdapter:
@@ -276,6 +345,7 @@ class SmartRouterPrimitive:
 
         Args:
             **kwargs: Forwarded to :class:`SmartRouterPrimitive.__init__`.
+                Supports ``mode``, ``or_free_model``, and ``data_dir``.
 
         Returns:
             Configured :class:`LiteLLMSmartAdapter`.

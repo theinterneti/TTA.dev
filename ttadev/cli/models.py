@@ -380,6 +380,36 @@ def register_model_subcommands(sub: argparse._SubParsersAction) -> None:  # type
     )
     test_p.add_argument("model", metavar="MODEL", help="litellm model string to test")
 
+    # ------------------------------------------------------------------ #
+    # models benchmark                                                     #
+    # ------------------------------------------------------------------ #
+    bench_p = models_sub.add_parser(
+        "benchmark",
+        help="Benchmark configured providers for latency and quality",
+        description=(
+            "Sends a standardised prompt set to each configured provider,\n"
+            "measures latency and quality, then saves results to .tta/benchmarks.json.\n\n"
+            "Examples:\n"
+            "  tta models benchmark\n"
+            "  tta models benchmark --runs 5\n"
+            "  tta models benchmark --json\n"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    bench_p.add_argument(
+        "--runs",
+        type=int,
+        default=3,
+        metavar="N",
+        help="Number of prompt-set repetitions per model (default: 3)",
+    )
+    bench_p.add_argument(
+        "--json",
+        dest="json_output",
+        action="store_true",
+        help="Output results as JSON",
+    )
+
 
 def handle_model_command(args: argparse.Namespace) -> int:
     """Dispatch ``tta models`` to the appropriate subcommand handler.
@@ -405,10 +435,17 @@ def handle_model_command(args: argparse.Namespace) -> int:
         return _cmd_test(args.model)
     if cmd == "ollama":
         return _cmd_ollama(args)
+    if cmd == "benchmark":
+        from pathlib import Path
+
+        from ttadev.cli.benchmark import cmd_benchmark
+
+        data_dir = Path(getattr(args, "data_dir", ".tta"))
+        return cmd_benchmark(args, data_dir)
 
     # No subcommand given — show help.
     print(
-        "usage: tta models {list,info,test,advise,roi,suggest-qwen,ollama} [options]",
+        "usage: tta models {list,info,test,advise,roi,suggest-qwen,ollama,benchmark} [options]",
         file=sys.stderr,
     )
     print("Try 'tta models --help' for more information.", file=sys.stderr)
