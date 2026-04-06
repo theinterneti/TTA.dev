@@ -286,6 +286,43 @@ class TestExecute:
         assert "max_tokens" not in captured
 
     @pytest.mark.asyncio
+    async def test_reasoning_effort_forwarded(self) -> None:
+        llm = LiteLLMPrimitive()
+        ctx = _make_ctx()
+        mock_resp = _make_litellm_response()
+        captured: dict = {}
+
+        async def fake_acompletion(**kwargs: object) -> MagicMock:
+            captured.update(kwargs)
+            return mock_resp
+
+        req = LLMRequest(
+            model="ollama/qwen3.5:0.8b",
+            messages=[{"role": "user", "content": "Hi"}],
+            reasoning_effort="none",
+        )
+        with patch("litellm.acompletion", side_effect=fake_acompletion):
+            await llm.execute(req, ctx)
+
+        assert captured.get("reasoning_effort") == "none"
+
+    @pytest.mark.asyncio
+    async def test_reasoning_effort_absent_when_not_set(self) -> None:
+        llm = LiteLLMPrimitive()
+        ctx = _make_ctx()
+        mock_resp = _make_litellm_response()
+        captured: dict = {}
+
+        async def fake_acompletion(**kwargs: object) -> MagicMock:
+            captured.update(kwargs)
+            return mock_resp
+
+        with patch("litellm.acompletion", side_effect=fake_acompletion):
+            await llm.execute(_make_request(), ctx)
+
+        assert "reasoning_effort" not in captured
+
+    @pytest.mark.asyncio
     async def test_tool_calls_mapped(self) -> None:
         llm = LiteLLMPrimitive()
         ctx = _make_ctx()

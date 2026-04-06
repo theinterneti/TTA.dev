@@ -248,6 +248,8 @@ class LiteLLMPrimitive(WorkflowPrimitive[LLMRequest, LLMResponse]):
         if request.tools:
             kwargs["tools"] = [t.to_openai() for t in request.tools]
             kwargs["tool_choice"] = request.tool_choice
+        if request.reasoning_effort is not None:
+            kwargs["reasoning_effort"] = request.reasoning_effort
         return kwargs
 
     @staticmethod

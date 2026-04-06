@@ -124,6 +124,11 @@ class LLMRequest:
         tool_choice: How the model should select tools.  Accepted values are
             ``"auto"`` (default), ``"none"``, ``"required"``, or the name of a
             specific tool.
+        reasoning_effort: Controls thinking/reasoning overhead for models that
+            support it.  Accepted values are ``"high"``, ``"medium"``, ``"low"``,
+            or ``"none"`` (disables thinking entirely).  ``None`` (default) lets
+            the provider decide.  Ollama maps ``"none"`` to ``think=false`` for
+            Qwen3/3.5 models on its OpenAI-compatible endpoint.
     """
 
     model: str
@@ -134,6 +139,7 @@ class LLMRequest:
     stream: bool = False
     tools: list[ToolSchema] | None = None
     tool_choice: str = "auto"
+    reasoning_effort: str | None = None
 
 
 @dataclass
