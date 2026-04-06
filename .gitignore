@@ -71,6 +71,7 @@ dist-ssr/
 .env.local
 .env.*.local
 .env.production
+.envrc
 *.pem
 *.key
 secrets/
