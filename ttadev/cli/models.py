@@ -1,8 +1,9 @@
-"""CLI subcommands for the ModelAdvisor: advise, roi, suggest-qwen."""
+"""CLI subcommands for the ModelAdvisor: advise, roi, suggest-qwen, list, info, test."""
 
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
 # ---------------------------------------------------------------------------
@@ -209,8 +210,24 @@ def register_model_subcommands(sub: argparse._SubParsersAction) -> None:  # type
         sub: The top-level subparsers action from the main ``argparse``
             parser into which ``models`` is added.
     """
-    models_p = sub.add_parser("models", help="ModelAdvisor: tier advice, ROI, fine-tune hints")
+    models_p = sub.add_parser(
+        "models",
+        help="ModelAdvisor: list/info/test models, tier advice, ROI, fine-tune hints",
+    )
     models_sub = models_p.add_subparsers(dest="models_command")
+
+    # ------------------------------------------------------------------ #
+    # models ollama                                                        #
+    # ------------------------------------------------------------------ #
+    ollama_p = models_sub.add_parser(
+        "ollama",
+        help="Ollama model helpers",
+    )
+    ollama_sub = ollama_p.add_subparsers(dest="ollama_command")
+    ollama_sub.add_parser(
+        "recommend",
+        help="Recommend the best Ollama model for this machine's hardware",
+    )
 
     # ------------------------------------------------------------------ #
     # models advise                                                        #
@@ -335,10 +352,33 @@ def register_model_subcommands(sub: argparse._SubParsersAction) -> None:  # type
         help="Space-separated task=calls pairs, e.g. coding=200 math=50",
     )
 
+    # ------------------------------------------------------------------ #
+    # models list                                                          #
+    # ------------------------------------------------------------------ #
+    models_sub.add_parser(
+        "list",
+        help="List TTA.dev recommended models with cost and capability info",
+    )
 
-# ---------------------------------------------------------------------------
-# Handlers
-# ---------------------------------------------------------------------------
+    # ------------------------------------------------------------------ #
+    # models info                                                          #
+    # ------------------------------------------------------------------ #
+    info_p = models_sub.add_parser(
+        "info",
+        help="Show full litellm metadata for a specific model string",
+    )
+    info_p.add_argument(
+        "model", metavar="MODEL", help="litellm model string, e.g. groq/llama-3.3-70b-versatile"
+    )
+
+    # ------------------------------------------------------------------ #
+    # models test                                                          #
+    # ------------------------------------------------------------------ #
+    test_p = models_sub.add_parser(
+        "test",
+        help="Send a quick ping prompt to a model and show latency",
+    )
+    test_p.add_argument("model", metavar="MODEL", help="litellm model string to test")
 
 
 def handle_model_command(args: argparse.Namespace) -> int:
@@ -357,9 +397,20 @@ def handle_model_command(args: argparse.Namespace) -> int:
         return _cmd_roi(args)
     if cmd == "suggest-qwen":
         return _cmd_suggest_qwen(args)
+    if cmd == "list":
+        return _cmd_list()
+    if cmd == "info":
+        return _cmd_info(args.model)
+    if cmd == "test":
+        return _cmd_test(args.model)
+    if cmd == "ollama":
+        return _cmd_ollama(args)
 
     # No subcommand given — show help.
-    print("usage: tta models {advise,roi,suggest-qwen} [options]", file=sys.stderr)
+    print(
+        "usage: tta models {list,info,test,advise,roi,suggest-qwen,ollama} [options]",
+        file=sys.stderr,
+    )
     print("Try 'tta models --help' for more information.", file=sys.stderr)
     return 1
 
@@ -544,3 +595,328 @@ def _cmd_suggest_qwen(args: argparse.Namespace) -> int:
         )
         print(f"   Rationale: {s.rationale}")
     return 0
+
+
+# ---------------------------------------------------------------------------
+# ollama
+# ---------------------------------------------------------------------------
+
+
+def _cmd_ollama(args: argparse.Namespace) -> int:
+    """Handle ``tta models ollama`` subcommands.
+
+    Args:
+        args: Parsed argument namespace.
+
+    Returns:
+        Exit code: ``0`` on success, ``1`` on error.
+    """
+    ollama_cmd = getattr(args, "ollama_command", None)
+    if ollama_cmd == "recommend":
+        return _cmd_ollama_recommend()
+    print("usage: tta models ollama {recommend}", file=sys.stderr)
+    print("Try 'tta models ollama --help' for more information.", file=sys.stderr)
+    return 1
+
+
+def _cmd_ollama_recommend() -> int:
+    """Handle ``tta models ollama recommend``.
+
+    Detects GPU VRAM and system RAM, then prints the recommended Ollama model.
+
+    Returns:
+        Exit code: ``0`` on success.
+    """
+    from ttadev.cli.hw_detect import hardware_summary
+
+    summary = hardware_summary()
+    vram_gb: float | None = summary["gpu_vram_gb"]  # type: ignore[assignment]
+    ram_gb: float = summary["system_ram_gb"]  # type: ignore[assignment]
+    model: str = summary["recommended_model"]  # type: ignore[assignment]
+    reason: str = summary["reason"]  # type: ignore[assignment]
+
+    _rule = "─" * 18
+    print("\nHardware Detection")
+    print(_rule)
+    if vram_gb is not None:
+        print(f"GPU VRAM:    {vram_gb:.1f} GB")
+    else:
+        print("GPU VRAM:    not detected")
+    print(f"System RAM:  {ram_gb:.1f} GB")
+    print(f"\nRecommended Ollama model: {model}")
+    print(f"Reason: {reason}")
+    print(f"\nTo pull:  ollama pull {model}")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# TTA.dev recommended models for `tta models list`
+# ---------------------------------------------------------------------------
+
+#: Models shown by ``tta models list`` in display order.
+#: Each entry: (litellm_model_key, display_name, provider_label, env_var_for_key, context_hint)
+#: context_hint is used only when litellm.model_cost doesn't contain context info.
+_RECOMMENDED_MODELS: list[tuple[str, str, str, str | None, str]] = [
+    (
+        "groq/llama-3.3-70b-versatile",
+        "groq/llama-3.3-70b-versatile",
+        "Groq",
+        "GROQ_API_KEY",
+        "128k",
+    ),
+    (
+        "groq/llama-3.1-8b-instant",
+        "groq/llama-3.1-8b-instant",
+        "Groq",
+        "GROQ_API_KEY",
+        "128k",
+    ),
+    (
+        "gemini/gemini-2.0-flash-lite",
+        "gemini/gemini-2.0-flash-lite",
+        "Google",
+        "GOOGLE_API_KEY",
+        "1M",
+    ),
+    (
+        "openrouter/google/gemma-3-27b-it:free",
+        "openrouter/google/gemma-3-27b-it:free",
+        "OpenRouter",
+        "OPENROUTER_API_KEY",
+        "128k",
+    ),
+    (
+        "ollama/qwen2.5:7b",
+        "ollama/qwen2.5:7b",
+        "Ollama",
+        None,  # no API key needed
+        "32k",
+    ),
+]
+
+#: Provider → env var mapping for "configured" detection.
+_PROVIDER_ENV: dict[str, str] = {
+    "Groq": "GROQ_API_KEY",
+    "Google": "GOOGLE_API_KEY",
+    "OpenRouter": "OPENROUTER_API_KEY",
+}
+
+
+def _format_context(tokens: int | None, hint: str) -> str:
+    """Format a context-window size for display.
+
+    Args:
+        tokens: Max input tokens from litellm (or ``None`` if unavailable).
+        hint: Fallback human-readable string (e.g. ``"128k"``).
+
+    Returns:
+        A short string like ``"128k"`` or ``"1M"``.
+    """
+    if tokens is None:
+        return hint
+    if tokens >= 1_000_000:
+        return f"{tokens // 1_000_000}M"
+    if tokens >= 1_000:
+        return f"{tokens // 1_000}k"
+    return str(tokens)
+
+
+def _format_cost(cost_per_token: float | None) -> str:
+    """Convert a per-token cost to a per-million-token string.
+
+    Args:
+        cost_per_token: Cost in USD per token, or ``None``.
+
+    Returns:
+        A string like ``"$0.59"`` or ``"FREE"``.
+    """
+    if cost_per_token is None:
+        return "FREE"
+    per_million = cost_per_token * 1_000_000
+    if per_million == 0.0:
+        return "FREE"
+    return f"${per_million:.3g}"
+
+
+def _query_ollama_models() -> list[str]:
+    """Query the local Ollama daemon for available models.
+
+    Returns an empty list (silently) if Ollama is not running.
+
+    Returns:
+        List of model name strings, e.g. ``["qwen2.5:7b", "llama3:latest"]``.
+    """
+    try:
+        import httpx
+
+        resp = httpx.get("http://localhost:11434/api/tags", timeout=2)
+        data = resp.json()
+        return [m["name"] for m in data.get("models", [])]
+    except Exception:  # noqa: BLE001 — intentional graceful degradation
+        return []
+
+
+# ---------------------------------------------------------------------------
+# list
+# ---------------------------------------------------------------------------
+
+
+def _cmd_list() -> int:
+    """Handle ``tta models list``.
+
+    Prints a formatted table of TTA.dev recommended models with cost and
+    capability info sourced from ``litellm.model_cost``.
+
+    Returns:
+        Exit code: always ``0``.
+    """
+    import litellm
+
+    model_cost: dict[str, dict] = litellm.model_cost  # type: ignore[assignment]
+
+    # Detect configured providers
+    configured: set[str] = set()
+    for provider, env_var in _PROVIDER_ENV.items():
+        if os.environ.get(env_var):
+            configured.add(provider)
+
+    # Query Ollama once
+    ollama_models = _query_ollama_models()
+    ollama_running = len(ollama_models) > 0
+
+    col_model = 38
+    col_provider = 12
+    col_input = 12
+    col_output = 12
+    col_ctx = 8
+
+    header = (
+        f"{'Model':<{col_model}}"
+        f"{'Provider':<{col_provider}}"
+        f"{'Input $/1M':>{col_input}}"
+        f"{'Output $/1M':>{col_output}}"
+        f"{'Context':>{col_ctx}}"
+    )
+    divider = "─" * (col_model + col_provider + col_input + col_output + col_ctx)
+
+    print(header)
+    print(divider)
+
+    for litellm_key, display_name, provider, env_var, ctx_hint in _RECOMMENDED_MODELS:
+        data = model_cost.get(litellm_key) or {}
+        input_cost = _format_cost(data.get("input_cost_per_token"))
+        output_cost = _format_cost(data.get("output_cost_per_token"))
+        context = _format_context(data.get("max_input_tokens"), ctx_hint)
+
+        # Status indicator
+        if provider == "Ollama":
+            if ollama_running:
+                status = " ✓"
+            else:
+                status = " (not running)"
+        elif provider in configured:
+            status = " ✓"
+        else:
+            status = ""
+
+        provider_display = provider + status
+
+        print(
+            f"{display_name:<{col_model}}"
+            f"{provider_display:<{col_provider}}"
+            f"{input_cost:>{col_input}}"
+            f"{output_cost:>{col_output}}"
+            f"{context:>{col_ctx}}"
+        )
+
+    print()
+    configured_str = ", ".join(sorted(configured)) if configured else "none"
+    print(f"Configured providers: {configured_str}")
+    if ollama_running:
+        print(f"Ollama models available: {', '.join(ollama_models)}")
+    else:
+        print("Ollama: not running (start with `ollama serve`)")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# info
+# ---------------------------------------------------------------------------
+
+
+def _cmd_info(model: str) -> int:
+    """Handle ``tta models info <model>``.
+
+    Prints all litellm metadata fields for the given model string.
+
+    Args:
+        model: litellm model string, e.g. ``"groq/llama-3.3-70b-versatile"``.
+
+    Returns:
+        Exit code: ``0`` on success, ``1`` if model not found.
+    """
+    import litellm
+
+    model_cost: dict[str, dict] = litellm.model_cost  # type: ignore[assignment]
+    data = model_cost.get(model)
+
+    if data is None:
+        print(f"Model '{model}' not found in litellm.model_cost.", file=sys.stderr)
+        print("Try 'tta models list' to see available recommended models.", file=sys.stderr)
+        return 1
+
+    print(f"litellm metadata for: {model}")
+    print(_DIVIDER)
+    for key, value in sorted(data.items()):
+        if isinstance(value, float) and "cost_per_token" in key:
+            per_million = value * 1_000_000
+            print(f"  {key:<40} {value}  (= ${per_million:.4g}/1M tokens)")
+        else:
+            print(f"  {key:<40} {value}")
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# test
+# ---------------------------------------------------------------------------
+
+
+def _cmd_test(model: str) -> int:
+    """Handle ``tta models test <model>``.
+
+    Sends a quick "Say 'ok'" prompt via ``litellm.acompletion()`` and prints
+    the response and round-trip latency.
+
+    Args:
+        model: litellm model string to test.
+
+    Returns:
+        Exit code: ``0`` on success, ``1`` on error.
+    """
+    import asyncio
+    import time
+
+    async def _run() -> int:
+        import litellm
+
+        messages = [{"role": "user", "content": "Say 'ok'"}]
+        print(f"Testing model: {model}")
+        print("Sending: Say 'ok'")
+        t0 = time.monotonic()
+        try:
+            response = await litellm.acompletion(model=model, messages=messages, max_tokens=16)
+        except Exception as exc:  # noqa: BLE001
+            elapsed_ms = (time.monotonic() - t0) * 1000
+            print(f"Error after {elapsed_ms:.0f}ms: {exc}", file=sys.stderr)
+            print(
+                "Check that the model string is correct and the API key is set.",
+                file=sys.stderr,
+            )
+            return 1
+        elapsed_ms = (time.monotonic() - t0) * 1000
+        content = response.choices[0].message.content or ""
+        print(f"Response: {content.strip()}")
+        print(f"Latency:  {elapsed_ms:.0f} ms")
+        return 0
+
+    return asyncio.run(_run())

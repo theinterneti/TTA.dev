@@ -484,7 +484,13 @@ def _run_wizard(env_path: Path, project_root: Path) -> int:
             else:
                 print("  ❌  Not running")
                 print("       Install: https://ollama.ai")
-                print("       Then:  ollama pull gemma3:4b\n")
+                try:
+                    from ttadev.cli.hw_detect import recommend_ollama_model
+
+                    rec = recommend_ollama_model()
+                    print(f"       Then:  ollama pull {rec}  (hardware recommendation)\n")
+                except Exception:
+                    print("       Then:  ollama pull gemma3:4b\n")
             continue
 
         existing_key = env.get(provider.env_var) or os.environ.get(provider.env_var)
