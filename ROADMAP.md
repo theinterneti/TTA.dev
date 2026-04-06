@@ -1,6 +1,6 @@
 # TTA.dev Roadmap
 
-**Last Updated:** June 2026 (reality-aligned; see Issue #234)
+**Last Updated:** April 2026 (reality-aligned; see Issue #234)
 
 ---
 
@@ -387,7 +387,7 @@ Priority is driven by what actually unblocks building TTA, not by feature reques
 | Phase 1: Foundation | ⚠ Mostly implemented | Q4 2025 (delivered) | Core primitives + observability foundation |
 | Phase 2: Agents | ⚠ Partially implemented | Q1–Q2 2026 | Role-based agent system + L0 control plane |
 | Phase 3: Guided Workflows | 📋 Planned | Q3 2026 | Interactive step-by-step guidance |
-| Phase 4: Knowledge Base | 🚧 Stub exists | Q4 2026 | Contextual best practices (primitive exists, content doesn't) |
+| Phase 4: Knowledge Base | 🚧 DEFERRED | Q4 2026 | Deferred — stub removed in April 2026 audit |
 | Phase 5: IDE Integration | 📋 Concept | 2027 | IDE and editor integrations |
 
 ---
@@ -468,4 +468,4 @@ The **Atomic DevOps Architecture** represents the ultimate evolution of TTA.dev 
 - GitHub Discussions: <https://github.com/theinterneti/TTA.dev/discussions>
 - Issues: <https://github.com/theinterneti/TTA.dev/issues>
 
-**Last Updated:** June 2026 (reality-aligned; see Issue #234)
+**Last Updated:** April 2026 (reality-aligned; see Issue #234)

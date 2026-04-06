@@ -40,7 +40,7 @@
 | `AGENTS.md` | AI agent entry point & discovery hub | ✅ Excellent | Context document |
 | `PRIMITIVES_CATALOG.md` | Complete API reference for all primitives | ✅ Excellent | Reference (not spec) |
 | `GETTING_STARTED.md` | Onboarding guide with progressive complexity | ✅ Excellent | Tutorial |
-| `VIBE_CODING.md` | Quick-start for AI-assisted development | ⚠️ Brief (70 lines) | Marketing/Intro |
+| `docs/guides/vibe-coding.md` | Quick-start for AI-assisted development | ⚠️ Brief (70 lines) | Marketing/Intro |
 | `CLAUDE.md` | Claude Code agent instructions | ✅ Good | Agent config |
 | `MCP_TOOL_REGISTRY.md` | MCP tool catalog | ✅ Good | Reference |
 | `docs/README.md` | Documentation navigation hub | ✅ Excellent | Index |

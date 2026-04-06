@@ -67,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### 🔧 Quality & Tooling
 - 3 000+ tests passing; pre-commit hooks (Ruff, Bandit, Semgrep, detect-secrets)
 - `.github/copilot-hooks/post-generation.sh` quality gate
-- `ACKNOWLEDGEMENTS.md` — full credits for open-source dependencies
+- `docs/ACKNOWLEDGEMENTS.md` — full credits for open-source dependencies
 - Pyright clean (≤2 known OTel SDK false positives)
 
 ## [Unreleased]
@@ -81,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   usage, anti-pattern detection, workflow orchestration, and testing patterns
   ([`c32de42`](https://github.com/theinterneti/TTA.dev/commit/c32de42))
 
-- **`ACKNOWLEDGEMENTS.md`** — comprehensive credits for all open-source dependencies,
+- **`docs/ACKNOWLEDGEMENTS.md`** — comprehensive credits for all open-source dependencies,
   tooling, and inspirations used across TTA.dev
 
 #### 📖 Documentation (April 2026)
