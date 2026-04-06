@@ -234,12 +234,12 @@ def test_consistent_primitives_over_manual_loops():
 
 
 def test_consistent_python_version():
-    """All files referencing Python version should agree on 3.11+."""
+    """All files referencing Python version should agree on 3.12+."""
     main_content = COPILOT_INSTRUCTIONS.read_text(encoding="utf-8")
     python_content = (INSTRUCTIONS_DIR / "python.instructions.md").read_text(encoding="utf-8")
 
-    assert "3.11" in main_content, "Main instructions should specify Python 3.11+"
-    assert "3.11" in python_content, "Python instructions should specify Python 3.11+"
+    assert "3.12" in main_content, "Main instructions should specify Python 3.12+"
+    assert "3.12" in python_content, "Python instructions should specify Python 3.12+"
 
 
 def test_consistent_type_hint_style():

@@ -19,7 +19,7 @@ If you're looking for a place to start, you can check out the [open issues](http
 2.  **Set up your development environment** by following the instructions in [`GETTING_STARTED.md`](GETTING_STARTED.md).
 3.  **Review the standards**: Read [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for comprehensive coding guidelines including:
     - Package manager (use `uv`, never `pip` or `poetry`)
-    - Python 3.11+ type hints (use `str | None`, not `Optional[str]`)
+    - Python 3.12+ type hints (use `str | None`, not `Optional[str]`)
     - Testing requirements (pytest with AAA pattern, 100% coverage)
     - Code style (Ruff with 100 char line length)
     - Security practices
@@ -50,7 +50,7 @@ Before submitting your PR, ensure:
 - [ ] No secrets committed
 - [ ] Using `uv` (not pip/poetry)
 - [ ] Using primitives for workflows
-- [ ] Python 3.11+ type hints (no `Optional`, `Dict`)
+- [ ] Python 3.12+ type hints (no `Optional`, `Dict`)
 
 See [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for detailed requirements.
 

@@ -51,7 +51,7 @@ uv run ruff check . --fix   # Lint code
 
 ## Python Standards
 
-- Python 3.11+ required
+- Python 3.12+ required
 - Type hints: `str | None` not `Optional[str]`
 - Dicts: `dict[str, Any]` not `Dict[str, Any]`
 - Type check: `uvx pyright ttadev/` (basic mode)

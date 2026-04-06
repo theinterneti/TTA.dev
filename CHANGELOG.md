@@ -1,12 +1,5 @@
 # Changelog
 
-> [!WARNING]
-> This changelog is a historical release record, not a guarantee that every release claim below
-> still matches the repository's current verified state.
->
-> For March 2026 repo reality, prefer `README.md`, `GETTING_STARTED.md`, `QUICKSTART.md`, and
-> `ROADMAP.md`.
-
 All notable changes to TTA.dev will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

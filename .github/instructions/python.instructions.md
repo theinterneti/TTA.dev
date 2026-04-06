@@ -7,7 +7,7 @@ applyTo: 'ttadev/**/*.py'
 
 ## General Instructions
 
-- Use Python 3.11+ features
+- Use Python 3.12+ features
 - Type hints: `str | None` not `Optional[str]`
 - Dicts: `dict[str, Any]` not `Dict[str, Any]`
 - Follow Google-style docstrings

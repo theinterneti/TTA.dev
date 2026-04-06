@@ -61,7 +61,7 @@ tests/              # Test suite
 ## Non-Negotiable Standards (Quick Reference)
 
 - **Package manager:** `uv` always (never `pip`/`poetry`)
-- **Python:** 3.11+ with `str | None` (not `Optional[str]`)
+- **Python:** 3.12+ with `str | None` (not `Optional[str]`)
 - **Linting:** Ruff — line length 88, strict mode (`uv run ruff check . --fix`)
 - **Type checking:** Pyright basic mode (`uvx pyright ttadev/`)
 - **Testing:** pytest AAA pattern, 100% coverage for new code — use `make watch` during development, `make test` for the full run

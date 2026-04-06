@@ -19,7 +19,7 @@ uv run pytest -v           # Run via uv
 
 #### Python Version & Types
 
-- Python 3.11+ required
+- Python 3.12+ required
 - `str | None` not `Optional[str]`
 - `dict[str, Any]` not `Dict[str, Any]`
 - Google-style docstrings on all public functions
