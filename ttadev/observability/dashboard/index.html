@@ -20,6 +20,7 @@
     </button>
     <button class="tab-btn" data-tab="fleet" role="tab" aria-selected="false">Fleet</button>
     <button class="tab-btn" data-tab="cost" role="tab" aria-selected="false">💰 Cost</button>
+    <button class="tab-btn" data-tab="dag" role="tab" aria-selected="false">🔗 Workflow DAG</button>
   </nav>
 
   <!-- Sessions tab content -->
@@ -53,6 +54,9 @@
     </div>
   </div>
 
+  <!-- Toast notification container -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
   <!-- Fleet status tab content -->
   <div id="tab-fleet" class="tab-panel" role="tabpanel" hidden>
     <div id="fleet-panel">
@@ -65,6 +69,7 @@
             <th>Status</th>
             <th>Elapsed</th>
             <th>Lease TTL</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="fleet-runs-body">
@@ -76,6 +81,23 @@
         <p>No active runs.</p>
         <small>Start an agent workflow to see fleet activity.</small>
       </div>
+      <!-- Gate-blocked tasks panel -->
+      <div id="fleet-gates-section" hidden>
+        <div class="panel-heading">🔒 Pending Gates</div>
+        <table id="fleet-gates-table">
+          <thead>
+            <tr>
+              <th>Task ID</th>
+              <th>Gate</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="fleet-gates-body">
+            <!-- Rows rendered by app.js -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -85,6 +107,16 @@
       <div class="panel-heading">💰 Cost &amp; Quality</div>
       <div id="cost-content">
         <!-- Rendered by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Workflow DAG tab content -->
+  <div id="tab-dag" class="tab-panel" role="tabpanel" hidden>
+    <div id="dag-panel">
+      <div class="panel-heading">🔗 Workflow DAG</div>
+      <div id="dag-content">
+        <!-- Rendered by workflow-dag.js -->
       </div>
     </div>
   </div>

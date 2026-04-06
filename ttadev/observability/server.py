@@ -11,6 +11,7 @@ Routes:
   GET  /api/v2/langfuse/trace/{trace_id} → proxy generations + scores for one trace
   GET  /api/v2/langfuse/session/cost     → token counts + estimated cost for current session
   GET  /api/v2/langfuse/scores           → recent quality scores (last 10)
+  GET  /api/v2/tracing/dag        → workflow DAG (nodes = agents, edges = handoffs)
   GET  /api/v2/cgc/{view}         → CGC graph data (graceful degradation)
   GET  /api/v2/cgc/live           → active primitive names for live overlay
   GET  /api/v2/primitives         → primitives catalog
@@ -22,6 +23,10 @@ Routes:
   GET  /api/v2/control/runs       → active agent runs (L0 control plane)
   GET  /api/v2/control/locks      → active workspace + file locks (L0 control plane)
   GET  /api/v2/control/workflows  → workflow steps with timing (L0 control plane)
+  POST /api/v2/control/gates/{task_id}/{gate_id}/approve  → approve a pending gate
+  POST /api/v2/control/gates/{task_id}/{gate_id}/reject   → reject a pending gate
+  POST /api/v2/control/runs/{run_id}/release              → force-release an active run
+  POST /api/v2/control/leases/{run_id}/release            → release lease for a run
   WS   /ws                        → real-time span/session/agent events
 
   Legacy v1 routes preserved for backward compatibility.
@@ -29,6 +34,7 @@ Routes:
 
 import asyncio
 import json
+import logging
 import os
 import threading
 import time
@@ -40,6 +46,13 @@ import httpx
 from aiohttp import web
 
 from ttadev.control_plane import ControlPlaneService
+from ttadev.control_plane.exceptions import (
+    ControlPlaneError,
+    RunNotFoundError,
+    TaskGateError,
+    TaskNotFoundError,
+)
+from ttadev.control_plane.models import GateStatus
 from ttadev.control_plane.store import ControlPlaneStore
 from ttadev.observability.agent_tracker import AgentTracker
 from ttadev.observability.cgc_integration import CGCIntegration
@@ -50,6 +63,8 @@ from ttadev.observability.span_processor import SpanProcessor
 
 DASHBOARD_DIR = Path(__file__).parent / "dashboard"
 _HOME_TTA_TRACES = Path.home() / ".tta" / "traces"
+
+_logger = logging.getLogger(__name__)
 _OTEL_JSONL = Path(".observability/traces.jsonl")
 _AGENT_TRACKER_JSONL = Path(".observability/agents/current_session.jsonl")
 
@@ -166,6 +181,7 @@ class ObservabilityServer:
         self.app.router.add_get("/api/v2/spans", self._v2_all_spans)
         self.app.router.add_get("/api/v2/sessions/{id}/spans", self._v2_session_spans)
         self.app.router.add_get("/api/v2/sessions/{id}", self._v2_session_detail)
+        self.app.router.add_get("/api/v2/tracing/dag", self._v2_tracing_dag)
         self.app.router.add_get("/api/v2/cgc/live", self._v2_cgc_live)
         self.app.router.add_get("/api/v2/cgc/{view}", self._v2_cgc_graph)
         self.app.router.add_get("/api/v2/primitives", self._v2_primitives)
@@ -174,6 +190,23 @@ class ObservabilityServer:
         self.app.router.add_get("/api/v2/control/runs", self._v2_control_runs)
         self.app.router.add_get("/api/v2/control/locks", self._v2_control_locks)
         self.app.router.add_get("/api/v2/control/workflows", self._v2_control_workflows)
+        # Management write endpoints
+        self.app.router.add_post(
+            "/api/v2/control/gates/{task_id}/{gate_id}/approve",
+            self._v2_control_gate_approve,
+        )
+        self.app.router.add_post(
+            "/api/v2/control/gates/{task_id}/{gate_id}/reject",
+            self._v2_control_gate_reject,
+        )
+        self.app.router.add_post(
+            "/api/v2/control/runs/{run_id}/release",
+            self._v2_control_run_release,
+        )
+        self.app.router.add_post(
+            "/api/v2/control/leases/{run_id}/release",
+            self._v2_control_lease_release,
+        )
         self.app.router.add_get("/api/v2/projects", self._v2_projects)
         self.app.router.add_get("/api/v2/projects/{id}/sessions", self._v2_project_sessions)
         self.app.router.add_get("/api/v2/projects/{id}/ownership", self._v2_project_ownership)
@@ -301,6 +334,111 @@ class ObservabilityServer:
         session_id = request.match_info["id"]
         spans = self._session_mgr.get_session_spans(session_id)
         return web.json_response([asdict(s) for s in spans])
+
+    async def _v2_tracing_dag(self, request: web.Request) -> web.Response:
+        """Return the workflow DAG built from ingested agent.handoff spans.
+
+        Nodes are agents (identified by their name), edges are directed handoffs.
+        Always returns valid JSON — degrades to ``{nodes:[], edges:[]}`` when no
+        handoff spans have been ingested yet.
+
+        Response shape::
+
+            {
+              "available": true,
+              "nodes": [
+                {"id": "architect", "label": "architect",
+                 "status": "completed", "span_count": 3}
+              ],
+              "edges": [
+                {"source": "architect", "target": "developer",
+                 "task_id": "wf-123", "reason": "needs implementation", "count": 1}
+              ]
+            }
+        """
+        loop = asyncio.get_running_loop()
+        dag = await loop.run_in_executor(None, self._build_agent_dag)
+        return web.json_response(dag)
+
+    def _build_agent_dag(self) -> dict[str, Any]:
+        """Build the agent workflow DAG from ingested handoff spans.
+
+        Runs in a thread-pool executor so it never blocks the event loop.
+        """
+        all_spans = []
+        for session in self._session_mgr.list_sessions():
+            all_spans.extend(self._session_mgr.get_session_spans(session.id))
+
+        nodes: dict[str, dict[str, Any]] = {}
+        edges: list[dict[str, Any]] = []
+        edge_index: dict[tuple[str, str], int] = {}  # (source, target) → edge list index
+
+        # Pass 1 — collect agents mentioned in any role-tagged span.
+        for span in all_spans:
+            if span.agent_role and span.agent_role not in nodes:
+                nodes[span.agent_role] = {
+                    "id": span.agent_role,
+                    "label": span.agent_role,
+                    "status": "idle",
+                    "span_count": 0,
+                }
+            if span.agent_role:
+                nodes[span.agent_role]["span_count"] += 1
+
+        # Pass 2 — build directed edges from agent.handoff spans.
+        for span in all_spans:
+            if span.name != "agent.handoff":
+                continue
+            attrs = span.attributes
+            from_agent: str = attrs.get("handoff.from_agent") or ""
+            to_agent: str = attrs.get("handoff.to_agent") or ""
+            task_id: str = attrs.get("handoff.task_id") or ""
+            reason: str = attrs.get("handoff.reason") or ""
+
+            if not from_agent or not to_agent:
+                continue
+
+            # Ensure both agents appear as nodes (they may not have role-tagged spans yet).
+            for agent_name in (from_agent, to_agent):
+                if agent_name not in nodes:
+                    nodes[agent_name] = {
+                        "id": agent_name,
+                        "label": agent_name,
+                        "status": "idle",
+                        "span_count": 0,
+                    }
+
+            # Mark source agent as having handed off.
+            nodes[from_agent]["status"] = "completed"
+
+            # Accumulate or create the edge.
+            key = (from_agent, to_agent)
+            if key in edge_index:
+                edges[edge_index[key]]["count"] += 1
+            else:
+                edge_index[key] = len(edges)
+                edges.append(
+                    {
+                        "source": from_agent,
+                        "target": to_agent,
+                        "task_id": task_id,
+                        "reason": reason,
+                        "count": 1,
+                    }
+                )
+
+        # Mark leaf nodes (targets with no outgoing edges) as "active".
+        sources = {e["source"] for e in edges}
+        for edge in edges:
+            target = edge["target"]
+            if target in nodes and target not in sources:
+                nodes[target]["status"] = "active"
+
+        return {
+            "available": True,
+            "nodes": list(nodes.values()),
+            "edges": edges,
+        }
 
     async def _v2_cgc_graph(self, request: web.Request) -> web.Response:
         view = request.match_info["view"]
@@ -588,6 +726,160 @@ class ObservabilityServer:
 
         workflows = await loop.run_in_executor(None, _load)
         return web.json_response({"workflows": workflows})
+
+    # ------------------------------------------------------------------
+    # Management write endpoints (gates / runs / leases)
+    # ------------------------------------------------------------------
+
+    async def _v2_control_gate_approve(self, request: web.Request) -> web.Response:
+        """Approve a pending gate for a task.
+
+        POST /api/v2/control/gates/{task_id}/{gate_id}/approve
+        Optional JSON body: {"decided_by": "...", "summary": "..."}
+        """
+        task_id = request.match_info["task_id"]
+        gate_id = request.match_info["gate_id"]
+        body: dict[str, Any] = {}
+        try:
+            body = await request.json()
+        except Exception:
+            pass
+        decided_by = body.get("decided_by", "dashboard")
+        summary = body.get("summary", "Approved via dashboard")
+
+        loop = asyncio.get_running_loop()
+
+        def _approve() -> dict[str, Any]:
+            svc = ControlPlaneService(self._data_dir)
+            task = svc.decide_gate(
+                task_id,
+                gate_id,
+                status=GateStatus.APPROVED,
+                decided_by=decided_by,
+                summary=summary,
+            )
+            return task.to_dict()
+
+        try:
+            task_dict = await loop.run_in_executor(None, _approve)
+        except (TaskNotFoundError, TaskGateError) as exc:
+            return web.json_response({"error": str(exc)}, status=404)
+        except ControlPlaneError as exc:
+            return web.json_response({"error": str(exc)}, status=400)
+        _logger.info(
+            "dashboard.gate_approved task_id=%s gate_id=%s decided_by=%s",
+            task_id,
+            gate_id,
+            decided_by,
+        )
+        return web.json_response({"task": task_dict})
+
+    async def _v2_control_gate_reject(self, request: web.Request) -> web.Response:
+        """Reject a pending gate for a task.
+
+        POST /api/v2/control/gates/{task_id}/{gate_id}/reject
+        Optional JSON body: {"decided_by": "...", "summary": "..."}
+        """
+        task_id = request.match_info["task_id"]
+        gate_id = request.match_info["gate_id"]
+        body: dict[str, Any] = {}
+        try:
+            body = await request.json()
+        except Exception:
+            pass
+        decided_by = body.get("decided_by", "dashboard")
+        summary = body.get("summary", "Rejected via dashboard")
+
+        loop = asyncio.get_running_loop()
+
+        def _reject() -> dict[str, Any]:
+            svc = ControlPlaneService(self._data_dir)
+            task = svc.decide_gate(
+                task_id,
+                gate_id,
+                status=GateStatus.REJECTED,
+                decided_by=decided_by,
+                summary=summary,
+            )
+            return task.to_dict()
+
+        try:
+            task_dict = await loop.run_in_executor(None, _reject)
+        except (TaskNotFoundError, TaskGateError) as exc:
+            return web.json_response({"error": str(exc)}, status=404)
+        except ControlPlaneError as exc:
+            return web.json_response({"error": str(exc)}, status=400)
+        _logger.info(
+            "dashboard.gate_rejected task_id=%s gate_id=%s decided_by=%s",
+            task_id,
+            gate_id,
+            decided_by,
+        )
+        return web.json_response({"task": task_dict})
+
+    async def _v2_control_run_release(self, request: web.Request) -> web.Response:
+        """Force-release an active run back to pending.
+
+        POST /api/v2/control/runs/{run_id}/release
+        Optional JSON body: {"reason": "..."}
+        """
+        run_id = request.match_info["run_id"]
+        body: dict[str, Any] = {}
+        try:
+            body = await request.json()
+        except Exception:
+            pass
+        reason = body.get("reason", "Force-released via dashboard")
+
+        loop = asyncio.get_running_loop()
+
+        def _release() -> dict[str, Any]:
+            svc = ControlPlaneService(self._data_dir)
+            run = svc.release_run(run_id, reason=reason)
+            return run.to_dict()
+
+        try:
+            run_dict = await loop.run_in_executor(None, _release)
+        except RunNotFoundError as exc:
+            return web.json_response({"error": str(exc)}, status=404)
+        except ControlPlaneError as exc:
+            return web.json_response({"error": str(exc)}, status=400)
+        _logger.info("dashboard.run_released run_id=%s reason=%s", run_id, reason)
+        return web.json_response({"run": run_dict})
+
+    async def _v2_control_lease_release(self, request: web.Request) -> web.Response:
+        """Release the lease held by the run identified by run_id.
+
+        POST /api/v2/control/leases/{run_id}/release
+
+        This is a convenience wrapper: releasing the lease is achieved by
+        force-releasing the owning run (which also clears locks and resets
+        the task to pending).
+        """
+        run_id = request.match_info["run_id"]
+        body: dict[str, Any] = {}
+        try:
+            body = await request.json()
+        except Exception:
+            pass
+        reason = body.get("reason", "Lease released via dashboard")
+
+        loop = asyncio.get_running_loop()
+
+        def _release_lease() -> dict[str, Any]:
+            svc = ControlPlaneService(self._data_dir)
+            # Releasing the run releases its lease and locks atomically.
+            run = svc.release_run(run_id, reason=reason)
+            return run.to_dict()
+
+        try:
+            run_dict = await loop.run_in_executor(None, _release_lease)
+        except RunNotFoundError as exc:
+            return web.json_response({"error": str(exc)}, status=404)
+        except ControlPlaneError as exc:
+            return web.json_response({"error": str(exc)}, status=400)
+        _logger.info("dashboard.lease_released run_id=%s reason=%s", run_id, reason)
+        return web.json_response({"run": run_dict})
 
     async def _v2_projects(self, request: web.Request) -> web.Response:
         """Return all project sessions, newest first."""

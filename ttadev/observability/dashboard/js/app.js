@@ -9,6 +9,7 @@ import { SessionTree } from './session-tree.js';
 import { SessionDetail } from './session-detail.js';
 import { SpanDetail } from './span-detail.js';
 import { CgcGraph } from './cgc-graph.js';
+import { WorkflowDag } from './workflow-dag.js';
 
 // ---------------------------------------------------------------------------
 // EventEmitter (lightweight, no external deps)
@@ -54,11 +55,13 @@ class App extends EventEmitter {
     this.sessionDetail = new SessionDetail(document.getElementById('session-detail'), this);
     this.spanDetail    = new SpanDetail(document.getElementById('span-detail'),      this);
     this.cgcGraph      = new CgcGraph(document.getElementById('cgc-graph-section'),  this);
+    this.workflowDag   = new WorkflowDag(document.getElementById('dag-content'),      this);
 
     // Init all components (registers event listeners) before any auto-selection
     await this.sessionDetail.init();
     await this.spanDetail.init();
     await this.cgcGraph.init();
+    await this.workflowDag.init();
     await this.sessionTree.init();  // last: its auto-select fires after all listeners are ready
 
     this._initTabs();
@@ -90,7 +93,16 @@ class App extends EventEmitter {
       this._activateFleetTab();
     } else if (tabName === 'cost') {
       this._activateCostTab();
+    } else if (tabName === 'dag') {
+      this._activateDagTab();
     }
+  }
+
+  // ------------------------------------------------------------------
+  // Workflow DAG panel
+  // ------------------------------------------------------------------
+  async _activateDagTab() {
+    if (this.workflowDag) await this.workflowDag.activate();
   }
 
   // ------------------------------------------------------------------
@@ -350,13 +362,12 @@ LANGFUSE_HOST=https://cloud.langfuse.com  # optional</pre>
       tbody.innerHTML = '';
       if (runs.length === 0) {
         emptyState && (emptyState.hidden = false);
-        return;
+      } else {
+        emptyState && (emptyState.hidden = true);
       }
-      emptyState && (emptyState.hidden = true);
 
       const now = Date.now();
       runs.forEach(run => {
-        const task = taskMap[run.task_id] || {};
         const agentRole = run.agent_role || '—';
         const taskId = run.task_id || '—';
         const status = run.status || '—';
@@ -368,11 +379,27 @@ LANGFUSE_HOST=https://cloud.langfuse.com  # optional</pre>
           : `${Math.floor(elapsedSec / 60)}m ${elapsedSec % 60}s`;
 
         let ttlCell = '—';
+        let ttlClass = '';
         if (run.lease_expires_at) {
           const expiresMs = new Date(run.lease_expires_at).getTime();
-          const ttlSec = Math.max(0, Math.floor((expiresMs - now) / 1000));
-          ttlCell = ttlSec > 0 ? `${ttlSec}s` : 'expired';
+          const acquiredMs = run.lease_acquired_at ? new Date(run.lease_acquired_at).getTime() : (now - 60000);
+          const totalMs = expiresMs - acquiredMs;
+          const remainingMs = expiresMs - now;
+          const ttlSec = Math.max(0, Math.floor(remainingMs / 1000));
+          if (ttlSec === 0) {
+            ttlCell = 'expired';
+            ttlClass = 'lease-expiry-critical';
+          } else {
+            ttlCell = `${ttlSec}s`;
+            const ratio = totalMs > 0 ? remainingMs / totalMs : 1;
+            if (ratio < 0.1) ttlClass = 'lease-expiry-critical';
+            else if (ratio < 0.2) ttlClass = 'lease-expiry-warn';
+          }
         }
+
+        const releaseBtn = status === 'active'
+          ? `<button class="fleet-action-btn release" data-run-id="${this._esc(run.id)}">⏹ Force Release</button>`
+          : '';
 
         const tr = document.createElement('tr');
         tr.dataset.runId = run.id;
@@ -381,10 +408,56 @@ LANGFUSE_HOST=https://cloud.langfuse.com  # optional</pre>
           <td><code>${this._esc(taskId)}</code></td>
           <td><span class="run-status run-status--${this._esc(status)}">${this._esc(status)}</span></td>
           <td>${elapsed}</td>
-          <td class="fleet-ttl">${ttlCell}</td>
+          <td class="fleet-ttl ${ttlClass}">${ttlCell}</td>
+          <td>${releaseBtn}</td>
         `;
         tbody.appendChild(tr);
       });
+
+      // Wire up Force Release buttons
+      tbody.querySelectorAll('.fleet-action-btn.release').forEach(btn => {
+        btn.addEventListener('click', () => this._releaseRun(btn.dataset.runId));
+      });
+
+      // Render pending gates panel
+      const gatesSection = document.getElementById('fleet-gates-section');
+      const gatesTbody = document.getElementById('fleet-gates-body');
+      if (gatesSection && gatesTbody) {
+        const pendingGates = [];
+        tasks.forEach(task => {
+          const gates = task.gates || [];
+          gates.forEach(gate => {
+            if (gate.status === 'pending') {
+              pendingGates.push({ task, gate });
+            }
+          });
+        });
+        gatesSection.hidden = pendingGates.length === 0;
+        gatesTbody.innerHTML = '';
+        pendingGates.forEach(({ task, gate }) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><code>${this._esc(task.id)}</code></td>
+            <td>${this._esc(gate.id)}</td>
+            <td>${this._esc(gate.gate_type || gate.type || '—')}</td>
+            <td>
+              <button class="fleet-action-btn approve"
+                      data-task-id="${this._esc(task.id)}"
+                      data-gate-id="${this._esc(gate.id)}">✔ Approve</button>
+              <button class="fleet-action-btn reject"
+                      data-task-id="${this._esc(task.id)}"
+                      data-gate-id="${this._esc(gate.id)}">✖ Reject</button>
+            </td>
+          `;
+          gatesTbody.appendChild(tr);
+        });
+        gatesTbody.querySelectorAll('.fleet-action-btn.approve').forEach(btn => {
+          btn.addEventListener('click', () => this._approveGate(btn.dataset.taskId, btn.dataset.gateId));
+        });
+        gatesTbody.querySelectorAll('.fleet-action-btn.reject').forEach(btn => {
+          btn.addEventListener('click', () => this._rejectGate(btn.dataset.taskId, btn.dataset.gateId));
+        });
+      }
 
       // Auto-refresh TTL countdown every 5s
       if (this._fleetRefreshTimer) clearInterval(this._fleetRefreshTimer);
@@ -396,7 +469,84 @@ LANGFUSE_HOST=https://cloud.langfuse.com  # optional</pre>
         }
       }, 5000);
     } catch (err) {
-      tbody.innerHTML = `<tr><td colspan="5" class="live-empty-state">Could not load fleet data: ${err.message}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="live-empty-state">Could not load fleet data: ${err.message}</td></tr>`;
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // Toast notifications
+  // ------------------------------------------------------------------
+  _showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast toast--${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => toast.remove(), 450);
+    }, duration);
+  }
+
+  // ------------------------------------------------------------------
+  // Fleet management actions
+  // ------------------------------------------------------------------
+  async _approveGate(taskId, gateId) {
+    try {
+      const resp = await fetch(`/api/v2/control/gates/${encodeURIComponent(taskId)}/${encodeURIComponent(gateId)}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decided_by: 'dashboard', summary: 'Approved via dashboard' }),
+      });
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => ({}));
+        this._showToast(`Approve failed: ${body.error || resp.statusText}`, 'error');
+        return;
+      }
+      this._showToast('Gate approved ✓', 'success');
+      this._activateFleetTab();
+    } catch (err) {
+      this._showToast(`Approve error: ${err.message}`, 'error');
+    }
+  }
+
+  async _rejectGate(taskId, gateId) {
+    try {
+      const resp = await fetch(`/api/v2/control/gates/${encodeURIComponent(taskId)}/${encodeURIComponent(gateId)}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decided_by: 'dashboard', summary: 'Rejected via dashboard' }),
+      });
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => ({}));
+        this._showToast(`Reject failed: ${body.error || resp.statusText}`, 'error');
+        return;
+      }
+      this._showToast('Gate rejected', 'info');
+      this._activateFleetTab();
+    } catch (err) {
+      this._showToast(`Reject error: ${err.message}`, 'error');
+    }
+  }
+
+  async _releaseRun(runId) {
+    if (!confirm(`Force-release run ${runId}? This will reset the task to pending.`)) return;
+    try {
+      const resp = await fetch(`/api/v2/control/runs/${encodeURIComponent(runId)}/release`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: 'Force-released via dashboard' }),
+      });
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => ({}));
+        this._showToast(`Release failed: ${body.error || resp.statusText}`, 'error');
+        return;
+      }
+      this._showToast('Run released ✓', 'success');
+      this._activateFleetTab();
+    } catch (err) {
+      this._showToast(`Release error: ${err.message}`, 'error');
     }
   }
 
