@@ -88,6 +88,8 @@ class App extends EventEmitter {
       this._activateLiveTab();
     } else if (tabName === 'fleet') {
       this._activateFleetTab();
+    } else if (tabName === 'cost') {
+      this._activateCostTab();
     }
   }
 
@@ -206,6 +208,118 @@ class App extends EventEmitter {
       const grid = document.getElementById('live-agents-grid');
       if (grid && grid.children.length === 0) this._renderLiveEmptyState(grid);
     }, 5000);
+  }
+
+  // ------------------------------------------------------------------
+  // Cost / Quality panel
+  // ------------------------------------------------------------------
+  async _activateCostTab() {
+    const container = document.getElementById('cost-content');
+    if (!container) return;
+
+    // Cancel any existing refresh timer when re-entering the tab.
+    if (this._costRefreshTimer) {
+      clearInterval(this._costRefreshTimer);
+      this._costRefreshTimer = null;
+    }
+
+    const render = async () => {
+      // Only refresh while the Cost tab is still visible.
+      if (document.getElementById('tab-cost')?.hidden) {
+        clearInterval(this._costRefreshTimer);
+        this._costRefreshTimer = null;
+        return;
+      }
+      try {
+        const [costData, scoresData] = await Promise.all([
+          this.fetchJSON('/api/v2/langfuse/session/cost'),
+          this.fetchJSON('/api/v2/langfuse/scores'),
+        ]);
+        container.innerHTML = this._renderCostPanel(costData, scoresData);
+      } catch (err) {
+        container.innerHTML = `<div class="live-empty-state"><p>Could not load cost data.</p><small>${err.message}</small></div>`;
+      }
+    };
+
+    await render();
+    this._costRefreshTimer = setInterval(render, 30_000);
+  }
+
+  _renderCostPanel(costData, scoresData) {
+    if (!costData.available) {
+      const reason = costData.reason || 'Langfuse not configured';
+      return `
+        <div class="cost-unconfigured">
+          <div class="empty-icon">🔑</div>
+          <h3>Configure Langfuse</h3>
+          <p>${_esc(reason)}</p>
+          <div class="cost-env-instructions">
+            <p>Set the following environment variables to enable cost tracking:</p>
+            <pre>LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_HOST=https://cloud.langfuse.com  # optional</pre>
+          </div>
+        </div>`;
+    }
+
+    const inputTok  = (costData.total_input_tokens  ?? 0).toLocaleString();
+    const outputTok = (costData.total_output_tokens ?? 0).toLocaleString();
+    const totalTok  = (costData.total_tokens        ?? 0).toLocaleString();
+    const costUsd   = (costData.estimated_cost_usd  ?? 0).toFixed(6);
+    const topModels = costData.top_models || [];
+
+    const modelRows = topModels.length
+      ? topModels.map(m => `
+          <tr>
+            <td>${_esc(m.model)}</td>
+            <td>${(m.input_tokens ?? 0).toLocaleString()}</td>
+            <td>${(m.output_tokens ?? 0).toLocaleString()}</td>
+            <td>$${(m.cost_usd ?? 0).toFixed(6)}</td>
+          </tr>`).join('')
+      : '<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">No data</td></tr>';
+
+    const scores = scoresData?.available ? (scoresData.scores || []) : [];
+    const scoreRows = scores.length
+      ? scores.map(s => `
+          <tr>
+            <td>${_esc(s.name ?? '—')}</td>
+            <td>${_esc(String(s.value ?? '—'))}</td>
+            <td>${_esc(s.traceId ?? '—')}</td>
+          </tr>`).join('')
+      : '<tr><td colspan="3" style="text-align:center;color:var(--text-muted)">No scores</td></tr>';
+
+    return `
+      <div class="cost-stats-grid">
+        <div class="cost-stat-card">
+          <div class="cost-stat-value">${inputTok}</div>
+          <div class="cost-stat-label">Input tokens</div>
+        </div>
+        <div class="cost-stat-card">
+          <div class="cost-stat-value">${outputTok}</div>
+          <div class="cost-stat-label">Output tokens</div>
+        </div>
+        <div class="cost-stat-card">
+          <div class="cost-stat-value">${totalTok}</div>
+          <div class="cost-stat-label">Total tokens</div>
+        </div>
+        <div class="cost-stat-card cost-stat-card--accent">
+          <div class="cost-stat-value">$${costUsd}</div>
+          <div class="cost-stat-label">Estimated cost (USD)</div>
+        </div>
+      </div>
+
+      <h4 class="cost-section-title">Top models by cost</h4>
+      <table class="cost-table">
+        <thead><tr><th>Model</th><th>Input tokens</th><th>Output tokens</th><th>Est. cost</th></tr></thead>
+        <tbody>${modelRows}</tbody>
+      </table>
+
+      <h4 class="cost-section-title">Recent quality scores</h4>
+      <table class="cost-table">
+        <thead><tr><th>Name</th><th>Value</th><th>Trace ID</th></tr></thead>
+        <tbody>${scoreRows}</tbody>
+      </table>
+      <p class="cost-refresh-note">Auto-refreshes every 30 s</p>`;
   }
 
   // ------------------------------------------------------------------

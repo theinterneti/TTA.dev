@@ -8,6 +8,9 @@ Routes:
   GET  /api/v2/sessions/current   → active session or 404
   GET  /api/v2/sessions/{id}      → session detail + provider summary
   GET  /api/v2/sessions/{id}/spans → all spans for a session
+  GET  /api/v2/langfuse/trace/{trace_id} → proxy generations + scores for one trace
+  GET  /api/v2/langfuse/session/cost     → token counts + estimated cost for current session
+  GET  /api/v2/langfuse/scores           → recent quality scores (last 10)
   GET  /api/v2/cgc/{view}         → CGC graph data (graceful degradation)
   GET  /api/v2/cgc/live           → active primitive names for live overlay
   GET  /api/v2/primitives         → primitives catalog
@@ -26,12 +29,14 @@ Routes:
 
 import asyncio
 import json
+import os
 import threading
 import time
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+import httpx
 from aiohttp import web
 
 from ttadev.control_plane import ControlPlaneService
@@ -59,6 +64,54 @@ _PRIMITIVES_CATALOG = [
     {"name": "SequentialPrimitive", "description": "Sequential execution (>> operator)"},
     {"name": "LambdaPrimitive", "description": "Wrap any callable as a primitive"},
 ]
+
+# ---------------------------------------------------------------------------
+# Langfuse helpers
+# ---------------------------------------------------------------------------
+
+# Approximate USD cost per 1 million tokens for common models.
+# Input (prompt) cost, Output (completion) cost.
+_MODEL_COSTS_PER_1M: dict[str, dict[str, float]] = {
+    "gpt-4o": {"input": 2.50, "output": 10.00},
+    "gpt-4o-mini": {"input": 0.15, "output": 0.60},
+    "gpt-4-turbo": {"input": 10.00, "output": 30.00},
+    "gpt-4": {"input": 30.00, "output": 60.00},
+    "gpt-3.5-turbo": {"input": 0.50, "output": 1.50},
+    "claude-3-5-sonnet": {"input": 3.00, "output": 15.00},
+    "claude-3-5-haiku": {"input": 0.80, "output": 4.00},
+    "claude-3-opus": {"input": 15.00, "output": 75.00},
+    "claude-3-sonnet": {"input": 3.00, "output": 15.00},
+    "claude-3-haiku": {"input": 0.25, "output": 1.25},
+    "gemini-1.5-pro": {"input": 1.25, "output": 5.00},
+    "gemini-1.5-flash": {"input": 0.075, "output": 0.30},
+    "gemini-2.0-flash": {"input": 0.10, "output": 0.40},
+}
+
+
+def _langfuse_creds() -> tuple[str, str, str] | None:
+    """Return (host, public_key, secret_key) or None if not configured."""
+    public_key = os.environ.get("LANGFUSE_PUBLIC_KEY", "")
+    secret_key = os.environ.get("LANGFUSE_SECRET_KEY", "")
+    if not public_key or not secret_key:
+        return None
+    host = os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com").rstrip("/")
+    return host, public_key, secret_key
+
+
+def _estimate_cost(model: str, input_tokens: int, output_tokens: int) -> float:
+    """Return estimated USD cost for the given token counts."""
+    model_lower = model.lower()
+    # Fuzzy-match: find the longest key that is a substring of the model name
+    # (longest wins so "gpt-4o-mini" beats "gpt-4o").
+    costs: dict[str, float] | None = None
+    best_len = 0
+    for key, pricing in _MODEL_COSTS_PER_1M.items():
+        if key in model_lower and len(key) > best_len:
+            costs = pricing
+            best_len = len(key)
+    if costs is None:
+        return 0.0
+    return (input_tokens * costs["input"] + output_tokens * costs["output"]) / 1_000_000
 
 
 class ObservabilityServer:
@@ -128,6 +181,12 @@ class ObservabilityServer:
         self.app.router.add_get("/api/v2/sessions/{id}/ownership", self._v2_session_ownership)
         # NOTE: /agents/active must be registered before any wildcard {id} patterns
         self.app.router.add_get("/api/v2/agents/active", self._v2_agents_active)
+
+        # Langfuse proxy routes — gracefully degrade when credentials not set
+        # NOTE: /langfuse/session/cost must be registered before /langfuse/trace/{trace_id}
+        self.app.router.add_get("/api/v2/langfuse/session/cost", self._v2_langfuse_session_cost)
+        self.app.router.add_get("/api/v2/langfuse/scores", self._v2_langfuse_scores)
+        self.app.router.add_get("/api/v2/langfuse/trace/{trace_id}", self._v2_langfuse_trace)
 
         # Static assets (new dashboard)
         if DASHBOARD_DIR.exists():
@@ -305,6 +364,156 @@ class ObservabilityServer:
         loop = asyncio.get_running_loop()
         agents = await loop.run_in_executor(None, self._agent_tracker.get_active_agents_for_api)
         return web.json_response({"agents": agents})
+
+    # ------------------------------------------------------------------
+    # Langfuse proxy endpoints
+    # ------------------------------------------------------------------
+
+    async def _v2_langfuse_trace(self, request: web.Request) -> web.Response:
+        """Proxy generations + scores for a single Langfuse trace.
+
+        Returns ``{"available": false, "reason": "..."}`` when credentials are absent
+        or Langfuse is unreachable.  Never raises — always returns valid JSON.
+        """
+        creds = _langfuse_creds()
+        if creds is None:
+            return web.json_response(
+                {"available": False, "reason": "LANGFUSE_PUBLIC_KEY/SECRET_KEY not configured"}
+            )
+        host, public_key, secret_key = creds
+        trace_id = request.match_info["trace_id"]
+        try:
+            async with httpx.AsyncClient(auth=(public_key, secret_key), timeout=10.0) as client:
+                trace_resp, gens_resp, scores_resp = await asyncio.gather(
+                    client.get(f"{host}/api/public/traces/{trace_id}"),
+                    client.get(
+                        f"{host}/api/public/observations",
+                        params={"traceId": trace_id, "type": "GENERATION"},
+                    ),
+                    client.get(f"{host}/api/public/scores", params={"traceId": trace_id}),
+                )
+            trace_resp.raise_for_status()
+            gens_resp.raise_for_status()
+            scores_resp.raise_for_status()
+            return web.json_response(
+                {
+                    "available": True,
+                    "trace": trace_resp.json(),
+                    "generations": gens_resp.json(),
+                    "scores": scores_resp.json(),
+                }
+            )
+        except httpx.TimeoutException:
+            return web.json_response({"available": False, "reason": "Langfuse request timed out"})
+        except httpx.HTTPStatusError as exc:
+            return web.json_response(
+                {"available": False, "reason": f"Langfuse HTTP {exc.response.status_code}"}
+            )
+        except Exception as exc:  # noqa: BLE001
+            return web.json_response({"available": False, "reason": str(exc)})
+
+    async def _v2_langfuse_session_cost(self, request: web.Request) -> web.Response:
+        """Return token counts and estimated USD cost for the current session.
+
+        Queries the most-recent GENERATION observations from Langfuse (up to 50),
+        aggregates token counts per model, and estimates cost.  Always returns
+        valid JSON — gracefully degrades when Langfuse is not configured.
+        """
+        creds = _langfuse_creds()
+        if creds is None:
+            return web.json_response(
+                {"available": False, "reason": "LANGFUSE_PUBLIC_KEY/SECRET_KEY not configured"}
+            )
+        host, public_key, secret_key = creds
+        try:
+            async with httpx.AsyncClient(auth=(public_key, secret_key), timeout=10.0) as client:
+                resp = await client.get(
+                    f"{host}/api/public/observations",
+                    params={"type": "GENERATION", "limit": 50},
+                )
+            resp.raise_for_status()
+        except httpx.TimeoutException:
+            return web.json_response({"available": False, "reason": "Langfuse request timed out"})
+        except httpx.HTTPStatusError as exc:
+            return web.json_response(
+                {"available": False, "reason": f"Langfuse HTTP {exc.response.status_code}"}
+            )
+        except Exception as exc:  # noqa: BLE001
+            return web.json_response({"available": False, "reason": str(exc)})
+
+        data = resp.json()
+        observations = data if isinstance(data, list) else data.get("data", [])
+
+        total_input = 0
+        total_output = 0
+        model_stats: dict[str, dict[str, Any]] = {}
+
+        for obs in observations:
+            usage = obs.get("usage") or {}
+            model = obs.get("model") or "unknown"
+            inp = int(usage.get("input") or usage.get("promptTokens") or 0)
+            out = int(usage.get("output") or usage.get("completionTokens") or 0)
+            total_input += inp
+            total_output += out
+
+            if model not in model_stats:
+                model_stats[model] = {"input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0}
+            model_stats[model]["input_tokens"] += inp
+            model_stats[model]["output_tokens"] += out
+            model_stats[model]["cost_usd"] += _estimate_cost(model, inp, out)
+
+        total_cost = sum(s["cost_usd"] for s in model_stats.values())
+        top_models = sorted(
+            [{"model": m, **s} for m, s in model_stats.items()],
+            key=lambda x: x["cost_usd"],
+            reverse=True,
+        )[:3]
+
+        return web.json_response(
+            {
+                "available": True,
+                "total_input_tokens": total_input,
+                "total_output_tokens": total_output,
+                "total_tokens": total_input + total_output,
+                "estimated_cost_usd": round(total_cost, 6),
+                "top_models": top_models,
+            }
+        )
+
+    async def _v2_langfuse_scores(self, request: web.Request) -> web.Response:
+        """Return the 10 most-recent quality scores from Langfuse.
+
+        Always returns valid JSON — gracefully degrades when Langfuse is not
+        configured or unreachable.
+        """
+        creds = _langfuse_creds()
+        if creds is None:
+            return web.json_response(
+                {"available": False, "reason": "LANGFUSE_PUBLIC_KEY/SECRET_KEY not configured"}
+            )
+        host, public_key, secret_key = creds
+        try:
+            async with httpx.AsyncClient(auth=(public_key, secret_key), timeout=10.0) as client:
+                resp = await client.get(
+                    f"{host}/api/public/scores",
+                    params={"limit": 10},
+                )
+            resp.raise_for_status()
+        except httpx.TimeoutException:
+            return web.json_response({"available": False, "reason": "Langfuse request timed out"})
+        except httpx.HTTPStatusError as exc:
+            return web.json_response(
+                {"available": False, "reason": f"Langfuse HTTP {exc.response.status_code}"}
+            )
+        except Exception as exc:  # noqa: BLE001
+            return web.json_response({"available": False, "reason": str(exc)})
+
+        data = resp.json()
+        scores = data if isinstance(data, list) else data.get("data", [])
+        return web.json_response({"available": True, "scores": scores})
+        """Return active control-plane ownership summaries."""
+        service = ControlPlaneService(self._data_dir)
+        return web.json_response({"active": service.list_active_ownership()})
 
     async def _v2_control_ownership(self, request: web.Request) -> web.Response:
         """Return active control-plane ownership summaries."""

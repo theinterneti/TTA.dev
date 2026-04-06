@@ -699,3 +699,104 @@ details pre { background: var(--bg-card); padding: 10px; border-radius: 4px; fon
 .live-empty-state .empty-icon { font-size: 3em; margin-bottom: 12px; }
 .live-empty-state p { font-size: 1em; }
 .live-empty-state small { font-size: 0.85em; opacity: 0.7; }
+
+/* ------------------------------------------------------------------ Cost panel */
+#cost-panel {
+  padding: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.cost-unconfigured {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.cost-unconfigured h3 { color: var(--text); margin-bottom: 8px; font-size: 1.2em; }
+.cost-env-instructions {
+  display: inline-block;
+  text-align: left;
+  margin-top: 20px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 0.9em;
+}
+.cost-env-instructions pre {
+  background: var(--bg-panel);
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-size: 0.88em;
+  color: var(--accent);
+  white-space: pre-wrap;
+}
+
+.cost-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.cost-stat-card {
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.cost-stat-card--accent { border-color: var(--accent); }
+.cost-stat-value {
+  font-size: 1.7em;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+.cost-stat-card--accent .cost-stat-value { color: var(--accent); }
+.cost-stat-label {
+  font-size: 0.78em;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.cost-section-title {
+  color: var(--text-muted);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 24px 0 8px;
+  font-weight: 600;
+}
+
+.cost-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87em;
+  background: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.cost-table th {
+  text-align: left;
+  padding: 10px 14px;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+.cost-table td {
+  padding: 9px 14px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.cost-table tr:last-child td { border-bottom: none; }
+.cost-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+.cost-refresh-note {
+  font-size: 0.75em;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 20px;
+  opacity: 0.6;
+}
