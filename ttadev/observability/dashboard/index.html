@@ -12,23 +12,44 @@
     <!-- Rendered by app.js -->
   </header>
 
-  <div id="app-layout">
-    <nav id="session-tree">
-      <!-- Rendered by session-tree.js -->
-    </nav>
+  <!-- Tab bar -->
+  <nav id="tab-bar" role="tablist" aria-label="Dashboard tabs">
+    <button class="tab-btn active" data-tab="sessions" role="tab" aria-selected="true">Sessions</button>
+    <button class="tab-btn" data-tab="live" role="tab" aria-selected="false">
+      <span class="live-dot" aria-hidden="true"></span>Live
+    </button>
+  </nav>
 
-    <main id="session-detail">
-      <!-- Rendered by session-detail.js -->
-    </main>
+  <!-- Sessions tab content -->
+  <div id="tab-sessions" class="tab-panel" role="tabpanel">
+    <div id="app-layout">
+      <nav id="session-tree">
+        <!-- Rendered by session-tree.js -->
+      </nav>
 
-    <aside id="span-detail" hidden>
-      <!-- Rendered by span-detail.js -->
-    </aside>
+      <main id="session-detail">
+        <!-- Rendered by session-detail.js -->
+      </main>
+
+      <aside id="span-detail" hidden>
+        <!-- Rendered by span-detail.js -->
+      </aside>
+    </div>
+
+    <section id="cgc-graph-section">
+      <!-- Rendered by cgc-graph.js -->
+    </section>
   </div>
 
-  <section id="cgc-graph-section">
-    <!-- Rendered by cgc-graph.js -->
-  </section>
+  <!-- Live agents tab content -->
+  <div id="tab-live" class="tab-panel" role="tabpanel" hidden>
+    <div id="live-agents-panel">
+      <div class="panel-heading">🟢 Active Agents</div>
+      <div id="live-agents-grid">
+        <!-- Agent cards rendered by app.js -->
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="/static/js/app.js"></script>
 </body>

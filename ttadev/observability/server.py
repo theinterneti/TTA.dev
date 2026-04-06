@@ -14,7 +14,8 @@ Routes:
   GET  /api/v2/projects           → list project sessions (newest first)
   GET  /api/v2/projects/{id}      → project session detail
   GET  /api/v2/projects/{id}/sessions → sessions belonging to a project
-  WS   /ws                        → real-time span/session events
+  GET  /api/v2/agents/active      → currently active agents (live agent panel)
+  WS   /ws                        → real-time span/session/agent events
 
   Legacy v1 routes preserved for backward compatibility.
 """
@@ -30,6 +31,7 @@ from typing import Any
 from aiohttp import web
 
 from ttadev.control_plane import ControlPlaneService
+from ttadev.observability.agent_tracker import AgentTracker
 from ttadev.observability.cgc_integration import CGCIntegration
 from ttadev.observability.collector import TraceCollector
 from ttadev.observability.project_session import ProjectSessionManager
@@ -87,6 +89,9 @@ class ObservabilityServer:
         self.runner: web.AppRunner | None = None
         self.site: web.TCPSite | None = None
         self._websockets: set[web.WebSocketResponse] = set()
+        # Live-agent event tracking: agent_key → last-seen epoch seconds
+        self._live_agents: dict[str, float] = {}
+        self._agent_tracker = AgentTracker()
 
         self._register_routes()
 
@@ -112,6 +117,8 @@ class ObservabilityServer:
         self.app.router.add_get("/api/v2/projects/{id}/ownership", self._v2_project_ownership)
         self.app.router.add_get("/api/v2/projects/{id}", self._v2_project_detail)
         self.app.router.add_get("/api/v2/sessions/{id}/ownership", self._v2_session_ownership)
+        # NOTE: /agents/active must be registered before any wildcard {id} patterns
+        self.app.router.add_get("/api/v2/agents/active", self._v2_agents_active)
 
         # Static assets (new dashboard)
         if DASHBOARD_DIR.exists():
@@ -150,6 +157,7 @@ class ObservabilityServer:
         asyncio.create_task(self._probe_cgc())
         asyncio.create_task(self._broadcast_loop())
         asyncio.create_task(self._file_ingestion_loop())
+        asyncio.create_task(self._agent_expiry_loop())
 
     async def _probe_cgc(self) -> None:
         """Background task: probe CGC availability and set the flag."""
@@ -278,6 +286,16 @@ class ObservabilityServer:
 
     async def _v2_primitives(self, request: web.Request) -> web.Response:
         return web.json_response(_PRIMITIVES_CATALOG)
+
+    async def _v2_agents_active(self, request: web.Request) -> web.Response:
+        """Return currently active agents for the live agent activity panel.
+
+        Reads the agent registry and returns agents seen in the last 30 seconds.
+        Always returns ``{"agents": [...]}`` — never a 404 or error on empty state.
+        """
+        loop = asyncio.get_running_loop()
+        agents = await loop.run_in_executor(None, self._agent_tracker.get_active_agents_for_api)
+        return web.json_response({"agents": agents})
 
     async def _v2_control_ownership(self, request: web.Request) -> web.Response:
         """Return active control-plane ownership summaries."""
@@ -520,6 +538,42 @@ class ObservabilityServer:
             self.collector.unsubscribe(queue)
             raise
 
+    async def _agent_expiry_loop(self) -> None:
+        """Emit ``agent-end`` WebSocket events for agents that have gone quiet.
+
+        An agent is considered done when it has not produced a new span for
+        30 seconds.  The loop ticks every second so the frontend sees the
+        card disappear within ≈1 s of the timeout.
+        """
+        agent_expiry_seconds = 30.0
+        while True:
+            try:
+                await asyncio.sleep(1)
+                now = time.time()
+                expired = [
+                    k
+                    for k, ts in list(self._live_agents.items())
+                    if now - ts > agent_expiry_seconds
+                ]
+                for key in expired:
+                    del self._live_agents[key]
+                    provider, _, model = key.partition(":")
+                    msg = {
+                        "type": "agent-end",
+                        "agent_role": None,
+                        "provider": provider,
+                        "model": model,
+                    }
+                    for ws in list(self._websockets):
+                        try:
+                            await ws.send_json(msg)
+                        except Exception:
+                            self._websockets.discard(ws)
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                pass
+
     async def _file_ingestion_loop(self) -> None:
         """Poll file-based span sources every second and ingest new spans.
 
@@ -571,6 +625,36 @@ class ObservabilityServer:
                             await ws.send_json(msg)
                         except Exception:
                             self._websockets.discard(ws)
+
+                    # Emit agent-start / agent-step events for the Live panel
+                    if span.provider or span.model:
+                        agent_key = f"{span.provider or 'unknown'}:{span.model or 'unknown'}"
+                        is_new = agent_key not in self._live_agents
+                        self._live_agents[agent_key] = time.time()
+                        if is_new:
+                            agent_event: dict[str, Any] = {
+                                "type": "agent-start",
+                                "agent_role": span.agent_role,
+                                "provider": span.provider or "unknown",
+                                "model": span.model or "unknown",
+                                "task": span.name,
+                                "span_count": 1,
+                                "started_at": span.started_at,
+                            }
+                        else:
+                            agent_event = {
+                                "type": "agent-step",
+                                "agent_role": span.agent_role,
+                                "provider": span.provider or "unknown",
+                                "model": span.model or "unknown",
+                                "action_type": span.primitive_type or span.name,
+                                "span_count": len(self._session_mgr.get_session_spans(target.id)),
+                            }
+                        for ws in list(self._websockets):
+                            try:
+                                await ws.send_json(agent_event)
+                            except Exception:
+                                self._websockets.discard(ws)
             except asyncio.CancelledError:
                 raise
             except Exception:

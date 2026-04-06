@@ -123,6 +123,46 @@ class AgentTracker:
 
         return active
 
+    def get_active_agents_for_api(self, since_seconds: int = 30) -> list[dict[str, Any]]:
+        """Return active agents in the API schema expected by the live agent panel.
+
+        Args:
+            since_seconds: Include agents seen within this many seconds. Defaults to 30.
+
+        Returns:
+            List of dicts with keys: ``agent_role``, ``provider``, ``model``,
+            ``started_at``, ``last_seen``, ``span_count``.
+        """
+        cutoff = time.time() - since_seconds
+
+        if not self.agents_registry.exists():
+            return []
+
+        with self._lock:
+            with open(self.agents_registry) as f:
+                registry = json.load(f)
+
+        active: list[dict[str, Any]] = []
+        for _key, data in registry.items():
+            last_seen_ts = datetime.fromisoformat(data["last_seen"]).timestamp()
+            if last_seen_ts < cutoff:
+                continue
+            roles: list[str] = data.get("tta_agents_used") or []
+            active.append(
+                {
+                    "agent_role": roles[0] if roles else None,
+                    "provider": data["provider"],
+                    "model": data["model"],
+                    "started_at": data.get("first_seen", data["last_seen"]),
+                    "last_seen": data["last_seen"],
+                    "span_count": data.get("action_count", 0),
+                }
+            )
+
+        # Newest activity first
+        active.sort(key=lambda d: d["last_seen"], reverse=True)
+        return active
+
     def get_recent_actions(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get recent agent actions."""
         if not self.current_session_file.exists():

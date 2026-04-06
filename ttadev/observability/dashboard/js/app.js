@@ -1,6 +1,7 @@
 /**
  * app.js — Main controller
- * Owns: WebSocket connection, EventEmitter, header rendering.
+ * Owns: WebSocket connection, EventEmitter, header rendering, tab switching,
+ * and the live agent activity panel.
  * Other modules import the `app` singleton for the event bus and shared state.
  */
 
@@ -39,6 +40,8 @@ class App extends EventEmitter {
     this.maxReconnect = 5;
     this.health = null;
     this.selectedSessionId = null;
+    // Live agent panel state: agent_key (provider:model) → {card el, startedAt, timer}
+    this._agentCards = new Map();
   }
 
   async init() {
@@ -58,7 +61,149 @@ class App extends EventEmitter {
     await this.cgcGraph.init();
     await this.sessionTree.init();  // last: its auto-select fires after all listeners are ready
 
+    this._initTabs();
     this._connectWebSocket();
+  }
+
+  // ------------------------------------------------------------------
+  // Tab switching
+  // ------------------------------------------------------------------
+  _initTabs() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => this._switchTab(btn.dataset.tab));
+    });
+  }
+
+  _switchTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      const active = btn.dataset.tab === tabName;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', String(active));
+    });
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+      const show = panel.id === `tab-${tabName}`;
+      panel.hidden = !show;
+    });
+    if (tabName === 'live') {
+      this._activateLiveTab();
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // Live agent panel
+  // ------------------------------------------------------------------
+  async _activateLiveTab() {
+    const grid = document.getElementById('live-agents-grid');
+    if (!grid) return;
+    try {
+      const data = await this.fetchJSON('/api/v2/agents/active');
+      const agents = data.agents || [];
+      // Clear stale cards and rebuild from current API state
+      this._agentCards.forEach(({ timer }) => { if (timer) clearTimeout(timer); });
+      this._agentCards.clear();
+      grid.innerHTML = '';
+      if (agents.length === 0) {
+        this._renderLiveEmptyState(grid);
+      } else {
+        agents.forEach(agent => this._upsertAgentCard(agent));
+      }
+    } catch (err) {
+      grid.innerHTML = `<div class="live-empty-state"><p>Could not load active agents.</p><small>${err.message}</small></div>`;
+    }
+  }
+
+  _renderLiveEmptyState(grid) {
+    grid.innerHTML = `
+      <div class="live-empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">🤖</div>
+        <p>No active agents.</p>
+        <small>Start a workflow to see live activity.</small>
+      </div>`;
+  }
+
+  /** Build an agent key matching the server's provider:model format. */
+  _agentKey(agent) {
+    return `${agent.provider || 'unknown'}:${agent.model || 'unknown'}`;
+  }
+
+  _upsertAgentCard(agent) {
+    const grid = document.getElementById('live-agents-grid');
+    if (!grid) return;
+
+    const key = this._agentKey(agent);
+    const existing = this._agentCards.get(key);
+    const startedAt = existing ? existing.startedAt : (agent.started_at ? new Date(agent.started_at) : new Date());
+    const role = agent.agent_role || agent.model || 'unknown';
+
+    const card = existing ? existing.card : document.createElement('div');
+    card.className = 'agent-card';
+    card.dataset.agentKey = key;
+    card.innerHTML = `
+      <div class="agent-card-header">
+        <span class="agent-card-dot"></span>
+        <span class="agent-role">${_esc(role)}</span>
+      </div>
+      <div class="agent-card-body">
+        <span class="label">Provider</span><span class="value">${_esc(agent.provider || 'unknown')}</span>
+        <span class="label">Model</span><span class="value">${_esc(agent.model || 'unknown')}</span>
+        <span class="label">Spans</span><span class="value span-count">${agent.span_count ?? 0}</span>
+        <span class="label">Task</span><span class="value task-desc">${_esc(agent.task || agent.action_type || '—')}</span>
+      </div>
+      <div class="agent-duration" data-started="${startedAt.toISOString()}">⏱ —</div>`;
+
+    if (!existing) {
+      // Remove empty state if present
+      const empty = grid.querySelector('.live-empty-state');
+      if (empty) empty.remove();
+      grid.prepend(card);
+    }
+
+    const durationEl = card.querySelector('.agent-duration');
+    const tick = () => {
+      const secs = Math.floor((Date.now() - startedAt.getTime()) / 1000);
+      const m = Math.floor(secs / 60);
+      const s = secs % 60;
+      durationEl.textContent = `⏱ ${m > 0 ? m + 'm ' : ''}${s}s`;
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    this._agentCards.set(key, { card, startedAt, interval });
+  }
+
+  _updateAgentCard(event) {
+    const key = this._agentKey(event);
+    const entry = this._agentCards.get(key);
+    if (!entry) {
+      // Seen for the first time on this tab — create card
+      this._upsertAgentCard({
+        agent_role: event.agent_role,
+        provider: event.provider,
+        model: event.model,
+        span_count: event.span_count || 0,
+        task: event.action_type,
+      });
+      return;
+    }
+    const { card } = entry;
+    const spanCountEl = card.querySelector('.span-count');
+    if (spanCountEl && event.span_count != null) spanCountEl.textContent = event.span_count;
+    const taskEl = card.querySelector('.task-desc');
+    if (taskEl && event.action_type) taskEl.textContent = event.action_type;
+  }
+
+  _removeAgentCard(event) {
+    const key = this._agentKey(event);
+    const entry = this._agentCards.get(key);
+    if (!entry) return;
+    const { card, interval } = entry;
+    clearInterval(interval);
+    card.classList.add('fading');
+    setTimeout(() => {
+      card.remove();
+      this._agentCards.delete(key);
+      const grid = document.getElementById('live-agents-grid');
+      if (grid && grid.children.length === 0) this._renderLiveEmptyState(grid);
+    }, 5000);
   }
 
   // ------------------------------------------------------------------
@@ -94,6 +239,23 @@ class App extends EventEmitter {
         case 'session_start': this.emit('sessionStarted', msg.session); break;
         case 'session_end':   this.emit('sessionEnded',   msg.session_id); break;
         case 'metrics':       this.emit('metrics',        msg.metrics); break;
+        // Live agent events
+        case 'agent-start':
+          this._upsertAgentCard({
+            agent_role: msg.agent_role,
+            provider: msg.provider,
+            model: msg.model,
+            span_count: msg.span_count || 0,
+            started_at: msg.started_at,
+            task: msg.task,
+          });
+          break;
+        case 'agent-step':
+          this._updateAgentCard(msg);
+          break;
+        case 'agent-end':
+          this._removeAgentCard(msg);
+          break;
       }
     };
   }
@@ -145,6 +307,14 @@ class App extends EventEmitter {
     if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
     return r.json();
   }
+}
+
+// ---------------------------------------------------------------------------
+// Utilities
+// ---------------------------------------------------------------------------
+function _esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // Bootstrap

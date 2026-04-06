@@ -574,3 +574,128 @@ details pre { background: var(--bg-card); padding: 10px; border-radius: 4px; fon
 ::-webkit-scrollbar       { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ------------------------------------------------------------------ Tab bar */
+#tab-bar {
+  display: flex;
+  gap: 0;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 600;
+  padding: 12px 18px 10px;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 5px var(--success);
+  animation: pulse-dot 2s infinite;
+  display: inline-block;
+}
+
+/* ------------------------------------------------------------------ Tab panels */
+.tab-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.tab-panel[hidden] { display: none; }
+
+/* Sessions tab wraps existing layout */
+#tab-sessions { flex-direction: column; }
+
+/* ------------------------------------------------------------------ Live agents panel */
+#live-agents-panel {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-base);
+}
+
+#live-agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.agent-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--success);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  transition: opacity 0.4s, transform 0.4s;
+}
+.agent-card.fading {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.agent-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.agent-card-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: pulse-dot 2s infinite;
+  flex-shrink: 0;
+}
+
+.agent-role {
+  font-weight: 700;
+  font-size: 1em;
+  color: var(--text);
+  flex: 1;
+}
+
+.agent-card-body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  font-size: 0.83em;
+  color: var(--text-muted);
+}
+
+.agent-card-body .label { color: var(--text-muted); font-size: 0.9em; }
+.agent-card-body .value { color: var(--text); font-weight: 500; }
+
+.agent-duration {
+  font-size: 0.78em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.live-empty-state {
+  text-align: center;
+  padding: 80px 20px 40px;
+  color: var(--text-muted);
+}
+
+.live-empty-state .empty-icon { font-size: 3em; margin-bottom: 12px; }
+.live-empty-state p { font-size: 1em; }
+.live-empty-state small { font-size: 0.85em; opacity: 0.7; }
