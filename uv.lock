@@ -4000,6 +4000,7 @@ dependencies = [
     { name = "opentelemetry-api" },
     { name = "opentelemetry-sdk" },
     { name = "structlog" },
+    { name = "tenacity" },
 ]
 
 [package.optional-dependencies]
@@ -4064,6 +4065,7 @@ requires-dist = [
     { name = "redis", extras = ["asyncio"], marker = "extra == 'coordination'", specifier = ">=5.0" },
     { name = "redis", extras = ["asyncio"], marker = "extra == 'redis'", specifier = ">=5.0" },
     { name = "structlog", specifier = ">=25.5.0" },
+    { name = "tenacity", specifier = ">=9.1.4" },
     { name = "tta-apm-langfuse", marker = "extra == 'apm'", editable = "ttadev/observability/apm/langfuse" },
 ]
 provides-extras = ["cgc", "coordination", "redis", "gemini", "llm-all", "apm"]

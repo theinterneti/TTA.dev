@@ -1,0 +1,225 @@
+# LiteLLM Configuration for TTA.dev
+# Comprehensive multi-provider routing with free-tier prioritization
+#
+# Usage:
+#   1. Start proxy: litellm --config litellm_config.yaml
+#   2. Point your app to: http://localhost:4000/v1
+#
+# Or use directly via Python:
+#   import litellm
+#   response = litellm.completion(
+#       model="groq/llama-3.3-70b-versatile",
+#       messages=[{"role": "user", "content": "Hello!"}]
+#   )
+
+model_list:
+  # =============================================================================
+  # FREE TIER MODELS - Use these first
+  # =============================================================================
+
+  # Groq - FASTEST free tier (14,400-30,000 RPM)
+  - model_name: groq-llama-3.3-70b
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      rpm_limit: 30
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: false
+      supports_audio_input: false
+      supports_audio_output: false
+      context_window: 128000
+
+  - model_name: groq-llama-3.1-8b
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      rpm_limit: 30
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      context_window: 128000
+
+  # Google Gemini - Generous free tier (1500 RPM)
+  # Note: May hit rate limits with heavy usage
+  - model_name: gemini-2.0-flash
+    litellm_params:
+      model: gemini/gemini-2.0-flash
+      api_key: os.environ/GOOGLE_API_KEY
+      rpm: 1500
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+      context_window: 1048576
+
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GOOGLE_API_KEY
+      rpm: 1500
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+      context_window: 1048576
+
+  - model_name: gemini-2.0-flash-lite
+    litellm_params:
+      model: gemini/gemini-2.0-flash-lite
+      api_key: os.environ/GOOGLE_API_KEY
+      rpm: 1500
+    model_info:
+      mode: chat
+      supports_function_calling: false
+      supports_vision: false
+      context_window: 1048576
+
+  # OpenRouter - Large free tier pool
+  - model_name: openrouter-deepseek-r1
+    litellm_params:
+      model: openrouter/deepseek/deepseek-r1
+      api_key: os.environ/OPENROUTER_API_KEY
+    model_info:
+      mode: chat
+      supports_function_calling: false
+      context_window: 65536
+
+  - model_name: openrouter-qwen3-32b
+    litellm_params:
+      model: openrouter/qwen/qwen3-32b
+      api_key: os.environ/OPENROUTER_API_KEY
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      context_window: 32000
+
+  - model_name: openrouter-qwen3.6-plus
+    litellm_params:
+      model: openrouter/qwen/qwen3.6-plus
+      api_key: os.environ/OPENROUTER_API_KEY
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      context_window: 32000
+
+  # Hugging Face - Free inference
+  - model_name: huggingface-qwen-2.5
+    litellm_params:
+      model: huggingface/Qwen/Qwen2.5-7B-Instruct
+      api_key: os.environ/HF_TOKEN
+    model_info:
+      mode: chat
+      supports_function_calling: false
+      context_window: 32768
+
+  # Together.ai - $25 free credits
+  - model_name: together-llama-4-scout
+    litellm_params:
+      model: together_ai/meta-llama/Llama-4-Scout-17B-16E-Instruct
+      api_key: os.environ/TOGETHER_API_KEY
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      context_window: 100000
+
+  # =============================================================================
+  # PAID TIER MODELS - Fallback only
+  # =============================================================================
+
+  # Anthropic - High quality (if you add credits)
+  - model_name: claude-sonnet-4
+    litellm_params:
+      model: anthropic/claude-sonnet-4-20250514
+      api_key: os.environ/ANTHROPIC_API_KEY
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+      context_window: 200000
+
+  - model_name: claude-3-5-sonnet
+    litellm_params:
+      model: anthropic/claude-3-5-sonnet-v2-20241022
+      api_key: os.environ/ANTHROPIC_API_KEY
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+      context_window: 200000
+
+  # OpenAI - Standard fallback
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+      context_window: 128000
+
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+    model_info:
+      mode: chat
+      supports_function_calling: true
+      supports_vision: true
+      context_window: 128000
+
+# =============================================================================
+# LITELLM SETTINGS
+# =============================================================================
+
+litellm_settings:
+  # Request timeout (seconds)
+  request_timeout: 120
+
+  # Enable detailed logging
+  detailed_settings:
+    show_debug_log: false
+
+  # Retry settings
+  num_retries: 3
+  timeout: 120
+
+  # Drop request if model does not exist in config
+  set_verbose: false
+
+  # Custom API base URLs (if using proxy endpoints)
+  # custom_api_base: "http://localhost:4000"
+
+# =============================================================================
+# ENVIRONMENT VARIABLES (loaded from .env)
+# =============================================================================
+
+environment_variables:
+  GROQ_API_KEY: os.environ/GROQ_API_KEY
+  OPENROUTER_API_KEY: os.environ/OPENROUTER_API_KEY
+  GOOGLE_API_KEY: os.environ/GOOGLE_API_KEY
+  HF_TOKEN: os.environ/HF_TOKEN
+  TOGETHER_API_KEY: os.environ/TOGETHER_API_KEY
+  ANTHROPIC_API_KEY: os.environ/ANTHROPIC_API_KEY
+  OPENAI_API_KEY: os.environ/OPENAI_API_KEY
+
+# =============================================================================
+# GENERAL SETTINGS
+# =============================================================================
+
+general_settings:
+  # Master key for proxy (optional)
+  # master_key: "your-master-key"
+
+  # Database URL for tracking (optional - LiteLLM can use Redis/SQLite)
+  # database_url: "sqlite:///litellm.db"
+
+  # Port for proxy server
+  # port: 4000
+
+  # Host
+  # host: "0.0.0.0"

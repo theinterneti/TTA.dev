@@ -32,6 +32,7 @@ dependencies = [
     "opentelemetry-api>=1.20.0",
     "opentelemetry-sdk>=1.20.0",
     "structlog>=25.5.0",
+    "tenacity>=9.1.4",
 ]
 
 [dependency-groups]

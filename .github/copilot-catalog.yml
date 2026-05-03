@@ -1,0 +1,179 @@
+# Composition Model & Canonical Stack
+#
+# Machine-readable registry for the TTA.dev agent ecosystem.
+# Defines the composition chain: INSTRUCTIONS → SKILLS/WORKFLOWS → AGENTS
+# and declares the canonical technology stack.
+#
+# Validate with: uv run python scripts/validate-catalog.py
+# Documentation: docs/agents/dev/composition-model.md
+
+# ─── Canonical Stack ──────────────────────────────────────────────────
+# These are the non-negotiable technology choices for TTA.dev.
+# All agent integrations MUST route through these.
+stack:
+  llm: litellm            # All LLM calls via LiteLLMPrimitive (100+ providers)
+  observability: langfuse  # LLM tracing, auto-wired via LANGFUSE_* env vars
+  memory: hindsight        # Cross-session memory via MCP (http://localhost:8888/mcp/)
+  execution: openhands     # Agent execution integration via OpenHandsPrimitive
+
+# ─── Instructions ─────────────────────────────────────────────────────
+# Atomic coding standards, auto-applied by glob pattern (applyTo).
+# IDs are derived from filenames: python.instructions.md → python
+instructions:
+  python:
+    path: .github/instructions/python.instructions.md
+    applies_to: "ttadev/**/*.py"
+  testing:
+    path: .github/instructions/testing.instructions.md
+    applies_to: "**/tests/**/*.py,**/*_test.py,**/test_*.py"
+  scripts:
+    path: .github/instructions/scripts.instructions.md
+    applies_to: "scripts/**/*.py"
+  documentation:
+    path: .github/instructions/documentation.instructions.md
+    applies_to: "**/*.md"
+  agent-safety:
+    path: .github/instructions/agent-safety.instructions.md
+    applies_to: "**"
+  agent-skills:
+    path: .github/instructions/agent-skills.instructions.md
+    applies_to: "**/.github/skills/**/SKILL.md, **/.claude/skills/**/SKILL.md"
+  agents:
+    path: .github/instructions/agents.instructions.md
+    applies_to: "**/*.agent.md"
+  instructions:
+    path: .github/instructions/instructions.instructions.md
+    applies_to: "**/*.instructions.md"
+  context-engineering:
+    path: .github/instructions/context-engineering.instructions.md
+    applies_to: "**"
+  ai-prompt-engineering:
+    path: .github/instructions/ai-prompt-engineering-safety-best-practices.instructions.md
+    applies_to: "**"
+  github-actions:
+    path: .github/instructions/github-actions-ci-cd-best-practices.instructions.md
+    applies_to: ".github/workflows/*.yml,.github/workflows/*.yaml"
+
+# ─── Skills & Workflows ──────────────────────────────────────────────
+# Skills = task capabilities (kind: capability)
+# Workflows = multi-step processes (kind: workflow)
+# instruction_refs link to the instruction IDs above.
+skills:
+  core-conventions:
+    path: .github/skills/core-conventions/SKILL.md
+    kind: capability
+    instruction_refs: [python, agent-safety]
+
+  build-test-verify:
+    path: .github/skills/build-test-verify/SKILL.md
+    kind: capability
+    instruction_refs: [python, testing]
+
+  git-commit:
+    path: .github/skills/git-commit/SKILL.md
+    kind: capability
+    instruction_refs: []
+
+  create-pull-request:
+    path: .github/skills/create-pull-request/SKILL.md
+    kind: capability
+    instruction_refs: []
+
+  create-agent:
+    path: .github/skills/create-agent/SKILL.md
+    kind: capability
+    instruction_refs: [agents]
+
+  create-atomic-note:
+    path: .github/skills/create-atomic-note/SKILL.md
+    kind: capability
+    instruction_refs: [documentation]
+
+  self-review-checklist:
+    path: .github/skills/self-review-checklist/SKILL.md
+    kind: capability
+    instruction_refs: [python, testing]
+
+  session-start:
+    path: .github/skills/session-start/SKILL.md
+    kind: capability
+    instruction_refs: []
+
+  ttadev-llm:
+    path: .github/skills/ttadev-llm/SKILL.md
+    kind: capability
+    instruction_refs: [python]
+
+  ttadev-primitives:
+    path: .github/skills/ttadev-primitives/SKILL.md
+    kind: capability
+    instruction_refs: [python, scripts]
+
+  sdd-workflow:
+    path: .github/skills/sdd-workflow/SKILL.md
+    kind: workflow
+    instruction_refs: [python, testing]
+
+  feature-development:
+    path: .github/skills/feature-development/SKILL.md
+    kind: workflow
+    instruction_refs: [python, testing]
+
+  incident-response:
+    path: .github/skills/incident-response/SKILL.md
+    kind: workflow
+    instruction_refs: []
+
+  package-release:
+    path: .github/skills/package-release/SKILL.md
+    kind: workflow
+    instruction_refs: [python, testing]
+
+# ─── Agents ───────────────────────────────────────────────────────────
+# Each agent declares which skills and workflows it uses.
+# tools are kept in the .agent.md frontmatter (official Copilot field).
+agents:
+  architect:
+    path: .github/agents/architect.agent.md
+    skill_refs: [core-conventions, session-start, ttadev-primitives]
+    workflow_refs: [sdd-workflow]
+
+  backend-engineer:
+    path: .github/agents/backend-engineer.agent.md
+    skill_refs: [core-conventions, build-test-verify, ttadev-primitives, ttadev-llm, git-commit]
+    workflow_refs: [sdd-workflow, feature-development]
+
+  code-reviewer:
+    path: .github/agents/code-reviewer.agent.md
+    skill_refs: [core-conventions, self-review-checklist, build-test-verify]
+    workflow_refs: []
+
+  data-scientist:
+    path: .github/agents/data-scientist.agent.md
+    skill_refs: [core-conventions, build-test-verify]
+    workflow_refs: []
+
+  devops-engineer:
+    path: .github/agents/devops-engineer.agent.md
+    skill_refs: [core-conventions, build-test-verify, git-commit, create-pull-request]
+    workflow_refs: [package-release]
+
+  frontend-engineer:
+    path: .github/agents/frontend-engineer.agent.md
+    skill_refs: [build-test-verify, git-commit]
+    workflow_refs: [feature-development]
+
+  observability-expert:
+    path: .github/agents/observability-expert.agent.md
+    skill_refs: [core-conventions, build-test-verify, ttadev-primitives]
+    workflow_refs: []
+
+  project-planner:
+    path: .github/agents/project-planner.agent.md
+    skill_refs: [core-conventions, session-start]
+    workflow_refs: [sdd-workflow]
+
+  testing-specialist:
+    path: .github/agents/testing-specialist.agent.md
+    skill_refs: [core-conventions, build-test-verify, self-review-checklist]
+    workflow_refs: [sdd-workflow]
