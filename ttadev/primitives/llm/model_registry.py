@@ -182,7 +182,14 @@ class RegistryResponse:
 
 from ttadev.primitives.llm.model_registry_data import (  # noqa: E402
     _DEFAULT_CLOUD_MODELS,
+    GEMINI_MODELS,
+    GROQ_ROTATION_MODELS,
 )
+
+__all__ = [
+    "GEMINI_MODELS",
+    "GROQ_ROTATION_MODELS",
+]
 
 # ── Primitive ─────────────────────────────────────────────────────────────────
 
