@@ -6,12 +6,9 @@ Core primitives are exported directly from this package:
     RetryPrimitive, FallbackPrimitive, TimeoutPrimitive, CompensationPrimitive,
     CachePrimitive, MockPrimitive, GitCollaborationPrimitive.
 
-Extension modules (ace, adaptive, analysis, apm, benchmarking,
-lifecycle, orchestration, research, speckit) are accessible via their original
-import paths or through the ``extensions`` namespace::
-
-    from ttadev.primitives.extensions import EXTENSION_MODULES
-    from ttadev.primitives.extensions import adaptive
+LLM primitives (LiteLLMPrimitive, UniversalLLMPrimitive, etc.) are lazy-loaded
+via __getattr__ to avoid triggering ``import litellm`` (which can hang at import
+time in some environments due to network cost-map checks).
 
 KB Safety: All primitives follow the one-way sync architecture (Code → KB only).
 See docs/architecture/KB_SAFETY_ARCHITECTURE.md for details.
@@ -36,21 +33,6 @@ from .core.parallel import ParallelPrimitive
 from .core.routing import RouterPrimitive
 from .core.sequential import SequentialPrimitive
 
-# ── LLM primitives (runtime provider abstraction) ───────────────────────
-from .llm import (
-    LiteLLMPrimitive,
-    LLMProvider,
-    LLMRequest,
-    LLMResponse,
-    ToolCall,
-    ToolSchema,
-    UniversalLLMPrimitive,
-    make_resilient_llm,
-)
-
-# ── Memory (Hindsight / AgentMemory) ─────────────────────────────────────
-from .memory import AgentMemory, HindsightClient, MemoryResult, RetainResult
-
 # ── Core: performance ───────────────────────────────────────────────────
 from .performance.cache import CacheBackend, CachePrimitive, InMemoryBackend, RedisBackend
 
@@ -69,17 +51,41 @@ from .safety import SafetyGateEscalatedError, SafetyGatePrimitive, SeverityLevel
 # ── Core: streaming ─────────────────────────────────────────────────
 from .streaming import StreamingPrimitive
 
-# ── Integrations: LangGraph ──────────────────────────────────────────────────
-try:
-    from .integrations.langgraph_primitive import LangGraphPrimitive
-except (ImportError, ModuleNotFoundError) as _e:
-    if "langgraph" in str(_e):
-        LangGraphPrimitive = None  # type: ignore[assignment]
-    else:
-        raise
-
 # ── Core: testing ───────────────────────────────────────────────────────
 from .testing.mocks import MockPrimitive
+
+# ── Memory (Hindsight / AgentMemory) ─────────────────────────────────────
+from .memory import AgentMemory, HindsightClient, MemoryResult, RetainResult
+
+
+# ── Lazy-loaded modules — deferred via __getattr__ to avoid pulling heavy
+#    deps (litellm, langgraph) until the caller actually needs them.
+_lazy_imports = {
+    # LLM primitives (trigger import litellm)
+    "LiteLLMPrimitive": ".llm",
+    "LLMProvider": ".llm",
+    "LLMRequest": ".llm",
+    "LLMResponse": ".llm",
+    "ToolCall": ".llm",
+    "ToolSchema": ".llm",
+    "UniversalLLMPrimitive": ".llm",
+    "make_resilient_llm": ".llm",
+    # LangGraph (trigger import langgraph)
+    "LangGraphPrimitive": ".integrations.langgraph_primitive",
+}
+
+
+def __getattr__(name: str):
+    if name in _lazy_imports:
+        import importlib
+
+        mod = importlib.import_module(_lazy_imports[name], package=__name__)
+        attr = getattr(mod, name)
+        # Cache in module globals so next access is direct
+        globals()[name] = attr
+        return attr
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     # Core primitives
@@ -116,7 +122,7 @@ __all__ = [
     "AbstractRepository",
     "AbstractUnitOfWork",
     "FakeUnitOfWork",
-    # LLM primitives
+    # LLM primitives (lazy)
     "LiteLLMPrimitive",
     "make_resilient_llm",
     "LLMProvider",
@@ -129,7 +135,7 @@ __all__ = [
     "MockPrimitive",
     # Streaming primitives
     "StreamingPrimitive",
-    # LangGraph integration
+    # LangGraph integration (lazy)
     "LangGraphPrimitive",
     # Code graph primitives
     "CodeGraphPrimitive",
@@ -145,7 +151,7 @@ __all__ = [
 
 __version__ = "1.3.1"
 
-# Auto-setup observability on import
-from .observability.tracing import setup_tracing
-
-setup_tracing()
+# Auto-setup observability is opt-in — call initialize_observability() explicitly.
+# Previously setup_tracing() was called at import time, but that triggers the
+# observability chain (aiohttp, etc.) on every ``import ttadev.primitives``.
+# See ttadev.initialize_observability() for the explicit opt-in path.

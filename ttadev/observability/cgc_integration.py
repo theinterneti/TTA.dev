@@ -12,10 +12,6 @@ import shutil
 import socket
 from typing import Any
 
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
-from mcp.types import TextContent
-
 # Direct binary path avoids uv startup overhead on each call
 _CGC_BIN = shutil.which("cgc") or "cgc"
 _FALKORDB_SOCK = os.path.expanduser("~/.codegraphcontext/falkordb.sock")
@@ -51,6 +47,8 @@ class CGCIntegration:
     """Integration with CodeGraphContext MCP server."""
 
     def __init__(self) -> None:
+        from mcp import StdioServerParameters
+
         self.server_params = StdioServerParameters(
             command=_CGC_BIN,
             args=["mcp", "start"],
@@ -63,6 +61,10 @@ class CGCIntegration:
 
     async def _run(self, tool: str, args: dict[str, Any] | None = None) -> Any:
         """Spawn cgc subprocess, call one tool, return parsed result."""
+        from mcp import ClientSession
+        from mcp.client.stdio import stdio_client
+        from mcp.types import TextContent
+
         async with stdio_client(self.server_params) as (read, write):
             async with ClientSession(read, write) as session:
                 await asyncio.wait_for(session.initialize(), timeout=_CALL_TIMEOUT)

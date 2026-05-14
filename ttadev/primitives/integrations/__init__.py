@@ -94,13 +94,23 @@ except (
     else:
         raise
 
-from ttadev.primitives.integrations.openhands_primitive import (
-    _OPENHANDS_DENYLIST,
-    OPENHANDS_COMPATIBLE_FREE_MODELS,
-    OpenHandsAgentError,
-    OpenHandsPrimitive,
-    get_ranked_openhands_free_models,
-)
+try:  # Optional dependency: openhands-sdk
+    from ttadev.primitives.integrations.openhands_primitive import (
+        _OPENHANDS_DENYLIST,
+        OPENHANDS_COMPATIBLE_FREE_MODELS,
+        OpenHandsAgentError,
+        OpenHandsPrimitive,
+        get_ranked_openhands_free_models,
+    )
+except ModuleNotFoundError as exc:  # pragma: no cover - executed only when SDK missing
+    if exc.name and "openhands" in str(exc.name):
+        _OPENHANDS_DENYLIST = []  # type: ignore[assignment]
+        OPENHANDS_COMPATIBLE_FREE_MODELS = []  # type: ignore[assignment]
+        OpenHandsAgentError = None  # type: ignore[assignment]
+        OpenHandsPrimitive = None  # type: ignore[assignment]
+        get_ranked_openhands_free_models = None  # type: ignore[assignment]
+    else:
+        raise
 
 
 def __getattr__(name: str) -> object:
