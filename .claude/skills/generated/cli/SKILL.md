@@ -1,32 +1,32 @@
 ---
 name: cli
-description: "Skill for the Cli area of TTA.dev. 108 symbols across 26 files."
+description: "Cli subsystem in TTA.dev: cmd_status and related code. 110 symbols | 27 files | Cohesion: 70%"
 ---
 
 # Cli
 
-108 symbols | 26 files | Cohesion: 72%
+110 symbols | 27 files | Cohesion: 70%
 
 ## When to Use
 
-- Working with code in `ttadev/`
-- Understanding how cmd_status, test_exit_code_zero_when_providers_healthy, test_output_contains_checkmark_for_healthy_provider work
-- Modifying cli-related functionality
+- Working on `cli`-related functionality in TTA.dev
+- Modifying `cmd_status`
+- Navigating `ttadev/cli/run.py`, `ttadev/cli/models.py`
 
 ## Key Files
 
 | File | Symbols |
 |------|---------|
-| `tests/cli/test_status.py` | _args, _make_validation_result, _make_ok_result, test_exit_code_zero_when_providers_healthy, test_output_contains_checkmark_for_healthy_provider (+13) |
+| `tests/cli/test_status.py` | _args, _make_validation_result, _make_ok_result, test_exit_code_zero_when_providers_healthy, test_output_contains_checkmark_for_healthy_provider (+14) |
 | `tests/cli/test_setup.py` | _make_args, test_exit_0_when_at_least_one_connected, test_exit_1_when_none_connected, test_json_output_parses, test_json_output_no_key_values (+8) |
 | `ttadev/cli/run.py` | execute, _path, get, set, run_cache (+5) |
 | `ttadev/cli/models.py` | handle_model_command, _cmd_suggest_qwen, _cmd_ollama, _cmd_ollama_recommend, _cmd_info (+5) |
+| `ttadev/cli/control.py` | _step_duration, _handle_task_create, _handle_task_list, _handle_task_show, _handle_task_claim (+4) |
 | `ttadev/cli/setup.py` | _get_key, cmd_validate_keys, validate_provider, _read_env, _write_env (+4) |
 | `ttadev/cli/benchmark.py` | _validate_response, _benchmark_model, run_benchmark, cmd_benchmark, _run (+2) |
-| `ttadev/cli/project.py` | _validate_name, _projects_dir, join, show |
-| `tests/unit/test_cli_project.py` | test_prints_project_name, test_prints_project_id, test_prints_created_at, test_correct_project_shown_among_many |
+| `ttadev/cli/status.py` | _provider_slug, _check_port, cmd_status, _count_control_plane |
 | `ttadev/cli/hw_detect.py` | detect_gpu_vram_gb, detect_system_ram_gb, recommend_ollama_model, hardware_summary |
-| `ttadev/cli/session.py` | _find_active, end_session, _span_count, current_session |
+| `tests/unit/test_hw_detect.py` | _with_gpu, _no_gpu, test_recommended_model_matches_standalone_recommend |
 
 ## Entry Points
 
@@ -58,10 +58,10 @@ Start here when exploring this area:
 | `test_json_services_reflect_port_state` | Function | `tests/cli/test_status.py` | 434 |
 | `test_control_plane_counts_in_human_output` | Function | `tests/cli/test_status.py` | 455 |
 | `test_control_plane_counts_in_json_output` | Function | `tests/cli/test_status.py` | 471 |
-| `join` | Function | `ttadev/cli/project.py` | 30 |
-| `show` | Function | `ttadev/cli/project.py` | 68 |
-| `test_prints_project_name` | Function | `tests/unit/test_cli_project.py` | 230 |
-| `test_prints_project_id` | Function | `tests/unit/test_cli_project.py` | 236 |
+| `cmd_validate_keys` | Function | `ttadev/cli/setup.py` | 314 |
+| `test_exit_0_when_at_least_one_connected` | Function | `tests/cli/test_setup.py` | 281 |
+| `test_exit_1_when_none_connected` | Function | `tests/cli/test_setup.py` | 296 |
+| `test_json_output_parses` | Function | `tests/cli/test_setup.py` | 309 |
 
 ## Execution Flows
 
@@ -74,18 +74,18 @@ Start here when exploring this area:
 | `Handle_model_command → Calculate_roi_breakeven` | cross_community | 5 |
 | `Main → _path` | cross_community | 4 |
 | `Handle_model_command → _build_rationale` | intra_community | 4 |
-| `Main → Register_agent_subcommands` | intra_community | 3 |
-| `Main → Register_agents_subcommands` | intra_community | 3 |
-| `Main → Register_workflow_subcommands` | intra_community | 3 |
+| `Main → Register_agent_subcommands` | cross_community | 3 |
+| `Main → Register_agents_subcommands` | cross_community | 3 |
+| `Main → Register_workflow_subcommands` | cross_community | 3 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
-| Unit | 26 calls |
+| Unit | 36 calls |
+| Control_plane | 4 calls |
+| Observability | 3 calls |
 | Model_advisor | 2 calls |
-| Observability | 1 calls |
-| Control_plane | 1 calls |
 | Agents | 1 calls |
 
 ## How to Explore

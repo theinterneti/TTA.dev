@@ -1,6 +1,6 @@
 ---
 name: integrations
-description: "Skill for the Integrations area of TTA.dev. 60 symbols across 6 files."
+description: "Integrations area in TTA.dev (openhands_primitive and related). 60 symbols | 6 files | Cohesion: 82%"
 ---
 
 # Integrations
@@ -9,9 +9,9 @@ description: "Skill for the Integrations area of TTA.dev. 60 symbols across 6 fi
 
 ## When to Use
 
-- Working with code in `tests/`
-- Understanding how test_injects_workflow_id, test_injects_session_id_when_present, test_injects_trace_id_when_present work
-- Modifying integrations-related functionality
+- Working on `integrations`-related functionality in TTA.dev
+- Navigating `ttadev/primitives/integrations/openhands_primitive.py`, `ttadev/primitives/integrations/supabase_primitive.py`
+- Understanding test coverage for this area
 
 ## Key Files
 

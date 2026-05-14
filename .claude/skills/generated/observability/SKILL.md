@@ -1,32 +1,32 @@
 ---
 name: observability
-description: "Skill for the Observability area of TTA.dev. 91 symbols across 29 files."
+description: "Observability subsystem in TTA.dev: demo_hierarchical_trace, handle_api_active_agents, handle_api_agent_actions and related code. 115 symbols | 38 files | Cohesion: 73%"
 ---
 
 # Observability
 
-91 symbols | 29 files | Cohesion: 83%
+115 symbols | 38 files | Cohesion: 73%
 
 ## When to Use
 
-- Working with code in `ttadev/`
-- Understanding how demo_hierarchical_trace, handle_api_active_agents, handle_api_agent_actions work
-- Modifying observability-related functionality
+- Working on `observability`-related functionality in TTA.dev
+- Modifying `demo_hierarchical_trace`, `handle_api_active_agents`
+- Navigating `ttadev/observability/server.py`, `ttadev/observability/project_session.py`
 
 ## Key Files
 
 | File | Symbols |
 |------|---------|
+| `ttadev/observability/server.py` | _langfuse_creds, _estimate_cost, _v2_langfuse_session_cost, _v2_langfuse_scores, _init_state (+5) |
+| `tests/observability/test_span_pipeline.py` | test_retry_succeeds_after_transient_failure, test_retry_exhausted_raises, test_retry_with_mock_primitive, test_cache_hit_skips_inner_primitive, _make_otel_span (+3) |
 | `ttadev/observability/project_session.py` | join, get, get_by_id, add_member, assign_role (+2) |
-| `tests/observability/test_span_pipeline.py` | test_retry_succeeds_after_transient_failure, test_retry_exhausted_raises, test_retry_with_mock_primitive, _make_otel_span, test_cache_span_classified_correctly_by_span_processor (+2) |
 | `ttadev/observability/span_processor.py` | from_activity_log, from_agent_tracker, extract_primitive_type, _normalize_provider, _parse_timestamp (+2) |
 | `ttadev/observability/agent_tracker.py` | track_agent_action, log_activity, get_active_agents, get_recent_actions, get_tracker (+1) |
-| `tests/observability/test_handoff_tracing.py` | _make_agent_spec, test_handoff_span_emitted_with_required_attributes, test_execution_span_tagged_with_agent_role, test_handoff_span_not_emitted_when_condition_false, _free_port (+1) |
 | `ttadev/primitives/observability/logging.py` | _log, debug, info, warning, error (+1) |
+| `ttadev/observability/session_manager.py` | end_session_by_id, list_sessions, get_or_create_agent_session, update_session_project, _persist_session (+1) |
 | `ttadev/observability/auto_instrument.py` | log_activity, log_tool_use, log_workflow_end, get_logger, log_workflow_start (+1) |
+| `tests/observability/test_handoff_tracing.py` | _free_port, test_dag_endpoint_empty_when_no_handoffs, test_dag_endpoint_returns_nodes_and_edges, _make_agent_spec, test_handoff_span_emitted_with_required_attributes (+1) |
 | `ttadev/observability/auto_track_copilot.py` | is_copilot_session, get_copilot_context, wrapper, track_workflow_execution, track_agent_activation |
-| `ttadev/primitives/observability/tracing.py` | get_agent_id, get_agent_tool, export, setup_tracing, execute |
-| `ttadev/observability/demo_trace_generation.py` | simulate_backend_engineer_workflow, simulate_architect_workflow, main |
 
 ## Entry Points
 
@@ -59,9 +59,9 @@ Start here when exploring this area:
 | `test_retry_succeeds_after_transient_failure` | Function | `tests/observability/test_span_pipeline.py` | 234 |
 | `test_retry_exhausted_raises` | Function | `tests/observability/test_span_pipeline.py` | 261 |
 | `test_retry_with_mock_primitive` | Function | `tests/observability/test_span_pipeline.py` | 275 |
+| `test_cache_hit_skips_inner_primitive` | Function | `tests/observability/test_span_pipeline.py` | 367 |
 | `execute` | Function | `ttadev/primitives/recovery/retry.py` | 81 |
 | `root` | Function | `ttadev/primitives/core/base.py` | 217 |
-| `from_activity_log` | Function | `ttadev/observability/span_processor.py` | 133 |
 
 ## Execution Flows
 
@@ -82,10 +82,11 @@ Start here when exploring this area:
 
 | Area | Connections |
 |------|-------------|
-| Unit | 20 calls |
+| Unit | 32 calls |
 | Agents | 2 calls |
+| Tools | 2 calls |
 | Recovery | 1 calls |
-| Performance | 1 calls |
+| Control_plane | 1 calls |
 
 ## How to Explore
 

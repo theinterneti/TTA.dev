@@ -130,7 +130,7 @@ and cross-repo sync rules with the TTA repository.
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **TTA.dev** (36271 symbols, 58586 relationships, 246 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **TTA.dev** (0 symbols, 0 relationships, 0 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -168,25 +168,5 @@ This project is indexed by GitNexus as **TTA.dev** (36271 symbols, 58586 relatio
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-| Work in the Unit area (1397 symbols) | `.claude/skills/generated/unit/SKILL.md` |
-| Work in the Scripts area (187 symbols) | `.claude/skills/generated/scripts/SKILL.md` |
-| Work in the Tests area (177 symbols) | `.claude/skills/generated/tests/SKILL.md` |
-| Work in the Llm area (156 symbols) | `.claude/skills/generated/llm/SKILL.md` |
-| Work in the Adaptive area (151 symbols) | `.claude/skills/generated/adaptive/SKILL.md` |
-| Work in the Cli area (108 symbols) | `.claude/skills/generated/cli/SKILL.md` |
-| Work in the Observability area (91 symbols) | `.claude/skills/generated/observability/SKILL.md` |
-| Work in the Control_plane area (82 symbols) | `.claude/skills/generated/control-plane/SKILL.md` |
-| Work in the Agents area (77 symbols) | `.claude/skills/generated/agents/SKILL.md` |
-| Work in the Integration area (65 symbols) | `.claude/skills/generated/integration/SKILL.md` |
-| Work in the Integrations area (60 symbols) | `.claude/skills/generated/integrations/SKILL.md` |
-| Work in the Workflows area (56 symbols) | `.claude/skills/generated/workflows/SKILL.md` |
-| Work in the Memory area (55 symbols) | `.claude/skills/generated/memory/SKILL.md` |
-| Work in the Recovery area (48 symbols) | `.claude/skills/generated/recovery/SKILL.md` |
-| Work in the Js area (48 symbols) | `.claude/skills/generated/js/SKILL.md` |
-| Work in the Tools area (32 symbols) | `.claude/skills/generated/tools/SKILL.md` |
-| Work in the Safety area (24 symbols) | `.claude/skills/generated/safety/SKILL.md` |
-| Work in the Testing area (21 symbols) | `.claude/skills/generated/testing/SKILL.md` |
-| Work in the Config area (21 symbols) | `.claude/skills/generated/config/SKILL.md` |
-| Work in the Apm area (21 symbols) | `.claude/skills/generated/apm/SKILL.md` |
 
 <!-- gitnexus:end -->

@@ -1,6 +1,6 @@
 ---
 name: scripts
-description: "Skill for the Scripts area of TTA.dev. 187 symbols across 39 files."
+description: "Scripts subsystem in TTA.dev: get_open_prs, calculate_pr_age, calculate_pr_staleness and related code. 187 symbols | 39 files | Cohesion: 91%"
 ---
 
 # Scripts
@@ -9,9 +9,9 @@ description: "Skill for the Scripts area of TTA.dev. 187 symbols across 39 files
 
 ## When to Use
 
-- Working with code in `scripts/`
-- Understanding how get_open_prs, calculate_pr_age, calculate_pr_staleness work
-- Modifying scripts-related functionality
+- Working on `scripts`-related functionality in TTA.dev
+- Modifying `get_open_prs`, `calculate_pr_age`
+- Navigating `scripts/pr_manager.py`, `scripts/issue_manager.py`
 
 ## Key Files
 

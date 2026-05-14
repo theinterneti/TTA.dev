@@ -1,27 +1,26 @@
 ---
 name: tools
-description: "Skill for the Tools area of TTA.dev. 32 symbols across 7 files."
+description: "Tools subsystem in TTA.dev: list_active_ownership, control_start_workflow, control_mark_workflow_step_running and related code. 35 symbols | 6 files | Cohesion: 85%"
 ---
 
 # Tools
 
-32 symbols | 7 files | Cohesion: 46%
+35 symbols | 6 files | Cohesion: 85%
 
 ## When to Use
 
-- Working with code in `ttadev/`
-- Understanding how control_start_workflow, control_mark_workflow_step_running, control_record_workflow_step_result work
-- Modifying tools-related functionality
+- Working on `tools`-related functionality in TTA.dev
+- Modifying `list_active_ownership`, `control_start_workflow`
+- Navigating `ttadev/primitives/mcp_server/tools/control_plane.py`, `ttadev/primitives/mcp_server/tools/_helpers.py`
 
 ## Key Files
 
 | File | Symbols |
 |------|---------|
-| `ttadev/primitives/mcp_server/tools/control_plane.py` | control_release_lock, control_create_task, control_list_tasks, control_get_task, control_claim_task (+9) |
-| `ttadev/primitives/mcp_server/tools/_helpers.py` | _create_control_plane_service, _emit_mcp_span, _serialize_task, _control_plane_error_payload, _paginate (+3) |
+| `ttadev/primitives/mcp_server/tools/control_plane.py` | control_create_task, control_list_tasks, control_get_task, control_claim_task, control_decide_gate (+13) |
+| `ttadev/primitives/mcp_server/tools/_helpers.py` | _paginate, _create_control_plane_service, _serialize_task, _serialize_run, _serialize_lease (+4) |
 | `ttadev/primitives/mcp_server/tools/workflow.py` | control_start_workflow, control_mark_workflow_step_running, control_record_workflow_step_result, control_record_workflow_gate_outcome, control_mark_workflow_step_failed |
-| `ttadev/control_plane/service.py` | list_active_ownership, acquire_workspace_lock |
-| `ttadev/control_plane/models.py` | to_dict |
+| `ttadev/control_plane/service.py` | list_active_ownership |
 | `ttadev/primitives/mcp_server/tools/primitives.py` | tta_bootstrap |
 | `ttadev/primitives/mcp_server/tools/observability.py` | _get_providers_status |
 
@@ -29,36 +28,36 @@ description: "Skill for the Tools area of TTA.dev. 32 symbols across 7 files."
 
 Start here when exploring this area:
 
+- **`list_active_ownership`** (Function) — `ttadev/control_plane/service.py:181`
 - **`control_start_workflow`** (Function) — `ttadev/primitives/mcp_server/tools/workflow.py:22`
 - **`control_mark_workflow_step_running`** (Function) — `ttadev/primitives/mcp_server/tools/workflow.py:81`
 - **`control_record_workflow_step_result`** (Function) — `ttadev/primitives/mcp_server/tools/workflow.py:126`
 - **`control_record_workflow_gate_outcome`** (Function) — `ttadev/primitives/mcp_server/tools/workflow.py:175`
-- **`control_mark_workflow_step_failed`** (Function) — `ttadev/primitives/mcp_server/tools/workflow.py:221`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
+| `list_active_ownership` | Function | `ttadev/control_plane/service.py` | 181 |
 | `control_start_workflow` | Function | `ttadev/primitives/mcp_server/tools/workflow.py` | 22 |
 | `control_mark_workflow_step_running` | Function | `ttadev/primitives/mcp_server/tools/workflow.py` | 81 |
 | `control_record_workflow_step_result` | Function | `ttadev/primitives/mcp_server/tools/workflow.py` | 126 |
 | `control_record_workflow_gate_outcome` | Function | `ttadev/primitives/mcp_server/tools/workflow.py` | 175 |
 | `control_mark_workflow_step_failed` | Function | `ttadev/primitives/mcp_server/tools/workflow.py` | 221 |
-| `control_release_lock` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 278 |
 | `control_create_task` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 31 |
 | `control_list_tasks` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 67 |
 | `control_get_task` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 92 |
 | `control_claim_task` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 108 |
 | `control_decide_gate` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 147 |
 | `control_reopen_gate` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 181 |
-| `list_active_ownership` | Function | `ttadev/control_plane/service.py` | 181 |
-| `control_list_ownership` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 398 |
-| `control_list_project_ownership` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 418 |
-| `control_list_session_ownership` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 445 |
-| `acquire_workspace_lock` | Function | `ttadev/control_plane/service.py` | 213 |
-| `to_dict` | Function | `ttadev/control_plane/models.py` | 563 |
+| `control_list_locks` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 209 |
 | `control_acquire_workspace_lock` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 232 |
 | `control_acquire_file_lock` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 255 |
+| `control_release_lock` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 278 |
+| `control_list_runs` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 294 |
+| `control_get_run` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 317 |
+| `control_heartbeat_run` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 337 |
+| `control_complete_run` | Function | `ttadev/primitives/mcp_server/tools/control_plane.py` | 358 |
 
 ## Execution Flows
 
@@ -79,12 +78,12 @@ Start here when exploring this area:
 
 | Area | Connections |
 |------|-------------|
-| Unit | 15 calls |
-| Control_plane | 3 calls |
+| Unit | 16 calls |
+| Control_plane | 9 calls |
 | Observability | 2 calls |
 
 ## How to Explore
 
-1. `gitnexus_context({name: "control_start_workflow"})` — see callers and callees
+1. `gitnexus_context({name: "list_active_ownership"})` — see callers and callees
 2. `gitnexus_query({query: "tools"})` — find related execution flows
 3. Read key files listed above for implementation details

@@ -1,17 +1,17 @@
 ---
 name: adaptive
-description: "Skill for the Adaptive area of TTA.dev. 151 symbols across 10 files."
+description: "Adaptive subsystem in TTA.dev: get_fallback_stats and related code. 156 symbols | 11 files | Cohesion: 80%"
 ---
 
 # Adaptive
 
-151 symbols | 10 files | Cohesion: 81%
+156 symbols | 11 files | Cohesion: 80%
 
 ## When to Use
 
-- Working with code in `tests/`
-- Understanding how get_fallback_stats, test_get_default_strategy_returns_baseline, test_primary_succeeds_returns_primary_result work
-- Modifying adaptive-related functionality
+- Working on `adaptive`-related functionality in TTA.dev
+- Modifying `get_fallback_stats`
+- Navigating `ttadev/primitives/adaptive/retry.py`, `ttadev/primitives/adaptive/cache.py`
 
 ## Key Files
 
@@ -21,12 +21,12 @@ description: "Skill for the Adaptive area of TTA.dev. 151 symbols across 10 file
 | `tests/primitives/adaptive/test_adaptive_cache.py` | _ctx, _make_cache, test_cache_default_strategy_params, test_cache_miss_calls_target_primitive, test_cache_hit_returns_cached_value_without_calling_target (+26) |
 | `tests/primitives/adaptive/test_adaptive_fallback.py` | _ctx, _make_fallback, test_get_default_strategy_returns_baseline, test_primary_succeeds_returns_primary_result, test_primary_success_increments_primary_attempts (+21) |
 | `tests/primitives/adaptive/test_adaptive_timeout.py` | _ctx, _make_timeout, test_execute_success_records_latency, test_execute_success_tracks_context_latency, test_execute_multiple_successes_accumulate (+18) |
-| `ttadev/primitives/adaptive/retry.py` | _execute_retry_with_tracing, _consider_error_specific_strategy, _context_extractor, _consider_reducing_retries, _consider_faster_backoff (+7) |
-| `ttadev/primitives/adaptive/cache.py` | _get_default_strategy, _consider_new_strategy, get_cache_stats, evict_expired, _get_hit_rate (+2) |
-| `ttadev/primitives/adaptive/base.py` | _execute_impl, _select_strategy, _execute_with_strategy, _get_default_strategy, _learn_from_execution (+2) |
+| `ttadev/primitives/adaptive/retry.py` | _execute_retry_with_tracing, _consider_error_specific_strategy, _context_extractor, _consider_reducing_retries, to_dict (+7) |
+| `ttadev/primitives/adaptive/cache.py` | _get_default_strategy, _consider_new_strategy, get_cache_stats, evict_expired, _execute_with_strategy (+2) |
+| `tests/unit/test_primitives_adaptive.py` | test_consider_error_specific_strategy_for_timeout_error, test_context_extractor_embeds_environment_and_priority, test_consider_reducing_retries_creates_strategy, test_max_strategies_limit_prevents_new_creation, test_from_dict_round_trip_preserves_values (+1) |
+| `ttadev/primitives/adaptive/base.py` | record_usage, _execute_impl, _select_strategy, _execute_with_strategy, _get_default_strategy (+1) |
 | `ttadev/primitives/adaptive/fallback.py` | _get_default_strategy, _consider_new_strategy, get_fallback_stats |
 | `ttadev/primitives/adaptive/exceptions.py` | AdaptiveError, LearningError, StrategyValidationError |
-| `ttadev/primitives/adaptive/timeout.py` | _consider_new_strategy, get_timeout_stats |
 
 ## Entry Points
 
@@ -62,6 +62,12 @@ Start here when exploring this area:
 | `test_get_fallback_stats_with_data` | Function | `tests/primitives/adaptive/test_adaptive_fallback.py` | 399 |
 | `test_get_fallback_stats_best_order_by_success_rate` | Function | `tests/primitives/adaptive/test_adaptive_fallback.py` | 422 |
 | `test_get_fallback_stats_strategies_included` | Function | `tests/primitives/adaptive/test_adaptive_fallback.py` | 440 |
+
+## Connected Areas
+
+| Area | Connections |
+|------|-------------|
+| Unit | 9 calls |
 
 ## How to Explore
 

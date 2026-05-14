@@ -1,17 +1,17 @@
 ---
 name: integration
-description: "Skill for the Integration area of TTA.dev. 65 symbols across 10 files."
+description: "Integration area in TTA.dev (universal_llm_primitive and related). 65 symbols | 10 files | Cohesion: 77%"
 ---
 
 # Integration
 
-65 symbols | 10 files | Cohesion: 78%
+65 symbols | 10 files | Cohesion: 77%
 
 ## When to Use
 
-- Working with code in `tests/`
-- Understanding how test_groq_llama_8b, test_groq_llama_70b, test_groq_gemma2 work
-- Modifying integration-related functionality
+- Working on `integration`-related functionality in TTA.dev
+- Navigating `ttadev/primitives/llm/universal_llm_primitive.py`, `ttadev/primitives/core/base.py`
+- Understanding test coverage for this area
 
 ## Key Files
 
@@ -67,10 +67,9 @@ Start here when exploring this area:
 
 | Area | Connections |
 |------|-------------|
-| Unit | 9 calls |
-| Observability | 3 calls |
-| Llm | 3 calls |
-| Recovery | 1 calls |
+| Unit | 11 calls |
+| Observability | 4 calls |
+| Llm | 4 calls |
 | Control_plane | 1 calls |
 
 ## How to Explore

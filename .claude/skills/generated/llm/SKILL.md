@@ -1,17 +1,17 @@
 ---
 name: llm
-description: "Skill for the Llm area of TTA.dev. 156 symbols across 23 files."
+description: "Llm subsystem in TTA.dev: execute and related code. 171 symbols | 30 files | Cohesion: 67%"
 ---
 
 # Llm
 
-156 symbols | 23 files | Cohesion: 68%
+171 symbols | 30 files | Cohesion: 67%
 
 ## When to Use
 
-- Working with code in `ttadev/`
-- Understanding how execute, test_raises_value_error_for_unknown_mode, test_error_message_lists_available_modes work
-- Modifying llm-related functionality
+- Working on `llm`-related functionality in TTA.dev
+- Modifying `execute`
+- Navigating `ttadev/primitives/llm/hardware_detector.py`, `ttadev/primitives/llm/ollama_primitive.py`
 
 ## Key Files
 
@@ -19,13 +19,13 @@ description: "Skill for the Llm area of TTA.dev. 156 symbols across 23 files."
 |------|---------|
 | `tests/primitives/llm/test_model_router.py` | _make_router, _ctx, test_raises_value_error_for_unknown_mode, test_error_message_lists_available_modes, test_calls_ollama_and_returns_response (+27) |
 | `tests/primitives/llm/test_task_selector.py` | test_known_coding_model_scores_above_zero, test_returns_float_between_0_and_1, test_gemini_flash_scores_for_coding, test_unknown_model_with_large_params_scores_above_tiny, test_completely_unknown_model_gets_minimal_score (+11) |
-| `ttadev/primitives/llm/hardware_detector.py` | _estimate_params_b, _vram_needed_gb, can_run, summary, filter_ollama_models (+10) |
+| `ttadev/primitives/llm/hardware_detector.py` | max_params_b, summary, to_dict, detect, filter_ollama_models (+10) |
 | `ttadev/primitives/llm/ollama_primitive.py` | _get_client, _list_models, _running_models, _show_model, _pull_model (+6) |
-| `tests/primitives/llm/test_hardware_detector.py` | test_can_run_small_model_on_4gb_gpu, test_registry_select_filters_by_hardware, test_detect_cached, test_detect_force_re_reads, test_max_params_b_with_gpu (+5) |
-| `tests/primitives/llm/test_model_advisor.py` | _make_tier_map, test_recommend_tier_returns_tier_recommendation, test_recommend_tier_threshold_met_returns_valid_model, test_recommend_tier_no_threshold_met_returns_best_available, test_recommend_tier_ollama_preferred_when_score_meets_threshold (+4) |
-| `ttadev/primitives/llm/provider_dispatch.py` | parse_openai_tool_calls, call_groq, call_google, call_together, build_openai_tool_kwargs (+4) |
-| `ttadev/primitives/llm/model_router.py` | execute, _call_tier, _try_model_candidates, _call_ollama, _call_openai_compat (+3) |
-| `ttadev/primitives/llm/task_selector.py` | general, score_model_for_task, sort_key, coding, meets_complexity_threshold (+3) |
+| `tests/primitives/llm/test_hardware_detector.py` | test_detect_cached, test_detect_force_re_reads, _profile, test_can_run_small_model_on_4gb_gpu, test_cannot_run_70b_on_4gb_gpu_limited_ram (+5) |
+| `ttadev/primitives/llm/provider_dispatch.py` | build_openai_tool_kwargs, call_openai_compat, call_openai, call_openrouter, call_xai (+4) |
+| `tests/primitives/llm/test_model_advisor.py` | test_recommend_tier_threshold_met_returns_valid_model, test_recommend_tier_ollama_preferred_when_score_meets_threshold, _make_tier_map, test_recommend_tier_returns_tier_recommendation, test_recommend_tier_no_threshold_met_returns_best_available (+4) |
+| `ttadev/primitives/llm/model_registry.py` | _list, _has_benchmark, _select, _key, _get (+3) |
+| `ttadev/primitives/llm/task_selector.py` | general, _extract_param_size_b, score_model_for_task, sort_key, coding (+2) |
 | `tests/primitives/llm/test_free_model_tracker.py` | _make_httpx_response, test_returns_only_free_models, test_passes_api_key_as_auth_header, test_no_api_key_sends_no_auth_header, test_handles_null_pricing_gracefully (+2) |
 
 ## Entry Points
@@ -68,21 +68,21 @@ Start here when exploring this area:
 | Flow | Type | Steps |
 |------|------|-------|
 | `Main → _build_messages` | cross_community | 7 |
+| `Main → Resolve_model_id` | cross_community | 7 |
 | `Handle_model_command → Rank_models_for_task` | cross_community | 6 |
 | `Handle_model_command → _classify_entry` | cross_community | 6 |
+| `Get_ranked_openhands_free_models → Resolve_model_id` | cross_community | 6 |
 | `Llm_hardware_profile → _run` | cross_community | 6 |
 | `Llm_viable_ollama_models → _run` | cross_community | 6 |
 | `Test_router_ollama_skip_small → _build_messages` | cross_community | 6 |
 | `Test_router_ollama_allow_large → _build_messages` | cross_community | 6 |
-| `Main → _is_cooling` | cross_community | 4 |
-| `Main → _mark_cooling` | cross_community | 4 |
-| `Main → Get_integration` | cross_community | 4 |
+| `Main → _build_kwargs` | cross_community | 4 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
-| Unit | 10 calls |
+| Unit | 18 calls |
 | Tests | 1 calls |
 | Integration | 1 calls |
 | Model_advisor | 1 calls |
