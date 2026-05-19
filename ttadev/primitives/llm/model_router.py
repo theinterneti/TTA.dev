@@ -84,8 +84,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import httpx
-
 from ttadev.primitives.core import WorkflowContext, WorkflowPrimitive
 from ttadev.primitives.llm.free_model_tracker import FreeModelTracker
 from ttadev.primitives.llm.model_discovery import ProviderModelDiscovery
@@ -370,6 +368,8 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
             ValueError: If the requested mode is not configured.
             RuntimeError: If every configured tier fails.
         """
+        import httpx
+
         mode_cfg = self._modes.get(request.mode)
         if mode_cfg is None:
             available = sorted(self._modes)
@@ -673,6 +673,8 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         Raises:
             RuntimeError: When every candidate fails.
         """
+        import httpx
+
         last_exc: Exception = RuntimeError("No model candidates provided")
         all_were_429 = True
         last_429_exc: httpx.HTTPStatusError | None = None
@@ -737,6 +739,8 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         Returns:
             Generated text content.
         """
+        import httpx
+
         messages = _build_messages(prompt, system)
         payload: dict[str, Any] = {"model": model, "messages": messages, "stream": False}
         if params:
@@ -774,6 +778,8 @@ class ModelRouterPrimitive(WorkflowPrimitive[ModelRouterRequest, LLMResponse]):
         Returns:
             Generated text content.
         """
+        import httpx
+
         messages = _build_messages(prompt, system)
         headers = {"Authorization": f"Bearer {api_key}"}
         if extra_headers:

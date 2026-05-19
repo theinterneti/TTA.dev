@@ -52,8 +52,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import httpx
-
 logger = logging.getLogger(__name__)
 
 _DEFAULT_CACHE_TTL: float = 6 * 3600  # 6 hours — model lists don't change often
@@ -378,6 +376,8 @@ class ProviderModelDiscovery:
             httpx.HTTPStatusError: On non-2xx response.
             httpx.TimeoutException: On timeout.
         """
+        import httpx
+
         url = base_url.rstrip("/") + "/models"
         headers: dict[str, str] = {}
         if api_key:
@@ -416,6 +416,8 @@ class ProviderModelDiscovery:
         Returns:
             List of :class:`DiscoveredModel` with IDs as ``gemini/<model-name>``.
         """
+        import httpx
+
         async with httpx.AsyncClient(timeout=20.0) as client:
             resp = await client.get(_GOOGLE_NATIVE_URL, params={"key": api_key})
             resp.raise_for_status()

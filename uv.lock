@@ -3997,9 +3997,7 @@ source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
     { name = "filelock" },
-    { name = "litellm" },
-    { name = "opentelemetry-api" },
-    { name = "opentelemetry-sdk" },
+    { name = "pydantic" },
     { name = "structlog" },
     { name = "tenacity" },
 ]
@@ -4022,10 +4020,14 @@ integrations = [
     { name = "e2b-code-interpreter" },
     { name = "openhands-sdk" },
 ]
+llm = [
+    { name = "litellm" },
+]
 llm-all = [
     { name = "anthropic" },
     { name = "google-generativeai" },
     { name = "groq" },
+    { name = "litellm" },
 ]
 mcp = [
     { name = "mcp" },
@@ -4033,6 +4035,8 @@ mcp = [
 observability = [
     { name = "aiohttp" },
     { name = "aiohttp-cors" },
+    { name = "opentelemetry-api" },
+    { name = "opentelemetry-sdk" },
 ]
 ollama = [
     { name = "ollama" },
@@ -4073,20 +4077,22 @@ requires-dist = [
     { name = "google-generativeai", marker = "extra == 'llm-all'", specifier = ">=0.8.0" },
     { name = "groq", marker = "extra == 'llm-all'", specifier = ">=0.11.0" },
     { name = "langfuse", marker = "extra == 'apm'", specifier = ">=4.0" },
-    { name = "litellm", specifier = ">=1.0.0" },
+    { name = "litellm", marker = "extra == 'llm'", specifier = ">=1.0.0" },
+    { name = "litellm", marker = "extra == 'llm-all'", specifier = ">=1.0.0" },
     { name = "mcp", marker = "extra == 'mcp'", specifier = ">=1.26.0" },
     { name = "ollama", marker = "extra == 'ollama'", specifier = ">=0.6.1" },
     { name = "openai", marker = "extra == 'openai'", specifier = ">=2.30.0" },
     { name = "openhands-sdk", marker = "extra == 'integrations'", specifier = ">=1.16.1" },
-    { name = "opentelemetry-api", specifier = ">=1.20.0" },
-    { name = "opentelemetry-sdk", specifier = ">=1.20.0" },
+    { name = "opentelemetry-api", marker = "extra == 'observability'", specifier = ">=1.20.0" },
+    { name = "opentelemetry-sdk", marker = "extra == 'observability'", specifier = ">=1.20.0" },
+    { name = "pydantic", specifier = ">=2.0.0" },
     { name = "redis", extras = ["asyncio"], marker = "extra == 'coordination'", specifier = ">=5.0" },
     { name = "redis", extras = ["asyncio"], marker = "extra == 'redis'", specifier = ">=5.0" },
     { name = "structlog", specifier = ">=25.5.0" },
     { name = "tenacity", specifier = ">=9.1.4" },
     { name = "tta-apm-langfuse", marker = "extra == 'apm'", editable = "ttadev/observability/apm/langfuse" },
 ]
-provides-extras = ["cgc", "coordination", "redis", "gemini", "llm-all", "apm", "mcp", "integrations", "ollama", "openai", "observability"]
+provides-extras = ["llm", "llm-all", "gemini", "openai", "ollama", "observability", "apm", "cgc", "coordination", "redis", "mcp", "integrations"]
 
 [package.metadata.requires-dev]
 dev = [

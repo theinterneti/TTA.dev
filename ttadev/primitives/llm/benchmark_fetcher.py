@@ -46,9 +46,10 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import httpx
+if TYPE_CHECKING:
+    import httpx
 
 from ttadev.primitives.llm.model_benchmarks import (
     BENCHMARK_DATA,
@@ -207,6 +208,8 @@ class BenchmarkFetcher:
         Returns:
             All benchmark entries (static + live) after refresh.
         """
+        import httpx
+
         if not force and self._cache_is_fresh():
             logger.debug("Benchmark cache is fresh; skipping refresh.")
             return self.get_cached()
@@ -285,6 +288,8 @@ class BenchmarkFetcher:
         Returns:
             List of benchmark entry dicts (ModelBenchmarkMetadata-compatible).
         """
+        import httpx
+
         try:
             resp = await client.get(
                 _AA_API_URL,
@@ -425,6 +430,8 @@ class BenchmarkFetcher:
         Returns:
             List of benchmark entry dicts (ModelBenchmarkMetadata-compatible).
         """
+        import httpx
+
         entries: list[dict[str, Any]] = []
         offset = 0
 
@@ -574,6 +581,8 @@ def load_live_benchmarks_into_global() -> None:
 
 async def _cli_main() -> None:
     import sys
+
+    import httpx
 
     force = "--force" in sys.argv or "-f" in sys.argv
     list_slugs = "--list-slugs" in sys.argv

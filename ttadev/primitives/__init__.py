@@ -14,18 +14,6 @@ KB Safety: All primitives follow the one-way sync architecture (Code → KB only
 See docs/architecture/KB_SAFETY_ARCHITECTURE.md for details.
 """
 
-# ── Code graph (CGC / FalkorDB) ─────────────────────────────────────────
-from .code_graph import CGCOp, CodeGraphPrimitive, CodeGraphQuery, ImpactReport
-
-# ── Core: collaboration ─────────────────────────────────────────────────
-from .collaboration import (
-    AgentIdentity,
-    CommitFrequencyPolicy,
-    GitCollaborationPrimitive,
-    IntegrationFrequency,
-    MergeStrategy,
-)
-
 # ── Core: control flow ──────────────────────────────────────────────────
 from .core.base import LambdaPrimitive, WorkflowContext, WorkflowPrimitive
 from .core.conditional import ConditionalPrimitive
@@ -54,12 +42,9 @@ from .streaming import StreamingPrimitive
 # ── Core: testing ───────────────────────────────────────────────────────
 from .testing.mocks import MockPrimitive
 
-# ── Memory (Hindsight / AgentMemory) ─────────────────────────────────────
-from .memory import AgentMemory, HindsightClient, MemoryResult, RetainResult
-
-
 # ── Lazy-loaded modules — deferred via __getattr__ to avoid pulling heavy
-#    deps (litellm, langgraph) until the caller actually needs them.
+#    deps (litellm, langgraph, httpx, falkordb, opentelemetry) until the
+#    caller actually needs them.
 _lazy_imports = {
     # LLM primitives (trigger import litellm)
     "LiteLLMPrimitive": ".llm",
@@ -72,6 +57,22 @@ _lazy_imports = {
     "make_resilient_llm": ".llm",
     # LangGraph (trigger import langgraph)
     "LangGraphPrimitive": ".integrations.langgraph_primitive",
+    # Code graph (trigger import falkordb → observability → OTel)
+    "CGCOp": ".code_graph",
+    "CodeGraphPrimitive": ".code_graph",
+    "CodeGraphQuery": ".code_graph",
+    "ImpactReport": ".code_graph",
+    # Collaboration (trigger git integration)
+    "AgentIdentity": ".collaboration",
+    "CommitFrequencyPolicy": ".collaboration",
+    "GitCollaborationPrimitive": ".collaboration",
+    "IntegrationFrequency": ".collaboration",
+    "MergeStrategy": ".collaboration",
+    # Memory (trigger import httpx)
+    "AgentMemory": ".memory",
+    "HindsightClient": ".memory",
+    "MemoryResult": ".memory",
+    "RetainResult": ".memory",
 }
 
 
@@ -79,7 +80,9 @@ def __getattr__(name: str):
     if name in _lazy_imports:
         import importlib
 
-        mod = importlib.import_module(_lazy_imports[name], package=__name__)
+        # fmt: off
+        mod = importlib.import_module(_lazy_imports[name], package=__name__)  # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import  # fmt: skip
+        # fmt: on
         attr = getattr(mod, name)
         # Cache in module globals so next access is direct
         globals()[name] = attr

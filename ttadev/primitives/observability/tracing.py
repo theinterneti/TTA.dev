@@ -44,6 +44,13 @@ try:
     TRACING_AVAILABLE = True
 except ImportError:
     TRACING_AVAILABLE = False
+    # Provide stubs so the module can be imported without OTel installed.
+    SpanExporter = object  # type: ignore[misc,assignment]
+    SpanExportResult = object  # type: ignore[misc,assignment]
+    ReadableSpan = object  # type: ignore[misc,assignment]
+    Status = object  # type: ignore[misc,assignment]
+    StatusCode = object  # type: ignore[misc,assignment]
+    trace = None  # type: ignore[assignment]
 
 from ..core.base import WorkflowContext, WorkflowPrimitive
 

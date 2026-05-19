@@ -23,8 +23,6 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-import httpx
-
 from ttadev.primitives.llm.model_benchmarks import get_best_score
 
 logger = logging.getLogger(__name__)
@@ -129,6 +127,8 @@ async def fetch_free_models(api_key: str | None = None) -> list[ORModel]:
     headers: dict[str, str] = {}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
+
+    import httpx
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         resp = await client.get(_OR_MODELS_URL, headers=headers)
